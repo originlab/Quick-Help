@@ -1,0 +1,80 @@
+﻿<h1 class="firstheading">FAQ-750 二つの信号間の伝搬遅延はどのように計算するのですか？</h1>
+<p class="urlname" style="display: none;">Water-Fall-LabTalk</p>
+<p class="faqID">最終更新日:2015/08/06</p>
+<p>二つの時変信号があると仮定します。<i>Y1</i> と<i>Y</i>が、それぞれワークシートの列Bと列Cに保存されています。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="Signal y.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_y.png" width="372" height="427" border="0"></a></dd>
+</dl>
+<p>このモデルが二つの信号間の伝搬遅延を計算するのに使われており、すべての<img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-e358efa489f58062f10dd7316b65649e.png" title="t" alt="t" class="tex" border="0">に対して<img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-cd66cd5a0b1003efcb6660ccd9173745.png" title="Y(t)=Y1(t-t_0)" alt="Y(t)=Y1(t-t_0)" class="tex" border="0">、常に<img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-e358efa489f58062f10dd7316b65649e.png" title="t" alt="t" class="tex" border="0">です。t_0t_0</p>
+<p><img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png" title="t_0" alt="t_0" class="tex" border="0">を計算するために非線形曲線フィットを使いますが、ユーザ定義フィット関数はこのように構築されます。</p>
+<dl>
+<dd>
+<table class="simple">
+<tr>
+<td width="170"><b style="font-weight: bold;">関数名：</b></td>
+<td>fitdelay</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">実現方式：</b></td>
+<td>ユーザ定義</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">独立変数：</b></td>
+<td>X</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">従属変数：</b></td>
+<td>Y</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">パラメータの名前：</b></td>
+<td>t0</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">定義形式：</b></td>
+<td>Origin C</td>
+</tr>
+<tr>
+<td width="170"><b style="font-weight: bold;">関数:</b></td>
+<td>
+<pre class="oc" style="font-family: monospace;">
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+NLFitContext <span style="color: #000040;">*</span>pCtxt <span style="color: #000080;">=</span> Project.<span style="color: #000000;">GetNLFitContext</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ <span style="color: #0000ff;">
+if</span> <span style="color: #000000;">(</span> pCtxt <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        <span style="color: #0000ff;">static</span> vector vX, vY1;
+ 
+        <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> nSize;
+ 
+        <span style="color: #0000ff;">BOOL</span> bIsNewParamValues <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>IsNewParamValues<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> bIsNewParamValues <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Dataset dsx<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                Dataset dsy<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+ 
+                vX <span style="color: #000080;">=</span> dsx;
+                vY1 <span style="color: #000080;">=</span> dsy;
+ 
+                nSize <span style="color: #000080;">=</span> vY1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+ 
+        <span style="color: #0000ff;">double</span> x1;
+        x1 <span style="color: #000080;">=</span> x<span style="color: #000040;">-</span>t0;
+        ocmath_interpolate<span style="color: #000000;">(</span> <span style="color: #000040;">&amp;</span>x1, <span style="color: #000040;">&amp;</span>y, <span style="color: #0000dd;">1</span>, vX, vY1, nSize <span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+</pre></td>
+</tr>
+</table>
+</dd>
+</dl>
+<p>ユーザ定義フィット関数の構築について、詳細は<a class="external text" href="../../Tutorial/Tutorial/Fitting_With_Convolution.html">このページ</a>をご参照ください。</p>
+<h3><a name="Fit_the_Curve" id="Fit_the_Curve"></a><span class="mw-headline">曲線をフィットする</span></h3>
+<p>フィット関数の本体で、アクティブワークシートから直接応答データを読み込みます。よって、ワークシートからフィットを実行します。</p>
+<ol>
+<li>列Cを選択し、<b>Ctrl + Y</b>を押し、<b>非線形フィット</b>ダイアログを開きます。</li>
+<li>関数選択ページに移動して、いま定義した<i>fitdelay</i>関数を選択します。</li>
+<li>「<b>フィット</b>」ボタンをクリックし、結果を生成します。</li>
+</ol>
+<hr class="keywordshr" align="center">
+<p><span class="keywords">キーワード:</span><span class="keywordsInput">非線形曲線フィット, 信号処理</span></p>

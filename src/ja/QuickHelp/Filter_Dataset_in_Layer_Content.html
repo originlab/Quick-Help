@@ -1,0 +1,58 @@
+﻿<h1 class="firstheading">FAQ-146 レイヤ内容でカスタム条件を元にデータセットをフィルタするには？</h1><p class='urlname' style='display: none'>Filter-Dataset-in-Layer-Content</p>
+<p class='faqID'>最終更新: 2018/07/08</p>
+<p>複数のワークブックやシートがあり、<i>レイヤ内容</i> ダイアログでデータを追加したり削除する場合、左パネルで目的の列を見つけるのに時間がかかることがあります。組み込みの<a class="external text" href="../../UserGuide/UserGuide/The_Layer_n_Dialog_Box.html"><b>利用可能なデータドロップダウンリスト</b></a>を使用する方法のほかに、このリストにカスタム条件を追加して、より効果的にフィルタをかけることができます。
+</p><p>同じプロジェクト内のすべての列から、ショートネームが<i>A</i> (例: Col <i>A</i> )のというフィルタを、<i>レイヤ内容</i> ダイアログの左パネルで使用したい場合を考えます。  カスタム条件を追加するには、
+</p>
+<ol>
+<li><b>コードビルダ</b>を開き、<a class="external text" href="../../OriginC/OCGuide/Create_and_Edit_an_Origin_C_File.html#Code_Builder_Quick_StartCode_Builder">新しいCファイルを作成</a>して以下の関数を入力します。
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> MySelection<span style="color: #000000;">(</span>OriginObject<span style="color: #000040;">&amp;</span> obj, <span style="color: #0000ff;">int</span> nType<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">switch</span> <span style="color: #000000;">(</span> nType <span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__FOLDER<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__PAGE<span style="color: #000000;">:</span>
+		<span style="color: #000000;">{</span>
+			WorksheetPage wksPage;
+			wksPage <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>WorksheetPage<span style="color: #000000;">)</span>obj;
+			<span style="color: #0000ff;">return</span> wksPage.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+		<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__LAYER<span style="color: #000000;">:</span>
+		<span style="color: #000000;">{</span>
+			Worksheet wks;
+			wks <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Worksheet<span style="color: #000000;">)</span>obj;
+			<span style="color: #0000ff;">return</span> wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+		<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__COLUMN<span style="color: #000000;">:</span>
+		<span style="color: #000000;">{</span>
+			Column col;
+			col <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Column<span style="color: #000000;">)</span>obj;
+			<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>obj <span style="color: #000000;">)</span>
+				<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+			string strName;
+			col.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">return</span> strName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;A&quot;</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>;
+		<span style="color: #000000;">}</span>
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">}</span></pre>
+<li><a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">このファイルをコンパイルして、ワークスペースをビルドします</a>。
+<li><i>レイヤの内容</i> ダイアログの、<b>利用可能なデータのドロップダウンリスト</b>にカスタム条件を追加するには、<a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">User Filesフォルダ</a>にある<i>Origin.ini</i> を、テキストエディタで開いて、このファイルの最後に以下のスクリプトを貼り付けます。保存してファイルを閉じます。
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">[</span>DatasetFilterFuncs<span style="color: #000000;">]</span>
+ShowColAOnly<span style="color: #000080;">=</span>MySelection<span style="color: #000080;">|</span>Column 
+User Defined<span style="color: #000080;">=</span>Oubtn.<span style="color: #000080;">ini</span></pre>
+<li><b>グラフ操作: レイヤ内容</b>を選択し、<i>レイヤ内容</i>をクリックします。   を選択してダイアログを開き、左パネルにある<b>利用可能なデータドロップダウン</b>をクリックします。リストの最後に<b>ShowColAOnly</b> という項目が追加されていることがわかります。
+<li> ドロップダウンリストから<b>ShowColAOnly</b>を選択します。プロジェクト内の、ショートネームが<i>A</i> であるすべての列が左パネルに表示されます。
+</ol>
+<p><br />
+<b>Note:</b>コードビルダー内で<a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html#Add_files_to_the_System_FolderBuilding_Origin_C_Files_under_Workspace_System_Folder">システムフォルダに作成したCファイルを追加する</a>ことでOriginを立ち上げるとすぐに利用できるようになります。
+</p><p><br />
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Filter_Dataset_in_Layer_Content/Tip_icon.png" width="57" border="0"></td><td><p>Origin 2018bでは、ワークシートのタブを右クリックし、<b>作図ダイアログから除外</b>を選択し、<b>作図セットアップ</b>と<b>レイヤ内容</b>ダイアログで表示されるワークシートを制限できます。 
+</p></td></tr></table>
+<p><br />
+</p>
+<hr class='keywordshr'><p><span class='keywords'>キーワード:</span> <span class='keywordsInput'>フィルタ, レイヤ内容, 列</span></p>
+
+    

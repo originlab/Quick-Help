@@ -1,0 +1,58 @@
+﻿<h1 class="firstheading">FAQ-1135 ループが増えると速度が遅くなるのはなぜですか?</h1>
+<p class='urlname' style='display: none'>Why_Speed_Slow_When_Loop_Increase</p>
+<p class='faqID'>最終更新日：2022/5/6</p>
+<p>既存のシートの列数が多いとき、列の追加と指定の設定に時間がかかる場合、ループの数が増えると各ループが遅くなります。</p>
+<pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//[Book1]1! にすでに2450x3列ある</span>
+rw<span style="color: #000080;">=</span><span style="color: #0000dd;">2450</span>;
+sec;
+loop <span style="color: #000000;">(</span>tt,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">50</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+ncol <span style="color: #000080;">=</span> rw<span style="color: #000080;">*</span><span style="color: #0000dd;">3</span>;
+
+<span style="color: #008000;">//存在しない列にアクセスするため列を追加</span>
+range dis3<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ncol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;  
+range vel3<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ncol<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>; 
+range vel3a<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ncol<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+dis3<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>dis;
+vel3<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>vel;
+vel3a<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>vela;
+
+<span style="color: #008000;">//既存シートの列数が多いと属性指定に時間がかかる</span>
+dis3.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+vel3.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+vel3a.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+
+rw<span style="color: #000080;">=</span>rw<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">}</span>;
+</pre>
+<p>したがって、ループ内で上記のアクションを回避する必要があるので、ループの前に予めワークシート全体を準備します。</p>
+<pre class="lt" style="font-family:monospace;">
+int nloop <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span>;
+
+<span style="color: #008000;">//ワークシート指定</span>
+range rWa <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book4<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;
+int oldcol <span style="color: #000080;">=</span> rWa.<span style="color: #000080;">nCols</span>;
+
+<span style="color: #008000;">//列追加</span>
+rWa.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> rWa.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> nloop<span style="color: #000080;">*</span><span style="color: #0000dd;">3</span>;
+
+<span style="color: #008000;">//属性設定</span>
+coldesig desig<span style="color: #000000;">:</span><span style="color: #000080;">=</span>X2Y rng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rWa<span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>oldcol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>rWa.<span style="color: #000080;">nCols</span><span style="color: #000000;">)</span>;
+
+loop <span style="color: #000000;">(</span>tt,<span style="color: #0000dd;">1</span>,nloop<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+range dis3<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rWa<span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>oldcol<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>tt<span style="color: #000080;">-</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+range vel3<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rWa<span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>oldcol<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>tt<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+range vel3a<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rWa<span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>oldcol<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>tt<span style="color: #000000;">)</span>;
+
+dis3<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>dis;
+vel3<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>vel;
+vel3a<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>f<span style="color: #000080;">$</span><span style="color: #000000;">(</span>tt<span style="color: #000000;">)</span>vela;
+
+<span style="color: #000000;">}</span>
+</pre>
+<p></p>
+<hr class='keywordshr' />
+<p><span class='keywords'>キーワード:</span><span class='keywordsInput'>LabTalk, loop</span></p>

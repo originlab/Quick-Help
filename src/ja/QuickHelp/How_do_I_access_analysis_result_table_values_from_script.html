@@ -1,0 +1,47 @@
+﻿<h1 class="firstheading">FAQ-372 LabTalkスクリプトから分析結果テーブルの値にアクセスするには?</h1><p class='urlname' style='display: none'>Access-Result-Table-by-Script</p>
+<p class='faqID'>最終更新日:2015/02/04</p>
+<p>線形および非線形フィットなどの分析操作は、フィット統計値やパラメータ値のようなフィット結果を持つ埋め込みのテーブルを含むレポートシートを作成します。これらの結果にアクセスする目的で提供されているXファンクションを使ってスクリプトからアクセスできます。
+</p><p>レポートシートの一般的な利用に対し、Xファンクション <b><a class="external text" href="../../XFunction/X-Function/Getresults.html">getresults</a></b> を使うことができます。
+</p><p>例えば,
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// アクティブな結果シートにツリー変数を作成します</span>
+getresults myLRFitResults;
+&nbsp;
+<span style="color: #008000;">// プロパティの一覧を出力します</span>
+myLRFitResults.<span style="color: #000080;">=</span>;
+&nbsp;
+<span style="color: #008000;">// 線形フィットの場合、傾きを出力します</span>
+myLRFitResults.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">Slope</span>.<span style="color: #000080;">Value</span><span style="color: #000080;">=</span>;</pre>
+<p><br /> 非線形曲線フィット機構で操作している場合、非線形フィットの結果にアクセスするために設計されたXファンクションがあります。それは<b><a class="external text" href="../../XFunction/X-Function/getnlr.html">getnlr</a></b> Xファンクションです。このXファンクションを使って、ツリー構造をより単純化し、オプションによって、インデックスではなくパラメータ名で結果にアクセスするようにカスタマイズできます。
+</p><p><br /> 例えば、<a class="external text" href="../../LabTalk/LabTalk/Last_Used_System_Variables.html">__REPORT$</a> システム変数を使い、レポートシートを見つけ、FDFファイルの「フィット後」のスクリプトセクションに次のスクリプトを配置し、フィット後のいくつかのフィット値を出力します。
+</p>
+<pre class="lt" style="font-family:monospace;">getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>__REPORT<span style="color: #000080;">$</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+type <span style="color: #000080;">%</span><span style="color: #000000;">(</span>myfit.<span style="color: #000080;">func</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span> fit of <span style="color: #000080;">%</span><span style="color: #000000;">(</span>myfit.<span style="color: #000080;">Data1</span>.<span style="color: #000080;">y1</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span> results<span style="color: #000000;">:</span>;
+for<span style="color: #000000;">(</span> int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>myfit.<span style="color: #000080;">nfuncparams</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    val <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+    err <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">e</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+    type Parameter <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span> \x3D <span style="color: #000080;">$</span><span style="color: #000000;">(</span>val<span style="color: #000000;">)</span> <span style="color: #000080;">+/-</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>err<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>Note:
+</p>
+<ul><li> 作成したツリーの内容は、<B>LabTalk変数と関数</B>ダイアログdialog (<code><b>ed</b></code>  コマンドで開く)で表示できます。
+</li><li> <B>__REPORT$ </B>は、別の分析を実行するとその値が変化するので、<B>列値の設定</B>では役立ちません。
+</li><li> データセットの数を取得するには、ツリーの <I>nsets </I>の値を使います。<I>nfuncparams</I> および <I>nderivparams</I> は、それぞれパラメータの数と派生パラメータの数です。
+</li><li> 出力ツリーのパラメータの表記として、<B>パラメータ名(オプション 0)</B>、<B>省略形(オプション1) </B>または両方(オプション 2) を選択できます。オプション0では、パラメータの名前と誤差はP1, E1, P2, E2, などのように増えていきます。。オプション1では、誤差と名前はそれぞれ、y0_1, e_y0_1, n_y0_1, y0_2, e_y0_2, n_y0_2, などのように、<B>e_</B> と<B> n_ </B>のプレフィックスになります。
+</li></ul>
+<p><br /> 次のスクリプトでは、Boltzmann関数による2つのデータセットのグローバルフィット結果、A1 と A2があるものとします。このときパラメータはP1 とP2で、getnlr Xファンクションを使って、両方の名前表記を持つレポートツリーを取得します。
+</p>
+<pre class="lt" style="font-family:monospace;">getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>FitNL1<span style="color: #000080;">!</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+FirstAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p1</span>; <span style="color: #008000;">// 別の名前は A1_1</span>
+FirstAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p2</span>; <span style="color: #008000;">// 別の名前は A2_1</span>
+SecondAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A1_2</span>; <span style="color: #008000;">// 別の名前は p5</span>
+SecondAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A2_2</span>; <span style="color: #008000;">// 別の名前は p6</span></pre>
+
+<hr class='keywordshr'><p><span class='keywords'>キーワード:</span> <span class='keywordsInput'>フィット, nlfit, 非線形, 曲線, パラメータ, 結果, getnlr</span></p>
+
+
+
+
+
+    
