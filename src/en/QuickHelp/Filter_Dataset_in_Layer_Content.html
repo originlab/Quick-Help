@@ -1,0 +1,63 @@
+<h1 class="firstHeading">1.31 FAQ-146 How can I filter dataset based on custom conditions in Layer Contents?</h1><p class='urlname' style='display: none'>Filter-Dataset-in-Layer-Content</p>
+<p class='faqID'>Last Update: 7/8/2018</p>
+<p>When adding or removing data plots in <i>Layer Contents</i>  dialog with dataset  from multiple workbooks and worksheets , finding the favorite columns in the left panel would be a time-consuming task. Apart from using the built-in <a class="external text" href="../../UserGuide/UserGuide/The_Layer_n_Dialog_Box.html"><b>Available Data Drop-Down List</b></a> , you can also add custom conditions in this list to do a more efficient filtering.
+</p><p>Suppose you want to filter columns with Short Name <i>A</i> (i.e. <i>Col A</i>) from all the columns of the same project in the <i>Layer Contents</i> left panel.  To begin with adding custom conditions:
+</p>
+<ol>
+<li>Open <b>Code Builder</b>, <a class="external text" href="../../OriginC/OCGuide/Create_and_Edit_an_Origin_C_File.html#Code_Builder_Quick_StartCode_Builder">create a new C file</a> then enter the following function:
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> MySelection<span style="color: #000000;">&#40;</span>OriginObject<span style="color: #000040;">&amp;</span> obj, <span style="color: #0000ff;">int</span> nType<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">switch</span> <span style="color: #000000;">&#40;</span> nType <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__FOLDER<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__PAGE<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			WorksheetPage wksPage;
+			wksPage <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">return</span> wksPage.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__LAYER<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			Worksheet wks;
+			wks <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Worksheet<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">return</span> wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__COLUMN<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			Column col;
+			col <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Column<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>obj <span style="color: #000000;">&#41;</span>
+				<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+
+			string strName;
+			col.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>strName<span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">return</span> strName.<span style="color: #000000;">Compare</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;A&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li><a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">Compile the file and build the workspace</a> .
+<li>To add the custom condition filter into the <b>Available Data Drop-Down List</b> of the <i>Layer Contents</i>  , open the <i>Origin.ini</i> in <a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">User File Folder</a>  and paste the following  script into the end of the  <i>Origin.ini</i>  file. Save and close the file.
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>DatasetFilterFuncs<span style="color: #000000;">&#93;</span>
+ShowColAOnly<span style="color: #000080;">=</span>MySelection<span style="color: #000080;">|</span>Column 
+User Defined<span style="color: #000080;">=</span>Oubtn.<span style="color: #000080;">ini</span></pre>
+<li>Open the <i>Layer Contents</i> by  clicking <b>Graph: Layer Contents...</b>  and click the <b>Available Data Drop-Down List</b> on the left panel. You can see the <b>ShowColAOnly</b> is shown at  the bottom of the list.
+<li> Select the <b>ShowColAOnly</b> in the drop-down list. All columns with short name of <i>A</i> in this project will be filtered in the left panel.
+</ol>
+<p><br />
+<b>Note:</b> You can <a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html#Add_files_to_the_System_FolderBuilding_Origin_C_Files_under_Workspace_System_Folder">add the created C file in the System Folder</a> in Code Builder so your functions are always ready when Origin starts.
+</p><p><br />
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Filter_Dataset_in_Layer_Content/Tip_icon.png?v=8477" width="57"  border="0" /></td><td><p>Since Origin 2018b, you can exclude some worksheets from showing in <b>Plot Setup</b> and <b>Layer Contents</b> dialogs by right clicking worksheet(s) tab and tag as <b>Exclude from Plotting Dialogs</b>. 
+</p></td></tr></table>
+<p><br />
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>filter, layer content, column</span></p>
+
+

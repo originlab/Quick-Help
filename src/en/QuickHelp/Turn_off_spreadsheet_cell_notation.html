@@ -1,0 +1,60 @@
+<h1 class="firstHeading">2.79 FAQ-849 Can I turn off or selectively control use of spreadsheet cell notation in my workbooks?</h1><p class='urlname' style='display: none'>Turn-off-spreadsheet-cell-notation</p>
+<p class='faqID'>Last Update: 4/26/2022</p>
+<p><br />
+</p><p>Origin 2017 introduced a simplified <a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">"Spreadsheet Cell Notation" (SCN)</a> for use in the <a class="external text" href="../../UserGuide/UserGuide/Quick_Start_SetColumnValues.html">Set Column Values</a> and <a class="external text" href="../../UserGuide/UserGuide/Displaying_Supporting_Data_in_Worksheet_Header_Rows.html#F.28x.29.3D">F(x)=</a> column formulas. This notation simplifies writing of column formulas and it supports <a class="external text" href="../../UserGuide/UserGuide/Quick_Start_SetColumnValues.html#Spreadsheet_Cell_Notation_References_to_Other_Sheets_and_Books">references to other sheets and books</a> but there may be instances where you would prefer to use the older "col()/wcol()" notation (e.g. you have scripts that rename the column Short Name). This FAQ summarizes how to control use of spreadsheet cell notation in your workbooks and projects.
+</p>
+<h2><a name="How_to_turn_spreadsheet_cell_notation_off_.28or_on.29_for_a_single_workbook"></a><span class="mw-headline">How to turn spreadsheet cell notation off (or on) for a single workbook</span></h2>
+<p>Since introduction, SCN has been enabled, by default, for new workbooks. <b>Origin 2017</b> through <b>Origin 2019</b> displayed this icon <a  class="image"><img alt="Spreadsheet cell notation mode.png" src="../images/Turn_off_spreadsheet_cell_notation/Spreadsheet_cell_notation_mode.png?v=48540" width="20"  /></a> in the upper-left corner of the worksheet to indicate that SCN was enabled. Beginning with Origin <b>2019b</b>, the icon is hidden by default, to make room for new features. However, as with previous versions, SCN remains enabled, by default, for new workbooks.
+</p><p><br />
+<i><b>To turn off cell notation via the user-interface ...</b></i>
+</p><p>Right-click on the workbook window title bar, and choose <a class="external text" href="../../UserGuide/UserGuide/Folder_and_Window_Properties_Dialog.html#Window_Properties_dialog"><b>Properties</b></a>. On the <b>Properties</b> tab, clear the <b>Spreadsheet Cell Notation</b> check box (it will be near the center of the dialog).
+</p><p><br />
+<i><b>To control this via LabTalk, use ...</b></i>
+</p>
+<pre class="lt" style="font-family:monospace;">page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0 = off, 1 = on.</span></pre>
+<h2><a name="Using_the_.40RCN_LabTalk_System_Variable_to_control_spreadsheet_cell_notation"></a><span class="mw-headline">Using the @RCN LabTalk System Variable to control spreadsheet cell notation</span></h2>
+<p><b>Origin 2017</b>, @RCN = <i>7</i> (default): Spreadsheet cell notation is turned on, by default, for new books created from the <b>New Workbook</b> <a  class="image"><img alt="Button New Workbook.png" src="../images/Turn_off_spreadsheet_cell_notation/Button_New_Workbook.png?v=1383" width="23"  /></a> toolbar button; or new books created on file import, when SCN is on in the active workbook. Additionally, new workbooks created by most X-Function based analysis dialog boxes will also have SCN turned on, regardless of whether SCN is turned on in the active workbook (the workbook containing the data which you are analyzing).
+</p><p><b>Origin 2019</b>, @RCN = <i>15</i> (default): In addition to those cases described for Origin 2017, Origin 2019 and later will have SCN turned ON for windows created by <code>win -t</code> or <code>newbook</code>. This new default behavior may not work for you -- for instance, in situations where you have scripts that change the column Short Name (see, for instance, <a href="../../QuickHelp/QuickHelp/Set_column_names_in_script_using_wksaddCol_wkscolname.html" title="QuickHelp:Set column names in script using wksaddCol wkscolname"><b>FAQ-872</b></a>). 
+</p><p><i><b>Therefore,</b></i> if you do not want SCN turned on when creating new windows by <code>win -t</code> or <code>newbook</code>, you should set the value of <b>@RCN=7</b> in <a class="external text" href="../../UserGuide/UserGuide/Customizing_Origin_using_System_Variables.html#Changing_the_Value_of_a_System_Variable">the <b>Set System Variables</b> dialog box</a>. Each time Origin runs, the value of @RCN will be read and Origin will treat windows created by <code>win -t</code> or <code>newbook</code>, as it did in Origin 2017. 
+</p><p><br />
+<i><b>Bit Values of @RCN:</b></i>
+</p>
+<ul><li> 0 = Cell notation is turned OFF for all new books.</li>
+<li> 1 = Cell notation is turned ON for new books created from the New Workbook toolbar button.</li>
+<li> 2 = When importing, cell notation behavior follows active book; if cell notation is OFF in active book, then OFF in all new books. If ON in active book, ON in all new books.</li>
+<li> 4 = Most analysis X-Functions have an <b>Auto Spreadsheet Cell Notation on New Book</b> check box that is shown in <a class="external text" href="../../UserGuide/UserGuide/Other_Tree_View_controls.html">Tree View mode</a>. When this box is checked and this bit is enabled, any new workbook created for X-Function output will have SCN turned on (Auto On) regardless of the SCN-state of the active book (does not apply to <a class="external text" href="../../XFunction/X-Function/Wsplit.html">wsplit</a>, <a class="external text" href="../../XFunction/X-Function/Wsplit_book.html">wsplit_book</a>, <a class="external text" href="../../XFunction/X-Function/Merge_book.html">merge_book</a>, <a class="external text" href="../../XFunction/X-Function/Wmove_sheet.html">wmove_sheet</a>).</li>
+<li> 8 = Added in 2019. Cell notation is turned ON for all workbooks created by LabTalk <code>win -t </code> command or X-Function <code>newbook</code>. </li></ul>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>  Bit values are additive (e.g., the default value of @RCN = 7 means cell notation is Auto On for conforming analysis tools (+4), import follows active book (+2), and SCN is ON for all new worksheets from toolbar (+1)), BUT it is OFF for all workbooks created by LabTalk <code>win -t </code> command or X-Function <code>newbook</code>.
+</td></tr></table>
+<h2><a name="Globally_turn_off_spreadsheet_cell_notation"></a><span class="mw-headline">Globally turn off spreadsheet cell notation</span></h2>
+<p>When you manipulate the value of @RCN, you are controlling use of spreadsheet cell notation for <i>new</i> books. However, there is a method for turning off spreadsheet cell notation for <i>every</i> existing book in the project <i>and</i>, optionally, for turning off spreadsheet cell notation for all <i>new</i> books. 
+</p><p><i><b>Turn off spreadsheet cell notation for every book in this project:</b></i><br />
+Open your Script Window or Command Window, type the following and press Enter:
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e WW <span style="color: #000000;">&#123;</span>page.<span style="color: #000080;">xlcolname</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span></pre>
+<p>Note that you can turn <i>on</i> cell notation using <code>page.xlcolname=1</code>. See <a class="external text" href="../../LabTalk/LabTalk/Page_(object).html#Properties:Page_Property">the LT page.xlcolname object property</a>.
+</p><p><i><b>Turn off cell notation for every book in this project AND for all new books created in any project:</b></i><br />
+Open your Script Window or Command Window, type the following and press Enter:
+</p>
+<pre class="lt" style="font-family:monospace;">ClrX</pre>
+<p>Running the <code>ClrX</code> macro, does two things:
+</p>
+<dl><dd><ul><li>Runs the <code>doc -e WW {page.xlcolname=0}</code> script described above. This disables spreadsheet cell notation for every workbook in the project.</li>
+<li> Adds <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#R">the @RCN LT System Variable</a> to <a class="external text" href="../../UserGuide/UserGuide/Set_System_Variables_Dialog_Box.html#Adding_and_Setting_Values_of_System_Variables_by_LabTalk_Script">the <b>Set System Variables</b> dialog box</a> and set its value to <i>0</i>. This disables spreadsheet cell notation for all new workbooks and this applies across all Origin sessions (unless/until you delete @RCN or change its value, in the Set System Variables dialog box).</li></ul></dd></dl>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Turn_off_spreadsheet_cell_notation/Tip_icon.png?v=8477" width="57"  border="0" /></td><td><p>Note that you can undo the effects of running this macro by:
+</p>
+<ol><li> running the <code>doc -e WW {page.xlcolname=1}</code> command.</li>
+<li> Opening the <b>Set System Variables</b> dialog box and either deleting <code>@RCN</code> or setting its value to <i>1</i>.</li></ol>
+</td></tr></table>
+<p><br />
+<i><b>For more information, see:</b></i>
+</p>
+<ul><li>  <a class="external text" href="../../LabTalk/LabTalk/ClrX_(macro).html">the LT ClrX macro</a>.</li>
+<li> <a href="../../QuickHelp/QuickHelp/Set_column_names_in_script_using_wksaddCol_wkscolname.html" title="QuickHelp:Set column names in script using wksaddCol wkscolname">FAQ-872 Why can't I set column names in my script, e.g. using wks.addCol or wks.col.name?</a></li></ul>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>short name, Set Values, Set Column Values, column formula, worksheet, new book</span></p>
+
+

@@ -1,0 +1,95 @@
+<h1 class="firstHeading">2.77 FAQ-839 What should I do when Origin becomes slower as more data is imported?</h1><p class='urlname' style='display: none'>Large-Dataset-Import-Project-Speedup</p>
+<p class='faqID'>Last Update: 2/20/2022</p>
+<p><br />
+When you import large number of files(by using <b>Data: Import From File</b>), you may find Origin becomes slower and slower along with more and more data is imported. It may often happen when you use LabTalk or OriginC scripts to import a large number of data files. It is probably caused by
+</p>
+<dl><dd><ul><li> <a href="../../QuickHelp/QuickHelp/What_is_a_Sparkline_and_how_do_I_customize_it.html" title="QuickHelp:What is a Sparkline and how do I customize it">sparklines</a>  stored in the worksheet (displayed or hidden)</li>
+<li> file information will be recorded in the workbook to enable <b>Re-Import</b> (you can find all the imported file path and names listed in the <a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>Workbook Organizer</b></a> after import)</li>
+<li> the mechanism to enable Undo of importing (if you are using OriginC or LabTalk to import multiple files in a loop)</li></ul></dd></dl>
+<p>You can try the following solutions to speed up the system.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Turn_off_Sparklines"><span class="tocnumber">1</span> <span class="toctext">Turn off Sparklines</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Turn_off_Save_File_Info_in_Workbook"><span class="tocnumber">2</span> <span class="toctext">Turn off Save File Info in Workbook</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Turn_off_Undo_Temporarily"><span class="tocnumber">3</span> <span class="toctext">Turn off Undo Temporarily</span></a></li>
+</ul>
+</div>
+
+<h3><a name="Turn_off_Sparklines"></a><span class="mw-headline">Turn off Sparklines</span></h3>
+<dl><dd><a  class="image"><img alt="FAQ1070 turnoff sparkline.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_sparkline.png?v=64239" width="465"  /></a></dd></dl>
+<p><br />
+<i><b>If you are running LabTalk scripts,</b></i> 
+</p><p>Add the <a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Options">following option</a> to the import code:
+</p>
+<pre class="lt" style="font-family:monospace;">options.<span style="color: #000080;">Sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span></pre>
+<p><br />
+<i><b>If you already import data files with sparkline enable</b></i>
+</p><p>Run the following scripts to delete all sparkline graphs, and then resave project.
+</p>
+<pre class="lt" style="font-family:monospace;">StringArray sa;
+
+doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">&#123;</span>
+	if <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H <span style="color: #000080;">==</span> <span style="color: #ff00ff;">&quot;sparkline*&quot;</span><span style="color: #000000;">&#41;</span>
+		sa.<span style="color: #000080;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+int nn <span style="color: #000080;">=</span> sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+for <span style="color: #000000;">&#40;</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nn; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	win <span style="color: #000080;">-</span>c <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sa.<span style="color: #000080;">GetAt</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><br />
+</p>
+<h3><a name="Turn_off_Save_File_Info_in_Workbook"></a><span class="mw-headline">Turn off Save File Info in Workbook</span></h3>
+<dl><dd><a  class="image"><img alt="FAQ1070 turnoff save file info in wkb.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_save_file_info_in_wkb.png?v=64241" width="459"  /></a></dd></dl>
+<p><i>Or,</i>
+</p>
+<dl><dd>Set system variable <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#N">@npi</a> to 1 to prevent recording the import files information into the workbook. See <a href="../../QuickHelp/QuickHelp/How_do_I_permanently_change_the_value_of_a_system_variable.html" title="QuickHelp:How do I permanently change the value of a system variable">this page</a> for detailed steps of change system variable value.</dd></dl>
+<p><br />
+<i><b>If you are running LabTalk code,</b></i> 
+</p><p>Add the <a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Miscs">following option</a> to the import code:
+</p>
+<pre class="lt" style="font-family:monospace;">options.<span style="color: #000080;">Miscs</span>.<span style="color: #000080;">SaveFileInfo</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span></pre>
+<p><br />
+<b>Note</b>: Without saving the import information, you cannot use <a class="external text" href="../../GettingStarted/OriginLab/Import_Data.html#Re-Importing_Data_Files"><b>Data: Re-Import</b> menu</a> to reimport the data. Please keep this in mind when you turn off "Save File Info in Workbook".
+</p>
+<h3><a name="Turn_off_Undo_Temporarily"></a><span class="mw-headline">Turn off Undo Temporarily</span></h3>
+<p>Set the system variable <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#U.2CV.2CW">@UN</a> to 0 before importing and restore it afterwards. 
+</p><p><i><b>If you are running Origin C code,</b></i>
+</p><p>Use similar functioni to this examplen:
+</p>
+<pre class="lt" style="font-family:monospace;">void DoImport<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// This class sets a system variable to a new value</span>
+    <span style="color: #008000;">// while storing the old value.</span>
+    <span style="color: #008000;">// When the instance of the class goes out of scope,</span>
+    <span style="color: #008000;">// the instance is destroyed and the system variable</span>
+    <span style="color: #008000;">// restored to it's previous value.</span>
+ 
+   LTVarTempChange junk<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@UN&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+   <span style="color: #008000;">// Perform all importing in same scope as above class instance until done.</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><i><b>If you are running LabTalk code:</b></i>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Save current value of @UN.</span>
+int nOld <span style="color: #000080;">=</span> @UN;
+
+<span style="color: #008000;">// Turn off Undo.</span>
+@UN <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">// Perform all importing until done.</span>
+
+<span style="color: #008000;">// Finally restore previous value of @UN.</span>
+@UN <span style="color: #000080;">=</span> nOld;</pre>
+<p><br />
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>impasc, slow, import file, freeze, take long time, data import, import ASCII, project, slowness, OPJ, save, open, sparkline,LT, OC, import,multiple, many,files, loop, speed, memory, import, re-import</span></p>
+
+
+
+
+
+

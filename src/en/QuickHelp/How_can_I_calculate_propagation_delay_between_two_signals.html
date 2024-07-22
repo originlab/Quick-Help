@@ -1,0 +1,105 @@
+<h1 class="firstHeading">3.127 FAQ-750 How can I calculate propagation delay time between two signals?</h1><p class='urlname' style='display: none'>Calculate-Propagation</p>
+<p class='faqID'>Last Update: 10/13/2016</p>
+<p>Assume we have two time-varying signal: <i>Signal</i> and <i>Delay Signal</i>, saved in worksheet column(B), column(D), respectively;
+<a  class="image"><img alt="Signal y.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_y.png?v=42635" width="401"  /></a>
+</p><p>Assume we want to calculate the propagation delay between two signals, A model could be set up as below, f(t) is original signal while g(t) is delay signal.
+</p><p><img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-fcaf4218745f9f5913857c06347860bc.png?v=0" title="g(t)=f(t-t_0)" alt="g(t)=f(t-t_0)" class="tex"/>
+</p><p>for all <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-e358efa489f58062f10dd7316b65649e.png?v=0" title="t" alt="t" class="tex"/>, and <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/> is a constant.
+</p><p>Next, we will use the Nonlinear Curve Fit to calculate the <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/>, a user defined fitting function can be constructed in this way:
+</p><p>The graph shown that the <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/> is approximate to 0.8, so the initial value for fitting can be set to 0.8. 
+</p>
+<dl><dd><table class="simple">
+
+<tr>
+<td width="170"><b>Function Name:</b>
+</td>
+<td> fitdelay
+</td></tr>
+<tr>
+<td width="170"><b>Function Type:</b>
+</td>
+<td> User-Defined
+</td></tr>
+<tr>
+<td width="170"><b>Independent Variables:</b>
+</td>
+<td> x
+</td></tr>
+<tr>
+<td width="170"><b>Dependent Variables:</b>
+</td>
+<td> y
+</td></tr>
+<tr>
+<td width="170"><b>Parameter Names:</b>
+</td>
+<td> t0
+</td></tr>
+<tr>
+<td width="170"><b>Function Form:</b>
+</td>
+<td> Origin C
+</td></tr>
+<tr>
+<td width="170"><b>Function:</b>
+</td>
+<td>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">//</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">H</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">// </span>
+<span style="color: #0000ff;">void</span> _nlsffitdelay1<span style="color: #000000;">&#40;</span>
+<span style="color: #008000;">// Fit Parameter(s):</span>
+<span style="color: #0000ff;">double</span> t0,
+<span style="color: #008000;">// Independent Variable(s):</span>
+<span style="color: #0000ff;">double</span> x,
+<span style="color: #008000;">// Dependent Variable(s):</span>
+<span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> y<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Beginning of editable part</span>
+	NLFitContext <span style="color: #000040;">*</span>pCtxt <span style="color: #000080;">=</span> Project.<span style="color: #000000;">GetNLFitContext</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	Worksheet wks;
+	DataRange dr;
+	<span style="color: #0000ff;">int</span> c1,c2;
+	dr <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetSourceDataRange<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Get the source data range</span>
+	dr.<span style="color: #000000;">GetRange</span><span style="color: #000000;">&#40;</span>wks, c1, c2<span style="color: #000000;">&#41;</span>;        <span style="color: #008000;">//Get the source data worksheet	</span>
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pCtxt <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">static</span> vector vX, vY;	
+		<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> nSize;
+		
+		<span style="color: #0000ff;">BOOL</span> bIsNewParamValues <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>IsNewParamValues<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bIsNewParamValues <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			Dataset dsx<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+			Dataset dsy<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;				
+			vX <span style="color: #000080;">=</span> dsx;			
+			vY <span style="color: #000080;">=</span> dsy;
+			
+			nSize <span style="color: #000080;">=</span> vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>		
+		<span style="color: #0000ff;">double</span> x1;
+		x1 <span style="color: #000080;">=</span> x<span style="color: #000040;">-</span>t0;
+		ocmath_interpolate<span style="color: #000000;">&#40;</span> <span style="color: #000040;">&amp;</span>x1, <span style="color: #000040;">&amp;</span>y, <span style="color: #0000dd;">1</span>, vX, vY, nSize <span style="color: #000000;">&#41;</span>;	
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// End of editable part</span>
+<span style="color: #000000;">&#125;</span></pre>
+</td></tr></table></dd></dl>
+<p>Please refer to <a class="external text" href="../../Tutorial/Tutorial/Fitting_With_Convolution.html">this page</a> for detailed steps about constructing user defined fitting function.
+</p>
+<h3><a name="Fit_the_Curve"></a><span class="mw-headline">Fit the Curve</span></h3>
+<p>In the fitting function body, we read the response data directly from the active worksheet. So, you should perform the fit from the worksheet. Start with a new workbook and import the file \Samples\Curve Fitting\DelaySignal.dat 
+</p>
+<ol><li> Highlight column C and press <b>Ctrl + Y</b> to bring up the <b>Nonlinear Fitting</b> dialog. </li>
+<li> Go to the Function Selection page to select the <i>fitdelay</i> function you just defined.</li>
+<li> Click the <b>Fit</b> button to generate the results.</li></ol>
+<dl><dd><dl><dd>The fitting results will be similar to this:</dd>
+<dd><a  class="image"><img alt="Signal delay results.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_delay_results.png?v=42632" width="267"  /></a></dd></dl></dd></dl>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>Nonlinear Curve Fit, Signal Process</span></p>
+
+
+
+
+
+
