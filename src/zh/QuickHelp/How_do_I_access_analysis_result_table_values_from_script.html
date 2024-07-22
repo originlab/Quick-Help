@@ -1,0 +1,48 @@
+<h1 class="firstHeading">4.13 FAQ-372 如何利用 LabTalk 脚本获取分析结果报告表的值？</h1><p class='urlname' style='display: none'>Access-Result-Table-by-Script</p>
+<p class='faqID'>Last Update: 7/6/2018</p>
+<p>部分分析操作，如线性拟合和非线性拟合会生成相应的结果报表。这种结果报表将会包含各种嵌套的表格，而表格中将会存放拟合的统计值和参数值。您可以通过 Labtalk 脚本调用 X-Function 来访问这些数值。
+</p><p>对于访问一般的结果报表，您可以使用 <b><a class="external text" href="../../XFunction/X-Function/Getresults.html">getresults</a></b> X-Function.
+。  
+例如：
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// create a tree variable of the results in the active result sheet</span>
+getresults myLRFitResults;
+
+<span style="color: #008000;">// Output a list of properties</span>
+myLRFitResults.<span style="color: #000080;">=</span>;
+
+<span style="color: #008000;">// if linear fit, can return the slope value by:</span>
+myLRFitResults.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">Slope</span>.<span style="color: #000080;">Value</span><span style="color: #000080;">=</span>;</pre>
+<p><br />
+如果您正在使用非线性曲线拟合工具，那么 LabTalk 有一个专门设计用于获取非线性拟合结果的 X-Function: <b><a class="external text" href="../../XFunction/X-Function/Getnlr.html">getnlr</a></b> X-Function。使用此 X-Function 获取的树的结构更简单，并且它还提供自定义选项允许用户通过除索引外的其他方式（如：参数名称）来访问结果。
+</p><p>例如，以下示例已使用已使用 <a class="external text" href="../../LabTalk/LabTalk/Last_Used_System_Variables.html">__REPORT$</a> 系统变量查找结果报表，您可以将以下脚本放到 FDF 文件的 “After Fit” 那部分脚本中，这样就可以在拟合后输出部分拟合结果值。
+</p>
+<pre class="lt" style="font-family:monospace;">getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>__REPORT<span style="color: #000080;">$</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>myfit.<span style="color: #000080;">func</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> fit of <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>myfit.<span style="color: #000080;">Data1</span>.<span style="color: #000080;">y1</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> results<span style="color: #000000;">:</span>;
+for<span style="color: #000000;">&#40;</span> int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>myfit.<span style="color: #000080;">nfuncparams</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    val <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+    err <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">e</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+    type Parameter <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span> \x3D <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>val<span style="color: #000000;">&#41;</span> <span style="color: #000080;">+/-</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>err<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>注:
+</p>
+<ul><li> 您可以从 <b>LabTalk Variable and Functions</b> 对话框（可通过 <code><b>ed</b></code> 命令打开）查看创建的树的内容。</li>
+<li> <b>__REPORT$</b> 在 <b>Set Column Value</b> 对话框中不适用，因为当您进行其他分析操作时它的值会随之而更改。</li>
+<li> 要获取 datasets 的数量，请使用 <i>nsets</i>。另外， <i>nfuncparams</i> 和 <i>nderivparams</i> 分别是指参数和派生参数的数量。</li>
+<li> 您可以选择使用 <b>参数名称 (Option 0)</b>，<b>缩写 (Option 1)</b> 或 <b>两者皆选 (Option 2)</b> 作为输出树的参数指示。对于(Option 0)，参数的名称和误差被枚举为P1，E1，P2，E2等。对于(Option 1)，误差和名称则分别以e_和n_为前缀，例如，y0_1，e_y0_1，n_y0_1，y0_2， e_y0_2，n_y0_2等。</li></ul>
+<p><br />
+在以下示例中，假设对两个 datasets 利用 Boltzmann 函数进行共享参数全局拟合并已获取其拟合结果，其中A1和A2为参数P1和P2，然后我们可以使用 getnlr X-Function 来获取具有两个具有参数名称和缩写表示参数的报告树。
+</p>
+<pre class="lt" style="font-family:monospace;">getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>FitNL1<span style="color: #000080;">!</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+FirstAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p1</span>; <span style="color: #008000;">// Alternative name is A1_1</span>
+FirstAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p2</span>; <span style="color: #008000;">// Alternative name is A2_1</span>
+SecondAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A1_2</span>; <span style="color: #008000;">// Alternative name is p5</span>
+SecondAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A2_2</span>; <span style="color: #008000;">// Alternative name is p6</span></pre>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>after, fit, nlfit, nonlinear, curve, parameter, result, getnlr， 拟合, 非线性拟合, 曲线, 参数, 结果</span></p>
+
+
+
+
+
+

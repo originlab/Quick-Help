@@ -1,0 +1,109 @@
+<h1 class="firstHeading">3.127 FAQ-750 如何计算两个信号之间的传播延迟时间？</h1><p class='urlname' style='display: none'>Calculate-Propagation</p>
+<p class='faqID'>Last Update: 7/22/2018</p>
+<p>假设我们有两个时变信号：<i>信号</i>和 <i>延迟信号</i>，数据分别保存在工作表列(B)，列(D) 中。
+</p>
+<dl><dd><a  class="image"><img alt="Signal y.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_y.png?v=5003" width="401"  /></a></dd></dl>
+<p>假设我们要计算两个信号之间的传播延迟，模型可以设置如下，其中 f(t) 是原始信号，而 g(t) 是延迟信号。
+</p><p><img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-fcaf4218745f9f5913857c06347860bc.png?v=0" title="g(t)=f(t-t_0)" alt="g(t)=f(t-t_0)" class="tex"/>
+</p><p>对于所有 <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-e358efa489f58062f10dd7316b65649e.png?v=0" title="t" alt="t" class="tex"/>, <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/> 是常数.
+</p><p>然后，我们将使用非线性曲线拟合来计算 <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/>,，可以用一下这种方法来构建用户定义的拟合函数：
+</p><p>图中显示的 <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png?v=0" title="t_0" alt="t_0" class="tex"/> 接近0.8，因此以0.8 作为拟合的初始值。
+</p><p><br />
+</p>
+<dl><dd><table class="simple">
+
+<tr>
+<td width="170"><b>Function Name:</b>
+</td>
+<td> fitdelay
+</td></tr>
+<tr>
+<td width="170"><b>Function Type:</b>
+</td>
+<td> User-Defined
+</td></tr>
+<tr>
+<td width="170"><b>Independent Variables:</b>
+</td>
+<td> x
+</td></tr>
+<tr>
+<td width="170"><b>Dependent Variables:</b>
+</td>
+<td> y
+</td></tr>
+<tr>
+<td width="170"><b>Parameter Names:</b>
+</td>
+<td> t0
+</td></tr>
+<tr>
+<td width="170"><b>Function Form:</b>
+</td>
+<td> Origin C
+</td></tr>
+<tr>
+<td width="170"><b>Function:</b>
+</td>
+<td>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">//</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">H</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">// </span>
+<span style="color: #0000ff;">void</span> _nlsffitdelay1<span style="color: #000000;">&#40;</span>
+<span style="color: #008000;">// Fit Parameter(s):</span>
+<span style="color: #0000ff;">double</span> t0,
+<span style="color: #008000;">// Independent Variable(s):</span>
+<span style="color: #0000ff;">double</span> x,
+<span style="color: #008000;">// Dependent Variable(s):</span>
+<span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> y<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Beginning of editable part</span>
+	NLFitContext <span style="color: #000040;">*</span>pCtxt <span style="color: #000080;">=</span> Project.<span style="color: #000000;">GetNLFitContext</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	Worksheet wks;
+	DataRange dr;
+	<span style="color: #0000ff;">int</span> c1,c2;
+	dr <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetSourceDataRange<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Get the source data range</span>
+	dr.<span style="color: #000000;">GetRange</span><span style="color: #000000;">&#40;</span>wks, c1, c2<span style="color: #000000;">&#41;</span>;        <span style="color: #008000;">//Get the source data worksheet	</span>
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pCtxt <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">static</span> vector vX, vY;	
+		<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> nSize;
+		
+		<span style="color: #0000ff;">BOOL</span> bIsNewParamValues <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>IsNewParamValues<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bIsNewParamValues <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			Dataset dsx<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+			Dataset dsy<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;				
+			vX <span style="color: #000080;">=</span> dsx;			
+			vY <span style="color: #000080;">=</span> dsy;
+			
+			nSize <span style="color: #000080;">=</span> vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>		
+		<span style="color: #0000ff;">double</span> x1;
+		x1 <span style="color: #000080;">=</span> x<span style="color: #000040;">-</span>t0;
+		ocmath_interpolate<span style="color: #000000;">&#40;</span> <span style="color: #000040;">&amp;</span>x1, <span style="color: #000040;">&amp;</span>y, <span style="color: #0000dd;">1</span>, vX, vY, nSize <span style="color: #000000;">&#41;</span>;	
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// End of editable part</span>
+<span style="color: #000000;">&#125;</span></pre>
+</td></tr></table></dd></dl>
+<p><br />
+关于构建用户定义拟合函数的详细步骤，请参考 <a class="external text" href="../../Tutorial/Tutorial/Fitting_With_Convolution.html">此页面</a> 
+</p><p><br />
+</p>
+<h3><a name=".E6.8B.9F.E5.90.88.E6.9B.B2.E7.BA.BF"></a><span class="mw-headline">拟合曲线</span></h3>
+<p>在拟合函数主体中，我们会从当前工作表中直接读取响应数据。 因此，您应该从工作表中执行拟合。 打开一个新工作簿，并导入文件\ Samples \ Curve Fitting \ DelaySignal.dat
+</p>
+<ol><li> 选中列 C，按 <b>Ctrl + Y</b> 打开 <b>Nonlinear Fitting</b> 对话框。</li>
+<li> 选择 <b>Function Selection</b> 页，选择刚刚定义的 <i>fitdelay</i> 函数</li>
+<li>点击 <b>Fit</b> 按钮，输出结果。</li></ol>
+<dl><dd><dl><dd>拟合结果与此类似：</dd>
+<dd><a  class="image"><img alt="Signal delay results.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_delay_results.png?v=5004" width="267"  /></a></dd></dl></dd></dl>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>Nonlinear Curve Fit, Signal Process，非线性曲线拟合，信号处理</span></p>
+
+
+
+
+
+

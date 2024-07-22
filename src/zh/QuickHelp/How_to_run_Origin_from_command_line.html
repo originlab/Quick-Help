@@ -1,0 +1,47 @@
+<h1 class="firstHeading">4.45 FAQ-656 如何从命令行运行 Origin？</h1><p class='urlname' style='display: none'>run-from-command-line</p>
+<p class='faqID'>Last Update: 7/14/2018</p>
+<p><br />
+程序自动化的一种方法是在命令行执行程序并传递参数。这里我们将介绍两个如何使用命令行运行 Origin 的简单示例。
+</p><p>请参阅<a class="external text" href="../../UserGuide/UserGuide/Adjusting_How_Origin_Starts_by_Modifying_the_Command_Line.html"><b>利用命令行自定义 Origin 的启动</b></a>了解更多有关此主题的讨论。
+</p>
+<h4><a name=".E8.BF.90.E8.A1.8C_LabTalk_.E8.84.9A.E6.9C.AC.E6.96.87.E4.BB.B6"></a><span class="mw-headline">运行 LabTalk 脚本文件</span></h4>
+<p>LabTalk 脚本通常保存为具有OGS扩展名的文本文件中。您可以将脚本文件存放于您选择的文件夹中，然后直接在命令行中指定存放的路径。请参阅<a class="external text" href="../../LabTalk/Script/From_Files.html"><b>从文件中运行脚本</b></a>了解更多详细的信息。
+</p><p><i><b>Example 1:</b></i><br />
+打开文本编辑器，复制以下三行命令到文本编辑器，保存文件为 Startup.OGS 并置于路径 C:\Temp\下。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>Main<span style="color: #000000;">&#93;</span>
+  type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;hello world&quot;</span>;
+  exit;</pre>
+<p>然后，假设已安装 Origin 到 C:\Program Files\OriginLab\Origin2018，那么您可以直接使用以下命令在命令行中运行上述保存的脚本文件。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #ff00ff;">&quot;C:\Program Files\OriginLab\Origin2018\Origin95_64.exe&quot;</span> <span style="color: #000080;">-</span>h <span style="color: #000080;">-</span>rs run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;c:\Temp\Startup.OGS&quot;</span>, main<span style="color: #000000;">&#41;</span></pre>
+<p>此时，Origin 将会被启动。使用 <code>-rs</code> 开关则可执行 Startup.OGS 文件的 <code>[Main]</code> 部分中的脚本。由于使用 <code>-h</code> 开关 Origin 主窗口将会被隐藏（尽管用内部控制指令仍能打开 Script Window）。
+</p>
+<h4><a name=".E6.B7.BB.E5.8A.A0.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></a><span class="mw-headline">添加配置文件</span></h4>
+<p>配置文件可包含任意的 LabTalk 命令，但通常是包含菜单命令和宏定义。其他的命令行选项用于控制初始化文件和菜单。虽然这种方法十分有用，但往往使用起来会比此处展示的示例更为复杂。请参阅<a class="external text" href="../../CodeBuilder/CodeBuilder/Working_With_Files.html"><b>使用文件</b></a>了解更多的信息。
+<br />
+</p><p><i><b>Example 2:</b></i><br />
+创建一个文本文件并命名为 COMMAND.CNF， 然后将它保存于您的用户文件夹。这个文本文件包含的内容如下：
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>Main<span style="color: #000000;">&#93;</span>
+	string bkPath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Linear Regression.OGW&quot;</span>;
+	doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>bkPath<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+	string dataPath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Sensor01.dat&quot;</span>; 
+	impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>dataPath<span style="color: #000080;">$</span>;
+	sec <span style="color: #000080;">-</span>p <span style="color: #0000dd;">3</span>;
+	save <span style="color: #000080;">%</span>YSensor01.<span style="color: #000080;">opj</span>;
+	type <span style="color: #000080;">-</span>b Automation complete.; <span style="color: #008000;">// Remove this line for complete automation</span>
+	doc <span style="color: #000080;">-</span>s;
+	exit;</pre>
+<p>利用 Windows 的 RUN，输入以 START 开头的命令提示，或者可以通过您自己的应用程序调用 command shell，您将可以启动 Origin 并且将上述保存的文件作为参数传入。例如，运行以下命令：
+</p>
+<dl><dd><code><i>&lt;Origin.EXE path and name&gt;</i> -r run.section(command.cnf, Main)</code></dd></dl>
+<p>这个示例将加载 Origin 的分析模板，导入一组示例数据并且将 opj 文件保存于用户文件夹并命名为 Sensor01.opj（注意，当 run.section 命令没有指定路径时，将会把<a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">用户文件夹</a>设为默认路径）。
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>Command Window, LabTalk, Origin Startup, Origin 启动</span></p>
+
+
+
+
+
+

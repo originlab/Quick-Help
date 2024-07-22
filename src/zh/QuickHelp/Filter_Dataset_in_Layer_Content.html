@@ -1,0 +1,61 @@
+<h1 class="firstHeading">1.31 FAQ-146 如何根据 Layer Contents 中的自定义条件筛选数据？</h1><p class='urlname' style='display: none'>Filter-Dataset-in-Layer-Content</p>
+<p class='faqID'>Last Update: 11/13/2018</p>
+<p>当使用多个工作簿和工作表中的数据在 <b>图层内容</b> 对话框中添加或删除绘图时， 在左侧面板中找到目标数据列将是一项耗时的工作。除了使用软件内置的 <a class="external text" href="../../UserGuide/UserGuide/The_Layer_n_Dialog_Box.html"><b>可用数据下拉列表</b></a> 进行操作之外，还可以在此列表中添加自定义的条件来进一步提高效率。
+</p><p>假如想要在 <b>图层内容</b> 对话框的左侧面板中筛选出该工程中所有短名称为  <i>A</i> (i.e. <i>Col A</i>) 的列。首先需要添加自定义的条件：
+</p>
+<ol>
+<li>打开 <b>Code Builder</b>, <a class="external text" href="../../OriginC/OCGuide/Create_and_Edit_an_Origin_C_File.html#Code_Builder_Quick_StartCode_Builder">新建一个 C 语言文件</a> 并输入以下代码：
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> MySelection<span style="color: #000000;">&#40;</span>OriginObject<span style="color: #000040;">&amp;</span> obj, <span style="color: #0000ff;">int</span> nType<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">switch</span> <span style="color: #000000;">&#40;</span> nType <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__FOLDER<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__PAGE<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			WorksheetPage wksPage;
+			wksPage <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">return</span> wksPage.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__LAYER<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			Worksheet wks;
+			wks <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Worksheet<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">return</span> wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__COLUMN<span style="color: #000000;">:</span>
+		<span style="color: #000000;">&#123;</span>
+			Column col;
+			col <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Column<span style="color: #000000;">&#41;</span>obj;
+			<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>obj <span style="color: #000000;">&#41;</span>
+				<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+
+			string strName;
+			col.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>strName<span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">return</span> strName.<span style="color: #000000;">Compare</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;A&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li><a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">编译文件并生成工作区</a> 。
+<li>要把自定义的条件添加到 <b>图层内容</b> 对话框的可用数据下拉列表中，首先关闭 Origin，然后在电脑资源管理器中找到  <a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">User File Folder</a>  并打开 <i>Origin.ini</i> 文件，最后把以下代码粘贴到此文件的末尾。保存并关闭文件。
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>DatasetFilterFuncs<span style="color: #000000;">&#93;</span>
+ShowColAOnly<span style="color: #000080;">=</span>MySelection<span style="color: #000080;">|</span>Column 
+User Defined<span style="color: #000080;">=</span>Oubtn.<span style="color: #000080;">ini</span></pre>
+<li>单击 <b>图：图层内容...</b>  菜单以打开 <b>图层内容</b> 对话框，然后再点击左侧面板中的<b>可用数据下拉列表</b>。就可以看到再弹出列表的底部显示有 <b>ShowColAOnly</b> 选项。
+<li> 在下拉菜单中选择 <b>ShowColAOnly</b> ，则可以在左侧面板中选出工程中所有短名称都是 <i>A</i> 的项。
+</ol>
+<p><br />
+<b>注意:</b> 可以 <a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html#Add_files_to_the_System_FolderBuilding_Origin_C_Files_under_Workspace_System_Folder">在系统文件夹中添加创建的 C 文件</a> 至代码编辑器，这样每次 Origin 启动时都会运行所定义的函数功能。
+</p><p><br />
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Filter_Dataset_in_Layer_Content/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>从 Origin 2018b 开始， 如果希望某些工作表不出现在 <b>图表绘制</b> and <b>图层内容</b> 对话框的 <a class="external text" href="../../UserGuide/UserGuide/The_Layer_n_Dialog_Box.html"><b>可用数据下拉列表</b></a>中。可以在所需剔除的工作表标签的右键菜单中选择 <b>从绘图对话框中排除</b>
+</p></td></tr></table>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>filter, layer content, column，筛选，图层内容管理，列</span></p>
+
+

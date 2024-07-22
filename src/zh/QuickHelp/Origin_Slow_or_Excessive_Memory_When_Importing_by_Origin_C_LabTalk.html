@@ -1,0 +1,39 @@
+<h1 class="firstHeading">4.64 FAQ-942 为什么使用 Origin C 或者 LabTalk 导入数据时，Origin 会变慢或者消耗过多的内存？</h1><p class='urlname' style='display: none'>Origin-slow-when-importing-by-OC-or-LT</p>
+<p class='faqID'>Last Update: 7/15/2018</p>
+<p>如果您编写了 Origin C 或者 LabTalk 代码来循环导入多个文件，并且发现速度急剧地变慢和内存消耗急剧地变大，那么很可能是与 Origin 启用导入撤销的机制有关。
+</p><p>要解决这个问题，您可以在导入数据之前通过将 @UN 系统变量设置为 0 来暂时地关闭支持撤销的机制，然后在导入数据后再将其恢复。
+</p><p>若要在 Origin C 中执行此操作，您可以使用与此示例函数相似的代码：
+</p>
+<pre class="lt" style="font-family:monospace;">void DoImport<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// This class sets a system variable to a new value</span>
+    <span style="color: #008000;">// while storing the old value.</span>
+    <span style="color: #008000;">// When the instance of the class goes out of scope,</span>
+    <span style="color: #008000;">// the instance is destroyed and the system variable</span>
+    <span style="color: #008000;">// restored to it's previous value.</span>
+ 
+   LTVarTempChange junk<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@UN&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+   <span style="color: #008000;">// Perform all importing in same scope as above class instance until done.</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>若要在 LabTalk 中执行此操作：
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Save current value of @UN.</span>
+int nOld <span style="color: #000080;">=</span> @UN;
+
+<span style="color: #008000;">// Turn off Undo.</span>
+@UN <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">// Perform all importing until done.</span>
+
+<span style="color: #008000;">// Finally restore previous value of @UN.</span>
+@UN <span style="color: #000080;">=</span> nOld;</pre>
+<p><br />
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>LabTalk,Origin C,import,multiple,many,files,loop,speed,slow,memory, 导入，多个，许多，文件，循环，速度，慢，内存</span></p>
+
+
+
+
+
+

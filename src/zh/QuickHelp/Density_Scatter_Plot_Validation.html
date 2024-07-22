@@ -1,0 +1,54 @@
+<h1 class="firstHeading">1.244 FAQ-1032 点密度图的有效性验证</h1><p class='urlname' style='display: none'>density-dots-validation</p>
+<p class='faqID'>Last Update: 11/3/2020</p>
+<p><br />
+</p><p>点密度图是使用散点图显示数据密度，其中散点的颜色映射到数据密度。而密度将使用核密度估计来计算。
+</p><p>为了计算核密度估计，Origin 使用了一种快速算法，该算法利用了 2D 区间逼近和 2D 插值。先把全图划分为若干小格子， 然后对每个格子内的（x，y）点进行计数，以获得具有区间计数的矩阵。然后利用 2D 快速傅立叶变换执行离散卷积，以计算每个网格的密度值。计算密度值的 4 次根以将密度标尺映射到色标。
+</p><p>Origin 可以使用同一数据集生成与 R 类似的结果
+</p>
+<h3><a name="R_.E5.92.8C_Origin_.E7.BB.93.E6.9E.9C.E7.9A.84.E6.AF.94.E8.BE.83"></a><span class="mw-headline">R 和 Origin 结果的比较</span></h3>
+<dl><dd><a  class="image"><img alt="Density Plot Origin R Comparison.png" src="../images/Density_Scatter_Plot_Validation/800px-Density_Plot_Origin_R_Comparison.png?v=10105" width="800"   /></a></dd></dl>
+<h3><a name=".E5.8F.82.E8.80.83"></a><span class="mw-headline">参考</span></h3>
+<p><b>数据</b>:<br />
+1 个响应变量 (y), 1 预测变量 (x)
+<br />
+100000 观察值
+<br />
+生成的数据
+<br />
+<a class="external text" href="http://blog.originlab.com/ftp/graph_gallery/DP.csv" target="_blank"><b>数据文件: DP.csv</b></a>
+</p><p><b>Origin 项目文件</b>: <a class="external text" href="http://blog.originlab.com/ftp/graph_gallery/density_dots_validation_sample.opju" target="_blank">density_dots_validation_sample.opju</a>
+</p><p><b>生成图形的 R 代码</b>
+</p>
+<pre class="lt" style="font-family:monospace;">xx<span style="color: #000080;">=</span> read.<span style="color: #000080;">csv</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;DP.csv&quot;</span>,header<span style="color: #000080;">=</span>FALSE<span style="color: #000000;">&#41;</span>
+as.<span style="color: #000080;">list</span><span style="color: #000000;">&#40;</span>body<span style="color: #000000;">&#40;</span>smoothScatter<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+trace<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;smoothScatter&quot;</span>,quote<span style="color: #000000;">&#40;</span>browser<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>,at<span style="color: #000080;">=</span><span style="color: #0000dd;">19</span><span style="color: #000000;">&#41;</span>
+
+w<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>c<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0.056990976577602</span>, <span style="color: #0000dd;">0.13442535086237</span><span style="color: #000000;">&#41;</span>
+smoothScatter<span style="color: #000000;">&#40;</span>xx, nrpoints <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>,nbin<span style="color: #000080;">=</span><span style="color: #0000dd;">151</span>,bandwidth<span style="color: #000080;">=</span>w<span style="color: #000000;">&#41;</span>
+
+#Debug and run following script
+#Type <span style="color: #ff00ff;">&quot;n&quot;</span> to enter line <span style="color: #0000dd;">19</span>
+stopifnot<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>nx <span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span> length<span style="color: #000000;">&#40;</span>xm<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> nrow<span style="color: #000000;">&#40;</span>dens<span style="color: #000000;">&#41;</span>,
+		  <span style="color: #000000;">&#40;</span>ny <span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span> length<span style="color: #000000;">&#40;</span>ym<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> ncol<span style="color: #000000;">&#40;</span>dens<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+ixm <span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span> 1L <span style="color: #000080;">+</span> as.<span style="color: #000080;">integer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>nx<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>x<span style="color: #000000;">&#91;</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>xm<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">/</span><span style="color: #000000;">&#40;</span>xm<span style="color: #000000;">&#91;</span>nx<span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>xm<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+iym <span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span> 1L <span style="color: #000080;">+</span> as.<span style="color: #000080;">integer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>ny<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>x<span style="color: #000000;">&#91;</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>ym<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">/</span><span style="color: #000000;">&#40;</span>ym<span style="color: #000000;">&#91;</span>ny<span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>ym<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+
+z<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>dens<span style="color: #000000;">&#91;</span>cbind<span style="color: #000000;">&#40;</span>ixm, iym<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>
+df<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>data.<span style="color: #000080;">frame</span><span style="color: #000000;">&#40;</span>x<span style="color: #000080;">=</span>x<span style="color: #000000;">&#91;</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>,y<span style="color: #000080;">=</span>x<span style="color: #000000;">&#91;</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>,z<span style="color: #000080;">=</span>z<span style="color: #000000;">&#41;</span>
+
+library<span style="color: #000000;">&#40;</span>ggplot2<span style="color: #000000;">&#41;</span>
+sp<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>ggplot<span style="color: #000000;">&#40;</span>df, aes<span style="color: #000000;">&#40;</span>x,y,colour<span style="color: #000080;">=</span>z<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">+</span>  geom_point<span style="color: #000000;">&#40;</span>shape<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;.&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">+</span> 
+	theme<span style="color: #000000;">&#40;</span>panel.<span style="color: #000080;">background</span> <span style="color: #000080;">=</span> element_rect<span style="color: #000000;">&#40;</span>fill <span style="color: #000080;">=</span> <span style="color: #ff00ff;">'black'</span><span style="color: #000000;">&#41;</span>,
+	panel.<span style="color: #000080;">grid</span>.<span style="color: #000080;">major</span> <span style="color: #000080;">=</span> element_blank<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>,
+	panel.<span style="color: #000080;">grid</span>.<span style="color: #000080;">minor</span> <span style="color: #000080;">=</span> element_blank<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>,
+	panel.<span style="color: #000080;">border</span> <span style="color: #000080;">=</span> element_blank<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+sp
+cval<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>seq<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">1</span>,length.<span style="color: #000080;">out</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span>
+sp<span style="color: #000080;">+</span>scale_color_gradientn<span style="color: #000000;">&#40;</span>values <span style="color: #000080;">=</span> cval,colours <span style="color: #000080;">=</span> rainbow<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">20</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>验证, 对比 R</span></p>
+
+
+
+
+
+

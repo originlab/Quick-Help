@@ -1,0 +1,28 @@
+<h1 class="firstHeading">3.137 FAQ-808 为什么使用自定义函数进行峰值拟合的速度很缓慢？ 如何加快速度？</h1><p class='urlname' style='display: none'>Speedup-UserDefined-PeakFit</p>
+<p class='faqID'>Last Update: 7/30/2018</p>
+<p>使用自定义函数进行峰值拟合，速度缓慢的主要原因是由于 <b>Peak Analyzer</b> 对话框中 <b>Fit Peaks</b> 页， <b>Result: Configure Report: Peak Properties</b> 节点下的 <b>Peak Gravity Center</b>。 这个选项是默认选中的。Origin 的内置峰值拟合功能提供解析解，从而计算出 <b>Peak Gravity Center</b>。然而，用户自定义的拟合函数并没有解析解，因此就以数值方式计算  <b>Peak Gravity Center</b> ，这使得拟合过程变慢。
+</p><p>另一个原因是，<b>Fit Peaks</b> 页中 <b>Result: Configure Report: Peak Properties</b>节点下的 <b>Fitted Peak Area</b>。 计算峰值拟合后的面积 (fitted peak area) 会需要计算零阶矩， Origin 内置的函数会直接给出解析解但用户自定义的函数就必须用数值计算出结果，所以比较费时。
+</p><p>为了加快拟合过程，你可以在 <b>Peak Analyzer</b> 中取消选择 <b>Peak Gravity Center</b> 和 <b>Fitted Peak Area</b>。 这将大大提高拟合速度。 如果你知道 <b>Peak Gravity Center</b> 和 <b>Fitted Peak Area</b> 的解析解，您可以在 FDF 文件中手动添加这个部分。 以下面的拟合函数为例，
+</p><p><img src="../images/How_to_speed_up_peak_fit_with_user_defined_function/math-2ff2101feb19c319629768bbefb6dab5.png?v=0" title="y = y0+ f \frac{A}{\frac{2w}{1+e^{s(x-x_c)}}}*\sqrt{4\frac{Ln2}{\pi}}*e^{-4Ln({\frac{x-x_c}{\frac{2w}{1+e^{s(x-x_c)}}})^2}}+&#10;(1-f)\frac{\frac{2A}{\pi*(\frac{2w}{1+e^{s(x-x_c)}})}}&#10;{1+4(\frac{x-x_c}{\frac{2w}{1+e^{s(x-x_c)}}})^2}" alt="y = y0+ f \frac{A}{\frac{2w}{1+e^{s(x-x_c)}}}*\sqrt{4\frac{Ln2}{\pi}}*e^{-4Ln({\frac{x-x_c}{\frac{2w}{1+e^{s(x-x_c)}}})^2}}+&#10;(1-f)\frac{\frac{2A}{\pi*(\frac{2w}{1+e^{s(x-x_c)}})}}&#10;{1+4(\frac{x-x_c}{\frac{2w}{1+e^{s(x-x_c)}}})^2}" class="tex"/>
+</p><p><b>Peak Gravity Center</b> 和 <b>Fitted Peak Area</b> 分别是 <i>x_c</i> 和 <i>A</i>。因此，你可以将以下部分添加到 FDF 文件的末尾：
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>Moments<span style="color: #000000;">&#93;</span> 
+mz0 <span style="color: #000080;">=</span> A 
+mz1 <span style="color: #000080;">=</span> xc
+mc2 <span style="color: #000080;">=</span> N.<span style="color: #000080;">A</span>.
+<span style="color: #000080;">mc3</span> <span style="color: #000080;">=</span> N.<span style="color: #000080;">A</span>.
+<span style="color: #000080;">mc4</span> <span style="color: #000080;">=</span> N.<span style="color: #000080;">A</span>.</pre>
+<p><br />
+</p>
+<table class="note">
+
+<tr>
+<td><b>注:</b> <b>Peak Properties</b> 分支下， 这些选项都有可能比较耗时， <b>Peak Skew</b>, <b>Peak Excess</b>, <b>3rd Order Moment</b>, <b>4th Order Moment</b>。 如果使用自定义函数要谨慎考虑勾选
+</td></tr></table>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>User defined fitting function, slow, peak analyzer, speed up，用户自定义拟合函数，缓慢，峰值分析，加速</span></p>
+
+
+
+
+
+

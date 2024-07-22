@@ -1,0 +1,45 @@
+<h1 class="firstHeading">3.144 FAQ-878 如何根据用户自定义的条件消除异常值？</h1><p class='urlname' style='display: none'>Identify-and-Eliminate-User-Defined-Outliers</p>
+<p class='faqID'>Last Update: 7/30/2018</p>
+<p>如果想通过自定义异常值的条件来识别工作表中异常值所在的单元格，你需要使用  LabTalk 脚本。在以下的代码例子中，如果绝对 Z 值 (=abs((x-<i>MeanOfColumn</i>)/<i>SDOfColumn</i>))  大于某个预设阈值，我们将该值定义为 “异常值”：
+</p>
+<pre class="lt" style="font-family:monospace;">function dataset remoutliers<span style="color: #000000;">&#40;</span>dataset ds1, double zthresh<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+  dataset ds2;
+  double ii;
+  sum<span style="color: #000000;">&#40;</span>ds1<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">//collect stats of ds1</span>
+  double summean<span style="color: #000080;">=</span>sum.<span style="color: #000080;">mean</span>;  <span style="color: #008000;">//store mean</span>
+  double sumsd<span style="color: #000080;">=</span>sum.<span style="color: #000080;">SD</span>;      <span style="color: #008000;">//store SD</span>
+  double nr<span style="color: #000080;">=</span>ds1.<span style="color: #000080;">getSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">//number of rows</span>
+  for<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nr; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+    ds2<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span>abs<span style="color: #000000;">&#40;</span>ds1<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>summean<span style="color: #000000;">&#41;</span><span style="color: #000080;">/</span>sumsd<span style="color: #000080;">&lt;=</span>zthresh?ds1<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">:</span><span style="color: #0000dd;">0</span><span style="color: #000080;">/</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">//set missing if outlier</span>
+  <span style="color: #000000;">&#125;</span>
+  return ds2;
+<span style="color: #000000;">&#125;</span></pre>
+<p>然后你可以使用 <i>remoutliers</i> 函数搜索整个工作表。例如，要屏蔽以下工作表中的异常值：
+</p><p><a  class="image"><img alt="FAQ 878 1.png" src="../images/How_to_eliminate_the_outliers_by_user_defined_defination/FAQ_878_1.png?v=5022" width="397"  /></a>
+</p><p>你可以运行下面的脚本：
+</p>
+<pre class="lt" style="font-family:monospace;">zthreshold<span style="color: #000080;">=</span><span style="color: #0000dd;">1.0</span>;  <span style="color: #008000;">//Set the threshold Z</span>
+nc<span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span>;  <span style="color: #008000;">//number of columns</span>
+nr<span style="color: #000080;">=</span>wks.<span style="color: #000080;">maxrows</span>;  <span style="color: #008000;">//number of rows</span>
+for<span style="color: #000000;">&#40;</span>jj<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; jj<span style="color: #000080;">&lt;=</span>nc; jj<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>
+dataset ds<span style="color: #000080;">=</span>wcol<span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span>;
+range rc<span style="color: #000080;">=</span>wcol<span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span>;
+wcol<span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>remoutliers<span style="color: #000000;">&#40;</span>wcol<span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span>,zthreshold<span style="color: #000000;">&#41;</span>;
+for<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nr; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+    if<span style="color: #000000;">&#40;</span>rc<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000080;">/</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+      rc<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span>ds<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>; <span style="color: #008000;">//recover the data from original</span>
+      rc<span style="color: #000080;">&lt;</span>ii<span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">1</span>;      <span style="color: #008000;">//if cell is missing, mask it</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>最后，你将获得以下结果。
+</p><p><a  class="image"><img alt="FAQ 878 2.png" src="../images/How_to_eliminate_the_outliers_by_user_defined_defination/FAQ_878_2.png?v=5023" width="395"  /></a>
+</p><p><b>注</b>: 如果您的数据集按行排列，则需要先将工作表转置为按列排列。
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>mask outlier, detect outlier，屏蔽异常值，检测异常值</span></p>
+
+
+
+
+
+

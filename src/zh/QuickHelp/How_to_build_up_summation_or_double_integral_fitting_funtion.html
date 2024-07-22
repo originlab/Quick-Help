@@ -1,0 +1,91 @@
+<h1 class="firstHeading">3.142 FAQ-858 如何创建求和拟合函数或双积分拟合函数？</h1><p class='urlname' style='display: none'>Summation-DoubleIntegral-Func</p>
+<p class='faqID'>Last Update: 7/30/2018</p>
+<p>在 <b>Tools: Fitting Function Organizer</b> 中，你可以利用 LabTalk 脚本或者 Origin C 代码，创建求和拟合函数或双积分拟合函数。
+</p>
+<h2><a name=".E6.B1.82.E5.92.8C.E6.8B.9F.E5.90.88.E5.87.BD.E6.95.B0"></a><span class="mw-headline">求和拟合函数</span></h2>
+<p>你可以在函数定义框中定义带嵌入 <b>For</b> 循环的拟合函数。以下面的函数为例。
+</p><p><img src="../images/How_to_build_up_summation_or_double_integral_fitting_funtion/math-45e5bd7a44a0155e3ee7419c9d48fd72.png?v=0" title="y=\sum_{i=1}^{10}a \cdot x^2" alt="y=\sum_{i=1}^{10}a \cdot x^2" class="tex"/>
+</p><p>假设你在 <b>Function</b> 框中定义拟合函数，如下所示：
+</p>
+<pre class="lt" style="font-family:monospace;">y <span style="color: #000080;">=</span> sum<span style="color: #000000;">&#40;</span>x, a, n<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//n is a constant, and n=10</span></pre>
+<p>然后，在 <b>LabTalk Functions Definition and Initializations</b> 框中，定义一个用户自定义的 Labtalk 函数 <i>sum</i> ，如下所示：
+</p>
+<pre class="lt" style="font-family:monospace;">function double sum<span style="color: #000000;">&#40;</span>double x, double a, int n<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    double bb <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    for<span style="color: #000000;">&#40;</span>ii <span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>n; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	bb <span style="color: #000080;">=</span> a <span style="color: #000080;">*</span> x <span style="color: #000080;">*</span> x <span style="color: #000080;">+</span> bb;
+    <span style="color: #000000;">&#125;</span>
+    return bb;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name=".E5.8F.8C.E7.A7.AF.E5.88.86.E6.8B.9F.E5.90.88.E5.87.BD.E6.95.B0"></a><span class="mw-headline">双积分拟合函数</span></h2>
+<p>你可以定义一个 Origin C 拟合函数，在该函数中调用 NAG 函数以执行积分。 以下面的公式为例。
+</p><p><img src="../images/How_to_build_up_summation_or_double_integral_fitting_funtion/math-a24fb58509ff124bdd2be944ec80b8b0.png?v=0" title="y=\int_{amp}^x \int_{amp}^x (z_{1}+z_{2})dz_{1}dz_{2}" alt="y=\int_{amp}^x \int_{amp}^x (z_{1}+z_{2})dz_{1}dz_{2}" class="tex"/>
+</p>
+<ol>
+<li>点击  <b>Function</b> 编辑框旁边的按钮，打开 <b>Code Builder</b>。
+<li>移动到这行
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//add the header file for the NAG functions here.</span></pre>
+<p>并且在此行下方添加 NAG 函数的头文件：
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<li>定义你的拟合模型。
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> n, <span style="color: #0000ff;">double</span> z<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span>, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span>use_comm <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p;
+	<span style="color: #0000ff;">double</span> dUserSuppliedFunction;
+	dUserSuppliedFunction <span style="color: #000080;">=</span> z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000040;">+</span> z<span style="color: #000000;">&#91;</span>n<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>;
+	<span style="color: #0000ff;">return</span> dUserSuppliedFunction;
+<span style="color: #000000;">&#125;</span></pre>
+<li>编辑你的拟合功能。
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> _nlsfnag_double_integral_fitting<span style="color: #000000;">&#40;</span>
+<span style="color: #008000;">// Fit Parameter(s):</span>
+<span style="color: #0000ff;">double</span> amp,
+<span style="color: #008000;">// Independent Variable(s):</span>
+<span style="color: #0000ff;">double</span> x,
+<span style="color: #008000;">// Dependent Variable(s):</span>
+<span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> y<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Beginning of editable part</span>
+        <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">int</span> use_comm;
+	<span style="color: #0000ff;">int</span> ndim <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// the integral dimension</span>
+	<span style="color: #0000ff;">int</span> maxpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">1000</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// maximum number of function evaluation </span>
+	<span style="color: #0000ff;">double</span> a<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>, b<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	
+	<span style="color: #0000ff;">static</span> NagError fail;
+	<span style="color: #0000ff;">double</span> finval;
+	<span style="color: #0000ff;">int</span> minpts;
+	<span style="color: #0000ff;">double</span> acc, eps;
+	Nag_User comm;
+	comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Pointer<span style="color: #000000;">&#41;</span><span style="color: #000040;">&amp;</span>use_comm; <span style="color: #008000;">// For communication with user-supplied functions</span>
+	
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> k<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; k <span style="color: #000080;">&lt;</span> ndim; <span style="color: #000040;">++</span>k<span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// integration interval</span>
+	<span style="color: #000000;">&#123;</span>
+	  a<span style="color: #000000;">&#91;</span>k<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> amp;
+	  b<span style="color: #000000;">&#91;</span>k<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> x;
+	<span style="color: #000000;">&#125;</span>
+	eps <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>; <span style="color: #008000;">// set the precision</span>
+	minpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+		
+	d01wcc<span style="color: #000000;">&#40;</span>ndim, f, a, b, <span style="color: #000040;">&amp;</span>minpts, maxpts, eps, <span style="color: #000040;">&amp;</span>finval, <span style="color: #000040;">&amp;</span>acc, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+	
+	y <span style="color: #000080;">=</span> finval;
+	<span style="color: #008000;">// End of editable part</span>
+<span style="color: #000000;">&#125;</span></pre>
+<li>单击 <b>Compile</b> 按钮，完成编译。
+</ol>
+<p><br />
+我们提供了几个教程，是关于怎么自定义含积分的拟合函数的。如有需要, 请参阅相应主题以查看详细步骤:
+</p>
+<ul><li><a class="external text" href="../../Tutorial/Tutorial/Fitting_with_Integral_using_NAG_Library.html">使用 Origin C 和 NAG 库定义拟合函数</a></li>
+<li><a class="external text" href="../../Tutorial/Tutorial/Fitting_with_Integral_using_LabTalk_Function.html">使用 LabTalk 脚本定义积分的拟合函数</a></li>
+<li><a class="external text" href="../../Tutorial/Tutorial/Fitting_with_Two_Integrals_using_LabTalk_Function.html">使用 LabTalk 定义带两次积分的拟合函数</a></li>
+<li><a class="external text" href="../../Tutorial/Tutorial/Fitting_with_Summation.html">定义带求和的拟合函数</a></li></ul>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'> integrate, integral, fitting, Origin C, LabTalk, NAG, summation, double integral，积分，拟合，求和，双积分</span></p>
+
+
+
+
+
+

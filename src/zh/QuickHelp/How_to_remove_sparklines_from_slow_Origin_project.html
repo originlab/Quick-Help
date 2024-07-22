@@ -1,0 +1,93 @@
+<h1 class="firstHeading">2.79 FAQ-839 如何避免Origin随着越多数据的导入变得越慢？</h1><p class='urlname' style='display: none'>Large-Dataset-Import-Project-Speedup</p>
+<p class='faqID'>Last Update: 5/9/2022</p>
+<p><br />
+当您导入大量的文件（通过<b>数据：从文件导入</b>），您可能会发现随着越来越多的文件导入，Origin变得越来越慢。这可能经常发生在使用LabTalk或OriginC代码来导入大量的数据文件。可能导致变慢的原因有：
+</p>
+<dl><dd><ul><li> 保存在工作表的<a href="../../QuickHelp/QuickHelp/What_is_a_Sparkline_and_how_do_I_customize_it.html" title="QuickHelp:What is a Sparkline and how do I customize it">迷你图</a>（显示或隐藏）</li>
+<li> 为了使<b>重导数据</b>可用，文件的信息会记录到工作簿（导入之后，您可以在<a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>工作簿管理器</b></a>里找到所有导入文件的路径和文件名）</li>
+<li> 导入的撤消机制（如果使用OriginC或LabTalk来循环导入很多文件）</li></ul></dd></dl>
+<p>您可以尝试下面的办法来避免Origin变慢。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#.E5.85.B3.E9.97.AD.E8.BF.B7.E4.BD.A0.E5.9B.BE"><span class="tocnumber">1</span> <span class="toctext">关闭迷你图</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#.E5.85.B3.E9.97.AD.E4.BF.9D.E5.AD.98.E6.96.87.E4.BB.B6.E4.BF.A1.E6.81.AF.E5.88.B0.E5.B7.A5.E4.BD.9C.E7.B0.BF.E4.B8.AD"><span class="tocnumber">2</span> <span class="toctext">关闭保存文件信息到工作簿中</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#.E6.9A.82.E6.97.B6.E5.85.B3.E9.97.AD.E6.92.A4.E9.94.80.E5.8A.9F.E8.83.BD"><span class="tocnumber">3</span> <span class="toctext">暂时关闭撤销功能</span></a></li>
+</ul>
+</div>
+
+<h3><a name=".E5.85.B3.E9.97.AD.E8.BF.B7.E4.BD.A0.E5.9B.BE"></a><span class="mw-headline">关闭迷你图</span></h3>
+<dl><dd><a  class="image"><img alt="FAQ1070 turnoff sparkline.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_sparkline.png?v=9875" width="465"  /></a></dd></dl>
+<p><br />
+<i><b>如果您运行LabTalk脚本</b></i> 
+</p><p>在导入的代码中加入<a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Options">以下选项</a>：
+</p>
+<pre class="lt" style="font-family:monospace;">options.<span style="color: #000080;">Sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span></pre>
+<p><br />
+<i><b>如果您已经导入了文件，并且迷你图已经打开</b></i>
+</p><p>运行下面的脚本来删除所有的迷你图，然后重新保存项目。
+</p>
+<pre class="lt" style="font-family:monospace;">StringArray sa;
+
+doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">&#123;</span>
+	if <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H <span style="color: #000080;">==</span> <span style="color: #ff00ff;">&quot;sparkline*&quot;</span><span style="color: #000000;">&#41;</span>
+		sa.<span style="color: #000080;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+int nn <span style="color: #000080;">=</span> sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+for <span style="color: #000000;">&#40;</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nn; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	win <span style="color: #000080;">-</span>c <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sa.<span style="color: #000080;">GetAt</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><br />
+</p>
+<h3><a name=".E5.85.B3.E9.97.AD.E4.BF.9D.E5.AD.98.E6.96.87.E4.BB.B6.E4.BF.A1.E6.81.AF.E5.88.B0.E5.B7.A5.E4.BD.9C.E7.B0.BF.E4.B8.AD"></a><span class="mw-headline">关闭保存文件信息到工作簿中</span></h3>
+<dl><dd><a  class="image"><img alt="FAQ1070 turnoff save file info in wkb.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_save_file_info_in_wkb.png?v=9874" width="459"  /></a></dd></dl>
+<p><i>或者，</i>
+</p>
+<dl><dd>设置系统变量<a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#N">@npi</a>为1，从而不会记录导入文件信息到工作簿。请参阅<a href="../../QuickHelp/QuickHelp/How_do_I_permanently_change_the_value_of_a_system_variable.html" title="QuickHelp:How do I permanently change the value of a system variable">此页面</a>了解修改系统变量的详细步骤。</dd></dl>
+<p><br />
+<i><b>如果您运行LabTalk脚本</b></i> 
+</p><p>在导入的代码中加入<a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Miscs">以下选项</a>：
+</p>
+<pre class="lt" style="font-family:monospace;">options.<span style="color: #000080;">Miscs</span>.<span style="color: #000080;">SaveFileInfo</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span></pre>
+<p><br />
+<b>注意</b>: 不保存导入信息的话，您将不能使用<a class="external text" href="../../GettingStarted/OriginLab/Import_Data.html#Re-Importing_Data_Files"><b>数据：重导数据</b>菜单</a>来重新导入数据。当您关闭<b>保存文件信息到工作簿中</b>，请记住这将不能使用重导数据。
+</p>
+<h3><a name=".E6.9A.82.E6.97.B6.E5.85.B3.E9.97.AD.E6.92.A4.E9.94.80.E5.8A.9F.E8.83.BD"></a><span class="mw-headline">暂时关闭撤销功能</span></h3>
+<p>在导入之前，设置系统变量<a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#U.2CV.2CW">@UN</a>为0，完成导入后，再恢复撤销功能。
+</p><p><i><b>如果您运行OriginC代码</b></i>
+</p><p>使用类似于下面例子的函数：
+</p>
+<pre class="lt" style="font-family:monospace;">void DoImport<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// This class sets a system variable to a new value</span>
+    <span style="color: #008000;">// while storing the old value.</span>
+    <span style="color: #008000;">// When the instance of the class goes out of scope,</span>
+    <span style="color: #008000;">// the instance is destroyed and the system variable</span>
+    <span style="color: #008000;">// restored to it's previous value.</span>
+ 
+   LTVarTempChange junk<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@UN&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+   <span style="color: #008000;">// Perform all importing in same scope as above class instance until done.</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><i><b>如果您运行LabTalk脚本</b></i>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Save current value of @UN.</span>
+int nOld <span style="color: #000080;">=</span> @UN;
+
+<span style="color: #008000;">// Turn off Undo.</span>
+@UN <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">// Perform all importing until done.</span>
+
+<span style="color: #008000;">// Finally restore previous value of @UN.</span>
+@UN <span style="color: #000080;">=</span> nOld;</pre>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>impasc, slow, import file, freeze, take long time, data import, import ASCII, project, slowness, OPJ, save, open, sparkline,LT, OC, import,multiple, many,files, loop, speed, memory, import, re-import，操作慢，导入文件，超级卡顿，长时间，数据导入，工程，项目，缩略图，迷你图，导入，很多，循环，速度，存储，重新导入</span></p>
+
+
+
+
+
+
