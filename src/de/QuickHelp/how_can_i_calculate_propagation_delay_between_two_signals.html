@@ -1,0 +1,84 @@
+﻿<h1 class="firstHeading">FAQ-750 Wie kann ich die Laufzeitverzögerung zwischen zwei Signalen berechnen?</h1>
+
+  <p class='urlname' style='display: none'>Water-Fall-LabTalk</p>
+
+  <p class='faqID'>Letztes Update: 06.08.2015</p>
+
+  <p>Angenommen, Sie haben zwei zeitlich variierende Signale: <i>Y1</i> und <i>Y</i>, die in Spalte(B) bzw. Spalte(C) des Arbeitsblatt gespeichert sind.</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Signal y.png" src="../images/How_can_I_calculate_propagation_delay_between_two_signals/Signal_y.png" width="371" height="417"></a></dd>
+  </dl>
+
+  <p>Das Modell wird zum Berechnen der Laufzeitverzögerung zwischen zwei Signalen verwendet, <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-cd66cd5a0b1003efcb6660ccd9173745.png" title="Y(t)=Y1(t-t_0)" alt="Y(t)=Y1(t-t_0)" class="tex"> für alle <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-e358efa489f58062f10dd7316b65649e.png" title="t" alt="t" class="tex"> und die Konstante <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png" title="t_0" alt="t_0" class="tex">.</p>
+
+  <p>Sie verwenden die nichtlineare Kurvenanpassung, um <img src="../images/How_can_I_calculate_propagation_delay_between_two_signals/math-d81584f09e174eec259979ae8f92eb09.png" title="t_0" alt="t_0" class="tex"> zu berechnen, eine benutzerdefinierte Anpassungsfunktion, die folgendermaßen erzeugt werden kann:</p>
+
+  <dl>
+    <dd>
+      <table class="simple">
+        <tr>
+          <td width="170"><b>Funktionsname:</b></td>
+
+          <td>fitdelay</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Funktionstyp:</b></td>
+
+          <td>Benutzerdefiniert</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Unabhängige Variable:</b></td>
+
+          <td>X</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Abhängige Variable:</b></td>
+
+          <td>Y</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Parameternamen:</b></td>
+
+          <td>t0</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Funktionsform:</b></td>
+
+          <td>Origin C</td>
+        </tr>
+
+        <tr>
+          <td width="170"><b>Funktion:</b></td>
+
+          <td>
+            <pre class="oc" style="font-family:monospace;">
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; NLFitContext <span style="color: #000040;">*</span>pCtxt <span style="color: #000080;">=</span> Project.<span style="color: #000000;">GetNLFitContext</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> pCtxt <span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #0000ff;">static</span> vector vX, vY1; <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> nSize; <span style="color: #0000ff;">BOOL</span> bIsNewParamValues <span style="color: #000080;">=</span> pCtxt<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>IsNewParamValues<span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> bIsNewParamValues <span style="color: #000000;">)</span> <span style="color: #000000;">{</span> Dataset dsx<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; Dataset dsy<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>; vX <span style="color: #000080;">=</span> dsx; vY1 <span style="color: #000080;">=</span> dsy; nSize <span style="color: #000080;">=</span> vY1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #000000;">}</span> <span style="color: #0000ff;">double</span> x1; x1 <span style="color: #000080;">=</span> x<span style="color: #000040;">-</span>t0; ocmath_interpolate<span style="color: #000000;">(</span> <span style="color: #000040;">&amp;</span>x1, <span style="color: #000040;">&amp;</span>y, <span style="color: #0000dd;">1</span>, vX, vY1, nSize <span style="color: #000000;">)</span>; <span style="color: #000000;">}</span>
+</pre>
+          </td>
+        </tr>
+      </table>
+    </dd>
+  </dl>
+
+  <p>Bitte lesen Sie auf <a class="external text" href="../../Tutorial/Tutorial/Fitting_With_Convolution.html">dieser Seite</a> die einzelnen Schritte zum Erzeugen von benutzerdefinierten Anpassungsfunktionen nach.</p>
+
+  <h3><a name="Fit_the_Curve"></a><span class="mw-headline">Kurve anpassen</span></h3>
+
+  <p>Im Anpassungsfunktionskörper werden die Antwortdaten direkt aus dem aktiven Arbeitsblatt gelesen. Daher sollte die Anpassung aus dem Arbeitsblatt erfolgen.</p>
+
+  <ol>
+    <li>Markieren Sie Spalte C und drücken Sie <b>Strg + Y</b>, um den Dialog der <b>Nichtlinearen Anpassung</b> aufzurufen.</li>
+
+    <li>Gehen Sie zurück zur Seite Funktionsauswahl, um die Funktion <i>fitdelay</i> auszuwählen, die Sie gerade definiert haben.</li>
+
+    <li>Klicken Sie auf die Schaltfläche <b>Fit</b>, um die Ergebnisse zu erzeugen.</li>
+  </ol>
+  <hr class='keywordshr'>
+
+  <p><span class='keywords'>Schlüsselwörter:</span><span class='keywordsInput'>Nichtlineare Kurvenanpassung, Signalprozess</span></p>

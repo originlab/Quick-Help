@@ -1,0 +1,44 @@
+﻿<h1 class="firstHeading">FAQ-372 Wie greife ich per Skript auf Werte aus Ergebnistabellen zu?</h1>
+
+  <p class='urlname' style='display: none'>Access-Result-Table-by-Script</p>
+
+  <p class='faqID'>Letztes Update: 04.02.2015</p>
+
+  <p>Analyseoperationen wie linearer und nichtlinearer Fit erstellen Berichtsblätter, die eingebettete Tabellen mit den Fit-Ergebnissen (Fit-Statistik, Parameterwerte) beinhalten. Diese Ergebnisse können per Skript unter Verwendung von X-Funktionen aufgerufen werden.</p>
+
+  <p>Zur allgemeinen Verwendung jedes Berichtsblattes können Sie die X-Funktion <b><a class="external text" href="../../XFunction/X-Function/Getresults.html">getresults</a></b> verwenden.</p>
+
+  <p>Zum Beispiel:</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// create a tree variable of the results in the active result sheet</span> getresults myLRFitResults; <span style="color: #008000;">// Output a list of properties</span> myLRFitResults.<span style="color: #000080;">=</span>; <span style="color: #008000;">// if linear fit, can return the slope value by:</span> myLRFitResults.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">Slope</span>.<span style="color: #000080;">Value</span><span style="color: #000080;">=</span>;
+</pre>
+
+  <p><br>
+  Wenn Sie einen nichtlinearen Fit ausführen, gibt es eine X-Funktion, die speziell für nichtlineare Anpassungsergebnisse erstellt wurde: <b><a class="external text" href="../../XFunction/X-Function/getnlr.html">getnlr</a></b>. Mit dieser X-Funktion ist die Baumstruktur einfacher und es sind Optionen verfügbar, mit denen Sie den Zugriff auf das Ergebnis durch Parametername statt Index usw. anpassen können.</p>
+
+  <p><br>
+  Geben Sie zum Beispiel folgendes Skript, das die Systemvariable <a class="external text" href="../../LabTalk/LabTalk/Last_Used_System_Variables.html">__REPORT$</a> zum Suchen des Berichtsblatt verwendet hat, im Skriptabschnitt "After Fit" Ihrer FDF-Datei ein, um einige Anpassungswerte nach der Anpassung auszugeben.</p>
+  <pre class="lt" style="font-family:monospace;">
+getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>__REPORT<span style="color: #000080;">$</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; type <span style="color: #000080;">%</span><span style="color: #000000;">(</span>myfit.<span style="color: #000080;">func</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span> fit of <span style="color: #000080;">%</span><span style="color: #000000;">(</span>myfit.<span style="color: #000080;">Data1</span>.<span style="color: #000080;">y1</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span> results<span style="color: #000000;">:</span>; for<span style="color: #000000;">(</span> int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>myfit.<span style="color: #000080;">nfuncparams</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> val <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>; err <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">e</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>; type Parameter <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span> \x3D <span style="color: #000080;">$</span><span style="color: #000000;">(</span>val<span style="color: #000000;">)</span> <span style="color: #000080;">+/-</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>err<span style="color: #000000;">)</span>; <span style="color: #000000;">}</span>
+</pre>
+
+  <p>Hinweise:</p>
+
+  <ul>
+    <li>Der Inhalt des erstellten Baums kann über den Dialog <b>LabTalk-Variablen und -Funktionen</b> (aufgerufen durch den Befehl <code><b>ed</b></code>) angezeigt werden.</li>
+
+    <li><b>__REPORT$</b> sind möglicherweise nicht sinnvoll im Dialog <b>Werte setzen</b>, da der Wert sich verändert, wenn eine andere Analyse ausgeführt wird.</li>
+
+    <li>Sie können die Anzahl der Datensätze mit dem <i>nsets</i>-Werts des Baums bestimmen. Und <i>nfuncparams</i> bzw. <i>nderivparams</i> sind die Anzahl der Parameter bzw. die abgeleiteten Parameter.</li>
+
+    <li>Sie können <b>Parameternamen (Option 0)</b>, <b>Abkürzungen (Option 1)</b> oder beides (Option 2) als Notation der Parameter für den Ausgabebaum wählen. Für Option 0 werden die Namen und Fehler der Parameter folgendermaßen nummeriert: P1, E1, P2, E2 etc. Bei Option 1 besitzen Fehler und Namen das Präfix <b>e_</b> bzw. <b>n_</b>, beispielsweise y0_1, e_y0_1, n_y0_1, y0_2, e_y0_2, n_y0_2 etc.</li>
+  </ul>
+
+  <p><br>
+  Nehmen Sie an, dass es im folgenden Skript ein globales Anpassungsergebnis der zwei Datensätze durch die Boltzmann-Funktion gibt, die A1 and A2 als Parameter P1 und P2 enthält. Um den Berichtsbaum mit beiden Namennotationen zu erhalten, verwenden Sie dann die X-Funktion getnlr.</p>
+  <pre class="lt" style="font-family:monospace;">
+getnlr myfit iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>FitNL1<span style="color: #000080;">!</span> p<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; FirstAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p1</span>; <span style="color: #008000;">// Alternative name is A1_1</span> FirstAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">p2</span>; <span style="color: #008000;">// Alternative name is A2_1</span> SecondAsymptoteA1 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A1_2</span>; <span style="color: #008000;">// Alternative name is p5</span> SecondAsymptoteA2 <span style="color: #000080;">=</span> myfit.<span style="color: #000080;">A2_2</span>; <span style="color: #008000;">// Alternative name is p6</span>
+</pre>
+  <hr class='keywordshr'>
+
+  <p><span class='keywords'>Schlüsselwörter:</span> <span class='keywordsInput'>nach, Fit, nlfit, nichtlinear, Kurve, Parameter, Ergebnis, getnlr</span></p>

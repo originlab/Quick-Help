@@ -1,0 +1,104 @@
+﻿<h1 class="firstHeading">FAQ-839 Was sollte ich tun, wenn Origin immer langsamer wird, je mehr Daten importiert werden?</h1>
+
+  <p class='urlname' style='display: none'>Large-Dataset-Import-Project-Speedup</p>
+
+  <p class='faqID'>Letztes Update: 20.02.2022</p>
+
+  <p><br>
+  Wenn Sie eine große Anzahl von Dateien importieren (über <b>Daten: Aus Datei importieren</b>), kann es sein, dass Origin stetig langsamer wird, je mehr Daten importiert werden. Wenn Sie LabTalk- oder Origin-C-Skripts verwenden, kann es häufig vorkommen, dass Sie eine große Anzahl von Datendateien importieren müssen. Das Problem wird wahrscheinlich verursacht durch</p>
+
+  <dl>
+    <dd>
+      <ul>
+        <li><a href="../../QuickHelp/QuickHelp/What_is_a_Sparkline_and_how_do_I_customize_it.html" title="QuickHelp:What is a Sparkline and how do I customize it">Sparklines</a>, die im Arbeitsblatt (angezeigt oder verborgen) gespeichert sind),</li>
+
+        <li>Dateiinformationen, die in der Arbeitsmappe aufgezeichnet werden, um einen <b>erneuten Import</b> zu ermöglichen (Sie können alle Pfade und Namen der importierten Dateien nach dem Import im <a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>Arbeitsmappenorganizer</b></a> nachlesen),</li>
+
+        <li>den Mechanismus, der das Rückgängigmachen des Importierens möglich macht (wenn Sie OriginC oder LabTalk zum Importieren von mehreren Dateien in einer Schleife verwenden).</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <p>Sie können die folgenden Lösungen testen, um das System zu beschleunigen.</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Inhalt</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Turn_off_Sparklines"><span class="tocnumber">1</span> <span class="toctext">Sparklines ausschalten</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Turn_off_Save_File_Info_in_Workbook"><span class="tocnumber">2</span> <span class="toctext">Dateiinfo in Arbeitsmappe speichern ausschalten</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Turn_off_Undo_Temporarily"><span class="tocnumber">3</span> <span class="toctext">Rückgängigmachen vorübergehend ausschalten</span></a></li>
+    </ul>
+  </div>
+
+  <h3><a name="Turn_off_Sparklines"></a><span class="mw-headline">Sparklines ausschalten</span></h3>
+
+  <dl>
+    <dd><a class="image"><img alt="FAQ1070 turnoff sparkline.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_sparkline.png" width="465"></a></dd>
+  </dl>
+
+  <p><br>
+  <i><b>Wenn Sie LabTalk-Skripts ausführen:</b></i></p>
+
+  <p>Fügen Sie die <a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Options">folgende Option</a> zum Importcode hinzu:</p>
+  <pre class="lt" style="font-family:monospace;">
+options.<span style="color: #000080;">Sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>
+</pre>
+
+  <p><br>
+  <i><b>Wenn Sie bereits Datendateien mit aktivierten Sparklines importieren:</b></i></p>
+
+  <p>Führen Sie die folgenden Skripte aus, um alle Sparklinediagramme zu löschen und das Projekt neu zu speichern.</p>
+  <pre class="lt" style="font-family:monospace;">
+StringArray sa; doc <span style="color: #000080;">-</span>e P <span style="color: #000000;">{</span> if <span style="color: #000000;">(</span><span style="color: #000080;">%</span>H <span style="color: #000080;">==</span> <span style="color: #ff00ff;">"sparkline*"</span><span style="color: #000000;">)</span> sa.<span style="color: #000080;">Add</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>H<span style="color: #000000;">)</span>; <span style="color: #000000;">}</span> int nn <span style="color: #000080;">=</span> sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; for <span style="color: #000000;">(</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nn; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> win <span style="color: #000080;">-</span>c <span style="color: #000080;">%</span><span style="color: #000000;">(</span>sa.<span style="color: #000080;">GetAt</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>; <span style="color: #000000;">}</span>
+</pre>
+
+  <p> </p>
+
+  <h3><a name="Turn_off_Save_File_Info_in_Workbook"></a><span class="mw-headline">Dateiinfo in Arbeitsmappe speichern ausschalten</span></h3>
+
+  <dl>
+    <dd><a class="image"><img alt="FAQ1070 turnoff save file info in wkb.png" src="../images/How_to_remove_sparklines_from_slow_Origin_project/FAQ1070_turnoff_save_file_info_in_wkb.png" width="459"></a></dd>
+  </dl>
+
+  <p><i>Oder</i></p>
+
+  <dl>
+    <dd>Setzen Sie die Systemvariable <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#N">@npi</a> auf 1, um zu verhindern, dass die Informationen der Importdateien in der Arbeitsmappe aufgezeichnet werden. Siehe <a href="../../QuickHelp/QuickHelp/How_do_I_permanently_change_the_value_of_a_system_variable.html" title="QuickHelp:How do I permanently change the value of a system variable">diese Seite</a> detaillierte Schritte zum Ändern des Werts einer Systemvariablen.</dd>
+  </dl>
+
+  <p><br>
+  <i><b>Wenn Sie LabTalk-Code ausführen:</b></i></p>
+
+  <p>Fügen Sie die <a class="external text" href="../../XFunction/X-Function/Details_of_TreeNodes_in_Import_ASCII.html#Miscs">folgende Option</a> zum Importcode hinzu:</p>
+  <pre class="lt" style="font-family:monospace;">
+options.<span style="color: #000080;">Miscs</span>.<span style="color: #000080;">SaveFileInfo</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>
+</pre>
+
+  <p><br>
+  <b>Hinweis</b>: Ohne Speichern der Importinformationen können Sie das Menü <a class="external text" href="../../GettingStarted/OriginLab/Import_Data.html#Re-Importing_Data_Files"><b>Daten: Neu importieren</b></a> nicht verwenden, um die Daten erneut zu importieren. Bitte bedenken Sie dies, wenn Sie "Dateiinfo in Arbeitsmappe speichern" ausschalten.</p>
+
+  <h3><a name="Turn_off_Undo_Temporarily"></a><span class="mw-headline">Rückgängigmachen vorübergehend ausschalten</span></h3>
+
+  <p>Setzen Sie die Systemvariable <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#U.2CV.2CW">@UN</a> vor dem Import auf 0 und hinterher wieder zurück.</p>
+
+  <p><i><b>Wenn Sie Origin-C-Code ausführen:</b></i></p>
+
+  <p>Verwenden Sie eine diesem Beispiel entsprechende Funktion:</p>
+  <pre class="lt" style="font-family:monospace;">
+void DoImport<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #008000;">// This class sets a system variable to a new value</span> <span style="color: #008000;">// while storing the old value.</span> <span style="color: #008000;">// When the instance of the class goes out of scope,</span> <span style="color: #008000;">// the instance is destroyed and the system variable</span> <span style="color: #008000;">// restored to it's previous value.</span> LTVarTempChange junk<span style="color: #000000;">(</span><span style="color: #ff00ff;">"@UN"</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Perform all importing in same scope as above class instance until done.</span> <span style="color: #000000;">}</span>
+</pre>
+
+  <p><i><b>Wenn Sie LabTalk-Code ausführen:</b></i></p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// Save current value of @UN.</span> int nOld <span style="color: #000080;">=</span> @UN; <span style="color: #008000;">// Turn off Undo.</span> @UN <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Perform all importing until done.</span> <span style="color: #008000;">// Finally restore previous value of @UN.</span> @UN <span style="color: #000080;">=</span> nOld;
+</pre>
+
+  <p> </p>
+  <hr class='keywordshr'>
+
+  <p><span class='keywords'>Schlüsselwörter:</span><span class='keywordsInput'>impasc, langsam, Datei importieren, einfrieren, lange Zeit dauern, Datenimport, ASCII importieren, Projekt, Langsamkeit, OPJ, speichern, öffnen, Sparkline, LT, OC, Import, mehrere, viele, Dateien, Schleife, Geschwindigkeit, Speicher, importieren, neu importieren</span></p>

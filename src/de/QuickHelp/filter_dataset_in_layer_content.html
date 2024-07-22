@@ -1,0 +1,49 @@
+﻿<h1 class="firstHeading">FAQ-146 Wie kann ich einen Datensatz basierend auf benutzerdefinierten Bedingungen in 'Layerinhalt' filtern?</h1>
+
+  <p class='urlname' style='display: none'>Filter-Dataset-in-Layer-Content</p>
+
+  <p class='faqID'>Letztes Update: 08.07.2018</p>
+
+  <p>Beim Hinzufügen bzw. Entfernen von Datenzeichnungen im Dialog <i>Layerinhalt</i> mit einem Datensatz aus mehreren Arbeitsmappen und Arbeitsblättern stellt die Suche nach den favorisierten Spalten im linken Bedienfeld eine zeitaufwändige Aufgabe dar. Außer der Standardauswahlliste der <a class="external text" href="../../UserGuide/UserGuide/The_Layer_n_Dialog_Box.html"><b>Verfügbaren Daten</b></a> können Sie auch benutzerdefinierte Bedingungen in dieser Liste hinzufügen, um effizienter filtern zu können.</p>
+
+  <p>Angenommen, Sie möchten Spalten mit dem Kurznamen <i>A</i> (d.h. <i>Col A</i>) unter allen Spalten des gleichen Projekts im linken Bedienfeld von <i>Layerinhalt</i> filtern. Zuerst fügen Sie benutzerdefinierte Bedingungen hinzu:</p>
+
+  <ol>
+    <li>Öffnen Sie den <b>Code Builder</b>, <a class="external text" href="../../OriginC/OCGuide/Create_and_Edit_an_Origin_C_File.html#Code_Builder_Quick_StartCode_Builder">erstellen Sie eine neue C-Datei</a> und geben Sie folgende Funktion ein:
+      <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> MySelection<span style="color: #000000;">(</span>OriginObject<span style="color: #000040;">&amp;</span> obj, <span style="color: #0000ff;">int</span> nType<span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #0000ff;">switch</span> <span style="color: #000000;">(</span> nType <span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__FOLDER<span style="color: #000000;">:</span> <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>; <span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__PAGE<span style="color: #000000;">:</span> <span style="color: #000000;">{</span> WorksheetPage wksPage; wksPage <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>WorksheetPage<span style="color: #000000;">)</span>obj; <span style="color: #0000ff;">return</span> wksPage.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #000000;">}</span> <span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__LAYER<span style="color: #000000;">:</span> <span style="color: #000000;">{</span> Worksheet wks; wks <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Worksheet<span style="color: #000000;">)</span>obj; <span style="color: #0000ff;">return</span> wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #000000;">}</span> <span style="color: #0000ff;">case</span> QUERYRESULTS_FILTER_ELEMENTTYPE__COLUMN<span style="color: #000000;">:</span> <span style="color: #000000;">{</span> Column col; col <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Column<span style="color: #000000;">)</span>obj; <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>obj <span style="color: #000000;">)</span> <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>; string strName; col.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>; <span style="color: #0000ff;">return</span> strName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"A"</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>; <span style="color: #000000;">}</span> <span style="color: #000000;">}</span> <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>; <span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li><a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">Datei kompilieren und Arbeitsbereich erzeugen</a></li>
+
+    <li>Um den benutzerdefinierten Bedingungsfilter in die <b>Auswahlliste Verfügbare Daten</b> des Dialogs <i>Layerinhalt</i> einzufügen, öffnen Sie <i>Origin.ini</i> im <a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">Anwenderdateiordner</a> und fügen Sie das folgende Skript am Ende der Datei <i>Origin.ini</i> ein. Speichern und schließen Sie die Datei.
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #000000;">[</span>DatasetFilterFuncs<span style="color: #000000;">]</span> ShowColAOnly<span style="color: #000080;">=</span>MySelection<span style="color: #000080;">|</span>Column User Defined<span style="color: #000080;">=</span>Oubtn.<span style="color: #000080;">ini</span>
+</pre>
+    </li>
+
+    <li>Öffnen Sie <i>Layerinhalt</i> über das Menü <b>Grafik: Layerinhalt</b> und klicken Sie im linken Bedienfeld auf die <b>Auswahlliste Verfügbare Daten</b>. Sie können sehen, dass <b>ShowColAOnly</b> unten in der Liste angezeigt wird.</li>
+
+    <li>Wählen Sie <b>ShowColAOnly</b> in der Auswahlliste. Alle Spalten mit dem Kurznamen <i>A</i> in diesem Projekt werden im linken Bedienfeld gefiltert.</li>
+  </ol>
+
+  <p><br>
+  <b>Hinweis:</b> Sie können <a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html#Add_files_to_the_System_FolderBuilding_Origin_C_Files_under_Workspace_System_Folder">die erstellte C-Datei zu dem Systemordner im Code Builder hinzufügen</a>, so dass Ihre Funktionen immer bereit sind, wenn Origin geöffnet wird.</p>
+
+  <p>&#160;</p>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Filter_Dataset_in_Layer_Content/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>Seit Origin 2018b können Sie einige Arbeitsblätter ausschließen, so dass sie nicht in den Dialogen <b>Diagrammeinstellungen</b> und <b>Layerinhalt</b> gezeigt werden. Dazu klicken Sie mit der rechten Maustaste auf die Reiter der Arbeitsblätter und kennzeichnen sie mit <b>Aus Zeichendialogen ausschließen</b>.</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>&#160;</p>
+  <hr class='keywordshr'>
+
+  <p><span class='keywords'>Schlüsselwörter:</span><span class='keywordsInput'>Filter, Layerinhalt, Spalte</span></p>

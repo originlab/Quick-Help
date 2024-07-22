@@ -1,0 +1,74 @@
+﻿<h1 class="firstHeading">FAQ-858 Wie erzeuge eine Anpassungsfunktion zur Summenbildung oder für ein doppeltes Integral?</h1>
+
+  <p class='urlname' style='display: none'>Summation-DoubleIntegral-Func</p>
+
+  <p class='faqID'>Letztes Update: 23.06.2017</p>
+
+  <p>Sie können eine benutzerdefinierte Anpassungsfunktion zur Summenbildung oder für ein doppeltes Integral mit LabTalk-Skript oder Origin-C-Code erstellen. Dazu verwenden Sie das Menü <b>Hilfsmittel: Fitfunktionen verwalten</b>.</p>
+
+  <h2><a name="summation_fitting_function"></a><span class="mw-headline">Anpassungsfunktion zur Summenbildung</span></h2>
+
+  <p>Sie können die Anpassungsfunktion mit einer eingebetteten <b>For</b>-Schleife im Definitionsfeld der Funktion definieren. Nehmen Sie die folgende Funktion als Beispiel.</p>
+
+  <p><img src="../images/How_to_build_up_summation_or_double_integral_fitting_funtion/math-45e5bd7a44a0155e3ee7419c9d48fd72.png" title="y=\sum_{i=1}^{10}a \cdot x^2" alt="y=\sum_{i=1}^{10}a \cdot x^2" class="tex"></p>
+
+  <p>Angenommen, Sie definieren die Anpassungsfunktion im Feld <b>Funktion</b>, wie folgt:</p>
+  <pre class="lt" style="font-family:monospace;">
+y <span style="color: #000080;">=</span> sum<span style="color: #000000;">(</span>x, a, n<span style="color: #000000;">)</span>; <span style="color: #008000;">//n is a constant, and n=10</span>
+</pre>
+
+  <p>Definieren Sie dann die benutzerdefinierten LabTalk-Funktionen <i>sum</i> im Feld <b>LabTalk-Funktionsdefinitionen und -initialisierungen</b> folgendermaßen:</p>
+  <pre class="lt" style="font-family:monospace;">
+function double sum<span style="color: #000000;">(</span>double x, double a, int n<span style="color: #000000;">)</span> <span style="color: #000000;">{</span> double bb <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; for<span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>n; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> bb <span style="color: #000080;">=</span> a <span style="color: #000080;">*</span> x <span style="color: #000080;">*</span> x <span style="color: #000080;">+</span> bb; <span style="color: #000000;">}</span> return bb; <span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="double_integral_fitting_function"></a><span class="mw-headline">Anpassungsfunktion für doppeltes Integral</span></h2>
+
+  <p>Sie können eine Origin-C-Fitfunktion definieren, in der NAG-Funktionen aufgerufen werden, um die Integration durchzuführen. Nehmen Sie die folgende Funktion als Beispiel.</p>
+
+  <p><img src="../images/How_to_build_up_summation_or_double_integral_fitting_funtion/math-96f39de0f0b38c57d21e5dc984043c20.png" title="y=\int_{Amp}^x \int_{Amp}^x (t+k)dtdk" alt="y=\int_{Amp}^x \int_{Amp}^x (t+k)dtdk" class="tex"></p>
+
+  <ol>
+    <li>Klicken Sie auf die Schaltfläche neben dem Bearbeitungsfeld <b>Funktion</b>, um den <b>Code Builder</b> zu öffnen.</li>
+
+    <li>Scrollen Sie nach oben bis zu der Zeile
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//add the header file for the NAG functions here.</span>
+</pre>
+
+      <p>und fügen Sie die Headerdatei für die NAG-Funktionen unter dieser Zeile ein:</p>
+      <pre class="lt" style="font-family:monospace;">
+#include <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000080;">h</span><span style="color: #000080;">&gt;</span>
+</pre>
+    </li>
+
+    <li>Defininieren Sie Ihr Anpassungsmodell.
+      <pre class="lt" style="font-family:monospace;">
+static double NAG_CALL f<span style="color: #000000;">(</span>int n, double z<span style="color: #000000;">[</span><span style="color: #000000;">]</span>, Nag_User <span style="color: #000080;">*</span>comm<span style="color: #000000;">)</span> <span style="color: #000000;">{</span> double tmp_pwr; tmp_pwr <span style="color: #000080;">=</span> z<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">+</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>; return tmp_pwr; <span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Bearbeiten Sie Ihre Anpassungsfunktion.
+      <pre class="lt" style="font-family:monospace;">
+void _nlsfnag_double_integral_fitting<span style="color: #000000;">(</span> <span style="color: #008000;">// Fit Parameter(s):</span> double amp, <span style="color: #008000;">// Independent Variable(s):</span> double x, <span style="color: #008000;">// Dependent Variable(s):</span> double<span style="color: #000080;">&amp;</span> y<span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #008000;">// Beginning of editable part</span> int ndim <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// the integral dimension</span> int maxpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">1000</span><span style="color: #000080;">*</span><span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// maximum number of function evaluation </span> double a<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>, b<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>; int k; static NagError fail; double finval; int minpts; double acc, eps; Nag_User comm; for <span style="color: #000000;">(</span>k<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; k <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">2</span>; <span style="color: #000080;">++</span>k<span style="color: #000000;">)</span>  <span style="color: #008000;">// integration interval</span> <span style="color: #000000;">{</span> a<span style="color: #000000;">[</span>k<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> amp; b<span style="color: #000000;">[</span>k<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> x; <span style="color: #000000;">}</span> eps <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>; <span style="color: #008000;">// set the precision</span> minpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; d01wcc<span style="color: #000000;">(</span>ndim, f, a, b, <span style="color: #000080;">&amp;</span>minpts, maxpts, eps, <span style="color: #000080;">&amp;</span>finval, <span style="color: #000080;">&amp;</span>acc, <span style="color: #000080;">&amp;</span>comm, <span style="color: #000080;">&amp;</span>fail<span style="color: #000000;">)</span>; y <span style="color: #000080;">=</span> finval; <span style="color: #008000;">// End of editable part</span> <span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Klicken Sie zum Kompilieren auf die Schaltfläche <b>Kompilieren</b>.</li>
+  </ol>
+
+  <p><br>
+  Wir stellen mehrere Tutorial zu benutzerdefinierten Integralfunktionen zur Verfügung. Unter den entsprechenden Themen können Sie bei Bedarf eine ausführliche Beschreibung der Schritte nachlesen:</p>
+
+  <ul>
+    <li><a href="../../Tutorial/Tutorial/Fitting_with_Integral_using_NAG_Library.html" title="Tutorial:Fitting with Integral using NAG Library">Origin C- und NAG Library-Funktionen verwenden</a></li>
+
+    <li><a href="../../Tutorial/Tutorial/Fitting_with_Integral_using_LabTalk_Function.html" title="Tutorial:Fitting with Integral using LabTalk Function">LabTalk-Skript verwenden</a></li>
+
+    <li><a href="../../Tutorial/Tutorial/Fitting_with_Two_Integrals_using_LabTalk_Function.html" title="Tutorial:Fitting with Two Integrals using LabTalk Function">Anpassen mit zwei Integralen mit Hilfe der LabTalk-Funktion</a></li>
+
+    <li><a href="../../Tutorial/Tutorial/Fitting_with_Summation.html" title="Tutorial:Fitting with Summation">Anpassen durch Addition</a></li>
+  </ul>
+  <hr class='keywordshr'>
+
+  <p><span class='keywords'>Schlüsselwörter:</span><span class='keywordsInput'>integratieren, Integral, anpassen, Origin C, LabTalk, NAG, Addition, Summenbildung, doppeltes Integral</span></p>
