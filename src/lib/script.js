@@ -1,6 +1,6 @@
 function searchSite(inputId) {
     var terms = document.getElementById(inputId).value;
-    document.location.href = "https://www.google.com/search?sitesearch=www.originlab.com&q=" + encodeURIComponent(terms);
+    document.location.href = "https://www.google.com/search?sitesearch=originlab.com&q=" + encodeURIComponent(terms);
 }
 
 function searchDoc(lang, inputId, selectId) {
