@@ -10,7 +10,7 @@ public class DocumentPageModel
 
     public required string Language { get; set; }
     
-    public (string title, string file, string url) PageInfo { get; set; }
+    public (string title, string file, string url) Page { get; set; }
 
     public required HtmlString MainContents { get; set; }
 }

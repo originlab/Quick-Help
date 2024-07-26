@@ -147,7 +147,7 @@ internal class Program
         {
             BookUrlName = bookUrlName,
             BookFolderName = bookFolderName,
-            PageInfo = page,
+            Page = page,
             Language = language,
             MainContents = new HtmlString(File.ReadAllText(sourcePath)),
         });
