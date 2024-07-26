@@ -74,20 +74,18 @@ internal class Program
 
     private async Task BuildOutput(CancellationToken cancellation)
     {
-        var outputRootFolder = Path.Combine(Path.GetDirectoryName(Options.SourcePath)!, "out");
-
-        if (Directory.Exists(outputRootFolder))
+        if (Directory.Exists(Options.OutputPath))
         {
-            Directory.Delete(outputRootFolder, true);
+            Directory.Delete(Options.OutputPath, true);
         }
 
-        Directory.CreateDirectory(outputRootFolder);
+        Directory.CreateDirectory(Options.OutputPath);
 
         foreach (var language in Languages)
         {
             var templateDocument = GetHtmlDocument(Path.Combine(Options.SourcePath, language, "template.html"));
 
-            Directory.CreateDirectory(Path.Combine(outputRootFolder, language));
+            Directory.CreateDirectory(Path.Combine(Options.OutputPath, language));
 
             if (!Options.IndexPagesOnly)
             {
@@ -97,7 +95,7 @@ internal class Program
                     var bookUrlName = pages[0].url;
                     var bookFolderName = Path.GetFileName(bookFolder);
 
-                    CopyImages(outputRootFolder, language, bookFolderName, bookUrlName);
+                    CopyImages(Options.OutputPath, language, bookFolderName, bookUrlName);
 
                     await Parallel.ForEachAsync(pages,
                     new ParallelOptions
@@ -111,7 +109,7 @@ internal class Program
                     {
                         try
                         {
-                            var pageFolder = Path.Combine(outputRootFolder, language, page.url);
+                            var pageFolder = Path.Combine(Options.OutputPath, language, page.url);
 
                             Directory.CreateDirectory(pageFolder);
 
@@ -127,10 +125,10 @@ internal class Program
                 }
             }
 
-            ProcessPage("", "", ("Index", "index.html", ""), language, templateDocument, Path.Combine(outputRootFolder, language, "index.html"));
+            ProcessPage("", "", ("Index", "index.html", ""), language, templateDocument, Path.Combine(Options.OutputPath, language, "index.html"));
         }
 
-        File.Copy(Path.Combine(outputRootFolder, "en", "index.html"), Path.Combine(outputRootFolder, "index.html"));
+        File.Copy(Path.Combine(Options.OutputPath, "en", "index.html"), Path.Combine(Options.OutputPath, "index.html"));
     }
 
     private void ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, string language, IHtmlDocument templateDocument, string destinationPath)
