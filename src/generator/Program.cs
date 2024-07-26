@@ -5,6 +5,9 @@ using AngleSharp.Dom;
 using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
+using Microsoft.AspNetCore.Html;
+using OriginLab.DocumentGeneration.Templates;
+using Razor.Templating.Core;
 
 namespace OriginLab.DocumentGeneration;
 
@@ -83,8 +86,6 @@ internal class Program
 
         foreach (var language in Languages)
         {
-            var templateDocument = GetHtmlDocument(Path.Combine(Options.SourcePath, language, "template.html"));
-
             Directory.CreateDirectory(Path.Combine(Options.OutputPath, language));
 
             if (!Options.IndexPagesOnly)
@@ -100,38 +101,29 @@ internal class Program
                     await Parallel.ForEachAsync(pages,
                     new ParallelOptions
                     {
-    #if DEBUG
+#if DEBUG
                         MaxDegreeOfParallelism = 1,
-    #endif
+#endif
                         CancellationToken = cancellation,
                     },
-                    (page, cancellation) =>
+                    async (page, cancellation) =>
                     {
-                        try
-                        {
-                            var pageFolder = Path.Combine(Options.OutputPath, language, page.url);
+                        var pageFolder = Path.Combine(Options.OutputPath, language, page.url);
 
-                            Directory.CreateDirectory(pageFolder);
+                        Directory.CreateDirectory(pageFolder);
 
-                            ProcessPage(bookUrlName, bookFolderName, page, language, templateDocument, Path.Combine(pageFolder, "index.html"));
-
-                            return ValueTask.CompletedTask;
-                        }
-                        catch (Exception error)
-                        {
-                            return ValueTask.FromException(error);
-                        }
+                        await ProcessPage(bookUrlName, bookFolderName, page, language, Path.Combine(pageFolder, "index.html"));
                     });
                 }
             }
 
-            ProcessPage("", "", ("Index", "index.html", ""), language, templateDocument, Path.Combine(Options.OutputPath, language, "index.html"));
+            await ProcessPage("", "", ("Index", "index.html", ""), language, Path.Combine(Options.OutputPath, language, "index.html"));
         }
 
         File.Copy(Path.Combine(Options.OutputPath, "en", "index.html"), Path.Combine(Options.OutputPath, "index.html"));
     }
 
-    private void ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, string language, IHtmlDocument templateDocument, string destinationPath)
+    private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, string language, string destinationPath)
     {
         var sourcePath = Path.Combine(Options.SourcePath, language, bookFolderName, page.file);
 
@@ -151,8 +143,16 @@ internal class Program
             }
         }
 
-        var document = (IHtmlDocument)templateDocument.Clone();
-        document.GetElementById("default-contents-body")!.InnerHtml = File.ReadAllText(sourcePath);
+        var html = await RazorTemplateEngine.RenderAsync("/DocumentPage.cshtml", new DocumentPageModel
+        {
+            BookUrlName = bookUrlName,
+            BookFolderName = bookFolderName,
+            PageInfo = page,
+            Language = language,
+            MainContents = new HtmlString(File.ReadAllText(sourcePath)),
+        });
+        var parser = new HtmlParser();
+        var document = await parser.ParseDocumentAsync(html);
 
         Transform(document, bookUrlName, bookFolderName, language, page);
 
@@ -272,14 +272,6 @@ internal class Program
         }
 
         return mappings.ToFrozenDictionary(m => m.file, m => (m.url, m.title), StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static IHtmlDocument GetHtmlDocument(string path)
-    {
-        var parser = new HtmlParser();
-        using var fs = File.OpenRead(path);
-
-        return parser.ParseDocument(fs);
     }
 
     private static IEnumerable<(string title, string file, string url)> GetPagesXml(string xmlFileName)
