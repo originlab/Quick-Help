@@ -270,7 +270,9 @@ internal class Program
         => XElement.Load(file).Descendants("page");
 
     private static (string title, string file, string url) GetPageInfo(XElement? page)
-        => page is null ? ("Index", "index.html", "") : (page.Attribute("title")!.Value, page.Attribute("file")!.Value, page.Attribute("url")!.Value);
+        => page is null || page.Name != "page"
+        ? ("Index", "index.html", "")
+        : (page.Attribute("title")!.Value, page.Attribute("file")!.Value, page.Attribute("url")!.Value);
 
     private static void CopyDirectory(string source, string destination, bool recursive = true, bool overwrite = true)
     {
