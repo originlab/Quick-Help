@@ -149,7 +149,7 @@ internal class Program
             BookFolderName = bookFolderName,
             Page = page,
             Language = language,
-            MainContents = new HtmlString(File.ReadAllText(sourcePath)),
+            Contents = new HtmlString(File.ReadAllText(sourcePath)),
         });
         var parser = new HtmlParser();
         var document = await parser.ParseDocumentAsync(html);
