@@ -1,0 +1,121 @@
+<h1 class="firstHeading">2.2.5.1.16 file::Write</h1><p><span class="OIndex" style="display:none">Write</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Write data from a buffer into the file associated with the file object.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;">UINT Write<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">void</span> <span style="color: #000040;">*</span> lpBuf, UINT nCount <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpBuf</dt>
+<dd>[input] A buffer where the data to be written is stored.</dd>
+<dt> nCount</dt>
+<dd>[input] The number of bytes to write from the buffer to the file indicated by the File object.  Carriage return-line feed character combinations are counted as one byte.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>The number of bytes written to the file from the buffer.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//write the 1st column of active worksheet with dataset</span>
+<span style="color: #008000;">//assume all elements of the column are numeric.</span>
+<span style="color: #0000ff;">int</span> file_Write_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">file</span> ff;
+    <span style="color: #0000ff;">bool</span> bOK <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Open</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;C:<span style="color: #666666; font-weight: bold;">\\</span>test.txt&quot;</span>, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeCreate</span> <span style="color: #000040;">|</span> <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeReadWrite</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bOK<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to open file C:<span style="color: #666666; font-weight: bold;">\t</span>est.txt&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Column cc; 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>
+        cc <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">else</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Iinvalid worksheet&quot;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">//get data</span>
+    cc.<span style="color: #000000;">SetInternalData</span><span style="color: #000000;">&#40;</span>FSI_DOUBLE<span style="color: #000000;">&#41;</span>;
+    Dataset ds<span style="color: #000000;">&#40;</span>cc<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nDataSize <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+    ds.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">//write data</span>
+    <span style="color: #0000ff;">int</span> nRead <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span>ds, nDataSize <span style="color: #000040;">*</span> <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;            
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> file_Write_ex2<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">file</span> ff;
+    <span style="color: #0000ff;">bool</span> bOK <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Open</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;C:<span style="color: #666666; font-weight: bold;">\\</span>test.txt&quot;</span>, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeCreate</span> <span style="color: #000040;">|</span> <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeReadWrite</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bOK<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to open file C:<span style="color: #666666; font-weight: bold;">\t</span>est.txt&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">int</span> ia <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>ia, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>ia<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;            <span style="color: #008000;">//write 4 to file.</span>
+    <span style="color: #0000ff;">int</span> ib<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#125;</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span>ib, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>ib<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;            <span style="color: #008000;">//write 1, 2, 3, 4 to file following previous 4.</span>
+ 
+    <span style="color: #008000;">//write double</span>
+    <span style="color: #0000ff;">double</span> da <span style="color: #000080;">=</span> <span style="color: #0000dd;">123.345</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>da, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>da<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">//write structure</span>
+    WIN32_FIND_DATAA sa;
+    <span style="color: #000000;">memset</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>sa, <span style="color: #0000dd;">0</span>, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>WIN32_FIND_DATAA<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    sa.<span style="color: #000000;">dwFileAttributes</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">20000</span>;
+    sa.<span style="color: #000000;">ftCreationTime</span>.<span style="color: #000000;">dwLowDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+    sa.<span style="color: #000000;">ftCreationTime</span>.<span style="color: #000000;">dwHighDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span>;
+    sa.<span style="color: #000000;">ftLastAccessTime</span>.<span style="color: #000000;">dwLowDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">100000</span>;
+    sa.<span style="color: #000000;">ftLastAccessTime</span>.<span style="color: #000000;">dwHighDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">500000</span>;
+    sa.<span style="color: #000000;">ftLastWriteTime</span>.<span style="color: #000000;">dwLowDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1000</span>;
+    sa.<span style="color: #000000;">ftLastWriteTime</span>.<span style="color: #000000;">dwHighDateTime</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5000</span>;
+    sa.<span style="color: #000000;">nFileSizeHigh</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">9000000</span>;
+    sa.<span style="color: #000000;">nFileSizeLow</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    sa.<span style="color: #000000;">dwReserved0</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">600</span>;
+    sa.<span style="color: #000000;">dwReserved1</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">98745</span>;
+    lstrcpy<span style="color: #000000;">&#40;</span>sa.<span style="color: #000000;">cFileName</span>, <span style="color: #ff00ff;">&quot;C:<span style="color: #666666; font-weight: bold;">\\</span>Origin70<span style="color: #666666; font-weight: bold;">\\</span>OriginC<span style="color: #666666; font-weight: bold;">\\</span>origin.h&quot;</span><span style="color: #000000;">&#41;</span>;
+    lstrcpy<span style="color: #000000;">&#40;</span>sa.<span style="color: #000000;">cAlternateFileName</span>,<span style="color: #ff00ff;">&quot;originc.h&quot;</span><span style="color: #000000;">&#41;</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>sa, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>sa<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">//write char array</span>
+    <span style="color: #0000ff;">char</span> ca<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">20</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;This is a string.&quot;</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span>ca, <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span>ca<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">//write vector</span>
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> ik <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">&#125;</span>;
+    <span style="color: #0000ff;">int</span> size <span style="color: #000080;">=</span> <span style="color: #000000;">sizeof</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> ik.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    ff.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span>ik, size<span style="color: #000000;">&#41;</span>;
+	ff.<span style="color: #000000;">Close</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/File-Read.html" title="OriginC:File-Read">File::Read</a>, <a href="../../OriginC/OriginC/StdioFile-WriteString.html" title="OriginC:StdioFile-WriteString">StdioFile::WriteString</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

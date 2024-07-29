@@ -1,0 +1,70 @@
+<h1 class="firstHeading">3.16.1 Get XY Coordinate of Min/Max Z From Matrix</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Get_XY_Coordinate_of_Minimum.2FMaximum_Z_From_Matrix"><span class="tocnumber">2</span> <span class="toctext">Get XY Coordinate of Minimum/Maximum Z From Matrix</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin8 SR0</p>
+<h2><a name="Get_XY_Coordinate_of_Minimum.2FMaximum_Z_From_Matrix"></a><span class="mw-headline">Get XY Coordinate of Minimum/Maximum Z From Matrix</span></h2>
+<p>This example will show how to get the XY coordinate of the minimum/maximum Z value from a matrix.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> get_xy_coordinate_min_max_z<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// get the matrix object</span>
+	MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>ml<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate a matrix.&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>mo<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please make sure that there is a valid matrix object&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// get number of column and row</span>
+	<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// get matrix data and find the indices of min/max</span>
+	Matrix<span style="color: #000040;">&amp;</span> mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	uint iStart <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// start data index</span>
+	uint iEnd <span style="color: #000080;">=</span> nCols<span style="color: #000040;">*</span>nRows<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// end data index</span>
+	uint iMinIndex, iMaxIndex;
+
+    <span style="color: #008000;">// get indices of min/max z</span>
+	ocmath_d_minmax<span style="color: #000000;">&#40;</span>mat, iStart, iEnd, <span style="color: #000040;">&amp;</span>iMinIndex, <span style="color: #000040;">&amp;</span>iMaxIndex<span style="color: #000000;">&#41;</span>;  
+
+	<span style="color: #008000;">// convert the indices to column/row indices</span>
+	<span style="color: #0000ff;">int</span> iMaxRow <span style="color: #000080;">=</span> iMaxIndex<span style="color: #000040;">/</span>nCols;
+	<span style="color: #0000ff;">int</span> iMaxCol <span style="color: #000080;">=</span> iMaxIndex<span style="color: #000040;">%</span>nCols;
+	<span style="color: #0000ff;">int</span> iMinRow <span style="color: #000080;">=</span> iMinIndex<span style="color: #000040;">/</span>nCols;
+	<span style="color: #0000ff;">int</span> iMinCol <span style="color: #000080;">=</span> iMinIndex<span style="color: #000040;">%</span>nCols;
+	
+	<span style="color: #008000;">// get min and max z value</span>
+	<span style="color: #0000ff;">double</span> dMin <span style="color: #000080;">=</span> mat<span style="color: #000000;">&#91;</span>iMinRow<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#91;</span>iMinCol<span style="color: #000000;">&#93;</span>;
+	<span style="color: #0000ff;">double</span> dMax <span style="color: #000080;">=</span> mat<span style="color: #000000;">&#91;</span>iMaxRow<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#91;</span>iMaxCol<span style="color: #000000;">&#93;</span>;
+	
+	<span style="color: #008000;">// get the xy coordinate for min/max z value</span>
+	<span style="color: #0000ff;">double</span> dXMin <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetXValue</span><span style="color: #000000;">&#40;</span>iMinCol<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">double</span> dYMin <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetYValue</span><span style="color: #000000;">&#40;</span>iMinRow<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">double</span> dXMax <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetXValue</span><span style="color: #000000;">&#40;</span>iMaxCol<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">double</span> dYMax <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetYValue</span><span style="color: #000000;">&#40;</span>iMaxRow<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// print the result</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The minimum Z =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>The maximum Z =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, dMin, dMax<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The XY coordinate of minimum Z is (%f,&#160;%f)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, dXMin, dYMin<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The XY coordinate of maximum Z is (%f,&#160;%f)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, dXMax, dYMax<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

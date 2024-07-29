@@ -1,0 +1,59 @@
+<h1 class="firstHeading">3.9.6.1.3 Report with Embedded Graphs</h1><p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>The following example shows how to embed graphs into report tables.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> Datasheet_SetReportTree_Ex3<span style="color: #000000;">&#40;</span>string strGraphName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Graph1&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphPage gp<span style="color: #000000;">&#40;</span>strGraphName<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gp<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No graph named&#160;%s in project<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strGraphName<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique	</span>
+	<span style="color: #0000ff;">int</span> nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN <span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_HEADINGS<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_HEADINGS <span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+	
+	<span style="color: #008000;">// 1. Create report tree</span>
+	Tree tr;
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; 
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Report with Embedded Graph&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table title</span>
+	<span style="color: #008000;">// TREE_Table attribute is critical in getting the report to work so must be present in every table level. </span>
+	<span style="color: #008000;">// Can set this attribute as 0 without any format, but many bits GETNBRANCH_* defined in oc_const.h to set table display format.</span>
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 	
+
+	<span style="color: #008000;">// 2. Put graph page inside report table</span>
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;	
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> gp.<span style="color: #000000;">GetUID</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Control, ONODETYPE_EMBED_GRAPH<span style="color: #000000;">&#41;</span>;		
+
+	<span style="color: #008000;">// 3. Prepare worksheet window to report</span>
+	WorksheetPage wksPage;
+	wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span>, CREATE_EMPTY<span style="color: #000000;">&#41;</span>;	
+	wksPage.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	
+	DWORD 	dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE;		
+	string	strSheetName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Report Sheet&quot;</span>;
+	<span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>strSheetName, dwOptions<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>	
+		<span style="color: #0000ff;">return</span>;		
+	
+	<span style="color: #008000;">// 4. Do report</span>
+	Worksheet wksOut <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wksOut.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Report</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Returns last row number on successful exit and -1 on failure.</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>		
+	wksPage.<span style="color: #000000;">Rename</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ReportSample&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksOut.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;		
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

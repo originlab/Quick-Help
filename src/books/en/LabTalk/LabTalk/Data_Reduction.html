@@ -1,0 +1,125 @@
+<h1 class="firstHeading">4.1.2 Data Reduction</h1><p class='urlname' style='display: none'>Data-Reduction</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Deleting"><span class="tocnumber">1</span> <span class="toctext">Deleting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Delete_Columns"><span class="tocnumber">1.1</span> <span class="toctext">Delete Columns</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Averaging"><span class="tocnumber">2</span> <span class="toctext">Averaging</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Average_Data_from_All_Sheets_with_Row_Statistics"><span class="tocnumber">2.1</span> <span class="toctext">Average Data from All Sheets with Row Statistics</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Data_Average_over_Selected_Sheets"><span class="tocnumber">2.2</span> <span class="toctext">Data Average over Selected Sheets</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Average_XYY_Data_from_All_Sheets_with_Interpolation_of_X"><span class="tocnumber">2.3</span> <span class="toctext">Average XYY Data from All Sheets with Interpolation of X</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Deleting"></a><span class="mw-headline">Deleting</span></h2>
+<h3><a name="Delete_Columns"></a><span class="mw-headline">Delete Columns</span></h3>
+<p>You can delete columns by name or index:
+</p>
+<pre class="lt" style="font-family:monospace;">del col<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sample 6&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// By Long Name</span>
+del col<span style="color: #000000;">&#40;</span>G<span style="color: #000000;">&#41;</span>;          <span style="color: #008000;">// By Short Name</span>
+del col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>;          <span style="color: #008000;">// By column index (counting from 1)</span>
+
+NextCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;         <span style="color: #008000;">// By variable index</span>
+del wcol<span style="color: #000000;">&#40;</span>NextCol<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Averaging"></a><span class="mw-headline">Averaging</span></h2>
+<h3><a name="Average_Data_from_All_Sheets_with_Row_Statistics"></a><span class="mw-headline">Average Data from All Sheets with Row Statistics</span></h3>
+<p>The following code will use the <b>rowStats</b> X-Function to average each column in a workbook across of all the sheets and put the results into a new book. Start with a workbook with two or more worksheets each containing two or more columns of data (same number of columns in each).
+</p>
+<pre class="lt" style="font-family:monospace;">string ss<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;        <span style="color: #008000;">// Save active book name.</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;  <span style="color: #008000;">// Save number of columns of active sheet.</span>
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;         <span style="color: #008000;">// New book for Results, with 3 sheets.</span>
+
+<span style="color: #008000;">// Name each sheet:</span>
+range s1<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;s1.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Mean;
+range s2<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>;s2.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> N;
+range s3<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span><span style="color: #000080;">!</span>;s3.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SD;
+
+loop<span style="color: #000000;">&#40;</span>i,<span style="color: #0000dd;">1</span>,ncols<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   rowstats <span style="color: #000000;">&#91;</span>ss<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> 
+   mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> 
+   n<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> 
+   sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Data_Average_over_Selected_Sheets"></a><span class="mw-headline">Data Average over Selected Sheets</span></h3>
+<p>The following code will use the rowStats X-Function to average each column in a workbook across of all the <b>Selected</b> sheets and put the results into 3 sheets named <i>Mean, N, SD</i> in the same book.
+Start with a workbook with three or more worksheets each containing two or more columns of data (same number of columns in each).
+Select two or more sheets by holding the Ctrl key and clicking the sheet names.
+</p>
+<pre class="lt" style="font-family:monospace;">int ncols<span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span>;<span style="color: #008000;">//save number of columns of active sheet</span>
+<span style="color: #008000;">// get selected sheets like 3,4,6</span>
+string sel<span style="color: #000080;">$</span><span style="color: #000080;">=</span>SelLayers<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+
+if<span style="color: #000000;">&#40;</span>exist<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span>Mean<span style="color: #000080;">!</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Mean&quot;</span>;
+	newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;N&quot;</span>;
+	newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;SD&quot;</span>;
+<span style="color: #000000;">&#125;</span>
+
+type <span style="color: #ff00ff;">&quot;selected sheets&#160;%(sel$)&quot;</span>;
+loop<span style="color: #000000;">&#40;</span>i,<span style="color: #0000dd;">1</span>,ncols<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+   rowstats <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sel<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Mean<span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> n<span style="color: #000000;">:</span><span style="color: #000080;">=</span>N<span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SD<span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Mean;</pre>
+<h3><a name="Average_XYY_Data_from_All_Sheets_with_Interpolation_of_X"></a><span class="mw-headline">Average XYY Data from All Sheets with Interpolation of X</span></h3>
+<p>The following code will use the average X-Function to average the common XYY pairs in all of the sheets and put the 
+</p><p>results into a new sheet.  All of the sheets in the book should be of similar data; i.e. first column is X values and 
+</p><p>each sheet has the same number of columns and the same column names, etc..  Each sheet does not have to have the same 
+</p><p>number of X values as linear interpolation will occur.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Point to where the data files are </span>
+string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Import and Export\&quot;</span>; 
+<span style="color: #008000;">// Find all files with wild card </span>
+findfiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;S*-*-*.dat&quot;</span>; 
+int numFiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>; 
+<span style="color: #008000;">// Start a new book </span>
+newbook; 
+<span style="color: #008000;">// Loop over all files and import each as a new sheet in the book</span>
+for<span style="color: #000000;">&#40;</span>int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ifile <span style="color: #000080;">&lt;=</span> numFiles; ifile<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span> 
+   string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>; 
+   <span style="color: #008000;">// Get next file name </span>
+   filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span>ifile,CRLF<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>; 
+   <span style="color: #008000;">// Import by adding new sheet </span>
+   impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #000000;">&#125;</span> 
+
+<span style="color: #008000;">//Average all sheets	</span>
+
+<span style="color: #008000;">// Get number of layers</span>
+int nlayers <span style="color: #000080;">=</span> page.<span style="color: #000080;">nlayers</span>;
+
+<span style="color: #008000;">// Get X  </span>
+range rXIn <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get number of Y cols - same in all sheets</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">-</span> <span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">// Add a new output sheet </span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Average&quot;</span>;
+
+<span style="color: #008000;">// Loop over all data cols and do averaging</span>
+for<span style="color: #000000;">&#40;</span>int icol <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; icol<span style="color: #000080;">&lt;=</span>ncols; icol<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  averagexy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nlayers<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>icol <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> interp<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> x<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> y<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wcol<span style="color: #000000;">&#40;</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+  <span style="color: #008000;">// Get long name and units of data Y col in first sheet and assign to output Y col</span>
+  range rYIn <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+  col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rYIn<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>; 
+  col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rYIn<span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>; 
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Get long name and units of data X col and assign to output x col</span>
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rXIn<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>; 
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rXIn<span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;</pre>
+
+
+
+
+
+

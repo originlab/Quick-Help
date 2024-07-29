@@ -1,0 +1,159 @@
+<h1 class="firstHeading">2.13.6 Image Processing</h1><p class='urlname' style='display: none'>Image-Processing</p>
+<p><span class="OIndex" style="display:none">Image Processing</span>Origin 8 offers enhanced image processing capabilities compared with earlier versions of Origin.  A few examples of basic image processing are shown below, along with LabTalk scripts for performing the necessary tasks.
+</p><p>To view a list of all X-Functions available for image processing, please type the following command:
+</p>
+<pre class="lt" style="font-family:monospace;">lx cat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;image*&quot;</span>;</pre>
+<p>Some of the X-Functions are only available in OriginPro.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Rotate_and_Make_Image_Compact"><span class="tocnumber">1</span> <span class="toctext">Rotate and Make Image Compact</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Edge_Detection"><span class="tocnumber">2</span> <span class="toctext">Edge Detection</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Apply_Rainbow_Palette_to_Gray_Image"><span class="tocnumber">3</span> <span class="toctext">Apply Rainbow Palette to Gray Image</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Converting_Image_to_DataConverting_Image_to_Data"><span class="tocnumber">4</span> <span class="toctext">Converting Image to Data<span class="OIndex" style="display:none">Converting Image to Data</span></span></a></li>
+</ul>
+</div>
+
+<h2><a name="Rotate_and_Make_Image_Compact"></a><span class="mw-headline">Rotate and Make Image Compact</span></h2>
+<p>This example rotates, trims the margins, and applies an auto-level to make the image more compact and clear.<span class="OIndex" style="display:none">Rotate image</span>, <span class="OIndex" style="display:none">Trim margin</span>
+<a  class="image"><img alt="ImageRotate Trim AutoLevel.jpg" src="../images/Image_Processing/ImageRotate_Trim_AutoLevel.jpg?v=0" width="600"  /></a>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create a new folder in the Project Explorer</span>
+pe_mkdir RotateTrim path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span>;
+pe_cd aa<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">//Create a matrix and import an image into it</span>
+window <span style="color: #000080;">-</span>t m;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;samples\Image Processing and Analysis\rice.bmp&quot;</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impimage;
+window <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>h Original;
+
+<span style="color: #008000;">//Get the dimension of the original image</span>
+matrix <span style="color: #000080;">-</span>pg DIM nCol1 nRow1;	 
+
+window <span style="color: #000080;">-</span>d;	<span style="color: #008000;">//Duplicate the image</span>
+window <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>h Modified;
+
+imgRotate angle<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">42</span>;
+imgTrim t<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">17</span>;
+
+matrix <span style="color: #000080;">-</span>pg DIM nCol2 nRow2; <span style="color: #008000;">//Get the dimension of the modified iamge</span>
+
+imgAutoLevel;<span style="color: #008000;">// Apply auto leveling to image</span>
+
+window <span style="color: #000080;">-</span>s T;	<span style="color: #008000;">//Tile the windows horizontally</span>
+
+<span style="color: #008000;">//Report</span>
+window <span style="color: #000080;">-</span>n n Report;
+old <span style="color: #000080;">=</span> type.<span style="color: #000080;">redirection</span>;
+type.<span style="color: #000080;">redirection</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+type.<span style="color: #000080;">notes</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Report;
+type <span style="color: #ff00ff;">&quot;Dimension of the original image: &quot;</span>;
+type <span style="color: #ff00ff;">&quot;   $(nCol1) * $(nRow1)\r\n&quot;</span>;   <span style="color: #008000;">//  &quot;754 * 668&quot;</span>
+type <span style="color: #ff00ff;">&quot;Dimension of the modified image: &quot;</span>;   <span style="color: #008000;">//  &quot;688 * 601&quot;</span>
+type <span style="color: #ff00ff;">&quot;   $(nCol2) * $(nRow2)\r\n&quot;</span>;
+type.<span style="color: #000080;">redirection</span> <span style="color: #000080;">=</span> old;</pre>
+<p>We can also rotate, resize, and adjust the color scale of the image in new image window.
+</p>
+<p class="version" >Minimum Origin Version Required:  2016 SR0</p>
+<pre class="lt" style="font-family:monospace;">fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SYSTEM.<span style="color: #000080;">PATH</span>.<span style="color: #000080;">PROGRAM</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Image Processing and Analysis\Rice.bmp&quot;</span>;
+cvopen fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;  <span style="color: #008000;">//open the image in new image window;</span>
+
+cvRotate angle<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">42</span> interp<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> resize<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> trim<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">//rotate and resize the image</span>
+cvGray img<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+cvHistEq img<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;   <span style="color: #008000;">//equalizes the histogram</span></pre>
+<h2><a name="Edge_Detection"></a><span class="mw-headline">Edge Detection</span></h2>
+<p><span class="OIndex" style="display:none">Edge Detection</span>Subtract background from Cells image then detect the edges.
+<a  class="image"><img alt="Edges detect from cells.jpg" src="../images/Image_Processing/Edges_detect_from_cells.jpg?v=0" width="600"  /></a>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create a new folder in the Project Explorer</span>
+pe_mkdir EdgeDetection path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span>;
+pe_cd aa<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">//Create a matrix and import the cell image into it</span>
+window <span style="color: #000080;">-</span>t m;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;samples\Image Processing and Analysis\cell.jpg&quot;</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impimage;
+cell<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>h;
+
+<span style="color: #008000;">//Create a matrix and import the background image into it</span>
+window <span style="color: #000080;">-</span>t m;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;samples\Image Processing and Analysis\bgnd.jpg&quot;</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impimage;
+cellbk<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>h;
+
+
+<span style="color: #008000;">//Subtract background and pre-processing</span>
+<span style="color: #008000;">//x, y is the offset of Image2</span>
+imgSimpleMath img1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cellbk<span style="color: #000080;">$</span> img2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cell<span style="color: #000080;">$</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sub12 x<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">7</span> y<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">13</span> crop<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">//specify the lowest and highest intensity to be convert to binary 0 or 1.</span>
+imgBinary t1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">65</span> t2<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">255</span>;
+<span style="color: #008000;">// the dimensions of median filter is 18</span>
+imgMedian d<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">18</span>;
+
+<span style="color: #008000;">//Edge detection</span>
+<span style="color: #008000;">// the threshold value 12 used to determine edge pixels, </span>
+<span style="color: #008000;">// and shv(Sobel horizontal &amp; vertical) Edge detection filter is applied.</span>
+imgEdge t<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">12</span> f<span style="color: #000000;">:</span><span style="color: #000080;">=</span>shv;
+edge<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>h;
+
+<span style="color: #008000;">//Add the edges back to the cell image</span>
+imgSimpleMath img1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>edge<span style="color: #000080;">$</span> img2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cell<span style="color: #000080;">$</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>add;
+window <span style="color: #000080;">-</span>z;</pre>
+<h2><a name="Apply_Rainbow_Palette_to_Gray_Image"></a><span class="mw-headline">Apply Rainbow Palette to Gray Image</span></h2>
+<p>This example shows how to convert a gray image to rainbow color.
+<a  class="image"><img alt="Gray2rainbow.jpg" src="../images/Image_Processing/Gray2rainbow.jpg?v=0" width="600"  /></a>
+</p>
+<pre class="lt" style="font-family:monospace;">pe_mkdir Conversion path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span>;
+pe_cd aa<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">//Create a matrix and import a sample image</span>
+window <span style="color: #000080;">-</span>t m;
+path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> path<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;samples\Image Processing and Analysis\myocyte8.tif&quot;</span>;
+impimage;
+window <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>h Original;
+
+window <span style="color: #000080;">-</span>d;	<span style="color: #008000;">//Duplicate the image</span>
+window <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>h newimage;
+
+imgC2gray;	<span style="color: #008000;">//Convert to gray</span>
+
+<span style="color: #008000;">//Apply pallete</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;palettes\Rainbow.PAL&quot;</span>;
+imgpalette palfile<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;
+
+window <span style="color: #000080;">-</span>s T;	<span style="color: #008000;">//Tile the windows horizontally</span></pre>
+<p><br />
+Add Palettes to gray scale image in new image window
+</p>
+<p class="version" >Minimum Origin Version Required: 2016 SR0</p>
+<pre class="lt" style="font-family:monospace;">fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SYSTEM.<span style="color: #000080;">PATH</span>.<span style="color: #000080;">PROGRAM</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Image Processing and Analysis\cell.jpg&quot;</span>;
+cvopen fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;  <span style="color: #008000;">//open the image in new image window;</span>
+
+cvGray img<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+cvPalette img<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span> fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;C:\Program Files\OriginLab\Origin2016\Palettes\Lite Cyan.pal&quot;</span>;</pre>
+<h2><a name="Converting_Image_to_DataConverting_Image_to_Data"></a><span class="mw-headline">Converting Image to Data<span class="OIndex" style="display:none">Converting Image to Data</span></span></h2>
+<p>When an image is imported into a matrix object, it is kept as type <b>Image</b>, indicated by the icon <b>I</b> on the top right corner of the window. For certain mathematical operations such as <b>2D FFT</b> the type needs to be converted to <b>Data</b>, which would then be indicated by the icon <b>D</b> at the top right corner.
+</p><p>This script example shows importing multiple images into a matrixbook and converting them to type <b>data</b>:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Find files using wildcard</span>
+string path<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span><span style="color: #000080;">+</span><span style="color: #ff00ff;">&quot;Samples\Image Processing and Analysis&quot;</span>;
+findFiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;*tif*&quot;</span>;
+
+<span style="color: #008000;">// Create a new matrixbook and import all images as new sheets</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+impImage options.<span style="color: #000080;">FirstMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> options.<span style="color: #000080;">Mode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">// Loop over all sheets and convert image to byte data</span>
+doc <span style="color: #000080;">-</span>e LW <span style="color: #000000;">&#123;</span>
+   img2m om<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>input<span style="color: #000080;">&gt;</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

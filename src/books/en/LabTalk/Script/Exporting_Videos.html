@@ -1,0 +1,63 @@
+<h1 class="firstHeading">2.11.4 Exporting Videos</h1><p class='urlname' style='display: none'>Exporting-Videos</p>
+<p>To export group of graphs as a video, you need to use the <a href="../../LabTalk/LabTalk/Vw_(object).html" title="LabTalk:Vw (object)">Video Writer (vw) object</a>. In order to export a video with actual frames, you must create a video writer object, write some windows to it as frames and then release the video writer. You can only work with one video writer at a time, i.e. each time you create a video writer object with the <b>vw.Create( )</b> method, you must use <b>vw.Release( )</b> to release the video writer before you can use the <b>vw.Create( )</b> method again. 
+</p><p>We provide several example scripts showing how to create, write graphs to, or release a video writer object. You can also view a <a href="../../LabTalk/LabTalk/Export.html#Export_Videos" title="LabTalk:Export">full example</a> in the <a href="../../LabTalk/Category/Script_Examples.html" title="Category:Script Examples">LabTalk Examples</a> category.
+</p>
+<h2><a name="Create_a_Video_Writer_Object"></a><span class="mw-headline">Create a Video Writer Object</span></h2>
+<p>To export a video, first create a video writer object with the <b>vw.Create( )</b> method. At a minimum, you need to specify the file name (including the complete file path) of the video. You can also specify the codec value for the compression method, frames per second and video dimensions, at this stage.
+</p><p>For example, this script creates a video file named "test.avi" in an existing file path <i>D:\Exported Videos\</i> with other settings as default (i.e. no compression, 1 frame per second, 640 px as width and 480 px as height):
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;D:\Exported Videos\test.avi&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//The above script is the same as the script below</span>
+<span style="color: #008000;">//vw.Create(&quot;D:\Exported Videos\test.avi&quot;, 0, 1, 640, 480);</span></pre>
+<p>You can also define the compression method with <a href="../../LabTalk/LabTalk/FourCC_Table.html" title="LabTalk:FourCC Table">FourCC code</a>. For example, the script below uses WMV1 compressed format to create the video:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Define codec with four character code</span>
+int codec <span style="color: #000080;">=</span> vw.<span style="color: #000080;">FourCC</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">'W'</span>, <span style="color: #ff00ff;">'M'</span>, <span style="color: #ff00ff;">'V'</span>, <span style="color: #ff00ff;">'1'</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Create a 800*600 video file as test.avi under user files folder</span>
+vw.<span style="color: #000080;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>Y\My Video.<span style="color: #000080;">avi</span>, codec, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">800</span>, <span style="color: #0000dd;">600</span><span style="color: #000000;">&#41;</span></pre>
+<p>To check if the video creation is successful, use <b>vw.Create( )</b>. The <b>vw.Create( )</b> method returns 0 if the video is created, and returns a non-zero value if the creation fails. For example:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//If file path D:\AAA exist,the following should return 0</span>
+<span style="color: #008000;">//If the file path does NOT exist, it will return error code</span>
+int err <span style="color: #000080;">=</span> vw.<span style="color: #000080;">Create</span><span style="color: #000000;">&#40;</span>D<span style="color: #000000;">:</span>\AAA\test.<span style="color: #000080;">avi</span><span style="color: #000000;">&#41;</span>;
+if<span style="color: #000000;">&#40;</span>err<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+   type <span style="color: #ff00ff;">&quot;video creation is successful&quot;</span>;
+else
+   type <span style="color: #ff00ff;">&quot;video creation failure, the error code is $(err)&quot;</span>;</pre>
+<h2><a name="Write_Graph.28s.29_to_a_Video_Writer_Object"></a><span class="mw-headline">Write Graph(s) to a Video Writer Object</span></h2>
+<p>Once a video writer object is created, you can start to write graphs into it with the <b>vw.WriteGraph( )</b> method. In addition to graph windows, you can write other windows including function plots, workbooks, matrixes, and layout pages.  
+</p><p>This example script writes the current active window to the video.
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span>;</pre>
+<p>You can specify the window name and also the number of frames to write. For example, the following script will add Graph1 as 5 frames:
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">&#40;</span>Graph1,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>You can make use of a loop structure to, for example, add all graphs in a video, so that you do not need to write multiple lines of script. The example below writes all graph windows in the project to the video. Each graph will be inserted as 2 frames.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">&#123;</span>
+   vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">&#40;</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>You can return an error code from this method as in the last example of the create video writer session. If the return value is 0, it means that writing the graph (or other window) was successful.
+</p>
+<h2><a name="Release_a_Video_Writer_Object"></a><span class="mw-headline">Release a Video Writer Object</span></h2>
+<p>For each video writer object, it is essential to release the video writer to generate the video. The method used in this case is <b>vw.Release( )</b>.
+</p><p>The following script shows a complete example of generating a video file "example.avi" in the user files folder with a newly created empty graph window.
+</p>
+<pre class="lt" style="font-family:monospace;">int err <span style="color: #000080;">=</span> vw.<span style="color: #000080;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>Y\example.<span style="color: #000080;">avi</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Write existing graphs into the video if the video can be created.</span>
+if<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> err<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">//Create an empty graph window with default template</span>
+    win <span style="color: #000080;">-</span>t plot;
+    vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">//Release the video writer</span>
+vw.<span style="color: #000080;">Release</span><span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span>;</pre>
+<p>The <b>vw.Release( )</b> method also has a return value. If it is 0 then the video generation is successful; if it is 1, it indicates that the video generation failed.
+</p>
+
+
+
+
+

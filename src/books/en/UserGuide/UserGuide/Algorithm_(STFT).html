@@ -1,0 +1,74 @@
+<h1 class="firstHeading">18.4.3.2 Algorithms (STFT)</h1><p class='urlname' style='display: none'>STFT-Algorithm</p>
+<p>A STFT devides an input signal, {<i>ix(n)</i>}, into N sections according to the sliding window, and performs FFT on each sections. It can be defined as
+</p><p><img src="../images/Algorithm_(STFT)/math-b7782b6d6de5c1237e94d47beca08bcb.png?v=0" title="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" alt="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" class="tex"/>
+</p><p>where <img src="../images/Algorithm_(STFT)/math-b5e496a80c0259060dad76468e217c13.png?v=0" title="\omega (n)" alt="\omega (n)" class="tex"/> represents the sliding window that emphasizes local frequency components within it.
+</p><p><br />
+<b>STFT is computed in the following procedure:</b>
+</p>
+<ol><li>Devide the input signal into <i>N</i> section. Each time <i>n</i> points are taken, where <i>n</i> is equal to the <b>Window length</b> specified. </li>
+<li>The chosen <b>Window Type</b> is used to multiply the extracted data, point-by-point.</li>
+<li>Zeros will be padded on both sides of the window, if the <b>Window length</b> is less than the size of the <b>FFT Length</b>.</li>
+<li>FFT is computed on the FFT section.</li>
+<li>Move the window according to the user-specified <b>Overlap</b> size, and repeat steps 1 through 4 until the end of the input signal is reached.</li></ol>
+<dl><dd><a  class="image"><img alt="STFT algorithms overlap.png" src="../images/Algorithm_(STFT)/STFT_algorithms_overlap.png?v=79340" width="352"  /></a></dd></dl>
+<p>The result of STFT is a matrix that has N columns and M rows, where
+</p><p><img src="../images/Algorithm_(STFT)/math-9e348c3fe7f09aadbbd7d72a053ac985.png?v=0" title="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" alt="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" class="tex"/>
+</p><p>and
+</p><p><img src="../images/Algorithm_(STFT)/math-59e9a587d2252885aae75c225885eb51.png?v=0" title="M= &#10;\begin{cases} &#10;  FFTLength/2+1,  &amp; \mbox{if input signal is real} \\&#10;  FFTLength, &amp; \mbox{if input signal is not real}&#10;\end{cases}" alt="M= &#10;\begin{cases} &#10;  FFTLength/2+1,  &amp; \mbox{if input signal is real} \\&#10;  FFTLength, &amp; \mbox{if input signal is not real}&#10;\end{cases}" class="tex"/>
+</p><p><i>j</i>th column in the matrix represents the FFT result of the <i>j</i>th section of the input signal and the X value of this column is the center time of the <i>j</i>th section. The Y values are the frequency obtained from the sampling interval <img src="../images/Algorithm_(STFT)/math-5a72f1304af0783657605aed0e38201a.png?v=0" title="\Delta t" alt="\Delta t" class="tex"/> and the number of input data points <i>N</i>. The <i>i</i>th frequency is given by:
+</p><p><img src="../images/Algorithm_(STFT)/math-50aa7a12fb8c13db0f687048c53d8b89.png?v=0" title="f_i=\frac i{N\Delta t}" alt="f_i=\frac i{N\Delta t}" class="tex"/>
+</p><p><br />
+</p><p><b>About the automatic computation of the sampling interval:</b>
+</p><p>When <b>&lt;Auto&gt;</b> is selected for <b>Sampling Interval</b>, the sampling interval needed in the computation is computed automatically by Origin. 
+</p><p>The automatically computed sampling interval is the average increment of the time sequence, which is usually from the X column associated with the input signal. If there is no associated X column, the row numbers will be used. Note that if Origin fails to get the average increment, the sampling interval will be set to 1.
+</p><p><b>Windows</b>
+</p><p>Specifies the window type used by FFT. The default option is <b>Hanning</b>.
+</p>
+<ul><li><b>Rectangle</b> 
+<dl><dd>Rectangular window: </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-1dff02816a08f5abee4db570718fae2e.png?v=0" title="w[n] = &#10;\begin{cases} &#10;  1,  &amp; \mbox{if }0 \leq n \leq N-1 \\&#10;  0, &amp; \mbox{otherwise } &#10;\end{cases}" alt="w[n] = &#10;\begin{cases} &#10;  1,  &amp; \mbox{if }0 \leq n \leq N-1 \\&#10;  0, &amp; \mbox{otherwise } &#10;\end{cases}" class="tex"/></dd></dl></li>
+<li><b>Welch</b> 
+<dl><dd>Welch window </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-6e73eab9df4bcc92805e0be4ccc831c1.png?v=0" title="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" alt="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" class="tex"/> </dd></dl></li>
+<li><b>Triangular</b> 
+<dl><dd><b>Triangular Window</b>:</dd>
+<dd> odd: <img src="../images/Algorithm_(STFT)/math-0301923ac9ba030df614e6d597b61aca.png?v=0" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex"/> <br /></dd>
+<dd> even: <img src="../images/Algorithm_(STFT)/math-8e83f30fc0b782e1d8b13c070ff8819d.png?v=0" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex"/></dd></dl></li>
+<li><b>Bartlett</b> 
+<dl><dd>Bartlett window </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-e66a9f4dcc74b3ab6be533c1c74db331.png?v=0" title="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right]  \,\!" alt="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right]  \,\!" class="tex"/></dd></dl></li>
+<li><b>Hanning</b> 
+<dl><dd>Hann Window </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-f625e1fbe6f2ba1e906c542714a5a198.png?v=0" title="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right]   \,\!" alt="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right]   \,\!" class="tex"/></dd></dl></li>
+<li><b>Hamming</b> 
+<dl><dd>Hamming window: </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-b6803ad49e62341c7d027fda8b337cb8.png?v=0" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})  \,\!" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})  \,\!" class="tex"/> </dd></dl></li>
+<li><b>Blackman</b> 
+<dl><dd>Blackman window </dd>
+<dd><img src="../images/Algorithm_(STFT)/math-53be39cb73653898ae42aa3e07614275.png?v=0" title="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})  \,\!" alt="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})  \,\!" class="tex"/> </dd></dl></li>
+<li><b>Gaussian</b>
+<dl><dd>Gaussian window:</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-fab7a042f67f1dfb6dc5556e228508ec.png?v=0" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex"/></dd>
+<dd>where <i>Alpha</i> is specified by the <b>Alpha</b> parameter.</dd></dl></li>
+<li><b>Kaiser</b>
+<dl><dd>Kaiser window:</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-04b7bbeb549a0b1d5ee22e3d50305676.png?v=0" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex"/></dd>
+<dd>where I(ix) denotes Bessel Function and <i>beta</i> is specified by the <b>Beta</b> parameter.</dd></dl></li></ul>
+<p><b>Results</b>
+</p>
+<ol>
+<li>Complex Result<br />
+Complex FFT result on each FFT section. And it is shifted so that beginning part is the result of negative frequencies.</li>
+<li>Amplitude Result<br />
+One-sided for real input signal and two-sided for complex input signal. The definition is similar to <a href="../../UserGuide/UserGuide/Algorithm_(FFT1).html" title="UserGuide:Algorithm (FFT1)">FFT tool's amplitude</a>. And for the two-sided result shift is used so that the beginning part is the result of negative frequencies.</li>
+<li>Amplitude in dB<br />
+<img src="../images/Algorithm_(STFT)/math-12ec70533ced68ec298d82a8c5ab34e7.png?v=0" title="20\text{log}(\text{Amplitude})" alt="20\text{log}(\text{Amplitude})" class="tex"/></li>
+</ol>
+<p><b>Time</b>
+<br />Each FFT section's time in the STFT result corresponds to the center of the time interval for each section's signal. e.g. for a section interval (ti, ti+(N-1)*dt), its FFT section's time in the STFT result is: ti+(N-1)*dt/2.
+</p>
+
+
+
+
+

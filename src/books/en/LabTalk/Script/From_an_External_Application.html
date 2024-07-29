@@ -1,0 +1,43 @@
+<h1 class="firstHeading">2.5.1.10 From an External Application</h1><p class='urlname' style='display: none'>From-an-External-Application</p>
+<p><span class="OIndex" style="display:none">Run Script from External Application</span><span class="OIndex">External application</span>s can communicate with Origin as a <span class="OIndex">COM Server</span>. Origin's COM Object exposes various classes with properties and methods to other applications. For complete control, Origin has the <b>Execute</b> method which allows any LabTalk - including LabTalk callable X-Functions and OriginC function - to be executed.
+<span class="OIndex" style="display:none">Script</span>
+In this example (using Visual Basic Syntax), we start Origin, import some data, do a Gauss fit and report the peak center&#160;:
+</p>
+<pre class="vb" style="font-family:monospace;">    <span style="color: #008000;">' Start Origin
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> oa
+    <span style="color: #151B8D; font-weight: bold;">Set</span> oa = <span style="color: #E56717; font-weight: bold;">GetObject</span>(<span style="color: #800000;">&quot;&quot;</span>, <span style="color: #800000;">&quot;Origin.Application&quot;</span>)
+    <span style="color: #008000;">'oa.Execute (&quot;doc -m 1&quot;) ' Uncomment if you want to see Origin
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> strCmd, strVar <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> dVar <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+
+    <span style="color: #008000;">' Wait for Origin to finish startup compile
+</span>    <span style="color: #008000;">' (30 seconds is specified here, 
+</span>    <span style="color: #008000;">'  but function may return in less than 1 second)
+</span>    oa.Execute (<span style="color: #800000;">&quot;sec -poc 30&quot;</span>)
+    
+    <span style="color: #008000;">'Project is empty so create a workbook and import some data
+</span>    oa.Execute (<span style="color: #800000;">&quot;newbook&quot;</span>)
+    strVar = oa.LTStr(<span style="color: #800000;">&quot;SYSTEM.PATH.PROGRAM$&quot;</span>) + _
+             <span style="color: #800000;">&quot;Samples\Curve Fitting\Gaussian.DAT&quot;</span>
+    oa.Execute (<span style="color: #800000;">&quot;string fname&quot;</span>) <span style="color: #008000;">' Declare string in Origin
+</span>    oa.LTStr(<span style="color: #800000;">&quot;fname$&quot;</span>) = strVar <span style="color: #008000;">' Set its value
+</span>    oa.Execute (<span style="color: #800000;">&quot;impasc&quot;</span>)       <span style="color: #008000;">' Import
+</span>
+    <span style="color: #008000;">' Do a nonlinear fit (Gauss)
+</span>    strCmd = <span style="color: #800000;">&quot;nlbegin 2 Gauss;nlfit;nlend;&quot;</span>
+    oa.Execute (strCmd)
+    <span style="color: #008000;">' Get peak center
+</span>    dVar = oa.LTVar(<span style="color: #800000;">&quot;nlt.xc&quot;</span>)
+    strVar = <span style="color: #800000;">&quot;Peak Center at &quot;</span> + CStr(dVar)
+    bRet = MsgBox(strVar, vbOKOnly, <span style="color: #800000;">&quot;Gauss Fit&quot;</span>)
+
+    oa.<span style="color: #E56717; font-weight: bold;">Exit</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> oa = <span style="color: #00C2FF; font-weight: bold;">Nothing</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span></pre>
+<p>There are more detailed examples of COM Client Applications in the <b>Samples\COM Server and Client</b> folder.
+</p>
+
+
+
+
+

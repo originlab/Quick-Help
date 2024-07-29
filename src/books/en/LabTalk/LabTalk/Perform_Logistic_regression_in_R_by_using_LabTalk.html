@@ -1,0 +1,142 @@
+<h1 class="firstHeading">2.16.1 Examples: Perform Logistic regression in R by using LabTalk</h1><p class='urlname' style='display: none'>R-Console-Example</p>
+<p>Logistic regression models a relationship between predictor variables and a categorical response variable. The following example shows how to perform a Logistic regression on data <i>Origin2016\Samples\Statistics\LogRegData.dat</i> by using Labtalk <a class="external text" href="../../LabTalk/LabTalk/R_(object).html"><b>R object</b></a> and <a class="external text" href="../../LabTalk/LabTalk/Rserve_(object).html"><b>RS object</b></a>in Script window. 
+</p><p>We first read data into Origin worksheet, and send the data as R data frame. Then perform Logistic Regression on imported data by using R command <a class="external text" href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html" target="_blank"><b>glm</b></a>, finally create a new Origin worksheet as the summary table for fitting results, and send the results including parameters, residual, aic and dispersion...calculated by R into summary table worksheet.
+</p>
+<h3><a name="R_Object"></a><span class="mw-headline">R Object</span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//R object example to call R in LabTalk</span>
+<span style="color: #008000;">//run.section(testRex,LogisticRoex)</span>
+
+<span style="color: #008000;">//Import sample data</span>
+newbook;
+string fn <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\LogRegData.dat&quot;</span>; 
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span> options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">//Check whether R is installed</span>
+if<span style="color: #000000;">&#40;</span> R.<span style="color: #000080;">Init</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Please install R software first.&quot;</span>;
+	return;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Send imported data in Origin to R's data frame variable dfy</span>
+<span style="color: #008000;">//Data frame dfy includes four columns: Age, Salary, Gender and Career_Change</span>
+<span style="color: #008000;">//Gender and Career_Change columns are category data</span>
+R.<span style="color: #000080;">Send</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;!&quot;</span>, dfy, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Perform Logistic Regression on imported data</span>
+<span style="color: #008000;">//Results are stored in R's list variable yr</span>
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">&#40;</span> <span style="color: #ff00ff;">&quot;yf&lt;-glm( Career_Change ~ Age + Salary + Gender, family=binomial(logit), data=dfy)&quot;</span> <span style="color: #000000;">&#41;</span>;
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;yr&lt;-summary(yf)&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//New a workbook to output R's result</span>
+newbook;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Logistic Regression Result&quot;</span>;
+
+<span style="color: #008000;">//Send R's coefficients matrix in list object to Origin's worksheet </span>
+<span style="color: #008000;">//and start at 1st column in the worksheet</span>
+R.<span style="color: #000080;">Receive</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;1&quot;</span>, yr<span style="color: #000080;">$</span>coefficients<span style="color: #000000;">&#41;</span>;
+
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc <span style="color: #000080;">+</span> <span style="color: #0000dd;">6</span>;
+
+<span style="color: #008000;">//Calculate the exp of parameters</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Exp of Parameter&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> exp<span style="color: #000000;">&#40;</span> wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Set label and column Long Name for calculated result</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Residual&quot;</span>;
+
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;DF&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Deviance&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;AIC&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Dispersion Parameter for Binomial Family&quot;</span>;
+
+<span style="color: #008000;">//Send R's residual info to Origin's worksheet</span>
+double dfr, devr, aic, rlev;
+<span style="color: #008000;">//Get LabTalk double variables from list object's element variables in R</span>
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> dfr, yr<span style="color: #000080;">$</span>df.<span style="color: #000080;">residual</span> <span style="color: #000000;">&#41;</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> devr, yr<span style="color: #000080;">$</span>deviance <span style="color: #000000;">&#41;</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> aic, yr<span style="color: #000080;">$</span>aic <span style="color: #000000;">&#41;</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> rlev, yr<span style="color: #000080;">$</span>dispersion <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Set worksheet's cells with LabTalk double variables</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dfr;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> devr;
+
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> aic;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> rlev;
+
+<span style="color: #008000;">//Clear all R variables</span>
+R.<span style="color: #000080;">Reset</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="RS_Object"></a><span class="mw-headline">RS Object</span></h3>
+<p>You need to <a class="external text" href="../../UserGuide/UserGuide/Setup_R_Server.html">Setup R Serve</a> before running this example.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//RS example to call Rserve in LabTalk	</span>
+<span style="color: #008000;">//Import sample data</span>
+newbook;
+string fn <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\LogRegData.dat&quot;</span>; 
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span> options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">//Connect Rserve. An Rserve should be set up first.</span>
+if<span style="color: #000000;">&#40;</span> RS.<span style="color: #000080;">Init</span><span style="color: #000000;">&#40;</span> <span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>, <span style="color: #0000dd;">12306</span> <span style="color: #000000;">&#41;</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//input the IP address of the server side here</span>
+<span style="color: #000000;">&#123;</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Fail to connect R server.&quot;</span>;
+	return;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Send imported data in Origin to R's data frame variable dfy</span>
+<span style="color: #008000;">//Data frame dfy includes four columns: Age, Salary, Gender and Career_Change</span>
+<span style="color: #008000;">//Gender and Career_Change columns are category data</span>
+RS.<span style="color: #000080;">Send</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;!&quot;</span>, dfy, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Perform Logistic Regression on imported data</span>
+<span style="color: #008000;">//Results are stored in R's list variable yr</span>
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">&#40;</span> <span style="color: #ff00ff;">&quot;yf&lt;-glm( Career_Change ~ Age + Salary + Gender, family=binomial(logit), data=dfy)&quot;</span> <span style="color: #000000;">&#41;</span>;
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;yr&lt;-summary(yf)&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//New a workbook to output R's result</span>
+newbook;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Logistic Regression Result&quot;</span>;
+
+<span style="color: #008000;">//Send R's coefficients matrix in list object to Origin's worksheet </span>
+<span style="color: #008000;">//and start at 1st column in the worksheet</span>
+RS.<span style="color: #000080;">Receive</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;1&quot;</span>, yr<span style="color: #000080;">$</span>coefficients<span style="color: #000000;">&#41;</span>;
+
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc <span style="color: #000080;">+</span> <span style="color: #0000dd;">6</span>;
+
+<span style="color: #008000;">//Calculate the exp of parameters</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Exp of Parameter&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> exp<span style="color: #000000;">&#40;</span> wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Set label and column Long Name for calculated result</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Residual&quot;</span>;
+
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;DF&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Deviance&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;AIC&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Dispersion Parameter for Binomial Family&quot;</span>;
+
+<span style="color: #008000;">//Send R's residual info to Origin's worksheet</span>
+double dfr, devr, aic, rlev;
+<span style="color: #008000;">//Get LabTalk double variables from list object's element variables in R</span>
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> dfr, yr<span style="color: #000080;">$</span>df.<span style="color: #000080;">residual</span> <span style="color: #000000;">&#41;</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> devr, yr<span style="color: #000080;">$</span>deviance <span style="color: #000000;">&#41;</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> aic, yr<span style="color: #000080;">$</span>aic <span style="color: #000000;">&#41;</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">&#40;</span> rlev, yr<span style="color: #000080;">$</span>dispersion <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Set worksheet's cells with LabTalk double variables</span>
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dfr;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> devr;
+
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> aic;
+wcol<span style="color: #000000;">&#40;</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> rlev;
+
+<span style="color: #008000;">//Clear all R variables</span>
+RS.<span style="color: #000080;">Reset</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

@@ -1,0 +1,116 @@
+<h1 class="firstHeading">1.12.3.5 Find XY</h1><p>The following procedure will show how to use the specified parameter values to get the value of the dependent variable from the independent variable or get the value of the independent variable from the dependent variable.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Linear"><span class="tocnumber">1</span> <span class="toctext">Linear</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Non-linear"><span class="tocnumber">2</span> <span class="toctext">Non-linear</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Get_Y_from_X"><span class="tocnumber">2.1</span> <span class="toctext">Get Y from X</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Get_X_from_Y"><span class="tocnumber">2.2</span> <span class="toctext">Get X from Y</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Linear"></a><span class="mw-headline">Linear</span></h2>
+<p>The formula of getting Y from X:
+</p>
+<pre class="oc" style="font-family:monospace;">y <span style="color: #000080;">=</span> a <span style="color: #000040;">+</span> x <span style="color: #000040;">*</span> b;</pre>
+<p>The formula of getting X from Y:
+</p>
+<pre class="oc" style="font-family:monospace;">x <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>y <span style="color: #000040;">-</span> a<span style="color: #000000;">&#41;</span> <span style="color: #000040;">/</span> b;</pre>
+<h2><a name="Non-linear"></a><span class="mw-headline">Non-linear</span></h2>
+<p>For non-linear function, we use NumericFunction class to get y from x and use ocmath_find_xs function to get x from y. 
+</p><p>Prior to running the following example, the nlsf_utils.c file need to be loaded and compiled. This can be done from script with the command run.LoadOC(Originlab\nlsf_utils.c) or just add this file to your workspace. 
+</p><p><br />
+</p>
+<h3><a name="Get_Y_from_X"></a><span class="mw-headline">Get Y from X</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\nlsf_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> _findy_from_x<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	<span style="color: #008000;">// Please use the proper function from the related category in </span>
+	<span style="color: #008000;">// Fitting Function Organizer dialog. Press F9 to open this dialog. </span>
+	<span style="color: #008000;">// The Poly function below under Polynomial category.</span>
+	string 	strFuncFileName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Poly&quot;</span>;
+	
+	Tree	trFF;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlsf_load_fdf_tree<span style="color: #000000;">&#40;</span>trFF, strFuncFileName<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to load function file to tree&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	NumericFunction	func;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>func.<span style="color: #000000;">SetTree</span><span style="color: #000000;">&#40;</span>trFF<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;NumericFunction object init failed&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">int</span> nNumParamsInFunc <span style="color: #000080;">=</span> trFF.<span style="color: #000000;">GeneralInformation</span>.<span style="color: #000000;">NumberOfParameters</span>.<span style="color: #000000;">nVal</span>;
+	vector vParams<span style="color: #000000;">&#40;</span>nNumParamsInFunc<span style="color: #000000;">&#41;</span>;
+	vParams <span style="color: #000080;">=</span> NANUM;
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;		
+
+	vector vX <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1.5</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#125;</span>;
+	vector vY;
+	vY <span style="color: #000080;">=</span> func.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span>vX, vParams<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Get_X_from_Y"></a><span class="mw-headline">Get X from Y</span></h3>
+<p>The following function shows how to get two X values from the specified Y value. Before running, please import Samples\Curve Fitting\Gaussian.dat to Worksheet and keep the Worksheet active. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>...\originlab\nlsf_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> 
+<span style="color: #0000ff;">void</span> _findx_from_y<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">double</span> y <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>; <span style="color: #008000;">// assign 20 as Y value to find X value</span>
+	
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #008000;">//get data to fitting</span>
+	DataRange dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	DWORD dwPlotID;
+	vector vDataX, vDataY;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #000040;">&amp;</span>vDataY, <span style="color: #000040;">&amp;</span>vDataX<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;failed to get data&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+	
+	uint nFindXNum <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">//set how many x should be found</span>
+	vector vFindX;
+	vFindX.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nFindXNum<span style="color: #000000;">&#41;</span>;
+	
+	string strFile <span style="color: #000080;">=</span> GetOriginPath<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;OriginC<span style="color: #666666; font-weight: bold;">\\</span>OriginLab<span style="color: #666666; font-weight: bold;">\\</span>nlsf_utils.c&quot;</span>;
+	PFN_STR_INT_DOUBLE_DOUBLE_DOUBLEP pFunc <span style="color: #000080;">=</span> 
+		Project.<span style="color: #000000;">FindFunction</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;compute_y_by_x&quot;</span>, strFile, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+	string strFuncFileName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Gauss&quot;</span>;
+	vector vParams<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.58333</span>; <span style="color: #008000;">// y0</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>; <span style="color: #008000;">// xc</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8.66585</span>; <span style="color: #008000;">// w</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">976.41667</span>; <span style="color: #008000;">// A</span>
+	
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_find_xs<span style="color: #000000;">&#40;</span>y, <span style="color: #000000;">&#40;</span>uint<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>vDataY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>, vDataX, 
+		vDataY, nFindXNum, vFindX, strFuncFileName, vParams.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, 
+		vParams, pFunc<span style="color: #000000;">&#41;</span>;	
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> OE_NOERROR <span style="color: #000080;">==</span> nRet <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y =&#160;%g<span style="color: #666666; font-weight: bold;">\t</span>X1 =&#160;%g<span style="color: #666666; font-weight: bold;">\t</span>X2 =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, y, vFindX<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, vFindX<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

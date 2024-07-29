@@ -1,0 +1,206 @@
+<h1 class="firstHeading">17.4.1.6 Algorithms (Three-Way ANOVA)</h1><p class='urlname' style='display: none'>ThreeWayANOVA-Algorithm</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Theory_of_Three-Way_ANOVA"><span class="tocnumber">1</span> <span class="toctext">Theory of Three-Way ANOVA</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Multiple_Means_Comparisons"><span class="tocnumber">2</span> <span class="toctext">Multiple Means Comparisons</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Power_Analysis"><span class="tocnumber">3</span> <span class="toctext">Power Analysis</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Levene_test_for_Homogeneity_of_Variances"><span class="tocnumber">4</span> <span class="toctext">Levene test for Homogeneity of Variances</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Theory_of_Three-Way_ANOVA"></a><span class="mw-headline">Theory of Three-Way ANOVA</span></h2>
+<p>Suppose <i>N</i> observations are associated with three factors, say, factor A with I levels, factor B with J levels and factor C with K levels.
+</p><p>Let <img src="../images/Algorithm(Three_Way_ANOVA)/math-3d26ff2a9bebac5afd9fb871c7eddf45.png?v=0" title="y_{hijk}\,\!" alt="y_{hijk}\,\!" class="tex"/> denotes the <i>h</i>th observation at level <i>i</i> of factor A, level <i>j</i> of factor B and level <i>k</i> of factor C, the three-way ANOVA model can be written as
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-a5fddfa546aea6fc7b34789cdba6254a.png?v=0" title="y_{hijk}=\mu +\alpha _i+\beta _j+\gamma _k+(\alpha\beta)_{ij}+(\alpha\gamma)_{ik}+(\beta\gamma)_{jk}+(\alpha\beta\gamma)_{ijk}+\varepsilon _{hijk}" alt="y_{hijk}=\mu +\alpha _i+\beta _j+\gamma _k+(\alpha\beta)_{ij}+(\alpha\gamma)_{ik}+(\beta\gamma)_{jk}+(\alpha\beta\gamma)_{ijk}+\varepsilon _{hijk}" class="tex"/>
+</p><p>where <img src="../images/Algorithm(Three_Way_ANOVA)/math-74b8eddf4b37de80c7c8eed1b64e46fc.png?v=0" title="\mu \,\!" alt="\mu \,\!" class="tex"/> is the whole response data mean, <img src="../images/Algorithm(Three_Way_ANOVA)/math-d015b015788a3872acceec61ded52bfb.png?v=0" title="\alpha _i\,\!" alt="\alpha _i\,\!" class="tex"/> is deviation at level <i>i</i> of factor A; <img src="../images/Algorithm(Three_Way_ANOVA)/math-193f021d9028eb9706698a6f5c0f1e0a.png?v=0" title="\beta _j\,\!" alt="\beta _j\,\!" class="tex"/> is the deviation at level <i>j</i> of factor <i>B</i>, <img src="../images/Algorithm(Three_Way_ANOVA)/math-f7fa86ea1e9e4cb6fec7a55a2c1b2de6.png?v=0" title="\gamma _k\,\!" alt="\gamma _k\,\!" class="tex"/> is the deviation at level <i>k</i> of factor <i>C</i>,<img src="../images/Algorithm(Three_Way_ANOVA)/math-db2e33c6b70364fbd8ab6f8aa270224b.png?v=0" title="(\alpha\beta)_{ij}\,\!" alt="(\alpha\beta)_{ij}\,\!" class="tex"/> is interaction term between factors A and B,<img src="../images/Algorithm(Three_Way_ANOVA)/math-b001b2a044d8308d62fb40dd094f95ec.png?v=0" title="(\alpha\gamma)_{ij}\,\!" alt="(\alpha\gamma)_{ij}\,\!" class="tex"/> is interaction term between factors A and C,<img src="../images/Algorithm(Three_Way_ANOVA)/math-e21552d4f43db3892b1d72d6fc7bb005.png?v=0" title="(\beta\gamma)_{ij}\,\!" alt="(\beta\gamma)_{ij}\,\!" class="tex"/> is interaction term between factors B and C,<img src="../images/Algorithm(Three_Way_ANOVA)/math-6967f59091d9c0e5b30e61946dc6a872.png?v=0" title="(\alpha\beta\gamma)_{ijk}\,\!" alt="(\alpha\beta\gamma)_{ijk}\,\!" class="tex"/> is the interaction term among factors A and B and C, and <img src="../images/Algorithm(Three_Way_ANOVA)/math-fe57a484afa70baac90662116b2751f0.png?v=0" title="\varepsilon _{hijk}\,\!" alt="\varepsilon _{hijk}\,\!" class="tex"/> is the error term. 
+</p><p>In three-way ANOVA, users can specify their model. For example, they can exclude the term <img src="../images/Algorithm(Three_Way_ANOVA)/math-db2e33c6b70364fbd8ab6f8aa270224b.png?v=0" title="(\alpha\beta)_{ij}\,\!" alt="(\alpha\beta)_{ij}\,\!" class="tex"/> (if so, then the term <img src="../images/Algorithm(Three_Way_ANOVA)/math-6967f59091d9c0e5b30e61946dc6a872.png?v=0" title="(\alpha\beta\gamma)_{ijk}\,\!" alt="(\alpha\beta\gamma)_{ijk}\,\!" class="tex"/> is autonomously excluded at the same time), then their model would like this:
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-4a67b5560fa0f3072ae9571ca065784a.png?v=0" title="y_{hijk}=\mu +\alpha _i+\beta _j+\gamma _k+(\alpha\gamma)_{ik}+(\beta\gamma)_{jk}+\varepsilon _{hijk}" alt="y_{hijk}=\mu +\alpha _i+\beta _j+\gamma _k+(\alpha\gamma)_{ik}+(\beta\gamma)_{jk}+\varepsilon _{hijk}" class="tex"/>
+</p><p>The sample variation of a specified model can be obtained through so-called "design matrix" method. Taking the full model for example, the brief procedure for this method is:
+</p><p>Degrees of Freedom (DF) for the whole model is <img src="../images/Algorithm(Three_Way_ANOVA)/math-17c23ef3a646b0a619980567eee3809c.png?v=0" title="df_{Model}=IJK-1" alt="df_{Model}=IJK-1" class="tex"/>. The whole design matrix is <img src="../images/Algorithm(Three_Way_ANOVA)/math-974cbbf249506b83847ef3a27f40bb64.png?v=0" title="X&#160;:= X_{N\times df_{Model}} = [X_\mu |X_A |X_B |X_C |X_{AB} |X_{AC} |X_{BC} |X_{ABC}]" alt="X&#160;:= X_{N\times df_{Model}} = [X_\mu |X_A |X_B |X_C |X_{AB} |X_{AC} |X_{BC} |X_{ABC}]" class="tex"/>, where <img src="../images/Algorithm(Three_Way_ANOVA)/math-22b3962c846ffd00ff3604200a8f5e60.png?v=0" title="X_\mu" alt="X_\mu" class="tex"/> is the sub-design-matrix for <img src="../images/Algorithm(Three_Way_ANOVA)/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/>, which is usually constructed by all "1", and other sub-design-matrices for what their subscripts stand. Let <img src="../images/Algorithm(Three_Way_ANOVA)/math-44129bb28848bd077486456b3db71fc1.png?v=0" title="X_{-*}" alt="X_{-*}" class="tex"/> denotes X by replacing the corresponding sub-design-matrix with zeros, for instance, <img src="../images/Algorithm(Three_Way_ANOVA)/math-2e179930336cd7d54632e143300c93f5.png?v=0" title="X_{-AB} = [X_\mu |X_A |X_B |X_C |0 |X_{AC} |X_{BC} |X_{ABC}]" alt="X_{-AB} = [X_\mu |X_A |X_B |X_C |0 |X_{AC} |X_{BC} |X_{ABC}]" class="tex"/>
+</p><p>Define 
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-bd00b8792be7ede4e683c46aa3a0e6fe.png?v=0" title="R_0 = Y^T X_{\mu}(X_{\mu}^T X_{\mu})^{-1}X_{\mu}^T Y" alt="R_0 = Y^T X_{\mu}(X_{\mu}^T X_{\mu})^{-1}X_{\mu}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-4b044b5a44959ebbbe8951655538bf20.png?v=0" title="R_\mu = Y^T Y" alt="R_\mu = Y^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-e6d8ebe5c5cccf19ba0d715d407631f5.png?v=0" title="R_{Model} = Y^T X(X^T X)^{-1}X^T Y" alt="R_{Model} = Y^T X(X^T X)^{-1}X^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-2f8bfaaeced6351ba75efa018c499abc.png?v=0" title="R_A = Y^T X_{-A}(X_{-A}^T X_{-A})^{-1}X_{-A}^T Y" alt="R_A = Y^T X_{-A}(X_{-A}^T X_{-A})^{-1}X_{-A}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-db10147d89f311a36da03b92e09c88c8.png?v=0" title="R_B = Y^T X_{-B}(X_{-B}^T X_{-B})^{-1}X_{-B}^T Y" alt="R_B = Y^T X_{-B}(X_{-B}^T X_{-B})^{-1}X_{-B}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-6cb959ea1659d205096410b7a4662bda.png?v=0" title="R_C = Y^T X_{-C}(X_{-C}^T X_{-C})^{-1}X_{-C}^T Y" alt="R_C = Y^T X_{-C}(X_{-C}^T X_{-C})^{-1}X_{-C}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-01e08550766c2a23ba562a5e0b9c1f98.png?v=0" title="R_{AB} = Y^T X_{-AB}(X_{-AB}^T X_{-AB})^{-1}X_{-AB}^T Y" alt="R_{AB} = Y^T X_{-AB}(X_{-AB}^T X_{-AB})^{-1}X_{-AB}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-4d3bc46b96f974b945c5110257c650c3.png?v=0" title="R_{AC} = Y^T X_{-AC}(X_{-AC}^T X_{-AC})^{-1}X_{-AC}^T Y" alt="R_{AC} = Y^T X_{-AC}(X_{-AC}^T X_{-AC})^{-1}X_{-AC}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-8c89db815bd0926df808c32e9673ca27.png?v=0" title="R_{BC} = Y^T X_{-BC}(X_{-BC}^T X_{-BC})^{-1}X_{-BC}^T Y" alt="R_{BC} = Y^T X_{-BC}(X_{-BC}^T X_{-BC})^{-1}X_{-BC}^T Y" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-e382d8f4938548dc7e5f1e2de7ef68d9.png?v=0" title="R_{ABC} = Y^T X_{-ABC}(X_{-ABC}^T X_{-ABC})^{-1}X_{-ABC}^T Y" alt="R_{ABC} = Y^T X_{-ABC}(X_{-ABC}^T X_{-ABC})^{-1}X_{-ABC}^T Y" class="tex"/>
+</p><p>Then the sum of squares error would be
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-9fd9a174f2d229ee0e4859ab1bf62f9e.png?v=0" title="SS_A = R_{Model}-R_A" alt="SS_A = R_{Model}-R_A" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-57fba17a0f57ca5a0e9c8e9cf2c37b1e.png?v=0" title="SS_B = R_{Model}-R_B" alt="SS_B = R_{Model}-R_B" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-2a96e63724970e7dfd4779f8a2d5f6e2.png?v=0" title="SS_C = R_{Model}-R_C" alt="SS_C = R_{Model}-R_C" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-9452cd76150d8354a840a8a112d411df.png?v=0" title="SS_{AB} = R_{Model}-R_{AB}" alt="SS_{AB} = R_{Model}-R_{AB}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-afde43906b1e11b6d60f84c222fda31d.png?v=0" title="SS_{AC} = R_{Model}-R_{AC}" alt="SS_{AC} = R_{Model}-R_{AC}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-1c1d599d9c128c3ddc13ca84287d28cb.png?v=0" title="SS_{BC} = R_{Model}-R_{BC}" alt="SS_{BC} = R_{Model}-R_{BC}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-b9f4cf1dfcacf65ce36198b56478c620.png?v=0" title="SS_{ABC} = R_{Model}-R_{ABC}" alt="SS_{ABC} = R_{Model}-R_{ABC}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-3d7f5f8de700e2dcfcaf3cc86413c447.png?v=0" title="SS_{Error} = R_{\mu}-R_{Model}" alt="SS_{Error} = R_{\mu}-R_{Model}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-a3a8cbb61688ec90e5dbcec307f6d11d.png?v=0" title="SS_{Total} = R_{\mu}-R_{0}" alt="SS_{Total} = R_{\mu}-R_{0}" class="tex"/>
+</p><p><br />
+For full model, the ANOVA table is summarized as below:
+</p>
+<table class="simple">
+<tr>
+<th>Source of Variation
+</th>
+<th>Degrees of Freedom (DF)
+</th>
+<th>Sum of Squares (SS)
+</th>
+<th>Mean Square (MS)
+</th>
+<th><i>F</i> Value
+</th>
+<th><i>Prob &gt; F</i>
+</th></tr>
+<tr>
+<th>Factor A
+</th>
+<td><i>I</i> - 1
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-8d95f5934baa7c353f18fd77c675e92c.png?v=0" title="SS_A" alt="SS_A" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-d8cf712091994539169b7f92bcabdd67.png?v=0" title="MS_A" alt="MS_A" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-d8cf712091994539169b7f92bcabdd67.png?v=0" title="MS_A" alt="MS_A" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-46b9373262cf908281fa3c046a60ab1b.png?v=0" title="P\{F\geq F_{(I-1,df_e,\alpha )}\}" alt="P\{F\geq F_{(I-1,df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>Factor B
+</th>
+<td><i>J</i> - 1
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-8abe5e40ad8ae7fd4ed12d2d27a1a7dd.png?v=0" title="SS_B" alt="SS_B" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-666cadb9e58dc0e560e052a20e3a510f.png?v=0" title="MS_B" alt="MS_B" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-666cadb9e58dc0e560e052a20e3a510f.png?v=0" title="MS_B" alt="MS_B" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-b1db7b83604a33d08e8d2e08be7f9d90.png?v=0" title="P\{F\geq F_{(J-1,df_e,\alpha )}\}" alt="P\{F\geq F_{(J-1,df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>Factor C
+</th>
+<td><i>K</i> - 1
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-91392ab538a2412e4840647ffe5ab230.png?v=0" title="SS_C" alt="SS_C" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-6bbe60f8d599863a5b3ba709763b4a05.png?v=0" title="MS_C" alt="MS_C" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-6bbe60f8d599863a5b3ba709763b4a05.png?v=0" title="MS_C" alt="MS_C" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-3ea7efc0c93b626e4949d94eb32b07f6.png?v=0" title="P\{F\geq F_{(K-1,df_e,\alpha )}\}" alt="P\{F\geq F_{(K-1,df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>A*B
+</th>
+<td>(<i>I</i>- 1) (<i>J</i> - 1)
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-23d40e491f33023cbce6ed1898054a81.png?v=0" title="SS_{AB}" alt="SS_{AB}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-bcd1cd8741b39cdd8c3e290f145ae5a1.png?v=0" title="MS_{AB}" alt="MS_{AB}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-bcd1cd8741b39cdd8c3e290f145ae5a1.png?v=0" title="MS_{AB}" alt="MS_{AB}" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-40b10ce24f549a5335b5b18831b089ad.png?v=0" title="P\{F\geq F_{((I-1)(J-1),df_e,\alpha )}\}" alt="P\{F\geq F_{((I-1)(J-1),df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>A*C
+</th>
+<td>(<i>I</i>- 1) (<i>K</i> - 1)
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-6fad30abaac99bb8dc35c5f3b8b3826a.png?v=0" title="SS_{AC}" alt="SS_{AC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-fd73263586214fb88d8cc0b02d928fa2.png?v=0" title="MS_{AC}" alt="MS_{AC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-fd73263586214fb88d8cc0b02d928fa2.png?v=0" title="MS_{AC}" alt="MS_{AC}" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-85c6dd067f19d46df5527874d27fea88.png?v=0" title="P\{F\geq F_{((I-1)(K-1),df_e,\alpha )}\}" alt="P\{F\geq F_{((I-1)(K-1),df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>B*C
+</th>
+<td>(<i>J</i>- 1) (<i>K</i> - 1)
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-bab5b2ee657f228f35b225324f0bc1b6.png?v=0" title="SS_{BC}" alt="SS_{BC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-eaac51e7bc7de46573d845cf3b0607b1.png?v=0" title="MS_{BC}" alt="MS_{BC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-eaac51e7bc7de46573d845cf3b0607b1.png?v=0" title="MS_{BC}" alt="MS_{BC}" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-517dca22cbb9f9c5cc95baa146662800.png?v=0" title="P\{F\geq F_{((J-1)(K-1),df_e,\alpha )}\}" alt="P\{F\geq F_{((J-1)(K-1),df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>A*B*C
+</th>
+<td>(<i>I</i>- 1) (<i>J</i> - 1)(<i>K</i> - 1)
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-e3fe9a6e0feaf250ab6566828ab58be7.png?v=0" title="SS_{ABC}" alt="SS_{ABC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-c2497270b6bc7784f01f58e06d8a2454.png?v=0" title="MS_{ABC}" alt="MS_{ABC}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-c2497270b6bc7784f01f58e06d8a2454.png?v=0" title="MS_{ABC}" alt="MS_{ABC}" class="tex"/> / <img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-42856e0f0acc8506fd925fe88c3be665.png?v=0" title="P\{F\geq F_{((I-1)(J-1)(K-1),df_e,\alpha )}\}" alt="P\{F\geq F_{((I-1)(J-1)(K-1),df_e,\alpha )}\}" class="tex"/>
+</td></tr>
+<tr>
+<th>Error
+</th>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-0cec8e73933cf1bb4ed01dde2e10a68d.png?v=0" title="df_e" alt="df_e" class="tex"/>=<i>N</i>-<i>IJK</i>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-349fb0475e9b16a6353bbc1aae235e6a.png?v=0" title="SS_{Error}" alt="SS_{Error}" class="tex"/>
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-ff8dc369a4b279c7e064cb1ef6fc4ba1.png?v=0" title="MS_{Error}" alt="MS_{Error}" class="tex"/>
+</td>
+<td>
+</td>
+<td>
+</td></tr>
+<tr>
+<th>Total
+</th>
+<td><i>N</i> - 1
+</td>
+<td><img src="../images/Algorithm(Three_Way_ANOVA)/math-100f5db42fc55631c7b4e798218f6a8f.png?v=0" title="SS_{Total}" alt="SS_{Total}" class="tex"/>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td></tr></table>
+<h2><a name="Multiple_Means_Comparisons"></a><span class="mw-headline">Multiple Means Comparisons</span></h2>
+<p>There are various methods for multiple means comparison in Origin, and we use the <i>ocstat_dlsm_mean_comparison()</i> function to perform means comparisons. 
+</p><p>Two types of multiple means comparison methods: 
+</p><p>Single-step method. It creates simultaneous confidence intervals to show how the means differ, including Tukey-Kramer, Bonferroni, Dunn-Sidak, Fisher’s LSD and Scheffé mothods.
+</p><p>Stepwise method. Sequentially perform the hypothesis tests, including Holm-Bonferroni and Holm-Sidak tests
+</p>
+<h2><a name="Power_Analysis"></a><span class="mw-headline">Power Analysis</span></h2>
+<p>The power analysis procedure calculates the actual power for the sample data, as well as the hypothetical power if additional sample sizes are specified.
+</p><p>The power of a three-way analysis of variance is a measurement of its sensitivity. Power is the probability that the ANOVA will detect differences in the population means when real differences exist. In terms of the null and alternative hypotheses, power is the probability that the test statistic F will be extreme enough to reject the null hypothesis when it should be rejected actually (i.e. given the null hypothesis is not true).
+</p><p>The Origin Three-Way ANOVA dialog can compute powers for the Factor A, B and C sources.  If the specified intersect terms are selected, Origin also can compute power for them.
+</p><p>Power is defined by the equation:  
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-e3a9b7f790e5b9b01d2fe974337ea4cf.png?v=0" title="power=1-probf(f,df,dfe,nc)\,\!" alt="power=1-probf(f,df,dfe,nc)\,\!" class="tex"/>
+</p><p>where <i>f</i> is the deviate from the non-central <i>F</i>-distribution with <i>df</i> and <i>dfe</i> degrees of freedom and <i>nc = SS/MSE</i>.  SS is the sum of squares of the source <i>A</i>, <i>B</i>, <i>C</i>, <i>A*B</i>, <i>A*C</i>, <i>B*C</i>, or <i>A*B*C</i>, MSE is the mean square of the Errors, df is the degrees of freedom of the numerator, <i>dfe</i> is the degrees of freedom of the Errors.  All values (<i>SS</i>, <i>MSE</i>, <i>df</i>, and <i>dfe</i>) are obtained from the ANOVA table. The value of <i>probf( )</i> is obtained using the NAG function <a class="external text" href="http://www.originlab.com/pdfs/nagcl09/manual/pdf/g01/g01gdc.pdf" target="_blank"><b>nag_prob_non_central_f_dist (g01gdc)</b></a> 
+. See the NAG documentation for more detailed information.
+</p><p>All the above is a brief algorithm outline of three-way analysis of variation, for more information about the detail mathematical deduction, please reference to the corresponding part of the user's manual.
+</p>
+<h2><a name="Levene_test_for_Homogeneity_of_Variances"></a><span class="mw-headline">Levene test for Homogeneity of Variances</span></h2>
+<p>We use the following statistics to do Levene test.
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-d3bfbc09dea01e9ac160725781de92ea.png?v=0" title="L = \frac{(N-k)\sum_{k}^{i=1}n_i(Z_i-Z)^2}{(k-1)\sum_{k}^{i=1}\sum_{n_i}^{j=1}(Z_{ij}-Z_i)^2}" alt="L = \frac{(N-k)\sum_{k}^{i=1}n_i(Z_i-Z)^2}{(k-1)\sum_{k}^{i=1}\sum_{n_i}^{j=1}(Z_{ij}-Z_i)^2}" class="tex"/>
+</p><p>where 
+</p><p><i>N</i> is the number of observation, <img src="../images/Algorithm(Three_Way_ANOVA)/math-d12d6997eb7752845328c388de196659.png?v=0" title="k = IJK" alt="k = IJK" class="tex"/> is the number of subgroups with <img src="../images/Algorithm(Three_Way_ANOVA)/math-adc98b949625e9830e389a7232a15d2d.png?v=0" title="n_i(i=1,...,k)" alt="n_i(i=1,...,k)" class="tex"/> observation.
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-c259a976bb76363cc7e1babf02971f77.png?v=0" title="Z_{ij} = |Y_{ij}-T_i|" alt="Z_{ij} = |Y_{ij}-T_i|" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-8c310536db00fa9688168ebace905389.png?v=0" title="T_i = \frac{1}{n_i}\sum_{n_i}^{j=1}Y_{ij}" alt="T_i = \frac{1}{n_i}\sum_{n_i}^{j=1}Y_{ij}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-442f62839ba312c5dd42941add171871.png?v=0" title="Z_i = \frac{1}{n_i}\sum_{n_i}^{j=1}Z_{ij}" alt="Z_i = \frac{1}{n_i}\sum_{n_i}^{j=1}Z_{ij}" class="tex"/>
+</p><p><img src="../images/Algorithm(Three_Way_ANOVA)/math-776a1d6fd0b15cb0ee444a11839e2da4.png?v=0" title="Z = \frac{1}{N}\sum_{k}^{i=1}Z_i" alt="Z = \frac{1}{N}\sum_{k}^{i=1}Z_i" class="tex"/>
+</p><p>Then we can get the p-value, which is <img src="../images/Algorithm(Three_Way_ANOVA)/math-61b92b4e6a98ff4a75c7ae495f4af4ee.png?v=0" title="1-F_{k-1,N-k}(L)" alt="1-F_{k-1,N-k}(L)" class="tex"/>.
+</p>
+
+
+
+
+

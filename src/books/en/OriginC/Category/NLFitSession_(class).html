@@ -1,0 +1,331 @@
+<h1 class="firstHeading">2.2.1.2 NLFitSession</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Name"><span class="tocnumber">1</span> <span class="toctext">Name</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Remark"><span class="tocnumber">2</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Hierarchy"><span class="tocnumber">3</span> <span class="toctext">Hierarchy</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Header_to_Include"><span class="tocnumber">5</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Reference"><span class="tocnumber">6</span> <span class="toctext">Reference</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Members"><span class="tocnumber">7</span> <span class="toctext">Members</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Name"></a><span class="mw-headline">Name</span></h2>
+<p>NLFitSession
+</p>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>The NLFitSession is a higher level Origin class, which is available to perform nonlinear fitting by handling the fitting process with a copy of the data while perform iterations. It wraps the NLFit class with a friendly interface to aid in implementing the fitting evaluation procedure. It is the kernel of the NLFit dialog. This class is recommended for coding in Origin C, because it takes care of all the complexities that arise from the process of interfacing to Origin.
+</p>
+<h2><a name="Hierarchy"></a><span class="mw-headline">Hierarchy</span></h2>
+<ul><li><strong class="selflink"> NLFitSession </strong></li></ul>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p><p>Prior to running the following example, the <b>nlsf_utils.c</b> file need to be loaded and compiled. This can be done from script with the command <b>run.LoadOC(Originlab\nlsf_utils.c)</b> or just add this file to your workspace.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">bool</span> NLFitSession_Fit_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>   
+    Worksheet   wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// Prepare worksheet with XYY columns and simulate data for the first two XY columns as Gauss curve</span>
+    vector      vX, vY;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>prepare_simulate_data_wks<span style="color: #000000;">&#40;</span>wks, vX, vY<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to generate simulate data&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    
+    NLFitSession    FitSession;
+ 
+    <span style="color: #008000;">// Set function</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Gauss&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// set function as Gauss, category name can be ignore</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;invalid fit function&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>   
+ 
+    <span style="color: #008000;">// Set data</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vY, vX<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail to set data&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #008000;">// Parameter initializtion</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">ParamsInitValues</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail to initialize parameter&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The parameter values before fitting&quot;</span><span style="color: #000000;">&#41;</span>;
+    FitSession.<span style="color: #000000;">GetChiSqr</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// call GetChiSqr in order to set parameter settings on internal fit object</span>
+    show_params<span style="color: #000000;">&#40;</span>FitSession<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// Fit</span>
+    <span style="color: #0000ff;">int</span>     nOutcome;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>nOutcome<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to do fitting&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The parameter values after fitting&quot;</span><span style="color: #000000;">&#41;</span>;
+    show_params<span style="color: #000000;">&#40;</span>FitSession<span style="color: #000000;">&#41;</span>;
+ 
+ 
+    <span style="color: #008000;">// Calculate fitting Y   </span>
+    vector      vFitY<span style="color: #000000;">&#40;</span>vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> FitSession.<span style="color: #000000;">GetYFromX</span><span style="color: #000000;">&#40;</span>vX, vFitY, vFitY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to get Y values&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>        
+ 
+    <span style="color: #008000;">// Put fitting Y data to worksheet column C.</span>
+    XYRange xyFit;
+    xyFit.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    xyFit.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;     
+    xyFit.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vFitY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// Plot input data and fitting data</span>
+    GraphPage   gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+    GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>wks, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// plot input as line</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nPlot <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>          
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp<span style="color: #000000;">&#41;</span>
+            dp.<span style="color: #000000;">SetColor</span><span style="color: #000000;">&#40;</span>SYSCOLOR_RED<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// set fit plot color to read</span>
+ 
+        gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        legend_update<span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//refresh graph legend</span>
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+ 
+<span style="color: #0000ff;">bool</span> prepare_simulate_data_wks<span style="color: #000000;">&#40;</span>Worksheet<span style="color: #000040;">&amp;</span> wks, vector<span style="color: #000040;">&amp;</span> vX, vector<span style="color: #000040;">&amp;</span> vY<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;error in prepare_simulate_data_wks&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #008000;">// Format worksheet</span>
+    wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    wks.<span style="color: #000000;">SetColDesignations</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;XYY&quot;</span><span style="color: #000000;">&#41;</span>;
+ 
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsNames <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Data X&quot;</span>, <span style="color: #ff00ff;">&quot;Data Y&quot;</span>, <span style="color: #ff00ff;">&quot;Fit Y&quot;</span><span style="color: #000000;">&#125;</span>;
+    <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    foreach<span style="color: #000000;">&#40;</span>Column col in wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        col.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">&#40;</span>vsNames<span style="color: #000000;">&#91;</span>ii<span style="color: #000040;">++</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>  
+ 
+    <span style="color: #008000;">// Generate simulate data  </span>
+    string      strFDF <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">&#40;</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">&quot;FitFunc&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">+</span><span style="color: #ff00ff;">&quot;Gauss.FDF&quot;</span>;
+    Tree        trFF;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">&#40;</span> strFDF, <span style="color: #000040;">&amp;</span>trFF <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+    NumericFunction NF;
+    NF.<span style="color: #000000;">SetTree</span><span style="color: #000000;">&#40;</span>trFF<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// Initalize the independent data values:</span>
+    <span style="color: #0000ff;">int</span>         nPts <span style="color: #000080;">=</span> <span style="color: #0000dd;">500</span>;
+    vX.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, nPts, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+ 
+    vector      vParams<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 4 is the number of params in the function y0,xc,w,A are parameters for Gauss.    </span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;         <span style="color: #008000;">// y0</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">250</span>;       <span style="color: #008000;">// xc</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">40</span>;        <span style="color: #008000;">// w</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;         <span style="color: #008000;">// A</span>
+ 
+    <span style="color: #008000;">// Vector for the dependent data</span>
+    vY.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nPts<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">BOOL</span>        bb <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span>vParams, vY, vX, <span style="color: #0000ff;">NULL</span>, nPts<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bb<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>   
+    add_white_noise<span style="color: #000000;">&#40;</span>vY, <span style="color: #0000dd;">5</span>, NOISE_OVER_DIFFERENCE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// add 5% noise      </span>
+ 
+    <span style="color: #008000;">// Put data from vectors to worksheet</span>
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+ 
+    dr.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+ 
+<span style="color: #0000ff;">void</span> show_params<span style="color: #000000;">&#40;</span>NLFitSession<span style="color: #000040;">&amp;</span> FitSession<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// get parameter values after initialization</span>
+	vector vParamValues, vErrors;
+	FitSession.<span style="color: #000000;">GetFitResultsParams</span><span style="color: #000000;">&#40;</span>vParamValues, vErrors<span style="color: #000000;">&#41;</span>;    
+ 
+    <span style="color: #008000;">// output parameter values with names</span>
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParamNames;
+    FitSession.<span style="color: #000000;">GetParamNamesInFunction</span><span style="color: #000000;">&#40;</span>vsParamNames<span style="color: #000000;">&#41;</span>;   
+ 
+    <span style="color: #0000ff;">int</span>         nDataset <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vParamValues.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParamNames<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span>, vParamValues<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>   
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>Originlab\NLFitSession.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+<h2><a name="Members"></a><span class="mw-headline">Members</span></h2>
+<table class="TableGrid" style="; border-spacing: 0px; border-spacing: 0px;" border="1">
+<tr>
+<th bgcolor="#EFEFEF" width="2%">Name
+</th>
+<th bgcolor="#EFEFEF" width="18%">Brief
+</th>
+<th bgcolor="#EFEFEF" width="2%">Example
+</th></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-Fit.html" title="OriginC:NLFitSession-Fit"> Fit</a>
+</td>
+<td>  Perform the fitting.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-Fit.html#Examples" title="OriginC:NLFitSession-Fit">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetFitOutCome.html" title="OriginC:NLFitSession-GetFitOutCome"> GetFitOutCome</a>
+</td>
+<td>  Get fit outcome string.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetChiSqr.html#Examples" title="OriginC:NLFitSession-GetChiSqr">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetFitResultsParams.html" title="OriginC:NLFitSession-GetFitResultsParams"> GetFitResultsParams</a>
+</td>
+<td>  Get the parameter results after fitting done.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetFitResultsParams.html#Examples" title="OriginC:NLFitSession-GetFitResultsParams">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetFitResultsStats.html" title="OriginC:NLFitSession-GetFitResultsStats"> GetFitResultsStats</a>
+</td>
+<td>  To get the statistics reuslt after fitting done.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetFitResultsStats.html#Examples" title="OriginC:NLFitSession-GetFitResultsStats">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetParamNamesInFunction.html" title="OriginC:NLFitSession-GetParamNamesInFunction"> GetParamNamesInFunction</a>
+</td>
+<td>  Get the parameter names defined in function.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetParamNamesInFunction.html#Examples" title="OriginC:NLFitSession-GetParamNamesInFunction">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetParamValuesAndOffsets.html" title="OriginC:NLFitSession-GetParamValuesAndOffsets"> GetParamValuesAndOffsets</a>
+</td>
+<td>  Get parameter values.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetParamValuesAndOffsets.html#Examples" title="OriginC:NLFitSession-GetParamValuesAndOffsets">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetYFromX.html" title="OriginC:NLFitSession-GetYFromX"> GetYFromX</a>
+</td>
+<td>  Get fitting Y calculated by given X value and parameters.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetYFromX.html#Examples" title="OriginC:NLFitSession-GetYFromX">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-GetChiSqr.html" title="OriginC:NLFitSession-GetChiSqr"> GetChiSqr</a>
+</td>
+<td>  Calculate the current reduced Chi-square value.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-GetChiSqr.html#Examples" title="OriginC:NLFitSession-GetChiSqr">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-Iterate.html" title="OriginC:NLFitSession-Iterate"> Iterate</a>
+</td>
+<td>  Perform iteration.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-Iterate.html#Examples" title="OriginC:NLFitSession-Iterate">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-ParamsInitValues.html" title="OriginC:NLFitSession-ParamsInitValues"> ParamsInitValues</a>
+</td>
+<td>  Initialize parameters.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-ParamsInitValues.html#Examples" title="OriginC:NLFitSession-ParamsInitValues">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetData.html" title="OriginC:NLFitSession-SetData"> SetData</a>
+</td>
+<td>  Set input data.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetData.html#Examples" title="OriginC:NLFitSession-SetData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetFunction.html" title="OriginC:NLFitSession-SetFunction"> SetFunction</a>
+</td>
+<td>  Set fitting function.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetFunction.html#Examples" title="OriginC:NLFitSession-SetFunction">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetMaxNumIter.html" title="OriginC:NLFitSession-SetMaxNumIter"> SetMaxNumIter</a>
+</td>
+<td>  Set the max number of allowed iterate times when do fitting.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetMaxNumIter.html#Examples" title="OriginC:NLFitSession-SetMaxNumIter">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetParamBounds.html" title="OriginC:NLFitSession-SetParamBounds"> SetParamBounds</a>
+</td>
+<td>  To set parameter lower/upper bounds.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetParamBounds.html#Examples" title="OriginC:NLFitSession-SetParamBounds">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetParamFix.html" title="OriginC:NLFitSession-SetParamFix"> SetParamFix</a>
+</td>
+<td>  To set parameter fixed.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetParamFix.html#Examples" title="OriginC:NLFitSession-SetParamFix">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetParamShare.html" title="OriginC:NLFitSession-SetParamShare"> SetParamShare</a>
+</td>
+<td>  To set parameter share
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetParamShare.html#Examples" title="OriginC:NLFitSession-SetParamShare">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetParamValues.html" title="OriginC:NLFitSession-SetParamValues"> SetParamValues</a>
+</td>
+<td>  To set all the parameter values.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetParamValues.html#Examples" title="OriginC:NLFitSession-SetParamValues">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/NLFitSession-SetTolerance.html" title="OriginC:NLFitSession-SetTolerance"> SetTolerance</a>
+</td>
+<td>  Set the tolerance value to stop the iterations.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/NLFitSession-SetTolerance.html#Examples" title="OriginC:NLFitSession-SetTolerance">Examples</a>
+</td></tr></table>
+
+
+
+
+
+

@@ -1,0 +1,137 @@
+<h1 class="firstHeading">2.2.4.33.5 Page::Create</h1><p><span class="OIndex" style="display:none">Create</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Create a new page using the supplied template. Supports both *.otw, *.otp as well as *.ogg, *.ogw files.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> Create<span style="color: #000000;">&#40;</span> LPCSTR lpcszTemplate <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">int</span> iOption <span style="color: #000080;">=</span> CREATE_DEFAULT_OPTIONS <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpcszTemplate</dt>
+<dd>[input]The template file name from which to create the page</dd>
+<dd>Pass "Origin" to use the default template, which can be origin.otp, origin.otw, or origin.otm depending on page type.</dd>
+<dd>Pass NULL or an empty string to create without a template.</dd>
+<dd>You may also pass a single window file name *.OGW, *.OGM and *.OGG. This will load the single window file provided</dd>
+<dd>the type matches. For single windows, only CREATE_HIDDEN, CREATE_VISIBLE_SAME, CREATE_VISIBLE and CREATE_HIDDEN are relevant.</dd>
+<dt> iOption</dt>
+<dd>[input]Bitwise flag indicating how window should be created</dd>
+<dd>Must be one of the following:</dd>
+<dd>			CREATE_TEMP = Create invisible and destroy on exit of scope.</dd>
+<dd>			CREATE_VISIBLE_SAME = Create with a visibility setting the same as what is stored in the template.</dd>
+<dd>			CREATE_VISIBLE = Create visible.</dd>
+<dd>			CREATE_HIDDEN = Create the page so it appears hidden in Proejct Explorer.</dd>
+<dd>			The following flags can be OR'ed with the above options:</dd>
+<dd>			CREATE_NO_REMOVE_TEMPLATEPICT = Do not remove template preview picture (graphic object) on loading.</dd>
+<dd>			CREATE_NO_GUI_ACCESS = Do not allow access from Project Explorer (only valid with CREATE_HIDDEN).</dd>
+<dd>			CREATE_EMPTY =  Do not create any child object for page (i.e. do not create 1st layer).</dd>
+<dd>			CREATE_NO_DEFAULT_TEMPLATE = When template is specified but not found will fail creation and return FALSE,ignore if lpcszTemplate = NULL.</dd>
+<dd>			CREATE_KEEP_LAYER_NAMES = if not used, layer names will be reset, like for worksheets as Sheet1, Sheet2</dd>
+<dd>			CREATE_LOAD_1ST_LAYER_ONLY = only the first layer, for WorksheetPage, this is similar to Create of Worksheet class</dd>
+<dd>			CREATE_ENUM_EXIST_PAGE = Reset the short name, similar to LabTalk Win -t. If this bit is not set (default), the template's shortname will be kept but may subject to enumeration to avoid duplicate.</dd>
+<dd>			CREATE_ENUM_ADD_SEPARATOR = Add underscore between shortname and enumeration index, like Graph_1</dd>
+<dd>			CREATE_DEFAULT_OPTIONS = (CREATE_VISIBLE | CREATE_KEEP_LAYER_NAMES)</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns TRUE for success and FALSE for failure.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Create a new workbook</span>
+<span style="color: #0000ff;">void</span> Page_Create_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	WorksheetPage wksPg;
+	wksPg.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> Page_Create_ex2<span style="color: #000000;">&#40;</span>string strTemplateName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Origin&quot;</span>, <span style="color: #0000ff;">BOOL</span> bNoDefaultTemplate <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    DWORD dwCntrl <span style="color: #000080;">=</span> CREATE_VISIBLE;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bNoDefaultTemplate <span style="color: #000000;">&#41;</span>
+        dwCntrl <span style="color: #000040;">|</span><span style="color: #000080;">=</span> CREATE_NO_DEFAULT_TEMPLATE;
+        
+    GraphPage gp;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>strTemplateName, dwCntrl<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Created a graph named&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>bNoDefaultTemplate <span style="color: #000040;">&amp;&amp;</span> <span style="color: #000040;">!</span>strTemplateName.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Not sure if specified template&#160;%s is used, it may be missing and default was substituded<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strTemplateName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Template&#160;%s not found, can not create graph page<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strTemplateName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX3</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//This example loads an OGW file from the samples folder and set the newly </span>
+<span style="color: #008000;">//loaded page's short name. If you repeated run load_ogw, you will see the </span>
+<span style="color: #008000;">//new page name will start to enumerate as Test1, Test2 etc.</span>
+
+<span style="color: #0000ff;">void</span> Page_Create_ex3<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">BOOL</span> bHideIt <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>, string strNewName<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Test&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string strPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+	strPath <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\C</span>urve Fitting<span style="color: #666666; font-weight: bold;">\S</span>ingle Peak Fit.ogw&quot;</span>;
+	WorksheetPage page;
+	page.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>strPath, CREATE_HIDDEN<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strPath<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>page<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;failed to be loaded&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	page.<span style="color: #000000;">Rename</span><span style="color: #000000;">&#40;</span>strNewName<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;is loaded, new Page Name is&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, page.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bHideIt<span style="color: #000000;">&#41;</span>
+		page.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX3</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// use CREATE_EMPTY to create a page without 1st default layer</span>
+<span style="color: #0000ff;">void</span> Page_Create_ex3<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    WorksheetPage page;
+    page.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, CREATE_EMPTY<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Page Name is&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, page.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;    
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> page.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>    
+        page.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Test&quot;</span><span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #0000ff;">int</span> index <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        foreach<span style="color: #000000;">&#40;</span>Layer lay in page.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;layer&#160;%d named&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, index, lay.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+            index<span style="color: #000040;">++</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error, fail to create empty workbook<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    page.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Create a new page using the supplied template and attach it to the Origin C object. The Create method should only be called from derived classes such as GraphPage, MatrixPage, WorksheetPage, and LayoutPage. A worksheet page created without a template will not have columns. A matrix page created without a template will have no MatrixObject. Creating a page without specifying a template is faster than when creating one from a template. Code to add needed columns and MatrixObjects can be subsequently executed.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/PageBase-PageBase.html" title="OriginC:PageBase-PageBase">PageBase::PageBase</a>, <a href="../../OriginC/OriginC/Page-Page.html" title="OriginC:Page-Page">Page::Page</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

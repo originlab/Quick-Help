@@ -1,0 +1,343 @@
+<h1 class="firstHeading">1.4.4 Setting and Getting Data</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Numeric_Data"><span class="tocnumber">1</span> <span class="toctext">Numeric Data</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Excel_VBA_Complex_Data_Type"><span class="tocnumber">1.1</span> <span class="toctext">Excel VBA Complex Data Type</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Excel_VBA_Float_Data_Type"><span class="tocnumber">1.2</span> <span class="toctext">Excel VBA Float Data Type</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Excel_VBA_to_Transfer_A_Matrix"><span class="tocnumber">1.3</span> <span class="toctext">Excel VBA to Transfer A Matrix</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#C.23_to_and_from_a_Column_in_a_Worksheet"><span class="tocnumber">1.4</span> <span class="toctext">C# to and from a Column in a Worksheet</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#C.23_To_and_From_a_Matrix"><span class="tocnumber">1.5</span> <span class="toctext">C# To and From a Matrix</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#VC.2B.2B_to_Worksheet"><span class="tocnumber">1.6</span> <span class="toctext">VC++ to Worksheet</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#VC.2B.2B_to_Matrix"><span class="tocnumber">1.7</span> <span class="toctext">VC++ to Matrix</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Numeric_Data"></a><span class="mw-headline">Numeric Data</span></h2>
+<h3><a name="Excel_VBA_Complex_Data_Type"></a><span class="mw-headline">Excel VBA Complex Data Type</span></h3>
+<p>Origin supports complex columns and matrix objects. To transfer complex data, 2D array is needed.
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Option</span> <span style="color: #E56717; font-weight: bold;">Explicit</span>
+
+Const NUMPTS = 100
+<span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> SetAndGetComplexData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wbk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> col <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> cc(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS, 1 <span style="color: #8D38C9; font-weight: bold;">To</span> 2) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+        cc(ii, 1) = ii + 0.12
+        cc(ii, 2) = -100 + ii * 0.5
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+    app.NewProject
+    <span style="color: #151B8D; font-weight: bold;">Set</span> wbk = app.WorksheetPages.Add
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = wbk.Layers(0)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> col = Wks.Columns.Add(<span style="color: #800000;">&quot;CC&quot;</span>)
+    col.DataFormat = DF_COMPLEX
+    col.SetData (cc)
+    
+    <span style="color: #008000;">' now we will try to get it back, if using 1D array, will only get the real part
+</span>    data = col.GetData(ARRAY2D_NUMERIC)
+    ii = <span style="color: #151B8D; font-weight: bold;">UBound</span>(data)
+    Worksheets(1).Range(<span style="color: #800000;">&quot;A1&quot;</span>).Resize(ii, 2) = data
+
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h3><a name="Excel_VBA_Float_Data_Type"></a><span class="mw-headline">Excel VBA Float Data Type</span></h3>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Option</span> <span style="color: #E56717; font-weight: bold;">Explicit</span>
+
+Const NUMPTS = 100
+
+<span style="color: #008000;">'before running this, select col A in Excel and hit Del key to clear the data
+</span><span style="color: #008000;">'if already run before
+</span><span style="color: #008000;">'  generate some data
+</span>
+<span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> SetGetFloatData1D2DArray()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wbk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> col <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ff(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Single</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+        ff(ii) = ii + 0.12
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+    app.NewProject
+    <span style="color: #151B8D; font-weight: bold;">Set</span> wbk = app.WorksheetPages.Add
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = wbk.Layers(0)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> col = Wks.Columns.Add(<span style="color: #800000;">&quot;FF&quot;</span>)
+    col.DataFormat = DF_FLOAT
+    col.SetData (ff)
+    
+    <span style="color: #008000;">' now we will try to get it back
+</span>    data = col.GetData(ARRAY2D_NUMERIC, 90, NUMPTS)
+    ii = <span style="color: #151B8D; font-weight: bold;">UBound</span>(data)
+    Worksheets(1).Range(<span style="color: #800000;">&quot;A1&quot;</span>).Resize(ii, 1) = data
+    
+    <span style="color: #008000;">'we can also get data back as 1D array
+</span>    data = col.GetData(ARRAY1D_NUMERIC)
+   
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(data)
+        Cells(ii, 2) = data(ii)
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+    
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h3><a name="Excel_VBA_to_Transfer_A_Matrix"></a><span class="mw-headline">Excel VBA to Transfer A Matrix</span></h3>
+<p>In this example we will create two matreces in an Origin MatrixSheet and set and get data in double format for one and complex for the second. Dimension of all matrices in a MatrixSheet must be the same in Origin
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Option</span> <span style="color: #E56717; font-weight: bold;">Explicit</span>
+
+Const NumRows = 50
+Const NumCols = 50
+
+<span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> TrsMtx()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> org <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgMtPg <span style="color: #151B8D; font-weight: bold;">As</span> Origin.MatrixPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgMtS <span style="color: #151B8D; font-weight: bold;">As</span> Origin.MatrixSheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgMtObjS1 <span style="color: #151B8D; font-weight: bold;">As</span> Origin.MatrixObject
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgMtObjS2 <span style="color: #151B8D; font-weight: bold;">As</span> Origin.MatrixObject
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> nn <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Boolean</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii, jj <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Long</span>
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s1(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumRows, 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumCols) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s2(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumRows, 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumCols) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+   
+    <span style="color: #008000;">'------------------------------------------------------------
+</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> org = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+    org.NewProject
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgMtPg = org.MatrixPages.Add
+    orgMtPg.Layers.Add
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgMtS = orgMtPg.Layers(0)
+    orgMtS.Cols = NumCols
+    orgMtS.Rows = NumRows
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgMtObjS1 = orgMtS.MatrixObjects.Add
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgMtS = orgMtPg.Layers(1)
+    orgMtS.Cols = NumCols
+    orgMtS.Rows = NumRows
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgMtObjS2 = orgMtS.MatrixObjects(0)
+    
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumRows
+        <span style="color: #8D38C9; font-weight: bold;">For</span> jj = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NumCols
+            s1(ii, jj) = jj * 0.2
+            s2(ii, jj) = ii * 2
+        <span style="color: #8D38C9; font-weight: bold;">Next</span> jj
+    <span style="color: #8D38C9; font-weight: bold;">Next</span> ii
+   
+    <span style="color: #008000;">'---------SetData---------------
+</span>    orgMtObjS1.DataFormat = DF_DOUBLE
+    nn = orgMtObjS1.SetData(s1, 0, 0)
+    orgMtObjS2.DataFormat = DF_COMPLEX
+    nn = orgMtObjS2.SetData(s2, 0, 0)
+    
+    org.<span style="color: #E56717; font-weight: bold;">Exit</span>
+    
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h3><a name="C.23_to_and_from_a_Column_in_a_Worksheet"></a><span class="mw-headline">C# to and from a Column in a Worksheet</span></h3>
+<p>The using section typically looks like the following:
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Collections.Generic</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Text</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// this will allow using Column Worksheet etc without having to write Origin.Column</span></pre>
+<p>In this example we shows how to send an array of floats (4 byte floating point) to an Origin column and how to read the values back as 1D and 2D float array, as well as 2D Variant array and an array of strings with current display settings in Origin.
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> Main<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> args<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    doTest<span style="color: #008000;">&#40;</span><span style="color: #FF0000;">100</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> doTest<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> npts<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> <span style="color: #0600FF; font-weight: bold;">Default</span> <span style="color: #008000;">=</span> <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> ff <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span>npts<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> npts<span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        ff<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span><span style="color: #008000;">=</span> ii<span style="color: #008000;">;</span>
+    <span style="color: #008000;">&#125;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// to attach to running Origin</span>
+    <span style="color: #008080; font-style: italic;">//Origin.Application app = new Origin.Application();</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">NewProject</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    WorksheetPage wbk <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Worksheet wks <span style="color: #008000;">=</span> wbk<span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #0600FF; font-weight: bold;">as</span> Worksheet<span style="color: #008000;">;</span>
+    wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Name</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;My Sheet Name&quot;</span><span style="color: #008000;">;</span>
+    Column col <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;FF&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    col<span style="color: #008000;">.</span><span style="color: #0000FF;">DataFormat</span> <span style="color: #008000;">=</span> COLDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">DF_FLOAT</span><span style="color: #008000;">;</span>
+    col<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>ff, <span style="color: #0600FF; font-weight: bold;">Default</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">Write</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Get Data into 1D array&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008080; font-style: italic;">//read the floats back as 1D float array, must use 0 lower bound for .NET array</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> data <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> dd <span style="color: #008000;">=</span> data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[0] = &quot;</span> <span style="color: #008000;">+</span> dd<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, [last pt] = &quot;</span> <span style="color: #008000;">+</span> dd<span style="color: #008000;">&#91;</span>npts<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">Write</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Get Data into 2D array&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> dd2 <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY2D_NUMERIC</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[0,0] = &quot;</span> <span style="color: #008000;">+</span> dd2<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span>,<span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, [last pt] = &quot;</span> <span style="color: #008000;">+</span> dd2<span style="color: #008000;">&#91;</span>npts <span style="color: #008000;">-</span> <span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">Write</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Get Data as string array&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    data <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_STR</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> ss1 <span style="color: #008000;">=</span> data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[0] = &quot;</span> <span style="color: #008000;">+</span> ss1<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, [last pt] = &quot;</span> <span style="color: #008000;">+</span> ss1<span style="color: #008000;">&#91;</span>npts <span style="color: #008000;">-</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">Write</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Press any key to terminate&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadKey</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<h3><a name="C.23_To_and_From_a_Matrix"></a><span class="mw-headline">C# To and From a Matrix</span></h3>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> TestMatrix<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> NumRows, <span style="color: #6666cc; font-weight: bold;">int</span> NumCols<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+            <span style="color: #0600FF; font-weight: bold;">const</span> <span style="color: #6666cc; font-weight: bold;">int</span> NumRows <span style="color: #008000;">=</span> <span style="color: #FF0000;">50</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">const</span> <span style="color: #6666cc; font-weight: bold;">int</span> NumCols <span style="color: #008000;">=</span> <span style="color: #FF0000;">50</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">object</span> <span style="color: #0600FF; font-weight: bold;">Default</span> <span style="color: #008000;">=</span> <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> s1<span style="color: #008000;">=</span><a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>NumRows,NumCols<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>, ,<span style="color: #008000;">&#93;</span> s2 <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>NumRows, NumCols, <span style="color: #FF0000;">2</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> org <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            org<span style="color: #008000;">.</span><span style="color: #0000FF;">NewProject</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            MatrixPage orgMtPg <span style="color: #008000;">=</span> org<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            MatrixSheet OrgMtS <span style="color: #008000;">=</span> orgMtPg<span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #0600FF; font-weight: bold;">as</span> MatrixSheet<span style="color: #008000;">;</span>
+            OrgMtS<span style="color: #008000;">.</span><span style="color: #0000FF;">Cols</span> <span style="color: #008000;">=</span> NumCols<span style="color: #008000;">;</span>
+            OrgMtS<span style="color: #008000;">.</span><span style="color: #0000FF;">Rows</span> <span style="color: #008000;">=</span> NumRows<span style="color: #008000;">;</span>
+            MatrixObject orgMtObjS1 <span style="color: #008000;">=</span> OrgMtS<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixObjects</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            MatrixObject orgMtObjS2 <span style="color: #008000;">=</span> OrgMtS<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixObjects</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> NumRows<span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> jj <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> jj <span style="color: #008000;">&lt;</span> NumCols<span style="color: #008000;">;</span> jj<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                <span style="color: #008000;">&#123;</span>
+                    s1<span style="color: #008000;">&#91;</span>ii, jj<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii<span style="color: #008000;">;</span>
+                    s2<span style="color: #008000;">&#91;</span>ii, jj, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">*</span> <span style="color: #FF0000;">0.1</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">/// real</span>
+                    s2<span style="color: #008000;">&#91;</span>ii, jj, <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">+</span> jj <span style="color: #008000;">*</span> <span style="color: #FF0000;">0.01</span><span style="color: #008000;">;</span><span style="color: #008080; font-style: italic;">//imaginary</span>
+                <span style="color: #008000;">&#125;</span>
+            <span style="color: #008000;">&#125;</span>
+
+            orgMtObjS1<span style="color: #008000;">.</span><span style="color: #0000FF;">DataFormat</span> <span style="color: #008000;">=</span> COLDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">DF_DOUBLE</span><span style="color: #008000;">;</span>
+            orgMtObjS1<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s1, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            orgMtObjS2<span style="color: #008000;">.</span><span style="color: #0000FF;">DataFormat</span> <span style="color: #008000;">=</span> COLDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">DF_COMPLEX</span><span style="color: #008000;">;</span>
+            orgMtObjS2<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s2, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> data1 <span style="color: #008000;">=</span> orgMtObjS1<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY2D_NUMERIC</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data1<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, &quot;</span> <span style="color: #008000;">+</span> data1<span style="color: #008000;">&#91;</span>NumRows<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, NumCols<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,,<span style="color: #008000;">&#93;</span> data2 <span style="color: #008000;">=</span> orgMtObjS2<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY2D_NUMERIC</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,,<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data2<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, &quot;</span> <span style="color: #008000;">+</span> data2<span style="color: #008000;">&#91;</span>NumRows<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, NumCols<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span><span style="color: #666666;">&quot;+ i&quot;</span><span style="color: #008000;">+</span> data2<span style="color: #008000;">&#91;</span>NumRows<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, NumCols<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadKey</span><span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            org<span style="color: #008000;">.</span><span style="color: #0000FF;">Visible</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_VISIBLE</span><span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_SHOW</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<h3><a name="VC.2B.2B_to_Worksheet"></a><span class="mw-headline">VC++ to Worksheet</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;stdafx.h&quot;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>afxdisp.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>        <span style="color: #008000;">// MFC classes, as to use COleSafeArray</span>
+<span style="color: #008000;">//make sure Origin8.tlb in the same folder as this program</span>
+#import <span style="color: #ff00ff;">&quot;Origin8.tlb&quot;</span> rename_namespace<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span> Origin;
+
+<span style="color: #0000ff;">#define</span>	NUM_COLS <span style="color: #0000dd;">4</span>
+<span style="color: #0000ff;">#define</span> NUM_ROWS <span style="color: #0000dd;">10</span>
+<span style="color: #0000ff;">#define</span>	PAGE_TYPE_WKS	<span style="color: #0000dd;">2</span>
+<span style="color: #0000ff;">#define</span>	PAGE_VISIBLE	<span style="color: #0000dd;">2</span> 
+
+<span style="color: #0000ff;">bool</span> sendDataToWks<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">IOApplicationPtr</span> pOrigin;
+	pOrigin.<span style="color: #000000;">CreateInstance</span><span style="color: #000000;">&#40;</span>__uuidof<span style="color: #000000;">&#40;</span>Application<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutVisible<span style="color: #000000;">&#40;</span>Origin<span style="color: #000000;">::</span><span style="color: #000000;">MAINWND_SHOW_BRING_TO_FRONT</span><span style="color: #000000;">&#41;</span>;
+
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>CreatePage<span style="color: #000000;">&#40;</span>PAGE_TYPE_WKS, <span style="color: #ff00ff;">&quot;Data&quot;</span>, <span style="color: #ff00ff;">&quot;w&quot;</span>, PAGE_VISIBLE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//&quot;w&quot; is template name while &quot;Data&quot; as worksheet page name</span>
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">WorksheetPagePtr</span> pPage <span style="color: #000080;">=</span> pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetActivePage<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	pPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">WorksheetPtr</span> pwks <span style="color: #000080;">=</span> pPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetLayers<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;abc&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//new worksheet name is abc</span>
+	pwks<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	COleSafeArray csarr;
+	DWORD dwBound<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>NUM_ROWS, NUM_COLS<span style="color: #000000;">&#125;</span>; <span style="color: #008000;">//declare the array as NUM_ROWS*NUM_COLS</span>
+	csarr.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>VT_UI2, <span style="color: #0000dd;">2</span>, dwBound<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">long</span> nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	USHORT uData;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> NUM_ROWS; ii<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; jj <span style="color: #000080;">&lt;</span> NUM_COLS; jj<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span> 
+		<span style="color: #000000;">&#123;</span>
+			nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ii;
+			nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> jj;
+			uData <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>ii <span style="color: #000040;">+</span> jj<span style="color: #000000;">&#41;</span><span style="color: #000040;">%</span>65536;
+			csarr.<span style="color: #000000;">PutElement</span><span style="color: #000000;">&#40;</span>nIndices, <span style="color: #000040;">&amp;</span>uData<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	pwks<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetData<span style="color: #000000;">&#40;</span>csarr, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+ 	<span style="color: #000000;">System</span><span style="color: #000000;">::</span><span style="color: #000000;">Console</span><span style="color: #000000;">::</span><span style="color: #000000;">ReadKey</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//press key will exit Origin and this instance</span>
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span><span style="color: #000000;">Exit</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="VC.2B.2B_to_Matrix"></a><span class="mw-headline">VC++ to Matrix</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;stdafx.h&quot;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>afxdisp.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>        <span style="color: #008000;">// MFC classes, as to use COleSafeArray</span>
+<span style="color: #008000;">//make sure Origin8.tlb in the same folder as this program</span>
+#import <span style="color: #ff00ff;">&quot;Origin8.tlb&quot;</span> rename_namespace<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span> Origin;
+
+<span style="color: #0000ff;">#define</span>	NUM_COLS <span style="color: #0000dd;">4</span>
+<span style="color: #0000ff;">#define</span> NUM_ROWS <span style="color: #0000dd;">10</span>
+<span style="color: #0000ff;">#define</span>	PAGE_VISIBLE	<span style="color: #0000dd;">2</span> 
+<span style="color: #0000ff;">#define</span>	PAGE_TYPE_MATRIX	<span style="color: #0000dd;">5</span>
+
+<span style="color: #0000ff;">bool</span> sendDataToMatrix<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">IOApplicationPtr</span> pOrigin;
+	pOrigin.<span style="color: #000000;">CreateInstance</span><span style="color: #000000;">&#40;</span>__uuidof<span style="color: #000000;">&#40;</span>Application<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutVisible<span style="color: #000000;">&#40;</span>Origin<span style="color: #000000;">::</span><span style="color: #000000;">MAINWND_SHOW_BRING_TO_FRONT</span><span style="color: #000000;">&#41;</span>;
+
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>CreatePage<span style="color: #000000;">&#40;</span>PAGE_TYPE_MATRIX, <span style="color: #ff00ff;">&quot;Data&quot;</span>, <span style="color: #ff00ff;">&quot;&quot;</span>, PAGE_VISIBLE<span style="color: #000000;">&#41;</span>;
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">MatrixPagePtr</span>  pPage <span style="color: #000080;">=</span> pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetActivePage<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	pPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//bring it to the front</span>
+	
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">MatrixSheetPtr</span>  pmtx <span style="color: #000080;">=</span> pPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetLayers<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;abc&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//new matrixsheet name is abc</span>
+	pmtx<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	pmtx<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutCols<span style="color: #000000;">&#40;</span>NUM_COLS<span style="color: #000000;">&#41;</span>;
+	pmtx<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutRows<span style="color: #000000;">&#40;</span>NUM_ROWS<span style="color: #000000;">&#41;</span>;
+
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">MatrixObjectPtr</span> pmtxObj <span style="color: #000080;">=</span> pmtx<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetMatrixObjects<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	pmtxObj<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	pmtxObj<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>DataFormat <span style="color: #000080;">=</span> Origin<span style="color: #000000;">::</span><span style="color: #000000;">DF_USHORT</span>;
+
+	COleSafeArray csarr;
+	DWORD dwBound<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>NUM_ROWS, NUM_COLS<span style="color: #000000;">&#125;</span>; <span style="color: #008000;">//declare the array as NUM_ROWS*NUM_COLS</span>
+	csarr.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>VT_UI2, <span style="color: #0000dd;">2</span>, dwBound<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">long</span> nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	USHORT uData;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> NUM_ROWS; ii<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; jj <span style="color: #000080;">&lt;</span> NUM_COLS; jj<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span> 
+		<span style="color: #000000;">&#123;</span>
+			nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ii;
+			nIndices<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> jj;
+			uData <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>ii <span style="color: #000040;">+</span> jj<span style="color: #000000;">&#41;</span><span style="color: #000040;">%</span>65536;
+			csarr.<span style="color: #000000;">PutElement</span><span style="color: #000000;">&#40;</span>nIndices, <span style="color: #000040;">&amp;</span>uData<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	pmtxObj<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetData<span style="color: #000000;">&#40;</span>csarr, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+ 	<span style="color: #000000;">System</span><span style="color: #000000;">::</span><span style="color: #000000;">Console</span><span style="color: #000000;">::</span><span style="color: #000000;">ReadKey</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//press key will exit Origin and this instance</span>
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span><span style="color: #000000;">Exit</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

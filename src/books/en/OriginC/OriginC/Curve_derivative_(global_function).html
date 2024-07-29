@@ -1,0 +1,122 @@
+<h1 class="firstHeading">2.1.17.2.3.1 Curve_derivative</h1><p class='urlname' style='display: none'>Curve-Derivative-GlobalFunction</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Create the n-th Order derivative of a source curve with optional weighting.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> Curve_derivative<span style="color: #000000;">&#40;</span> curvebase <span style="color: #000040;">*</span> pcrvData, curvebase <span style="color: #000040;">*</span> pcrvResults, <span style="color: #0000ff;">int</span> nOrder <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">double</span> dSmoothness <span style="color: #000080;">=</span> BSPLN_OFF, Dataset <span style="color: #000040;">*</span> pdsWeights <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pcrvData</dt>
+<dd>[input] source curve</dd>
+<dt> pcrvResults</dt>
+<dd>[output] result curve</dd>
+<dt> nOrder</dt>
+<dd>[input] The order of the derivative</dd>
+<dt> dSmoothness</dt>
+<dd>[input] Smoothness factor can be any arbitrary value &gt;= 0 or a predefined constant</dd>
+<dd>(BSPLN_AUTO, BSPLN_INTERPOLATE and BSPLN_WEIGTHED_LEAST_SQUARE_POLYNOMIAL, BSPLN_OFF)</dd>
+<dd>enumerated in OC_const.h. The enumerated constants are negative numbers to distinguish them from arbitrary smoothness factors.</dd>
+<dt> pdsWeights</dt>
+<dd>[output] Dataset containing weights for the input curve. If not NULL the number of points in the weight data set must equal the number of points in the source curve. The default weighting is 1 for all points.</dd>
+<dd>if dSmoothness equals BSPLN_OFF, only the first order derivative will be calculated.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns zero on successful exit and a non-zero error code on failure.
+</p><p>Errors:
+</p><p>-1=System can not allocate enough memeory
+</p><p>-2=Curve data type error
+</p><p>-4=The result curve range can not be set
+</p><p>5=The smoothness parameter must be equal to or greater than 0
+</p><p>11=The number of data points is less than 4
+</p><p>63=The sequence of X in source data is not increasing
+</p><p>73=Memory allocation failed
+</p><p>240=The weights are not all positive
+</p><p>254=The smoothness parameter is too small
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This is a self contained sample program for the function Curve_derivative, </span>
+<span style="color: #008000;">// Its sample data is created at the beginning of the program. </span>
+<span style="color: #008000;">// To run the program, enter the following command in the Script window:</span>
+<span style="color: #008000;">//   Curve_derivative_ex1</span>
+<span style="color: #008000;">// It returns a message like the following line:</span>
+<span style="color: #008000;">//   Derivation Succeeded: Data4_B==&gt;DerivY, Order=1, Smoothness=1</span>
+
+<span style="color: #0000ff;">void</span> Curve_derivative_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string wksName,colNameInY,colNameOutY;
+    Column myColInY, myColOutY;
+    <span style="color: #0000ff;">double</span> dSmoothness;
+    <span style="color: #0000ff;">int</span> nOrder, rc;
+
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    wksName<span style="color: #000080;">=</span>wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Dataset myInXDs<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    Dataset myInYDs<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//******* Create sample data *****************</span>
+    myInXDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>;
+    myInYDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.097</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.41256</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.24909</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.47304</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.2476</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.64529</span>;
+    myInXDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">7</span>;    myInYDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.44514</span>;
+    <span style="color: #008000;">//******** End of Sample Data Creation *******</span>
+
+    wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;DerivX&quot;</span><span style="color: #000000;">&#41;</span>;    
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+    wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;DerivY&quot;</span><span style="color: #000000;">&#41;</span>;
+
+    myColInY.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    myColInY.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>colNameInY<span style="color: #000000;">&#41;</span>;
+    myColOutY.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    myColOutY.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>colNameOutY<span style="color: #000000;">&#41;</span>;
+
+    Curve crvData<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    Curve crvResults<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+
+    nOrder<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+    dSmoothness<span style="color: #000080;">=</span><span style="color: #0000dd;">1.0</span>;
+    rc <span style="color: #000080;">=</span> Curve_derivative<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>crvData, <span style="color: #000040;">&amp;</span>crvResults, nOrder, dSmoothness<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Demonstration of Curve_derivative</span>
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>rc<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Derivation Succeeded:&#160;%s_%s==&gt;%s, Order=%d, Smoothness=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>,
+          wksName,colNameInY,colNameOutY,nOrder,dSmoothness<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Derivation Failed. Error Code=%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>,rc<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Create the n-th Order derivative of a source curve with optional weighting.
+</p><p>The resulting derivative curve will copy the source X data set if an empty X data set is provided or it will use a specified X data set as long as the range is within the source X range.
+</p><p>Please note that in Origin 7.0, the default argument dSmoothness was BSPLN_AUTO, but from 7.5, it was changed to BSPLN_OFF.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Curve_derivative_(lowcase)_(global_function).html" title="OriginC:Curve derivative (lowcase) (global function)">curve_derivative</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

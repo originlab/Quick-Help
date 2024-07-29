@@ -1,0 +1,67 @@
+<h1 class="firstHeading">2.1.21.7 ocu_url_encode</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Remark"><span class="tocnumber">5</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_Also"><span class="tocnumber">6</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Header_to_Included"><span class="tocnumber">7</span> <span class="toctext">Header to Included</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Reference"><span class="tocnumber">8</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Enter text to URL encode or decode
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> ocu_url_encode<span style="color: #000000;">&#40;</span> string <span style="color: #000040;">*</span> pstrText, <span style="color: #0000ff;">BOOL</span> bEncode <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pstrText</dt>
+<dd>[modify] pointer to the input and result string</dd>
+<dt> bEncode</dt>
+<dd>[input] false will do decode instead of encode</dd></dl>
+<p><br />
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ocu.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> state_search<span style="color: #000000;">&#40;</span>string strSearch<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;South Carolina&quot;</span>, string strCountry<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;USA&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">//example &quot;http://services.groupkt.com/state/search/IND?text=pradesh&quot;</span>
+    string strURL <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;http://services.groupkt.com/state/search/&quot;</span>;
+    strURL <span style="color: #000040;">+</span><span style="color: #000080;">=</span> strCountry;
+    strURL <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;?text=&quot;</span>;
+    ocu_url_encode<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>strSearch<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//search text might have spaces</span>
+    strURL <span style="color: #000040;">+</span><span style="color: #000080;">=</span> strSearch;
+    string result;
+    <span style="color: #0000ff;">int</span> err <span style="color: #000080;">=</span> okutil_http_get<span style="color: #000000;">&#40;</span>strURL, <span style="color: #000040;">&amp;</span>result<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> err <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        Tree tr;
+        JSON.<span style="color: #000000;">FromString</span><span style="color: #000000;">&#40;</span>tr, result<span style="color: #000000;">&#41;</span>;
+        TreeNode trResult <span style="color: #000080;">=</span> tr.<span style="color: #000000;">RestResponse</span>;
+        string strRetMsg <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">messages</span>._0.<span style="color: #000000;">strVal</span>;
+        out_str<span style="color: #000000;">&#40;</span>strRetMsg<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>strRetMsg.<span style="color: #000000;">Find</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+            out_tree<span style="color: #000000;">&#40;</span>trResult.<span style="color: #000000;">result</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Included"></a><span class="mw-headline">Header to Included</span></h2>
+<p>ocu.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

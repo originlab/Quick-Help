@@ -1,0 +1,139 @@
+<h1 class="firstHeading">2.1.23.2.8 ocmath_find_peaks_1st_derivative</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Find curve's peaks by 1st derivative.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_find_peaks_1st_derivative<span style="color: #000000;">&#40;</span> UINT <span style="color: #000040;">*</span> lSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pXPeaks, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pYPeaks, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span> pnIndices, DWORD dwCtrl <span style="color: #000080;">=</span> POSITIVE_DIRECTION, <span style="color: #0000ff;">bool</span> bUseSGderivativeForFindPeak <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">int</span> nPtsSmooth<span style="color: #000080;">=</span><span style="color: #0000dd;">11</span>, <span style="color: #0000ff;">int</span> nPolyOrder<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lSize</dt>
+<dd>[modify] on input, size of pX, pY, pXPeaks, pYPeaks, pnIndices; on output, return number of peaks</dd>
+<dt> pX</dt>
+<dd>[input] it contains curve's X coordinate's datas</dd>
+<dt> pY</dt>
+<dd>[input] it contains curve's Y coordinate's datas</dd>
+<dt> pXPeaks</dt>
+<dd>[output] Its size is equal to the size of px. it contains peaks' X coordinate's datas,</dd>
+<dd>if the number of peaks is less than its size, the excrescent elements of it are filled</dd>
+<dd>with 0.</dd>
+<dt> pYPeaks</dt>
+<dd>[output] Its size is equal to the size of py. it contains peaks' Y coordinate's datas,</dd>
+<dd>if the number of peaks is less than its size, the excrescent elements of it are filled</dd>
+<dd>with 0.</dd>
+<dt> pnIndices</dt>
+<dd>[output] Its size is equal to the size of px. it contains peaks' indices, if peaks's number is</dd>
+<dd>less than its size, the excrescent elements of it are filled with 0.</dd>
+<dt> dwCtrl</dt>
+<dd>[input]  combine of POSITIVE_DIRECTION, NEGATIVE_DIRECTION,  KEEP_OPPOSITE_SIDE</dd>
+<dt> nPtsSmooth</dt>
+<dd>[input] smooth points number, if equal to 0, then omit smooth</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Return OE_NOERROR if succeed, otherwise, non-zero error code is returned.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Assume in the current graph, curve's XY data is in the first data plot. This piece</span>
+<span style="color: #008000;">//of code get the XY data of the curve from the first data plot and find the feets of</span>
+<span style="color: #008000;">//the peaks. The result is output in a new worksheet and the feets will plot in the </span>
+<span style="color: #008000;">//original data plot.</span>
+<span style="color: #0000ff;">void</span> ocmath_find_peaks_1st_derivative_ex1<span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+
+    <span style="color: #008000;">//get data from the first data plot</span>
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;        
+    DataRange dr;
+    vector vxData, vyData;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        DWORD dwPlotID;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vyData, <span style="color: #000040;">&amp;</span>vxData<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;get_plot_data failed GetData&quot;</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+ 
+    uint nDataSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> iSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    vector vxPeaks, vyPeaks;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnIndices;
+ 
+    vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vnIndices.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_find_peaks_1st_derivative<span style="color: #000000;">&#40;</span> <span style="color: #000040;">&amp;</span>nDataSize, vxData, vyData, vxPeaks, vyPeaks, vnIndices, POSITIVE_DIRECTION <span style="color: #000040;">|</span> NEGATIVE_DIRECTION,<span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nRet <span style="color: #000080;">&lt;</span> OE_NOERROR <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;error code:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+    vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vnIndices.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//new a worksheet to output the result</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Worksheet wksResult <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nIndCol, nXCol, nYCol;
+    nIndCol <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Indices&quot;</span><span style="color: #000000;">&#41;</span>;
+    nXCol <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X Coordinate&quot;</span><span style="color: #000000;">&#41;</span>;
+    nYCol <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y Coordinate&quot;</span><span style="color: #000000;">&#41;</span>;
+    wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nIndCol<span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+    wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nXCol<span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+    wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nYCol<span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>;
+    
+    DataRange drOut;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nIndCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nIndCol<span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nXCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nXCol<span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nYCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nYCol<span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vyPeaks, <span style="color: #000040;">&amp;</span>vxPeaks, <span style="color: #000040;">&amp;</span>vnIndices<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//show the feets in the data plot</span>
+    XYRange plotRange;
+    plotRange.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nXCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nXCol<span style="color: #000000;">&#41;</span>;
+    plotRange.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nYCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nYCol<span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>plotRange, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Find curve's peaks by 1st derivative. Calculate curve's smoothed 1st derivative on every point in px, py.
+</p><p>Then the point is a peak, if the signs of smoothed 1st derivatives are different on its left point and right point.
+</p><p>POSITIVE_DIRECTION peak, if the smoothed 1st derivative is greater than zero on its left point, and less than zero on its right point.
+</p><p>NEGATIVE_DIRECTION peak, if the smoothed 1st derivative is less than zero on its left point, and greater than zero on its right point.
+</p><p>lsize returns the number of peaks, pXPeaks and pYPeaks contain X and Y coordinate's datas of peaks,and pnIndices contains the indices of peaks.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Ocmath_find_peaks_2nd_derivative_(global_function).html" title="OriginC:Ocmath find peaks 2nd derivative (global function)">ocmath_find_peaks_2nd_derivative</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

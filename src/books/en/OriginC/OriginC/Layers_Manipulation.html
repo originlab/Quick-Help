@@ -1,0 +1,79 @@
+<h1 class="firstHeading">3.5.3 Layers Manipulation</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>Following function <b>arrange_all_graphs_into_one_graph</b> shows how to copy graph layer from one page to another page and arrange multiple layers in one page using Origin C code. 
+</p><p>Before run <b>arrange_all_graphs_into_one_graph</b> need to prepare a clear project without any graph window and then run <b>prepare_graphs</b> function to create multiple graphs firstly or prepare graphs that want to arrange in one graph yourself.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> prepare_graphs<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string  strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Multiple Gaussians.dat&quot;</span>;
+ 
+    ASCIMP  ai;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>        
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">&#40;</span>strFile, ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// returns 0 on success</span>
+        <span style="color: #000000;">&#123;</span>        
+            <span style="color: #008000;">// loop all xy and plot each one in the separate graph window</span>
+            <span style="color: #0000ff;">int</span> nXIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+            <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nYIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; nYIndex <span style="color: #000080;">&lt;</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nYIndex<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+            <span style="color: #000000;">&#123;</span>
+                GraphPage gp;
+                gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+                
+                GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get active layer            </span>
+                Curve crv<span style="color: #000000;">&#40;</span>wks, nXIndex, nYIndex<span style="color: #000000;">&#41;</span>; 
+                gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>crv<span style="color: #000000;">&#41;</span>;
+                gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #000000;">&#125;</span>
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> arrange_all_graphs_into_one_graph<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	
+    <span style="color: #008000;">// copy layers from the graphs in vsGraphPages</span>
+    GraphPage gpAll;
+    gpAll.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nNumLayers <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    foreach<span style="color: #000000;">&#40;</span>GraphPage gp in Project.<span style="color: #000000;">GraphPages</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> gpAll.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    	<span style="color: #000000;">&#123;</span>
+        	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        	gpAll.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>;
+        	nNumLayers<span style="color: #000040;">++</span>;
+    	<span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>    
+    GraphLayer glEmpty <span style="color: #000080;">=</span> gpAll.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// remove the first layer that already existed when page created</span>
+    glEmpty.<span style="color: #000000;">Destroy</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// arrange layers to N * 1</span>
+    <span style="color: #0000ff;">int</span> nNumRows <span style="color: #000080;">=</span> nNumLayers, nNumCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    page_arrange_layers<span style="color: #000000;">&#40;</span>gpAll, nNumRows, nNumCols<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// Combine all legends to a single legend on the first layer.</span>
+    <span style="color: #0000ff;">int</span> iLegendLayer <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">//the index of the layer on which to put the combined legend;</span>
+    <span style="color: #0000ff;">bool</span> bAscending <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; <span style="color: #008000;">//sort the legends ascending before combine into one legend</span>
+    legend_combine<span style="color: #000000;">&#40;</span>gpAll, iLegendLayer, bAscending<span style="color: #000000;">&#41;</span>;   
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

@@ -1,0 +1,103 @@
+<h1 class="firstHeading">2.2.4.46.97 Worksheet::WriteRecordset</h1><p><span class="OIndex" style="display:none">WriteRecordset</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Write data from worksheet into recordset.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> WriteRecordset<span style="color: #000000;">&#40;</span> Object <span style="color: #000040;">&amp;</span> object, DWORD dwCntrl <span style="color: #000080;">=</span> LAYWKSETRECORDSET_REPLACE, <span style="color: #0000ff;">int</span> nRowBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nNumRows <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nColBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nNumCols <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> object</dt>
+<dd>[input] The recordset.</dd>
+<dt> dwCntrl</dt>
+<dd>[input] Options replace recordset or append data to it. default is LAYWKSETRECORDSET_REPLACE</dd>
+<dt> nRowBegin</dt>
+<dd>[input] The starting row in the worksheet. default is 0.</dd>
+<dt> nNumRows</dt>
+<dd>[input] Total number of worksheet to write recordset. default is -1.</dd>
+<dt> nColBegin</dt>
+<dd>[input] The starting in worksheet from which to begin. default is 0.</dd>
+<dt> nNumCols</dt>
+<dd>[input] The number of columns to use, beginning with nColBegin, or -1 to use all columns to the right of nColBegin.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>error message, 0 if no error
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#define</span> DB_SETUP_STR            <span style="color: #ff00ff;">&quot;Provider=Microsoft.Jet.OLEDB.4.0;Password=&quot;</span><span style="color: #ff00ff;">&quot;;User ID=Admin;Data Source=&quot;</span>
+<span style="color: #0000ff;">#define</span> DB_FILE_FULLPATH        GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\I</span>mport and Export<span style="color: #666666; font-weight: bold;">\s</span>tars.mdb&quot;</span>
+<span style="color: #0000ff;">#define</span> TABLE_NAME                 <span style="color: #ff00ff;">&quot;Stars&quot;</span>
+ 
+<span style="color: #008000;">// when bReplace is true, it will delete all entry firstly then copy data from current worksheet to table.</span>
+<span style="color: #008000;">// NOTE if you wants to use append, and there is a Key field which not allow duplicate data, then you have to make sure after appending no duplicate data in key field/column. </span>
+<span style="color: #0000ff;">int</span>  WriteRecordset_ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bReplace <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// assume use active wks</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;NO active wks!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    Object ocrs;
+    ocrs <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>ocrs <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot; ADO init error!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #008000;">// Get Access file name</span>
+    string strDBFileName <span style="color: #000080;">=</span> DB_FILE_FULLPATH;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>strDBFileName.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid database file path!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; 
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #008000;">// prepare and open database recordset</span>
+    string strConn <span style="color: #000080;">=</span> DB_SETUP_STR <span style="color: #000040;">+</span> strDBFileName; 
+    ocrs.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+    string strQuery <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Select * From &quot;</span><span style="color: #000040;">+</span> TABLE_NAME  <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;;&quot;</span>;
+    ocrs.<span style="color: #000000;">open</span><span style="color: #000000;">&#40;</span> strQuery, strConn, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_APPEND;    
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bReplace <span style="color: #000000;">&#41;</span>
+        nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_REPLACE;
+ 
+    <span style="color: #008000;">//write worksheet data to recordset.</span>
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">WriteRecordset</span><span style="color: #000000;">&#40;</span>ocrs,nOption <span style="color: #000000;">&#41;</span>;
+    out_int<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;nRet = &quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> nRet <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> nRet;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>ocrs.<span style="color: #000000;">State</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//adStateOpen</span>
+         ocrs.<span style="color: #000000;">Close</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Worksheet-ReadRecordset.html" title="OriginC:Worksheet-ReadRecordset">Worksheet::ReadRecordset</a>,  
+<a href="../../OriginC/OriginC/Worksheet-PutRecordset.html" title="OriginC:Worksheet-PutRecordset">Worksheet::PutRecordset</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

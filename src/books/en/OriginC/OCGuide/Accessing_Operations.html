@@ -1,0 +1,67 @@
+<h1 class="firstHeading">1.9.5 Accessing Operations</h1><p><br />
+</p>
+<h2><a name="List_All_OperationsOperation.2C_List_AllProject.2C_List_All_Operations"></a><span class="mw-headline">List All Operations<span class="OIndex" style="display:none">Operation, List All</span><span class="OIndex" style="display:none">Project, List All Operations</span></span></h2>
+<p>Many recalculating analysis tools, such as the Statistics on Columns dialog, the Nonlinear Curve Fitting dialog, etc., are based on the Operation class. After finishing the whole operation, there will be a lock on the result sheet or result graph. We can list all operations via <b><a href="../../OriginC/OriginC/Project-Operations.html" title="OriginC:Project-Operations">Project::Operations</a></b>. The following code is used to get all operations objects and print out the operation names.
+</p>
+<pre class="oc" style="font-family:monospace;">OperationManager opManager;
+opManager <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Operations</span>;
+
+<span style="color: #0000ff;">int</span> count <span style="color: #000080;">=</span> opManager.<span style="color: #000000;">GetCount</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> index<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; index <span style="color: #000080;">&lt;</span> count; index<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>		
+	OperationBase<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> opManager.<span style="color: #000000;">GetOperation</span><span style="color: #000000;">&#40;</span>index<span style="color: #000000;">&#41;</span>;
+	string strName <span style="color: #000080;">=</span> op.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	out_str<span style="color: #000000;">&#40;</span>strName<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Check_Worksheet_if_HierarchyWorksheet.2C_Check_If_Hierarchy"></a><span class="mw-headline">Check Worksheet if Hierarchy<span class="OIndex" style="display:none">Worksheet, Check If Hierarchy</span></span></h2>
+<p>If you want to check whether a worksheet is a result table sheet, you can check with layer system parameters, as in the following code.
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">bool</span> bHierarchySheet <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>wks.<span style="color: #000000;">GetSystemParam</span><span style="color: #000000;">&#40;</span>GLI_PCD_BITS<span style="color: #000000;">&#41;</span> <span style="color: #000040;">&amp;</span> WP_SHEET_HIERARCHY<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bHierarchySheet <span style="color: #000000;">&#41;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;This is a report table sheet&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">else</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;This is not a report table sheet&quot;</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Accessing_Report_Sheet"></a><span class="mw-headline">Accessing Report Sheet</span></h2>
+<p><span class="OIndex" style="display:none">Report Sheet, Get the Specified Result</span>The following code shows how to get a report tree from a report sheet, convert the result gotten from the report tree into a cell linking format string, and put it into a new worksheet.
+</p><p>This is how to get a report tree from a report sheet. To run this code you need keep a report sheet active.
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+Tree trResult;
+wks.<span style="color: #000000;">GetReportTree</span><span style="color: #000000;">&#40;</span>trResult<span style="color: #000000;">&#41;</span>;</pre>
+<p>The following code shows how to get the needed results from the report tree, convert them to a cell linking format string, and put it into a newly created worksheet.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Add a new sheet for summary table</span>
+WorksheetPage wksPage <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> index <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+Worksheet wksSummary <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>index<span style="color: #000000;">&#41;</span>;	
+
+string strCellPrefix;
+strCellPrefix.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;cell://%s!&quot;</span>, wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsLabels, vsValues;
+<span style="color: #008000;">// Parameters</span>
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Intercept.row_label2&quot;</span><span style="color: #000000;">&#41;</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Intercept.Value&quot;</span><span style="color: #000000;">&#41;</span>;
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Slope.row_label2&quot;</span><span style="color: #000000;">&#41;</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Slope.Value&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Statistics</span>
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.DOF.row_label&quot;</span><span style="color: #000000;">&#41;</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.C1.DOF&quot;</span><span style="color: #000000;">&#41;</span>;
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.SSR.row_label&quot;</span><span style="color: #000000;">&#41;</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.C1.SSR&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+<span style="color: #008000;">// put to columns</span>
+Column colLabel<span style="color: #000000;">&#40;</span>wksSummary, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+Column colValue<span style="color: #000000;">&#40;</span>wksSummary, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;	
+colLabel.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">&#40;</span>vsLabels<span style="color: #000000;">&#41;</span>;
+colValue.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">&#40;</span>vsValues<span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

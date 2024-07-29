@@ -1,0 +1,127 @@
+<h1 class="firstHeading">2.1.22.3.11 ocmsp_iir_order</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Included"><span class="tocnumber">8</span> <span class="toctext">Header to Included</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Estimate the minimum order of a digital/analog IIR filter required to meet a set
+of filter design specifications: loses no more than Rp dB in passband and has at
+least Rs dB of attenuation in the stopband.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmsp_iir_order<span style="color: #000000;">&#40;</span> UINT <span style="color: #000040;">*</span> pN, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pWn, <span style="color: #0000ff;">double</span> Wp, <span style="color: #0000ff;">double</span> Ws, <span style="color: #0000ff;">double</span> Rp, <span style="color: #0000ff;">double</span> Rs, <span style="color: #0000ff;">int</span> type, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pWn2 <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> Wp2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1.0</span>, <span style="color: #0000ff;">double</span> Ws2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1.0</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pN</dt>
+<dd>[output] returned lowest order N</dd>
+<dt> pWn</dt>
+<dd>[output] natural frequency of the filter, for filter design with ocmsp_IIR_filter</dd>
+<dt> Wp</dt>
+<dd>[input] passband edge frequency, it's in radians/second if is analog type, and should be normalized to [0, 1] if is digital (where 1 corresponds to pi radians/sample)</dd>
+<dt> Ws</dt>
+<dd>[input] stopband edge frequency, it's in radians/second if is analog type, and should be normalized to [0, 1] if is digital(where 1 corresponds to pi radians/sample)</dd>
+<dt> Rp</dt>
+<dd>[input] passband ripple in dB. It's the maximum permissible passband loss in decibels</dd>
+<dt> Rs</dt>
+<dd>[input] stopband attenuation in dB. It's the number of decibels the stopband is down from the passband</dd>
+<dt> type</dt>
+<dd>[input] filter type. It specifies the filter prototype(Butterworth, Chebyshev Type I, Chebyshev Type II, Elliptic or Bessel), band type (lowpass, highpass, bandstop or bandpass) and digital or analog type. For example</dd>
+<dd>OMSP_BUTTERWORTH|OMSP_LOWPASS|OMSP_DIGITAL means a lowpass Butterworth digital filter.</dd>
+<dt> pWn2</dt>
+<dd>[output] natural frequency 2, only needed when it's a bandpass or bandstop filter</dd>
+<dt> Wp2</dt>
+<dd>[input][optional] passband edge frequency, it's in radians/second if is analog type, and should be normalized to [0, 1] if is digital (where 1 corresponds to pi radians/sample). Only needed when it's a bandpass or bandstop filter</dd>
+<dt> Ws2</dt>
+<dd>[input][optional] stopband edge frequency, it's in radians/second if is analog type, and should be normalized to [0, 1] if is digital(where 1 corresponds to pi radians/sample). Only needed when it's a bandpass or bandstop filter</dd></dl>
+<dl><dd>The stopband and passband frequency range should follow:</dd></dl>
+<table>
+<tr>
+<th> Filter Type
+</th>
+<th> Stopband/Passband conditions
+</th>
+<th> Stopband
+</th>
+<th> Passband
+</th></tr>
+<tr>
+<td> Lowpass
+</td>
+<td> Wp &lt; Ws
+</td>
+<td> (Ws, 1)
+</td>
+<td> (0, Wp)
+</td></tr>
+<tr>
+<td> Highpass
+</td>
+<td> Wp &gt; Ws
+</td>
+<td> (0, Ws)
+</td>
+<td> (Wp, 1)
+</td></tr>
+<tr>
+<td> Bandpass
+</td>
+<td> Ws &lt; Wp &lt; Wp2 &lt; Ws2
+</td>
+<td> (0, Ws) and (Ws2, 1)
+</td>
+<td> (Wp, Wp2)
+</td></tr>
+<tr>
+<td> Bandstop
+</td>
+<td> Wp &lt; Ws &lt; Ws2 &lt; Wp2
+</td>
+<td> (0, Wp) and (Wp2, 1)
+</td>
+<td> (Ws, Ws2)
+</td></tr></table>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Return OE_NOERROR if succeed, otherwise, non-zero error code is returned (OE_NULL_POINTER, OE_INVALID_FREQ, OE_INVALID_BANDFREQS, OE_INVLAID_RIPPLE, OE_INVALID_BANDRIPPLES or OE_INVALID_TYPE)
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ocmsp.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> ocmsp_iir_order_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> type <span style="color: #000080;">=</span> OMSP_BUTTERWORTH<span style="color: #000040;">|</span>OMSP_BANDPASS<span style="color: #000040;">|</span>OMSP_DIGITAL;
+    <span style="color: #0000ff;">double</span> Wn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0.0</span>, <span style="color: #0000dd;">0.0</span><span style="color: #000000;">&#125;</span>, Wp<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">60.0</span><span style="color: #000040;">/</span><span style="color: #0000dd;">500</span>, <span style="color: #0000dd;">200.0</span><span style="color: #000040;">/</span><span style="color: #0000dd;">500</span><span style="color: #000000;">&#125;</span>, Ws<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">50.0</span><span style="color: #000040;">/</span><span style="color: #0000dd;">500</span>, <span style="color: #0000dd;">250.0</span><span style="color: #000040;">/</span><span style="color: #0000dd;">500</span><span style="color: #000000;">&#125;</span>;
+    <span style="color: #0000ff;">double</span> Rp <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, Rs <span style="color: #000080;">=</span> <span style="color: #0000dd;">40</span>;
+    UINT N <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>nRet <span style="color: #000080;">=</span> ocmsp_iir_order<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>N, <span style="color: #000040;">&amp;</span>Wn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, Wp<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, Ws<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, Rp, Rs, type, <span style="color: #000040;">&amp;</span>Wn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>, Wp<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>, Ws<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ocmsp_iir_order failed, error code=%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;N =&#160;%d, Wn = [%lf,&#160;%lf]<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, N, Wn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, Wn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Included"></a><span class="mw-headline">Header to Included</span></h2>
+<p>ocmsp.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

@@ -1,0 +1,87 @@
+<h1 class="firstHeading">3.7.2 Export Graph</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR1</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>This example illustrates how to export a graph to the User Files Folder, with the "png" graph type.
+</p><p>To run this example, please run the following LabTalk script first to create the required graph.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// create a new workbook</span>
+newbook;  
+
+<span style="color: #008000;">// import file path</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Gauss Lorentz.dat&quot;</span>;  
+
+<span style="color: #008000;">// import</span>
+impASC;</pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> export_graph<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  <span style="color: #008000;">// get active worksheet</span>
+  Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  
+
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// get no worksheet</span>
+  <span style="color: #000000;">&#123;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to get active worksheet!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+  <span style="color: #000000;">&#125;</span>
+	
+  <span style="color: #008000;">// set data of data range by column 1 and column 2 in worksheet</span>
+  DataRange dr;  
+  dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+  dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	
+  GraphPage gp; 
+
+  <span style="color: #008000;">// create graph page</span>
+  gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>; 
+
+  <span style="color: #008000;">// check if graph page was created </span>
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gp<span style="color: #000000;">&#41;</span>  
+  <span style="color: #000000;">&#123;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to create graph page!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+  <span style="color: #000000;">&#125;</span>
+
+  <span style="color: #008000;">// get graph layer in graph page	</span>
+  GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  
+
+  <span style="color: #008000;">// add plot with line type to graph layer</span>
+  <span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;  
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nPlot <span style="color: #000080;">==</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+  <span style="color: #000000;">&#123;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to add plot to graph layer!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+  <span style="color: #000000;">&#125;</span>
+
+  <span style="color: #008000;">// rescale the graph layer</span>
+  gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  
+	
+  <span style="color: #008000;">// graph page name</span>
+  string strGraphPageName;  
+  gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>strGraphPageName<span style="color: #000000;">&#41;</span>;
+
+  <span style="color: #008000;">// type of exported graph	</span>
+  string strGraphType <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;png&quot;</span>;  
+	
+  <span style="color: #008000;">// full path of the exported graph, in User Files Folder</span>
+  string strGraphPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strGraphPageName <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;.&quot;</span> <span style="color: #000040;">+</span> strGraphType;
+	
+  <span style="color: #008000;">// export the graph</span>
+  <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> export_page<span style="color: #000000;">&#40;</span>gp, strGraphPath, strGraphType<span style="color: #000000;">&#41;</span>;  
+	
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>bRet <span style="color: #000080;">==</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to export graph!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

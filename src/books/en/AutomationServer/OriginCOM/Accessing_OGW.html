@@ -1,0 +1,232 @@
+<h1 class="firstHeading">1.4.3 Accessing OGW</h1><p><br />
+These examples show how to create a workbook, add data and meta data to the workbook, and save the workbook to an OGW file.  After saving the workbook to an OGW file the workbook is destroyed.  Then a new workbook is created using the OGW file.  The data and meta data is read from the created workbook.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<h3><a name="VBA"></a><span class="mw-headline">VBA</span></h3>
+<pre class="vb" style="font-family:monospace;">    <span style="color: #008000;">' This code references Origin or OrgLab8 and Microsoft XML v2.6
+</span>
+    <span style="color: #008000;">' This example expects write access to C:
+</span>    <span style="color: #008000;">' If you do not have write access to C: then
+</span>    <span style="color: #008000;">' change the fileName assignment below to a drive with write access.
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> fileName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    fileName = <span style="color: #800000;">&quot;C:\testBook.ogw&quot;</span>
+
+    <span style="color: #008000;">' Connect to Origin
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> orig <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orig = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+    <span style="color: #8D38C9; font-weight: bold;">If</span> orig <span style="color: #8D38C9; font-weight: bold;">Is</span> <span style="color: #00C2FF; font-weight: bold;">Nothing</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to connect to Origin.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+    <span style="color: #008000;">' Create a new workbook
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> workBookName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    workBookName = orig.CreatePage(2, <span style="color: #800000;">&quot;&quot;</span>, <span style="color: #800000;">&quot;Origin&quot;</span>)
+    
+    <span style="color: #008000;">' Put data into the worksheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> i <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> data(1 <span style="color: #8D38C9; font-weight: bold;">To</span> 32, 1 <span style="color: #8D38C9; font-weight: bold;">To</span> 2) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #8D38C9; font-weight: bold;">For</span> i = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> 32
+        data(i, 1) = i
+        data(i, 2) = i * 1.012
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+    <span style="color: #8D38C9; font-weight: bold;">If</span> <span style="color: #8D38C9; font-weight: bold;">Not</span> orig.PutWorksheet(<span style="color: #800000;">&quot;&quot;</span>, data) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to put data into worksheet.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    
+    <span style="color: #008000;">' Create some metadata
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> xml <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.DOMDocument
+    <span style="color: #151B8D; font-weight: bold;">Set</span> xml = <span style="color: #E56717; font-weight: bold;">New</span> MSXML2.DOMDocument
+
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> xmlOrigin <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.IXMLDOMElement
+    <span style="color: #151B8D; font-weight: bold;">Set</span> xmlOrigin = xml.appendChild(xml.createElement(<span style="color: #800000;">&quot;OriginStorage&quot;</span>))
+
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> xmlData <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.IXMLDOMElement
+    <span style="color: #151B8D; font-weight: bold;">Set</span> xmlData = xmlOrigin.appendChild(xml.createElement(<span style="color: #800000;">&quot;Color&quot;</span>))
+    xmlData.Text = <span style="color: #800000;">&quot;Blue&quot;</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> xmlData = xmlOrigin.appendChild(xml.createElement(<span style="color: #800000;">&quot;Length&quot;</span>))
+    xmlData.Text = <span style="color: #800000;">&quot;42&quot;</span>
+
+    <span style="color: #008000;">' Put metadata into the workbook page
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> Workbook <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Workbook = orig.ActivePage
+    <span style="color: #8D38C9; font-weight: bold;">If</span> Workbook <span style="color: #8D38C9; font-weight: bold;">Is</span> <span style="color: #00C2FF; font-weight: bold;">Nothing</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to get workbook.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    <span style="color: #8D38C9; font-weight: bold;">If</span> <span style="color: #8D38C9; font-weight: bold;">Not</span> Workbook.SetMetaData(xmlOrigin.xml, <span style="color: #800000;">&quot;UserBookInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">True</span>) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to set metadata into workbook.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    
+    <span style="color: #008000;">' Save the workbook as an OGW file
+</span>    <span style="color: #008000;">' No COM way to do this, use LabTalk
+</span>    orig.Execute (<span style="color: #800000;">&quot;save -i &quot;</span> + fileName)
+
+    <span style="color: #008000;">' Destroy the workbook
+</span>    orig.DestroyPage (Workbook.Name)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Workbook = <span style="color: #00C2FF; font-weight: bold;">Nothing</span>
+    
+    <span style="color: #008000;">' Open the OGW file to create a new workbook
+</span>    <span style="color: #8D38C9; font-weight: bold;">If</span> <span style="color: #8D38C9; font-weight: bold;">Not</span> orig.Load(fileName, <span style="color: #00C2FF; font-weight: bold;">True</span>) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to load file.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+    <span style="color: #008000;">' Copy data from worksheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> dataGet <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    dataGet = orig.GetWorksheet(<span style="color: #800000;">&quot;&quot;</span>, 0, 0, -1, -1, ARRAY2D_VARIANT)
+    
+    <span style="color: #008000;">' Put data into Excel worksheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> dataRows <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    dataRows = <span style="color: #151B8D; font-weight: bold;">UBound</span>(dataGet)
+    Range(<span style="color: #800000;">&quot;A1&quot;</span>).Resize(dataRows, 2) = dataGet
+    
+    <span style="color: #008000;">' Get metadata from workbook
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Workbook = orig.ActivePage
+    <span style="color: #8D38C9; font-weight: bold;">If</span> Workbook <span style="color: #8D38C9; font-weight: bold;">Is</span> <span style="color: #00C2FF; font-weight: bold;">Nothing</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox (<span style="color: #800000;">&quot;Failed to get workbook from OGW.&quot;</span>)
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    xmlOrigin.Text = Workbook.GetMetaData(<span style="color: #800000;">&quot;UserBookInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">True</span>)
+
+    <span style="color: #008000;">' Put metadata into Excel worksheet
+</span>
+    <span style="color: #008000;">' Disconnect from Origin
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> orig = <span style="color: #00C2FF; font-weight: bold;">Nothing</span></pre>
+<h3><a name="C.23"></a><span class="mw-headline">C#</span></h3>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #008080; font-style: italic;">// This code references Origin or OrgLab8 and Microsoft XML v2.6</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> Main<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> args<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+	<span style="color: #008080; font-style: italic;">// This example expects write access to C:</span>
+	<span style="color: #008080; font-style: italic;">// If you do not have write access to C: then</span>
+	<span style="color: #008080; font-style: italic;">// change the fileName assignment below to a drive with write access.</span>
+	<span style="color: #6666cc; font-weight: bold;">string</span> strFileName <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;C:<span style="color: #008080; font-weight: bold;">\\</span>testBook.ogw&quot;</span><span style="color: #008000;">;</span>
+
+	<span style="color: #008080; font-style: italic;">// Connect to Origin or Orglab</span>
+	Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span> orgApp <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span> <span style="color: #008000;">==</span> orgApp<span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to connect to Origin or Orglab.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	CreateOGW<span style="color: #008000;">&#40;</span>orgApp, strFileName<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	OpenOGW<span style="color: #008000;">&#40;</span>orgApp, strFileName<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+	Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadKey</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+	<span style="color: #008080; font-style: italic;">// Disconnect from Origin</span>
+	orgApp <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">bool</span> CreateOGW<span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span> orgApp, <span style="color: #6666cc; font-weight: bold;">string</span> strFileName<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+	<span style="color: #008080; font-style: italic;">// Create a new workbook and worksheet</span>
+	<span style="color: #6666cc; font-weight: bold;">string</span> strWBookName <span style="color: #008000;">=</span> orgApp<span style="color: #008000;">.</span><span style="color: #0000FF;">CreatePage</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span><span style="color: #008000;">&#41;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">PAGETYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">OPT_WORKSHEET</span>, <span style="color: #666666;">&quot;OriginLab&quot;</span>, <span style="color: #666666;">&quot;Origin&quot;</span>, <span style="color: #FF0000;">2</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span><span style="color: #008000;">&#40;</span> <span style="color: #666666;">&quot;&quot;</span> <span style="color: #008000;">==</span> strWBookName <span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to create an Origin Workbook.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+	Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span> wks <span style="color: #008000;">=</span> orgApp<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// Use empty string to get active</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span> <span style="color: #008000;">==</span> wks<span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to find the newly created worksheet.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+	Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span> wkbook <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span><span style="color: #008000;">&#41;</span>wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Parent</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span> <span style="color: #008000;">==</span> wkbook<span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to get the newly created workbook.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	<span style="color: #008080; font-style: italic;">// Put data into the worksheet</span>
+	<span style="color: #6666cc; font-weight: bold;">int</span> i<span style="color: #008000;">;</span>
+	<span style="color: #6666cc; font-weight: bold;">Double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> d1 <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">32</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+	<span style="color: #6666cc; font-weight: bold;">Double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> d2 <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">32</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">for</span><span style="color: #008000;">&#40;</span> i <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> i <span style="color: #008000;">&lt;</span> <span style="color: #FF0000;">32</span><span style="color: #008000;">;</span> i<span style="color: #008000;">++</span> <span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		d1<span style="color: #008000;">&#91;</span>i<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> i<span style="color: #008000;">;</span>
+		d2<span style="color: #008000;">&#91;</span>i<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> i <span style="color: #008000;">*</span> <span style="color: #FF0000;">1.012</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+	wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>d1, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>  <span style="color: #008080; font-style: italic;">//col (1)</span>
+	wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>d2, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>  <span style="color: #008080; font-style: italic;">//col (2)</span>
+
+	<span style="color: #008080; font-style: italic;">// Create XML meta-data to be put into workbook</span>
+	XmlDocument xmlDoc <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> XmlDocument<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	XmlElement elemRoot <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;OriginStorage&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>elemRoot<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	XmlElement elem<span style="color: #008000;">;</span>
+	elem <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Color&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	elem<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;Blue&quot;</span><span style="color: #008000;">;</span> elemRoot<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>elem<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	elem <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Length&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	elem<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;42&quot;</span><span style="color: #008000;">;</span> elemRoot<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>elem<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+	<span style="color: #008080; font-style: italic;">// Put meta-data into workbook</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #008000;">!</span>wkbook<span style="color: #008000;">.</span><span style="color: #0000FF;">SetMetaData</span><span style="color: #008000;">&#40;</span>elemRoot<span style="color: #008000;">.</span><span style="color: #0000FF;">OuterXml</span>, <span style="color: #666666;">&quot;UserBookInfo&quot;</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to set meta data into workbook.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	<span style="color: #008080; font-style: italic;">// Save the workbook as an OGW file</span>
+	<span style="color: #008080; font-style: italic;">// No COM way to do this, use LabTalk</span>
+	orgApp<span style="color: #008000;">.</span><span style="color: #0000FF;">Execute</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;save -i &quot;</span> <span style="color: #008000;">+</span> strFileName, strWBookName<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+	<span style="color: #008080; font-style: italic;">// Destroy the workbook</span>
+	wkbook<span style="color: #008000;">.</span><span style="color: #0000FF;">Destroy</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	
+	<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">bool</span> OpenOGW<span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span> orgApp, <span style="color: #6666cc; font-weight: bold;">string</span> strFileName<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+	<span style="color: #008080; font-style: italic;">// Open the OGW file to create a new workbook</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span><span style="color: #008000;">&#40;</span> <span style="color: #008000;">!</span>orgApp<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>strFileName, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to load OGW file.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	<span style="color: #008080; font-style: italic;">// Get the active workbook and it's active worksheet</span>
+	Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span> wks <span style="color: #008000;">=</span> orgApp<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// Use empty string to get active</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span> <span style="color: #008000;">==</span> wks<span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to find the newly created worksheet.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+	Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span> wkbook <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span><span style="color: #008000;">&#41;</span>wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Parent</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span> <span style="color: #008000;">==</span> wkbook<span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to get the newly created workbook.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+		<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	<span style="color: #008080; font-style: italic;">// Get and output the data from the worksheet</span>
+	<span style="color: #6666cc; font-weight: bold;">object</span> do1 <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAYDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>  <span style="color: #008080; font-style: italic;">//col (1)</span>
+	<span style="color: #6666cc; font-weight: bold;">object</span> do2 <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAYDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>  <span style="color: #008080; font-style: italic;">//col (2)</span>
+	<span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> d1 <span style="color: #008000;">=</span> do1 <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+	<span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> d2 <span style="color: #008000;">=</span> do2 <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+	<span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> i <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> i <span style="color: #008000;">&lt;</span> d1<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> i<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+	<span style="color: #008000;">&#123;</span>
+		Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>i <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\t</span>&quot;</span> <span style="color: #008000;">+</span> d1<span style="color: #008000;">&#91;</span>i<span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\t</span>&quot;</span> <span style="color: #008000;">+</span> d2<span style="color: #008000;">&#91;</span>i<span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	<span style="color: #008000;">&#125;</span>
+
+	<span style="color: #008080; font-style: italic;">// Get and output the meta data from the workbook</span>
+	<span style="color: #6666cc; font-weight: bold;">string</span> strXML <span style="color: #008000;">=</span> wkbook<span style="color: #008000;">.</span><span style="color: #0000FF;">GetMetaData</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;UserBookInfo&quot;</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	XmlDocument xmlDoc <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> XmlDocument<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+	xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">LoadXml</span><span style="color: #008000;">&#40;</span>strXML<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+
+	<span style="color: #0600FF; font-weight: bold;">return</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+
+
+
+
+
+

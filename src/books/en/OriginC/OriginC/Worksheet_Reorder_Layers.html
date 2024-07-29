@@ -1,0 +1,87 @@
+<h1 class="firstHeading">3.2.9.5 Reorder Layers</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>This example shows how to reorder layers in worksheet page. Copy the following functions and compile. Run <b>wks_reorder_ex</b> in Command Window.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> wks_reorder_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	WorksheetPage wksPage;		
+	wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">int</span> nIndexToken <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetName</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 1&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 3&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 5&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 2&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 4&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sheet 6&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Before reorder...<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksPage<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// current the index in sheet name is 1, 3, 5, 2, 4, 6, after the following loop to reorder, the index in name should be 1, 2, 3, 4, 5, 6. </span>
+	<span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vn;
+		_get_layer_index_from_name<span style="color: #000000;">&#40;</span>wksPage, vn, nIndexToken<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// if vn already be increment, then no need reorder</span>
+		vector vData;
+		vData <span style="color: #000080;">=</span> vn;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>MONO_INCREASE  <span style="color: #000080;">==</span> ocmath_is_monotonic<span style="color: #000000;">&#40;</span>vData, vData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Reorder layers done!&quot;</span><span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #000000;">&#125;</span>
+		
+		vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnIndeces;
+		vn.<span style="color: #000000;">Sort</span><span style="color: #000000;">&#40;</span>SORT_ASCENDING, <span style="color: #0000ff;">true</span>, vnIndeces<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+		<span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span> vnIndeces<span style="color: #000000;">&#91;</span>nn<span style="color: #000000;">&#93;</span> <span style="color: #000080;">==</span> nn <span style="color: #000040;">&amp;&amp;</span> nn <span style="color: #000080;">&lt;</span> vnIndeces.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+			nn<span style="color: #000040;">++</span>;
+		
+		<span style="color: #008000;">// adjust layer index vnIndeces[nn] from nn</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> vnIndeces.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			wksPage.<span style="color: #000000;">Reorder</span><span style="color: #000000;">&#40;</span>nn, vnIndeces<span style="color: #000000;">&#91;</span>nn<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;					
+		<span style="color: #000000;">&#125;</span>	
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;After reorder...<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksPage<span style="color: #000000;">&#41;</span>;
+	
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> _get_layer_index_from_name<span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000040;">&amp;</span> wksPage, vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vn, <span style="color: #0000ff;">int</span> nToken<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	foreach<span style="color: #000000;">&#40;</span>Layer lay in wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		string strLayerName <span style="color: #000080;">=</span> lay.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #000000;">atoi</span><span style="color: #000000;">&#40;</span>strLayerName.<span style="color: #000000;">GetToken</span><span style="color: #000000;">&#40;</span>nToken<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get the 3rd item</span>
+		vn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> print_out_layer_names<span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000040;">&amp;</span> wksPage<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Layers in&#160;%s page: <span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, wksPage.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	foreach<span style="color: #000000;">&#40;</span>Layer lay in wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\t</span>Layer&#160;%d =&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, <span style="color: #000040;">++</span>ii, lay.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

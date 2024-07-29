@@ -1,0 +1,68 @@
+<h1 class="firstHeading">3.2.5.2 Copy Paste Cell Formatting</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Copy_Format"><span class="tocnumber">2</span> <span class="toctext">Copy Format</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Apply_Format"><span class="tocnumber">3</span> <span class="toctext">Apply Format</span></a></li>
+</ul>
+</div>
+
+<p>The following code shows how to get and set tables/blocks of cells of same dimension using Origin C code. You can use <a href="../../OriginC/OriginC/OriginObject-GetFormat.html" title="OriginC:OriginObject-GetFormat">OriginObject::GetFormat</a> to get the format tree of one Origin object(e.x. DataRange), save it to XML file or output it the learn more about it. Then you can use <a href="../../OriginC/OriginC/OriginObject-GetFormat.html" title="OriginC:OriginObject-GetFormat">OriginObject::SetFormat</a> to set the format to the Origin objects.
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Copy_Format"></a><span class="mw-headline">Copy Format</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Define the theme file path and name.</span>
+<span style="color: #0000ff;">#define</span>	  STR_THEME_FILE_PATH        GetOriginPath<span style="color: #000000;">&#40;</span>ORIGIN_PATH_USER<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;wksTheme.xml&quot;</span>
+
+<span style="color: #0000ff;">void</span> copy_cell_format<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please keep worksheet active before running.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">int</span> r1, c1, r2, c2;
+	wks.<span style="color: #000000;">GetSelectedRange</span><span style="color: #000000;">&#40;</span> r1, c1, r2, c2 <span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// to get the selected range</span>
+	
+	DataRange dr;	
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span> <span style="color: #ff00ff;">&quot;Range1&quot;</span>, wks, r1, c1, r2, c2 <span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// construct a data range object</span>
+	
+	Tree tr;
+	tr <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span> FPB_ALL, FOB_RANGE_STYLE, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span> <span style="color: #000000;">&#41;</span>;	
+	tr.<span style="color: #000000;">Save</span><span style="color: #000000;">&#40;</span>STR_THEME_FILE_PATH<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Apply_Format"></a><span class="mw-headline">Apply Format</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> paste_cell_format<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please keep worksheet active before running.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vR1, vC1, vR2, vC2;
+	wks.<span style="color: #000000;">GetSelectedRange</span><span style="color: #000000;">&#40;</span> vR1, vC1, vR2, vC2 <span style="color: #000000;">&#41;</span>;
+    Tree tr;	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> tr.<span style="color: #000000;">Load</span><span style="color: #000000;">&#40;</span>STR_THEME_FILE_PATH<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>			
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iRange <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iRange <span style="color: #000080;">&lt;</span> vR1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iRange<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>			
+			DataRange dr;
+			dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span> <span style="color: #ff00ff;">&quot;Range1&quot;</span>, wks, vR1<span style="color: #000000;">&#91;</span>iRange<span style="color: #000000;">&#93;</span>, vC1<span style="color: #000000;">&#91;</span>iRange<span style="color: #000000;">&#93;</span>, vR2<span style="color: #000000;">&#91;</span>iRange<span style="color: #000000;">&#93;</span>, vC2<span style="color: #000000;">&#91;</span>iRange<span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#41;</span>; 
+			
+			<span style="color: #008000;">// apply the format from drSource to drDest</span>
+			<span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> dr.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span> tr, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span> <span style="color: #000000;">&#41;</span>;			
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

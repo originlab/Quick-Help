@@ -1,0 +1,375 @@
+<h1 class="firstHeading">2.11.17 smooth</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Menu_Information"><span class="tocnumber">1</span> <span class="toctext">Menu Information</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Brief_Information"><span class="tocnumber">2</span> <span class="toctext">Brief Information</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Additional_Information"><span class="tocnumber">3</span> <span class="toctext">Additional Information</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Command_Line_Usage"><span class="tocnumber">4</span> <span class="toctext">Command Line Usage</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#X-Function_Execution_Options"><span class="tocnumber">5</span> <span class="toctext">X-Function Execution Options</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Variables"><span class="tocnumber">6</span> <span class="toctext">Variables</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Examples"><span class="tocnumber">7</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#More_Information"><span class="tocnumber">8</span> <span class="toctext">More Information</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Related_X-Functions"><span class="tocnumber">9</span> <span class="toctext">Related X-Functions</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Menu_Information"></a><span class="mw-headline">Menu Information</span></h2>
+<p>Analysis: Signal Processing: Smooth
+</p>
+<h2><a name="Brief_Information"></a><span class="mw-headline">Brief Information</span></h2>
+<p>Performing smoothing of XY data to remove noise or irregularities
+</p>
+<h2><a name="Additional_Information"></a><span class="mw-headline">Additional Information</span></h2>
+<p>This feature is updated in 9.1 SR1. With the options of Lowess and Loess as smoothing method.
+</p>
+<h2><a name="Command_Line_Usage"></a><span class="mw-headline">Command Line Usage</span></h2>
+<p><code>
+1. smooth //Perform default smoothing to active data plot or highlighted 1st column in worksheet. smooth&#160;%C also works so
+</p><p>2. smooth (1,2) //Perform default Savitzky-Golay filtering using default settings, to XY data in columns 1, 2 of the active worksheet
+</p><p>3. smooth iy:=Col(2) boundary:=periodic; //Perform default Savitzky-Golay filtering with Boundary Condition set to periodic, to Y data in 2nd column of active worksheet
+</p><p>4. smooth iy:=Col(2) polyorder:=3; //Perform Perform default Savitzky-Golay filtering with Polynomial Order set to 2, to Y data in 2nd column of active worksheet
+</p><p>5. smooth iy:=Col(2) method:=pf percent:=70; //Perform smoothing with Percentile Filtering method, percentile is set to 70, to Y data in 2nd column of active worksheet
+</p><p>6. smooth -t "my short noise removal theme.oth" //Perform smoothing to active plot or selected column using a pre-saved smoothing theme file you saved in the smoothing dialog
+</p><p>7. smooth -d //open smooth dialog
+</code>
+</p>
+<h2><a name="X-Function_Execution_Options"></a><span class="mw-headline">X-Function Execution Options</span></h2>
+<p><a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">Please refer to the page for additional option switches when accessing the x-function from script</a>
+</p>
+<h2><a name="Variables"></a><span class="mw-headline">Variables</span></h2>
+<table class="xfvar">
+<tr>
+<th width="8%">Display<br />Name
+</th>
+<th width="8%">Variable<br />Name
+</th>
+<th width="8%">I/O<br />and<br />Type
+</th>
+<th width="8%">Default<br />Value
+</th>
+<th>Description
+</th></tr>
+<tr>
+<td>Input
+</td>
+<td>iy
+</td>
+<td>
+<p>Input
+</p><p>XYRange
+</p>
+</td>
+<td> <center>&lt;active&gt;</center>
+</td>
+<td>
+<p>Specifies the input XY data range to be smoothed
+</p>
+</td></tr>
+<tr>
+<td>Method
+</td>
+<td>method
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>sg</center>
+</td>
+<td>
+<p>Specifies the smoothing method to be used. The default is Savitzky-Golay.
+</p><p>Option list:
+</p>
+<ul><li><i>aav: Adjacent-Averaging</i> (0)
+<dl><dd>This method essentially takes the average of a certain number (which you specify) of data points around each point in your data and replaces that point with the new average value.</dd></dl></li>
+<li><i>sg: Savitzky-Golay</i> (1, default)
+<dl><dd>This method is actually performing a local polynomial regression. It is best suited to remove noise without affecting the overall signal shape. Original data values are replaced with fitted values.</dd></dl></li>
+<li><i>pf: Percentile Filter</i> (2) 
+<dl><dd>This method is also known as rank-order filter. It essentially finds the specified percentile of data points in the data window around each point in your data and replaces that point with the percentile. It is best suited for removing shot noise.</dd></dl></li>
+<li><i>fft:FFT Filter</i> (3)
+<dl><dd>This method is based on FFT low-pass filter. It should be used when the frequency of noise is higher than the true signal. In essence, it removes the high-frequency components with a parabolic window. Frequencies not less than the cutoff frequency will be discarded. </dd></dl></li>
+<li><i>lw:Lowess</i> (4)</li>
+<li><i>le:Loess</i> (5)
+<dl><dd>These two options above are "locally weighted scatter plot smoothing". They are best used when there are a large number of data points. Please refer to <a class="external text" href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Lowess_and_Loess_method">the algorithm page</a> for details.</dd></dl></li>
+<li><i>bm:Binomial</i> (6)
+<dl><dd>This method uses a weighted moving average filter whose weight is derived from binomial coefficients. It is a low-pass filter for removing high frequency noise. </dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>Weighted Average
+</td>
+<td>weight
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td>
+<p>This parameter is available only when Method is Adjacent-Averaging. When this parameter is set to 1 (checked), weighted averaging will be used.
+</p>
+</td></tr>
+<tr>
+<td>Specify Span by
+</td>
+<td>prop
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>1</center>
+</td>
+<td> This variable is available only when Method is either Lowess or Loess.
+<p>Option list:
+</p>
+<ul><li><i>0=pts: Points of Window</i>
+<dl><dd>Use point of windows for span</dd></dl></li>
+<li><i>1=prop: Proportion</i>
+<dl><dd> Use the proportion (0-1) for span</dd></dl></li>
+<li><i>2=x: X Value</i>
+<dl><dd>Use the specified X value for span</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>X Value
+</td>
+<td>xval
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td>
+<p>When <b>X Value</b> is selected for <b>Specify Span by</b>, specifies the X Value. By default, this <b>X Value</b> is 0.1*(x max-x min).
+</p>
+</td></tr>
+<tr>
+<td>Span (0-1)
+</td>
+<td>span
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0.1</center>
+</td>
+<td>
+<p>This is only available when <b>Proportion</b> is selected for <b>Specify Span by</b> (i.e. prop = 1). It specifies the proportion value for the span. The bigger the value is, the smoother the curve will be.
+</p>
+</td></tr>
+<tr>
+<td>Points of Window
+</td>
+<td>npts
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>5</center>
+</td>
+<td>
+<p>If FFT Filter is not selected for Method, this parameter specifies the number of points in the moving window. Otherwise, you can use this parameter to control the cutoff frequency for the FFT filter. The greater this value, the greater the degree of smoothing. It must be a non-zero positive value. See the Algorithm part for the computation of cutoff frequency.
+</p>
+</td></tr>
+<tr>
+<td>Boundary Condition
+</td>
+<td>boundary
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>none</center>
+</td>
+<td>
+<p>Specifies the boundary condition. It is not available when FFT Filter/Lowess/Loess is selected for Method.
+</p><p>Option list
+</p>
+<ul><li><i>none:None</i>
+<dl><dd>Does no padding</dd></dl></li>
+<li><i>reflect:Reflect</i>
+<dl><dd>Pads data by reflecting signal at both ends</dd></dl></li>
+<li><i>repeat:Repeat</i>
+<dl><dd>Pads data by repeating the ending point at both ends</dd></dl></li>
+<li><i>periodic:Periodic</i>
+<dl><dd>Treats data as a periodic signal</dd></dl></li>
+<li><i>extrap:Extrapolate</i>
+<dl><dd>Uses linear extrapolation to pad signal at both ends</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>Polynomial Order
+</td>
+<td>polyorder
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>2</center>
+</td>
+<td>
+<p>This parameter applies only to the Savitzky-Golay smoothing option. It specifies the polynomial order.
+</p>
+</td></tr>
+<tr>
+<td>Percentile
+</td>
+<td>percent
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>50</center>
+</td>
+<td>
+<p>This parameter determines the percentile to be used in percentile filtering. The default is 50%, which corresponds to replacing the signal point with median value of the data points in the data window.
+</p>
+</td></tr>
+<tr>
+<td>Cutoff Frequency
+</td>
+<td>cutoff
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td>
+<p>This parameter is visible in GUI when FFT Filter is selected for Method. It is a read-only variable showing the cutoff frequency of the low-pass filter calculated from Points of Window. Please do not use it in script.
+</p>
+</td></tr>
+<tr>
+<td>Pad to Power of 2 Points
+</td>
+<td>pad
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td>
+<p>This parameter is available only when FFT Filter is selected for Method. It is available only from script. It specifies whether to pad the number of data points to power of 2. When this is set to 1, the result will match the result calculated with Origin prior to the Version 8. See more details in the Algorithm part.
+</p>
+</td></tr>
+<tr>
+<td>Filter Type
+</td>
+<td>filter
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>new</center>
+</td>
+<td>
+<p>This parameter is available only when FFT Filter is selected for Method. It is available only from script. It specifies the filter type. When <i>old</i> is selected, the result will match the result calculated with Origin prior to the Version 8.
+</p><p>Option list:
+</p>
+<ul><li><i>new:Low-pass parabolic</i></li></ul>
+<dl><dd>low-pass parabolic filter </dd></dl>
+<ul><li><i>old:Low-pass parabolic(7.5)</i></li></ul>
+<dl><dd>low-pass parabolic filter which is used in Origin 7.5</dd></dl>
+</td></tr>
+<tr>
+<td>Baseline to Subtract
+</td>
+<td>baseline
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>two_ends_1</center>
+</td>
+<td>
+<p>This parameter is available only when FFT Filter is selected for Method. It is available only from script. It specifies whether to subtract a baseline before fft filtering is used.
+Option list:
+</p>
+<ul><li><i>two_ends:Straight Line Obtained from End Points</i></li></ul>
+<dl><dd>Subtracts the input data with a straight line constructed from the two end points before fft filtering is applied.</dd></dl>
+<ul><li><i>two_ends_1:Straight Line Obtained from the mean of 1% End Points</i></li></ul>
+<dl><dd>Subtracts the input data with a straight line constructed from the mean of 1% end points before fft filtering is applied.</dd></dl>
+<ul><li><i>none:None</i></li></ul>
+<dl><dd>No subtraction is performed on input data before fft filtering is applied.</dd></dl>
+</td></tr>
+<tr>
+<td>Output
+</td>
+<td>oy
+</td>
+<td>
+<p>Output
+</p><p>XYRange
+</p>
+</td>
+<td> <center>&lt;new&gt;</center>
+</td>
+<td>
+<p>Specifies the destination of smoothed signal.
+</p><p>See the syntax <a href="../../XFunction/X-Function/Output_Notations.html" title="X-Function:Output Notations">here</a>.
+</p>
+</td></tr></table>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>This example shows how import gaussian.dat into Origin.<br />
+Use <a href="../../XFunction/X-Function/White_noise.html" title="X-Function:White noise">white_noise</a> X-Function to add white noise to it. <br />
+Use <a href="../../XFunction/X-Function/Plotxy.html" title="X-Function:Plotxy">plotxy</a> X-Function to plot the noised data<br />
+Smooth the data and then plot the the smoothed data in another new graph.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Load data to a new book</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;\Samples\Curve Fitting\Gaussian.dat&quot;</span>;
+newbook;
+impASC;
+string bkn<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+<span style="color: #008000;">// add noise into the data</span>
+white_noise <span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> level<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span>;
+<span style="color: #008000;">// plot the noised data</span>
+plotxy <span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>;
+
+<span style="color: #008000;">// smooth the noised data</span>
+newsheet book<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bkn<span style="color: #000080;">$</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Smoothed Data&quot;</span>;
+copydata <span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #ff00ff;">&quot;Smoothed Data&quot;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #ff00ff;">&quot;Smoothed Data&quot;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> npts<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span>;
+
+<span style="color: #008000;">// plot the smoothed data</span>
+plotxy <span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #ff00ff;">&quot;Smoothed Data&quot;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>;</pre>
+<h2><a name="More_Information"></a><span class="mw-headline">More Information</span></h2>
+<p>For more information, please refer to our User Guide.
+</p>
+<dl><dd><ul><li><a class="external text" href="../../UserGuide/Category/Smoothing.html">Description</a></li>
+<li><a class="external text" href="../../UserGuide/UserGuide/Algorithm_(Smooth).html">Algorithm</a></li>
+<li><a class="external text" href="../../UserGuide/UserGuide/Reference_(Smooth).html">Reference</a></li></ul></dd></dl>
+<h2><a name="Related_X-Functions"></a><span class="mw-headline">Related X-Functions</span></h2>
+<p><a href="../../XFunction/X-Function/Fft1.html" title="X-Function:Fft1">fft1</a>, <a href="../../XFunction/X-Function/Fft_filters.html" title="X-Function:Fft filters">fft_filters</a>, <a href="../../XFunction/X-Function/Wtsmooth.html" title="X-Function:Wtsmooth">wtsmooth</a>
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>adjacent averaging, savitzky golay, fft filter, lowess, loess, binomial, percentile</span></p>
+
+
+
+
+
+

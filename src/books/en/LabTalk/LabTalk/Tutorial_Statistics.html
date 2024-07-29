@@ -1,0 +1,155 @@
+<h1 class="firstHeading">5.11 Statistics with Labtalk</h1><p class='urlname' style='display: none'>Tutorial-Statistics</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#What_Will_You_Learn"><span class="tocnumber">2</span> <span class="toctext">What Will You Learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Calculate_the_means_on_the_rows"><span class="tocnumber">3.1</span> <span class="toctext">Calculate the means on the rows</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Create_box_graphs_with_template"><span class="tocnumber">3.2</span> <span class="toctext">Create box graphs with template</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Statistics_on_columns_with_grouping"><span class="tocnumber">3.3</span> <span class="toctext">Statistics on columns with grouping</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Unstack_columns"><span class="tocnumber">3.4</span> <span class="toctext">Unstack columns</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Create_Line.2BSymbol_graph"><span class="tocnumber">3.5</span> <span class="toctext">Create Line+Symbol graph</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Perform_Descriptive_Stats_on_matrix_object_with_theme"><span class="tocnumber">3.6</span> <span class="toctext">Perform Descriptive Stats on matrix object with theme</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>This tutorial demonstrates using labtalk for statistical analysis. We will start with datasets which consists of daily percent change of nine stocks in three sectors in 2012.  We will compare the performance between the three stock sector during the year.
+</p>
+<h2><a name="What_Will_You_Learn"></a><span class="mw-headline">What Will You Learn</span></h2>
+<p>This tutorial will show you how to use Labtalk script to:
+</p>
+<ul><li> Calculate the average daily data of each sector with <i>rowstats</i> to perform statistics on rows</li>
+<li> Perform statistics on column with grouping to calculate the monthly data.</li>
+<li> Plot line+symbol plot and box chart with calculated data</li>
+<li> Perform Descriptive Stats on matrix object with theme </li></ul>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<h3><a name="Calculate_the_means_on_the_rows"></a><span class="mw-headline">Calculate the means on the rows</span></h3>
+<p>The x-function <a class="external text" href="../../XFunction/X-Function/Rowstats.html">rowstats</a> is used to perform descriptive statistics on each row of data in a specific range. Here, calculate the <b>Mean</b> value of the stock percent change on the same date for three sectors respectively, and put the results on specified columns.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Define the file name  </span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\Stocks.dat&quot;</span>;
+<span style="color: #008000;">//Use the impfile x-function to import the specified file</span>
+newbook;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">//Save the active workbook short name</span>
+string bk<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+
+<span style="color: #008000;">// Turn off Spreadsheet Cell Notation firstly</span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// Add four new columns with short name;</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span>M<span style="color: #000000;">&#41;</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span>M1<span style="color: #000000;">&#41;</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span>M2<span style="color: #000000;">&#41;</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span>M3<span style="color: #000000;">&#41;</span>;
+ 
+<span style="color: #008000;">// Set the &quot;Long Name&quot; for four new columns;</span>
+col<span style="color: #000000;">&#40;</span>M<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Month;
+col<span style="color: #000000;">&#40;</span>M1<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Technology;
+col<span style="color: #000000;">&#40;</span>M2<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Electronics Manufacturer;
+col<span style="color: #000000;">&#40;</span>M3<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Consumer Products;
+
+<span style="color: #008000;">// Copy Date column to Month column</span>
+col<span style="color: #000000;">&#40;</span>M<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Date<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Set column 11 (Month) to date format</span>
+wks.<span style="color: #000080;">col11</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #008000;">// Set column 11 (Month) display as &quot;May&quot;</span>
+wks.<span style="color: #000080;">col11</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">17</span>; 
+ 
+<span style="color: #008000;">// Calculate the means on the rows for three sectors. </span>
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>M1<span style="color: #000000;">&#41;</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>M2<span style="color: #000000;">&#41;</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">8</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">10</span><span style="color: #000000;">&#41;</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>M3<span style="color: #000000;">&#41;</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Statistics/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>For the <a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">Spreadsheet Cell Notation</a> in the workbook, please see <a class="external text" href="../../QuickHelp/QuickHelp/Turn_off_spreadsheet_cell_notation.html"><b>FAQ-849</b></a> for more information.
+</p></td></tr></table>
+<h3><a name="Create_box_graphs_with_template"></a><span class="mw-headline">Create box graphs with template</span></h3>
+<p>Create box graph using the <a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a> x-function. All of the possible values for the plot type option can be found in the <a href="../../LabTalk/LabTalk/Plot_Type_IDs.html" title="LabTalk:Plot Type IDs">Plot Type IDs</a>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Create Box plots with &quot;box&quot; template by the means</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">12</span><span style="color: #000000;">&#41;</span>,<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">13</span><span style="color: #000000;">&#41;</span>,<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">14</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">206</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>box<span style="color: #000080;">&gt;</span>;
+ 
+<span style="color: #008000;">// Rotate 30 degree on the x label of active layer</span>
+range ll <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+ll.<span style="color: #000080;">x</span>.<span style="color: #000080;">label</span>.<span style="color: #000080;">rotate</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;</pre>
+<h3><a name="Statistics_on_columns_with_grouping"></a><span class="mw-headline">Statistics on columns with grouping</span></h3>
+<p>To get the monthly <b>Mean</b> value of the stock percent change in the three sectors, perform descriptive statistics on columns with grouping in the active sheet and generate a report sheet. 
+<br /><br />
+<b>Statistics on Columns</b> analysis is quite complicated and it has been implemented through a framework of Origin C called the operation framework. The operation framework allows these operation based classes to be called from Origin C, and thus an <a class="external text" href="../../XFunction/X-Function/Xop.html">xop</a> X-Function has been created to run the operation classes.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Now the newly created graph is the active window</span>
+<span style="color: #008000;">// But we need to activate original workbook </span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>bk<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Use the DescStats class to create a GUI tree &quot;statGUI&quot;</span>
+tree statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;
+
+<span style="color: #008000;">// Specify the input data in the GUI tree</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">X</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">&#40;</span>M1<span style="color: #000000;">:</span>M3<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Specify the grouping data</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">F</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">&#40;</span>Month<span style="color: #000000;">&#41;</span>;
+ 
+<span style="color: #008000;">// Specify some settings of the Statistics on Columns,</span>
+<span style="color: #008000;">// Set the value of N total, Standard Deviation, Sum, Max, Min and  Median not show in the result.</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">N</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">SD</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">Sum</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Min</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Median</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Max</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">// Generate a report tree with the prepared GUI tree</span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>report iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI otrresult<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statOut;
+
+<span style="color: #008000;">// Clean up operation objects after statistics</span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cleanup;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Statistics/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>After we create a GUI tree "statGUI" with the script, 
+</p>
+<pre class="lt" style="font-family:monospace;">xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;</pre>
+<p>we can run script below for the detailed settings in "statGUI" tree
+</p>
+<pre class="lt" style="font-family:monospace;">statGUI.<span style="color: #000080;">=</span></pre>
+<p><br />
+</p></td></tr></table>
+<h3><a name="Unstack_columns"></a><span class="mw-headline">Unstack columns</span></h3>
+<p>To plot the graph, unstack columns with three sectors (<b>Data</b> column in the <b>DescStatsQuantities1</b> sheet).  The <a class="external text" href="../../XFunction/X-Function/Wunstackcol.html">wunstackcol</a> X-Function is the most convenient way to perform this task from script. The columns are unstacked by a particular category, which we specify with the input range <b>irng2</b>. The data to be displayed (by category) is referenced by input range <b>irng1</b>. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Unstack all other columns using Data column</span>
+<span style="color: #008000;">// Place &quot;Data&quot; in &quot;Long Name&quot; row of output sheet</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;DescStatsQuantities1&quot;</span>;
+wunstackcol <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> irng1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Mean<span style="color: #000000;">&#41;</span> irng2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Data<span style="color: #000000;">&#41;</span> nonstack<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> other<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Month<span style="color: #000000;">&#41;</span> pos<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lname ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;UnstackCols1&quot;</span>;</pre>
+<h3><a name="Create_Line.2BSymbol_graph"></a><span class="mw-headline">Create Line+Symbol graph</span></h3>
+<p>Create Line+Symbol graph, using the <a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a> x-function. All of the possible values for the plot type option can be found in the <a href="../../LabTalk/LabTalk/Plot_Type_IDs.html" title="LabTalk:Plot Type IDs">Plot Type IDs</a>
+</p>
+<pre class="lt" style="font-family:monospace;">page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;UnstackCols1&quot;</span>;
+<span style="color: #008000;">// Create Line plots by columns 2, 3 and 4 in the active Worksheet</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>,<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;
+<span style="color: #008000;">//Update Legend as the Long Name of the source data. </span>
+legendupdate mode<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lname;</pre>
+<h3><a name="Perform_Descriptive_Stats_on_matrix_object_with_theme"></a><span class="mw-headline">Perform Descriptive Stats on matrix object with theme</span></h3>
+<p>To prepare the theme, open Statistics on Columns dialog, and then go to Output tab
+</p>
+<ul><li> under Report Tables branch, set Book = &lt;new&gt;. Then it will create a new workbook for report table.</li>
+<li> under Quantities branch, set Book = &lt;report&gt;. Then it will put Quantities to the same book as report table.</li>
+<li> click the triangle button on top of the dialog, and select Save As to save these change to a theme named "reportnewbook"</li></ul>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// use the DescStats class to create a GUI tree &quot;statGUI&quot; with theme &quot;reportnewbook&quot;</span>
+tree statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span>reportnewbook;
+
+<span style="color: #008000;">// set input data</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">X</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>MBook1<span style="color: #000000;">&#93;</span>MSheet1<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">//1:0 means all matrix objects</span>
+
+<span style="color: #008000;">// change report output to Book1, it was set to &lt;new&gt; in theme &quot;reportnewbook&quot;</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Output</span>.<span style="color: #000080;">Report</span>.<span style="color: #000080;">Book</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Book1&quot;</span>;
+
+<span style="color: #008000;">// generate report with the prepared GUI tree, and clean up operation objects </span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>report iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cleanup;</pre>
+
+

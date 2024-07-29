@@ -1,0 +1,140 @@
+<h1 class="firstHeading">17.7.4.3 Algorithms (Discriminant Analysis)</h1><p class='urlname' style='display: none'>DiscAnalysis-Algorithm</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Test_for_Equality_of_Within-group_Covariance_Matrices"><span class="tocnumber">1</span> <span class="toctext">Test for Equality of Within-group Covariance Matrices</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Canonical_Discriminant_Analysis"><span class="tocnumber">2</span> <span class="toctext">Canonical Discriminant Analysis</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Mahalanobis_Distance"><span class="tocnumber">3</span> <span class="toctext">Mahalanobis Distance</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Classify"><span class="tocnumber">4</span> <span class="toctext">Classify</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Prior_Probabilities"><span class="tocnumber">4.1</span> <span class="toctext">Prior Probabilities</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Posterior_Probability"><span class="tocnumber">4.2</span> <span class="toctext">Posterior Probability</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Atypicality_Index"><span class="tocnumber">4.3</span> <span class="toctext">Atypicality Index</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Linear_Discriminant_Function_Coefficients"><span class="tocnumber">4.4</span> <span class="toctext">Linear Discriminant Function Coefficients</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Classify_Training_Data"><span class="tocnumber">4.5</span> <span class="toctext">Classify Training Data</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Cross_Validation_for_Training_Data"><span class="tocnumber">4.6</span> <span class="toctext">Cross Validation for Training Data</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Classify_Test_Data"><span class="tocnumber">4.7</span> <span class="toctext">Classify Test Data</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<p><b>Discriminant Analysis</b> is used to allocate observations to groups using information from observations whose group memberships are known (i.e., training data).
+</p><p>Let <img src="../images/Algorithm_(Discriminant_Analysis)/math-687a245ac15fad69d39d2ac8207ff385.png?v=0" title="X_t\ " alt="X_t\ " class="tex"/> be the training data with n observations and p variables on <img src="../images/Algorithm_(Discriminant_Analysis)/math-6857d71951ca137bcda4fe14dccae251.png?v=0" title="n_g" alt="n_g" class="tex"/> groups.  <img src="../images/Algorithm_(Discriminant_Analysis)/math-fbcc679a0035f6fef5099eb0106f996d.png?v=0" title="\bar{x}_j" alt="\bar{x}_j" class="tex"/> is a row vector of the sample mean for the <i>j</i>th group, <img src="../images/Algorithm_(Discriminant_Analysis)/math-f898efd8ac64b6621a2aeed350ce3164.png?v=0" title="n_j\ " alt="n_j\ " class="tex"/> is the number of observations for the <i>j</i>th group. The within-group covariance matrix for group j can be expressed as:
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-42484c7b3cb9982bcabccb7cfda729e9.png?v=0" title="S_j=\frac{1}{n_j-1}\cdot (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" alt="S_j=\frac{1}{n_j-1}\cdot (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" class="tex"/>
+</p><p>The pooled within-group covariance matrix is:
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-25624e90423e449a29d89e9cb2ef1335.png?v=0" title="S=\frac{1}{n-n_g}\cdot\sum_{j=1}^{n_g} (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" alt="S=\frac{1}{n-n_g}\cdot\sum_{j=1}^{n_g} (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" class="tex"/>
+</p><p><b>Note</b> that missing values are excluded in a listwise way in the analysis (i.e., an observation containing one or more missing values will be excluded in the analysis).
+</p>
+<h2><a name="Test_for_Equality_of_Within-group_Covariance_Matrices"></a><span class="mw-headline">Test for Equality of Within-group Covariance Matrices</span></h2>
+<p>If training data are assumed to follow a multivariate normal distribution, the following likelihood-ratio test statistic <i>G</i> can be used to test for equality of within-group covariance matrices.
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-4f141902b982a67990e391daacc238dd.png?v=0" title="G=C{(n-n_g) \mathrm{log} |S|-\sum_{j=1}^{n_g} (n_j-1) \mathrm{log} |S_j|}" alt="G=C{(n-n_g) \mathrm{log} |S|-\sum_{j=1}^{n_g} (n_j-1) \mathrm{log} |S_j|}" class="tex"/>
+</p><p>where
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-7b51445c6fda672aa6cfd4a759c53f7d.png?v=0" title="C=1-\frac{2p^2+3p-1}{6(p+1)(n_g-1)}\cdot(\sum_{j=1}^{n_g} \frac{1}{n_j-1} -\frac{1}{n-n_g})" alt="C=1-\frac{2p^2+3p-1}{6(p+1)(n_g-1)}\cdot(\sum_{j=1}^{n_g} \frac{1}{n_j-1} -\frac{1}{n-n_g})" class="tex"/>
+</p><p>For large <i>n</i>, <i>G</i> is approximately distributed as a <img src="../images/Algorithm_(Discriminant_Analysis)/math-cfbb03435e8c5628a146d4d6c1697e6c.png?v=0" title="\chi^2\ " alt="\chi^2\ " class="tex"/> variable with <img src="../images/Algorithm_(Discriminant_Analysis)/math-d9da675dbc50d16c00b81e4fdf268f83.png?v=0" title="\frac{1}{2}\cdot p(p+1)(n_g-1)" alt="\frac{1}{2}\cdot p(p+1)(n_g-1)" class="tex"/> degrees of freedom.
+</p>
+<h2><a name="Canonical_Discriminant_Analysis"></a><span class="mw-headline">Canonical Discriminant Analysis</span></h2>
+<p>Canonical discriminant analysis is used to find the linear combination of the <i>p</i> variables that maximizes the ratio of between-group to within-group variation. The formed canonical variates can then be used to discriminate between groups.
+</p><p>Let the training data with total means subtracted be <i>X</i>, and its rank be <i>k</i>, then the orthogonal matrix <i>Q</i> can be calculated from <b>QR</b> decomposition (for full column rank) or <b>SVD</b> from <i>X</i>. And <img src="../images/Algorithm_(Discriminant_Analysis)/math-309bc456893777dfc6d546a826f80222.png?v=0" title="Q_X\ " alt="Q_X\ " class="tex"/> is the first <i>k</i> columns of <i>Q</i>. Let <img src="../images/Algorithm_(Discriminant_Analysis)/math-7f2bb5755738fc0dc2bce690ffbd02fb.png?v=0" title="Q_g\ " alt="Q_g\ " class="tex"/> be an <i>n</i> by <img src="../images/Algorithm_(Discriminant_Analysis)/math-748eca54826a6c8ac743ce0e8d9de0da.png?v=0" title="n_g-1" alt="n_g-1" class="tex"/> orthogonal matrix to define groups. Then let the <i>k</i> by <img src="../images/Algorithm_(Discriminant_Analysis)/math-bf9c1d397597752f55b120ef5a7d1a98.png?v=0" title="n_g-1\ " alt="n_g-1\ " class="tex"/> matrix <i>V</i> be
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-f1ba4d194a3d3c69ac32a0e4f172c72f.png?v=0" title="V=Q_X^TQ_g" alt="V=Q_X^TQ_g" class="tex"/>
+</p><p>The <b>SVD</b> of <i>V</i> is:
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-156accfd15fe0adbcb2d4dd525fb0797.png?v=0" title="V=U_X \triangle U_g^T" alt="V=U_X \triangle U_g^T" class="tex"/>
+</p><p>Non-zero diagonal elements of the matrix <img src="../images/Algorithm_(Discriminant_Analysis)/math-8722439958298b3dfbd60cded8990f4e.png?v=0" title="\triangle" alt="\triangle" class="tex"/> are the <i>l</i> canonical correlations associated with the <i>l</i> canonical variates, <img src="../images/Algorithm_(Discriminant_Analysis)/math-b1e513a36c4f9d05731ce051a387fc4e.png?v=0" title="\delta_i\ " alt="\delta_i\ " class="tex"/> i=1,2,...,<i>l</i> and <img src="../images/Algorithm_(Discriminant_Analysis)/math-8c794226d0a6faf42a11d59a9f5c7945.png?v=0" title="l=\mathrm{min}(k, n_g)\ " alt="l=\mathrm{min}(k, n_g)\ " class="tex"/>.
+</p><p>Eigenvalues of the within-group sums of squares matrix are:
+</p><p><img src="../images/Algorithm_(Discriminant_Analysis)/math-5b9da385f048bd163e59dc5f058db912.png?v=0" title="\lambda_i=\frac{\delta_i^2}{1-\delta_i^2}" alt="\lambda_i=\frac{\delta_i^2}{1-\delta_i^2}" class="tex"/>
+</p><p><br />
+</p>
+<ul><li> Wilks' Lambda</li></ul>
+<dl><dd><dl><dd>Testing for a significant dimensionality greater than <i>i</i>,</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-4e02cd8f2b56fe09ee5b91cfca052400.png?v=0" title="\Lambda_i=\prod_{j=i+1}^{l} 1/(1+\lambda_j)" alt="\Lambda_i=\prod_{j=i+1}^{l} 1/(1+\lambda_j)" class="tex"/></dd></dl></dd></dl>
+<dl><dd><dl><dd>A <img src="../images/Algorithm_(Discriminant_Analysis)/math-cfbb03435e8c5628a146d4d6c1697e6c.png?v=0" title="\chi^2\ " alt="\chi^2\ " class="tex"/> statistic with <img src="../images/Algorithm_(Discriminant_Analysis)/math-556713eae767a14fe21eb016694c8238.png?v=0" title="(k-i)(n_g-1-i)\ " alt="(k-i)(n_g-1-i)\ " class="tex"/>  degrees of freedom is used:</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ec58bf195d61ef078e1bc352e76becac.png?v=0" title="(n-1-n_g-\frac{1}{2}(k-n_g))\sum_{j=i+1}^{l} \mathrm{log}(1+\lambda_j)\ i=0,1,...,l-1" alt="(n-1-n_g-\frac{1}{2}(k-n_g))\sum_{j=i+1}^{l} \mathrm{log}(1+\lambda_j)\ i=0,1,...,l-1" class="tex"/></dd></dl></dd></dl>
+<ul><li> Unstandardized Canonical Coefficients</li></ul>
+<dl><dd><dl><dd>Loading matrix <i>B</i> for canonical variates can be calculated from <img src="../images/Algorithm_(Discriminant_Analysis)/math-d3f8540a0d3fb0b603051f1afdac58e8.png?v=0" title="U_X\ " alt="U_X\ " class="tex"/>. It is scaled so that the canonical variates have unit pooled within-group variance. i.e.
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ea1d8b4a1a9949c04ce897debcb0f3cb.png?v=0" title="B^TSB=I\ " alt="B^TSB=I\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd><b>Note</b> that eigenvector's sign in the <b>SVD</b> result is not unique, which means each column in <i>B</i> can be multiplied by -1. Origin normalizes its sign by forcing the sum of each column in <img src="../images/Algorithm_(Discriminant_Analysis)/math-dd2ed2b7aef1cc29f38fcf893e186990.png?v=0" title="RB\ " alt="RB\ " class="tex"/> to be positive, where <i>R</i> is the <b>Cholesky</b> factorization of <i>S</i>.</dd>
+<dd>Constant items can be calculated as follows.
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-842807b1d59b68029f9e47502204de56.png?v=0" title="C_0=-X_mB\ " alt="C_0=-X_mB\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-ad5fcaadac0238a2873254ce2bf39933.png?v=0" title="X_m\ " alt="X_m\ " class="tex"/> is a row vector of means for variables.</dd></dl></dd></dl>
+<ul><li> Standardized Canonical Coefficients</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-f83a67f933bd9989a9c82a155597d0f4.png?v=0" title="D=S_aB\ " alt="D=S_aB\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-720199a1df04989fca46b40db9dc3ffa.png?v=0" title="S_a\ " alt="S_a\ " class="tex"/> is a diagonal matrix, whose diagonal elements are the square roots of the diagonal elements of pooled within group covariance matrix <i>S</i>.</dd></dl></dd></dl>
+<ul><li> Canonical Structure Matrix</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-3d43ba2f89c50ad3d6e41f32eaad76dc.png?v=0" title="C=S_a^{-1}SB\ " alt="C=S_a^{-1}SB\ " class="tex"/></dd></dl></dd></dl></dd></dl></dd></dl>
+<ul><li> Canonical Group Means</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ae15be586008ad972cdb2e54d0a8c6c4.png?v=0" title="M_j=C_0+\bar{x}_jB\ " alt="M_j=C_0+\bar{x}_jB\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-163ee00f28eda2300d069cc196469322.png?v=0" title="M_j\ " alt="M_j\ " class="tex"/> and <img src="../images/Algorithm_(Discriminant_Analysis)/math-9a256199940d00c2536a5816e8562a68.png?v=0" title="\bar{x}_j\ " alt="\bar{x}_j\ " class="tex"/> are row vectors of the canonical group mean and group mean for the <i>j</i>th group, respectively.</dd></dl></dd></dl>
+<ul><li> Canonical Scores</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-e7722c1abe5d5c070d236c68e07ee5c8.png?v=0" title="A_i=C_0+X_iB\ " alt="A_i=C_0+X_iB\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-5c89cbde69c9b5306689d7612cc3a31c.png?v=0" title="A_i\ " alt="A_i\ " class="tex"/> is the canonical score for the <i>i</i>th observation <img src="../images/Algorithm_(Discriminant_Analysis)/math-364c437f9831f6eeb78ffd3643f5b2f0.png?v=0" title="X_i\ " alt="X_i\ " class="tex"/>.</dd>
+<dd><b>Note</b> that here the <i>i</i>th observation can be training data and test data.</dd></dl></dd></dl>
+<h2><a name="Mahalanobis_Distance"></a><span class="mw-headline">Mahalanobis Distance</span></h2>
+<p><b>Mahalanobis</b> distance is a measure of the distance of an observation from a group. It has two forms. For an observation <img src="../images/Algorithm_(Discriminant_Analysis)/math-22cf6d90476d6b87655fb83d74ee08f5.png?v=0" title="x_i\ " alt="x_i\ " class="tex"/> from the <i>j</i>th group, the distance is:
+</p>
+<ul><li> Using within-group covariance matrix</li></ul>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-4e610adaa8869efc930751889369fb0d.png?v=0" title="D_{ij}^2=(x_i-\bar{x}_j)S_j^{-1}(x_i-\bar{x}_j)^T" alt="D_{ij}^2=(x_i-\bar{x}_j)S_j^{-1}(x_i-\bar{x}_j)^T" class="tex"/></dd></dl></dd></dl>
+<ul><li> Using pooled within-group covariance matrix</li></ul>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-d92d0334e383634096e4117f51874db1.png?v=0" title="D_{ij}^2=(x_i-\bar{x}_j)S^{-1}(x_i-\bar{x}_j)^T" alt="D_{ij}^2=(x_i-\bar{x}_j)S^{-1}(x_i-\bar{x}_j)^T" class="tex"/></dd></dl></dd></dl>
+<h2><a name="Classify"></a><span class="mw-headline">Classify</span></h2>
+<h3><a name="Prior_Probabilities"></a><span class="mw-headline">Prior Probabilities</span></h3>
+<p>The prior probabilities reflect the user’s view as to the likelihood of the observations coming from the different groups. Origin supports two kinds of prior probabilities:
+</p>
+<ul><li> Equal</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-e1de4455b1c3e1e0a1ab05eda657f3ad.png?v=0" title="\pi_j=1/n_g\ " alt="\pi_j=1/n_g\ " class="tex"/></dd></dl></dd></dl></dd></dl></dd></dl>
+<ul><li> Proportional to Group Size</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-97ca54b52364dcc3af70b85c99b12763.png?v=0" title="\pi_j=n_j/n\ " alt="\pi_j=n_j/n\ " class="tex"/></dd></dl></dd></dl></dd>
+<dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-f898efd8ac64b6621a2aeed350ce3164.png?v=0" title="n_j\ " alt="n_j\ " class="tex"/> is the number of observations in the <i>j</i>th group of the training data.</dd></dl></dd></dl>
+<h3><a name="Posterior_Probability"></a><span class="mw-headline">Posterior Probability</span></h3>
+<p>The <i>p</i> variables of observations are assumed to follow a multivariate Normal distribution with mean <img src="../images/Algorithm_(Discriminant_Analysis)/math-d02f177eaa99e609210550a8e168aa2f.png?v=0" title="\mu_j\ " alt="\mu_j\ " class="tex"/> and covariance matrix <img src="../images/Algorithm_(Discriminant_Analysis)/math-46ad204a4582a9cd6ba59c2724056d0b.png?v=0" title="\Sigma_j\ " alt="\Sigma_j\ " class="tex"/> if the observation comes from the <i>j</i>th group.
+If <img src="../images/Algorithm_(Discriminant_Analysis)/math-381ca9d538e0de13d017ea1309e83ddb.png?v=0" title="p(x_i|\mu_j,\Sigma_j)\ " alt="p(x_i|\mu_j,\Sigma_j)\ " class="tex"/> is the probability of observing the observation <img src="../images/Algorithm_(Discriminant_Analysis)/math-22cf6d90476d6b87655fb83d74ee08f5.png?v=0" title="x_i\ " alt="x_i\ " class="tex"/> from group <i>j</i>, then the posterior probability of belonging to group <i>j</i> is:
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-55fe41c69c4f2dbb7fe75337bfa93c42.png?v=0" title="q_j=p(j|x_i,\mu_j,\Sigma_j)\propto p(x_i|\mu_j,\Sigma_j)\pi_j" alt="q_j=p(j|x_i,\mu_j,\Sigma_j)\propto p(x_i|\mu_j,\Sigma_j)\pi_j" class="tex"/></dd></dl></dd></dl>
+<p>The parameters <img src="../images/Algorithm_(Discriminant_Analysis)/math-d02f177eaa99e609210550a8e168aa2f.png?v=0" title="\mu_j\ " alt="\mu_j\ " class="tex"/> and <img src="../images/Algorithm_(Discriminant_Analysis)/math-46ad204a4582a9cd6ba59c2724056d0b.png?v=0" title="\Sigma_j\ " alt="\Sigma_j\ " class="tex"/> are estimated from training data <img src="../images/Algorithm_(Discriminant_Analysis)/math-687a245ac15fad69d39d2ac8207ff385.png?v=0" title="X_t\ " alt="X_t\ " class="tex"/>. And the observation is allocated to the group with the highest posterior probability. Origin provides two methods to calculate posterior probability.
+</p>
+<ul><li> Linear Discriminant Function</li></ul>
+<dl><dd><dl><dd>Within-group covariance matrices are assumed equal.</dd></dl></dd></dl>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-78b58f6de3a01695068779e99f80e92c.png?v=0" title="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)+c_0" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)+c_0" class="tex"/></dd></dl></dd></dl></dd></dl></dd></dl>
+<dl><dd><dl><dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-73850f915f6390176ce13cfdd422f1a3.png?v=0" title="D_{ij}^2" alt="D_{ij}^2" class="tex"/> is the the <b>Mahalanobis</b> distance of the <i>i</i>th observation from the <i>j</i>th group using pooled with-group covariance matrix, and <img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png?v=0" title="c_0\ " alt="c_0\ " class="tex"/> is a constant.</dd></dl></dd></dl>
+<ul><li> Quadratic Discriminant Function</li></ul>
+<dl><dd><dl><dd>Within-group covariance matrices are not assumed equal.</dd></dl></dd></dl>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-97bb999f1c63118e1c15d0cd99f3ecd9.png?v=0" title="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)-\frac{1}{2}\mathrm{log}|S_j|+c_0" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)-\frac{1}{2}\mathrm{log}|S_j|+c_0" class="tex"/></dd></dl></dd></dl></dd></dl></dd></dl>
+<dl><dd><dl><dd>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-73850f915f6390176ce13cfdd422f1a3.png?v=0" title="D_{ij}^2" alt="D_{ij}^2" class="tex"/> is the the <b>Mahalanobis</b> distance of the <i>i</i>th observation from the <i>j</i>th group using with-group covariance matrices, and <img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png?v=0" title="c_0\ " alt="c_0\ " class="tex"/> is a constant.</dd></dl></dd></dl>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-f680dc664fc7f822ae305c4d1586956d.png?v=0" title="q_j\ " alt="q_j\ " class="tex"/> are standardized as follows and  <img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png?v=0" title="c_0\ " alt="c_0\ " class="tex"/> will be determined from the standardization.
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-766af91331121006a73b3d401c5e661e.png?v=0" title="\sum_{j=1}^{n_g} q_j=1" alt="\sum_{j=1}^{n_g} q_j=1" class="tex"/></dd></dl></dd></dl>
+<h3><a name="Atypicality_Index"></a><span class="mw-headline">Atypicality Index</span></h3>
+<p><b>Atypicality Index</b> <img src="../images/Algorithm_(Discriminant_Analysis)/math-cc421199a07c0dc7f86b04779cf2a388.png?v=0" title="I_j(x_i)\ " alt="I_j(x_i)\ " class="tex"/> indicates the probability of obtaining an observation more typical of group
+<i>j</i> than the <i>i</i>th observation. If it is close to 1 for all groups, it implies that the observation may come from a grouping not represented in the training data. <b>Atypicality Index</b> is calculated as:
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-732acf44e40ad9cac61088dcd141df05.png?v=0" title="I_j(x_i)=P(B\le z:\frac{1}{2}p,\frac{1}{2}(n_j-d)) " alt="I_j(x_i)=P(B\le z:\frac{1}{2}p,\frac{1}{2}(n_j-d)) " class="tex"/></dd></dl></dd></dl>
+<p>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-8c5084405b04323ffd7f2875ca6a833b.png?v=0" title="P(B\le \beta:\ a, b)" alt="P(B\le \beta:\ a, b)" class="tex"/> is the lower tail probability from a beta distribution, for equal within-group covariance matrices,
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-cd6fb8799495aa07b0c4c32cb5b97836.png?v=0" title="z=D_{ij}^2/(D_{ij}^2+(n-n_g)(n_j-1)/n_j)" alt="z=D_{ij}^2/(D_{ij}^2+(n-n_g)(n_j-1)/n_j)" class="tex"/></dd></dl></dd></dl>
+<p>for unequal within-group covariance matrices,
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-45a4cc9d19289a7db844343cc7755561.png?v=0" title="z=D_{ij}^2/(D_{ij}^2+(n_j^2-1)/n_j)" alt="z=D_{ij}^2/(D_{ij}^2+(n_j^2-1)/n_j)" class="tex"/></dd></dl></dd></dl>
+<h3><a name="Linear_Discriminant_Function_Coefficients"></a><span class="mw-headline">Linear Discriminant Function Coefficients</span></h3>
+<p>Linear discriminant function (also known as Fisher's linear discriminant functions) can be calculated as:
+</p>
+<ul><li> Linear Coefficient for the <i>j</i>th Group.</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-bba90644f0ee4526a124e9a060efad5f.png?v=0" title="b_j=S^{-1}\bar{x}_j^T" alt="b_j=S^{-1}\bar{x}_j^T" class="tex"/></dd></dl></dd></dl></dd>
+<dd> where <img src="../images/Algorithm_(Discriminant_Analysis)/math-e10b85a99fd3e0319c1a12b37038bee1.png?v=0" title="b_j\ " alt="b_j\ " class="tex"/> is a column vector with size of <i>p</i>.</dd></dl></dd></dl>
+<ul><li> Constant Coefficient for the <i>j</i>th Group.</li></ul>
+<dl><dd><dl><dd><dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-b49fb8d88d19012d29f58a5ec2d3145e.png?v=0" title="a_j=\bar{x}_jb_j" alt="a_j=\bar{x}_jb_j" class="tex"/></dd></dl></dd></dl></dd></dl></dd></dl>
+<h3><a name="Classify_Training_Data"></a><span class="mw-headline">Classify Training Data</span></h3>
+<p>Each observation in training data can be classified by posterior probabilities (i.e., it is allocated to the group with the highest posterior probability). Squared <b>Mahalanobis</b> distance from each group and <b>Atypicality Index</b> of each group can also be calculated.
+</p><p>Classification result for training data is summarized by comparing given group membership and predicted group membership. Misclassified error rate is calculated by the percentage of misclassified observations weighted by the prior probabilities of groups. i.e.
+</p>
+<dl><dd><dl><dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-23a8991fe54e13492cec65429649bf96.png?v=0" title="E=\sum_{j=1}^{n_g} e_j\pi_j" alt="E=\sum_{j=1}^{n_g} e_j\pi_j" class="tex"/></dd></dl></dd></dl>
+<p>where <img src="../images/Algorithm_(Discriminant_Analysis)/math-c6c1265e2ebb2dd779b29fea40842909.png?v=0" title="e_j\ " alt="e_j\ " class="tex"/> is the percentage of misclassified observations for the <i>j</i>th group.
+</p>
+<h3><a name="Cross_Validation_for_Training_Data"></a><span class="mw-headline">Cross Validation for Training Data</span></h3>
+<p>It follows the same procedure as <a href="#Classify_Training_Data">Classify Training Data</a> except that to predict an observation's membership in training data, the observation is excluded during calculating within-group covariance matrices or pooled within-group covariance matrix.
+</p>
+<h3><a name="Classify_Test_Data"></a><span class="mw-headline">Classify Test Data</span></h3>
+<p>Within-group covariance matrices and pooled within-group covariance matrix are calculated from training data. Each observation in test data can be classified by posterior probabilities (i.e., it is allocated to the group with the highest posterior probability).
+</p>
+
+
+
+
+

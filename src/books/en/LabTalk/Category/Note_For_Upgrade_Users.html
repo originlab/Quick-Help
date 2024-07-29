@@ -1,0 +1,192 @@
+<h1 class="firstHeading">1 Note For Upgrade Users</h1><p class='urlname' style='display: none'>Upgrade-LT-Note</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Key_Limitations_in_Version_7.x"><span class="tocnumber">2</span> <span class="toctext">Key Limitations in Version 7.x</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Key_Improvements_in_Version_8.0"><span class="tocnumber">3</span> <span class="toctext">Key Improvements in Version 8.0</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#An_Example"><span class="tocnumber">4</span> <span class="toctext">An Example</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#The_old_way"><span class="tocnumber">4.1</span> <span class="toctext">The old way</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#The_New_Way"><span class="tocnumber">4.2</span> <span class="toctext">The New Way</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Incompatibilities"><span class="tocnumber">5</span> <span class="toctext">Incompatibilities</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#String_assignment"><span class="tocnumber">5.1</span> <span class="toctext">String assignment</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#String_Registers"><span class="tocnumber">5.2</span> <span class="toctext">String Registers</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Column_Justify"><span class="tocnumber">5.3</span> <span class="toctext">Column Justify</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Introduction"></a><span class="mw-headline">Introduction</span></h2>
+<p>These notes pertain to changes and improvements made to the LabTalk scripting language in Origin version 8.0. If you have script code developed in older versions such as 7.5, you may want to update your code to take advantage of the new features, as well as fix any compatibility issues with your script in later versions of Origin.
+</p>
+<h2><a name="Key_Limitations_in_Version_7.x"></a><span class="mw-headline">Key Limitations in Version 7.x</span></h2>
+<p>Many LabTalk commands act on an 'active' object such as a Worksheet, plotted data or column. This often required scripts to manage windows by remembering which window is a Worksheet and which is a Graph (or second Worksheet) and switch back and forth between these windows using the "window -a" command.
+</p><p>Variables were undeclared and global in scope.
+</p><p>Some Commands also can be destructive of data and require working on a copy if you need the original data.
+</p>
+<h2><a name="Key_Improvements_in_Version_8.0"></a><span class="mw-headline">Key Improvements in Version 8.0</span></h2>
+<p>Three additions to Origin 8 resolve the issues mentioned in the previous section. LabTalk programmers should familiarize themselves with these concepts:
+</p>
+<ul><li><a href="../../LabTalk/LabTalk/Data_Types_and_Variables.html#Scope_of_Variables" title="LabTalk:Data Types and Variables">Variable Declaration and Scope</a></li>
+<li><a href="../../LabTalk/LabTalk/Range_Notation.html" title="LabTalk:Range Notation">Range Variables</a></li>
+<li><a href="../../LabTalk/Category/X-Functions.html" title="Category:X-Functions">X-Functions</a></li></ul>
+<p>Declared variables have context only in the procedure in which they are declared.
+</p><p>Range Variables can point to various Origin objects and eliminate the need for an object being active.
+</p><p>X-Functions can accept range variables as Input and Output, separate source data from analysis results, and automatically update analysis result when source data changes. Therefore it's a  higher level of program function than regular LabTalk functions.
+</p>
+<h2><a name="An_Example"></a><span class="mw-headline">An Example</span></h2>
+<p>Suppose we want to look at Line graphs of the derivatives of data in multiple files.
+</p>
+<h3><a name="The_old_way"></a><span class="mw-headline">The old way</span></h3>
+<p>In Origin 7.5, you could import multiple ASCII files into New sheets, New Columns or New Rows. These options can be manipulated by reading and writing a special structure in the worksheet, but Since the latter two would create a management headache, we will stick with New Sheets (the default). Since it would be difficult to know which sheets get created,
+we will delete the empty worksheet in a new Origin project before we begin.
+</p><p>Here is our import:
+</p>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>cd <span style="color: #000080;">%</span>H; <span style="color: #008000;">// Delete the default Worksheet window</span>
+<span style="color: #008000;">// Following causes prompt for files then imports</span>
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>file,MultiImportToolbar<span style="color: #000000;">&#41;</span>;</pre>
+<p>We can loop over all the imported sheets using:
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e W <span style="color: #000000;">&#123;</span> <span style="color: #008000;">// Loop over all Worksheets</span>
+		...
+	<span style="color: #000000;">&#125;</span></pre>
+<p>but the derivative command we need is destructive and we may want to
+keep the imported data, so we will add a copy of our data and use it
+for the derivative:
+</p>
+<pre class="lt" style="font-family:monospace;">wo <span style="color: #000080;">-</span>a <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Add a column</span>
+copy col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column 3 is a copy of column 2</span>
+derivative col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column 3 is replaced with its derivative</span></pre>
+<p>To plot our data, we could create a graph window, remember it's name,
+loop over all worksheets (again), get the name of the data we want to
+add to the plot and temporarily switch to the graph to add the data.
+</p><p>Instead, I'll use a variable (count) so I know when I'm in the first
+pass of my Worksheet loop to create my first plot, then in subsequent
+loops, I will just note the name of the derivative data so I can
+temporarily switch to the graph (assuming I remembered its name)
+to add the data to my plot.
+</p><p>Here is our final script (comments removed):
+</p>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>cd <span style="color: #000080;">%</span>H;
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>file,MultiImportToolbar<span style="color: #000000;">&#41;</span>;
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+doc <span style="color: #000080;">-</span>e W <span style="color: #000000;">&#123;</span>
+	wo <span style="color: #000080;">-</span>a <span style="color: #0000dd;">1</span>;
+	copy col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	derivative col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	if<span style="color: #000000;">&#40;</span> count <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		wo <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">0</span>;
+		wo <span style="color: #000080;">-</span>p <span style="color: #0000dd;">200</span> LINE;
+		<span style="color: #000080;">%</span>M <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;
+	<span style="color: #000000;">&#125;</span>
+	else
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000080;">%</span>N <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+		win <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span>M
+		<span style="color: #000000;">&#123;</span>
+			layer <span style="color: #000080;">-</span>i <span style="color: #000080;">%</span>N;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	count<span style="color: #000080;">++</span>;
+<span style="color: #000000;">&#125;</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span>M;
+layer <span style="color: #000080;">-</span>a;</pre>
+<p>The windows that are active (however briefly) in the above script are: 
+</p><p>Worksheet1
+</p><p>Worksheet2
+</p><p>Worksheet3
+</p><p>Worksheet1
+</p><p>Graph1
+</p><p>Worksheet1
+</p><p>Worksheet2
+</p><p>Graph1
+</p><p>Worksheet2
+</p><p>Worksheet3
+</p><p>Graph1
+</p><p>Worksheet3
+</p><p>Graph1
+</p><p>An understanding of this sequence was a requirement to writing the code.
+</p>
+<h3><a name="The_New_Way"></a><span class="mw-headline">The New Way</span></h3>
+<p>Now let's make use of ranges and X-Functions and see how newer versions
+of Origin complete our task.
+</p><p>We begin with two X-Functions. The first prompts for the files to be imported, while the second directs how to import those files.
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">dat</span> mu<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+impASC options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBk</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;</pre>
+<p>It seems our old "run.section(file,MultiImportToolbar);" has been split in two, but the "dlgfile" function can be used in many other cases where we need to prompt for a file or files. The "impasc" X-Function now incorporates various options as part of its arguments, replacing many lines when options need to be modified.
+</p><p>Next, I'll declare a string variable which will be used for plotting:
+</p>
+<pre class="lt" style="font-family:monospace;">string strRanges;</pre>
+<p>and then loop over each Worksheet (imported file) in our Workbook:
+</p>
+<pre class="lt" style="font-family:monospace;">loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Our Workbook (a page) has multiple Worksheets (layers)</span>
+<span style="color: #000000;">&#123;</span>
+		...
+<span style="color: #000000;">&#125;</span></pre>
+<p>Within the loop, I declare a range that points to the data I want a derivative of and use that range as an argument to the differentiate X-Function:
+</p>
+<pre class="lt" style="font-family:monospace;">range raD <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Our range references sheet by index using column 1 as X and column 2 as Y</span>
+differentiate iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raD; <span style="color: #008000;">// Pass the range to the X-Function which defaults to creating new columns</span></pre>
+<p>Our string variable is used to define a string that's equivalent to a range syntax combining each range as a comma separated list:
+</p>
+<pre class="lt" style="font-family:monospace;">if<span style="color: #000000;">&#40;</span>ii <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+else strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>When the loop exits, our string looks like this:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">3</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span></pre>
+<p>and our last line wraps this with parentheses:
+</p>
+<pre class="lt" style="font-family:monospace;">strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>to create
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">3</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<p>which the plotxy X-Function interprets as a multiple XY range to create the final plot with one command.
+</p><p>Here is our final code:
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">dat</span> mu<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+impASC options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBk</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+string strRanges;
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	range raD <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	differentiate iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raD;
+	if<span style="color: #000000;">&#40;</span>ii <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	else strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+plotxy <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h2><a name="Incompatibilities"></a><span class="mw-headline">Incompatibilities</span></h2>
+<p>Some changes to the language accommodate new features or fix a problem can cause old scripts to break.
+</p><p>Here are some things to watch out for:
+</p>
+<h3><a name="String_assignment"></a><span class="mw-headline">String assignment</span></h3>
+<p>When assigning values to a string variable,there should be no space between the variable name and '$'.
+</p><p>Old way:	
+</p>
+<pre class="lt" style="font-family:monospace;">str <span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Hello&quot;</span>; <span style="color: #008000;">// will not work now</span></pre>
+<p>New way:	
+</p>
+<pre class="lt" style="font-family:monospace;">str<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Hello&quot;</span>;</pre>
+<h3><a name="String_Registers"></a><span class="mw-headline">String Registers</span></h3>
+<p>%D used to contain the name of the last Set Dataset. It now contains the Current Working Directory when executing commands in the Command or Script Window.
+</p>
+<h3><a name="Column_Justify"></a><span class="mw-headline">Column Justify</span></h3>
+<p>The property "wks.col#.justify" used to control left-center-right justification.
+</p><p>In new versions, use:
+</p>
+<pre class="lt" style="font-family:monospace;">DoMenu <span style="color: #0000dd;">35152</span>; <span style="color: #008000;">// Left</span>
+DoMenu <span style="color: #0000dd;">35153</span>; <span style="color: #008000;">// Center</span>
+DoMenu <span style="color: #0000dd;">35154</span>; <span style="color: #008000;">// Right</span></pre>
+<p><br />
+</p>
+
+
+
+
+

@@ -1,0 +1,190 @@
+<h1 class="firstHeading">4.5.6.1 Email Processing</h1><p class='urlname' style='display: none'>Email-Processing</p>
+<p>Origin8.5 provides a <b>mail</b> object to process emails using LabTalk script. The following script example shows how to get new emails from the mail server and analyze data from the email's attachment at regular intervals automatically in Origin.
+</p><p>In Addition, the following LabTalk features are demonstrated:
+</p>
+<ul><li> Use of functions and passing argument by reference to get more then one values back from a function, see <b>ProcessEmail</b> function</li>
+<li> LabTalk timer</li>
+<li> Using Analysis Template to encapurate complicated processing to simplify script</li>
+<li> ASCII import, string processing and graph export</li></ul>
+<h2><a name="Script_File"></a><span class="mw-headline">Script File</span></h2>
+<p>You can save the following into a file called emailserver.ogs in the UFF folder:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">&#91;</span>Main<span style="color: #000000;">&#93;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// define functions</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////</span>
+
+@global<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// to ensure all functions defined in this section will become global</span>
+
+Function Init_Server<span style="color: #000000;">&#40;</span>string strPOPServer, string strName, string strPassword, string strSMTPServer<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   <span style="color: #008000;">// Setup omail dll</span>
+   <span style="color: #008000;">// ********** NO SUPPORT FOR SSL, SO SERVERS LIKE GMAIL CANNOT BE USED **********</span>
+  dll <span style="color: #000080;">-</span>a mail omail; <span style="color: #008000;">//Create an '''mail''' object mail. </span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Server</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strPOPServer<span style="color: #000080;">$</span>; <span style="color: #008000;">// Incoming mail server</span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">UserName</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strName<span style="color: #000080;">$</span>; <span style="color: #008000;">// email server user name/account</span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Password</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strPassword<span style="color: #000080;">$</span>; <span style="color: #008000;">// email server password</span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Path</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;C:\OriginMails&quot;</span>; <span style="color: #008000;">// Path to save emails in the local computer</span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Port</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">110</span>; <span style="color: #008000;">// Incoming server port</span>
+  mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Timeout</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>; <span style="color: #008000;">//Incoming server timeouts</span>
+ 
+  mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Server</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strSMTPServer<span style="color: #000080;">$</span>; <span style="color: #008000;">// Outgoing mail server</span>
+  mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">From</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strName<span style="color: #000080;">$</span>; <span style="color: #008000;">// The sender's email address</span>
+  mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Timeout</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>; <span style="color: #008000;">// The connection timeout in seconds</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//The following function will analyze data from the email's attachment. </span>
+<span style="color: #008000;">//It performs Linear Fit using an Analysis Template.</span>
+<span style="color: #008000;">//returns number of mails on server, including the one being read and processed</span>
+<span style="color: #008000;">// if successfully process one email, 0 if no mail on server or not the right subject, &lt;0 if error occurs</span>
+<span style="color: #008000;">//status bar will be updated after each call to indicate number of emails on server</span>
+<span style="color: #008000;">//Function int ProcessEmail(ref int nSuccess, string strSubject$ = &quot;Origin LRFit Test&quot; )</span>
+Function int ProcessEmail<span style="color: #000000;">&#40;</span>ref int nSuccess, string strSubject<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	nSuccess <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">LeaveMessage</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// do not leave emails on the Server, you may change this to 0 during testing</span>
+	int nMailsLeft <span style="color: #000080;">=</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Retrieve</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	if<span style="color: #000000;">&#40;</span> nMailsLeft <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		return <span style="color: #000080;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+	if<span style="color: #000000;">&#40;</span>nMailsLeft <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+		return <span style="color: #0000dd;">0</span>;
+	
+        string strTrim <span style="color: #000080;">=</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Subject</span><span style="color: #000080;">$</span>;
+	strTrim.<span style="color: #000080;">TrimLeft</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Trim SPACE on the left</span>
+
+	<span style="color: #008000;">//if( mail.POP.Subject$&#160;!= strSubject$ )</span>
+        if<span style="color: #000000;">&#40;</span> strTrim<span style="color: #000080;">$</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> strSubject<span style="color: #000080;">$</span> <span style="color: #000000;">&#41;</span>
+		return nMailsLeft;
+
+	<span style="color: #008000;">// Load Origin's analysis Template</span>
+	string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SYSTEM.<span style="color: #000080;">PATH</span>.<span style="color: #000080;">PROGRAM</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Linear Regression.OGW&quot;</span>;
+	doc <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>fname<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//load ogw template as active window</span>
+	<span style="color: #008000;">// Read some text from the email body to use as our page Long Name</span>
+	page.<span style="color: #000080;">LongName</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Text1</span><span style="color: #000080;">$</span>; <span style="color: #008000;">//For Plain Text's email.</span>
+	page.<span style="color: #000080;">title</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	<span style="color: #008000;">// Now import the attached data file into our analysis template's Data Sheet</span>
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Data;
+	<span style="color: #008000;">//import the attached ASCII file and rename the book with the file's name</span>
+	<span style="color: #008000;">//impasc fname:=mail.POP.Attachment1$ Options.Names.FNameToBk:=0;</span>
+        impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Attachment1</span><span style="color: #000080;">$</span>;
+        
+        <span style="color: #008000;">//Wait for automatic update to complete</span>
+	run <span style="color: #000080;">-</span>p au;
+
+	<span style="color: #008000;">// Activate Origin's custom report sheet</span>
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Fit Summary&quot;</span>;
+	<span style="color: #008000;">// done with the attached file, so we can delete it</span>
+	mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">DeleteAttachments</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	nSuccess <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	return nMailsLeft;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Reply the email if email's Subject agrees with the string.</span>
+<span style="color: #008000;">//The email contains the fitted info and attaches the fitted curve.</span>
+Function int Reply_Email<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string strTo <span style="color: #000080;">=</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Sender</span><span style="color: #000080;">$</span>;
+	<span style="color: #008000;">//strTo.TrimLeft(); //Needn't trim</span>
+        mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">To</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strTo<span style="color: #000080;">$</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Subject</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Re:&quot;</span> <span style="color: #000080;">+</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Subject</span><span style="color: #000080;">$</span>;
+		
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text</span><span style="color: #000080;">$</span> #<span style="color: #000080;">=</span> empty<span style="color: #000080;">$</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text1</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;LR Fitted Results in Origin:&quot;</span>;	
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text2</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;--------------------&quot;</span>;
+	
+	<span style="color: #008000;">//Get number of rows from the worksheet of data</span>
+	page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text3</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Number of Points = $(wks.col1.nrows)&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text4</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;
+	
+	<span style="color: #008000;">//Get fitted results from Linear Fit Report</span>
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;FitLinear1&quot;</span>;
+	getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>tree;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text5</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Intercept of Fitted Line:&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text6</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Value = $(tree.Parameters.Intercept.Value,*), Standard Error = $(tree.Parameters.Intercept.Error,*)&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text7</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;
+	
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text8</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Slope of Fitted Line:&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text9</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Value = $(tree.Parameters.Slope.Value,*), Standard Error = $(tree.Parameters.Slope.Error,*)&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text10</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;
+	
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text11</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;R Value of Linear Fit: $(sqrt(tree.RegStats.C1.RsqCOD), *)&quot;</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Text12</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;----------------------&quot;</span>;
+	
+	<span style="color: #008000;">//Export the fitted curve</span>
+	expGraph type<span style="color: #000000;">:</span><span style="color: #000080;">=</span>jpg path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Path</span><span style="color: #000080;">$</span> export<span style="color: #000000;">:</span><span style="color: #000080;">=</span>specified pages<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;FitLine&quot;</span> 
+	  filename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span>;
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Attachment</span><span style="color: #000080;">$</span> #<span style="color: #000080;">=</span> empty<span style="color: #000080;">$</span>;   <span style="color: #008000;">// to empty the vector</span>
+	<span style="color: #008000;">//Attach the fitted curve image</span>
+	mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Attachment1</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> mail.<span style="color: #000080;">POP</span>.<span style="color: #000080;">Path</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;\&quot;</span> <span style="color: #000080;">+</span> page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span><span style="color: #000080;">+</span><span style="color: #ff00ff;">&quot;.jpg&quot;</span>;
+	
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Fit Summary&quot;</span>;
+	
+	if <span style="color: #000000;">&#40;</span> mail.<span style="color: #000080;">SMTP</span>.<span style="color: #000080;">Send</span><span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		return <span style="color: #0000dd;">0</span>; <span style="color: #008000;">//Sending email failed.</span>
+        else
+		return <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//Sending email is successful.</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// this is the function to call during timer proc, it will kill the timer on error</span>
+Function doTimerProc<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	int nOK;
+	<span style="color: #008000;">//int nn = ProcessEmail(nOK);</span>
+        <span style="color: #008000;">//Subject string will be prefixed with space.</span>
+        int nn <span style="color: #000080;">=</span> ProcessEmail<span style="color: #000000;">&#40;</span>nOK, <span style="color: #ff00ff;">&quot;Origin LRFit Test&quot;</span><span style="color: #000000;">&#41;</span>;
+	if<span style="color: #000000;">&#40;</span>nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		ty <span style="color: #000080;">-</span>A <span style="color: #ff00ff;">&quot;Mail Error return $(nn). Please resolve.&quot;</span>;
+		timer <span style="color: #000080;">-</span>k;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// update status bar</span>
+	else if<span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+		type <span style="color: #000080;">-</span>q <span style="color: #ff00ff;">&quot;$(@D,D10):No mail on server&quot;</span>;
+	else 
+	<span style="color: #000000;">&#123;</span>
+		if<span style="color: #000000;">&#40;</span>nOK <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+                <span style="color: #000000;">&#123;</span>
+			type <span style="color: #000080;">-</span>q <span style="color: #ff00ff;">&quot;$(@D,D10):Successfully process one mail, $(nn-1) emails left&quot;</span>;
+                	int nSend <span style="color: #000080;">=</span> Reply_Email<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+			if<span style="color: #000000;">&#40;</span> nSend <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+				ty <span style="color: #000080;">-</span>A <span style="color: #ff00ff;">&quot;Replying the email(%(mail.SMTP.To$)) failed.&quot;</span>; 
+                <span style="color: #000000;">&#125;</span>
+		else
+			type <span style="color: #000080;">-</span>q <span style="color: #ff00ff;">&quot;$(@D,D10):Ignore one mail due to wrong subject, $(nn-1) emails left&quot;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// start the process</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////</span>
+
+def timerproc <span style="color: #000000;">&#123;</span>
+	doTimerProc<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// replce with your own POP server and SMTP server, we have provided origin@originlab.com for this demo only</span>
+Init_Server<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;igor.originlab.com&quot;</span>, <span style="color: #ff00ff;">&quot;origin&quot;</span>, <span style="color: #ff00ff;">&quot;labtalk&quot;</span>, <span style="color: #ff00ff;">&quot;igor.originlab.com&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Init_Server(&quot;igor&quot;, &quot;origin&quot;, &quot;labtalk&quot;, &quot;igor&quot;);for inside Olab</span>
+
+timer <span style="color: #0000dd;">20</span>; <span style="color: #008000;">// Check every 20 seconds (20 seconds)</span>
+timerproc;<span style="color: #008000;">// run it immediately now so we don't wait for timer later in case there is an error so can kill right away</span></pre>
+<h2><a name="To_Run_Sample"></a><span class="mw-headline">To Run Sample</span></h2>
+<p>Before running the example, you should send an email to the account with the subject "Origin LRFit Test" and an attachment of ASCII file of data with two columns of numeric values separated by TABs. And you should also create a folder "C:\OriginMails" for the path of incoming emails.
+</p><p>Note that in this example it doesn't leave emails in the server.
+</p><p>If you have saved the code into an ogs file, you just run it by:
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>Yemailserver, main<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Stop_the_timer"></a><span class="mw-headline">Stop the timer</span></h2>
+<p>To stop the timer and prevent further timerproc macro execution, run the following script.
+</p>
+<pre class="lt" style="font-family:monospace;">timer <span style="color: #000080;">-</span>k; <span style="color: #008000;">//Stop the timer process</span></pre>
+<p>Please note that you can undefine the mail object with the following, but it is necessary unless you need to use the LabTalk mail command for something else in the same Origin session.
+</p>
+<pre class="lt" style="font-family:monospace;">dll <span style="color: #000080;">-</span>r mail; <span style="color: #008000;">//Remove the omail object and unload dll.</span></pre>
+
+
+
+
+
+

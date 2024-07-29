@@ -1,0 +1,344 @@
+<h1 class="firstHeading">3.2.4.3 Display Chemical Structures in Worksheet cells using third party DLLs</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Indigo_Toolkit"><span class="tocnumber">2</span> <span class="toctext">Indigo Toolkit</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Origin_C_Code"><span class="tocnumber">3</span> <span class="toctext">Origin C Code</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Indigo.h"><span class="tocnumber">3.1</span> <span class="toctext">Indigo.h</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Chemical_Structure.c"><span class="tocnumber">3.2</span> <span class="toctext">Chemical Structure.c</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Introduction"></a><span class="mw-headline">Introduction</span></h2>
+<p>The Simplified Molecular-Input Line-Entry Specification or SMILES is a specification in the form of a line notation for describing the structure of chemical molecules using ASCII characters.  This article describes how to use SMILES within Origin.
+</p><p>For more information about SMILES see the <a class="external text" href="http://en.wikipedia.org/wiki/Smiles" target="_blank">Wikipedia SMILES article</a>.
+</p>
+<h2><a name="Indigo_Toolkit"></a><span class="mw-headline">Indigo Toolkit</span></h2>
+<p>The Indigo toolkit for organic chemistry from EPAM Life Sciences provides APIs for rendering SMILES strings to images. 
+You can download both 64-bit and 32-bit DLLs from the <a class="external text" href="http://lifescience.opensource.epam.com/indigo/" target="_blank">Indigo Toolkit page</a> of the EPAM website. We will use the DLLs from Origin C for processing SMILES strings within Origin.
+</p><p>The 32-bit and 64-bit DLLs have the same names and can not be used by Origin at the same time.  Using the download link above, download only the DLLs that match the Origin platform (bits) you will be running. Origin only needs three DLLs from the Zip file.  Open the Zip file and navigate to the <b>dynamic</b> folder.  Copy the following DLLs to your <b>User Files\OriginC\</b> folder:
+</p>
+<ul><li> indigo.dll</li>
+<li> indigo-renderer.dll</li>
+<li> zlib.dll</li></ul>
+<h2><a name="Origin_C_Code"></a><span class="mw-headline">Origin C Code</span></h2>
+<h3><a name="Indigo.h"></a><span class="mw-headline">Indigo.h</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #008000;">// Indigo.h</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// This header file and the required Indigo DLLs should be put into your </span>
+<span style="color: #008000;">// Origin 'User Files\OriginC' folder.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// The Required DLLs are:</span>
+<span style="color: #008000;">// zlib.dll</span>
+<span style="color: #008000;">// indigo.dll</span>
+<span style="color: #008000;">// indigo-renderer.dll</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// You can download both 64-bit and 32-bit DLLs from GGA Software's Indigo </span>
+<span style="color: #008000;">// Download Page ( http://ggasoftware.com/download/indigo ).  The 32-bit and</span>
+<span style="color: #008000;">// 64-bit DLLs have the same names and can not be used by Origin at the same</span>
+<span style="color: #008000;">// time. download only the DLLs that match the Origin platform (bits) you</span>
+<span style="color: #008000;">// will be running.Open the Zip file and navigate to the 'dynamic' folder.</span>
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+#ifndef __INDIGO_H__
+<span style="color: #0000ff;">#define</span> __INDIGO_H__
+
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #008000;">// indigo.dll</span>
+<span style="color: #008000;">// A pragma is used to tell Origin C the following declared functions</span>
+<span style="color: #008000;">// are in the named DLL which is located in the same folder as this header file.</span>
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>indigo, header<span style="color: #000000;">&#41;</span>
+
+<span style="color: #0000ff;">int</span> indigoLoadMoleculeFromString <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">char</span> <span style="color: #000040;">*</span>str<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// http://ggasoftware.com/opensource/indigo/api/options</span>
+<span style="color: #0000ff;">int</span> indigoSetOption <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">char</span> <span style="color: #000040;">*</span>name, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">char</span> <span style="color: #000040;">*</span>value<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">int</span> indigoWriteBuffer <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">void</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> indigoToBuffer <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> handle, <span style="color: #0000ff;">char</span> <span style="color: #000040;">**</span>buf, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span>size<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> indigoFree <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> handle<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #008000;">// indigo-renderer.dll</span>
+<span style="color: #008000;">// A pragma is used to tell Origin C the following declared functions</span>
+<span style="color: #008000;">// are in the named DLL which is located in the same folder as this header file.</span>
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>indigo<span style="color: #000040;">-</span>renderer, header<span style="color: #000000;">&#41;</span>
+
+<span style="color: #0000ff;">int</span> indigoRender <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> object, <span style="color: #0000ff;">int</span> output<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> indigoRenderToFile <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> object, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">char</span> <span style="color: #000040;">*</span>filename<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">#endif</span> <span style="color: #008000;">// __INDIGO_H__</span></pre>
+<h3><a name="Chemical_Structure.c"></a><span class="mw-headline">Chemical Structure.c</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\theme_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// For setting worksheet row height</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;indigo.h&quot;</span> <span style="color: #008000;">// Indigo DLL functions</span>
+
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #008000;">// render_molecule_to_file</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// pcszFileName = file name of target image</span>
+<span style="color: #008000;">// pcszMolecule = source molecule string</span>
+<span style="color: #008000;">// pcszFileType = target image type</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Returns true for success or false for error.</span>
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">bool</span> render_molecule_to_file<span style="color: #000000;">&#40;</span>LPCSTR pcszFileName, LPCSTR pcszMolecule, LPCSTR pcszFileType<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #0000ff;">int</span> nMolecule <span style="color: #000080;">=</span> indigoLoadMoleculeFromString<span style="color: #000000;">&#40;</span>pcszMolecule<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nMolecule <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// There are many options that can be set.  See more options at:</span>
+		<span style="color: #008000;">// http://ggasoftware.com/opensource/indigo/api/options</span>
+		indigoSetOption<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;render-output-format&quot;</span>, pcszFileType<span style="color: #000000;">&#41;</span>;
+		indigoSetOption<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;render-background-color&quot;</span>, <span style="color: #ff00ff;">&quot;255, 255, 255&quot;</span><span style="color: #000000;">&#41;</span>;
+
+		<span style="color: #0000ff;">int</span> nWriteBuf <span style="color: #000080;">=</span> indigoWriteBuffer<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nWriteBuf <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			bRet <span style="color: #000080;">=</span> indigoRenderToFile<span style="color: #000000;">&#40;</span>nMolecule, pcszFileName<span style="color: #000000;">&#41;</span>;
+			indigoFree<span style="color: #000000;">&#40;</span>nWriteBuf<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		indigoFree<span style="color: #000000;">&#40;</span>nMolecule<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> bRet;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">enum</span> <span style="color: #000000;">&#123;</span>
+	CHEM_SUCCESS <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>,
+	CHEM_USER_CANCEL,
+	CHEM_INVALID_WKS,
+	CHEM_INVALID_SOURCE_COL,
+	CHEM_INVALID_TARGET_COL,
+	CHEM_CREATE_FOLDER,
+	CHEM_CREATE_FILE_NAME,
+	CHEM_RENDER_TO_FILE,
+	CHEM_GET_CELL,
+	CHEM_SET_CELL,
+	CHEM_INSERT_COL,
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #008000;">// convert_molecule_to_image_links</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// wks = source worksheet</span>
+<span style="color: #008000;">// nMoleculeCol = index of source molecule column</span>
+<span style="color: #008000;">// nImgCol = index of target image column</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Returns 0 for success or a non-zero error number.</span>
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">int</span> convert_molecule_to_image_links<span style="color: #000000;">&#40;</span>Worksheet<span style="color: #000040;">&amp;</span> wks, <span style="color: #0000ff;">int</span> nMoleculeCol, <span style="color: #0000ff;">int</span> nImgCol<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #008000;">// Check arguments.</span>
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_INVALID_WKS;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nMoleculeCol <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;=</span> nMoleculeCol <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_INVALID_SOURCE_COL;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nImgCol <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;=</span> nImgCol <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_INVALID_TARGET_COL;
+
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #008000;">// Make sure the image target subfolder exists.</span>
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #0000ff;">char</span> szFolder<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;chemical<span style="color: #666666; font-weight: bold;">\\</span>images&quot;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>create_folder_in_uff<span style="color: #000000;">&#40;</span>szFolder<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_CREATE_FOLDER;
+	string strPath;
+	strPath.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s%s<span style="color: #666666; font-weight: bold;">\\</span>&quot;</span>, GetOriginPath<span style="color: #000000;">&#40;</span>ORIGIN_PATH_USER<span style="color: #000000;">&#41;</span>, szFolder<span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #008000;">// Variables used within the loop.</span>
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #0000ff;">char</span> szFileType<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;png&quot;</span>;
+	string str, strMolecule, strFileName;
+	<span style="color: #0000ff;">int</span> nErr <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	<span style="color: #008000;">// Loop and process each molecule.</span>
+	<span style="color: #008000;">//--------------------------------------------------------</span>
+	Dataset ds<span style="color: #000000;">&#40;</span>wks, nMoleculeCol<span style="color: #000000;">&#41;</span>;
+
+	progressBox pb<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Processing Molecules&quot;</span>, PBOX_TOPMOST<span style="color: #000000;">&#41;</span>;
+	pb.<span style="color: #000000;">SetRange</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, ds.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nRow <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nRow <span style="color: #000080;">&lt;</span> ds.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nRow<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>pb.<span style="color: #000000;">Set</span><span style="color: #000000;">&#40;</span>nRow<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			nErr <span style="color: #000080;">=</span> CHEM_USER_CANCEL;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #000000;">&#125;</span>
+
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">GetCell</span><span style="color: #000000;">&#40;</span>nRow, nMoleculeCol, strMolecule<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">continue</span>;
+
+		strMolecule.<span style="color: #000000;">TrimLeft</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		strMolecule.<span style="color: #000000;">TrimRight</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> strMolecule.<span style="color: #000000;">GetLength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">continue</span>; <span style="color: #008000;">// no data to process</span>
+
+		LPSTR pszFileName <span style="color: #000080;">=</span> strFileName.<span style="color: #000000;">GetBuffer</span><span style="color: #000000;">&#40;</span>MAX_PATH<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> pszFileName <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>create_file_name_from_data<span style="color: #000000;">&#40;</span>pszFileName, strPath, <span style="color: #000000;">&#40;</span>LPBYTE<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>LPCSTR<span style="color: #000000;">&#41;</span>strMolecule, strMolecule.<span style="color: #000000;">GetLength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, szFileType<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+				nErr <span style="color: #000080;">=</span> CHEM_CREATE_FILE_NAME;
+			strFileName.<span style="color: #000000;">ReleaseBuffer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nErr <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">return</span> nErr;
+
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>strFileName.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>render_molecule_to_file<span style="color: #000000;">&#40;</span>strFileName, strMolecule, szFileType<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				nErr <span style="color: #000080;">=</span> CHEM_RENDER_TO_FILE;
+				<span style="color: #0000ff;">break</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+
+		str.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;file://%s&quot;</span>, strFileName<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">SetCell</span><span style="color: #000000;">&#40;</span>nRow, nImgCol, str, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			nErr <span style="color: #000080;">=</span> CHEM_SET_CELL;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> nErr;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #008000;">// create_molecule_images</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Create molecule images from chemical data.</span>
+<span style="color: #008000;">// Chemical data is taken from the selected column in the active worksheet.</span>
+<span style="color: #008000;">// Molecule images are put into the &quot;Molecule Image&quot; column.  If this column</span>
+<span style="color: #008000;">// does not exist then a new column will be inserted after the data column.</span>
+<span style="color: #008000;">// The new column will contain links to the image file.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Returns 0 for success or a non-zero error number.</span>
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">int</span> create_molecule_images<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">char</span> s_szImageColName<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Molecule Image&quot;</span>;
+
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_INVALID_WKS;
+
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnSelCols;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">GetSelectedColumns</span><span style="color: #000000;">&#40;</span>vnSelCols<span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> vnSelCols.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> CHEM_INVALID_SOURCE_COL;
+
+	<span style="color: #0000ff;">int</span> nMoleculeCol <span style="color: #000080;">=</span> vnSelCols<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>;
+
+	Column col <span style="color: #000080;">=</span> wks.<span style="color: #000000;">FindCol</span><span style="color: #000000;">&#40;</span>s_szImageColName<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>col.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		string strColNameCreated;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">InsertCol</span><span style="color: #000000;">&#40;</span>nMoleculeCol <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">NULL</span>, strColNameCreated<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">return</span> CHEM_INSERT_COL;
+		col <span style="color: #000080;">=</span> wks.<span style="color: #000000;">FindCol</span><span style="color: #000000;">&#40;</span>strColNameCreated<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>col.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">return</span> CHEM_INSERT_COL;
+		col.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">&#40;</span>s_szImageColName<span style="color: #000000;">&#41;</span>;
+		col.<span style="color: #000000;">SetWidth</span><span style="color: #000000;">&#40;</span>col.<span style="color: #000000;">GetWidth</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	wks_set_cell_heights<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">400.0</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">int</span> nImgCol <span style="color: #000080;">=</span> col.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">return</span> convert_molecule_to_image_links<span style="color: #000000;">&#40;</span>wks, nMoleculeCol, nImgCol<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+string get_molecule_err_msg<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nErr<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">switch</span> <span style="color: #000000;">&#40;</span>nErr<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">case</span> CHEM_SUCCESS<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Success&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_USER_CANCEL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;User canceled.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_INVALID_WKS<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Invalid active worksheet.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_INVALID_SOURCE_COL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Invalid source column. Select a single column.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_INVALID_TARGET_COL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Invalid target column.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_CREATE_FOLDER<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to create subfolder for images.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_CREATE_FILE_NAME<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to create image file name.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_RENDER_TO_FILE<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to create image.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_GET_CELL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to access source cell.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_SET_CELL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to access target cell.&quot;</span>;
+	<span style="color: #0000ff;">case</span> CHEM_INSERT_COL<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Failed to insert images column.&quot;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Unknown Error&quot;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">bool</span> create_folder_in_uff<span style="color: #000000;">&#40;</span>LPCSTR pcszFolderName<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string strFolderNames <span style="color: #000080;">=</span> pcszFolderName;
+	string strPath <span style="color: #000080;">=</span> GetOriginPath<span style="color: #000000;">&#40;</span>ORIGIN_PATH_USER<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> i <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; i <span style="color: #000080;">&lt;</span> strFolderNames.<span style="color: #000000;">GetNumTokens</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">'<span style="color: #666666; font-weight: bold;">\\</span>'</span><span style="color: #000000;">&#41;</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		strPath <span style="color: #000040;">+</span><span style="color: #000080;">=</span> strFolderNames.<span style="color: #000000;">GetToken</span><span style="color: #000000;">&#40;</span>i, <span style="color: #ff00ff;">'<span style="color: #666666; font-weight: bold;">\\</span>'</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>strPath.<span style="color: #000000;">IsPath</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>CreateDirectory<span style="color: #000000;">&#40;</span>strPath, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+				<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+		<span style="color: #000000;">&#125;</span>
+		strPath <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\\</span>&quot;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #008000;">// Utility functions for creating a unique file name from a chemical</span>
+<span style="color: #008000;">// structure string.</span>
+<span style="color: #008000;">//---------------------------------------------------------------------------</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">bool</span> checksum<span style="color: #000000;">&#40;</span>LPBYTE pBuf, UINT nBufLen, DWORD<span style="color: #000040;">&amp;</span> nChksum, <span style="color: #0000ff;">bool</span> bReverse<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> pBuf <span style="color: #000040;">||</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nBufLen <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+	<span style="color: #0000ff;">int</span> nInc <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bReverse <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		pBuf <span style="color: #000040;">+</span><span style="color: #000080;">=</span> nBufLen <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+		nInc <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	WORD r <span style="color: #000080;">=</span> <span style="color: #0000dd;">55665</span>, c1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">52845</span>, c2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">22719</span>;
+	BYTE cipher, value;
+
+	nChksum <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	<span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span> nBufLen<span style="color: #000040;">--</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		value <span style="color: #000080;">=</span> <span style="color: #000040;">*</span>pBuf;
+		pBuf <span style="color: #000040;">+</span><span style="color: #000080;">=</span> nInc;
+		cipher <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>value <span style="color: #000040;">^</span> <span style="color: #000000;">&#40;</span>r <span style="color: #000080;">&gt;&gt;</span> <span style="color: #0000dd;">8</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		r <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>cipher <span style="color: #000040;">+</span> r<span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> c1 <span style="color: #000040;">+</span> c2;
+		nChksum <span style="color: #000040;">+</span><span style="color: #000080;">=</span> cipher;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

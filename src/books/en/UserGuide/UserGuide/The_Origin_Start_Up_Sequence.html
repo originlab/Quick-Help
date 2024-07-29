@@ -1,0 +1,93 @@
+<h1 class="firstHeading">27.7.5.4 Customizing Origin Start up</h1><p class='urlname' style='display: none'>Startup-Sequence</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#The_Origin_Startup_Sequence_When_Started_from_Command-line"><span class="tocnumber">1</span> <span class="toctext">The Origin Startup Sequence When Started from Command-line</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Directing_Origin_to_Start_by_Opening_a_Specific_File"><span class="tocnumber">2</span> <span class="toctext">Directing Origin to Start by Opening a Specific File</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Directing_Origin_to_Start_by_Opening_a_Worksheet_Based_on_a_Specific_Template"><span class="tocnumber">3</span> <span class="toctext">Directing Origin to Start by Opening a Worksheet Based on a Specific Template</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Using_a_Different_Initialization_File_When_Starting_Origin"><span class="tocnumber">4</span> <span class="toctext">Using a Different Initialization File When Starting Origin</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Specifying_a_Menu_Level_When_Starting_Origin"><span class="tocnumber">5</span> <span class="toctext">Specifying a Menu Level When Starting Origin</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Adding_a_New_or_Additional_Configuration_File"><span class="tocnumber">6</span> <span class="toctext">Adding a New or Additional Configuration File</span></a></li>
+</ul>
+</div>
+
+<table class="note">
+
+<tr>
+<td><b>Note:</b>
+<ol><li> The file name mentioned in this page will be different if you have a different version. For example, you will see ORIGIN86.INI in your folder instead of ORIGIN9.INI, when you are using Origin 8.6.</li>
+<li> When you try the Command Line (involving file path) illustrated in the page, please update it based on the version you are using. The path and file name are different for different versions.</li>
+<li> The screenshot for the <b>User Files Folder</b> dialog will look different when you are using a different version.</li></ol>
+</td></tr></table>
+<h2><a name="The_Origin_Startup_Sequence_When_Started_from_Command-line"></a><span class="mw-headline">The Origin Startup Sequence When Started from Command-line</span></h2>
+<p>When Origin is started from <b>command-line</b>  of an external console (such as Windows <b>cmd</b> window) or the <b>Target</b> text box of the Origin program icon's <b>Properties</b> dialog box, a predictable and orderly sequence of start up events takes place.  Changing this sequence by the use of command line switches or by altering the contents of the ORIGIN.INI file can have complex interactions with Origin and is intended for advanced users.  This section outlines the default start up sequence followed by Origin.
+</p>
+<ol>
+<li>The command line is read.  
+
+<li>The ORIGIN.INI (or replacement INI file) and ORIGIN9.INI files are read. If <a class="external text" href="../../QuickHelp/QuickHelp/How_do_I_define_global_constants.html">global constants and variables are defined</a> in an .ogs file listed in the <b>[Startup]</b> section of the Origin.ini, they are read into memory.
+<li>The files SYSTEM.CNF, OPTION.CNF, and ORGSYS.CNF are executed.  Configuration files are text files that contain LabTalk script commands.  The files SYSTEM.CNF and OPTION.CNF contain settings for many LabTalk <b>system</b> object properties.  The file ORGSYS.CNF contains settings for several object properties and system variables as well as a number of macro definitions.
+
+<li>The file MACROS.CNF and the menu level CNF files (or an overriding CNF file) are executed.  The file MACROS.CNF contains definitions for several system macros and should normally be included along with the menu level CNF files.  Caution is advised if not including this file. 
+
+&lt;<br />The menu level can be specified by the <b>-l <i>number</i></b> command line switch or by the LEVEL = <i>number</i> line in the ORIGIN.INI file (if not specified, it defaults to 1).  The menu level CNF files are specified by the line:
+<pre class="lt" style="font-family:monospace;">File#<span style="color: #000080;">=</span>Macros filename1 filename2 filename3 etc...</pre>
+<p>in the ORIGIN.INI file where File is literal, <i># equals number</i> (the menu level), Macros is literal, and <i>filename1, filename2, filename3,</i> etc... are the menu level CNF files located in the Origin software folder.  Menu level CNF files create different Origin menu arrangements depending on the value of the menu level setting.  An example taken from the ORIGIN.INI file is:
+</p>
+<pre class="lt" style="font-family:monospace;">File1<span style="color: #000080;">=</span>Macros FullMenu</pre>
+<li>The additional CNF file is executed.  If specified (with the <b>-a</b> command line switch), the additional CNF file is executed.
+
+<li>If a file to be opened is not specified at the end of the command line and the AutoExec macro is defined, then the AutoExec macro is executed.  If both conditions are met then Origin is opened with an empty workspace and the AutoExec macro is executed.  The AutoExec macro is generally used to override internal default settings.  A minimal and commented out definition of the AutoExec macro can be found in the MACROS.CNF file.  Not defining this macro is the normal and recommended start up sequence.  If the AutoExec macro is not executed then internal defaults are set and the default worksheet template is opened by Origin.
+
+<li>If a graph template (*.OTP), a window (*.OGG, *.OGW, *.OGM), or an Excel file (*.XLS) is specified at the end of the command line, then the template, window, or workbook is opened by Origin.  If defined, the macro DocEnd is executed when the newly created project file is closed.  Origin creates a new project and opens the specified template, window, or workbook.  If defined, Origin executes the DocEnd macro when the new project is closed.  A definition statement for the DocEnd macro can be found in the MACROS.CNF file.
+
+<li>If a project file (*.OPJ or *.ORG) is specified at the end of the command line, the file ORGSYS.CNF is executed again and Origin opens the specified project file.  If defined, the macros DocBegin, EndOpen, and DocEnd are executed.  Origin executes the file ORGSYS.CNF a second time and then opens the specified project file.  The DocBegin macro is executed just prior to the project file being opened, the EndOpen macro is executed immediately after the project file is opened, and the DocEnd macro is executed when the project file is closed.  A definition statement for the DocBegin macro can be found in the ORGSYS.CNF file.  Definition statements for the EndOpen and DocEnd macros can be found in the MACROS.CNF file.
+</ol>
+<h2><a name="Directing_Origin_to_Start_by_Opening_a_Specific_File"></a><span class="mw-headline">Directing Origin to Start by Opening a Specific File</span></h2>
+<p>To open a graph window template, an Origin window, or a project when starting Origin, you can specify the path and file name of any supported file type in the Command Line or Target text box of the Origin program icon's Properties dialog box.  The supported file types include:  graph templates (*.OTP), graphs (*.OGG), worksheets (*.OGW), matrices (*.OGM), projects (*.OPJ and *.ORG) and Excel files (*.XLS).  No extension to the file name is required if it is a *.OPJ file.
+</p><p>For example, to open a project named MYPROJECTFILE.OPJ that is located in the Origin software folder, type the following in the Command Line or Target text box:
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> MYPROJECTFILE</pre>
+<p>To open a graph window named MY GRAPH.OGG that is located in the folder D:\MY OGGs, type the following in the Command Line or Target text box:
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #ff00ff;">&quot;D:\MY OGGs\MY GRAPH.OGG&quot;</span></pre>
+<p>Note that, unlike files specified with the command line switches, you can specify files not located in the same directory as the Origin executable file.  However, if the specified file is not in the Origin software folder, you must specify the complete path and file name.  Long path and file names with spaces must be enclosed in double quotation marks.  In general, the file name should be the last command line option listed when using more than one switch.
+</p><p><br />
+</p>
+<h2><a name="Directing_Origin_to_Start_by_Opening_a_Worksheet_Based_on_a_Specific_Template"></a><span class="mw-headline">Directing Origin to Start by Opening a Worksheet Based on a Specific Template</span></h2>
+<p>By default, when Origin starts it opens a new project displaying a single worksheet created from the ORIGIN.OTW worksheet template.  To start Origin displaying a worksheet created from a different template, use the <b>-tw <i>templateName</i></b> switch.  In addition, templateName will become the default worksheet template used by the<b> New Worksheet</b> button on the Origin Standard toolbar.
+</p><p>For example, to start Origin and create a worksheet based on the CONVANALYSIS.OTW worksheet template, type the following in the Command Line or Target text box:
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>tw CONVANALYSIS.<span style="color: #000080;">OTW</span></pre>
+<p>Note that the specified template must be in the Origin program folder or the User Files Folder that you specified when you first ran Origin.
+</p>
+<dl><dd><a  class="image"><img alt="User Files Folder dialog box.png" src="../images/The_Origin_Start_Up_Sequence/User_Files_Folder_dialog_box.png?v=23964" width="576"  /></a></dd></dl>
+<h2><a name="Using_a_Different_Initialization_File_When_Starting_Origin"></a><span class="mw-headline">Using a Different Initialization File When Starting Origin</span></h2>
+<p>Origin's default initialization file, ORIGIN.INI, presets a number of Origin options that remain active until you close the Origin session.  These options include the menu configuration and some display settings.  Because Origin automatically uses ORIGIN.INI as the default initialization file, no Command Line or Target text box switch is needed to specify it.  
+</p><p>To use an initialization file other than ORIGIN.INI, specify the replacement initialization file by using the <b>-i <i>filename</i></b> switch.  If ORIGIN.INI is not found and no replacement INI file is specified, default values are used for initialization.
+</p><p>The following command line with the <b>-i</b> switch specifies that Origin use the MYINIT.INI file to preset Origin options:
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>i MYINIT</pre>
+<p>Note that the INI file must be in the User Files Folder (see the picture below) that you specified when you first ran Origin. 
+</p>
+<dl><dd><a  class="image"><img alt="Using a Different Initialization File When Starting Origin.png" src="../images/The_Origin_Start_Up_Sequence/Using_a_Different_Initialization_File_When_Starting_Origin.png?v=13717" width="576"  /></a></dd></dl>
+<h2><a name="Specifying_a_Menu_Level_When_Starting_Origin"></a><span class="mw-headline">Specifying a Menu Level When Starting Origin</span></h2>
+<p>The menu level determines which menus are available when Origin is open.  To specify the menu level at which Origin starts, use the <b>-l <i>number</i></b> switch.  The number must be valid for the lists of menus contained in the ORIGIN.INI file.  If a<b> -l</b> switch is not included in the Command Line or Target text box, then a default menu level of 1 is used unless overridden by assignment within the INI file.
+</p><p>The following command line with the<b> -l</b> switch specifies that Origin use menu level 2 when starting Origin:
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>l <span style="color: #0000dd;">2</span></pre>
+<h2><a name="Adding_a_New_or_Additional_Configuration_File"></a><span class="mw-headline">Adding a New or Additional Configuration File</span></h2>
+<p>Configuration files are text files that contain LabTalk script commands.  The configuration files define variables, menus, macros, and functions that remain active until you close the Origin session.  Configuration files execute when Origin starts as specified by the menu level in the ORIGIN.INI file.  
+</p><p>Use the <b>-c <i>filename</i></b> switch to specify a new configuration file to override the configuration files that are specified by the menu level in the INI file.  
+</p><p>Use the <b>-a <i>filename</i></b> switch to specify a configuration file to add to the list of configuration files that are specified by the menu level in the INI file.
+</p><p>The following command line with the -c switch specifies that Origin use a new configuration file, MYCONFIG.CNF, to override the current configuration files specified in the ORIGIN.INI file:  
+</p>
+<pre class="lt" style="font-family:monospace;">DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>c MYCONFIG</pre>
+<p>Note that the configuration file must be in the Origin program folder or the "User Files Folder" that you specified when you first ran Origin.
+</p>
+<dl><dd><a  class="image"><img alt="Adding a New or Additional Configuration File.png" src="../images/The_Origin_Start_Up_Sequence/Adding_a_New_or_Additional_Configuration_File.png?v=13719" width="576"  /></a></dd></dl>
+
+
+
+
+
+

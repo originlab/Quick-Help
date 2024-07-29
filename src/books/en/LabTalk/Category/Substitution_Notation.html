@@ -1,0 +1,64 @@
+<h1 class="firstHeading">2.3.2.2 Substitution Notation</h1><p class='urlname' style='display: none'>LabTalk-Substitution-Notation</p>
+<p>The substitution of LabTalk variables and expressions occurs routinely in Origin. Since the value of the substituted string is unknown until the statement is actually executed, it's called run-time string substitution. It is also the cornerstone of any repetitive batch operation (import, analysis, graphing and graph export). 
+</p><p>The substitution notations are preceded with <b>%</b> or <b>$</b> and are not limited to LabTalk Script only. It also happens in labels in various windows, including axis title, legend, tick labels or regular text, column &amp; cell display format, column &amp; cell formula, etc. When it is found, Origin will replace it with the interpreted string. 
+</p>
+<h2><a name="Types_of_Substitution"></a><span class="mw-headline">Types of Substitution</span></h2>
+<p>There are four types of run-time substitutions:
+</p>
+<ul><li><a href="../../LabTalk/LabTalk/String_registers.html" title="LabTalk:String registers"><b>String Register Substitution</b></a>&#160;%A -&#160;%Z, etc.</li>
+<li><a href="../../LabTalk/LabTalk/String_Substitution.html" title="LabTalk:String Substitution"><b>%( ) String Substitution</b></a>, a powerful notation to resolve <b>%(str$)</b>, <b>%(range)</b>, worksheet info and column dataset names, worksheet cells, legends, etc.</li>
+<li><a href="../../LabTalk/LabTalk/Numeric_to_String_Conversion.html" title="LabTalk:Numeric to String Conversion"><b>$( ) Substitution</b></a>, - convert the numeric variable or expression and formats the result as a string.</li>
+<li> <a href="../../LabTalk/LabTalk/Macro_and_Script_Substitution.html" title="LabTalk:Macro and Script Substitution"><b>%<i>n</i> Macro and Script substitution</b></a> of the form <b>%<i>n</i></b>, where arguments are passed to a macro or a script.</li></ul>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>Various substitution notations are used in the following script to demonstrate its usage. such as
+</p>
+<ul><li>&#160;%H is a reserved string register for current window name</li>
+<li>&#160;%1,&#160;%2 are arguments of macro</li>
+<li> $(ii,##) is used to convert ii into 2 digit string with zero padding, e.g. 1 will turn into 01</li>
+<li> $(ii) is used in wks.col$(ii) to create worksheet column object wks.col<i>n</i></li>
+<li>&#160;%(1, @WS) is used to create string with 1st's plot's worksheet name</li></ul>
+<p>Please start a new project to try this.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//define a macro with two argument&#160;%1 and&#160;%2</span>
+define import_plot 
+<span style="color: #000000;">&#123;</span>
+	for<span style="color: #000000;">&#40;</span>ii <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1; ii <span style="color: #000080;">&lt;=</span><span style="color: #000080;">%</span>2&#160;; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span>
+		if <span style="color: #000000;">&#40;</span><span style="color: #000080;">!</span>isEmpty<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> newsheet; 
+		<span style="color: #008000;">//create fn$ string variable with concatenated strings</span>
+		string fn<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\curve fitting\step$(ii, ##).dat&quot;</span>;
+		impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span>; 
+		delete col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span>; 
+		if <span style="color: #000000;">&#40;</span>exist<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//if current window type is worksheet</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">//set every odd other column as X</span>
+			for<span style="color: #000000;">&#40;</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>&#160;; jj <span style="color: #000080;">&lt;=</span> wks.<span style="color: #000080;">ncols</span>&#160;; jj<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//wks.col1 refers to 1st column</span>
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">//activate 1st sheet</span>
+	doc <span style="color: #000080;">-</span>e LB <span style="color: #008000;">//loop through all sheets</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">//plot all columms as scatter with XY column designation</span>
+		plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;
+		xb.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;X&quot;</span>; <span style="color: #008000;">//set X axis title as X</span>
+		yl.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, @WS<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Set Y axis title as worksheet name</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">//execute the macro with two arguments 1 and 5, 1 and 5 will be passed to&#160;%1 and&#160;%2</span>
+import_plot <span style="color: #0000dd;">1</span> <span style="color: #0000dd;">5</span>; <span style="color: #008000;">//import step01.dat to step05.dat and plot all data</span></pre>
+<p><br />
+As mentioned at the beginning, such substitution notations are used not only in LabTalk Script but also in various places in Origin. E.g.
+</p>
+<ul><li> customize text labels, including axis titles. See <a href="../../LabTalk/LabTalk/Text_Label_Options.html" title="LabTalk:Text Label Options">Text Label Substitution</a></li>
+<li> customize legend. See <a href="../../LabTalk/LabTalk/Legend_Substitution_Notation.html" title="LabTalk:Legend Substitution Notation">Legend Substitution Notation</a></li>
+<li> build RangeString of range variable. See <a href="../../LabTalk/LabTalk/Range_Notation.html" title="LabTalk:Range Notation">Range Notation</a></li></ul>
+
+
+
+
+
+

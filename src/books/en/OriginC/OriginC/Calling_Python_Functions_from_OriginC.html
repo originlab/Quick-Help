@@ -1,0 +1,75 @@
+<h1 class="firstHeading">1.17 Calling Python Functions from Origin C</h1><p><br />
+Python functions can be called from Origin C using the syntax
+</p>
+<pre class="oc" style="font-family:monospace;">Python.<span style="color: #000000;">function_name</span><span style="color: #000000;">&#40;</span>arg1, arg2...<span style="color: #000000;">&#41;</span></pre>
+<p>By default the <b>.py</b> file should be placed in the same folder as the C/CPP or XF file.
+The name of the file should be <b>origin.py</b>.
+</p><p>Example - Python Function to perform Bayesian regression:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">from</span> sklearn <span style="color: #ff7700;font-weight:bold;">import</span> linear_model
+
+<span style="color: #ff7700;font-weight:bold;">def</span> bayesian<span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> vY<span style="color: #000;">&#41;</span>:
+    blr <span style="color: #000;">=</span> linear_model.<span style="color: #000;">BayesianRidge</span><span style="color: #000;">&#40;</span>tol<span style="color: #000;">=</span><span style="color: #000;">1e-6</span><span style="color: #000;">,</span> fit_intercept<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">,</span> compute_score<span style="color: #000;">=</span><span style="color: #900090;">False</span><span style="color: #000;">,</span> alpha_init<span style="color: #000;">=</span><span style="color: #000;">1</span><span style="color: #000;">,</span> lambda_init<span style="color: #000;">=</span><span style="color: #000;">1e-3</span><span style="color: #000;">&#41;</span>
+    blr.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">vander</span><span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> vY<span style="color: #000;">&#41;</span>
+    mean <span style="color: #000;">=</span> blr.<span style="color: #000;">predict</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">vander</span><span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> mean</pre>
+<p>The function can then be called from OC code:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> bayesian_reg<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// Have a worksheet active, with three columns</span>
+        <span style="color: #008000;">// Columns 1 and 2 have the X and Y data for fitting</span>
+        <span style="color: #008000;">// Column 3 will have the fit curve result </span>
+	Worksheet wks<span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	Dataset dsx, dsy, dsypred;
+	dsx.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	dsy.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	dsypred.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+
+	dsypred <span style="color: #000080;">=</span> Python.<span style="color: #000000;">bayesian</span><span style="color: #000000;">&#40;</span>dsx, dsy<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Multiple variables can be returned from Python function through arguments. <b>&amp;</b> sign before the argument name indicates it's a returned variable. 
+</p>
+<pre class="oc" style="font-family:monospace;">Python.<span style="color: #000000;">function_name</span><span style="color: #000000;">&#40;</span>arg1, arg2..., <span style="color: #000040;">&amp;</span> ret1, <span style="color: #000040;">&amp;</span> ret2...<span style="color: #000000;">&#41;</span></pre>
+<p>Example - Python Function to perform Bayesian regression to return both fitted values and fitted errors:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">from</span> sklearn <span style="color: #ff7700;font-weight:bold;">import</span> linear_model
+
+<span style="color: #ff7700;font-weight:bold;">def</span> bayesian<span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> vY<span style="color: #000;">,</span> vYmean<span style="color: #000;">,</span> vYstd<span style="color: #000;">&#41;</span>:
+    blr <span style="color: #000;">=</span> linear_model.<span style="color: #000;">BayesianRidge</span><span style="color: #000;">&#40;</span>tol<span style="color: #000;">=</span><span style="color: #000;">1e-6</span><span style="color: #000;">,</span> fit_intercept<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">,</span> compute_score<span style="color: #000;">=</span><span style="color: #900090;">False</span><span style="color: #000;">,</span> alpha_init<span style="color: #000;">=</span><span style="color: #000;">1</span><span style="color: #000;">,</span> lambda_init<span style="color: #000;">=</span><span style="color: #000;">1e-3</span><span style="color: #000;">&#41;</span>
+    blr.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">vander</span><span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> vY<span style="color: #000;">&#41;</span>
+    mean<span style="color: #000;">,</span> std <span style="color: #000;">=</span> blr.<span style="color: #000;">predict</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">vander</span><span style="color: #000;">&#40;</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> return_std<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+    vYmean<span style="color: #000;">&#91;</span>:<span style="color: #000;">&#93;</span> <span style="color: #000;">=</span> mean <span style="color: #d00; font-style: italic;"># pass mean values to variable vYmean</span>
+    vYstd<span style="color: #000;">&#91;</span>:<span style="color: #000;">&#93;</span> <span style="color: #000;">=</span> std  <span style="color: #d00; font-style: italic;"># pass error values to variable vYstd</span></pre>
+<p>The function can then be called from OC code:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> bayesian_reg<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// Have a worksheet active, with four columns</span>
+        <span style="color: #008000;">// Columns 1 and 2 have the X and Y data for fitting</span>
+        <span style="color: #008000;">// Column 3 and column 4 will have the fit curve result, and fitted error.</span>
+	Worksheet wks<span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	Dataset dsx, dsy, dsypred, dsystd;
+	dsx.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	dsy.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	dsypred.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	dsystd.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	vector vYmean, vYstd;
+	Python.<span style="color: #000000;">bayesian</span><span style="color: #000000;">&#40;</span>dsx, dsy, <span style="color: #000040;">&amp;</span>vYmean, <span style="color: #000040;">&amp;</span>vYstd<span style="color: #000000;">&#41;</span>;  
+	dsypred <span style="color: #000080;">=</span> vYmean;
+	dsystd <span style="color: #000080;">=</span> vYstd;
+<span style="color: #000000;">&#125;</span></pre>
+<p>To change the file location, you can set the LabTalk Python object property: <b>Python.OCWD$</b> to the full path of the desired folder (the working directory).
+</p><p>To change the file name, you can set the LabTalk Python object property: <b>Python.OCWF$</b> to the name of the desired Python file in the working directory.
+</p>
+
+
+
+
+

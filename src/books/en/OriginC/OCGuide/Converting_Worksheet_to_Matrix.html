@@ -1,0 +1,172 @@
+<h1 class="firstHeading">1.6.3.3 Converting Worksheet to Matrix</h1><p>You may need to re-organize your data by converting from worksheet to matrix, or vice versa, for certain analysis or graphing needs. This page provides information and examples of converting worksheet to matrix, and please refer to <a href="../../OriginC/OCGuide/Converting_Matrix_to_Worksheet.html" title="OCGuide:Converting Matrix to Worksheet">Converting Matrix to Worksheet</a> for the "vice versa" case.
+</p>
+<h2><a name="Worksheet_GriddingWorksheet.2C_Convert_Data_To_MatrixsheetGridding"></a><span class="mw-headline">Worksheet Gridding<span class="OIndex" style="display:none">Worksheet, Convert Data To Matrixsheet</span><span class="OIndex" style="display:none">Gridding</span></span></h2>
+<ol><li>Run the following command in the Command Window to compile the nag_utils.c file and add it into the current workspace
+<pre class="lt" style="font-family:monospace;">Run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\nag_utils.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">&#41;</span>;</pre></li>
+<li>Include header files in the Origin C file.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Nag_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre></li>
+<li><span class="OIndex" style="display:none">DataRange, Construct XYZ Range</span>Get XYZ data from the active worksheet XYZ columns.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Construct XYZ data range from XYZ columns</span>
+XYZRange rng;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;Z&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get XYZ data from data range objects to vectors</span>
+vector vX, vY, vZ;
+rng.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vZ, vY, vX<span style="color: #000000;">&#41;</span>;</pre></li>
+<li>Examine source data type, for example: regular, sparse.
+<pre class="oc" style="font-family:monospace;">UINT nVar;
+<span style="color: #0000ff;">double</span> xmin, xstep, xmax, ymin, ystep, ymax;
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nMethod <span style="color: #000080;">=</span> ocmath_xyz_examine_data<span style="color: #000000;">&#40;</span>nSize, vX, vY, vZ, 1.0e<span style="color: #000040;">-</span>8, 1.0e<span style="color: #000040;">-</span>8, 
+<span style="color: #000040;">&amp;</span>nVar, <span style="color: #000040;">&amp;</span>xmin, <span style="color: #000040;">&amp;</span>xstep, <span style="color: #000040;">&amp;</span>xmax, <span style="color: #000040;">&amp;</span>ymin, <span style="color: #000040;">&amp;</span>ystep, <span style="color: #000040;">&amp;</span>ymax<span style="color: #000000;">&#41;</span>;</pre></li>
+<li>Calculate the number of rows and columns for the result matrix window.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>, nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000040;">||</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Regular or sparse</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">double</span> dGap <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.5</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">&#40;</span>ystep, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		nRows <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">&#40;</span>ymax <span style="color: #000040;">-</span> ymin<span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span>ystep <span style="color: #000040;">+</span> dGap; 
+
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">&#40;</span>xstep, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		nCols <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">&#40;</span>xmax <span style="color: #000040;">-</span> xmin<span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span>xstep <span style="color: #000040;">+</span> dGap;
+<span style="color: #000000;">&#125;</span></pre></li>
+<li>Prepare the result matrix window.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Prepare matrix window to put gridding result</span>
+MatrixPage mp;
+mp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Create matrix window</span>
+MatrixLayer ml <span style="color: #000080;">=</span> mp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Get the first matrixsheet</span>
+MatrixObject mo<span style="color: #000000;">&#40;</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Get the first matrix object</span>
+
+mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">&#40;</span>xmin, ymin, xmax, ymax<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Set the from/to for X and Y	</span>
+mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nRows, nCols<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Set the number of rows and columns</span></pre></li>
+<li>Do XYZ gridding with the different method types.
+<pre class="oc" style="font-family:monospace;">matrix<span style="color: #000040;">&amp;</span> mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Get data object from matrix object</span>
+
+<span style="color: #0000ff;">int</span> iRet;
+<span style="color: #0000ff;">switch</span><span style="color: #000000;">&#40;</span>nMethod<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Regular</span>
+	iRet <span style="color: #000080;">=</span> ocmath_convert_regular_xyz_to_matrix<span style="color: #000000;">&#40;</span>nSize, vX, vY, vZ, 
+		mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;---&#160;%d: regular conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">&#41;</span>;	
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Sparse</span>
+	iRet <span style="color: #000080;">=</span> ocmath_convert_sparse_xyz_to_matrix<span style="color: #000000;">&#40;</span>nSize, vX, vY, vZ, 
+		mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;---&#160;%d: sparse conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">&#41;</span>;		
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Random(Renka Cline) </span>
+	vector vxGrid<span style="color: #000000;">&#40;</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">&#41;</span>, vyGrid<span style="color: #000000;">&#40;</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">&#41;</span>;
+	iRet <span style="color: #000080;">=</span> ocmath_mat_to_regular_xyz<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, xmin, 
+		xmax, ymin, ymax, vxGrid, vyGrid<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> iRet <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		iRet <span style="color: #000080;">=</span> xyz_gridding_nag<span style="color: #000000;">&#40;</span>vX, vY, vZ, vxGrid, vyGrid, mat<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;---&#160;%d: random conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">default</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Error.</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;--- Error: Other method type ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre></ol>
+<h2><a name="Worksheet_to_Matrix"></a><span class="mw-headline">Worksheet to Matrix</span></h2>
+<p>Data contained in a worksheet can be converted to a matrix using a set of functions.
+</p><p>To converts matrix-like worksheet data directly into a matrix, data in source worksheet can contain the X or Y coordinate values in the first column, first row. However, because the coordinates in a matrix should be uniform spaced, you should have uniformly spaced X/Y values in the source worksheet. The <a href="../../OriginC/OriginC/Matrixbase-CopyFromWks.html" title="OriginC:Matrixbase-CopyFromWks">CopyFramWks</a> method can be used directly, or just attach XYZ data range to matrix.
+</p><p>The following example show how to perform direct worksheet to matrix conversion:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Method 1: using CopyFromWks</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+MatrixPage matPg;
+matPg.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+MatrixLayer matLy <span style="color: #000080;">=</span> matPg.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+Matrix mat<span style="color: #000000;">&#40;</span>matLy<span style="color: #000000;">&#41;</span>;
+
+matrix<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> mat1;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>mat1.<span style="color: #000000;">CopyFromWks</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error: CopyFromWks failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+mat <span style="color: #000080;">=</span> mat1;
+
+
+<span style="color: #008000;">// Method 2: attach to MatrixObject</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, nCols <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// First row excep the first cell</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, nRows <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// First column except the first cell</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, nRows <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, nCols <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+MatrixPage matPg;
+matPg.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+MatrixLayer matLy <span style="color: #000080;">=</span> matPg.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+MatrixObject mo <span style="color: #000080;">=</span> matLy.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+MatrixObject moTmp;
+moTmp.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span>;
+matrixbase <span style="color: #000040;">&amp;</span>matTmp <span style="color: #000080;">=</span> moTmp.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+matrixbase <span style="color: #000040;">&amp;</span>mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+mat <span style="color: #000080;">=</span> matTmp;
+moTmp.<span style="color: #000000;">Detach</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>When your worksheet data is organized in XYZ column form, you should use Gridding to convert such data into a matrix. Many gridding methods are available, which will interpolate your source data and generate a uniformly spaced array of values with the X and Y dimensions specified by you.
+</p><p>The following example converts XYZ worksheet data by Renka-Cline gridding method.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Convert worksheet data into a 20 x 20 matrix by Renka-Cline gridding method</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+Dataset dsX<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+Dataset dsY<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+Dataset dsZ<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nPoints <span style="color: #000080;">=</span> dsX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+vector vX <span style="color: #000080;">=</span> dsX;
+vector vY <span style="color: #000080;">=</span> dsY;
+vector vZ <span style="color: #000080;">=</span> dsZ;
+
+ocmath_RenkaCline_Struct comm;
+ocmath_renka_cline_interpolation<span style="color: #000000;">&#40;</span>nPoints, vX, vY, vZ, <span style="color: #000040;">&amp;</span>comm<span style="color: #000000;">&#41;</span>;
+
+
+<span style="color: #008000;">//set X and Y of the gridding</span>
+<span style="color: #0000ff;">double</span> dXMin, dXMax, dYMin, dYMax;
+vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>dXMin, dXMax<span style="color: #000000;">&#41;</span>;
+vY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>dYMin, dYMax<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//perform random matrix conversion using Kriging algorithm</span>
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+matrix mZ<span style="color: #000000;">&#40;</span>nRows, nCols<span style="color: #000000;">&#41;</span>;
+vector vEvalX<span style="color: #000000;">&#40;</span>nRows <span style="color: #000040;">*</span> nCols<span style="color: #000000;">&#41;</span>;
+vector vEvalY<span style="color: #000000;">&#40;</span>nRows <span style="color: #000040;">*</span> nCols<span style="color: #000000;">&#41;</span>;
+ocmath_mat_to_regular_xyz<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, dXMin, dXMax, dYMin, dYMax, vEvalX, vEvalY, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+ocmath_renka_cline_eval<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>comm, nRows <span style="color: #000040;">*</span> nCols, vEvalX, vEvalY, mZ<span style="color: #000000;">&#41;</span>;    
+ocmath_renka_cline_struct_free<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>comm<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//create Matrix storing the result</span>
+MatrixLayer    mResultLayer;
+mResultLayer.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+Matrix    matResult<span style="color: #000000;">&#40;</span>mResultLayer<span style="color: #000000;">&#41;</span>;
+matResult <span style="color: #000080;">=</span> mZ;
+MatrixObject mo <span style="color: #000080;">=</span> mResultLayer.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">&#40;</span>dXMin, dYMin, dXMax, dYMax<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//set X and Y range of Matrix</span></pre>
+
+
+
+
+
+

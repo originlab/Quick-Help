@@ -1,0 +1,144 @@
+<h1 class="firstHeading">18.4.1.2 Algorithms (FFT)</h1><p class='urlname' style='display: none'>FFT1-Algorithm</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#FFTW"><span class="tocnumber">1</span> <span class="toctext">FFTW</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Power_density"><span class="tocnumber">2</span> <span class="toctext">Power density</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#More_results"><span class="tocnumber">3</span> <span class="toctext">More results</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Normalization"><span class="tocnumber">4</span> <span class="toctext">Normalization</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Automatic_Computation_of_Sampling_Interval"><span class="tocnumber">5</span> <span class="toctext">Automatic Computation of Sampling Interval</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Windows"><span class="tocnumber">6</span> <span class="toctext">Windows</span></a></li>
+</ul>
+</div>
+
+<p>A discrete Fourier transform (DFT) converts a signal in the time domain into its counterpart in frequency domain. Let (<i><img src="../images/Algorithm_(FFT1)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png?v=0" title="x_i" alt="x_i" class="tex"/></i>) be a sequence of length N, then its DFT is the sequence (<i><img src="../images/Algorithm_(FFT1)/math-f67871cd00ac973d0e2b80db93f3bcd3.png?v=0" title="F_n" alt="F_n" class="tex"/></i>)  given by
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-44b84261a0760528e61954194fb105bb.png?v=0" title="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" alt="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" class="tex"/></dd></dl>
+<p>Origin uses the FFTW library to perform Fourier transform. With the transformed data, the amplitude, magnitude and power density can be computed by Origin.
+</p>
+<h4><a name="FFTW"></a><span class="mw-headline">FFTW</span></h4>
+<p>In FFTW, the computation of the transformed data is performed by an executor that is comprised of blocks of C code called "codelets". Each codelet specializes in one part of the transformation. With these codelets, the executor implements the Cooley-Turkey FFT algorithm, which factors the size of the input signal. By recursive factoring, the signal is broken into shorter parts. The results of the transforms of the short parts are multiplied; and finally the transform of the original signal is computed. More information on FFTW is available at <a class="external free" href="http://fftw.org/" target="_blank">http://fftw.org/</a>.
+</p>
+<h4><a name="Power_density"></a><span class="mw-headline">Power density</span></h4>
+<p>By definition, power density or spectrum can be computed with the following equation:
+</p><p><img src="../images/Algorithm_(FFT1)/math-01ea72bb6484d55067efaf077c138a95.png?v=0" title="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" alt="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" class="tex"/>
+</p><p>where <img src="../images/Algorithm_(FFT1)/math-da6b0fd4971690d9cd42cf8f66d491ea.png?v=0" title="r_{xx}(m)\,\!" alt="r_{xx}(m)\,\!" class="tex"/> is the auto-correlation function of the input signal.
+</p><p>However, we have a finite number of samples for the input signal and, therefore, computing the power spectrum with the definition is not possible as only certain methods can be used to estimate the power spectrum. The method used in Origin is the <i>Periodogram</i>, which estimates the power from the amplitude of the Fourier transformed data. While it is generally accepted that the squared amplitude is in proportion to the amplitude of power spectrum, various conventions exist for describing the normalization of power spectrum in each domain. The three descriptions used by Origin are "mean squared amplitude"(MSA), "sum squared amplitude"(SSA) and "time-integral squared amplitude"(TISA). They can be expressed as follows:
+</p><p><img src="../images/Algorithm_(FFT1)/math-f78ce05254203460fee0e30a9b4cff70.png?v=0" title="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" alt="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" class="tex"/>
+</p><p>where <img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png?v=0" title="Re\,\!" alt="Re\,\!" class="tex"/> and <img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png?v=0" title="Im\,\!" alt="Im\,\!" class="tex"/> are the real and imaginary parts of the transform data; <img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png?v=0" title="n\,\!" alt="n\,\!" class="tex"/> is the length of the input sequence; <img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png?v=0" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex"/> is the sampling interval.
+</p><p>Power spectrum can be either one-sided (single-sided) or two-sided (double-sided), depending on whether <b>Two-Sided</b> (2) or <b>One-Sided</b> (1) is selected for <b>Spectrum Type</b> (st). To compute the one-sided power density, it is necessary to compute the two-sided power density first. The result is then converted to the one-sided power using the following equations:
+</p><p><img src="../images/Algorithm_(FFT1)/math-7bce1e1b9a6be59860ec46e258c91cd1.png?v=0" title="P_s(i)=P_d(i),i=0\,\!" alt="P_s(i)=P_d(i),i=0\,\!" class="tex"/>
+</p><p><img src="../images/Algorithm_(FFT1)/math-baeb6ffeed47a699cc1b677554430b8c.png?v=0" title="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" alt="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" class="tex"/>
+</p><p>where <img src="../images/Algorithm_(FFT1)/math-31778efa2cc67bd5c807be00488cba96.png?v=0" title="P_s(i)\,\!" alt="P_s(i)\,\!" class="tex"/> is the one-sided power spectrum and <img src="../images/Algorithm_(FFT1)/math-e075b2b8adb8eba728d28cab34392d45.png?v=0" title="P_d(i)\,\!" alt="P_d(i)\,\!" class="tex"/> is the two-sided power spectrum.
+</p><p>If a window function is applied, the power result will be multiplied by a factor for compensation which is defined by&#160;:
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-363eaa9c63ea87cd48ba42fdf880175e.png?v=0" title="N/{\sum_{n=0}^{N-1}w(n)^2}" alt="N/{\sum_{n=0}^{N-1}w(n)^2}" class="tex"/>, where <img src="../images/Algorithm_(FFT1)/math-4f1e95fe0a7a8e27f3b50dd3fc160462.png?v=0" title="w(n)" alt="w(n)" class="tex"/> is the window function defined below. </dd></dl>
+<h4><a name="More_results"></a><span class="mw-headline">More results</span></h4>
+<p>Origin can calculate the magnitude, phase and amplitude of the transformed data. Let <img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png?v=0" title="Re\,\!" alt="Re\,\!" class="tex"/> and <img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png?v=0" title="Im\,\!" alt="Im\,\!" class="tex"/> be the real and imaginary parts of the transform data, and let <img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png?v=0" title="n\,\!" alt="n\,\!" class="tex"/> be the size of the input signal. Use <img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png?v=0" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex"/> to represent the sampling interval. Suppose the <b>norma</b> variable is set to 0 (normalization is not used). More outputs are calculated with the following formulas:
+</p>
+<table class="simple">
+<tr>
+<th>
+</th>
+<th>Spectrum Type<br />is Two-sided<br />(i=1-n/2 ~ n/2)
+</th>
+<th>Spectrum Type<br />is One-sided<br />(i=0 ~ n/2)
+</th></tr>
+<tr>
+<td>
+<p>Phase
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-ad64609096818ed7ccb8b3d4ba0f7ab6.png?v=0" title="\arctan (\frac{Im}{Re})\," alt="\arctan (\frac{Im}{Re})\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>Magnitude
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-c1ece0acf285e8b40cf88b80e8282cfa.png?v=0" title="\sqrt{Re^2+Im^2}\," alt="\sqrt{Re^2+Im^2}\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>Amplitude
+</td>
+<td>
+<p><img src="../images/Algorithm_(FFT1)/math-492e800da9c3c4b1292f0a0bea063f0d.png?v=0" title="\sqrt{Re^2+Im^2}/n\," alt="\sqrt{Re^2+Im^2}/n\," class="tex"/>
+</p>
+</td>
+<td>
+<p><img src="../images/Algorithm_(FFT1)/math-13a921e0253cc1827e37d9ff186d9278.png?v=0" title="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," alt="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," class="tex"/><br />
+<img src="../images/Algorithm_(FFT1)/math-59b53c2648a667df20f43a3773b28534.png?v=0" title="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," alt="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>dB
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-ea3686f5a52c473b0e14137f2542b7aa.png?v=0" title="20log(Amplitude)\," alt="20log(Amplitude)\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>Normalized Amplitude in dB
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-0496b25eab060be3595e4ca0bca32c71.png?v=0" title="dB-max(dB)\," alt="dB-max(dB)\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>RMS amplitude
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-01979a16e7b68ffff4f1b0b1456829ea.png?v=0" title="\frac{\sqrt{2}}2Amplitude\," alt="\frac{\sqrt{2}}2Amplitude\," class="tex"/>
+</p>
+</td></tr></table>
+<h4><a name="Normalization"></a><span class="mw-headline">Normalization</span></h4>
+<p>The above computations are actually based on the assumption that the <b>norma</b> vairable is set to false. If this variable is set to true, the complex, real, imaginary, magnitude and square magnitude results will be normalized. Note that phase, power, amplitude, normalzied amplitude, db and square amplitude are not affected by the <b>norma</b> vairable.
+</p><p>If <b>Two-Sided</b> (2) is selected for <b>Spectrum Type</b> (st) and <b>Normalize</b> (norma) is set to true, the complex, real, imaginary, magnitude and square magnitude results will be divided by <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png?v=0" title="n\," alt="n\," class="tex"/>, where <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png?v=0" title="n\," alt="n\," class="tex"/> is the size of the input signal.
+</p><p>If <b>One-Sided</b> (1) is selected for <b>Spectrum Type</b> (st) and <b>Normalize</b> (norma) is set to true, the complex, real, imaginary, magnitude and square magnitude results will be normalized as follows. Let <img src="../images/Algorithm_(FFT1)/math-4d30e4daa217409c00a4232ebdb923a1.png?v=0" title="res_s&#39;\," alt="res_s&#39;\," class="tex"/> be the normalized result: 
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-a5652bda282e618ec59b68074eb5790f.png?v=0" title="res_s&#39;(i) = &#10;\begin{cases} &#10;res_s(i)/n,  &amp; \mbox{if } i=0 \\&#10;2*res_s(i)/n,  &amp; \mbox{otherwise} &#10;\end{cases}" alt="res_s&#39;(i) = &#10;\begin{cases} &#10;res_s(i)/n,  &amp; \mbox{if } i=0 \\&#10;2*res_s(i)/n,  &amp; \mbox{otherwise} &#10;\end{cases}" class="tex"/></dd></dl>
+<h4><a name="Automatic_Computation_of_Sampling_Interval"></a><span class="mw-headline">Automatic Computation of Sampling Interval</span></h4>
+<p>The automatically computed sampling interval is the average increment of the time sequence, which is usually from the X column associated with the input signal. If there is no associated X column, the row numbers will be used. Note that if Origin fails to get the average increment, the sampling interval will be set to 1.
+</p><p><b>Frequency</b>
+</p><p>The frequency column is obtained from the sampling interval<a  class="image"><img alt="Fft1 help English files image014.gif" src="../images/Algorithm_(FFT1)/Fft1_help_English_files_image014.gif?v=8053" width="20"  /></a>and the number of input data points <i>N</i>. The <i>n</i>th frequency datum is given by:
+</p><p><img src="../images/Algorithm_(FFT1)/math-8763f1f56d63a872fd52fda663147678.png?v=0" title="f_n=\frac n{N\Delta t}" alt="f_n=\frac n{N\Delta t}" class="tex"/>
+</p><p>If there are N input data points, the frequency domain will also have N points with the maximum frequency, <img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png?v=0" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"/>equal to<img src="../images/Algorithm_(FFT1)/math-f10972036c4bdf0172f82cbdec5fdf32.png?v=0" title="\frac 1{\Delta t}(1-\frac 1N)" alt="\frac 1{\Delta t}(1-\frac 1N)" class="tex"/>.If <i>shift result</i> option is not selected, the transform will display from 0 to <img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png?v=0" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"/>. Otherwise, the shifted transform displays from <img src="../images/Algorithm_(FFT1)/math-da28b5b651977378ea2afdc6646eabbc.png?v=0" title="-\frac{f_{\max }}2" alt="-\frac{f_{\max }}2" class="tex"/> to <img src="../images/Algorithm_(FFT1)/math-e8556cbd67b2e41e95b7cbc74d5fdd96.png?v=0" title="\frac{f_{\max }}2" alt="\frac{f_{\max }}2" class="tex"/>.
+</p>
+<h4><a name="Windows"></a><span class="mw-headline">Windows</span></h4>
+<p>Windows are used to suppress leakage. Different types of windows are defined as follows in Origin.
+</p>
+<table class="mtip"><tr>
+	<td style="vertical-align:top"><img src="../images/Algorithm_(FFT1)/Mini_bulb.png?v=90101" /></td><td><p>In the equations below, <img src="../images/Algorithm_(FFT1)/math-7b8b965ad4bca0e41ab51de7b31363a1.png?v=0" title="n" alt="n" class="tex"/> is the index of data and <img src="../images/Algorithm_(FFT1)/math-8d9c307cb7f3c4a32822a51922d1ceaa.png?v=0" title="N" alt="N" class="tex"/> is the total number of the dataset.
+</p></td></tr></table>
+<p><b>Rectangular Window</b>: 
+</p><p><img src="../images/Algorithm_(FFT1)/math-0ea6c517a0282283a8ebbdd2525f1713.png?v=0" title="w[n]=1\,\!" alt="w[n]=1\,\!" class="tex"/>
+</p><p><b>Welch Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-36c370ad4c40cff081352cd6c147f4bf.png?v=0" title="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" alt="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" class="tex"/>
+</p><p><b>Triangular Window</b>:
+</p><p>odd: <img src="../images/Algorithm_(FFT1)/math-0301923ac9ba030df614e6d597b61aca.png?v=0" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex"/> <br />
+even: <img src="../images/Algorithm_(FFT1)/math-8e83f30fc0b782e1d8b13c070ff8819d.png?v=0" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex"/>
+</p><p><b>Bartlett Window:</b>
+</p><p><img src="../images/Algorithm_(FFT1)/math-825eb9c392e4c816f626392c7bd01c1b.png?v=0" title="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" alt="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" class="tex"/>
+</p><p><b>Hanning Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-8f823e6c7622542b06faa1579d56e96a.png?v=0" title="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" alt="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" class="tex"/>
+</p><p><b>Hamming Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-a6fd9500215ae9924cd381d672708a6d.png?v=0" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})" class="tex"/>
+</p><p><b>Blackman Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-d1c1de031af458564cd1fdf389d5fa25.png?v=0" title="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" alt="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" class="tex"/>
+</p><p><b>Gaussian Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-fab7a042f67f1dfb6dc5556e228508ec.png?v=0" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex"/>
+</p><p><b>Kaiser Window</b>:
+</p><p><img src="../images/Algorithm_(FFT1)/math-04b7bbeb549a0b1d5ee22e3d50305676.png?v=0" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex"/>
+</p>
+

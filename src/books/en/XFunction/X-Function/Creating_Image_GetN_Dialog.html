@@ -1,0 +1,84 @@
+<h1 class="firstHeading">1.1.5 Creating Image GetN Dialog</h1><p><span class="OIndex" style="display:none">GetN, Image Dialog</span>
+This section shows how to create an X-Function GetN dialog with a matrix image data preview as in the following dialog, including how to initialize an image preview and dialog controls, and how to update the image preview or dialog controls on any control change in the dialog performed by the user.
+</p><p><a  class="image"><img alt="Ocguide xf imagepreview dialog.png" src="../images/Creating_Image_GetN_Dialog/Ocguide_xf_imagepreview_dialog.png?v=77111" width="411"  /></a>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Create_an_Empty_GetN_Image_Preview_Dialog"><span class="tocnumber">1</span> <span class="toctext">Create an Empty GetN Image Preview Dialog</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#X-Function.2C_Coding_in_Code_BuilderCoding_X-Function_in_Code_Builder"><span class="tocnumber">2</span> <span class="toctext"><span class="OIndex" style="display:none">X-Function, Coding in Code Builder</span>Coding X-Function in Code Builder</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#X-Function.2C_Image_Dialog_Init_Event_FunctionGetNImageBox_OnInit_Event_Function"><span class="tocnumber">3</span> <span class="toctext"><span class="OIndex" style="display:none">X-Function, Image Dialog Init Event Function</span>GetNImageBox_OnInit Event Function</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#X-Function.2C_Image_Dialog_OnChange_Event_FunctionGetNImageBox_OnChange_Event_Function"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex" style="display:none">X-Function, Image Dialog OnChange Event Function</span>GetNImageBox_OnChange Event Function</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Main_Function"><span class="tocnumber">5</span> <span class="toctext">Main Function</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Using_X-Function_X-Function.2C_Execution"><span class="tocnumber">6</span> <span class="toctext">Using X-Function <span class="OIndex" style="display:none">X-Function, Execution</span></span></a></li>
+</ul>
+</div>
+
+<h2><a name="Create_an_Empty_GetN_Image_Preview_Dialog"></a><span class="mw-headline">Create an Empty GetN Image Preview Dialog</span></h2>
+<ol><li>Press F10 to Open X-Function Builder. </li>
+<li>Type "ImageBox" into the X-Function EditBox for X-Function name.</li>
+<li>Add more variables by right-clicking on the Variables list and choosing "Add variable". Change the variable names, labels, and other values to match the settings in the dialog below.
+<div><a  class="image"><img alt="Ocguide xf imagepreview variables.png" src="../images/Creating_Image_GetN_Dialog/Ocguide_xf_imagepreview_variables.png?v=77112" width="480"  /></a></div></li>
+<li>Click the Tree View button <a  class="image"><img alt="Ocguide xf treeview button.png" src="../images/Creating_Image_GetN_Dialog/Ocguide_xf_treeview_button.png?v=77098" width="23"  /></a> on X-Function Builder, open the branch Usage Context -&gt; Menu, set Auto GetN Dialog to GetNImageBox, then click the Save button to save this X-Function.</li>
+<li>Close X-Function Builder, open a new matrix window, choose menu File -&gt; Import -&gt; Image, select an image file, and click Open to import the image into a matrix window.</li>
+<li>Keep the matrix window active, and run "ImageBox -d" in the Command window.  An image preview GetN dialog will show.</li>
+</ol>
+<h2><a name="X-Function.2C_Coding_in_Code_BuilderCoding_X-Function_in_Code_Builder"></a><span class="mw-headline"><span class="OIndex" style="display:none">X-Function, Coding in Code Builder</span>Coding X-Function in Code Builder</span></h2>
+<ol><li>Open Origin Code Builder, in the menu choose File -&gt; Open, locate the X-Function saved above, make sure the Add to Workspace check box is checked in the Open dialog, and click OK.  ImageBox.XFC is added to the User folder in Origin C Workspace view and shows the function body in Edit view.</li>
+<li>Add the additional header file after the line <b>//put additional include files here</b> as in the following.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>image_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\matdata_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+</li>
+<li>Add a static function, like the following, under the line <b>//put your own support static functions here</b>.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put your own support static functions here</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">bool</span> _adjust_image_brightness_ex<span style="color: #000000;">&#40;</span>BITMAPHANDLE<span style="color: #000040;">*</span> pPreviewBitmap, TreeNode<span style="color: #000040;">&amp;</span> 
+trGetN, <span style="color: #0000ff;">bool</span><span style="color: #000040;">&amp;</span> bOKEnable, string<span style="color: #000040;">&amp;</span> strErrMsg<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> adjust_image_brightness<span style="color: #000000;">&#40;</span>pPreviewBitmap, trGetN.<span style="color: #000000;">level</span>.<span style="color: #000000;">nVal</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> SUCCESS <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		bOKEnable <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>; <span style="color: #008000;">// disable OK button if adjust image failed</span>
+		strErrMsg <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Fail to adjust image brightness&quot;</span>; <span style="color: #008000;">// error message string</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+</ol>
+<h2><a name="X-Function.2C_Image_Dialog_Init_Event_FunctionGetNImageBox_OnInit_Event_Function"></a><span class="mw-headline"><span class="OIndex" style="display:none">X-Function, Image Dialog Init Event Function</span>GetNImageBox_OnInit Event Function</span></h2>
+<p>This event function is called when the GetN image preview dialog is open. It can be used to initialize an image preview, initialize dialog controls and enable/disable the OK button. For this example, add the following code into the GetNImageBox_OnInit function to adjust the image brightness according to the value of the Level control.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Get bitmap handle pointer from image preview control</span>
+pBITMAPHANDLE pPreviewBitmap <span style="color: #000080;">=</span> pimgCntrl<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetBitmapHandlePtr<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+
+<span style="color: #008000;">// call internal function to adjust image</span>
+_adjust_image_brightness_ex<span style="color: #000000;">&#40;</span>pPreviewBitmap, trGetN, bOKEnable, strErrMsg<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="X-Function.2C_Image_Dialog_OnChange_Event_FunctionGetNImageBox_OnChange_Event_Function"></a><span class="mw-headline"><span class="OIndex" style="display:none">X-Function, Image Dialog OnChange Event Function</span>GetNImageBox_OnChange Event Function</span></h2>
+<p>This event function is called whenever any controls in the grid are modified by the user. It can be used to update the image preview on a dialog control change, update a dialog control on another control change, or update the OK button's enable/disable status. Add the following code into the GetNImageBox_OnChange function.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// call internal function to adjust image, return true to update image preview.</span>
+bUpdatePreview <span style="color: #000080;">=</span> _adjust_image_brightness_ex<span style="color: #000000;">&#40;</span>pPreviewBitmap, trGetN,
+                 bOKEnable, strErrMsg<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Main_Function"></a><span class="mw-headline">Main Function</span></h2>
+<p>The main function has the same name as its corresponding X-Function. Add the following code into the main function and click the Compile button.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Copy bitmap handle pointer from the input image to the output image</span>
+<span style="color: #0000ff;">bool</span> bCopy <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+oimg.<span style="color: #000000;">SetLBmp</span><span style="color: #000000;">&#40;</span>iimg.<span style="color: #000000;">GetLBmp</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, bCopy<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get bitmap handle pointer from the output image</span>
+pBITMAPHANDLE phBmp <span style="color: #000080;">=</span> oimg.<span style="color: #000000;">GetLBmp</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+
+<span style="color: #008000;">// adjust</span>
+adjust_image_brightness<span style="color: #000000;">&#40;</span>phBmp, level<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Using_X-Function_X-Function.2C_Execution"></a><span class="mw-headline">Using X-Function <span class="OIndex" style="display:none">X-Function, Execution</span></span></h2>
+<ol><li>Run "ImageBox -d" in the Command window to open this X-Function dialog. Change the value of the Level control, and the brightness of the image preview will be changed.</li>
+<li> Click the <a  class="image"><img alt="Ocguide dialog theme.png" src="../images/Creating_Image_GetN_Dialog/Ocguide_dialog_theme.png?v=77113" width="21"  /></a> button to open the theme context menu, choose Save As, type "mylevel" into the Theme Name box, then click OK to save the theme file. Click Cancel to close the X-Function dialog.</li>
+<li> Run "ImageBox -d -t mylevel" in the Command window to open the X-Function dialog with the specified theme.</li></ol>
+
+
+
+
+
+

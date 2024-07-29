@@ -1,0 +1,79 @@
+<h1 class="firstHeading">2.65.4.2 Algorithm for Data Transformation</h1><p class='urlname' style='display: none'>Algorithm-DT</p>
+<p>Origin provides 3 transformation functions for transforming the data to follow a normal distribution, including Box-Cox transformation, Johnson transformation, and Yeo-Johnson transformation.
+</p><p>Both Box-Cox transformation and Yeo-Johnson transformation are power transformation. And the difference is that, Box-Cox transformation can only apply to the data all are positive, but Yeo-Johnson transformation can be used for any data without restriction. While Johnson transformation uses the Johnson distribution system, it can check the normality of the original data, and transform the data.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Box-Cox_Transformation"><span class="tocnumber">1</span> <span class="toctext">Box-Cox Transformation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Optimal"><span class="tocnumber">1.1</span> <span class="toctext">Optimal</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Johnson_Transformation"><span class="tocnumber">2</span> <span class="toctext">Johnson Transformation</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Yeo-Johnson_Transformation"><span class="tocnumber">3</span> <span class="toctext">Yeo-Johnson Transformation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Optimal_2"><span class="tocnumber">3.1</span> <span class="toctext">Optimal</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Box-Cox_Transformation"></a><span class="mw-headline">Box-Cox Transformation</span></h2>
+<p>Box-Cox transformation is one kinds of power transformation, and it only works for positive data. The resulting of Box-Cox transformation is formulated as follows:
+</p><p><img src="../images/Algorithm_DT/math-fcc3c0413cb0b2b80231a6db5e541258.png?v=0" title="&#10;Y&#39;=\left\{&#10;    \begin{array}{ll}&#10;    Y^\lambda&amp;\lambda \neq 0\cr&#10;    \ln(Y)&amp;\lambda = 0&#10;    \end{array}&#10;\right.&#10;" alt="&#10;Y&#39;=\left\{&#10;    \begin{array}{ll}&#10;    Y^\lambda&amp;\lambda \neq 0\cr&#10;    \ln(Y)&amp;\lambda = 0&#10;    \end{array}&#10;\right.&#10;" class="tex"/>
+</p><p>Here <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> is in the range of <img src="../images/Algorithm_DT/math-b747b9797a8dfa8f5328f1fe223da7a5.png?v=0" title="[-5, 5]" alt="[-5, 5]" class="tex"/>.
+</p>
+<h3><a name="Optimal"></a><span class="mw-headline">Optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/></span></h3>
+<p>Origin estimates the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> in the range of <img src="../images/Algorithm_DT/math-b747b9797a8dfa8f5328f1fe223da7a5.png?v=0" title="[-5, 5]" alt="[-5, 5]" class="tex"/>, and the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> should get the minimal standard deviation of the transformed data. To eliminate the effect of different <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> for the standard deviation comparison, before calculating the standard deviation, standarizing the transformed data is needed. The following formula is used for the data standarization.
+</p><p><img src="../images/Algorithm_DT/math-840d39a3c7ed4b44e3eab9932312c51c.png?v=0" title="&#10;Z_i=\left\{&#10;    \begin{array}{ll}&#10;\frac{Y_i^\lambda -1}{\lambda G^{\lambda-1}}&amp;\lambda \neq 0\cr&#10;G \ln(Y_i)&amp;\lambda = 0&#10;    \end{array}&#10;\right.&#10;" alt="&#10;Z_i=\left\{&#10;    \begin{array}{ll}&#10;\frac{Y_i^\lambda -1}{\lambda G^{\lambda-1}}&amp;\lambda \neq 0\cr&#10;G \ln(Y_i)&amp;\lambda = 0&#10;    \end{array}&#10;\right.&#10;" class="tex"/>
+</p><p>where <img src="../images/Algorithm_DT/math-865c0c0b4ab0e063e5caa3387c1a8741.png?v=0" title="i" alt="i" class="tex"/> is for the <img src="../images/Algorithm_DT/math-811ed2017ce127575a960555aa6179d7.png?v=0" title="ith" alt="ith" class="tex"/> data, <img src="../images/Algorithm_DT/math-dfcf28d0734569a6a693bc8194de62bf.png?v=0" title="G" alt="G" class="tex"/> is the geometric mean of the original data. Then <img src="../images/Algorithm_DT/math-21c2e59531c8710156d34a3c30ac81d5.png?v=0" title="Z" alt="Z" class="tex"/> is used for the standard deviation calculation.
+</p><p>The detailed steps of the optimization (also called golden section search algorithm) are:
+</p>
+<ol><li> Initialize the range for the optimization, here is from -5 to 5, and the tolerance for stopping the iteration.</li>
+<li> Narrow down the range by the golden ratio, that is 
+<dl><dd> <img src="../images/Algorithm_DT/math-0aaf3b6542b8c585e49199762d65c92a.png?v=0" title="GoldenRatio=(\sqrt{5}+1)/2" alt="GoldenRatio=(\sqrt{5}+1)/2" class="tex"/></dd>
+<dd> <img src="../images/Algorithm_DT/math-85423bcb89ca6bc25e6de3d89b13a2d7.png?v=0" title="LenghOfOldRange=OldLargeEndPoint-OldSmallEndPoint" alt="LenghOfOldRange=OldLargeEndPoint-OldSmallEndPoint" class="tex"/></dd>
+<dd> <img src="../images/Algorithm_DT/math-3f1fa87ab6608af074c2ad3316b4a9f1.png?v=0" title="NewSmallEndPoint=OldSmallEndPoint+LenghOfOldRange/GoldenRatio" alt="NewSmallEndPoint=OldSmallEndPoint+LenghOfOldRange/GoldenRatio" class="tex"/></dd>
+<dd> <img src="../images/Algorithm_DT/math-2be3dbd580085d1d5a7b4875a1183b5f.png?v=0" title="NewLargeEndPoint=OldLargeEndPoint-LenghOfOldRange/GoldenRatio" alt="NewLargeEndPoint=OldLargeEndPoint-LenghOfOldRange/GoldenRatio" class="tex"/></dd>
+<dd> then get a smaller new range.</dd></dl></li>
+<li> Take the end points of the new range as two <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>, and calculate <img src="../images/Algorithm_DT/math-21c2e59531c8710156d34a3c30ac81d5.png?v=0" title="Z" alt="Z" class="tex"/> values, and then standard deviation.</li>
+<li> Compare two standard deviations.
+<dl><dd> If the standard deviation of the small end point of the new range is bigger than the one of the large end point of the new range, update the range as from the small end point of the old range to the small end point of the new range.</dd>
+<dd> Otherwise, update the range as from the large end point of the new range to the large end point of the old range.</dd></dl></li>
+<li> Take the updated range in 4 as the old range, repeat 2 to 4 util the old range's length is smaller than the spcified tolerance, then get this old range as the final range.</li>
+<li> The middle point of the final range is considered as the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>.</li></ol>
+<p><b>How to calculate standard deviation?</b>
+</p>
+<ol><li> For subgroup data, that is, subgroup size is bigger than 1, the unbiased pooled standard deviation is estimated.</li>
+<li> For individuals data, that is, subgroup size is 1, the average of moving range is estimated by moving range of 2.</li></ol>
+<p>Origin also provide the option if to round the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> to 0.5, that is to say, after getting the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>, round it to the closest value, which is the multiple times of 0.5.
+</p>
+<h2><a name="Johnson_Transformation"></a><span class="mw-headline">Johnson Transformation</span></h2>
+<p>The three Johnson families of distribution include SB, SL and SU, which are the Johnson families distributions with the variable bounded (SB), lognormal (SL) and unbounded (SU) respectively. And the formulas for the transformation functions of these three families are:
+</p><p><img src="../images/Algorithm_DT/math-3acdc53d7b1ddd697b78a44986a76361.png?v=0" title="&#10;Y&#39;=\left\{&#10;\begin{array}{ll}&#10;SB = \gamma + \eta \ln\frac{Y-\epsilon}{\lambda+\epsilon-Y} &amp;\eta, \lambda &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, \epsilon &lt; Y &lt; \epsilon + \lambda\cr&#10;SL = \gamma + \eta \ln(Y-\epsilon) &amp; \eta &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, \epsilon &lt; Y\cr&#10;SU = \gamma + \eta \sinh^{-1}\frac{Y-\epsilon}{\lambda} &amp;\eta, \lambda &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, -\infty &lt; Y &lt; \infty, \sinh^{-1}(x) = \ln(x+\sqrt{1+x^2})&#10;\end{array}&#10;\right.&#10;" alt="&#10;Y&#39;=\left\{&#10;\begin{array}{ll}&#10;SB = \gamma + \eta \ln\frac{Y-\epsilon}{\lambda+\epsilon-Y} &amp;\eta, \lambda &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, \epsilon &lt; Y &lt; \epsilon + \lambda\cr&#10;SL = \gamma + \eta \ln(Y-\epsilon) &amp; \eta &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, \epsilon &lt; Y\cr&#10;SU = \gamma + \eta \sinh^{-1}\frac{Y-\epsilon}{\lambda} &amp;\eta, \lambda &gt; 0, -\infty &lt; \gamma &lt; \infty, -\infty &lt; \epsilon &lt; \infty, -\infty &lt; Y &lt; \infty, \sinh^{-1}(x) = \ln(x+\sqrt{1+x^2})&#10;\end{array}&#10;\right.&#10;" class="tex"/>
+</p><p>The goal of this algorithm is to select the best transformation function from the three Johnson families. The "Best" means:
+</p>
+<ol><li> After transformation, perform Anderson-Darling test on the transformed data, and the corresponding p-value should be the largest.</li>
+<li> The largest p-value is greater than the specified p-value criterion (default is 0.1).</li></ol>
+<p>The general flow for picking the best transformation function is:
+</p>
+<ol><li> Almost all the potential transformation functions from the above three Johnson families are considered as candidates.</li>
+<li> For each candidate:
+<ol><li> Estimate the parameters by using the method described in Youn-Min Chou, Alan M. Polansky &amp; Robert L. Mason (1998) Transforming Non-Normal Data to Normality in Statistical Process Control, Journal of Quality Technology, 30:2, 133-141, DOI: 10.1080/00224065.1998.11979832</li>
+<li> Transform the original data by the candidate function with the esitmated parameters.</li>
+<li> Perform Anderson-Darling test (Note: in the literature above, Shapiro-Wilks normality test is used) on the transformed data and get the p-value.</li></ol></li>
+<li> According to the criterion of the "Best" mentioned above, pick out the "Best" transformation function. If no candidate can match the "Best" criterion, then no transformation is appropriate to be chosen for the data.</li></ol>
+<h2><a name="Yeo-Johnson_Transformation"></a><span class="mw-headline">Yeo-Johnson Transformation</span></h2>
+<p>Yeo-Johnson transformation is another kinds of power transformation. Different from Box-Cox transformation, Yeo-Johnson transformation works for any data, positive, negative and zero. The resulting of Yeo-Johnson transformation is formulated as follows:
+</p><p><img src="../images/Algorithm_DT/math-aa4b97258997bdffb6fea4cc88e8cbd5.png?v=0" title="&#10;Y&#39;=\left\{&#10;    \begin{array}{ll}&#10;    \frac{(Y+1)^\lambda - 1}{\lambda} &amp;\lambda \neq 0,Y\ge0\cr&#10;    \ln(Y+1) &amp;\lambda = 0,Y\ge0\cr&#10;   -\frac{(-Y+1)^{2-\lambda}-1}{2-\lambda} &amp;\lambda \neq 2,Y &lt; 0\cr&#10;   -\ln(-Y+1) &amp; \lambda = 2,Y &lt; 0&#10;    \end{array}&#10;\right.&#10;" alt="&#10;Y&#39;=\left\{&#10;    \begin{array}{ll}&#10;    \frac{(Y+1)^\lambda - 1}{\lambda} &amp;\lambda \neq 0,Y\ge0\cr&#10;    \ln(Y+1) &amp;\lambda = 0,Y\ge0\cr&#10;   -\frac{(-Y+1)^{2-\lambda}-1}{2-\lambda} &amp;\lambda \neq 2,Y &lt; 0\cr&#10;   -\ln(-Y+1) &amp; \lambda = 2,Y &lt; 0&#10;    \end{array}&#10;\right.&#10;" class="tex"/>
+</p><p>Here <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> is also restricted in the range of <img src="../images/Algorithm_DT/math-b747b9797a8dfa8f5328f1fe223da7a5.png?v=0" title="[-5, 5]" alt="[-5, 5]" class="tex"/>.
+</p>
+<h3><a name="Optimal_2"></a><span class="mw-headline">Optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/></span></h3>
+<p>Origin uses the same algorithm to estimate the optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> as Box-Cox transformation. However, as we can see that, the algorithm needs to calculate the geometric mean of the original data, which will fail if the original data contains negative data or zero. So, to make this optimization work for non-positive data, it needs to add a positive value to the original data, so to get a new data with all positive values for this algorithm.
+</p><p>For more details about the optimization, please refer to <a href="../../App/App/Algorithm_DT.html#Optimal" title="App:Algorithm DT">Optimal <img src="../images/Algorithm_DT/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/></a> section in <a href="../../App/App/Algorithm_DT.html#Box-Cox_Transformation" title="App:Algorithm DT">Box-Cox Transformation</a> section.
+</p>
+
+
+
+
+

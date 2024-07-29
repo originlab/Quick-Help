@@ -1,0 +1,376 @@
+<h1 class="firstHeading">2.8.1 avecurves</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Menu_Information"><span class="tocnumber">1</span> <span class="toctext">Menu Information</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Brief_Information"><span class="tocnumber">2</span> <span class="toctext">Brief Information</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Command_Line_Usage"><span class="tocnumber">3</span> <span class="toctext">Command Line Usage</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#X-Function_Execution_Options"><span class="tocnumber">4</span> <span class="toctext">X-Function Execution Options</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Variables"><span class="tocnumber">5</span> <span class="toctext">Variables</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Examples"><span class="tocnumber">6</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#More_Information"><span class="tocnumber">7</span> <span class="toctext">More Information</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Related_X-Functions"><span class="tocnumber">8</span> <span class="toctext">Related X-Functions</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Menu_Information"></a><span class="mw-headline">Menu Information</span></h2>
+<p>Analysis&#160;: Mathematics&#160;: Average Multiple Curves
+</p>
+<h2><a name="Brief_Information"></a><span class="mw-headline">Brief Information</span></h2>
+<p>Average or concatenate multiple curves
+</p>
+<h2><a name="Command_Line_Usage"></a><span class="mw-headline">Command Line Usage</span></h2>
+<pre>
+1. avecurves iy:=(Plot(1),Plot(2)) method:=concatenate; 
+2. avecurves iy:=((1,2),(3,4)) method:=ave avex:=common interp:=linear; 
+</pre>
+<h2><a name="X-Function_Execution_Options"></a><span class="mw-headline">X-Function Execution Options</span></h2>
+<p><a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">Please refer to the page for additional option switches when accessing the x-function from script</a>
+</p>
+<h2><a name="Variables"></a><span class="mw-headline">Variables</span></h2>
+<table class="xfvar">
+<tr>
+<th width="8%">Display<br />Name
+</th>
+<th width="8%">Variable<br />Name
+</th>
+<th width="8%">I/O<br />and<br />Type
+</th>
+<th width="8%">Default<br />Value
+</th>
+<th>Description
+</th></tr>
+<tr>
+<td>Input
+</td>
+<td>iy
+</td>
+<td>
+<p>Input
+</p><p>XYRange
+</p>
+</td>
+<td> <center>&lt;active&gt;</center>
+</td>
+<td> Specifies multiple curves to be averaged or concatenated. Note that beginning with Origin 2020b, there is a shortened syntax that follows the form [Book]Sheet!(X,Y1:YN), X = the common X column and Y1:YN = a contiguous range of Y columns to the right of the X column. More complex strings from non-contiguous data of the form [Book]Sheet!((X,Y1:YN),(X,YM:YO)) are also possible.
+</td></tr>
+<tr>
+<td>Method
+</td>
+<td>method
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> Specifies the method.
+<p>Option list:
+</p>
+<ul><li><i>ave:Average</i> {0}
+<dl><dd>Average the input curves.</dd></dl></li>
+<li><i>concatenate:Concatenate</i> {1}
+<dl><dd>Concatenates the input curves.</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>Averaged X
+</td>
+<td>avex
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>2</center>
+</td>
+<td> This is available only when Average is selected for the Method. It specifies the method to compute the X values of the averaged curve.
+<p>Option list:
+</p>
+<ul><li><i>same:Same as Source X</i> {0}
+<dl><dd>Use the X values of all input curves as the averaged X. X values within tolerance which is specified by Tolerance for Common X Values will be treated as a same x and averaged.</dd></dl></li>
+<li><i>common:Common X Range</i> {1}
+<dl><dd>Compute the X values of the averaged curve in the common X range of input curves. Create an X dataset of <i>npts</i> from the largest minimum X of all datasets to the smallest maximum X and computes an average of Y values based on the interpolation method.</dd></dl></li>
+<li><i>full:Full X Range</i> {2}
+<dl><dd>Compute the X values of the averaged curve in the full X range of the input curves. Create an X dataset of <i>npts</i> from the smallest minimum X of all datasets to the largest maximum X and computes an average of Y values based on the interpolation method.</dd></dl></li>
+<li><i>custom:Custom</i> {3}
+<dl><dd>Compute the X values of the averaged curve in the X range which you have customized in X Minimum and X Maximum. Create an X dataset of <i>npts</i> from the chosen X Minimum to the chosen X Maximum and compute an average of Y values based on the interpolation method.</dd></dl></li>
+<li><i>trace:Follow Curve Trace</i> {4}
+<dl><dd>Compute the X values of the averaged curve by trace interpolation, which can create a new curve which has a similar shape to the input curves. For more details, please refer to the Algorithm.</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>Tolerance for Common X Values
+</td>
+<td>toler
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>1e-8</center>
+</td>
+<td> This is available only when <b>Same as Source X</b> is selected for <b>Averaged X</b>. It is used to check if the X values of input curves are the same. Two, different X values are considered the same if abs(X1 - X2) &lt;
+</td></tr>
+<tr>
+<td>Number of Points
+</td>
+<td>npts
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>&lt;auto&gt;</center>
+</td>
+<td> This is available when <b>Averaged X</b> is <i>not</i> set to <b>Same as Source X</b>. It specifies the number of evenly spaced X points from X Minimum to X Maximum to get Y values based on the chosen Interpolate method. If <b>Averaged X</b> is <b>Custom</b> you can uncheck the Auto checkbox and specify the minimum or maximum values.
+</td></tr>
+<tr>
+<td>X Minimum
+</td>
+<td>xmin
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>&lt;auto&gt;</center>
+</td>
+<td> This is editable only when <b>Custom</b> is selected for <b>Averaged X</b>. It is read-only for <b>Common X Range</b> and <b>Full X Range</b>. It specifies the minimum X value of the averaged curve. It computes a number automatically if the Auto checkbox is enabled. You can also disable the Auto checkbox and specify the values.
+</td></tr>
+<tr>
+<td>X Maximum
+</td>
+<td>xmax
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>&lt;auto&gt;</center>
+</td>
+<td> This is editable only when <b>Custom</b> is selected for <b>Averaged X</b>. It is read-only for <b>Common X Range</b> and <b>Full X Range</b>. It specifies the maximum X value of the averaged curve. It computes a number automatically if the Auto checkbox is enabled. You can also disable the Auto checkbox and specify the values.
+</td></tr>
+<tr>
+<td>Interpolate
+</td>
+<td>interp
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This is available only when <b>Averaged X</b> is not set to <b>Same as Source X</b>. It specifies a method to interpolate the Y values when averaging.
+<p>Option list:
+</p>
+<ul><li><i>linear:Linear</i>
+<dl><dd>Performs linear interpolation on the Y values.</dd></dl></li>
+<li><i>spline:Spline</i>
+<dl><dd>Performs spline interpolation on the Y values.</dd></dl></li>
+<li><i>bspline:B-Spline</i>
+<dl><dd>Performs B-Spline interpolation on the Y values.</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>No Extrapolation
+</td>
+<td>extrap
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>1</center>
+</td>
+<td> This is available only when <b>Averaged X</b> is not set to <b>Full X Range</b>, <b>Custom</b>, and <b>Follow Curve Trace</b>. It is used to specify whether to extrapolate the curves when these curves have different X ranges.
+</td></tr>
+<tr>
+<td>Sort X
+</td>
+<td>sortx
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>1</center>
+</td>
+<td> This is available only when <b>Concatenate</b> is selected for <b>Method</b>. It specifies the method to sort the X values of the averaged curve. Y values will be reordered accordingly.
+<p>Option list:
+</p>
+<ul><li><i>none:None</i>
+<dl><dd>Do not sort the X values.</dd></dl></li>
+<li><i>ascend:Ascending</i>
+<dl><dd>Sort the X values ascending.</dd></dl></li>
+<li><i> descend:Descending</i>
+<dl><dd>Sort the X values descending.</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td>Std Dev
+</td>
+<td>sd
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to compute the standard deviations of the averaged curve.
+</td></tr>
+<tr>
+<td>Std Err
+</td>
+<td>se
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to compute the standard errors of the averaged curve.
+</td></tr>
+<tr>
+<td>N
+</td>
+<td>n
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to compute the counts of input data points that correspond to each averaged X value.
+</td></tr>
+<tr>
+<td>Minimum
+</td>
+<td>min
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to output the minimum value.
+</td></tr>
+<tr>
+<td>Maximum
+</td>
+<td>max
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to output the maximum value.
+</td></tr>
+<tr>
+<td>SD times 2
+</td>
+<td>sd2
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to compute the standard deviation times 2.
+</td></tr>
+<tr>
+<td>SD times 3
+</td>
+<td>sd3
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable is available only when the <b>Method</b> variable is set to <b>Average</b>. It specifies whether or not to compute the standard deviation times 3.
+</td></tr>
+<tr>
+<td>Output
+</td>
+<td>rd
+</td>
+<td>
+<p>Output
+</p><p>ReportData
+</p>
+</td>
+<td> <center>[&lt;input&gt;]&lt;new&gt;</center>
+</td>
+<td> Specifies the output data.
+</td></tr></table>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<ul><li> To concatenate two input curves (the first two plots of the active graph layer), type the following script command in the <b>Command Window</b>:</li></ul>
+<p><code>
+avecurves iy:=(plot(1), plot(2)) method:=concatenate;
+</code>
+</p>
+<ul><li> Code Sample</li></ul>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/*
+This example shows how to average multiple XY data that are
+monotonic in X but do not necessarily share X values.
+The sample data used is in
+  OriginPath\Samples\Spectroscopy\DSC\Data folder
+1. Load the data to different worksheets of the same book
+2. use avecurves XF to average the A(X)B(Y) of all the sheets.
+3. put the result into a new sheet
+4. Plot the original into one graph and the averaged data into another graph
+*/</span>
+<span style="color: #008000;">// Load the sample data to separated sheets, using existing </span>
+<span style="color: #008000;">// loadDSC.ogs</span>
+string LoadDSCogsPath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\LoadDSC.ogs&quot;</span>;
+<span style="color: #000080;">%</span>A<span style="color: #000080;">=</span>LoadDSCogsPath<span style="color: #000080;">$</span>;
+if<span style="color: #000000;">&#40;</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>A, Main, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	break <span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// Data should be loaded now into active book</span>
+string dscBook<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+<span style="color: #008000;">// plot all the data A(X), B(Y) first</span>
+plotxy <span style="color: #000000;">&#91;</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+<span style="color: #008000;">// Perform average on all the sheets data using interp average method with linear interpolation</span>
+avecurves iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Averaged Data&quot;</span><span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ave interp<span style="color: #000000;">:</span><span style="color: #000080;">=</span>linear;
+<span style="color: #008000;">// plot the averaged as well</span>
+plotxy <span style="color: #000000;">&#91;</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #ff00ff;">&quot;Averaged Data&quot;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span>;</pre>
+<h2><a name="More_Information"></a><span class="mw-headline">More Information</span></h2>
+<p>Please refer to <a class="external text" href="../../UserGuide/UserGuide/Average_Multiple_Curves.html">this page</a> in the User Guide for more information:
+</p>
+<ul><li>Description</li>
+<li>Algorithm</li></ul>
+<p><br />
+</p><p><br />
+</p>
+<h2><a name="Related_X-Functions"></a><span class="mw-headline">Related X-Functions</span></h2>
+<p><a href="../../XFunction/X-Function/Averagexy.html" title="X-Function:Averagexy">averagexy</a>
+</p>
+
+
+
+
+

@@ -1,0 +1,69 @@
+<h1 class="firstHeading">3.2.9.3 Copy Layer</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR2</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>This example shows how to copy one layer from one page to another page with <a href="../../OriginC/OriginC/Page-AddLayer.html" title="OriginC:Page-AddLayer">Page::AddLayer</a> method.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> wks_copy_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// 1. prepare source worksheet page</span>
+	WorksheetPage wksSourcePage;
+	wksSourcePage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksSourcePage.<span style="color: #000000;">Rename</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Source&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksSourcePage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// add more one worksheet layer.</span>
+	
+	Worksheet wks <span style="color: #000080;">=</span> wksSourcePage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	wks.<span style="color: #000000;">SetName</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ABC&quot;</span><span style="color: #000000;">&#41;</span>;
+	DataRange dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	vector vx, vy;
+	vx.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0.5</span>, <span style="color: #0000dd;">100</span>, <span style="color: #0000dd;">0.5</span><span style="color: #000000;">&#41;</span>;
+	vy <span style="color: #000080;">=</span> vx <span style="color: #000040;">*</span> <span style="color: #0000dd;">10</span>;
+	dr.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vy, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// 2. prepare destination worksheet page</span>
+	WorksheetPage wksDestPage;
+	wksDestPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	wksDestPage.<span style="color: #000000;">Rename</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Dest&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// 3. Copy worksheet from one page to another page</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Before moving....<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksSourcePage<span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksDestPage<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// want copy &quot;ABC&quot; layer from &quot;Source&quot; page to &quot;Dest&quot; page as the first one layer</span>
+	<span style="color: #0000ff;">BOOL</span> 	bKeepSrcLayer <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #0000ff;">int</span> 	nNewLayerPos <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	<span style="color: #0000ff;">bool</span>	bRet <span style="color: #000080;">=</span> wksDestPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>wks, DCTRL_COPY_DEFAULT, bKeepSrcLayer, nNewLayerPos<span style="color: #000000;">&#41;</span>; 
+
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;After moving....<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksSourcePage<span style="color: #000000;">&#41;</span>;
+	print_out_layer_names<span style="color: #000000;">&#40;</span>wksDestPage<span style="color: #000000;">&#41;</span>;
+	
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> print_out_layer_names<span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000040;">&amp;</span> wksPage<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Layers in&#160;%s page: <span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, wksPage.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	foreach<span style="color: #000000;">&#40;</span>Layer lay in wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\t</span>Layer&#160;%d =&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, <span style="color: #000040;">++</span>ii, lay.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

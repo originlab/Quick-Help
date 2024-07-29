@@ -1,0 +1,144 @@
+<h1 class="firstHeading">5 Supporting Multiple Clients with OriginPro</h1><p><br />
+</p><p>OriginPro supports two additional methods that can be used to lock an existing instance of Origin to one client, thereby denying access to other clients until the current client releases the connection (with Origin):
+</p>
+<ul><li> The <b>BeginSession</b> method reserves the current Origin session for exclusive use by a client.  </li>
+<li> The <b>EndSession</b> method releases the current Origin session for use by other clients.  </li></ul>
+<p>These two methods have meaning only for clients accessing a single instance of the Origin automation server. In other words, the clients need to declare the Origin object using the <a href="../../AutomationServer/Category/ApplicationSI_(OriginCOM).html" title="Category:ApplicationSI (OriginCOM)"> ApplicationSI </a> or <a href="../../AutomationServer/Category/ApplicationCOMSI_(OriginCOM).html" title="Category:ApplicationCOMSI (OriginCOM)"> ApplicationCOMSI</a> methods.  The <b>BeginSession</b> and <b>EndSession</b> methods are available only to clients connecting to an OriginPro session.
+</p><p><br />
+The following example show how <b>Session</b> works in OriginPro.
+</p>
+<h2><a name="Origin_Session_Demo"></a><span class="mw-headline">Origin Session Demo</span></h2>
+<p>This example is created in Visual Studio 2005, with C#.
+</p>
+<ul><li> The first step is to create a simple C# Window Application, with name "OriginSession".</li></ul>
+<ul><li> Turn to resource view and add buttons on the dialog, and a Text label and a Timer control to show time elapse during a session, like the following picture shows:</li></ul>
+<dl><dd><a  class="image"><img alt="OriginSessionDemoDlg.PNG" src="../images/Supporting_Multiple_Clients_with_OriginPro/OriginSessionDemoDlg.PNG?v=38675" width="412"  /></a></dd></dl>
+<ul><li> Add Origin.ApplicationSI m_pOrigin and an integer nSeconds as the Form class's members.</li></ul>
+<ul><li> Add code to handle events when button clicked:</li></ul>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Collections.Generic</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.ComponentModel</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Data</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Drawing</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Text</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Windows.Forms</span><span style="color: #008000;">;</span>
+
+<span style="color: #0600FF; font-weight: bold;">namespace</span> OriginSession
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #0600FF; font-weight: bold;">public</span> <span style="color: #0600FF; font-weight: bold;">partial</span> <span style="color: #6666cc; font-weight: bold;">class</span> MainForm <span style="color: #008000;">:</span> Form
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> m_pOrigin<span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">int</span> nSeconds <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">public</span> MainForm<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            InitializeComponent<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> Connect_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #0600FF; font-weight: bold;">try</span>
+            <span style="color: #008000;">&#123;</span>
+                m_pOrigin <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSIClass</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">catch</span> <span style="color: #008000;">&#40;</span>Exception ex<span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span>ex<span style="color: #008000;">.</span><span style="color: #0000FF;">Message</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">try</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>m_pOrigin <span style="color: #008000;">!=</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span>
+                    m_pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">Visible</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_VISIBLE</span><span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_SHOW</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">catch</span> <span style="color: #008000;">&#40;</span>Exception ex2<span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span>ex2<span style="color: #008000;">.</span><span style="color: #0000FF;">Message</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+
+            Connect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            Disconnect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            BeginSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> MainForm_Load<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            sstimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            Connect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            Disconnect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            BeginSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            EndSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            nSeconds <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> BeginSession_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #6666cc; font-weight: bold;">bool</span> bSuccess <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">try</span>
+            <span style="color: #008000;">&#123;</span>
+                bSuccess <span style="color: #008000;">=</span> m_pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">BeginSession</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">catch</span> <span style="color: #008000;">&#40;</span>Exception ex1<span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span>ex1<span style="color: #008000;">.</span><span style="color: #0000FF;">Message</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span> <span style="color: #008000;">!</span>bSuccess <span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Can not begin Origin session, maybe it is possessed by another client!&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+
+            sstimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            EndSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            BeginSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            Disconnect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> EndSession_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #6666cc; font-weight: bold;">bool</span> bSuccess <span style="color: #008000;">=</span> m_pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">EndSession</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #008000;">!</span>bSuccess<span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Fail to end Origin session!&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            nSeconds <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span>
+            sstimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            BeginSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            EndSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            Disconnect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">string</span> strMsg <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;This session lasts for &quot;</span> <span style="color: #008000;">+</span> <span style="color: #008000;">&#40;</span>nSeconds<span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot; seconds.&quot;</span><span style="color: #008000;">;</span>
+            SessionTimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> strMsg<span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> Disconnect_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>m_pOrigin <span style="color: #008000;">!=</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #000000;">System.<span style="color: #0000FF;">Runtime</span><span style="color: #008000;">.</span><span style="color: #0000FF;">InteropServices</span></span><span style="color: #008000;">.</span><span style="color: #0000FF;">Marshal</span><span style="color: #008000;">.</span><span style="color: #0000FF;">FinalReleaseComObject</span><span style="color: #008000;">&#40;</span>m_pOrigin<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                m_pOrigin <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">;</span>
+                Disconnect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+                Connect<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+                BeginSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+                EndSession<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+                <span style="color: #6666cc; font-weight: bold;">string</span> strMsg <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;This session lasts for &quot;</span> <span style="color: #008000;">+</span> <span style="color: #008000;">&#40;</span>nSeconds<span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot; seconds.&quot;</span><span style="color: #008000;">;</span>
+                SessionTimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> strMsg<span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> sstimer_Tick<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #6666cc; font-weight: bold;">string</span> strMsg <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;This session lasts for &quot;</span> <span style="color: #008000;">+</span> <span style="color: #008000;">&#40;</span><span style="color: #008000;">++</span>nSeconds<span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot; seconds.&quot;</span><span style="color: #008000;">;</span>
+            SessionTimer<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> strMsg<span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>When run this example, please launch multiple instance of the dialog application, click <b>Connect</b> and <b>Begin Session</b> on one of these dialogs, then try the same steps on any other instance will cause exception until <b>End Session</b> clicked on the first dialog, since during a session, Origin is possessed exclusively by the first instance.
+</p><p>Several examples of client applications connecting to Origin from Visual Basic, Visual C++, Excel, MATLAB, and LabVIEW can be found in the subfolder \Samples\COM Server and Client\ under the main Origin installation folder.  See <a href="../../AutomationServer/Category/Origin_COM_Examples_(OriginCOM).html" title="Category:Origin COM Examples (OriginCOM)">Automation Server Examplesfor</a> complete examples.
+</p>
+
+
+
+
+

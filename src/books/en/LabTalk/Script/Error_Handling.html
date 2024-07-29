@@ -1,0 +1,44 @@
+<h1 class="firstHeading">2.5.2.3 Error Handling</h1><p class='urlname' style='display: none'>Error-Handling</p>
+<p><span class="OIndex" style="display:none">script, interactive execution</span>LabTalk scripts may be interrupted if an error has been thrown. But there are times when you want to continue the execution of the script even if an error is encountered. In this situation, Origin allows you to use a pair of curly braces ("{" and “}”) to enclose a part of the script that might generate an error. When Origin encounters an error within the section the remaining script up to the "}" is skipped and execution resumes outside the curly braces. In this sense, braces and run.section() commands have the same behavior.
+</p><p>The following is a simple example to show how to handle possible errors. Please note that before executing the scripts in the Script Window, you should create a new worksheet and make sure that column C does not exist. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Script without error handling </span>
+type <span style="color: #ff00ff;">&quot;Start the section&quot;</span>;
+stats col<span style="color: #000000;">&#40;</span>c<span style="color: #000000;">&#41;</span>;
+stats.<span style="color: #000080;">max</span><span style="color: #000080;">=</span>;	
+type <span style="color: #ff00ff;">&quot;Finished the section&quot;</span>;</pre>
+<p>The line of code, <code>stats col(c);</code>, will throw an error, because Column C does not exist. Then, the script will terminate and only output:
+</p>
+<pre class="lt" style="font-family:monospace;">Start the section
+Failed to resolve range string, VarName <span style="color: #000080;">=</span> ix, VarValue <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span>c<span style="color: #000000;">&#41;</span></pre>
+<p>Now we will introduce braces to use error handling. We can add a variable to indicate if an error occurred and make use of a System Variable to temporarily shut off Origin error messages:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Script with error handling </span>
+type <span style="color: #ff00ff;">&quot;Start the section&quot;</span>;
+int iNOE <span style="color: #000080;">=</span> @NOE;  <span style="color: #008000;">// Save current Origin error message output flag</span>
+<span style="color: #008000;">// The section that will generate an error </span>
+<span style="color: #000000;">&#123;</span>
+	@NOE <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Shut off Origin error messages</span>
+	vErr <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Set our error variable to true (1)</span>
+	stats col<span style="color: #000000;">&#40;</span>c<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// This is the code which could produce an error</span>
+	stats.<span style="color: #000080;">max</span><span style="color: #000080;">=</span>; <span style="color: #008000;">// Execution will continue only if no error occurs</span>
+	vErr <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// If NO error then our variable gets set to false (0)</span>
+<span style="color: #000000;">&#125;</span>
+@NOE <span style="color: #000080;">=</span> iNOE; <span style="color: #008000;">// Restore Origin error messages</span>
+if<span style="color: #000000;">&#40;</span>vErr<span style="color: #000000;">&#41;</span> ty An error occurred. <span style="color: #000080;">Continuing</span> ...;
+type <span style="color: #ff00ff;">&quot;Finished the section&quot;</span>;</pre>
+<p>The output will become
+</p>
+<pre>
+Start the section
+An error occurred. Continuing ...
+Finished the section
+</pre>
+<p>After the error on the <code>stats col(c)</code> line, code execution continues outside the closing brace (<b>}</b>) and we can trap our error and process as needed.
+You can comment out the lines related to @NOE if you want the Message Log to retain a record of all errors that occurred.
+</p>
+
+
+
+
+

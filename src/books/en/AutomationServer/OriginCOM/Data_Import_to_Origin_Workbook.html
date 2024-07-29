@@ -1,0 +1,35 @@
+<h1 class="firstHeading">1.4.1 Data Import to Origin Workbook</h1><h2><a name="pCLAMP_Import_using_X-Function"></a><span class="mw-headline">pCLAMP Import using X-Function</span></h2>
+<p>The following example shows how to call X-Function from COM.
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> XF_Click()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    <span style="color: #008000;">'before we can run OC (XF is OC), we need to make sure OC startup compile/link is done
+</span>    app.Execute (<span style="color: #800000;">&quot;sec -poc 3&quot;</span>) <span style="color: #008000;">'wait up to 3 sec, actually will be far shorter
+</span>    app.NewProject
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wbk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Set</span> wbk = app.WorksheetPages.Add
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> strFileName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    <span style="color: #008000;">'replace with your actual pCLAMP file name
+</span>    strFileName$ = <span style="color: #800000;">&quot;D:\Origin61\pClamp\96322002.ABF&quot;</span>
+    <span style="color: #008000;">'put filename into Origin project variable fname$ as all import XF assumes that
+</span>    <span style="color: #008000;">'and this makes it easy to call the XF without passing it on the command line
+</span>    app.LTStr(<span style="color: #800000;">&quot;fname$&quot;</span>) = strFileName$
+    <span style="color: #008000;">'run pCLAMP import XF and turn off plotting XFbar
+</span>    wbk.Execute (<span style="color: #800000;">&quot;imppClamp options.XFBar:=0&quot;</span>)
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Col <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Set</span> wks = wbk.Layers(0) <span style="color: #008000;">'only one sheet(layer) for pCLAMP import
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Col = wks.Columns(0) <span style="color: #008000;">'get the first column
+</span>    Cells(1, 1) = Col.LongName <span style="color: #008000;">'put the long name to Excel top-left cell
+</span>    Cells(2, 1) = Col.Units
+    Cells(3, 1) = Col.EvenSampling <span style="color: #008000;">'Sampling interval
+</span>    app.Visible = MAINWND_SHOW
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+
+
+
+
+
+

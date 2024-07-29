@@ -1,0 +1,176 @@
+<h1 class="firstHeading">5.3 Matrix</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#3D_Parametric_Plot_From_Matrix"><span class="tocnumber">1</span> <span class="toctext">3D Parametric Plot From Matrix</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Download_GeoTIFF_Image_to_Make_Surface_Plot"><span class="tocnumber">2</span> <span class="toctext">Download GeoTIFF Image to Make Surface Plot</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Import_NetCDF_with_Partial_Settings"><span class="tocnumber">3</span> <span class="toctext">Import NetCDF with Partial Settings</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Matrix_Dot_Product_using_numpy"><span class="tocnumber">4</span> <span class="toctext">Matrix Dot Product using numpy</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Plot_Heatmap_from_Matrix"><span class="tocnumber">5</span> <span class="toctext">Plot Heatmap from Matrix</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Use_OpenCV_to_Load_TIFF_Images_into_Matrix_Sheet"><span class="tocnumber">6</span> <span class="toctext">Use OpenCV to Load TIFF Images into Matrix Sheet</span></a></li>
+</ul>
+</div>
+
+<p>
+<p>This folder contains examples of matrix manipulation, calculation and graphing with <strong>originpro</strong> package.<br />
+For matrix related functions in <strong>originpro</strong>, see <a href="https://www.originlab.com/python/doc/originpro/classoriginpro_1_1matrix_1_1_m_sheet.html">matrixsheet</a>.<br />
+For project related functions, see <a href="https://www.originlab.com/python/doc/originpro/functions_func.html">project</a>.  </p>
+
+</p>
+<h2><a name="3D_Parametric_Plot_From_Matrix"></a><span class="mw-headline">3D Parametric Plot From Matrix</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''This sample shows how to plot parametric 3D surface from a matrix sheet.'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+
+<span style="color: #d00; font-style: italic;"># Generate torus mesh</span>
+angle <span style="color: #000;">=</span> np.<span style="color: #000;">linspace</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">2</span>*np.<span style="color: #000;">pi</span><span style="color: #000;">,</span> <span style="color: #000;">32</span><span style="color: #000;">&#41;</span>
+theta<span style="color: #000;">,</span> phi <span style="color: #000;">=</span> np.<span style="color: #000;">meshgrid</span><span style="color: #000;">&#40;</span>angle<span style="color: #000;">,</span> angle<span style="color: #000;">&#41;</span>
+r<span style="color: #000;">,</span> R <span style="color: #000;">=</span> <span style="color: #000;">.25</span><span style="color: #000;">,</span> <span style="color: #000;">1</span>.
+<span style="color: #000;">X</span> <span style="color: #000;">=</span> <span style="color: #000;">&#40;</span>R + r * np.<span style="color: #000;">cos</span><span style="color: #000;">&#40;</span>phi<span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span> * np.<span style="color: #000;">cos</span><span style="color: #000;">&#40;</span>theta<span style="color: #000;">&#41;</span>
+Y <span style="color: #000;">=</span> <span style="color: #000;">&#40;</span>R + r * np.<span style="color: #000;">cos</span><span style="color: #000;">&#40;</span>phi<span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span> * np.<span style="color: #000;">sin</span><span style="color: #000;">&#40;</span>theta<span style="color: #000;">&#41;</span>
+Z <span style="color: #000;">=</span> r * np.<span style="color: #000;">sin</span><span style="color: #000;">&#40;</span>phi<span style="color: #000;">&#41;</span>
+arr_3D <span style="color: #000;">=</span> np.<span style="color: #000;">stack</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>Z<span style="color: #000;">,</span>X<span style="color: #000;">,</span>Y<span style="color: #000;">&#93;</span><span style="color: #000;">,</span> axis<span style="color: #000;">=</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># Stack X,Y,Z to get a 3D array</span>
+
+<span style="color: #d00; font-style: italic;"># Pass the data to a matrix sheet and plot</span>
+ms <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>arr_3D<span style="color: #000;">&#41;</span>
+
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'GLparafunc'</span><span style="color: #000;">&#41;</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">add_mplot</span><span style="color: #000;">&#40;</span>ms<span style="color: #000;">,</span><span style="color: #000;">0</span><span style="color: #000;">,</span><span style="color: #000;">1</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">&#41;</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'z'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Download_GeoTIFF_Image_to_Make_Surface_Plot"></a><span class="mw-headline">Download GeoTIFF Image to Make Surface Plot</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+Origin2023b or later is required to run this sample code.
+
+This example shows how to use Origin Image Window's ability to directly import an image using
+a URL address, which is not yet supported in a matrix window. Once image is downloaded into an
+Image Window, it can be converted to a matrix with the coordinates from the GeoTIFF retained.
+The sample also shows to download a graph template from Originlab to make our plot
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #d00; font-style: italic;">#use the smaller 2-arc sec DEM available only for Alaska from National Map</span>
+url <span style="color: #000;">=</span> r<span style="color: #0a0;">'https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/2/TIFF/historical/n59w154/USGS_2_n59w154_20210401.tif'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>url<span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#create an empty matrix and tranfer the image to it</span>
+mat <span style="color: #000;">=</span> op.<span style="color: #000;">new_book</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+mat<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">from_img</span><span style="color: #000;">&#40;</span>iw<span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#you may want to keep the image window and comment out the next line but </span>
+<span style="color: #d00; font-style: italic;">#it is no longer needed to make the graph</span>
+iw.<span style="color: #000;">destroy</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#On Template Center dialog, click any template will open the weblink to see the fid</span>
+<span style="color: #d00; font-style: italic;">#here 939 = RaisedReliefMap.otpu</span>
+nn<span style="color: #000;">=</span>op.<span style="color: #000;">olab_download</span><span style="color: #000;">&#40;</span><span style="color: #000;">939</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> nn <span style="color: #000;">&lt;</span> <span style="color: #000;">0</span>:
+    <span style="color: #ff7700;font-weight:bold;">if</span> nn<span style="color: #000;">==</span>-<span style="color: #000;">30</span>:
+        <span style="color: #ff7700;font-weight:bold;">raise</span> <span style="color: #900090;">Exception</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">&quot;Your copy of Origin needs to be registered to download templates from Originlab website&quot;</span><span style="color: #000;">&#41;</span>
+        
+    <span style="color: #ff7700;font-weight:bold;">raise</span> <span style="color: #900090;">Exception</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">&quot;Sorry, failed to download template from Originlab website&quot;</span><span style="color: #000;">&#41;</span>
+    
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'RaisedReliefMap'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#we need to turn on speed mode and hide the speed mode banner</span>
+gp.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Banner'</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span> <span style="color: #000;">=</span> gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'MatMaxPtsEnabled'</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+plot <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_mplot</span><span style="color: #000;">&#40;</span>mat<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#if template did not have clip data enabled</span>
+<span style="color: #d00; font-style: italic;">#gl.set_int('clip',1)</span>
+
+plot.<span style="color: #000;">colormap</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'Magma.PAL'</span>
+ax<span style="color: #000;">=</span><span style="color: #000;">gl</span>.<span style="color: #000;">axis</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'x'</span><span style="color: #000;">&#41;</span>
+ax.<span style="color: #000;">sto</span><span style="color: #000;">=</span>-<span style="color: #000;">153.2</span>
+ay<span style="color: #000;">=</span><span style="color: #000;">gl</span>.<span style="color: #000;">axis</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'y'</span><span style="color: #000;">&#41;</span>
+ay.<span style="color: #000;">set_limits</span><span style="color: #000;">&#40;</span><span style="color: #000;">58.4</span><span style="color: #000;">,</span><span style="color: #000;">59</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #000;">gl</span>.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'light.direction.h'</span><span style="color: #000;">,</span> <span style="color: #000;">74</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'light.direction.v'</span><span style="color: #000;">,</span> <span style="color: #000;">27</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Import_NetCDF_with_Partial_Settings"></a><span class="mw-headline">Import NetCDF with Partial Settings</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This example shows importing from the web and to specify from Jan of each year
+as well as doing proper longitude and latitude corrections.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+mat <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#you can actually use URL in from_file </span>
+url <span style="color: #000;">=</span> <span style="color: #0a0;">'https://www.unidata.ucar.edu/software/netcdf/examples/tos_O1_2001-2002.nc'</span>
+<span style="color: #d00; font-style: italic;">#keep the connector so after the import, you can click on the icon to </span>
+<span style="color: #d00; font-style: italic;">#choose Options... to see open the dialog to see the details indicated by the sel string</span>
+mat.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>url<span style="color: #000;">,</span> <span style="color: #900090;">True</span><span style="color: #000;">,</span> dctype<span style="color: #000;">=</span><span style="color: #0a0;">'NetCDF'</span><span style="color: #000;">,</span> sel<span style="color: #000;">=</span><span style="color: #0a0;">'NetCDF/tos[1:0|1-11][y#][x/2]'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Matrix_Dot_Product_using_numpy"></a><span class="mw-headline">Matrix Dot Product using numpy</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample shows basic data transfer between Origin matrix and a NumPy array.
+Make sure you've installed pandas before trying the following sample. 
+So to check for and install if needed, open the Script Window (Shift+Alt+3), 
+type the following and press Enter:
+    pip -chk pandas
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;">#integer matrix data</span>
+aa <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>	<span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">4</span><span style="color: #000;">,</span> <span style="color: #000;">5</span><span style="color: #000;">,</span> <span style="color: #000;">6</span><span style="color: #000;">&#93;</span> <span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+bb <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>	<span style="color: #000;">&#91;</span><span style="color: #000;">10</span><span style="color: #000;">,</span><span style="color: #000;">11</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">20</span><span style="color: #000;">,</span><span style="color: #000;">21</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">30</span><span style="color: #000;">,</span><span style="color: #000;">31</span><span style="color: #000;">&#93;</span> <span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#create a new hidden matrix book, and get the matrix sheet</span>
+ma<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#matrix sheet can hold a 3D array, shape and data type is automatically set </span>
+ma.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>aa<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#another sheet in same book</span>
+mb <span style="color: #000;">=</span> ma.<span style="color: #000;">get_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">add_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+mb.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>bb<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#put result into 3rd sheet</span>
+mc <span style="color: #000;">=</span> ma.<span style="color: #000;">get_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">add_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Dot Product'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#do the actual calculation using numpy</span>
+<span style="color: #d00; font-style: italic;">#here each sheet has only one matrix object, so we get it as 2d array</span>
+cc <span style="color: #000;">=</span> np.<span style="color: #000;">dot</span><span style="color: #000;">&#40;</span>ma.<span style="color: #000;">to_np2d</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> mb.<span style="color: #000;">to_np2d</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+mc.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>cc<span style="color: #000;">&#41;</span></pre>
+<h2><a name="Plot_Heatmap_from_Matrix"></a><span class="mw-headline">Plot Heatmap from Matrix</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''This sample shows how to plot a heatmap from a matrix sheet.'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+
+arr_2D <span style="color: #000;">=</span> np.<span style="color: #000;">random</span>.<span style="color: #000;">randint</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span><span style="color: #000;">4</span><span style="color: #000;">,</span> size<span style="color: #000;">=</span><span style="color: #000;">&#40;</span><span style="color: #000;">4</span><span style="color: #000;">,</span><span style="color: #000;">4</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+ms <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>arr_2D<span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">xymap</span> <span style="color: #000;">=</span> -<span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">,</span> -<span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">3</span>
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'heatmap'</span><span style="color: #000;">&#41;</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>ms<span style="color: #000;">,</span> colz<span style="color: #000;">=</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'z'</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#default XY scale will include the half width of each data point</span>
+<span style="color: #d00; font-style: italic;">#so to have same scale as the matrix, we need to force it</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">set_xlim</span><span style="color: #000;">&#40;</span>-<span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">&#41;</span>
+gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">set_ylim</span><span style="color: #000;">&#40;</span>-<span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Use_OpenCV_to_Load_TIFF_Images_into_Matrix_Sheet"></a><span class="mw-headline">Use OpenCV to Load TIFF Images into Matrix Sheet</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This example shows how to import tif images into a 3d numpy array and then pass into Origin matrix book.
+To install openCV (cv2), do the following from Script Window
+    pip install opencv-python
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> cv2
+
+<span style="color: #d00; font-style: italic;"># import tifs into array</span>
+<span style="color: #d00; font-style: italic;"># Assume all images share the same dimesion</span>
+ImArray <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> idx <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">&#40;</span><span style="color: #000;">7</span><span style="color: #000;">&#41;</span>:
+    fname <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + f<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\\</span>Image Processing and Analysis<span style="color: #000099; font-weight: bold;">\\</span>myocyte{idx+1}.tif'</span>
+    <span style="color: #000;">array</span> <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span>cv2.<span style="color: #000;">imread</span><span style="color: #000;">&#40;</span>fname<span style="color: #000;">,</span> cv2.<span style="color: #000;">IMREAD_UNCHANGED</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+    ImArray <span style="color: #000;">=</span> np.<span style="color: #000;">dstack</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#40;</span>ImArray<span style="color: #000;">,</span> <span style="color: #000;">array</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span> <span style="color: #ff7700;font-weight:bold;">if</span> ImArray.<span style="color: #000;">size</span> <span style="color: #ff7700;font-weight:bold;">else</span> <span style="color: #000;">array</span>
+
+<span style="color: #d00; font-style: italic;"># put this 3d array into Origin Matrix Sheet</span>
+ms <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'m'</span><span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">from_np</span><span style="color: #000;">&#40;</span>arr<span style="color: #000;">=</span>ImArray<span style="color: #000;">,</span> dstack<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">show_slider</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+ms.<span style="color: #000;">show_image</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span></pre>
+
+
+
+
+
+

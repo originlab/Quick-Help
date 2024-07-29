@@ -1,0 +1,88 @@
+<h1 class="firstHeading">6.4.7 Importing User Defined Data Files</h1><p class='urlname' style='display: none'>ImpWiz-UserDefined-File</p>
+<p>If the data files you wish to import cannot be imported via the Import Filters ASCII or Binary files options, you can write your own <b>Python</b> or <b>Origin C</b> function to import the files.
+</p>
+<h2><a name="Python_Code_for_Data_Import"></a><span class="mw-headline">Python Code for Data Import</span></h2>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Importing_User_Defined_Data_Files/Tutorial_icon.png?v=9654" width="57"  border="0" />
+	</td>
+	<td><p>Learn about how to create a <a class="external text" href="http://blog.originlab.com/creating-a-python-based-import-filter-with-origin-2021" target="_blank">Python-based Import Filter</a>.
+</p></td></tr></table>
+<p>Python code can be used to import a user-defined data file. A rough example of such code is presented below. The most important point about this code is that the target worksheet will be activated prior to the code being called by Origin. Additionally, the <b>fname$</b> LabTalk variable will be populated with the full path and file name of the current file to import. Please read the code comments to better understand what needs to be done in the Python code.
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #d00; font-style: italic;"># Function reads file into a pandas DataFrame.</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> read_file<span style="color: #000;">&#40;</span><span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>:
+    df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">with</span> <span style="color: #900090;">open</span><span style="color: #000;">&#40;</span><span style="color: #900090;">file</span><span style="color: #000;">,</span> <span style="color: #0a0;">'r'</span><span style="color: #000;">&#41;</span> <span style="color: #ff7700;font-weight:bold;">as</span> f:
+        line <span style="color: #000;">=</span> f.<span style="color: #000;">readline</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+        <span style="color: #ff7700;font-weight:bold;">while</span> line:
+            <span style="color: #d00; font-style: italic;"># Put your code here to parse the line in the file</span>
+            <span style="color: #d00; font-style: italic;"># and then append it to the DataFrame.</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> df
+
+
+<span style="color: #d00; font-style: italic;"># The file chosen by Origin import filter is placed into the fname$</span>
+<span style="color: #d00; font-style: italic;"># LabTalk variable. Must bring it into Python. Don't specify $ in name!</span>
+fname <span style="color: #000;">=</span> op.<span style="color: #000;">get_lt_str</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'fname'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Read the file into a pandas DataFrame.</span>
+data <span style="color: #000;">=</span> read_file<span style="color: #000;">&#40;</span>fname<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Returns the active sheet.</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add DataFrame to sheet starting at first column.</span>
+<span style="color: #d00; font-style: italic;"># DataFrame column labels will become worksheet column long names.</span>
+<span style="color: #d00; font-style: italic;"># Origin automagically sets column format based on DataFrame data types.</span>
+wks.<span style="color: #000;">from_df</span><span style="color: #000;">&#40;</span>data<span style="color: #000;">&#41;</span></pre>
+<p>After creating the code to handle the importing, you can use it as follows:
+</p>
+<ol>
+<li>Open the Import Wizard with the <b>Import Wizard</b> button <a  class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png?v=1807" width="23"  /></a> or selecting <b>Data: Import from File: Import Wizard</b> from the Origin menu. </li> 
+<li>On the first page (the <b>Source</b> page) of the Wizard, select the <b>User Defined</b> radio button in the <b>Data Type</b> group. </li> 
+<li>Specify the path for the imported files, if you wish to import one or more files; or, select the <b>Clipboard</b> radio button, if you wish to import from clipboard. </li> 
+<li>Select a target window by selecting one of the radio buttons in the <b>Target Window</b> group. Choose a template <span style="color:red">*</span> and an import mode, if desired. Then click <b>Next</b> to go to the <b>User Defined Filters</b> page. </li> 
+<li>In the <b>User Defined Filters</b> page, paste your code into the <b>Python Code</b> text area. Alternately, you can save your Python code to a file and use <b>Python File</b> control to specify a path to the Python file. The path can be one of:
+<ul>
+<li>An absolute file path.</li> 
+<li>A file path relative to your User Files folder.</li> 
+<li>Just a file name if the file is in your User Files folder.</li> 
+</ul></li> 
+<li>When you finish all the settings, click <b>Finish</b>. Your Python code will be used to import the files.</li> 
+</ol>
+<table class="note">
+
+<tr>
+<td><span style="color:red">*</span>The target window template named on the <b>Source</b> page of the Import Wizard is only used when new windows are created (as would happen under some conditions during drag-and-drop importing). If choosing <b>Data: Import from File</b> from the menu and your active window is consistent with your import filter's Target Window specification, no new window is created and a reference to the page object for the active window is passed to your function. If the active window is of a different type, a new window will be created using the specified template, and the page reference to this new window is passed.
+</td></tr></table>
+<p><br />
+</p>
+<h2><a name="Origin_C_Functions_for_Data_Import"></a><span class="mw-headline">Origin C Functions for Data Import</span></h2>
+<p>You can develop your own Origin C function to handle the importing user-defined data files by creating an Origin C function in an Origin C file.
+</p><p>The prototype of Origin C the function must be either one of the following:
+</p>
+<ul><li>int YourFunctionName(Page&amp; pgTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile) </li>
+<li>int YourFunctionName(Layer&amp; lyTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile) </li></ul>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> More details on how to write such Origin C functions can be found in the <a class="external text" href="../../OriginC/OCGuide/Importing_Data.html">Importing Data</a> chapter in Origin C Guide.
+</td></tr></table>
+<p>After writing a function to handle the importing and saving it to an Origin C file, you can use it as follows:
+</p>
+<ol><li> Open the Import Wizard with the <b>Import Wizard</b> button <a  class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png?v=1807" width="23"  /></a> or selecting <b>Data: Import from File: Import Wizard</b> from the Origin menu. </li>
+<li> On the first page (the <b>Source</b> page) of the Wizard, select the <b>User Defined</b> radio button in the <b>Data Type</b> group. </li>
+<li> Specify the path for the imported files, if you wish to import one or more files; or, select the <b>Clipboard</b> radio button, if you wish to import from clipboard. </li>
+<li> Select a target window by selecting one of the radio buttons in the <b>Target Window</b> group. Choose a template <span style="color:red">*</span> and an import mode, if desired. Then click <b>Next</b> to go to the <b>User Defined Filters</b> page. </li>
+<li> In the <b>User Defined Filters</b> page, click the <b>Browse</b> button <a  class="image"><img alt="Importing Simple Binary Files with the Import Wizard-1.png" src="../images/Importing_User_Defined_Data_Files/Importing_Simple_Binary_Files_with_the_Import_Wizard-1.png?v=8480" width="17"  /></a> to the right of <b>Origin C Source File</b>. Navigate to the folder where your Origin C file is. Select the file and click <b>Open</b> to return to the Import Wizard. Enter the name of the function in the <b>Origin C Function</b> edit box. Then click <b>Next</b> to customize settings in other pages. </li>
+<li> When you finish all the settings, click <b>Finish</b>. Your Origin C function will be used to import the files. </li></ol>
+<table class="note">
+
+<tr>
+<td><span style="color:red">*</span>The target window template named on the <b>Source</b> page of the Import Wizard is only used when new windows are created (as would happen under some conditions during drag-and-drop importing). If choosing <b>Data: Import from File</b> from the menu and your active window is consistent with your import filter's Target Window specification, no new window is created and a reference to the page object for the active window is passed to your function. If the active window is of a different type, a new window will be created using the specified template, and the page reference to this new window is passed.
+</td></tr></table>
+
+

@@ -1,0 +1,91 @@
+<h1 class="firstHeading">2.1.18.8 ocmath_find_xy_in_rect</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Select given XY array to find all points inside the rectangle defined by XY
+min max values.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_find_xy_in_rect<span style="color: #000000;">&#40;</span> uint nPts, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, uint <span style="color: #000040;">*</span> pIndices, <span style="color: #0000ff;">double</span> dxMin, <span style="color: #0000ff;">double</span> dyMin, <span style="color: #0000ff;">double</span> dxMax, <span style="color: #0000ff;">double</span> dyMax <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> nPts</dt>
+<dd>[input] The number of input data points in pX, pY, pZ;</dd>
+<dt> pX</dt>
+<dd>[input] The array of X coordinates, must no be NULL;</dd>
+<dt> pY</dt>
+<dd>[input] The array of Y coordinates, must no be NULL;</dd>
+<dt> pIndices</dt>
+<dd>[output], must be SetSize to nPts on input and will receive the</dd>
+<dd>indices of the XY points inside rect.</dd>
+<dt> dxMin</dt>
+<dd>[input] The minimum value of output X array;</dd>
+<dt> dyMin</dt>
+<dd>[input] The minimum value of output Y array;</dd>
+<dt> dxMax</dt>
+<dd>[input] The maximum value of output X array, must not be less than dXMin;</dd>
+<dt> dyMax</dt>
+<dd>[input] The maximum value of output Y array, must not be less than dYMin.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>0 if none found to be inside rect, otherwise the number of points found,
+</p><p>and will always be less than nPts.
+</p><p>-1 if given XY range does not define a valid Rect, like if xmin&gt;=xmax or
+</p><p>ymin&gt;=ymax.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Before running, make sure a worksheet is active in current project</span>
+<span style="color: #008000;">//the worksheet should has at least 2 columns and without any missing value in the first two columns</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> ocmath_find_xy_in_rect_ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> dXMin <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">double</span> dYMin <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">double</span> dXMax <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">double</span> dYMax <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsX<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>, dsY<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+
+    vector vX<span style="color: #000000;">&#40;</span>dsX<span style="color: #000000;">&#41;</span>, vY<span style="color: #000000;">&#40;</span>dsY<span style="color: #000000;">&#41;</span>;
+    
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vIndices<span style="color: #000000;">&#40;</span>dsX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">int</span> nPts <span style="color: #000080;">=</span> ocmath_find_xy_in_rect<span style="color: #000000;">&#40;</span>dsX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vX, vY, vIndices, dXMin, dYMin, dXMax, dYMax<span style="color: #000000;">&#41;</span>;
+    
+    ocmath_d_copy<span style="color: #000000;">&#40;</span>nPts, vIndices, vX, vX, vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    ocmath_d_copy<span style="color: #000000;">&#40;</span>nPts, vIndices, vY, vY, vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%d data points are found within rect.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nPts<span style="color: #000000;">&#41;</span>;
+    
+    vX.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nPts<span style="color: #000000;">&#41;</span>;
+    vY.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nPts<span style="color: #000000;">&#41;</span>;
+
+    dsX <span style="color: #000080;">=</span> vX;
+    dsY <span style="color: #000080;">=</span> vY;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Should trim Missing Value before using this function 
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Ocmath_find_xy_in_circle_(global_function).html" title="OriginC:Ocmath find xy in circle (global function)">ocmath_find_xy_in_circle</a>
+</p><p><br />
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>wks2mat.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

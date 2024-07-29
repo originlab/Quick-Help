@@ -1,0 +1,337 @@
+<h1 class="firstHeading">1.4.5 Controlling Column Data Types</h1><p>Origin support all the basic numeric data types.
+</p><p>In this example, you will see how to setup a worksheet with columns of signed and unsigned 1 byte, 2 byte, 4 byte integers, 4 byte and 8 byte floating points, as well as 16 bytes complex data type.
+</p><p>Strings can also put passed into Origin Columns, if a column is of the type <i>Text</i> or <i>Text &amp; Numeric</i>.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#VB_Example_to_Set_All_Columns_to_Y_and_Float_Data_Type"><span class="tocnumber">1</span> <span class="toctext">VB Example to Set All Columns to Y and Float Data Type</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Excel_VBA"><span class="tocnumber">2</span> <span class="toctext">Excel VBA</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#C.23_Codes_to_Show_Problems"><span class="tocnumber">3</span> <span class="toctext">C# Codes to Show Problems</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#long_and_ulong_does_not_work_in_C.23"><span class="tocnumber">3.1</span> <span class="toctext">long and ulong does not work in C#</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#long_does_not_work_in_VB.NET"><span class="tocnumber">3.2</span> <span class="toctext">long does not work in VB.NET</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="VB_Example_to_Set_All_Columns_to_Y_and_Float_Data_Type"></a><span class="mw-headline">VB Example to Set All Columns to Y and Float Data Type</span></h2>
+<pre class="vb" style="font-family:monospace;"> <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CommandButton1_Click()
+   <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> col <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Set</span> wks = app.FindWorksheet(<span style="color: #800000;">&quot;&quot;</span>)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> wks.Cols - 1
+        <span style="color: #151B8D; font-weight: bold;">Set</span> col = wks.Columns(ii)
+        col.DataFormat = DF_FLOAT
+        col.<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_Y
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h2><a name="Excel_VBA"></a><span class="mw-headline">Excel VBA</span></h2>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Option</span> <span style="color: #E56717; font-weight: bold;">Explicit</span>
+ 
+Const NUMPTS = 100
+
+<span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CreateOPJ()
+
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> org <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wksName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> rng <span style="color: #151B8D; font-weight: bold;">As</span> Origin.DataRange
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Long</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> strPathName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s1(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s2(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s3(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s4(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s5(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s6(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s7(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s8(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS, 1 <span style="color: #8D38C9; font-weight: bold;">To</span> 2) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+ 
+    <span style="color: #008000;">'------------------------------------------------------------
+</span>    <span style="color: #151B8D; font-weight: bold;">On</span> <span style="color: #151B8D; font-weight: bold;">Error</span> <span style="color: #8D38C9; font-weight: bold;">GoTo</span> <span style="color: #151B8D; font-weight: bold;">error</span>
+ 
+    <span style="color: #008000;">' Create the origin COM object:
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> org = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+    org.Visible = MAINWND_SHOW
+    
+    <span style="color: #008000;">' Initialize new project:
+</span>    org.NewProject
+ 
+    <span style="color: #008000;">' The sheets:
+</span>    wksName = org.CreatePage(2)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> orgWks = org.FindWorksheet(wksName)
+ 
+    <span style="color: #008000;">' Make sure WorkSheet has eight columns:
+</span>    <span style="color: #8D38C9; font-weight: bold;">Do</span> <span style="color: #8D38C9; font-weight: bold;">While</span> orgWks.Columns.Count &lt; 8
+        orgWks.Columns.Add
+    <span style="color: #8D38C9; font-weight: bold;">Loop</span>
+ 
+    <span style="color: #008000;">' Set Long Names, Units, and Comment to the four columns:
+</span>    orgWks.Columns(0).DataFormat = DF_BYTE              <span style="color: #008000;">'set DataFormat as unsigned 8-bit integer, DF_BYTE = 38
+</span>    orgWks.Columns(0).Name = <span style="color: #800000;">&quot;Ch1&quot;</span>
+    orgWks.Columns(0).LongName = <span style="color: #800000;">&quot;Byte&quot;</span>
+ 
+    orgWks.Columns(1).DataFormat = DF_SHORT             <span style="color: #008000;">'set DataFormat as signed 16-bit integer, DF_SHORT = 33
+</span>    orgWks.Columns(1).Name = <span style="color: #800000;">&quot;Ch2&quot;</span>
+    orgWks.Columns(1).LongName = <span style="color: #800000;">&quot;Short&quot;</span>
+ 
+    orgWks.Columns(2).DataFormat = DF_USHORT            <span style="color: #008000;">'set DataFormat as unsigned 16-bit integer, DF_USHORT = 39
+</span>    orgWks.Columns(2).Name = <span style="color: #800000;">&quot;Ch3&quot;</span>
+    orgWks.Columns(2).LongName = <span style="color: #800000;">&quot;uShort&quot;</span>
+ 
+    orgWks.Columns(3).DataFormat = DF_LONG              <span style="color: #008000;">'set DataFormat as signed 32-bit integer, DF_LONG = 34
+</span>    orgWks.Columns(3).Name = <span style="color: #800000;">&quot;Ch4&quot;</span>
+    orgWks.Columns(3).LongName = <span style="color: #800000;">&quot;Long&quot;</span>
+ 
+    orgWks.Columns(4).DataFormat = DF_ULONG             <span style="color: #008000;">'set DataFormat as unsigned 32-bit integer, DF_ULONG = 40
+</span>    orgWks.Columns(4).Name = <span style="color: #800000;">&quot;Ch5&quot;</span>
+    orgWks.Columns(4).LongName = <span style="color: #800000;">&quot;uLong&quot;</span>
+ 
+    orgWks.Columns(5).DataFormat = DF_FLOAT             <span style="color: #008000;">'set DataFormat as 32-bit floating point, DF_FLOAT = 32
+</span>    orgWks.Columns(5).Name = <span style="color: #800000;">&quot;Ch6&quot;</span>
+    orgWks.Columns(5).LongName = <span style="color: #800000;">&quot;Float&quot;</span>
+ 
+    orgWks.Columns(6).DataFormat = DF_DOUBLE            <span style="color: #008000;">'set DataFormat as 64-bit floating point, DF_DOUBLE = 0
+</span>    orgWks.Columns(6).Name = <span style="color: #800000;">&quot;Ch7&quot;</span>
+    orgWks.Columns(6).LongName = <span style="color: #800000;">&quot;Double&quot;</span>
+ 
+    orgWks.Columns(7).DataFormat = DF_COMPLEX           <span style="color: #008000;">'set DataFormat as Complex, DF_COMPLEX = 41
+</span>    orgWks.Columns(7).Name = <span style="color: #800000;">&quot;Ch8&quot;</span>
+    orgWks.Columns(7).LongName = <span style="color: #800000;">&quot;Complex&quot;</span>
+ 
+    <span style="color: #008000;">' Set data to the arrays
+</span>    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+        s1(ii) = Rnd(9)
+        s2(ii) = ii
+        s3(ii) = ii * 2
+        s4(ii) = ii * 4
+        s5(ii) = ii * 8
+        s6(ii) = ii * 0.1
+        s7(ii) = ii / 13.4
+        s8(ii, 1) = ii / 3.14
+        s8(ii, 2) = ii * 0.2
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+  <span style="color: #008000;">'Create a single column data range in the workSheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 0) <span style="color: #008000;">' col (1)
+</span>    ii = rng.SetData(s1)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 1) <span style="color: #008000;">' col (2)
+</span>    ii = rng.SetData(s2)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 2) <span style="color: #008000;">' col (3)
+</span>    ii = rng.SetData(s3)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 3) <span style="color: #008000;">' col (4)
+</span>    ii = rng.SetData(s4)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 4) <span style="color: #008000;">' col (5)
+</span>    ii = rng.SetData(s5)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 5) <span style="color: #008000;">' col (6)
+</span>    ii = rng.SetData(s6)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> rng = orgWks.NewDataRange(0, 6) <span style="color: #008000;">' col (7)
+</span>    ii = rng.SetData(s7)
+    orgWks.Columns(7).SetData (s8)
+ 
+    <span style="color: #008000;">'------------------------------------------------------------
+</span> 
+    <span style="color: #008000;">' Get the pathname for saving the OPJ:
+</span>    strPathName = Application.GetSaveAsFilename(<span style="color: #800000;">&quot;My Project Name&quot;</span>, <span style="color: #800000;">&quot;Project files (*.OPJ),*.OPJ&quot;</span>, 0)
+    <span style="color: #8D38C9; font-weight: bold;">If</span> strPathName = <span style="color: #00C2FF; font-weight: bold;">False</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+ 
+    <span style="color: #008000;">' Save:
+</span>    <span style="color: #8D38C9; font-weight: bold;">If</span> org.Save(strPathName) = <span style="color: #00C2FF; font-weight: bold;">False</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox <span style="color: #800000;">&quot;Failed to save the project into &quot;</span> &amp; strPathName
+    <span style="color: #8D38C9; font-weight: bold;">Else</span>
+        MsgBox <span style="color: #800000;">&quot;Saved into &quot;</span> &amp; strPathName
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+ 
+    <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+ 
+<span style="color: #151B8D; font-weight: bold;">error</span>:
+    MsgBox (<span style="color: #800000;">&quot;ERROR&quot;</span>)
+    <span style="color: #151B8D; font-weight: bold;">Resume</span> <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h2><a name="C.23_Codes_to_Show_Problems"></a><span class="mw-headline">C# Codes to Show Problems</span></h2>
+<h3><a name="long_and_ulong_does_not_work_in_C.23"></a><span class="mw-headline">long and ulong does not work in C#</span></h3>
+<pre class="csharp" style="font-family:monospace;">        <span style="color: #0600FF; font-weight: bold;">public</span> <span style="color: #6666cc; font-weight: bold;">void</span> TestDataFormat<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #6666cc; font-weight: bold;">long</span> NUMPTS <span style="color: #008000;">=</span> <span style="color: #FF0000;">50</span><span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span> orgWks<span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span> DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_BYTE</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">int</span> nn <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">string</span> DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;&quot;</span><span style="color: #008000;">;</span>
+
+
+            <span style="color: #6666cc; font-weight: bold;">long</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> s7 <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">long</span><span style="color: #008000;">&#91;</span>NUMPTS<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">ulong</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> s8 <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">ulong</span><span style="color: #008000;">&#91;</span>NUMPTS<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span> org <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            org<span style="color: #008000;">.</span><span style="color: #0000FF;">NewProject</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span> orgWkBk <span style="color: #008000;">=</span> org<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span>, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            orgWks <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span><span style="color: #008000;">&#41;</span>orgWkBk<span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #0600FF; font-weight: bold;">do</span>
+            <span style="color: #008000;">&#123;</span>
+                orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span> <span style="color: #0600FF; font-weight: bold;">while</span> <span style="color: #008000;">&#40;</span>orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Count</span> <span style="color: #008000;">&lt;</span> <span style="color: #FF0000;">2</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span>nn <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> nn <span style="color: #008000;">&lt;</span> <span style="color: #FF0000;">10</span><span style="color: #008000;">;</span> nn<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #0600FF; font-weight: bold;">switch</span> <span style="color: #008000;">&#40;</span>nn<span style="color: #008000;">&#41;</span>
+                <span style="color: #008000;">&#123;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_BYTE</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;BYTE&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_SHORT</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;SHORT&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">2</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_USHORT</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;USHORT&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">3</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_LONG</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;LONG&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">4</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_ULONG</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;ULONG&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">5</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_FLOAT</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;FLOAT&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">6</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_DOUBLE</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;DOUBLE&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">7</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_COMPLEX</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;COMPLEX&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">8</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_TEXT</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;TEXT&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                    <span style="color: #0600FF; font-weight: bold;">case</span> <span style="color: #FF0000;">9</span><span style="color: #008000;">:</span>
+                        DF <span style="color: #008000;">=</span> OrgLab8<span style="color: #008000;">.</span><span style="color: #0000FF;">COLDATAFORMAT</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DF_TEXT_NUMERIC</span><span style="color: #008000;">;</span>
+                        DF1 <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;TEXT_NUMERIC&quot;</span><span style="color: #008000;">;</span>
+                        <span style="color: #0600FF; font-weight: bold;">break</span><span style="color: #008000;">;</span>
+                <span style="color: #008000;">&#125;</span>
+                <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> <span style="color: #FF0000;">10</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                <span style="color: #008000;">&#123;</span>
+                    orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">DataFormat</span> <span style="color: #008000;">=</span> DF<span style="color: #008000;">;</span>
+                <span style="color: #008000;">&#125;</span>
+                <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> NUMPTS<span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                <span style="color: #008000;">&#123;</span>
+                    s7<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">*</span> <span style="color: #FF0000;">100</span><span style="color: #008000;">;</span>   <span style="color: #008080; font-style: italic;">//long</span>
+                    s8<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">ulong</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">*</span> <span style="color: #FF0000;">200</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>   <span style="color: #008080; font-style: italic;">//ulong</span>
+                <span style="color: #008000;">&#125;</span>
+
+                    <span style="color: #0600FF; font-weight: bold;">try</span>
+                    <span style="color: #008000;">&#123;</span> orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">6</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s7, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008000;">&#125;</span>
+                    <span style="color: #0600FF; font-weight: bold;">catch</span> <span style="color: #008000;">&#40;</span>Exception ex<span style="color: #008000;">&#41;</span>
+                    <span style="color: #008000;">&#123;</span> 
+                      MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;long--&gt;&quot;</span> <span style="color: #008000;">+</span> DF1<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> 
+                      MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span>ex<span style="color: #008000;">.</span><span style="color: #0000FF;">ToString</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                    <span style="color: #008000;">&#125;</span>
+                    <span style="color: #0600FF; font-weight: bold;">try</span>
+                    <span style="color: #008000;">&#123;</span> orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">7</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s8, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008000;">&#125;</span>
+                    <span style="color: #0600FF; font-weight: bold;">catch</span><span style="color: #008000;">&#40;</span>Exception ex<span style="color: #008000;">&#41;</span>
+                    <span style="color: #008000;">&#123;</span> 
+                      MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;ulong--&gt;&quot;</span> <span style="color: #008000;">+</span> DF1<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> 
+                      MessageBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Show</span><span style="color: #008000;">&#40;</span>ex<span style="color: #008000;">.</span><span style="color: #0000FF;">ToString</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                    <span style="color: #008000;">&#125;</span>
+              
+            <span style="color: #008000;">&#125;</span>
+        <span style="color: #008000;">&#125;</span></pre>
+<h3><a name="long_does_not_work_in_VB.NET"></a><span class="mw-headline">long does not work in VB.NET</span></h3>
+<pre class="vb" style="font-family:monospace;">    <span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CreateOPJ()
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> strPathName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Object</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> org <span style="color: #151B8D; font-weight: bold;">As</span> OrgLab8.Application
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWkBk <span style="color: #151B8D; font-weight: bold;">As</span> OrgLab8.WorksheetPage
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWks <span style="color: #151B8D; font-weight: bold;">As</span> OrgLab8.Worksheet
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> nn <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span> = 0
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span> = 0
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> DF <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span> = 0
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> DF1 <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span> = <span style="color: #800000;">&quot;&quot;</span>
+
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> s(NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Long</span>
+
+        <span style="color: #008000;">'------------------------------------------------------------
+</span>        org = <span style="color: #E56717; font-weight: bold;">New</span> OrgLab8.Application
+        org.NewProject()
+        orgWkBk = org.WorksheetPages.Add
+        orgWks = orgWkBk.Layers(0)
+
+        <span style="color: #8D38C9; font-weight: bold;">Do</span> <span style="color: #8D38C9; font-weight: bold;">While</span> orgWks.Columns.Count &lt; 9
+            orgWks.Columns.Add()
+        <span style="color: #8D38C9; font-weight: bold;">Loop</span>
+
+        <span style="color: #8D38C9; font-weight: bold;">For</span> nn = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> 9
+            <span style="color: #8D38C9; font-weight: bold;">Select</span> <span style="color: #8D38C9; font-weight: bold;">Case</span> nn
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 0
+                    DF = OrgLab8.COLDATAFORMAT.DF_BYTE
+                    DF1 = <span style="color: #800000;">&quot;BYTE&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 1
+                    DF = OrgLab8.COLDATAFORMAT.DF_SHORT
+                    DF1 = <span style="color: #800000;">&quot;SHORT&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 2
+                    DF = OrgLab8.COLDATAFORMAT.DF_USHORT
+                    DF1 = <span style="color: #800000;">&quot;USHORT&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 3
+                    DF = OrgLab8.COLDATAFORMAT.DF_LONG
+                    DF1 = <span style="color: #800000;">&quot;LONG&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 4
+                    DF = OrgLab8.COLDATAFORMAT.DF_ULONG
+                    DF1 = <span style="color: #800000;">&quot;ULONG&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 5
+                    DF = OrgLab8.COLDATAFORMAT.DF_FLOAT
+                    DF1 = <span style="color: #800000;">&quot;FLOAT&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 6
+                    DF = OrgLab8.COLDATAFORMAT.DF_DOUBLE
+                    DF1 = <span style="color: #800000;">&quot;DOUBLE&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 7
+                    DF = OrgLab8.COLDATAFORMAT.DF_COMPLEX
+                    DF1 = <span style="color: #800000;">&quot;COMPLEX&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 8
+                    DF = OrgLab8.COLDATAFORMAT.DF_TEXT
+                    DF1 = <span style="color: #800000;">&quot;TEXT&quot;</span>
+                <span style="color: #8D38C9; font-weight: bold;">Case</span> 9
+                    DF = OrgLab8.COLDATAFORMAT.DF_TEXT_NUMERIC
+                    DF1 = <span style="color: #800000;">&quot;TEXT_NUMERIC&quot;</span>
+            <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">Select</span>
+
+            <span style="color: #008000;">'-----Set Columns-----
+</span>            ii = 0
+            <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> 8
+                orgWks.Columns(ii).DataFormat = DF
+            <span style="color: #8D38C9; font-weight: bold;">Next</span> ii
+
+            <span style="color: #008000;">'-----------Set Array------------
+</span>            <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+                s(ii) = ii * 10  <span style="color: #008000;">'Long
+</span>            <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+            <span style="color: #008000;">'---------SetData---------------
+</span>            Try
+                orgWks.Columns(3).SetData(s)
+            Catch ex <span style="color: #151B8D; font-weight: bold;">As</span> Exception
+                MsgBox(<span style="color: #800000;">&quot;Long--&gt;&quot;</span> &amp; DF1)
+                MsgBox(ex.ToString())
+            <span style="color: #8D38C9; font-weight: bold;">End</span> Try
+
+        <span style="color: #8D38C9; font-weight: bold;">Next</span> nn
+
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+
+
+
+
+
+

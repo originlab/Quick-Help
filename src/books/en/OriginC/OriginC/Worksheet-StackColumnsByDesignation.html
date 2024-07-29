@@ -1,0 +1,67 @@
+<h1 class="firstHeading">2.2.4.46.93 Worksheet::StackColumnsByDesignation</h1><p><span class="OIndex" style="display:none">StackColumnsByDesignation</span>
+</p><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>This function stack columns by plot designation. Each column designation is unique in each combination.When there is a missing column in front/middle of the combination, repeat the column from last combination.
+Note:disregardful columns would be ignore
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> StackColumnsByDesignation<span style="color: #000000;">&#40;</span> Worksheet<span style="color: #000040;">&amp;</span> wksDest, <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vnColIndices <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> wksDest</dt>
+<dd>[Modified] The Worksheet where the stacked data is copied onto,it must be valid otherwise do nothing.</dd>
+<dt> vnColIndices </dt>
+<dd>[input] column indices to be stack in worksheet</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns true on successful exit and false on error.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This example stack all columns in worksheet1 by rule above and output result to worksheet2.</span>
+<span style="color: #0000ff;">void</span> Worksheet_StackColumnsByDesignation_Ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet worksheet1 <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nNumCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+	worksheet1.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nNumCols <span style="color: #000000;">&#41;</span>;
+	worksheet1.<span style="color: #000000;">SetColDesignations</span><span style="color: #000000;">&#40;</span> <span style="color: #ff00ff;">&quot;XYZYZ&quot;</span> <span style="color: #000000;">&#41;</span>;
+	Worksheet worksheet2;
+	worksheet2.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">//here fill data to worksheet</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> nNumCols; ii<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Dataset ds<span style="color: #000000;">&#40;</span>worksheet1, ii<span style="color: #000000;">&#41;</span>;
+		ds.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span> nNumCols <span style="color: #000000;">&#41;</span>;
+		ds.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span> ii, ii <span style="color: #000040;">+</span> nNumCols, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnIndices;
+	vnIndices.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span>, nNumCols, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> worksheet1.<span style="color: #000000;">StackColumnsByDesignation</span><span style="color: #000000;">&#40;</span> worksheet2, vnIndices<span style="color: #000000;">&#41;</span>;
+	string strMsg;
+	strMsg <span style="color: #000080;">=</span> bRet&#160;? <span style="color: #ff00ff;">&quot;Function succeed&quot;</span> <span style="color: #000000;">:</span> <span style="color: #ff00ff;">&quot;Function failed&quot;</span>;
+	out_str<span style="color: #000000;">&#40;</span> strMsg <span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

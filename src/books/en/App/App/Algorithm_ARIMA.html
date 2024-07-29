@@ -1,0 +1,96 @@
+<h1 class="firstHeading">2.2.5.1.2 Algorithm for ARIMA</h1><p class='urlname' style='display: none'>TSA-ARIMA-Algorithm</p>
+<p><b>ARIMA</b> model means an autoregressive integrated moving average model. And it may include autoregressive(<b>AR</b>), moving average (<b>MA</b>) or differencing. In this app, nag function nag_tsa_multi_inp_model_estim (<b>g13bec</b>) is used to fit an <b>ARIMA</b> model [<a href="#Ref1">1</a>], and nag function nag_tsa_multi_inp_model_forecast (<b>g13bjc</b>) is used to forecast future values by a known ARIMA model [<a href="#Ref2">2</a>].
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#ARIMA_Model"><span class="tocnumber">1</span> <span class="toctext">ARIMA Model</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Estimation"><span class="tocnumber">2</span> <span class="toctext">Estimation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Estimation_Criterion"><span class="tocnumber">2.1</span> <span class="toctext">Estimation Criterion</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Quantities"><span class="tocnumber">3</span> <span class="toctext">Quantities</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Forecast"><span class="tocnumber">4</span> <span class="toctext">Forecast</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Reference"><span class="tocnumber">5</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="ARIMA_Model"></a><span class="mw-headline">ARIMA Model</span></h2>
+<p>For a general <b>ARIMA</b> model,
+</p>
+<div align="center">
+<img src="../images/Algorithm_ARIMA/math-d98804886c9279e6f29bc3c78ce492f7.png?v=0" title="\begin{equation}\tag{1}&#10;\begin{split}&#10;\nabla ^d \nabla_s^D y_t &amp;= c + w_t \\&#10;w_t &amp;= \Phi_1 w_{t-s} + \Phi_2 w_{t-2s} + ... + \Phi_P w_{t-Ps} + e_t - \Theta_1 e_{t-s} - \Theta_2 e_{t-2s} - ... - \Theta_Q e_{t-Qs} \\&#10;e_t &amp;= \phi_1 e_{t-1} + \phi_2 e_{t-2} + ... + \phi_p e_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - ... - \theta_q e_{t-q} &#10;\end{split}&#10;\end{equation}" alt="\begin{equation}\tag{1}&#10;\begin{split}&#10;\nabla ^d \nabla_s^D y_t &amp;= c + w_t \\&#10;w_t &amp;= \Phi_1 w_{t-s} + \Phi_2 w_{t-2s} + ... + \Phi_P w_{t-Ps} + e_t - \Theta_1 e_{t-s} - \Theta_2 e_{t-2s} - ... - \Theta_Q e_{t-Qs} \\&#10;e_t &amp;= \phi_1 e_{t-1} + \phi_2 e_{t-2} + ... + \phi_p e_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - ... - \theta_q e_{t-q} &#10;\end{split}&#10;\end{equation}" class="tex"/></div>,
+<p>where <img src="../images/Algorithm_ARIMA/math-a568bf104397bd8311073893dff24222.png?v=0" title="y_t" alt="y_t" class="tex"/> is the input time series (<i>t</i> = 1 ... <i>n</i>), <i>P</i>, <i>Q</i>, <i>D</i>, <i>p</i>, <i>q</i>, <i>d</i> are orders of seasonal autoregressive, seasonal moving average, seasonal differencing, autoregressive, moving average and differencing respectively. And <i>s</i> is the seasonal period. <i>c</i> is the mean of the differenced values, <img src="../images/Algorithm_ARIMA/math-36241c2b714c9a3cca9ecbe2047ff416.png?v=0" title="\Phi_i (i=1 ... P)" alt="\Phi_i (i=1 ... P)" class="tex"/>, <img src="../images/Algorithm_ARIMA/math-d4f3a3726f683f276fae850649dfe956.png?v=0" title="\Theta_i (i=1 ... Q)" alt="\Theta_i (i=1 ... Q)" class="tex"/>, <img src="../images/Algorithm_ARIMA/math-764e9f83828ebf0863d655cdad210eb4.png?v=0" title="\phi_i (i=1 ... p)" alt="\phi_i (i=1 ... p)" class="tex"/>, <img src="../images/Algorithm_ARIMA/math-1b6d8e3210a880c1b4cb3bb5aa3f769e.png?v=0" title="\theta_i (i=1 ... q)" alt="\theta_i (i=1 ... q)" class="tex"/> are coefficients for seasonal autoregressive, seasonal moving average, autoregressive and moving average. <img src="../images/Algorithm_ARIMA/math-11134ff62a3534476fc6cc89687d67bf.png?v=0" title="a_t" alt="a_t" class="tex"/> is the residual.
+</p>
+<h2><a name="Estimation"></a><span class="mw-headline">Estimation</span></h2>
+<p>Residual series <img src="../images/Algorithm_ARIMA/math-11134ff62a3534476fc6cc89687d67bf.png?v=0" title="a_t" alt="a_t" class="tex"/> can be obtained by <img src="../images/Algorithm_ARIMA/math-a568bf104397bd8311073893dff24222.png?v=0" title="y_t" alt="y_t" class="tex"/> in equation 1. Sum squares of residuals:
+</p>
+<div align="right">
+<img src="../images/Algorithm_ARIMA/math-b7dc0e937548089ceaa80cc72ab08317.png?v=0" title="\begin{equation}\tag{2}S = \sum_{-\infty}^n a_t^2 \end{equation}" alt="\begin{equation}\tag{2}S = \sum_{-\infty}^n a_t^2 \end{equation}" class="tex"/></div>
+<h3><a name="Estimation_Criterion"></a><span class="mw-headline">Estimation Criterion</span></h3>
+<p>Three criteria are available:
+</p>
+<ul><li> Least Squares</li></ul>
+<dl><dd><img src="../images/Algorithm_ARIMA/math-2d6768b43c5a46f210b9e91c518cea50.png?v=0" title=" D = S" alt=" D = S" class="tex"/></dd></dl>
+<p>Iterate by minimizing D. 
+</p>
+<ul><li> Exact Likelihood</li></ul>
+<p><img src="../images/Algorithm_ARIMA/math-dd66da51c50135f190d4096619c26163.png?v=0" title="y_i, \; i=0, -1, ... " alt="y_i, \; i=0, -1, ... " class="tex"/> are considered as unobserved random variables with known distribution. 
+</p>
+<dl><dd><img src="../images/Algorithm_ARIMA/math-10232bc28f8635163d3bd5185dcb73df.png?v=0" title=" D = M \times S" alt=" D = M \times S" class="tex"/></dd></dl>
+<p>where the multiplier <i>M</i> is a function calculated from the ARIMA model arguments.
+</p><p>Minimizing <i>D</i> is equivalent to maximizing the exact likelihood of the data.
+</p>
+<ul><li> Marginal Likelihood</li></ul>
+<dl><dd><img src="../images/Algorithm_ARIMA/math-10232bc28f8635163d3bd5185dcb73df.png?v=0" title=" D = M \times S" alt=" D = M \times S" class="tex"/></dd></dl>
+<p>but with a different value of <i>M</i>.  It is distinct from exact likelihood method only if the mean term is included in the model.
+</p><p>In this app, Marquardt method [<a href="#Ref4">4</a>] is used to minimize the objective function.
+</p>
+<h2><a name="Quantities"></a><span class="mw-headline">Quantities</span></h2>
+<ul><li> Residual <img src="../images/Algorithm_ARIMA/math-11134ff62a3534476fc6cc89687d67bf.png?v=0" title="a_t" alt="a_t" class="tex"/></li></ul>
+<p>Residuals are available at <img src="../images/Algorithm_ARIMA/math-bd71a98794542313fe58812076ef3e72.png?v=0" title="t \ge 1 + d + s \times D" alt="t \ge 1 + d + s \times D" class="tex"/>.
+</p>
+<ul><li> Fitted y</li></ul>
+<p><img src="../images/Algorithm_ARIMA/math-c0a7312f9dd8b86fe502a5a1bd2d1a87.png?v=0" title="\hat{y}_t = y_t - a_t" alt="\hat{y}_t = y_t - a_t" class="tex"/>
+</p>
+<ul><li> Residual Degrees of Freedom</li></ul>
+<p>Differenced series length is: <img src="../images/Algorithm_ARIMA/math-b3d403b484a57246fc77215d3d683a56.png?v=0" title="N = n - d - s \times D" alt="N = n - d - s \times D" class="tex"/>, and <img src="../images/Algorithm_ARIMA/math-4c892b0a815b2985eb840fe5ef7ae00c.png?v=0" title="df = N - (\text{number of parameters})" alt="df = N - (\text{number of parameters})" class="tex"/> .
+</p>
+<ul><li> Residual Variance</li></ul>
+<p><img src="../images/Algorithm_ARIMA/math-68e1b01b16951bc5b1c790190d439082.png?v=0" title="erv = \frac{S}{df}" alt="erv = \frac{S}{df}" class="tex"/>
+</p>
+<ul><li> Covariance Matrix of Parameters</li></ul>
+<p><img src="../images/Algorithm_ARIMA/math-768aee78cb6b6ffe2b94bf4d761c93f5.png?v=0" title="C = erv \times H^{-1}" alt="C = erv \times H^{-1}" class="tex"/>
+</p><p>where <i>H</i> is the linearised least squares matrix in the final iteration.
+</p>
+<h2><a name="Forecast"></a><span class="mw-headline">Forecast</span></h2>
+<p>To predict time series <img src="../images/Algorithm_ARIMA/math-a568bf104397bd8311073893dff24222.png?v=0" title="y_t" alt="y_t" class="tex"/> at <i>t = n + 1</i>, ... <i>n + L</i>, set <img src="../images/Algorithm_ARIMA/math-12a6a3c044ce26c42ddc7e25f2afb54a.png?v=0" title="a_t = 0" alt="a_t = 0" class="tex"/> for <i>t = n + 1</i>, ... <i>n + L</i>, and calculate the predicted value by reversing Eq 1.
+</p>
+<div align="center">
+<img src="../images/Algorithm_ARIMA/math-23626cf9aadc659901dbc804da6d3963.png?v=0" title="\begin{equation}\tag{3}&#10;\begin{split}&#10;e_t &amp;= \phi_1 e_{t-1} + \phi_2 e_{t-2} + ... + \phi_p e_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - ... - \theta_q e_{t-q} \\&#10;w_t &amp;= \Phi_1 w_{t-s} + \Phi_2 w_{t-2s} + ... + \Phi_P w_{t-Ps} + e_t - \Theta_1 e_{t-s} - \Theta_2 e_{t-2s} - ... - \Theta_Q e_{t-Qs} \\&#10;y_t &amp;= (\nabla ^d \nabla_s^D)^{-1} (c + w_t)&#10;\end{split}&#10;\end{equation}" alt="\begin{equation}\tag{3}&#10;\begin{split}&#10;e_t &amp;= \phi_1 e_{t-1} + \phi_2 e_{t-2} + ... + \phi_p e_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - ... - \theta_q e_{t-q} \\&#10;w_t &amp;= \Phi_1 w_{t-s} + \Phi_2 w_{t-2s} + ... + \Phi_P w_{t-Ps} + e_t - \Theta_1 e_{t-s} - \Theta_2 e_{t-2s} - ... - \Theta_Q e_{t-Qs} \\&#10;y_t &amp;= (\nabla ^d \nabla_s^D)^{-1} (c + w_t)&#10;\end{split}&#10;\end{equation}" class="tex"/></div>
+<p>The forecast error variance of <img src="../images/Algorithm_ARIMA/math-ef009cb8593564a4936010eeb83302e8.png?v=0" title="y_{n+L}" alt="y_{n+L}" class="tex"/> can be calculated as:
+</p>
+<div align="center">
+<p><img src="../images/Algorithm_ARIMA/math-3700abf2c5a3d680163d9619651178f5.png?v=0" title="S_L^2 = V_n \times (\psi_0^2 + \psi_1^2 + ... + \psi_{L-1}^2)" alt="S_L^2 = V_n \times (\psi_0^2 + \psi_1^2 + ... + \psi_{L-1}^2)" class="tex"/>
+</p>
+</div>
+<p>where <i>V</i><sub>n</sub> is the residual variance of the ARIMA model, and <img src="../images/Algorithm_ARIMA/math-befd4ee507d221166c9012b44378ba31.png?v=0" title="\psi_i" alt="\psi_i" class="tex"/> is the "psi-weights" of the model as defined in [<a href="#Ref3">3</a>].
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+<ol><li> <span id="Ref1"><span><a class="external text" href="https://d2mvzyuse3lwjc.cloudfront.net/pdfs/NAG26/Manual/html/g13/g13bec.html" target="_blank">nag_tsa_multi_inp_model_estim (g13bec)</a></li>
+<li> <span id="Ref2"><span><a class="external text" href="https://d2mvzyuse3lwjc.cloudfront.net/pdfs/NAG26/Manual/html/g13/g13bjc.html" target="_blank">nag_tsa_multi_inp_model_forecast (g13bjc)</a></li>
+<li> <span id="Ref3"><span>George E. P. Box and Gwilym M. Jenkins (1976). <i>Time Series Analysis: Forecasting and Control</i>. (Revised Edition) Holden–Day</li>
+<li> <span id="Ref4"><span>D. W. Marquardt (1963). "An algorithm for least squares estimation of nonlinear parameters". <i>J. Soc. Indust. Appl. Math</i>. 11 431.</span></li></ol>
+<p></span>
+</span>
+</span>
+</span>
+</span>
+</span>
+</span>
+</p>
+
+
+
+
+

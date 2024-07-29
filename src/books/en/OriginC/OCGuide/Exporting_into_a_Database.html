@@ -1,0 +1,55 @@
+<h1 class="firstHeading">1.14.2 Exporting into a Database</h1><p><span class="OIndex" style="display:none">Export Data to Database</span>
+Origin C has the ability to export data from a worksheet to a specified database table. The following steps show how to export fitting summary data into a database.
+</p>
+<ol><li> Set up a database named "Analysis" in MySQL, and assume it is running on the machine "Lintilla".</li>
+<li> Create a table named "FittingSummary" with 9 fields, set the data type of the first two fields as varchar(40) and the rest as double.</li>
+<li> Open OriginExe\Samples\Curve Fitting\autofit.ogw, and fill the columns on the "Data" layer with data.</li>
+<li> After recalculating, activate the "Summary" layer, and run the following code to export the result to a database.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//user should modify connect and query string according to their database settings.</span>
+<span style="color: #008000;">//such as value of Server, Database, UID, PWD etc.</span>
+<span style="color: #0000ff;">#define</span>	STR_DB_CONN				<span style="color: #ff00ff;">&quot;Driver={MySQL ODBC 3.51 Driver};	<span style="color: #666666; font-weight: bold;">\</span>
+		Server=Lintilla;Port=3306;Option=4;Database=Analysis;UID=test;PWD=test;&quot;</span>
+<span style="color: #0000ff;">#define</span>	STR_QUERY				<span style="color: #ff00ff;">&quot;Select * from FittingSummary&quot;</span>
+
+<span style="color: #0000ff;">bool</span>	write_wks_to_db<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> wks <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	
+	<span style="color: #008000;">//connect to database &quot;Analysis&quot; on &quot;Lintilla&quot;</span>
+	string	strConn <span style="color: #000080;">=</span> STR_DB_CONN;
+	string	strQuery <span style="color: #000080;">=</span> STR_QUERY;
+	
+	Object	oConn;
+	oConn <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Connection&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>oConn <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to create ADODB.Connection object!&quot;</span><span style="color: #000000;">&#41;</span>;
+	oConn.<span style="color: #000000;">Open</span><span style="color: #000000;">&#40;</span>strConn<span style="color: #000000;">&#41;</span>;
+	
+	Object	oRecordset;
+	oRecordset <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>oRecordset <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to create ADODB.Recordset object!&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">//open recordset</span>
+	oRecordset.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">//adUseClient, please refer to MSDN for details</span>
+	oRecordset.<span style="color: #000000;">Open</span><span style="color: #000000;">&#40;</span>strQuery, oConn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//adOpenKeyset, adLockOptimistic</span>
+
+	<span style="color: #0000ff;">int</span> iRowBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>; <span style="color: #008000;">//8 rows</span>
+	<span style="color: #0000ff;">int</span> iColBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">9</span>; <span style="color: #008000;">//9 columns</span>
+	
+	<span style="color: #008000;">//LAYWKSETRECORDSET_APPEND for appending new recordset;</span>
+	<span style="color: #008000;">//LAYWKSETRECORDSET_REPLACE for replacing existing recordsets.</span>
+	<span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_APPEND; <span style="color: #008000;">//append.</span>
+	
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">WriteRecordset</span><span style="color: #000000;">&#40;</span>oRecordset, nOption,
+			iRowBegin, nRows, iColBegin, nCols<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

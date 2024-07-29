@@ -1,0 +1,88 @@
+<h1 class="firstHeading">1.12.2 Statistics</h1><p><span class="OIndex" style="display:none">Statistics Functions</span>
+Often we want to do statistics on the selected data in a worksheet, i.e. one column, one row, or an entire worksheet.  The <b><a href="../../OriginC/OCGuide/Numeric_Data.html#DataRange" title="OCGuide:Numeric Data">Working with Data: Numeric Data: DataRange</a></b> chapter shows how to construct a data range object by column/row index, then get the raw data into a vector.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Descriptive_Statistics_on_Columns_and_Rows"><span class="tocnumber">1</span> <span class="toctext"><span class="OIndex">Descriptive Statistics</span> on Columns and Rows</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Frequency_Count"><span class="tocnumber">2</span> <span class="toctext"><span class="OIndex">Frequency Count</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Correlation_Coefficient"><span class="tocnumber">3</span> <span class="toctext"><span class="OIndex">Correlation Coefficient</span></span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Normality_Test"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex">Normality Test</span></span></a></li>
+</ul>
+</div>
+
+<h2><a name="Descriptive_Statistics_on_Columns_and_Rows"></a><span class="mw-headline"><span class="OIndex">Descriptive Statistics</span> on Columns and Rows</span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_basic_summary_stats_(global_function).html" title="OriginC:Ocmath basic summary stats (global function)">ocmath_basic_summary_stats</a></b> function is used to compute basic descriptive statistics, such as total number, mean, standard deviation, and skewness, for raw data.  For more details, refer to Origin C help. The following Origin C code calculates and outputs the number of points, the mean, and the standard error of mean on the data in the vector object named vData.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> N;
+<span style="color: #0000ff;">double</span> Mean, SE;
+ocmath_basic_summary_stats<span style="color: #000000;">&#40;</span>vData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vData, <span style="color: #000040;">&amp;</span>N, <span style="color: #000040;">&amp;</span>Mean, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>SE<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;N=%d<span style="color: #666666; font-weight: bold;">\n</span>Mean=%g<span style="color: #666666; font-weight: bold;">\n</span>SE=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, N, Mean, SE<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Frequency_Count"></a><span class="mw-headline"><span class="OIndex">Frequency Count</span></span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_frequency_count_(global_function).html" title="OriginC:Ocmath frequency count (global function)">ocmath_frequency_count</a></b> function is used to calculate the frequency count, according to the options in the FreqCountOptions structure.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Source data to do frequency count</span>
+vector vData <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0.11</span>, <span style="color: #0000dd;">0.39</span>, <span style="color: #0000dd;">0.43</span>, <span style="color: #0000dd;">0.54</span>, <span style="color: #0000dd;">0.68</span>, <span style="color: #0000dd;">0.71</span>, <span style="color: #0000dd;">0.86</span><span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">// Set options, including bin size, from, to and border settings.</span>
+<span style="color: #0000ff;">int</span> nBinSize <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;	
+FreqCountOptions fcoOptions;    
+fcoOptions.<span style="color: #000000;">FromMin</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+fcoOptions.<span style="color: #000000;">ToMax</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+fcoOptions.<span style="color: #000000;">StepSize</span> <span style="color: #000080;">=</span> nBinSize;
+fcoOptions.<span style="color: #000000;">IncludeLTMin</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+fcoOptions.<span style="color: #000000;">IncludeGEMax</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+vector vBinCenters<span style="color: #000000;">&#40;</span>nBinSize<span style="color: #000000;">&#41;</span>;
+vector vAbsoluteCounts<span style="color: #000000;">&#40;</span>nBinSize<span style="color: #000000;">&#41;</span>;
+vector vCumulativeCounts<span style="color: #000000;">&#40;</span>nBinSize<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> FC_NUMINTERVALS; <span style="color: #008000;">// to extend last bin if not a full bin</span>
+
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_frequency_count<span style="color: #000000;">&#40;</span>
+    vData, vData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, <span style="color: #000040;">&amp;</span>fcoOptions,
+    vBinCenters, nBinSize, vAbsoluteCounts, nBinSize,
+    vCumulativeCounts, nBinSize, nOption<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> STATS_NO_ERROR <span style="color: #000080;">==</span> nRet <span style="color: #000000;">&#41;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Done&quot;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p><span class="OIndex" style="display:none">Discrete Frequency</span><span class="OIndex" style="display:none">Binning, 2D</span>In addition, there are two functions to calculate frequency count for discrete/categorical data.  One is <a href="../../OriginC/OriginC/Ocu_discrete_frequencies_(global_function).html" title="OriginC:Ocu discrete frequencies (global function)">ocu_discrete_frequencies</a> for text data, and the other is <a href="../../OriginC/OriginC/Ocmath_discrete_frequencies_(global_function).html" title="OriginC:Ocmath discrete frequencies (global function)">ocmath_discrete_frequencies</a> for numeric data. Also, there are two functions to calculate frequency count on 2 dimensions: <a href="../../OriginC/OriginC/Ocmath_2d_binning_stats_(global_function).html" title="OriginC:Ocmath 2d binning stats (global function)">ocmath_2d_binning_stats</a> and <a href="../../OriginC/OriginC/Ocmath_2d_binning_(global_function).html" title="OriginC:Ocmath 2d binning (global function)">ocmath_2d_binning</a>.
+</p>
+<h2><a name="Correlation_Coefficient"></a><span class="mw-headline"><span class="OIndex">Correlation Coefficient</span></span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_corr_coeff_(global_function).html" title="OriginC:Ocmath corr coeff (global function)">ocmath_corr_coeff</a></b> function is used to calculate the  Pearson rank, Spearman rank and Kendall rank correlation coefficients.
+</p>
+<pre class="oc" style="font-family:monospace;">matrix mData <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #000000;">&#123;</span><span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">12</span>,<span style="color: #0000dd;">13</span>,<span style="color: #0000dd;">11</span><span style="color: #000000;">&#125;</span>, <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">13</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">11</span>,<span style="color: #0000dd;">12</span><span style="color: #000000;">&#125;</span>, <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">12</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">11</span><span style="color: #000000;">&#125;</span><span style="color: #000000;">&#125;</span>; 
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mData.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mData.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+matrix mPeaCorr<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+matrix mPeaSig<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+
+matrix mSpeCorr<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+matrix mSpeSig<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+
+matrix mKenCorr<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+matrix mKenSig<span style="color: #000000;">&#40;</span>nCols, nCols<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>STATS_NO_ERROR <span style="color: #000080;">==</span> ocmath_corr_coeff<span style="color: #000000;">&#40;</span>nRows, nCols, mData, mPeaCorr, mPeaSig, 
+	mSpeCorr, mSpeSig, mKenCorr, mKenSig<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span> 
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Done&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Normality_Test"></a><span class="mw-headline"><span class="OIndex">Normality Test</span></span></h2>
+<p>Use the *<b><a href="../../OriginC/OriginC/Ocmath_shapiro_wilk_test_(global_function).html" title="OriginC:Ocmath shapiro wilk test (global function)">ocmath_shapiro_wilk_test</a></b> function to perform a Shapiro-Wilk Normality Test. 
+Use the *<b><a href="../../OriginC/OriginC/Ocmath_lilliefors_test_(global_function).html" title="OriginC:Ocmath lilliefors test (global function)">ocmath_lilliefors_test</a></b> function to perform a Lilliefors Normality Test. 
+Use the *<b><a href="../../OriginC/OriginC/Ocmath_kolmogorov_smirnov_test_(global_function).html" title="OriginC:Ocmath kolmogorov smirnov test (global function)">ocmath_kolmogorov_smirnov_test</a></b> function to perform a Kolmogorov-Smirnov Normality Test.
+</p>
+<pre class="oc" style="font-family:monospace;">vector vTestData <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0.11</span>, <span style="color: #0000dd;">0.39</span>, <span style="color: #0000dd;">0.43</span>, <span style="color: #0000dd;">0.54</span>, <span style="color: #0000dd;">0.68</span>, <span style="color: #0000dd;">0.71</span>, <span style="color: #0000dd;">0.86</span><span style="color: #000000;">&#125;</span>;
+
+NormTestResults SWRes;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> STATS_NO_ERROR <span style="color: #000080;">==</span> ocmath_shapiro_wilk_test<span style="color: #000000;">&#40;</span>vTestData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vTestData, 
+		<span style="color: #000040;">&amp;</span>SWRes, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;DOF=%d, TestStat=%g, Prob=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, SWRes.<span style="color: #000000;">DOF</span>, SWRes.<span style="color: #000000;">TestStat</span>, SWRes.<span style="color: #000000;">Prob</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

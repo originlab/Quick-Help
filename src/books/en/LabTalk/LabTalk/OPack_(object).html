@@ -1,0 +1,143 @@
+<h1 class="firstHeading">3.7.5.45 OPack</h1><p class='urlname' style='display: none'>OPack-obj</p>
+<p><b>LabTalk Object Type:</b> 
+</p>
+<dl><dd><a href="../../LabTalk/Category/Objects_(Labtalk).html" title="Category:Objects (Labtalk)">External Object</a></dd></dl>
+<p>The OPack object is used to pack and unpack user-specified files.  
+</p>
+<h2><a name="Properties:"></a><span class="mw-headline"><font color="chocolate">Properties:</font></span></h2>
+<table class="simple">
+<tr>
+<th width="110">Property
+</th>
+<th width="70">Access
+</th>
+<th width="540">Description
+</th></tr>
+<tr>
+<td> <b>opack.autoReplace</b>
+</td>
+<td> Read/write<br />numeric
+</td>
+<td>
+<p>Controls whether the user is prompted to replace existing files.  0: (Default) Ask the user before replacing existing files.  1: Automatically replace existing files.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.file$</b>
+</td>
+<td> Read/write<br /> string
+</td>
+<td>
+<p>List of files need to be packed.  Used by all methods.  If the file name begins without '\', go to the Origin directory to find the corresponding file.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.fileName$</b>
+</td>
+<td> Read/write<br /> string
+</td>
+<td>
+<p>Archive file name.  Use OPK as the extension name.  Used by the <b>opack.getFileNames( ),</b> <b>opack.pack( ),</b> and <b>opack.unpack()</b> methods.  If file name begins without '\', the archive file will be put in the corresponding path under the Origin directory.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.pack.saveFolderInfo</b>
+</td>
+<td> Read/write, numeric
+</td>
+<td>
+<p>Only used in the <b>opack.pack( )</b> method.  1: (Default) Save the full path name when pack into archive file.  0: Save the file name only.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.unpack.useFolderInfo</b>
+</td>
+<td> Read/write, numeric
+</td>
+<td>
+<p>Only used in the <b>opack.unpack( )</b> method.  1: (Default) Use the directory structure saved in OPK file when unpacking.  0:  Use the file name only.  
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.unpack.targetFolder$</b>
+</td>
+<td> Read/write, string
+</td>
+<td>
+<p>This is the unpack directory.  This property is only used in the <b>opack.unpack( )</b> method.  If it is not empty, use this as the target directory.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.unpack.uninstall$</b>
+</td>
+<td> Read/write, string
+</td>
+<td>
+<p>LabTalk script to be executed when the package is uninstalled.
+This property is used by the Unpack method.  During the installation of a package the LabTalk script in this property is saved by Origin.  When Origin is asked to uninstall the package it will execute this script before any files are uninstalled/removed.
+This is where you can perform any custom tasks necessary to fully uninstall your package from Origin.  OPack will only uninstall/remove files and will not undo any changes you made during installation.  Remember that during installation OPack will execute script code in the setup.ogs file's OnBeforeSetup and OnAfterSetup sections.
+To use this property you should set it in your OnBeforeSetup script and clear it in the OnAfterSetup script.
+</p>
+</td></tr></table>
+<h2><a name="Methods:"></a><span class="mw-headline"><font color="chocolate">Methods:</font></span></h2>
+<table class="simple">
+<tr>
+<th width="180">Method
+</th>
+<th> Description
+</th></tr>
+<tr>
+<td> <b>opack.getFileNames(TextFileName)</b>
+</td>
+<td>
+<p>TextFileName is the name of text file containing the destination archive file name and the names of the files need to be packed.  This method reads the first line to <b>FileName</b>$, then reads the following lines into the <b>File$</b> property.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.findFile(FileName [, StrVar])</b>
+</td>
+<td>
+<p>FileName is the file name to be found.  StrVar is the string variable (optional).  This method searches from the beginning of the <b>File$</b> property.  If the required file name is found, it assigns it to the LabTalk string variable.  Otherwise, it leaves the variable unchanged.  When the search is performed, only the last part of the file name will be compared.  For example: <b>opack.findFile(.dat,</b> <b>S</b>) will find the first file name with "dat" as the extension from the current position of the <b>File$</b> property and then assign it to a LabTalk string variable S.  This method's return value is the element index if found, or 0 if not found.  
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.findNext([StrVar])</b>
+</td>
+<td>
+<p>StrVar is the LabTalk string variable (optional).  This method searches from the current index of the <b>File$</b> property for the file name passed by the <b>opack.findFile( )</b> method.  If found, it is assigned to the LabTalk string variable.  Otherwise, the variable is left unchanged.  This method returns the element index if found, or 0 if not found.
+</p>
+</td></tr>
+<tr>
+<td><b>opack.pack([UserAccessCode])</b>
+</td>
+<td>
+<p>UserAccessCode can be:  0 = All, 1 = Non-registered, and 2 = Registered.  If UserAccessCode is not included, then 0 (All) is used.  This method packs all the files listed in the <b>File$</b> property to the file <b>FileName$</b>.  If <b>opack.pack.SaveFolderInfo</b> = <b>1</b>, save the full path name for every source file.  If <b>opack.pack.SaveFolderInfo</b> = <b>0</b>, save the file name only.  This method returns 0 for success, 2 for a File I/O error, or 6 for a File creation error.  
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.uninstall(ModuleName)</b>
+</td>
+<td>
+<p>Uninstall OPK file moduleName.  If found, removes the button group from the ini file.  Returns 0 = success, 1 = failure.
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.unpack( )</b>
+</td>
+<td>
+<p>Unpacks the archive file <b>FileName$</b>.  If <b>opack.unpack.UseFolderInfo</b> = <b>1</b>, use the directory structure saved in the OPK file.  If no folder information was saved, use the Origin directory instead.  If <b>opack.unpack.UseFolderInfo</b> = <b>0</b>, use the file name only.  Return values are:  0 Success, 1 User access error, 2 File I/O error, 3 File header error, and 4 Expanding file error.  
+</p>
+</td></tr>
+<tr>
+<td> <b>opack.reset( )</b>
+</td>
+<td>
+<p><b>Sets opack.pack.SaveFolderInfo</b> = <b>1</b>, and <b>opack.unpack.UseFolderInfo</b> = <b>1.</b>  Sets all the other arguments to empty. 
+</p>
+</td></tr></table>
+
+
+
+
+
+

@@ -1,0 +1,482 @@
+<h1 class="firstHeading">2.12.6 pkFind</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Brief_Information"><span class="tocnumber">1</span> <span class="toctext">Brief Information</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Additional_Information"><span class="tocnumber">2</span> <span class="toctext">Additional Information</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Command_Line_Usage"><span class="tocnumber">3</span> <span class="toctext">Command Line Usage</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#X-Function_Execution_Options"><span class="tocnumber">4</span> <span class="toctext">X-Function Execution Options</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Variables"><span class="tocnumber">5</span> <span class="toctext">Variables</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Description"><span class="tocnumber">6</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Examples"><span class="tocnumber">7</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Algorithm"><span class="tocnumber">8</span> <span class="toctext">Algorithm</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Basic_Concept:"><span class="tocnumber">8.1</span> <span class="toctext">Basic Concept:</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Local_Maximum_Method"><span class="tocnumber">8.2</span> <span class="toctext">Local Maximum Method</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Window_Search_Method"><span class="tocnumber">8.3</span> <span class="toctext">Window Search Method</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#First_Derivative_Method"><span class="tocnumber">8.4</span> <span class="toctext">First Derivative Method</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Second_Derivative_Method"><span class="tocnumber">8.5</span> <span class="toctext">Second Derivative Method</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Residual_after_1st_Derivative"><span class="tocnumber">8.6</span> <span class="toctext">Residual after 1st Derivative</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#References"><span class="tocnumber">9</span> <span class="toctext">References</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Related_X-Functions"><span class="tocnumber">10</span> <span class="toctext">Related X-Functions</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Brief_Information"></a><span class="mw-headline">Brief Information</span></h2>
+<p>Find peaks using various search methods
+</p>
+<h2><a name="Additional_Information"></a><span class="mw-headline">Additional Information</span></h2>
+<p>This feature is updated in 8.0 SR5. For more details, please refer to <a class="external text" href="http://www.originlab.com/doc/ReleaseNotes" target="_blank">Release Notes</a>.
+</p>
+<h2><a name="Command_Line_Usage"></a><span class="mw-headline">Command Line Usage</span></h2>
+<p><code>
+pkfind method:=first; // pick peaks by using the first derivative method.
+</code>
+</p>
+<h2><a name="X-Function_Execution_Options"></a><span class="mw-headline">X-Function Execution Options</span></h2>
+<p><a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">Please refer to the page for additional option switches when accessing the x-function from script</a>
+</p>
+<h2><a name="Variables"></a><span class="mw-headline">Variables</span></h2>
+<table class="xfvar">
+<tr>
+<th width="8%">Display<br />Name
+</th>
+<th width="8%">Variable<br />Name
+</th>
+<th width="8%">I/O<br />and<br />Type
+</th>
+<th width="8%">Default<br />Value
+</th>
+<th>Description
+</th></tr>
+<tr>
+<td>Input
+</td>
+<td>iy
+</td>
+<td>
+<p>Input
+</p><p>XYRange
+</p>
+</td>
+<td> <center>&lt;active&gt;</center>
+</td>
+<td> Specify the input data.
+</td></tr>
+<tr>
+<td>Smooth Points
+</td>
+<td>smooth
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> Savitzky-Golay smoothing can be performed to the spectrum data before the peak finding. If you want to perform the smoothing, specify the desired number of points (a positive integer) in the moving window for the Savitzky-Golay smoothing with this variable. If you do not want to perform the smoothing, set this variable to 0.
+</td></tr>
+<tr>
+<td>Direction
+</td>
+<td>dir
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>b</center>
+</td>
+<td> Specify the direction of the peaks.
+<p>Option list:
+</p>
+<ul><li><i>p:Positive</i></li></ul>
+<dl><dd>Only pick positive peaks</dd></dl>
+<ul><li><i>n:Negative</i></li></ul>
+<dl><dd>Only pick negative peaks</dd></dl>
+<ul><li><i>b:Both</i></li></ul>
+<dl><dd>Pick both positive and negative peaks</dd></dl>
+</td></tr>
+<tr>
+<td>Method
+</td>
+<td>method
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>max</center>
+</td>
+<td> Specify the method used to find the peaks.
+<p>Option list:
+</p>
+<ul><li><i>max:Local Maximum</i></li></ul>
+<dl><dd>Use the Local Maximum method to find the peaks. </dd></dl>
+<ul><li><i>win:Window Search</i></li></ul>
+<dl><dd>Use the Window Search method to find the peaks.</dd></dl>
+<ul><li><i>first:1st Derivative</i></li></ul>
+<dl><dd>Use the first derivative method to find the peaks.</dd></dl>
+<ul><li><i>second:2nd Derivative (search Hidden peaks)</i></li></ul>
+<dl><dd>Use the second derivative method to find the peaks. This method is capable of detecting hidden peaks in the data. </dd></dl>
+<ul><li><i>residue:Residual after 1st Derivative (search Hidden peaks)</i></li></ul>
+<dl><dd>Use the Residual after 1st Derivative method to find the peaks. This method is capable of detecting hidden peaks in the data. </dd></dl>
+</td></tr>
+<tr>
+<td>Local Points
+</td>
+<td>npts
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>20</center>
+</td>
+<td> This is available only when the method variable is 0 (max). It specifies the number of points in the local area, which will be used for finding the peaks with the Local Maximum method.
+</td></tr>
+<tr>
+<td>Size Option
+</td>
+<td>option
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>p</center>
+</td>
+<td> This is available only when the method variable is 1 (win). It specifies how the values for the height and width variable (see below) are interpreted.
+<p>Option list:
+</p>
+<ul><li><i>r:Raw Size</i></li></ul>
+<dl><dd>The values will be interpreted as raw sizes.</dd></dl>
+<ul><li><i>p:Percent of Raw Data</i></li></ul>
+<dl><dd>The values will be interpreted as the percentages with respect to the total width or maximum height of the input data. </dd></dl>
+</td></tr>
+<tr>
+<td>Height
+</td>
+<td>height
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>20</center>
+</td>
+<td> This is available only when the method variable is 1 (win). It specifies the height of the rectangle, which is used to find the peaks.
+</td></tr>
+<tr>
+<td>Width
+</td>
+<td>width
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>50</center>
+</td>
+<td> This is available only when the method variable is 1 (win). It specifies the width of the rectangle, which is used to find the peaks.
+</td></tr>
+<tr>
+<td>Filter Peaks by
+</td>
+<td>filter
+</td>
+<td>
+<p>Input
+</p><p>int
+</p>
+</td>
+<td> <center>h</center>
+</td>
+<td> Specify whether you want to limit the number of found peaks or the height of the peaks.
+<p>Option list:
+</p>
+<ul><li><i>0=none:None</i></li></ul>
+<dl><dd>Neither the number of found peaks nor the heights of the peaks are limited. </dd></dl>
+<ul><li><i>1=h:Height Value</i></li></ul>
+<dl><dd>This works with the <b>Value</b> variable below. The heights value of the found peaks will not be less than the value of that variable</dd></dl>
+<ul><li><i>2=num:Number</i></li></ul>
+<dl><dd>This works with the <b>Value</b> variable below. The number of found peaks will not excess the value of that variable.</dd></dl>
+<ul><li><i>3=hp:Height&#160;%</i></li></ul>
+<dl><dd>This works with the <b>Value</b> variable below. The height percent of the found peaks will not be less than the value of that variable</dd></dl>
+</td></tr>
+<tr>
+<td>Threshold Height / Number of Peaks / Threshold Height(%)
+</td>
+<td>value
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> This variable works with the <b>filter</b> variable above. It specifies the minimum height of the found peaks / the maximum number of the found peaks/ height percent of the found peaks
+</td></tr>
+<tr>
+<td>Maximum Half Width
+</td>
+<td>hwidth
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> Specify the maximum range for searching the peak markers.
+</td></tr>
+<tr>
+<td>Foot Height
+</td>
+<td>fheight
+</td>
+<td>
+<p>Input
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> Specify the threshold height for searching the peak markers.
+</td></tr>
+<tr>
+<td>Center Peaks Indices
+</td>
+<td>ocenter
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Output the the indices of peak centers by default. Specify where to output the indices of peak centers.
+</td></tr>
+<tr>
+<td>Left Markers Indices
+</td>
+<td>oleft
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the indeces of the left peak markers.
+</td></tr>
+<tr>
+<td>Right Markers Indices
+</td>
+<td>oright
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the indeces of the right peak markers.
+</td></tr>
+<tr>
+<td> Xs of Peak Centers
+</td>
+<td>ocenter_x
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the X values of the peak centers.
+</td></tr>
+<tr>
+<td> Ys of Peak Centers
+</td>
+<td>ocenter_y
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the Y values of the peak centers.
+</td></tr>
+<tr>
+<td> Xs of Left Markers
+</td>
+<td>oleft_x
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the X values of the left markers.
+</td></tr>
+<tr>
+<td> Ys of Left Markers
+</td>
+<td>oleft_y
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the Y values of left markers.
+</td></tr>
+<tr>
+<td> Xs of Right Markers
+</td>
+<td>oright_x
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the X values of the right markers.
+</td></tr>
+<tr>
+<td> Ys of Right Markers
+</td>
+<td>oright_y
+</td>
+<td>
+<p>Output
+</p><p>vector
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> Specify whether to output the Y values of the right markers.
+</td></tr></table>
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>This X-Function can be used to find peaks (peak centers and peak markers) with various methods and output the indices of peak centers .
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<ul><li> Code Sample</li></ul>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/*
+This example shows you how to detect peaks in spectrum data.
+The sample data used is in
+  \Samples\Spectroscopy folder.
+1. Import the sample data into a book in Origin.
+2. Use the pkfind X-Function to locate the peaks.
+3. Plot the original data and the found peaks.
+*/</span>
+<span style="color: #008000;">//Import spectrum data with 7 peaks</span>
+string fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\HiddenPeaks.dat&quot;</span>;
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> labels<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Time|Spectrum Data|Peak Center Indices|Peak Center X|Peak Center Y&quot;</span>;
+impASC;
+string bkn<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+
+<span style="color: #008000;">//Find peak centers</span>
+pkFind iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>second ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span> oleft<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span> oright<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>&#160;;
+
+<span style="color: #008000;">//Find peak center positions by their indeces</span>
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;	<span style="color: #008000;">//X positions</span>
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;	<span style="color: #008000;">//Y positions</span>
+<span style="color: #008000;">//Plot spetrum data as a black line</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+<span style="color: #008000;">//Plot peak centers as red scatters</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">201</span>  legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;</pre>
+<h2><a name="Algorithm"></a><span class="mw-headline">Algorithm</span></h2>
+<h3><a name="Basic_Concept:"></a><span class="mw-headline">Basic Concept:</span></h3>
+<p>This X-Function provides 5 methods to find peaks. Usually, ordinary peaks can be easily found by the Local Maximum, Window Search and First Derivative methods. If your data contains hidden peaks, more sophisticated methods like Second Derivative method and Residual after First Derivative method should be used.
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image004.jpg" src="../images/PkFind/Pkfind_help_English_files_image004.jpg?v=242" width="323"  /></a></dd></dl>
+<h3><a name="Local_Maximum_Method"></a><span class="mw-headline">Local Maximum Method</span></h3>
+<p>The peak finding is based on local extrema (maximum or minimum). The steps are as follows:
+</p>
+<ol>
+<li> For every point on the input curve, Origin checks whether it is the extrema (maximum or minimum) among points in the range, which centers in this point and has a length of <i>Local Points</i> from both the left and the right sides. If it is the extrema, this point will be marked as the center of a candidate peak.
+<dl><dd><a  class="image"><img alt="PkFind localmax.png" src="../images/PkFind/PkFind_localmax.png?v=83856" width="483"  /></a></dd></dl>
+<li> If a data point is candidate peak, Origin will further check whether it meets the constraints specified in <i>Peak Filtering</i> option. If <i>Filter Method</i> is set to <i>By Height</i> and <i>Threshold Height (%)</i> to 20, the peaks whose heights are less than 20% of the reference value will be filtered out. 
+<br />The reference value is determined in the following way:
+First, get the maximum and the minimum value of the spectrum. If a baseline has been subtracted from the spectrum, the spectrum after baseline subtraction is used. Then compare the absolute values of the max value and the min value. The greater one will be regarded as the reference value of the <i>Threshold Height</i>.
+<li>If a data point is candidate peak and meets the constraints specified in the Peak Filtering, this candidate peak will be considered a real peak and will be outputted in the result.
+</ol>
+<h3><a name="Window_Search_Method"></a><span class="mw-headline">Window Search Method</span></h3>
+<p>This X-Function picks the peaks with a moving rectangle, which has two sides paralleled to the X axis and the other two sides paralleled to the Y axis. The following four steps are performed so as to find whether a positive peak exists:
+</p><p>1.Suppose the x coordinate of the bottom-left corner of the rectangle is x1, and the x coordinate of its bottom-right corner of the rectangle is x2. We find a point P1 (x1, y1) on the input curve, whose x value is x1, and another point P2 (x2, y2) on the curve, whose x value is x2.
+</p><p>2.We compare y1 and y2 and take the larger of the two as y':
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 1.png" src="../images/PkFind/Pkfind_rectangle_1.png?v=7647" width="135"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>3.The local maximum of the curve (yLocalMax), which is the maximum y value on the curve between P1 and P2, is found. Then, we compute the difference between the local maximum and y' as follows:
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 2.png" src="../images/PkFind/Pkfind_rectangle_2.png?v=7648" width="131"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>4.Compare Diff with the rectangle height. If <a  class="image"><img alt="Pkfind rectangle 411.png" src="../images/PkFind/Pkfind_rectangle_411.png?v=7654" width="111"  /></a> , the local maximum point will be regarded as a positive peak; otherwise, no positive peaks will be picked within this rectangle.
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 3.png" src="../images/PkFind/Pkfind_rectangle_3.png?v=7656" width="329"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>The procedure for finding a negative peak is similar:
+</p><p>1.Suppose the x coordinate of the bottom-left corner of the rectangle is x1, and the x coordinate of its bottom-right corner of the rectangle is x2. We find a point Q1 (x1, y1) on the input curve, whose x value is x1, and another point Q2 (x2, y2) on the curve, whose x value is x2.
+</p><p>2.We compare y1 and y2 and take the lesser of the two as y":
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 11.png" src="../images/PkFind/Pkfind_rectangle_11.png?v=7657" width="137"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>3.The local minimum of the curve (yLocalMin), which is the minimum y value on the curve between Q1 and Q2, is found. Then, we compute the difference between the local minimum and y" as follows:
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 21.png" src="../images/PkFind/Pkfind_rectangle_21.png?v=7658" width="133"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>4.Compare Diff" with the rectangle height. If <a  class="image"><img alt="Pkfind rectangle 410.png" src="../images/PkFind/Pkfind_rectangle_410.png?v=7653" width="113"  /></a>, the local minimum point will be regarded as a negative peak; otherwise, no negative peaks will be picked within this rectangle.
+</p><p>After these steps are completed, the rectangle will be moved 1 point toward the right and these steps are performed again, until the rectangle is out of the data range.
+</p>
+<h3><a name="First_Derivative_Method"></a><span class="mw-headline">First Derivative Method</span></h3>
+<p>The basic idea of this method is as follows:
+1) A positive peak center locates in a position <img src="../images/PkFind/math-37f14e7725ae8fec0cacf956a69e3f6e.png?v=0" title="x_c" alt="x_c" class="tex"/>, where the first derivative at <img src="../images/PkFind/math-bce1e9f6a2ddb4a59309cf2286c2bade.png?v=0" title="x_c-1" alt="x_c-1" class="tex"/> is positive while the first derivative at <img src="../images/PkFind/math-f410f377926ef2b58e5b00696ab57488.png?v=0" title="x_c+1" alt="x_c+1" class="tex"/> is negative;
+2) A negative peak center locates in a position <img src="../images/PkFind/math-37f14e7725ae8fec0cacf956a69e3f6e.png?v=0" title="x_c" alt="x_c" class="tex"/>, where the first derivative at  -1 is negative while the first derivative at  +1 is positive.
+</p>
+<h3><a name="Second_Derivative_Method"></a><span class="mw-headline">Second Derivative Method</span></h3>
+<p>The smoothed second derivative of the data is capable of detecting local extrema in the raw data, which corresponds to peak positions of both ordinary and hidden peaks.
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image006.jpg" src="../images/PkFind/Pkfind_help_English_files_image006.jpg?v=243" width="361"  /></a></dd></dl>
+<p>In the figure, the spectrum consists of two local maxima peaks and one hidden peaks. Its second derivative curve is shown in the lower plot, in which the hidden peak is revealed by the local minima.
+</p>
+<h3><a name="Residual_after_1st_Derivative"></a><span class="mw-headline">Residual after 1st Derivative</span></h3>
+<p>The basic ideal is as follows:
+</p><p>1. Use the First Derivative method to find peaks and fit the peaks individually.  Then cumulate the fitting curves of every peak. 
+</p><p>2. Calculate the residuals between the spectrum data and the cumulated fitting data. 
+</p><p>3. The points whose corresponding residuals are greater than a threshold will be considered as hidden peaks.  
+</p><p>Following is an example using Residual after First Derivative method to find hidden peaks. The spectrum contains two positive peaks and one hidden peak. When the cumulated data of the fitting curves of the two positive peaks are subtracted from the spectrum, the hidden peak is clearly revealed in its residual plot. 
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image008.jpg" src="../images/PkFind/Pkfind_help_English_files_image008.jpg?v=244" width="332"  /></a></dd></dl>
+<h2><a name="References"></a><span class="mw-headline">References</span></h2>
+<h2><a name="Related_X-Functions"></a><span class="mw-headline">Related X-Functions</span></h2>
+<p><a href="../../XFunction/X-Function/Blauto.html" title="X-Function:Blauto">blauto</a>, <a href="../../XFunction/X-Function/Fitpeaks.html" title="X-Function:Fitpeaks">fitpeaks</a>, <a href="../../XFunction/X-Function/Pa.html" title="X-Function:Pa">pa</a>, <a href="../../XFunction/X-Function/PaMultiY.html" title="X-Function:PaMultiY">PaMultiY</a>, <a href="../../XFunction/X-Function/NLfitpeaks.html" title="X-Function:NLfitpeaks">NLfitpeaks</a>
+</p>
+<hr class='keywordshr'><p><span class='keywords'>Keywords:</span><span class='keywordsInput'>spectrum, second derivative, local maximum, window, threshold</span></p>
+
+
+
+
+
+

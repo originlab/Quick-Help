@@ -1,0 +1,124 @@
+<h1 class="firstHeading">3.12.3 Open Customize Dialog in Origin C</h1><p>The Origin Dialog Project Template (odialog.awx) is only compatible with Visual Studio 6.  This article will walk you through the steps necessary to make a resource-only DLL using Visual Studio 2008 or 2010.  It will then show you how to use your DLL in Origin C.
+</p>
+<h2><a name="Creating_a_Resource-Only_DLL"></a><span class="mw-headline">Creating a Resource-Only DLL</span></h2>
+<p>Here is an example of how to build a resource-only DLL that is accessible in Origin C.  After following these steps you will have a Visual Studio solution for building a 32-bit DLL.  The next section will then show you how to add 64-bit support to your solution.
+</p>
+<ol><li> Start Microsoft Visual Studio 2008 or 2010.</li>
+<li> Select "File &gt; New &gt; Project..." to create a new project.</li>
+<li> In the "New Project" dialog:
+<ol><li> Select "Visual C++" templates.</li>
+<li> Select "Win32 Project".</li>
+<li> Enter a name for your project.  For this example we will name our project "Welcome".</li>
+<li> Click the OK button.<br /><div class="center"><div class="floatnone"><a  class="image" title="New Project dialog"><img alt="New Project dialog" src="../images/Open_Customize_Dialog_in_Origin_C/Vs2010-new_project_dlg-thumb.gif?v=37422" width="320"  /></a></div></div></li></ol></li>
+<li> In the "Win32 Application Wizard" dialog:
+<ol><li> Click "Next" until you see "Application Settings".</li>
+<li> Set "Application type" to "DLL".</li>
+<li> Under "Additional options", check "Empty project".</li>
+<li> Click the Finish button.<br /><div class="center"><div class="floatnone"><a  class="image" title="Win32 Application Wizard dialog"><img alt="Win32 Application Wizard dialog" src="../images/Open_Customize_Dialog_in_Origin_C/Vs2010-win32_app_wiz_dlg-app_settings-thumb.gif?v=37434" width="213"  /></a></div></div></li></ol></li>
+<li> In "Solution Explorer", right-click on the project group and choose Properties.</li>
+<li> In the "Properties Pages" dialog:
+<ol><li> Set Configuration to "All Configurations".</li>
+<li> Expand "Configuration Properties".</li>
+<li> Expand "Linker".</li>
+<li> Select "Advanced".</li>
+<li> Set "No Entry Point" to "Yes".</li>
+<li> Click the OK button.</li></ol></li>
+<li> In "Solution Explorer", right-click on the project group and choose "Add &gt; Resource...".</li>
+<li> In the "Add Resource" dialog:
+<ol><li> Select Dialog.</li>
+<li> Click the New button.</li>
+<li> In "Properties" Misc branch, set the dialog ID as "IDD_MY_DIALOG".<br /><div class="center"><div class="floatnone"><a  class="image"><img alt="Vs2010-add res dlg.gif" src="../images/Open_Customize_Dialog_in_Origin_C/Vs2010-add_res_dlg.gif?v=37436" width="426"  /></a></div></div></li></ol></li>
+<li> In the dialog editor, add a Static Text control and an Edit Control to the dialog as below. Set the ID of the Edit Control as "IDC_EDIT1". <br /><div class="center"><div class="floatnone"><a  class="image"><img alt="New column.png" src="../images/Open_Customize_Dialog_in_Origin_C/New_column.png?v=37425" width="296"  /></a></div></div></li>
+<li> Select "File &gt; Save All".</li>
+<li> Select "Build &gt; Rebuild Solution".</li></ol>
+<h2><a name="Creating_a_64-Bit_Resource-Only_DLL"></a><span class="mw-headline">Creating a 64-Bit Resource-Only DLL</span></h2>
+<p>The above steps will create a 32-bit resource-only DLL.  The following steps will show you how to create a 64-bit resource-only DLL by adding an x64 (64-bit) configuration to your Visual Studio project.
+</p>
+<ol><li> Select "View &gt; Property Pages".</li>
+<li> Click the "Configuration Manager" button in the top right corner to open the "Configuration Manager" dialog.</li>
+<li> In the "Active solution platform" drop-down, select New to open the "New Solution Platform" dialog.</li>
+<li> Set Type to x64</li>
+<li> Click the OK button.</li>
+<li> Back in the "Configuration Manager" dialog, click the Close button.</li>
+<li> Set Platform to x64.</li>
+<li> Change "Target Name" from "$(ProjectName)" to "$(ProjectName)_64".</li>
+<li> Click the OK button.</li></ol>
+<p>Now you can switch between making a 32-bit (Win32) and a 64-bit (x64) DLL using the "Solutions Platform" setting in the toolbar.
+</p>
+<h2><a name="Using_a_Resource-Only_DLL_in_Origin_C"></a><span class="mw-headline">Using a Resource-Only DLL in Origin C</span></h2>
+<p>The following steps show you how to access the DLL created above, using Origin C.
+</p>
+<ol><li> Copy Welcome.dll (or Welcome_64.dll) and the resource.h to your Origin "User Files\OriginC" folder.</li>
+<li> Start Origin and open Code Builder.</li>
+<li> In Code Builder select "File &gt; New" to create a new C file.</li>
+<li> Copy the Origin C code below and paste it at the end of your new C file.</li>
+<li> Select "Build &gt; Build".</li>
+<li> In Code Builder's Command &amp; Results window type "DoMyDialog" and press Enter.</li>
+<li> When the Welcome dialog appears enter a message into the edit control and click OK.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Dialog.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;resource.h&quot;</span>
+
+<span style="color: #008000;">// the file name of resource DLL</span>
+<span style="color: #0000ff;">#ifdef</span> _OWIN64
+<span style="color: #0000ff;">#define</span> STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">&quot;Welcome_64&quot;</span> <span style="color: #008000;">// 64 bit DLL</span>
+<span style="color: #0000ff;">#else</span> <span style="color: #008000;">//!_OWIN64</span>
+<span style="color: #0000ff;">#define</span> STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">&quot;Welcome&quot;</span> <span style="color: #008000;">// 32 bit DLL</span>
+<span style="color: #0000ff;">#endif</span><span style="color: #008000;">// _OWIN64</span>
+
+<span style="color: #0000ff;">class</span> MyDialog <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> Dialog
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	MyDialog<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">:</span> Dialog<span style="color: #000000;">&#40;</span>IDD_MY_DIALOG, STR_DLG_RESOURCE_DLL<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">int</span> DoModal<span style="color: #000000;">&#40;</span>HWND hParent <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		InitMsgMap<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> Dialog<span style="color: #000000;">::</span><span style="color: #000000;">DoModal</span><span style="color: #000000;">&#40;</span>hParent<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> nRet;
+	<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+	EVENTS_BEGIN
+		ON_INIT<span style="color: #000000;">&#40;</span>OnInitDialog<span style="color: #000000;">&#41;</span>
+		ON_OK<span style="color: #000000;">&#40;</span>OnOK<span style="color: #000000;">&#41;</span>
+		ON_CANCEL<span style="color: #000000;">&#40;</span>OnCancel<span style="color: #000000;">&#41;</span>
+	EVENTS_END
+
+	<span style="color: #0000ff;">BOOL</span> OnInitDialog<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		this<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Text <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Welcome&quot;</span>;
+		m_editCtrl <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">&#40;</span>IDC_EDIT1<span style="color: #000000;">&#41;</span>;
+		m_editCtrl.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Enter a message here.&quot;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">BOOL</span> OnOK<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		MessageBox<span style="color: #000000;">&#40;</span>GetSafeHwnd<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, m_editCtrl.<span style="color: #000000;">Text</span>, this<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Text<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">BOOL</span> OnCancel<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	Edit m_editCtrl;
+<span style="color: #000000;">&#125;</span>;
+
+
+<span style="color: #0000ff;">bool</span> DoMyDialog<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	MyDialog myDlg;
+	myDlg.<span style="color: #000000;">DoModal</span><span style="color: #000000;">&#40;</span> GetWindow<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

@@ -1,0 +1,104 @@
+<h1 class="firstHeading">18.1.2 Algorithms (Smooth)</h1><p class='urlname' style='display: none'>Smooth-Algorithm</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Moving_window_in_adjacent-averaging.2C_Savitzky-Golay_or_percentile_filter_method"><span class="tocnumber">1</span> <span class="toctext">Moving window in adjacent-averaging, Savitzky-Golay or percentile filter method</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#The_adjacent-averaging_method"><span class="tocnumber">2</span> <span class="toctext">The adjacent-averaging method</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#The_Savitzky-Golay_method"><span class="tocnumber">3</span> <span class="toctext">The Savitzky-Golay method</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#The_percentile_filter_method"><span class="tocnumber">4</span> <span class="toctext">The percentile filter method</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#The_FFT_Filter_method"><span class="tocnumber">5</span> <span class="toctext">The FFT Filter method</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#The_Lowess_and_Loess_method"><span class="tocnumber">6</span> <span class="toctext">The Lowess and Loess method</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#The_Binomial_method"><span class="tocnumber">7</span> <span class="toctext">The Binomial method</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Cutoff_frenquency"><span class="tocnumber">7.1</span> <span class="toctext">Cutoff frenquency</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Moving_window_in_adjacent-averaging.2C_Savitzky-Golay_or_percentile_filter_method"></a><span class="mw-headline">Moving window in adjacent-averaging, Savitzky-Golay or percentile filter method</span></h2>
+<p>When the smoothing method is adjacent-averaging, Savitzky-Golay or percentile filter, each smoothed data point is computed from data points within a moving window. Let <img src="../images/Algorithm_(Smooth)/math-e1e6230760a8fc9ebc5517bbe56756ea.png?v=0" title="\left\{f_i| i = 1,2,...,N\right\}" alt="\left\{f_i| i = 1,2,...,N\right\}" class="tex"/> be the input data points and let <img src="../images/Algorithm_(Smooth)/math-cbf2a8ae7d00ceaa3a438a13f080810a.png?v=0" title="\left\{g_i|i = 1,2,...,N\right\}" alt="\left\{g_i|i = 1,2,...,N\right\}" class="tex"/> denote the output data points. Each  <img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png?v=0" title="g_i" alt="g_i" class="tex"/> is computed from 
+<img src="../images/Algorithm_(Smooth)/math-2d0012d8e86e7519e3d6bcbcc68b10db.png?v=0" title="\left\{f_m|i - floor(npts/2) &lt; m &lt; i + floor(npts/2)\right\}" alt="\left\{f_m|i - floor(npts/2) &lt; m &lt; i + floor(npts/2)\right\}" class="tex"/>
+</p><p>where <i>npts</i> is the value of the <b>Points of Window</b> variable. 
+</p><p>However, when the smoothing method is FFT filter, moving window is not used. Instead, the whole signal is processed.
+</p>
+<h2><a name="The_adjacent-averaging_method"></a><span class="mw-headline">The adjacent-averaging method</span></h2>
+<p>The<b> adjacent-averaging</b> method uses the simplest possible averaging procedure: each  <img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png?v=0" title="g_i" alt="g_i" class="tex"/>  is the average of the data points within the moving window. If the <b>Weighted average</b> option is used, the average will be computed using weighted averaging. In this case, a parabolic weight is used, with the weight area normalized to 1. For a window whose center is in <i>i</i> (which means to calculate the <i>i</i>th averaged point), the weight which corresponds to the <i>j</i>th (j=0, 1, ... npts-1) point is: 
+</p><p><img src="../images/Algorithm_(Smooth)/math-fd200c5c25b7b7843b83b864f39daef2.png?v=0" title="w_j=1-(\frac{(j-i)}{(N+1)/2})^2" alt="w_j=1-(\frac{(j-i)}{(N+1)/2})^2" class="tex"/>
+</p><p>where N is the number of <b>Points of Window</b>.
+</p>
+<h2><a name="The_Savitzky-Golay_method"></a><span class="mw-headline">The Savitzky-Golay method</span></h2>
+<p>The <b>Savitzky-Golay</b> method performs a polynomial regression to the data points in the moving window. Then <img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png?v=0" title="g_i" alt="g_i" class="tex"/> will be computed as the value of the polynomial at position <i>i</i>. 
+</p>
+<h2><a name="The_percentile_filter_method"></a><span class="mw-headline">The percentile filter method</span></h2>
+<p>For the<b> percentile filter</b>, the <i>p</i>th quantile of the points in the moving window is assigned as <img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png?v=0" title="g_i" alt="g_i" class="tex"/>, where <i>p</i> is specified by the parameter, <b>Percentile</b>. The <i>p</i>th quantile (or 100 <i>p</i>th percentile) is computed from the empirical distribution function as follows: 
+</p><p>Let <img src="../images/Algorithm_(Smooth)/math-7ae8e6c1c298971d77efadc3dad1752c.png?v=0" title="npts\cdot p/100=j+g" alt="npts\cdot p/100=j+g" class="tex"/>
+</p><p>where <i>j</i> is the integer part of <img src="../images/Algorithm_(Smooth)/math-a0c7f13b2f9f06d3210a4130a92e4caa.png?v=0" title="npts\cdot p/100" alt="npts\cdot p/100" class="tex"/>, and <i>g</i> is the fractional part of it. 
+</p><p>Then we can compute the <i>p</i>th quantile, which is denoted by y, with the following equations: 
+</p><p><img src="../images/Algorithm_(Smooth)/math-4aee7d1b3d1dbd0413eea75e0db28d4f.png?v=0" title="y=&#10;\begin{cases} &#10;  x_j,  &amp; \mbox{if }g=0 \\&#10;  x_{j+1}, &amp; \mbox{if }g&gt;0 &#10;\end{cases}" alt="y=&#10;\begin{cases} &#10;  x_j,  &amp; \mbox{if }g=0 \\&#10;  x_{j+1}, &amp; \mbox{if }g&gt;0 &#10;\end{cases}" class="tex"/>
+</p><p>where <img src="../images/Algorithm_(Smooth)/math-1f89889020cdc84d9e1c35237cb62f65.png?v=0" title="x_j" alt="x_j" class="tex"/> is the <i>j</i>th (j=0, 1, ... <i>npts-1</i>) point in the moving window.
+</p>
+<h2><a name="The_FFT_Filter_method"></a><span class="mw-headline">The FFT Filter method</span></h2>
+<p>When the FFT Filter method is selected, Origin performs the following: 
+</p>
+<ol>
+<li>Calculate the mean of the first 1% data points and the mean of the last 1% data points. 
+<li>Construct a straight line throught these two points and subtract the input data by this line. 
+<li>Perform FFT on the dataset acquired in last step. 
+<li>Apply filtering with the low-pass parabolic filter on the transformed acquired in last step. Fourier components with frequencies higher than a cutoff frequency are removed. The cutoff frequency is defined as:<br />
+<img src="../images/Algorithm_(Smooth)/math-8a6ec61a846152b8540507019900a780.png?v=0" title="f_{cutoff} = \frac {1}{2n\Delta t}" alt="f_{cutoff} = \frac {1}{2n\Delta t}" class="tex"/>
+<br />where <i>n</i> is the <b>Points of Window</b> specified, and <img src="../images/Algorithm_(Smooth)/math-5a72f1304af0783657605aed0e38201a.png?v=0" title="\Delta t" alt="\Delta t" class="tex"/> is the time (or more generally the abscissa) spacing between two adjacent data points. Larger values of <i>n</i> result in lower cutoff frequencies, and thus a greater degree of smoothing. The transformed data is multiplied with a one-side window so the above formula is further divided by 2 to account for a two-sided window. <br />
+The function used to clip out the high-frequency components is a parabola with a maximum of 1 at zero frequency, and falling off to zero at the cutoff frequency.
+<li>Perform IFFT on the filtered spetrum. 
+<li>Add the baseline to the dataset acquired in last step. 
+</ol>
+<table class="note">
+<tr>
+<td>
+<p><b>Note</b>: 
+</p>
+<ul><li>The low-pass parabolic filter used here is the same as the low-pass parabolic filter in the <a href="../../UserGuide/UserGuide/Algorithm_(FFT_Filters).html" title="UserGuide:Algorithm (FFT Filters)">FFT Filters</a> tool. </li>
+<li>There are more variable available when this function is used in script. See the <a class="external text" href="../../XFunction/X-Function/Smooth.html">X-Function document for the smooth X-Function</a> for details.</li></ul>
+</td></tr></table>
+<h2><a name="The_Lowess_and_Loess_method"></a><span class="mw-headline">The Lowess and Loess method</span></h2>
+<p><b>Lowess</b> and <b>Loess</b> are abbreviations for "locally weighted scatterplot smoothing" or "locally weighted least squares". We say "locally" because we calculate each smoothed value using neighboring points contained within a span of values. This method is classically performed by the following steps: 
+</p>
+<ol>
+  <li>
+  Calculate weights for a center  point <img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png?v=0" title="x_i" alt="x_i" class="tex"/>, and all neighboring points contained within the span, using the tri-cube weight function...
+
+<dl><dd><img src="../images/Algorithm_(Smooth)/math-d2de986db2dcdfead9130a94deacc948.png?v=0" title="w_i(x)=(1-(\frac{|x-x_i|}{d_i})^3)^3" alt="w_i(x)=(1-(\frac{|x-x_i|}{d_i})^3)^3" class="tex"/></dd></dl>
+
+where <img src="../images/Algorithm_(Smooth)/math-9dd4e461268c8034f5c8564e155c67a6.png?v=0" title="x" alt="x" class="tex"/> is a neighbor point within the span associated to the current center point <img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png?v=0" title="x_i" alt="x_i" class="tex"/>, and <img src="../images/Algorithm_(Smooth)/math-d247f594c78d0d2be10fc6d82512cc4e.png?v=0" title="d_i" alt="d_i" class="tex"/> is the distance along the abscissa from <img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png?v=0" title="x_i" alt="x_i" class="tex"/> to the most distant neighbor points within the span.
+  </li>
+  <li>
+  Perform the weighted least square regression.
+    <ul><li> For Lowess, a weighted linear regression is used.
+    <li>For Loess, a second-order polynomial regression is used.</ul>
+  </li>
+  <li>Obtain predicted value <img src="../images/Algorithm_(Smooth)/math-aeb3b53d344586a9c3e0ec0829777ae7.png?v=0" title="(x_i,\hat{y}_i)" alt="(x_i,\hat{y}_i)" class="tex"/> given in the step2 for <img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png?v=0" title="x_i" alt="x_i" class="tex"/>.
+  </li>
+  <li>Move to next point <img src="../images/Algorithm_(Smooth)/math-84ceb2513893acb7c9ea001cc9053995.png?v=0" title="x_{i+1}" alt="x_{i+1}" class="tex"/>, then perform step1-3 to get predicted value <img src="../images/Algorithm_(Smooth)/math-d845615daf118601c7a2d6719f7d165e.png?v=0" title="(x_{i+1},\hat{y}_{i+1})" alt="(x_{i+1},\hat{y}_{i+1})" class="tex"/>. The calculation stops when all points are calculated.
+  </li>
+</ol>
+<h2><a name="The_Binomial_method"></a><span class="mw-headline">The Binomial method</span></h2>
+<p>Binomial filter is a weighted moving average filter, Let <img src="../images/Algorithm_(Smooth)/math-e447c37303aa003c6e1b9992045ddfda.png?v=0" title="{x_n}" alt="{x_n}" class="tex"/> be the input source data, <img src="../images/Algorithm_(Smooth)/math-83c66063e0d9b8864bd422ee8386d59f.png?v=0" title="{y_n}" alt="{y_n}" class="tex"/> is the output smoothed data.
+</p><p><img src="../images/Algorithm_(Smooth)/math-ceebc9dfaa7e3ac79481ea2adf795b92.png?v=0" title="y_n=\sum_{k=-N_p}^{Np}b_kx_{n-k}" alt="y_n=\sum_{k=-N_p}^{Np}b_kx_{n-k}" class="tex"/>
+</p><p>The sequence of smoothing coefficients <img src="../images/Algorithm_(Smooth)/math-e23e5c6178fcede4de9a9673bf51cfd7.png?v=0" title="b_k" alt="b_k" class="tex"/> is given by:
+</p><p><img src="../images/Algorithm_(Smooth)/math-da59a8657b40db814c19a032fb1f0f9b.png?v=0" title="b_k=\begin{pmatrix}&#10;2N_p\\ &#10;N_p+k&#10;\end{pmatrix}/4^{N_p}\; \; (k=0,1,...N_p)" alt="b_k=\begin{pmatrix}&#10;2N_p\\ &#10;N_p+k&#10;\end{pmatrix}/4^{N_p}\; \; (k=0,1,...N_p)" class="tex"/>
+</p><p>and
+</p><p><img src="../images/Algorithm_(Smooth)/math-d32b55686a350cbec96b05c8c8be3bbb.png?v=0" title="b_{-k}=b_{k}" alt="b_{-k}=b_{k}" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-766b775dcac93fa1cf6f6b365212665f.png?v=0" title="N_p" alt="N_p" class="tex"/> is the <b>Order</b>.
+</p>
+<h3><a name="Cutoff_frenquency"></a><span class="mw-headline">Cutoff frenquency</span></h3>
+<p>The <b>Cutoff frenquency</b> <img src="../images/Algorithm_(Smooth)/math-e05fe30750d3ea262a610d17ebc07019.png?v=0" title="fc" alt="fc" class="tex"/> is calculated by:
+</p><p><img src="../images/Algorithm_(Smooth)/math-42d1e7ee57aef355b30eddda869213a7.png?v=0" title="&#10;fc=\frac{2}{\pi}arccos(Ac^{1/2N_p})\frac{fs}{2}&#10;" alt="&#10;fc=\frac{2}{\pi}arccos(Ac^{1/2N_p})\frac{fs}{2}&#10;" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-54c355936eabc80c15d1dcbc2e697d0d.png?v=0" title="&#10;fs=\frac{1}{dt}&#10;" alt="&#10;fs=\frac{1}{dt}&#10;" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-3017d911efceb27d1de6a92b70979795.png?v=0" title="dt" alt="dt" class="tex"/> is <b>Sampling Interval</b>. <img src="../images/Algorithm_(Smooth)/math-8819a837186918b90b59cc316f36b1e1.png?v=0" title="Ac" alt="Ac" class="tex"/> is cutoff amplitude at -6dB, <img src="../images/Algorithm_(Smooth)/math-57caf3aa6efe351c51c785be280b5c0d.png?v=0" title="Ac=0.5" alt="Ac=0.5" class="tex"/>. Cutoff frequency decreases with insceasing <b>Order <img src="../images/Algorithm_(Smooth)/math-766b775dcac93fa1cf6f6b365212665f.png?v=0" title="N_p" alt="N_p" class="tex"/></b>.
+</p>
+
+
+
+
+

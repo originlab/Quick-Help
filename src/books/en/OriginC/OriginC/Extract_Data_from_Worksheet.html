@@ -1,0 +1,108 @@
+<h1 class="firstHeading">3.2.7.2 Extract Data from Worksheet</h1><p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>The following example shows how to extract data with LT condition expression from one worksheet to another worksheet, or highlight result rows, or add a new column with 0/1 as mark. Please refer to <a href="../../OriginC/OriginC/Worksheet-Extract.html" title="OriginC:Worksheet-Extract">Worksheet::Extract</a> for more details.
+</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>Please take a look on <b>strLTRunBeforeloop</b> variable in example code below, it is used to set LT script command running before test condition, here used to define two range variables <b>a</b> and <b>b</b> to column 1 and column 2. <b>strCondition</b> variable is used to specified LT condition expression. 
+</p><p>There are two functions below, before example function <b>Worksheet_Extract_Example</b> running please run <b>Before_Running</b> to prepare worksheet with random data to do extract. 
+</p><p><br />
+</p>
+<ul><li> <b>Worksheet_Extract_Example 1</b>, extract data to new worksheet base on condition</li>
+<li> <b>Worksheet_Extract_Example 2</b>, highlight rows in source worksheet base on condition</li>
+<li> <b>Worksheet_Extract_Example 3</b>, add a new column in source worksheet with 0/1 to mark result</li></ul>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">enum</span>
+<span style="color: #000000;">&#123;</span>
+	EXTRACT_TO_NEW_WKS <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>,
+	EXTRACT_WITH_HIGH_LIGHT,
+	EXTRACT_WITH_NEW_TAG_COL
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #0000ff;">void</span> Worksheet_Extract_Example<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> EXTRACT_TO_NEW_WKS<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+
+	<span style="color: #008000;">// prepare test condition string</span>
+    string strCondition <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;abs(a) &gt;= 1 &amp;&amp; abs(b) &gt;= 1&quot;</span>;  <span style="color: #008000;">//Note: here used &quot;&amp;&amp;&quot; not &quot;AND&quot;. And || for &quot;OR&quot;.</span>
+    string strLTRunBeforeloop <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;range a=1; range b=2&quot;</span>; <span style="color: #008000;">// define range objects, a is column 1 and b is column 2.</span>
+    
+    <span style="color: #008000;">// check worksheet with strCondition and result the number of rows base on the condition expression. </span>
+    <span style="color: #008000;">// vnRowIndices included the row index as result.</span>
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnRowIndices;
+    <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> wks.<span style="color: #000000;">SelectRows</span><span style="color: #000000;">&#40;</span>strCondition, vnRowIndices, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, strLTRunBeforeloop<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;User cancel&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>    
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nn <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No matching row&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>    
+    
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%d rows selected with condition --&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nn, strCondition<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">switch</span><span style="color: #000000;">&#40;</span>nOption<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">case</span> EXTRACT_TO_NEW_WKS<span style="color: #000000;">:</span>	    
+	    Worksheet wksResult;
+	    wksResult.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	    
+	    
+		<span style="color: #008000;">// Extract data to new worksheet with column indices &quot;vsCols&quot; and row indices &quot;vnRowIndices&quot;</span>
+		vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnCols <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>; <span style="color: #008000;">// only extract the first two columns to new worksheet</span>
+	    <span style="color: #0000ff;">BOOL</span> bRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Extract</span><span style="color: #000000;">&#40;</span>wksResult, vnRowIndices, vnCols<span style="color: #000000;">&#41;</span>;
+	    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>bRet<span style="color: #000000;">&#41;</span>
+	        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Extract selected rows to [%s]!%s.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, wksResult.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, wksResult.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;  	    
+	    <span style="color: #0000ff;">break</span>;
+	
+	<span style="color: #0000ff;">case</span> EXTRACT_WITH_HIGH_LIGHT<span style="color: #000000;">:</span>
+        <span style="color: #008000;">// hight light rows by vnRowIndices</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnRows;
+        vnRows <span style="color: #000080;">=</span> vnRowIndices; <span style="color: #008000;">// convert vector&lt;uint&gt; to vector&lt;int&gt;</span>
+        wks.<span style="color: #000000;">SetSelectedRange</span><span style="color: #000000;">&#40;</span>vnRows<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">break</span>;
+        
+    <span style="color: #0000ff;">case</span> EXTRACT_WITH_NEW_TAG_COL<span style="color: #000000;">:</span>
+        <span style="color: #008000;">// add a new column with 0/1 to mark if not fit or fit condiftion</span>
+        Dataset ds<span style="color: #000000;">&#40;</span>wks, wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        ds.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        ds <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        ds.<span style="color: #000000;">Replace</span><span style="color: #000000;">&#40;</span>vnRowIndices, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">break</span>;
+
+	<span style="color: #0000ff;">default</span><span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">break</span>;
+	<span style="color: #000000;">&#125;</span>    
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> Before_Running<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// prepare worksheet with data to do extract</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">30</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// set worksheet with 3o rows and 3 columns	</span>
+	
+	<span style="color: #008000;">// set random data for the first TWO columns</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nCol <span style="color: #000080;">&lt;</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; nCol<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Dataset ds<span style="color: #000000;">&#40;</span>wks, nCol<span style="color: #000000;">&#41;</span>;
+		ds.<span style="color: #000000;">Normal</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// fill row numbers to Column C</span>
+	Dataset dsC<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>; 
+	dsC.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

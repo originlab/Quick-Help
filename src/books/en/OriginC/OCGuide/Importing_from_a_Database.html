@@ -1,0 +1,53 @@
+<h1 class="firstHeading">1.14.1 Importing from a Database</h1><p><span class="OIndex" style="display:none">Importing from a Database</span>
+<span class="OIndex" style="display:none">Database</span>Origin C includes the ability to import data from a database<span class="OIndex" style="display:none">SQL</span> into a worksheet.  The following example shows how to do this by importing an Access database file, included in the Origin Samples folder.  An <i>ADODB.Reocrdset</i> object can refer to MSDN. To find out how to  construct your connection string, refer to <a class="external text" href="../../XFunction/X-Function/DbEdit.html#Connection_String">DbEdit X-Function</a>
+</p>
+<pre class="oc" style="font-family:monospace;">Object ocora;
+
+<span style="color: #0000ff;">try</span>
+<span style="color: #000000;">&#123;</span>
+	ocora <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">catch</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nError<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to create ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// Import stars.mdb from the Origin Samples folder</span>
+string  strDatabaseFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> 
+    <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>stars.mdb&quot;</span>;
+ 
+<span style="color: #008000;">// Prepare the database connection string</span>
+string strConn;
+strConn.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s; 
+    User ID=admin; Password=;&quot;</span>, strDatabaseFile<span style="color: #000000;">&#41;</span>;           
+ 
+<span style="color: #008000;">// Prepare the SQL string</span>
+string strQuery <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Select Stars.Index, Stars.Name, Stars.LightYears, 
+    Stars.Magnitude From Stars&quot;</span>;
+ 
+
+ocora.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> adUseClient;
+<span style="color: #0000ff;">try</span>
+<span style="color: #000000;">&#123;</span>
+	ocora.<span style="color: #000000;">open</span><span style="color: #000000;">&#40;</span>strQuery, strConn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">catch</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nError<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to open Oracle database&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">&#125;</span>
+
+Worksheet wks;
+wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//put data into the worksheet.</span>
+<span style="color: #0000ff;">BOOL</span>			bRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">PutRecordset</span><span style="color: #000000;">&#40;</span>ocora<span style="color: #000000;">&#41;</span>;
+out_int<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;bRet = &quot;</span>, bRet<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">return</span> bRet;</pre>
+
+
+
+
+
+

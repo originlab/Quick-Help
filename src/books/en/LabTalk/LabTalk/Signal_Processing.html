@@ -1,0 +1,197 @@
+<h1 class="firstHeading">4.5.3 Signal Processing</h1><p class='urlname' style='display: none'>Signal-Processing</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Smoothing_Plotted_Datasets"><span class="tocnumber">1</span> <span class="toctext">Smoothing Plotted Datasets</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Finding_Envelopes_.28Pro_Only.29"><span class="tocnumber">2</span> <span class="toctext">Finding Envelopes (Pro Only)</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#FFT_on_Data_with_Missing_Values"><span class="tocnumber">3</span> <span class="toctext">FFT on Data with Missing Values</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Compute_Basic_Statistics_on_FFT_Result"><span class="tocnumber">4</span> <span class="toctext">Compute Basic Statistics on FFT Result</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Compute_Convolution_for_two_signal_.28Pro_only.29"><span class="tocnumber">5</span> <span class="toctext">Compute Convolution for two signal (Pro only)</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Hilbert_transform_.28Pro_only.29"><span class="tocnumber">6</span> <span class="toctext">Hilbert transform (Pro only)</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Smoothing_Plotted_Datasets"></a><span class="mw-headline">Smoothing Plotted Datasets</span></h2>
+<p>This example smooths all plotted data in the active graph layer. The smoothed data is put into a new book.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Count the number of data plots in the layer </span>
+<span style="color: #008000;">//and save result in variable &quot;count&quot;</span>
+layer <span style="color: #000080;">-</span>c; 
+string gname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;   <span style="color: #008000;">// Get the name of this Graph page</span>
+<span style="color: #008000;">// Create a new book named smooth </span>
+<span style="color: #008000;">//actual name is stored in bkname$</span>
+newbook na<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Smoothed; 
+wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;          <span style="color: #008000;">// Start with no columns</span>
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,count<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Input Range refers to 'ii'th plot</span>
+    range riy <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>gname<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">!$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;    
+    <span style="color: #008000;">// Output Range refers to two, new columns            </span>
+    range roy <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>bkname<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+   <span style="color: #008000;">// Savitsky-Golay smoothing using third order polynomial </span>
+    smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>riy meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>roy;   
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Finding_Envelopes_.28Pro_Only.29"></a><span class="mw-headline">Finding Envelopes (Pro Only)</span></h2>
+<p>The following script uses the envelope X-Function to find the lower and upper envelope of a signal.
+</p>
+<dl><dd><a  class="image"><img alt="Envelope.png" src="../images/Signal_Processing/Envelope.png?v=31936" width="378"  /></a></dd></dl>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Import a signal with Gaussian envelope</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;samples\signal processing\Gaussian Envelope.dat&quot;</span>;
+impasc;
+envelope iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span>both;
+<span style="color: #008000;">//Plot</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h2><a name="FFT_on_Data_with_Missing_Values"></a><span class="mw-headline">FFT on Data with Missing Values</span></h2>
+<p>FFT in Origin requires that input data does not have missing values. So before you can perform FFT on data with missing values, you will need to fill in those missing data. The simplest would be to interpoate with good data nearby, using simple linear interpolation.
+</p><p>This example plots two different FFT Amplitudes from two date ranges of sunspot data to illustrate the ~11 year sunspot cycle, with missing data replaced by linear interpolation.
+</p>
+<dl><dd><a  class="image"><img alt="Sunspot.png" src="../images/Signal_Processing/Sunspot.png?v=32251" width="400"  /></a></dd></dl>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Import the data</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\dayssn.dat&quot;</span>;
+<span style="color: #008000;">//col(1) = year, col(2)=month, col(3)=day, </span>
+<span style="color: #008000;">//col(4) = date values in contiguous year with fractions</span>
+<span style="color: #008000;">//col(5) = observation</span>
+<span style="color: #008000;">//so we should have a sheet with 5 col and col(4)=X col(5)=Y</span>
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;NNNXY&quot;</span>; 
+impasc;
+
+<span style="color: #008000;">// Interpolate to replace missing values and put result to col(6)</span>
+interp1q <span style="color: #0000dd;">4</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span> <span style="color: #0000dd;">6</span>;
+<span style="color: #008000;">// this is our data</span>
+range rData1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">14609</span><span style="color: #000000;">&#93;</span>;<span style="color: #008000;">// row range for years 1818 to 1858</span>
+range rData2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">54057</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#93;</span>;<span style="color: #008000;">// row range for years 1966 - 2006</span>
+<span style="color: #008000;">// now start the FFT with the fft1 X-Function </span>
+<span style="color: #008000;">// which will create a ReportData sheet and a ReportTable sheet</span>
+fft1 rData1;
+<span style="color: #008000;">//after running an XF, a tree with same name is created, </span>
+<span style="color: #008000;">//here we will make use of fft1.rd the ReportData node</span>
+range rReportData1<span style="color: #000080;">=</span>fft1.<span style="color: #000080;">rd</span><span style="color: #000080;">$</span>;<span style="color: #008000;">//range to hold the Report Data from the FFT result</span>
+range rAmp1<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rReportData1.<span style="color: #000080;">getlayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>col<span style="color: #000000;">&#40;</span>Amplitude<span style="color: #000000;">&#41;</span>;
+rAmp1<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;1818 - 1858&quot;</span>; <span style="color: #008000;">// change the Comment to make better legend for the graph</span>
+
+fft1 rData2;
+range rReportData2<span style="color: #000080;">=</span>fft1.<span style="color: #000080;">rd</span><span style="color: #000080;">$</span>;
+range rAmp2<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rReportData2.<span style="color: #000080;">getlayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>col<span style="color: #000000;">&#40;</span>Amplitude<span style="color: #000000;">&#41;</span>;
+rAmp2<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;1966 - 2006&quot;</span>;
+
+<span style="color: #008000;">// Open a new empty graph. Use your own template if needed.</span>
+win <span style="color: #000080;">-</span>t plot;
+<span style="color: #008000;">// Plot output to active graph layer</span>
+plotxy rAmp1 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>red<span style="color: #000000;">&#41;</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+plotxy rAmp2 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>blue<span style="color: #000000;">&#41;</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+<span style="color: #008000;">// Zoom in to show the peak</span>
+x1<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;x2<span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;y1<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;y2<span style="color: #000080;">=</span><span style="color: #0000dd;">100</span>;
+<span style="color: #008000;">// Mark 11 years with a vertical line </span>
+draw <span style="color: #000080;">-</span>n peakval <span style="color: #000080;">-</span>l <span style="color: #000080;">-</span>v <span style="color: #0000dd;">1</span><span style="color: #000080;">/</span><span style="color: #0000dd;">11</span>; 
+peakval.<span style="color: #000080;">linewidth</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+peakval.<span style="color: #000080;">color</span> <span style="color: #000080;">=</span> color<span style="color: #000000;">&#40;</span>orange<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// and add a text label</span>
+label <span style="color: #000080;">-</span>n peaklabel \b<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">11</span> Year Cycle of Sunspots<span style="color: #000000;">&#41;</span>;
+peaklabel.<span style="color: #000080;">x</span> <span style="color: #000080;">=</span> peakval.<span style="color: #000080;">x</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">1.1</span> <span style="color: #000080;">*</span> peaklabel.<span style="color: #000080;">dx</span> <span style="color: #000080;">/</span> <span style="color: #0000dd;">2</span>;
+peaklabel.<span style="color: #000080;">y</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>y1 <span style="color: #000080;">+</span> y2<span style="color: #000000;">&#41;</span> <span style="color: #000080;">/</span> <span style="color: #0000dd;">2</span>;
+peaklabel.<span style="color: #000080;">fsize</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;</pre>
+<h2><a name="Compute_Basic_Statistics_on_FFT_Result"></a><span class="mw-headline">Compute Basic Statistics on FFT Result</span></h2>
+<p>This example shows to how to compute basic statistics such as max amplitude and corresponding frequency, mean frequency, median frequency based on the FFT result without creating any intermediate output if you are only interesting on those statistics.
+</p>
+<pre class="lt" style="font-family:monospace;">fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\Signal with Discrete Frequencies.dat&quot;</span>;
+newbook;
+impasc;
+ 
+Tree myfft;<span style="color: #008000;">// you can use &quot;list vt&quot; to see all tree variables</span>
+<span style="color: #008000;">// assign the FFT output to the tree &quot;myfft&quot;</span>
+<span style="color: #008000;">//you can use &quot;myfft.=&quot; to see the tree structure</span>
+fft1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfft rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>;
+dataset tmp_x<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">freq</span>; <span style="color: #008000;">// tree vector node can be assgined to any dataset</span>
+dataset tmp_y<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">amp</span>;
+ 
+diststats iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>tmp_x, tmp_y<span style="color: #000000;">&#41;</span>;
+type <span style="color: #ff00ff;">&quot;For data from&#160;%(fname$)&quot;</span>;
+type <span style="color: #ff00ff;">&quot;the mean frequency is $(diststats.mean)&quot;</span>;</pre>
+<p><br />
+</p><p><br />
+</p>
+<h2><a name="Compute_Convolution_for_two_signal_.28Pro_only.29"></a><span class="mw-headline">Compute Convolution for two signal (Pro only)</span></h2>
+<p>OriginPro provides X function <a class="external text" href="../../XFunction/X-Function/Conv.html">conv</a> to Compute the convolution of two signals.
+</p>
+<dl><dd><a  class="image"><img alt="Conv.png" src="../images/Signal_Processing/Conv.png?v=31943" width="304"  /></a></dd></dl>
+<pre class="lt" style="font-family:monospace;">newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Convolution;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYY&quot;</span>;
+<span style="color: #008000;">//Set up 2 signals for convolution </span>
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>Data<span style="color: #000000;">&#40;</span><span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">0.1</span><span style="color: #000000;">&#41;</span>;
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>exp<span style="color: #000000;">&#40;</span><span style="color: #000080;">-</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">^</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;   
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>?sqrt<span style="color: #000000;">&#40;</span><span style="color: #000080;">-</span>Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #0000dd;">0</span>;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal_1&quot;</span>;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal_2&quot;</span>;
+<span style="color: #008000;">//calculate the convolution for signal_1 and signal_2</span>
+conv ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Signal_1&quot;</span><span style="color: #000000;">&#41;</span> response<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Signal_2&quot;</span><span style="color: #000000;">&#41;</span> interval<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.1</span> circular<span style="color: #000000;">:</span><span style="color: #000080;">=</span>circular oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>,<span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#41;</span>;
+
+range rr<span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Convolution<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Arrange X to match original signal</span>
+rr<span style="color: #000080;">=</span>rr<span style="color: #000080;">-</span><span style="color: #0000dd;">10</span>;
+range rc<span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Convolution<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>; 
+rc<span style="color: #000080;">=</span>rc<span style="color: #000080;">*</span><span style="color: #0000dd;">0.1</span>;   <span style="color: #008000;">//multiply convolution results by sample interval 0.1</span>
+rc<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Convolution&quot;</span>;
+
+<span style="color: #008000;">//plot the results in graph</span>
+plotxy <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">from</span><span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>;
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">to</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">from</span><span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">0.2</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">to</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>;</pre>
+<h2><a name="Hilbert_transform_.28Pro_only.29"></a><span class="mw-headline">Hilbert transform (Pro only)</span></h2>
+<p>The Labtalk Script below will introduce you how to calculate the Hilbert transform using X-function <a class="external text" href="../../XFunction/X-Function/Hilbert.html">Hilbert</a>, which gives the analytic results. Then it will plot the results into a 3D line plot with projection by using the <a class="external text" href="../../LabTalk/LabTalk/Set_(command).html">Set</a> and <a class="external text" href="../../LabTalk/LabTalk/Set_(command).html">Get</a> command.
+</p>
+<dl><dd><a  class="image"><img alt="Hilbert.png" src="../images/Signal_Processing/Hilbert.png?v=31954" width="446"  /></a></dd></dl>
+<pre class="lt" style="font-family:monospace;">newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Hilbert1;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XY&quot;</span>;
+
+<span style="color: #008000;">//Set up data</span>
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>Data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">6</span>,<span style="color: #0000dd;">0.02</span><span style="color: #000000;">&#41;</span>;
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>sin<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span><span style="color: #000080;">*</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0.5</span><span style="color: #000080;">*</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; 
+ 
+<span style="color: #008000;">//calculate the Hilbert transform;</span>
+hilbert ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Hilbert1<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>;
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>ImReal<span style="color: #000000;">&#40;</span>Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>Imaginary<span style="color: #000000;">&#40;</span>Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Set the Long name for column</span>
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Time&quot;</span>;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Real&quot;</span>;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Imag&quot;</span>;
+
+<span style="color: #008000;">//Plot the Hilbert transform into 3D line plot </span>
+plotxyz iz<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">240</span>;
+
+<span style="color: #008000;">//Set the line and symbol properties for the complex signal;</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>lo <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Hide droplines along Z direction</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// Connect symbols with Line</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// Set Line width</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">9</span>; <span style="color: #008000;">// Set line color as Navy</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Set symbol size as 0 to hide it</span>
+
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Show XY projection</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Connect symbols with line</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Set symbol size as 0 to hide it</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// Set line width</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">15</span>; <span style="color: #008000;">// Set line color Orange</span>
+
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Show XZ projection</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Connect symbols with line</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Set symbol size as 0 to hide it</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// Set line width</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">15</span>; <span style="color: #008000;">// Set line color Orange</span>
+
+<span style="color: #008000;">//Set the axis range</span>
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">z</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">z</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;</pre>
+
+
+
+
+
+

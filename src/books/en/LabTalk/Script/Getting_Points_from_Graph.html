@@ -1,0 +1,279 @@
+<h1 class="firstHeading">2.14.2 Getting Points from Graph</h1><p class='urlname' style='display: none'>Getting-Points-from-Graph</p>
+<p><span class="OIndex" style="display:none">Get Point</span>
+Any of the Tools in the Origin <b>Tools</b> Toolbar can be initiated from script, but three can be linked to macros and programmed to do more.
+</p><p>To program tools, define the <b>pointproc</b> macro to execute appropriate code. The <b>pointproc</b> macro runs when the user double-clicks or single-clicks and presses the Enter key.
+</p>
+<h2><a name="Screen_Reader"></a><span class="mw-headline">Screen Reader</span></h2>
+<p>This script puts a label on a graph using the <span class="OIndex">Screen Reader</span> tool.
+</p>
+<pre class="lt" style="font-family:monospace;">dotool <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// Start the Screen Reader Tool</span>
+dotool <span style="color: #000080;">-</span>d; <span style="color: #008000;">// Allow a single click to act as double click</span>
+<span style="color: #008000;">// Here we define our '''pointproc''' macro</span>
+def pointproc <span style="color: #000000;">&#123;</span>
+    label <span style="color: #000080;">-</span>a x y <span style="color: #000080;">-</span>n MyLabel Hello;
+    dotool <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// Reset the tool to Pointer</span>
+    done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// Set the variable to allow infinite loop to end</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Script does not stop when using a tool, </span>
+<span style="color: #008000;">// so further execution needs to be prevented.</span>
+<span style="color: #008000;">// This infinite loop waits for the user to select the point</span>
+for<span style="color: #000000;">&#40;</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&#160;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>; <span style="color: #000000;">&#41;</span> sec <span style="color: #000080;">-</span>p .1; 
+<span style="color: #008000;">// A .1 second delay gives our loop something to do:</span>
+type Continuing script ...; 
+<span style="color: #008000;">// Once the macro has run, our infinite loop is released</span></pre>
+<h2><a name="Data_Reader"></a><span class="mw-headline">Data Reader</span></h2>
+<p>The <span class="OIndex">Data Reader</span> tool is similar to the Screen Reader, but the cursor locks on to actual data points.
+If defined, a <b>quittoolbox</b> macro runs if user presses <b>Esc</b> key or clicks the Pointer Tool to stop the Data Reader.
+</p><p>This example assumes a graph window is active and expects the user to select three points on their graph.
+</p>
+<pre class="lt" style="font-family:monospace;">@global <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+dataset dsx, dsy;  <span style="color: #008000;">// Create two datasets to hold the X and Y values</span>
+dotool <span style="color: #0000dd;">3</span>;          <span style="color: #008000;">// Start the tool</span>
+<span style="color: #008000;">// Define the macro that runs for each point selection</span>
+def pointproc <span style="color: #000000;">&#123;</span>
+    dsx<span style="color: #000000;">&#91;</span>count<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> x;  <span style="color: #008000;">// Get the X coordinate</span>
+    dsy<span style="color: #000000;">&#91;</span>count<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> y;  <span style="color: #008000;">// Get the Y coordinate</span>
+    count<span style="color: #000080;">++</span>;         <span style="color: #008000;">// Increment count</span>
+    if<span style="color: #000000;">&#40;</span>count <span style="color: #000080;">==</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> dotool <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// Check to see if we have three points</span>
+    else type <span style="color: #000080;">-</span>a Select next point;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Define a macro that runs if user presses Esc key, </span>
+<span style="color: #008000;">// or clicks the Pointer Tool:</span>
+def quittoolbox <span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Error&#160;: Not enough points</span>
+    if<span style="color: #000000;">&#40;</span>count <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> ty <span style="color: #000080;">-</span>b You did not specify three datapoints;  
+    else
+    <span style="color: #000000;">&#123;</span>
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">&#123;</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>,dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#125;</span>;
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">&#123;</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>,dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#125;</span>;
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">&#123;</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>,dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>,dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#125;</span>;
+        double ds12 <span style="color: #000080;">=</span> dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">-</span> dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+        double ds13 <span style="color: #000080;">=</span> dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">-</span> dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>;
+        double ds23 <span style="color: #000080;">=</span> dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">-</span> dsy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>;
+        area <span style="color: #000080;">=</span> abs<span style="color: #000000;">&#40;</span>.5<span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>ds12 <span style="color: #000080;">+</span> ds13 <span style="color: #000080;">+</span> ds23<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        type <span style="color: #000080;">-</span>b Area is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>area<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// Initial point</span>
+type DoubleClick your first point <span style="color: #000000;">&#40;</span>or SingleClick and press Enter<span style="color: #000000;">&#41;</span>;</pre>
+<p>The following example allows user to select arbitrary number of points until Esc key is pressed or user clicks on the Pointer tool in the Tools toolbar.
+</p>
+<pre class="lt" style="font-family:monospace;">@global <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+dataset dsx, dsy;  <span style="color: #008000;">// Create two datasets to hold the X and Y values</span>
+dotool <span style="color: #0000dd;">3</span>;          <span style="color: #008000;">// Start the tool</span>
+<span style="color: #008000;">// Define the macro that runs for each point selection</span>
+def pointproc <span style="color: #000000;">&#123;</span>
+    count<span style="color: #000080;">++</span>;         <span style="color: #008000;">// Increment count</span>
+    dsx<span style="color: #000000;">&#91;</span>count<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> x;  <span style="color: #008000;">// Get the X coordinate</span>
+    dsy<span style="color: #000000;">&#91;</span>count<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> y;  <span style="color: #008000;">// Get the Y coordinate</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// Define a macro that runs if user presses Esc key, </span>
+<span style="color: #008000;">// or clicks the Pointer Tool:</span>
+def quittoolbox <span style="color: #000000;">&#123;</span>
+   count<span style="color: #000080;">=</span>;
+   for<span style="color: #000000;">&#40;</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>count; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+   <span style="color: #000000;">&#123;</span>
+      type <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>, <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>dsx<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>, <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>dsy<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+   <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// Initial point</span>
+type <span style="color: #ff00ff;">&quot;Click to select point, then press Enter&quot;</span>;
+type <span style="color: #ff00ff;">&quot;Press Esc or click on Pointer tool to stop&quot;</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Getting_Points_from_Graph/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>Pressing Enter key to select a point works more reliably than double-clicking on the point. 
+</p></td></tr></table>
+<p>You can also use the <b><a href="../../LabTalk/LabTalk/GetPts_(command).html" title="LabTalk:GetPts (command)">getpts</a></b> command to gather data values from a graph.
+</p>
+<h2><a name="Data_Selector"></a><span class="mw-headline">Data Selector</span></h2>
+<p>The <span class="OIndex">Data Selector</span> tool is used to set a Range for a dataset.
+A range is defined by a beginning row number (index) and an ending row.
+You can define multiple ranges in a dataset and Origin analysis routines will use these ranges as input, excluding data outside these ranges.
+</p><p>Here is a script that lets the user select a range on a graph.
+</p>
+<pre class="lt" style="font-family:monospace;">    <span style="color: #008000;">// Start the tool</span>
+    dotool <span style="color: #0000dd;">4</span>;
+    <span style="color: #008000;">// Define macro that runs when user is done</span>
+    def pointproc <span style="color: #000000;">&#123;</span>
+        done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        dotool <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Wait in a loop for user to finish by pressing ...</span>
+    <span style="color: #008000;">// (1) Enter key or (2) double-clicking</span>
+    for<span style="color: #000000;">&#40;</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&#160;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>&#160;; <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        sec <span style="color: #000080;">-</span>p .1;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Additional script will run once user completes tool.</span>
+    ty continuing ..;</pre>
+<p>When using the <span class="OIndex">Regional Data Selector</span> or the <span class="OIndex">Regional Mask Tool</span> you can hook into the quittoolbox macro which triggers when a user presses Esc key:
+</p>
+<pre class="lt" style="font-family:monospace;">    <span style="color: #008000;">// Start the Regional Data Selector tool with a graph active</span>
+    dotool <span style="color: #0000dd;">17</span>;
+    <span style="color: #008000;">// Define macro that runs when user is done</span>
+    def quittoolbox <span style="color: #000000;">&#123;</span>
+        done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Wait in a loop for user to finish by pressing ... </span>
+    <span style="color: #008000;">// (1) Esc key or (2) clicking Pointer tool:</span>
+    for<span style="color: #000000;">&#40;</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&#160;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>&#160;; <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        sec <span style="color: #000080;">-</span>p .1;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Additional script will run once user completes tool.</span>
+    ty continuing ..;</pre>
+<p>And we can use an X-Function to find and use these ranges:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Get the ranges into datasets</span>
+dataset dsB, dsE;
+mks ob<span style="color: #000000;">:</span><span style="color: #000080;">=</span>dsB oe<span style="color: #000000;">:</span><span style="color: #000080;">=</span>dsE;
+<span style="color: #008000;">// For each range</span>
+for<span style="color: #000000;">&#40;</span>idx <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>&#160;; idx <span style="color: #000080;">&lt;=</span> dsB.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>&#160;; idx<span style="color: #000080;">++</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Get the integral under the curve for that range</span>
+    integ <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>b dsB<span style="color: #000000;">&#91;</span>idx<span style="color: #000000;">&#93;</span> <span style="color: #000080;">-</span>e dsE<span style="color: #000000;">&#91;</span>idx<span style="color: #000000;">&#93;</span>;
+    type Area of <span style="color: #000080;">%</span>C from <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>dsB<span style="color: #000000;">&#91;</span>idx<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span> to <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>dsE<span style="color: #000000;">&#91;</span>idx<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span> is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>integ.<span style="color: #000080;">area</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<hr />
+<p>List of Tools in Origin Tools Toolbar. Those in <b>bold</b> are useful in programming.
+</p>
+<table class="simple">
+<tr>
+<th> Tool Number</th>
+<th> Description
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td>
+<p>Pointer - The Pointer is the default condition for the mouse and makes the mouse act as a selector.
+</p>
+</td></tr>
+<tr>
+<td> 1
+</td>
+<td>
+<p>ZoomIn - A rectangular selection on a graph will rescale the axes to the rectangle. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 2
+</td>
+<td>
+<p><b>Screen Reader</b> - Reads the location of a point on a page.
+</p>
+</td></tr>
+<tr>
+<td> 3
+</td>
+<td>
+<p><b>Data Reader</b> - Reads the location of a data point on a graph. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 4
+</td>
+<td>
+<p><b>Data Selector</b> - Sets a pair of Data Markers indicating a data range. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 5
+</td>
+<td>
+<p>Draw Data - Allows user the draw data points on a graph. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 6
+</td>
+<td>
+<p>Text - Allows text annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 7
+</td>
+<td>
+<p>Arrow - Allows arrow annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 8
+</td>
+<td>
+<p>Curved Line - Allows curved line annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 9
+</td>
+<td>
+<p>Line - Allows line annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 10
+</td>
+<td>
+<p>Rectangle - Allows rectangle annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 11
+</td>
+<td>
+<p>Circle - Allows circle annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 12
+</td>
+<td>
+<p>Closed Polygon - Allows closed polygon annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 13
+</td>
+<td>
+<p>Open Polygon - Allows open polygon annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 14
+</td>
+<td>
+<p>Closed Region - Allows closed region annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 15
+</td>
+<td>
+<p>Open Region - Allows open region annotation to be added to a page.
+</p>
+</td></tr>
+<tr>
+<td> 16
+</td>
+<td>
+<p>ZoomOut - Zooms out (one level) when clicking anywhere in a graph. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 17
+</td>
+<td>
+<p><b>Regional Data Selector</b> - Allows selection of a data range. (Graph only)
+</p>
+</td></tr>
+<tr>
+<td> 18
+</td>
+<td>
+<p><b>Regional <span class="OIndex">Mask</span> Tool</b> - Allows masking a points in a data range. (Graph only)
+</p>
+</td></tr></table>
+
+

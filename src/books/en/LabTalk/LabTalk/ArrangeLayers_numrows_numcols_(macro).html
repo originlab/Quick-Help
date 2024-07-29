@@ -1,0 +1,46 @@
+<h1 class="firstHeading">3.6.4.1 ArrangeLayers (macro)</h1><p class='urlname' style='display: none'>ArrangeLayers-macro</p>
+<p>Arranges all unlinked layers and linked layers having units percent-of-linked-layer into a specified number of rows and columns.  Sets units of all layers to percent-of-page.  
+</p><p>Assumes that the <a href="../../LabTalk/LabTalk/CheckMargins_(macro).html" title="LabTalk:CheckMargins (macro)">CheckMargins</a> macro is executed just prior to its execution.  Will not add layers to pad out up to (number of rows)*(number of columns) layers.
+</p>
+<h2><a name="Definition:"></a><span class="mw-headline"><font color="chocolate">Definition:</font></span></h2>
+<pre class="lt" style="font-family:monospace;">Def ArrangeLayers <span style="color: #000000;">&#123;</span>
+      x <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span> <span style="color: #000080;">-</span> Left <span style="color: #000080;">-</span> Right <span style="color: #000080;">-</span> <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>2<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span>xGap;
+      x<span style="color: #000080;">/</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>2;      <span style="color: #008000;">// calculate width in&#160;% of page</span>
+      y <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span> <span style="color: #000080;">-</span> Top <span style="color: #000080;">-</span> Bottom <span style="color: #000080;">-</span> <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>1<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span>yGap;
+      y<span style="color: #000080;">/</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>1;<span style="color: #008000;">// calculate height in&#160;% of page</span>
+      if <span style="color: #000000;">&#40;</span>x <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">5</span> <span style="color: #000080;">||</span> y <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+            ty <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Resulting layers are too small, operation aborted!&quot;</span>;
+            break <span style="color: #0000dd;">1</span>; 
+      <span style="color: #000000;">&#125;</span>;
+      k <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+      for <span style="color: #000000;">&#40;</span>i <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; i <span style="color: #000080;">&lt;=</span> <span style="color: #000080;">%</span>1; i<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #008000;">// loop for&#160;%1 rows of layers</span>
+            for <span style="color: #000000;">&#40;</span>j <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; j <span style="color: #000080;">&lt;=</span> <span style="color: #000080;">%</span>2; j<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #008000;">// loop for&#160;%2 columns of layers </span>
+                  for <span style="color: #000000;">&#40;</span>k<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;k <span style="color: #000080;">&lt;=</span>page.<span style="color: #000080;">nlayers</span>;k<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+                  <span style="color: #008000;">// loop through all layers in page</span>
+                  #<span style="color: #000080;">!</span>k<span style="color: #000080;">=</span>;
+                  layer <span style="color: #000080;">-</span>s k;
+                  if <span style="color: #000000;">&#40;</span>layer.<span style="color: #000080;">link</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">||</span> layer.<span style="color: #000080;">unit</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span> break;
+                  <span style="color: #008000;">// select unlinked layers</span>
+            <span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// or linked layers having units</span>
+            <span style="color: #008000;">//&#160;% of linked layer</span>
+            layer <span style="color: #000080;">-</span>u <span style="color: #0000dd;">1</span>;
+            if <span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>2<span style="color: #000080;">==</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #008000;">// if only 1 column</span>
+                  layer x y <span style="color: #000000;">&#91;</span>Left<span style="color: #000080;">+</span><span style="color: #000000;">&#40;</span>j<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>x<span style="color: #000080;">+</span>xGap<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#91;</span>Top<span style="color: #000080;">+</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>1<span style="color: #000080;">-</span>i<span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>y<span style="color: #000080;">+</span>yGap<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+            <span style="color: #000000;">&#125;</span>
+            else <span style="color: #000000;">&#123;</span> <span style="color: #008000;">// if more than 1 column</span>
+                  layer x y <span style="color: #000000;">&#91;</span>Left<span style="color: #000080;">+</span><span style="color: #000000;">&#40;</span>j<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>x<span style="color: #000080;">+</span>xGap<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#91;</span>Top<span style="color: #000080;">+</span><span style="color: #000000;">&#40;</span>i<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000000;">&#40;</span>y<span style="color: #000080;">+</span>yGap<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+                  <span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// end else</span>
+            <span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// end columns for loop</span>
+      <span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// end rows loop</span>
+<span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// end def</span></pre>
+<h2><a name="Example:"></a><span class="mw-headline"><font color="chocolate">Example:</font></span></h2>
+<p>This script arranges 12 unlinked layers in the active graph window into 4 rows and 3 columns.  Note, again that <b>CheckMargins</b> must be run just before running <b>ArrangeLayers</b>.
+</p>
+<pre class="lt" style="font-family:monospace;">CheckMargins;
+ArrangeLayers <span style="color: #0000dd;">4</span> <span style="color: #0000dd;">3</span>;</pre>
+
+
+
+
+
+

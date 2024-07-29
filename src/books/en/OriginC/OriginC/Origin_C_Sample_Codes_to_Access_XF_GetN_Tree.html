@@ -1,0 +1,134 @@
+<h1 class="firstHeading">3.11.2 Accessing X-Function GetN Tree</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Access_MDF_X-Function_GetN_Tree.28Origin80_SR0.29"><span class="tocnumber">2</span> <span class="toctext">Access MDF X-Function GetN Tree(Origin80 SR0)</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Access_NetCDF_X-Function_GetN_Tree.28Origin80_SR0.29"><span class="tocnumber">3</span> <span class="toctext">Access NetCDF X-Function GetN Tree(Origin80 SR0)</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR5</p>
+<h2><a name="Access_MDF_X-Function_GetN_Tree.28Origin80_SR0.29"></a><span class="mw-headline">Access MDF X-Function GetN Tree(Origin80 SR0)</span></h2>
+<p>We may want to write Origin C codes to access X-Function GUI tree. The following function is an example to access <a class="external text" href="../../XFunction/X-Function/ImpMDF.html">impMDF</a> X-Function GUI tree to check/uncheck some checkboxes and then import file.
+</p><p>Different X-Function the struct of trGetN will be different. So before update trGetN, you need to set a break point at InvokeBeforeExecute function, after running this function to see the struct of trGetN in Local Variables window.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> AccessImpMDF<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	XFBase xf;
+	string strXFName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;impMDF&quot;</span>;
+	xf.<span style="color: #000000;">Load</span><span style="color: #000000;">&#40;</span>strXFName, LTXF_USE_FAST_ACCESS<span style="color: #000000;">&#41;</span>;
+	
+	Tree tr;
+	TreeNode trGetN;	
+	xf.<span style="color: #000000;">GetGUI</span><span style="color: #000000;">&#40;</span>tr, trGetN<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get GUI tree of xfunction</span>
+	
+	<span style="color: #008000;">// set file name to GUI tree</span>
+	trGetN.<span style="color: #000000;">fname</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>ETAS INCA MDF<span style="color: #666666; font-weight: bold;">\\</span>ZZP164_CPSSW_3_MS_0_SREC_0_shot43_20060227_151554.dat&quot;</span>;
+	
+	<span style="color: #008000;">// read data selection information from import file to GUI tree, after running, trGetN.trfiles.file1.DataSelection node will not be empty.</span>
+	xf.<span style="color: #000000;">InvokeBeforeExecute</span><span style="color: #000000;">&#40;</span>trGetN, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;	
+	
+	TreeNode trDataSelection <span style="color: #000080;">=</span> trGetN.<span style="color: #000000;">trfiles</span>.<span style="color: #000000;">file1</span>.<span style="color: #000000;">DataSelection</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>trDataSelection <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;	<span style="color: #008000;">//err	</span>
+	
+	<span style="color: #008000;">// DataSelection treenode contains many hidden node and will disappear on GUI, this count is the number of checkbox that appear on GUI.</span>
+	<span style="color: #0000ff;">int</span> nCount <span style="color: #000080;">=</span> tree_count_items_by_attribute<span style="color: #000000;">&#40;</span>trDataSelection, STR_SHOW_ATTRIB, <span style="color: #ff00ff;">&quot;1&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//returns count ignored hidden node </span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nCount <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>; <span style="color: #008000;">//err</span>
+	
+	vector vCheck<span style="color: #000000;">&#40;</span>nCount<span style="color: #000000;">&#41;</span>;
+	vCheck <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// set all items to 0 to uncheck	</span>
+	<span style="color: #008000;">// the following index 0, 2, 3 are the index of checkbox on GUI, set these checkboxes to 1</span>
+	vCheck<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	vCheck<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	vCheck<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+	
+	<span style="color: #008000;">//specify Data Selection checkboxes by vector</span>
+	<span style="color: #0000ff;">int</span> index<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+	foreach<span style="color: #000000;">&#40;</span>TreeNode trNode in trDataSelection.<span style="color: #000000;">Children</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trNode.<span style="color: #000000;">Show</span> <span style="color: #000000;">&#41;</span><span style="color: #008000;">//ignore hidden node</span>
+			trNode.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> vCheck<span style="color: #000000;">&#91;</span>index<span style="color: #000040;">++</span><span style="color: #000000;">&#93;</span>;		
+	<span style="color: #000000;">&#125;</span>
+	
+	xf.<span style="color: #000000;">SetGUI</span><span style="color: #000000;">&#40;</span>trGetN<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// set changed GUI tree back to xf</span>
+	
+ 	xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Access_NetCDF_X-Function_GetN_Tree.28Origin80_SR0.29"></a><span class="mw-headline">Access NetCDF X-Function GetN Tree(Origin80 SR0)</span></h2>
+<p><b>NOTE</b>:
+</p>
+<ul><li> We assume that there is a NetCDF file, madis-profiler.nc, in Origin sample folder. There are 3 dimensionality, 1D, 2D, 3D, in this file. </li></ul>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+<span style="color: #0000ff;">void</span> AccessImpNetCDF<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    XFBase xf;
+    string strXFName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;impNetCDF&quot;</span>;
+    xf.<span style="color: #000000;">Load</span><span style="color: #000000;">&#40;</span>strXFName, LTXF_USE_FAST_ACCESS<span style="color: #000000;">&#41;</span>;
+    
+    Tree tr;
+    TreeNode trGetN;    
+    xf.<span style="color: #000000;">GetGUI</span><span style="color: #000000;">&#40;</span>tr, trGetN<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get GUI tree of xfunction</span>
+    
+    <span style="color: #008000;">// set file name to GUI tree</span>
+    trGetN.<span style="color: #000000;">fname</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>madis-profiler.nc&quot;</span>;
+    
+    <span style="color: #008000;">// read data selection information from import file to GUI tree, after running, trGetN.trfiles.file1.DataSelection node will not be empty.</span>
+    xf.<span style="color: #000000;">InvokeBeforeExecute</span><span style="color: #000000;">&#40;</span>trGetN, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  
+    
+    TreeNode trDataSelection <span style="color: #000080;">=</span> trGetN.<span style="color: #000000;">trfiles</span>.<span style="color: #000000;">file1</span>.<span style="color: #000000;">DataSelection</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>trDataSelection <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span>; <span style="color: #008000;">//err   </span>
+    
+    <span style="color: #008000;">// only import following variables</span>
+    <span style="color: #008000;">// 1D&#160;: lastRecord, invTime</span>
+    <span style="color: #008000;">// 2D&#160;: staName, ICT</span>
+    <span style="color: #008000;">// 3D&#160;: consensusNumBeam, radVelocity</span>
+	TreeNode trVar1D <span style="color: #000080;">=</span> trDataSelection.<span style="color: #000000;">Var1D</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> trVar1D <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		uncheck_all_children<span style="color: #000000;">&#40;</span>trVar1D<span style="color: #000000;">&#41;</span>;
+		trVar1D.<span style="color: #000000;">lastRecord</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		trVar1D.<span style="color: #000000;">invTime</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		
+    <span style="color: #000000;">&#125;</span>
+    TreeNode trVar2D <span style="color: #000080;">=</span> trDataSelection.<span style="color: #000000;">Var2D</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> trVar2D <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+		uncheck_all_children<span style="color: #000000;">&#40;</span>trVar2D<span style="color: #000000;">&#41;</span>;
+		trVar2D.<span style="color: #000000;">staName</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    	trVar2D.<span style="color: #000000;">ICT</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    	
+    <span style="color: #000000;">&#125;</span>
+    TreeNode trVar3D <span style="color: #000080;">=</span> trDataSelection.<span style="color: #000000;">Var3D</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> trVar3D <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+		uncheck_all_children<span style="color: #000000;">&#40;</span>trVar3D<span style="color: #000000;">&#41;</span>;
+    	trVar3D.<span style="color: #000000;">consensusNumBeam</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    	trVar3D.<span style="color: #000000;">radVelocity</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span>
+   
+    xf.<span style="color: #000000;">SetGUI</span><span style="color: #000000;">&#40;</span>trGetN<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// set changed GUI tree back to xf</span>
+    
+    xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> uncheck_all_children<span style="color: #000000;">&#40;</span>TreeNode<span style="color: #000040;">&amp;</span> trBranch<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	foreach<span style="color: #000000;">&#40;</span>TreeNode trNode in trBranch.<span style="color: #000000;">Children</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		trNode.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

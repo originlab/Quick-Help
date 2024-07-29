@@ -1,0 +1,64 @@
+<h1 class="firstHeading">3.6.2 Importing Database</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Need_to_do_before_Running_Examples"><span class="tocnumber">2</span> <span class="toctext">Need to do before Running Examples</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Import_from_Included_Sample_Access_Database"><span class="tocnumber">3</span> <span class="toctext">Import from Included Sample Access Database</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Need_to_do_before_Running_Examples"></a><span class="mw-headline">Need to do before Running Examples</span></h2>
+<p>Prior to running the following example, the <b>datasource.c</b> file need to be loaded and compiled. This can be done from script with the following command:
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\datasource.<span style="color: #000080;">c</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Import_from_Included_Sample_Access_Database"></a><span class="mw-headline">Import from Included Sample Access Database</span></h2>
+<p>We have included a small Access database in the Samples folder called stars.mdb and the following OC code shows how to control the database to import into active worksheet:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\datasource.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> Import_Database_Ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet	wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	<span style="color: #008000;">// set settings to worksheet</span>
+	string	strDatabaseFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\</span>
+<span style="color: #666666; font-weight: bold;">\\</span>stars.mdb&quot;</span>;	
+
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> strDatabaseFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		string	strConn;
+		strConn.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s; 
+User ID=admin; Password=;&quot;</span>, strDatabaseFile<span style="color: #000000;">&#41;</span>;			
+		string	strSQL <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Select Stars.Index, Stars.Name, Stars.LightYears, 
+Stars.Magnitude From Stars&quot;</span>;
+		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> db_wks_set_query<span style="color: #000000;">&#40;</span>wks, strConn, strSQL<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">//do import </span>
+			db_wks_import<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+			
+			<span style="color: #008000;">// remove settings from worksheet</span>
+			db_wks_set_query<span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>;
+			
+			<span style="color: #0000ff;">return</span>;
+		<span style="color: #000000;">&#125;</span>
+		MessageBox<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">&quot;Fail to set query to worksheet.&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">else</span>
+	<span style="color: #000000;">&#123;</span>
+		string	strErr;
+		strErr.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Not found database file&#160;%s under&#160;%s&quot;</span>, 
+GetFileName<span style="color: #000000;">&#40;</span>strDatabaseFile<span style="color: #000000;">&#41;</span>, GetFilePath<span style="color: #000000;">&#40;</span>strDatabaseFile<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+		MessageBox<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, strErr<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

@@ -1,0 +1,77 @@
+<h1 class="firstHeading">1.10.2 Importing Images</h1><p><br />
+Origin allows you to import images into a matrix or a worksheet cell, and onto a graph.  The following sections will show you how to import images in your Origin C applications.
+</p>
+<h2><a name="Import_Image_into_Matrix"></a><span class="mw-headline"><span class="OIndex">Import Image into Matrix</span></span></h2>
+<p><span class="OIndex" style="display:none">Importing, Get Info from Image File</span>
+The following example function demonstrates how to import an image file into a matrix.  The function takes three arguments: matrix name, file name, and grayscale  depth.  The key functions being called in this example are oimg_image_info and oimg_load_image.  The first is used to get information about the image contained in the image file.  The information obtained is used in preparing the target matrix.  The latter function is used to do the actual importing of the image file into the target matrix as grayscale data values.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>import_image.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// needed for oimg_ functions</span>
+ 
+<span style="color: #0000ff;">bool</span> import_image_to_matrix_data<span style="color: #000000;">&#40;</span>
+    LPCSTR lpcszMatrixName, <span style="color: #008000;">// matrixbook name</span>
+    LPCSTR lpcszFileName,   <span style="color: #008000;">// image file name</span>
+    <span style="color: #0000ff;">int</span> nGrayDepth<span style="color: #000000;">&#41;</span>         <span style="color: #008000;">// import as 8-bit or 16-bit gray</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Get the target matrix object</span>
+    MatrixObject mo<span style="color: #000000;">&#40;</span>lpcszMatrixName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Get source image information</span>
+    <span style="color: #0000ff;">int</span> nWidth, nHeight, nBPP;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>oimg_image_info<span style="color: #000000;">&#40;</span>lpcszFileName, <span style="color: #000040;">&amp;</span>nWidth, <span style="color: #000040;">&amp;</span>nHeight, <span style="color: #000040;">&amp;</span>nBPP<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Set target matrix to same dimensions as source image</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nHeight, nWidth, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+    <span style="color: #008000;">// Set target matrix data size</span>
+    <span style="color: #0000ff;">int</span> nDataType <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">16</span> <span style="color: #000080;">==</span> nGrayDepth&#160;? FSI_USHORT <span style="color: #000000;">:</span> FSI_BYTE<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetInternalData</span><span style="color: #000000;">&#40;</span>nDataType, <span style="color: #0000ff;">FALSE</span>, <span style="color: #0000ff;">FALSE</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Import the image into the matrix</span>
+    <span style="color: #0000ff;">bool</span> bRet;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> FSI_USHORT <span style="color: #000080;">==</span> nDataType <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        Matrix<span style="color: #000080;">&lt;</span>WORD<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">&#40;</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">16</span>, nHeight, nWidth<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">else</span> <span style="color: #008000;">// FSI_BYTE</span>
+    <span style="color: #000000;">&#123;</span>
+        Matrix<span style="color: #000080;">&lt;</span>BYTE<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">&#40;</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">8</span>, nHeight, nWidth<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">return</span> bRet;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Import_Image_into_Worksheet_Cell"></a><span class="mw-headline"><span class="OIndex">Import Image into Worksheet Cell</span></span></h2>
+<p>The following example will embed a JPEG image from a file into a worksheet cell.  This is accomplished using the AttachPicture method of the Worksheet class.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nRow <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>Graph1.jpg&quot;</span>;
+DWORD dwEmbedInfo <span style="color: #000080;">=</span> EMBEDGRAPH_KEEP_ASPECT_RATIO;
+
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wks.<span style="color: #000000;">AttachPicture</span><span style="color: #000000;">&#40;</span>nRow, nCol, strFile, dwEmbedInfo<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nCol<span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetWidth</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">20</span><span style="color: #000000;">&#41;</span>;
+    wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Import_Image_to_Graph"></a><span class="mw-headline"><span class="OIndex">Import Image to Graph</span></span></h2>
+<p>The following example will embed a JPEG image from a file onto a graph layer. This is accomplished using the <b><a href="../../OriginC/OriginC/Image_import_to_active_graph_layer_(global_function).html" title="OriginC:Image import to active graph layer (global function)">image_import_to_active_graph_layer</a></b> global function. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>image_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">// make sure image_utils.c is compiled before calling</span>
+<span style="color: #008000;">// the image_import_to_active_graph_layer function.</span>
+LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;run.LoadOC(Originlab<span style="color: #666666; font-weight: bold;">\\</span>image_utils.c)&quot;</span><span style="color: #000000;">&#41;</span>;
+
+string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>Graph1.jpg&quot;</span>;
+image_import_to_active_graph_layer<span style="color: #000000;">&#40;</span>strFile<span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

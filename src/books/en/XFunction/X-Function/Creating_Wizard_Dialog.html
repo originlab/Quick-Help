@@ -1,0 +1,257 @@
+<h1 class="firstHeading">1.1.7 Creating Wizard Dialog</h1><p><span class="OIndex" style="display:none">X-Function Wizard Dialog</span><span class="OIndex" style="display:none">Wizard Dialog</span>
+X-Functions support wizard dialogs.  To create a wizard dialog, you need n+1 X-Functions, where n is the number of wizard pages.  One is the main X-Function.  The main X-Function is used to construct wizard pages and then open the wizard dialog if script mode is off, or run without dialog when script mode is on.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_a_Wizard"><span class="tocnumber">1</span> <span class="toctext">Creating a Wizard</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Using_X-Function"><span class="tocnumber">2</span> <span class="toctext">Using X-Function</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Run_with_wizard_dialogX-Function.2C_Execution_with_Wizard_Dialog"><span class="tocnumber">2.1</span> <span class="toctext">Run with wizard dialog<span class="OIndex" style="display:none">X-Function, Execution with Wizard Dialog</span></span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Run_with_script_mode_without_dialog_X-Function.2C_Execution_with_Theme"><span class="tocnumber">2.2</span> <span class="toctext">Run with script mode without dialog <span class="OIndex" style="display:none">X-Function, Execution with Theme</span></span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Creating_a_Wizard"></a><span class="mw-headline">Creating a Wizard</span></h2>
+<p>The following shows how to create a two page wizard. Page 1 is used to select an XY range, and to specify the sub x range of the selected data range. Page 2 is used to add a rectangle  with the specified fill color onto the source graph.  The left x and right x of this rectangle are equal to the values of x from/to in Page 1.
+</p>
+<ol>
+<li>Add a header file, wizDlg.h, under the UFF\OriginC\ folder. Put the following code into this header file to derive subclasses from Origin C built-in X-Function wizard classes. The X-Function basic wizard classes are:
+<ul><li> XFCore, which is used to save and pass values in each page.</li>
+<li> XFWizTheme, which is used to arrange theme settings for each wizard page.</li>
+<li> XFWizInputOutputRange, which is used to arrange input and output ranges for each page.</li>
+<li> XFWizManager, which is very important and must have a user-defined subclass derived from it. It is used to decide the steps in the wizard.</li></ul>
+<pre class="oc" style="font-family:monospace;">#ifndef __WIZ_DLG_H__
+<span style="color: #0000ff;">#define</span> __WIZ_DLG_H__
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWiz.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFCore.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\WizOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizNavigation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizManager.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizScript.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizard_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">class</span> WizDlgCore <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> XFCore
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	WizDlgCore<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">void</span> SetXRange<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> from, <span style="color: #0000ff;">double</span> to<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		m_dFrom <span style="color: #000080;">=</span> from;
+		m_dTo <span style="color: #000080;">=</span> to;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">void</span> GetXRange<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> from, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> to<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		from <span style="color: #000080;">=</span> m_dFrom;
+		to <span style="color: #000080;">=</span> m_dTo;
+	<span style="color: #000000;">&#125;</span>
+	
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+	<span style="color: #0000ff;">double</span> m_dFrom;
+	<span style="color: #0000ff;">double</span> m_dTo;
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">class</span> WizDlgTheme <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> XFWizTheme
+<span style="color: #000000;">&#123;</span>
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">class</span> WizDlgInputOutputRange <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> XFWizInputOutputRange
+<span style="color: #000000;">&#123;</span>
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">class</span> WizDlgManager <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> XFWizManager
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	WizDlgManager<span style="color: #000000;">&#40;</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwUIDOp <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+		
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>	
+	<span style="color: #0000ff;">virtual</span> XFCore<span style="color: #000040;">*</span>	CreateXFCore<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">new</span> WizDlgCore; <span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">virtual</span> XFWizTheme<span style="color: #000040;">*</span>	CreateXFWizTheme<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">new</span> WizDlgTheme; <span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">virtual</span> XFWizInputOutputRange<span style="color: #000040;">*</span> CreateXFWizInputOutputRange<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span> 
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">new</span> WizDlgInputOutputRange; 
+	<span style="color: #000000;">&#125;</span>
+ 
+	<span style="color: #0000ff;">virtual</span> string	GetClassName<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;WizDlgExample&quot;</span>; <span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #0000ff;">#define</span> STR_XFNAME_PAGE_1			<span style="color: #ff00ff;">&quot;wizPage1&quot;</span>
+<span style="color: #0000ff;">#define</span> STR_XFNAME_PAGE_2			<span style="color: #ff00ff;">&quot;wizPage2&quot;</span>
+
+<span style="color: #0000ff;">#define</span> STR_LABEL_XFNAME_PAGE_1		<span style="color: #ff00ff;">&quot;Page 1&quot;</span>
+<span style="color: #0000ff;">#define</span> STR_LABEL_XFNAME_PAGE_2		<span style="color: #ff00ff;">&quot;Page 2&quot;</span>
+
+WizDlgManager<span style="color: #000000;">::</span><span style="color: #000000;">WizDlgManager</span><span style="color: #000000;">&#40;</span>LPCSTR lpcszThemeName, 
+	<span style="color: #0000ff;">const</span> XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme, <span style="color: #0000ff;">const</span> XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO, 
+	DWORD dwUIDOp<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// = NULL, NULL, NULL, 0</span>
+<span style="color: #000000;">:</span> XFWizManager<span style="color: #000000;">&#40;</span>lpcszThemeName, pXFWizTheme, pXFWizIO, dwUIDOp<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	StringArray saMapXFNames <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>STR_XFNAME_PAGE_1, STR_XFNAME_PAGE_2<span style="color: #000000;">&#125;</span>;
+	StringArray saMapXFLabels <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>STR_LABEL_XFNAME_PAGE_1, 
+				STR_LABEL_XFNAME_PAGE_2<span style="color: #000000;">&#125;</span>;
+	m_saMapXFNames <span style="color: #000080;">=</span> saMapXFNames;
+	m_saMapXFLabels <span style="color: #000080;">=</span> saMapXFLabels;
+	<span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span> m_saMapXFNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> m_saMapXFLabels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+	
+	m_saDefaultXFNames <span style="color: #000080;">=</span> saMapXFNames;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">int</span> run_wiz_nodlg<span style="color: #000000;">&#40;</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwOPUID <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	TEMPLATE_run_wiz_nodlg<span style="color: #000000;">&#40;</span>WizDlgManager, lpcszThemeName, pXFWizTheme, 
+			pXFWizIO, dwOPUID<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">int</span> open_wiz_dlg<span style="color: #000000;">&#40;</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, 
+	<span style="color: #0000ff;">const</span> XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwOPUID <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	TEMPLATE_open_wiz_dlg<span style="color: #000000;">&#40;</span>WizDlgManager, lpcszThemeName, pXFWizTheme, 
+			pXFWizIO, dwOPUID<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">#endif</span>	<span style="color: #008000;">//__WIZ_DLG_H__</span></pre>
+</li>
+<li>Press F10 to open X-Function Builder, to create a main X-Function as below.<br /><a  class="image"><img alt="OCguide xf wizard main dlg vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_main_dlg_vars.png?v=77116" width="400"  /></a>Click the <a  class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_Wizard_Dialog/Ocguide_xfdialog_savebutton.png?v=77100" width="23"  /></a> button to save this X-Function. Close X-Function Builder.</li>
+<li>Open Code Builder, open the wizDlg.OXF file and add it to the current workspace. Add the following header files after the line <b>//put additional include files here</b>.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWiz.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>event_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\WksOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\WizOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFCore.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizNavigation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizManager.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizScript.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizard_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// user added header file for this example</span></pre>
+</li>
+<li>Add the following code to the main function <b>wizDlg</b>
+<pre class="oc" style="font-family:monospace;">WizDlgInputOutputRange objXFWizIO;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>xfwiz_construct_input_range<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>objXFWizIO, STR_XFNAME_PAGE_1,  iy<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	XF_THROW<span style="color: #000000;">&#40;</span>XFERR_FAIL_TO_UPDATE_GETN_TREE<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span>	
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> script <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	run_wiz_nodlg<span style="color: #000000;">&#40;</span>theme, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>objXFWizIO<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">else</span>
+<span style="color: #000000;">&#123;</span>
+	open_wiz_dlg<span style="color: #000000;">&#40;</span>theme, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>objXFWizIO<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Press F10 to open X-Function Builder and create the X-Function wizPage1 for the wizard page 1 as below.<br /><a  class="image"><img alt="OCguide xf wizard page1 vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_page1_vars.png?v=77117" width="528"  /></a></li>
+<li>Add the following user-defined header file after the line <b>//put additional include files here</b>, as below.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// user added header file for this example</span></pre>
+</li>
+<li>Put the following code into the page 1 main function <b>wizPage1</b>.
+<pre class="oc" style="font-family:monospace;">WizDlgCore<span style="color: #000040;">*</span> pWizCore <span style="color: #000080;">=</span> 
+	<span style="color: #000000;">&#40;</span>WizDlgCore<span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span>get_xf_core_handler<span style="color: #000000;">&#40;</span>NODE_NAME_XF_WIZ_CORE_POINTER<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span>pWizCore<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Set X From/To to WizCore class object</span>
+pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetXRange<span style="color: #000000;">&#40;</span>xfrom, xto<span style="color: #000000;">&#41;</span>;</pre>
+</li>
+<li>Add the following code to the wizPage1 X-Function _event1 function <b>wizPage1_before_execute</b>, to initialize the xfrom and xto controls according to the input data range.
+<span class="OIndex" style="display:none">X-Function, before_execute</span>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> PDS_AUTO <span style="color: #000080;">==</span> okutil_cvt_str_to_predefined_type<span style="color: #000000;">&#40;</span>trGetN.<span style="color: #000000;">xfrom</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000040;">||</span> PDS_AUTO <span style="color: #000080;">==</span> okutil_cvt_str_to_predefined_type<span style="color: #000000;">&#40;</span>trGetN.<span style="color: #000000;">xto</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	DataRange dr;
+	TreeNode trRange <span style="color: #000080;">=</span> trGetN.<span style="color: #000000;">iy</span>;
+	okxf_resolve_tree_construct_range<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>trRange, <span style="color: #000040;">&amp;</span>dr<span style="color: #000000;">&#41;</span>;
+	
+	vector vx;
+	dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">double</span> from, to;
+	vx.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>from, to<span style="color: #000000;">&#41;</span>;
+	
+	trGetN.<span style="color: #000000;">xfrom</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> from;
+	trGetN.<span style="color: #000000;">xto</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> to;
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Open X-Function Builder to create the X-Function wizPage2 for page 2. Set up the X-Function name and variables as below and click the Save button to save.<br /><a  class="image"><img alt="OCguide xf wizard page2 vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_page2_vars.png?v=77118" width="579"  /></a></li>
+<li>Open the wizPage2.OXF file in Code Builder, and add it to the current workspace to include header files, as below.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+</li>
+<li>Find the main function <b>wizPage2</b> and put the following code into it. The code is used to add a rectangle according to the xfrom and xto values assigned in page 1.
+<pre class="oc" style="font-family:monospace;">WizDlgCore<span style="color: #000040;">*</span> pWizCore <span style="color: #000080;">=</span> 
+	<span style="color: #000000;">&#40;</span>WizDlgCore<span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span>get_xf_core_handler<span style="color: #000000;">&#40;</span>NODE_NAME_XF_WIZ_CORE_POINTER<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span>pWizCore<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get the x from/to values that are specified in Page 1</span>
+<span style="color: #0000ff;">double</span> xfrom, xto;
+pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXRange<span style="color: #000000;">&#40;</span>xfrom, xto<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// To get input range.</span>
+XFWizNavigation<span style="color: #000040;">*</span> pXFWizNavg <span style="color: #000080;">=</span> 
+	<span style="color: #000000;">&#40;</span>XFWizNavigation<span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXFWizNavigation<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+WizDlgInputOutputRange<span style="color: #000040;">*</span> pwizInputOutputRange <span style="color: #000080;">=</span> 
+	<span style="color: #000000;">&#40;</span>WizDlgInputOutputRange<span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>pXFWizNavg<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXFWizInputOutputRange<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get input ranges from Page 1</span>
+Array<span style="color: #000080;">&lt;</span>DataRange<span style="color: #000040;">&amp;</span><span style="color: #000080;">&gt;</span> arrdr;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> pwizInputOutputRange<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Get<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>arrdr, STR_XFNAME_PAGE_1, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	DataRange<span style="color: #000040;">&amp;</span> dr <span style="color: #000080;">=</span> arrdr.<span style="color: #000000;">GetAt</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vUIDs;
+	DataPlot dp;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> dr.<span style="color: #000000;">GetPlots</span><span style="color: #000000;">&#40;</span>vUIDs<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// Get source graph layer from input range</span>
+		dp <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>DataPlot<span style="color: #000000;">&#41;</span>Project.<span style="color: #000000;">GetObject</span><span style="color: #000000;">&#40;</span>vUIDs<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+		GraphLayer gl;
+		dp.<span style="color: #000000;">GetParent</span><span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// To add rectangle to graph</span>
+		GraphObject go;
+		add_rect<span style="color: #000000;">&#40;</span>gl, go, xfrom, <span style="color: #0000dd;">0</span>, xto, <span style="color: #0000dd;">0</span>, color, <span style="color: #0000dd;">2</span>, LN_VERTICAL, 
+			<span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+</ol>
+<h2><a name="Using_X-Function"></a><span class="mw-headline">Using X-Function</span></h2>
+<p>Before running the example wizard, you need to create a new worksheet, fill two columns with data, and plot a line graph with two columns. 
+</p>
+<h3><a name="Run_with_wizard_dialogX-Function.2C_Execution_with_Wizard_Dialog"></a><span class="mw-headline">Run with wizard dialog<span class="OIndex" style="display:none">X-Function, Execution with Wizard Dialog</span></span></h3>
+<ol><li>Keep the graph window active. Run "wizDlg" in the Command window.</li>
+<li>In the dialog that appears, change the values of the xfrom and xto controls. Click the Next button.</li>
+<li>In the next page, change the Fill Color control to Blue. </li>
+<li>Click the theme button <a  class="image"><img alt="Ocguide dialog theme.png" src="../images/Creating_Wizard_Dialog/Ocguide_dialog_theme.png?v=77113" width="21"  /></a>, choose Save As, type in theme1 as the name, and click OK.</li>
+<li>Click the Finish button. The wizard dialog closes and a blue rectangle will be added to your source graph. </li></ol>
+<h3><a name="Run_with_script_mode_without_dialog_X-Function.2C_Execution_with_Theme"></a><span class="mw-headline">Run with script mode without dialog <span class="OIndex" style="display:none">X-Function, Execution with Theme</span></span></h3>
+<p>Keep the graph window active. Run "wizDlg s:=1 t:=theme1" in the Command window. No dialog opens and a rectangle will be added to the active graph with the settings specified in the theme file.
+</p>
+
+
+
+
+

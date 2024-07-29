@@ -1,0 +1,72 @@
+<h1 class="firstHeading">2.7.1.2 Workbook Manipulation</h1><p>Origin provides the capabilities for workbook manipulation by using LabTalk script, such as duplicating, merging, splitting, etc.
+</p>
+<h2><a name="Duplicate_Workbook"></a><span class="mw-headline">Duplicate Workbook</span></h2>
+<p>To duplicate active workbook, the <a href="../../LabTalk/LabTalk/Window_(command)&amp;action=edit&amp;redlink=1.html" class="new" title="LabTalk:Window (command) (page does not exist)">win -d</a> command is used. It allows to specify a name for the duplicated workbook, and the new workbook is activated after duplicated. The command <a href="../../LabTalk/LabTalk/Window_(command)&amp;action=edit&amp;redlink=1.html" class="new" title="LabTalk:Window (command) (page does not exist)">win -da</a> is doing the similar thing, however, it keeps the active workbook active after duplicated.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Open a project</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\Loop_wks.opj&quot;</span>;
+
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Activate the workbook S2Freq1</span>
+win <span style="color: #000080;">-</span>a S2Freq1;
+
+<span style="color: #008000;">// Duplicate this workbook, and name it &quot;MyCopy&quot;</span>
+<span style="color: #008000;">// And this new workbook will be activated</span>
+win <span style="color: #000080;">-</span>d MyCopy;
+
+<span style="color: #008000;">// Duplicate the MyCopy workbook, and name it &quot;MyCopy2&quot;</span>
+<span style="color: #008000;">// But keep MyCopy still activated</span>
+win <span style="color: #000080;">-</span>da MyCopy2;</pre>
+<h2><a name="Merge_Workbooks"></a><span class="mw-headline">Merge Workbooks</span></h2>
+<p>To merge multiple workbooks into one new workbook, the X-Function, <a class="external text" href="../../XFunction/X-Function/Merge_book.html">merge_book</a>, is available.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Open a project</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\Loop_wks.opj&quot;</span>;
+
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Activate Sample1 folder</span>
+pe_cd <span style="color: #000080;">/</span>Sample1;
+
+<span style="color: #008000;">// Merge two workbooks (S1Freq1 and S1Freq2) in two subfolders</span>
+<span style="color: #008000;">// User the source workbook name for the worksheet name in the merged workbook</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>recursive rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname;
+
+<span style="color: #008000;">// Activate Sample2 folder</span>
+pe_cd <span style="color: #000080;">/</span>Sample2;
+
+<span style="color: #008000;">// Merge two workbooks (S2Freq1 and S2Freq2) in two subfolders</span>
+<span style="color: #008000;">// User the source workbook name for the worksheet name in the merged workbook</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>recursive rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname;
+
+<span style="color: #008000;">// Activeate the root folder</span>
+pe_cd <span style="color: #000080;">/</span>;
+
+<span style="color: #008000;">// Two new workbooks are created from the above script</span>
+<span style="color: #008000;">// The names of these two workbooks begin with &quot;mergebook&quot;</span>
+<span style="color: #008000;">// Now, merge these two workbooks into a new workbooks</span>
+<span style="color: #008000;">// The worksheets in the final result workbook will name</span>
+<span style="color: #008000;">// by using the original worksheet name</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>project single<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> match<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wkbshort key<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;mergebook*&quot;</span> rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wksname;</pre>
+<h2><a name="Split_Workbook"></a><span class="mw-headline">Split Workbook</span></h2>
+<p>The example above is merging multiple workbooks into one workbook. It is also able to split a workbook into multiple workbooks, which contain single worksheet. The <a class="external text" href="../../XFunction/X-Function/Wsplit_book.html">wsplit_book</a> X-Function is designed for this purpose.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Open a project</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\COM Server and Client\Basic Stats on Data.opj&quot;</span>;
+
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// There are three worksheets in the active workbook, RawData</span>
+<span style="color: #008000;">// Now split this workbook into three workbooks</span>
+<span style="color: #008000;">// And each workbook will contain one worksheet from the original workbook</span>
+wsplit_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>active;</pre>
+
+
+
+
+
+

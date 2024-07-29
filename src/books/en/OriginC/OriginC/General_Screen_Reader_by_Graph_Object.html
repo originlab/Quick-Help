@@ -1,0 +1,146 @@
+<h1 class="firstHeading">3.4.9 General Screen Reader by Graph Object</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Remark"><span class="tocnumber">2</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Need_to_Do_Before_Running_Examples"><span class="tocnumber">3</span> <span class="toctext">Need to Do Before Running Examples</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Example"><span class="tocnumber">4</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR6</p>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>This example is using <a href="../../OriginC/Category/GraphObject_(class).html" title="Category:GraphObject (class)">Graph Object</a>, including rectangle and crossing lines, to make a screen reader. After activate this rectangle, can move it by top, left... key to the exact position.
+</p>
+<h2><a name="Need_to_Do_Before_Running_Examples"></a><span class="mw-headline">Need to Do Before Running Examples</span></h2>
+<p>Prior to running the following example, the grobj_utils.c file need to be loaded and compiled. This can be done from script with the following command or just add this file to your workspace. 
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\grobj_utils.<span style="color: #000080;">c</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#define</span> STR_LINE_1_NAME   <span style="color: #ff00ff;">&quot;MyLine1&quot;</span>
+<span style="color: #0000ff;">#define</span> STR_LINE_2_NAME   <span style="color: #ff00ff;">&quot;MyLine2&quot;</span>
+ 
+<span style="color: #0000ff;">#pragma</span> labtalk<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #008000;">//To control the calling of Origin C function, for any LT usage, no need to be inside run command</span>
+ 
+<span style="color: #008000;">// this function used to add rectangle and line on the active layer</span>
+<span style="color: #0000ff;">void</span> AddRectAndLine<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>   
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get active graph layer</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gl <span style="color: #000000;">&#41;</span>    <span style="color: #008000;">// if layer exist</span>
+    <span style="color: #000000;">&#123;</span>    
+        GraphObject goRect <span style="color: #000080;">=</span> gl.<span style="color: #000000;">CreateGraphObject</span><span style="color: #000000;">&#40;</span>GROT_RECT<span style="color: #000000;">&#41;</span>; 
+        SetRectangleFormat<span style="color: #000000;">&#40;</span>goRect, gl<span style="color: #000000;">&#41;</span>;
+        
+        GraphObject goVLine;    <span style="color: #008000;">// vertical line</span>
+        GraphObject goHLine;    <span style="color: #008000;">// horizontal line</span>
+        
+        <span style="color: #0000ff;">double</span> dVLineX0, dVLineX1, dVLineY0, dVLineY1;  <span style="color: #008000;">// coordinates of start and end points of vertical line</span>
+        dVLineX0 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">X</span>;                  <span style="color: #008000;">// start point x0</span>
+        dVLineX1 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">X</span>;                  <span style="color: #008000;">// end point x1</span>
+        dVLineY0 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">Y</span> <span style="color: #000040;">-</span> goRect.<span style="color: #000000;">DY</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2.0</span>;   <span style="color: #008000;">// start point y0</span>
+        dVLineY1 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">Y</span> <span style="color: #000040;">+</span> goRect.<span style="color: #000000;">DY</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2.0</span>;   <span style="color: #008000;">// end point y1</span>
+ 
+        <span style="color: #008000;">// add vertical line    </span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> add_line<span style="color: #000000;">&#40;</span>gl, goVLine, dVLineX0, dVLineY0, ATTACH_TO_SCALE, LN_FREE, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">false</span>, dVLineX1, dVLineY1, SYSCOLOR_RED, STR_LINE_1_NAME<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// add vertical line successfully</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #008000;">// set line format</span>
+            SetLineFormat<span style="color: #000000;">&#40;</span>goVLine, goRect<span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">&#125;</span>
+ 
+        <span style="color: #008000;">// coordinates of start and end points of horizontal line</span>
+        <span style="color: #0000ff;">double</span> dHLineX0, dHLineX1, dHLineY0, dHLineY1;
+        dHLineX0 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">X</span> <span style="color: #000040;">-</span> goRect.<span style="color: #000000;">DX</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2.0</span>;    <span style="color: #008000;">// start point x0</span>
+        dHLineX1 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">X</span> <span style="color: #000040;">+</span> goRect.<span style="color: #000000;">DX</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2.0</span>;    <span style="color: #008000;">// end point x1</span>
+        dHLineY0 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">Y</span>;                   <span style="color: #008000;">// start point y0</span>
+        dHLineY1 <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">Y</span>;                   <span style="color: #008000;">// end point y1</span>
+        
+        <span style="color: #008000;">// add horizontal line      </span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> add_line<span style="color: #000000;">&#40;</span>gl, goHLine, dHLineX0, dHLineY0, ATTACH_TO_SCALE, LN_FREE, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">false</span>, dHLineX1, dHLineY1, SYSCOLOR_RED, STR_LINE_2_NAME<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// add horizontal line successfully</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #008000;">// set line format</span>
+            SetLineFormat<span style="color: #000000;">&#40;</span>goHLine, goRect<span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">&#125;</span>   
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// set rectangle object properties</span>
+<span style="color: #0000ff;">void</span> SetRectangleFormat<span style="color: #000000;">&#40;</span>GraphObject<span style="color: #000040;">&amp;</span> goRect, GraphLayer<span style="color: #000040;">&amp;</span> gl<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>   
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gl <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	<span style="color: #008000;">// set size, position, color, etc. for rectangle.</span>
+        Tree tr;   
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Units</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> UNITS_SCALE;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Attachment</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// 2, attach layer and scale</span>
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Left</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> gl.<span style="color: #000000;">X</span>.<span style="color: #000000;">From</span>;    <span style="color: #008000;">// left axis</span>
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Top</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">From</span>;   <span style="color: #008000;">// top axis</span>
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Width</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>gl.<span style="color: #000000;">X</span>.<span style="color: #000000;">To</span> <span style="color: #000040;">-</span> gl.<span style="color: #000000;">X</span>.<span style="color: #000000;">From</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.08</span>;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Dimension</span>.<span style="color: #000000;">Height</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">To</span> <span style="color: #000040;">-</span> gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">From</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.1</span>;
+        
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Border</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> SYSCOLOR_GRAY;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Border</span>.<span style="color: #000000;">Width</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;        
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Fill</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> SYSCOLOR_LTGRAY; 
+        
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">KeepInside</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;   <span style="color: #008000;">// keep this object always inside the graph layer</span>
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">BehindData</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;   <span style="color: #008000;">// set rectangle behind data</span>
+        
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Event</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> GRCT_MOVE;   <span style="color: #008000;">// event: move</span>
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Script</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Run -OC MoveLines(this.Name$)&quot;</span>;     <span style="color: #008000;">// when move rectangle, call MoveLines()</span>
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> goRect.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>   <span style="color: #008000;">// 0 means no error</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span>bRet<span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">&#125;</span>        
+        
+        <span style="color: #008000;">// to disable resize, rotate... after perpare size, postion.</span>
+        Tree tr1;        
+        tr1.<span style="color: #000000;">Root</span>.<span style="color: #000000;">States</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> GOC_NO_RESIZE<span style="color: #000040;">|</span>GOC_NO_ROTATE<span style="color: #000040;">|</span>GOC_NO_SKEW<span style="color: #000040;">|</span>GOC_HITTEST_BEFORE_DATA;
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> goRect.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>tr1.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>    <span style="color: #008000;">// 0 means no error</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> goRect.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr1, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span>bRet<span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// set line object properties</span>
+<span style="color: #0000ff;">void</span> SetLineFormat<span style="color: #000000;">&#40;</span>GraphObject<span style="color: #000040;">&amp;</span> goLine, GraphObject<span style="color: #000040;">&amp;</span> goRect<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span> 
+	<span style="color: #008000;">// to disable selectable, resize, rotate...     </span>
+    Tree tr; 
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">States</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> GOC_NO_RESIZE<span style="color: #000040;">|</span>GOC_NO_ROTATE<span style="color: #000040;">|</span>GOC_NO_SKEW<span style="color: #000040;">|</span>GOC_NO_EDIT<span style="color: #000040;">|</span>GOC_NO_IN_PLACE_EDIT<span style="color: #000040;">|</span>GOC_NO_BORDERSIZE<span style="color: #000040;">|</span>GOC_NO_SELECT<span style="color: #000040;">|</span>GOC_NO_DEL_SEL_PT;
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> goLine.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// 0 means no error</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> goLine.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// return true if applied format successfully</span>
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #008000;">// make line to connect to rectange</span>
+    connect_justify<span style="color: #000000;">&#40;</span>goRect, goLine, CTP_AUTO<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+ 
+<span style="color: #0000ff;">#pragma</span> labtalk<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//To control the calling of Origin C function, cannot use like LT command, only use in run -oc cmd</span>
+ 
+<span style="color: #008000;">// call this function when rectangle moves</span>
+<span style="color: #0000ff;">void</span> MoveLines<span style="color: #000000;">&#40;</span>string strRectName<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>  
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// get the active layer</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">&#41;</span>   <span style="color: #008000;">// if active layer not exist, return</span>
+        <span style="color: #0000ff;">return</span>;
+    
+    GraphObject goRect <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GraphObjects</span><span style="color: #000000;">&#40;</span>strRectName<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// print the center coordinate of the rectangle</span>
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X =&#160;%f <span style="color: #666666; font-weight: bold;">\n</span>Y =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, goRect.<span style="color: #000000;">X</span>, goRect.<span style="color: #000000;">Y</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

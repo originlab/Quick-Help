@@ -1,0 +1,517 @@
+<h1 class="firstHeading">4.6.1 Passing Arguments to OC</h1><p class='urlname' style='display: none'>Passing-Arguments-to-OC</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Examples"><span class="tocnumber">2</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Pass_int_by_value"><span class="tocnumber">2.1</span> <span class="toctext">Pass int by value</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Pass_double_by_value"><span class="tocnumber">2.2</span> <span class="toctext">Pass double by value</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Pass_integer_by_reference"><span class="tocnumber">2.3</span> <span class="toctext">Pass integer by reference</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Pass_string_by_reference"><span class="tocnumber">2.4</span> <span class="toctext">Pass string by reference</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Pass_string_array"><span class="tocnumber">2.5</span> <span class="toctext">Pass string array</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Pass_column_range"><span class="tocnumber">2.6</span> <span class="toctext">Pass column range</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Pass_worksheet_range"><span class="tocnumber">2.7</span> <span class="toctext">Pass worksheet range</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Pass_data_plot_range"><span class="tocnumber">2.8</span> <span class="toctext">Pass data plot range</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Pass_window_name"><span class="tocnumber">2.9</span> <span class="toctext">Pass window name</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Pass_tree"><span class="tocnumber">2.10</span> <span class="toctext">Pass tree</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Construct_LabTalk_Tree_with_XML"><span class="tocnumber">2.11</span> <span class="toctext">Construct LabTalk Tree with XML</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Return_range_by_string"><span class="tocnumber">2.12</span> <span class="toctext">Return range by string</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>When working between LabTalk and Origin C, you may need to pass variables in your code. In LabTalk, numeric variables (int, double, etc.), string variables and column level range variables can be passed directly. Other LabTalk objects (like worksheet range, graph page range, etc.) should be passed by strings, and then work with these strings within Origin C functions. The following table summaries how to deal with function arguments when passing value from LabTalk to Origin C:
+</p>
+<table class="simple">
+<tr>
+<th align="left">LabTalk Data Type
+</th>
+<th align="left">Origin C Argument
+</th>
+<th align="left">Support passing reference
+</th></tr>
+<tr>
+<td> double
+</td>
+<td> double
+</td>
+<td> Yes
+</td></tr>
+<tr>
+<td> int
+</td>
+<td> int
+</td>
+<td> Yes
+</td></tr>
+<tr>
+<td> string
+</td>
+<td> string
+</td>
+<td> Yes
+</td></tr>
+<tr>
+<td> column level range
+</td>
+<td> DataRange
+</td>
+<td> No
+</td></tr>
+<tr>
+<td> range
+</td>
+<td> string
+</td>
+<td> No
+</td></tr>
+<tr>
+<td> string registers
+</td>
+<td> string
+</td>
+<td> No
+</td></tr>
+<tr>
+<td> loose dataset
+</td>
+<td> vector
+</td>
+<td> No
+</td></tr>
+<tr>
+<td> string array
+</td>
+<td> vector&lt;string&gt;
+</td>
+<td> No
+</td></tr>
+<tr>
+<td> tree
+</td>
+<td> Tree
+</td>
+<td> Yes
+</td></tr></table>
+<p>Please look into the following examples to see how to deal with different cases:
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<h3><a name="Pass_int_by_value"></a><span class="mw-headline">Pass int by value</span></h3>
+<p>This example is designed to show the trace interoplation, which acts on the curve based on X index number, thus preserving the sequential aspect of the data. The example is completed by a combination of Origin C and LabTalk. integral n, which stands for the order of the curve, is passed to Origin C by LabTalk.
+</p>
+<dl><dd><a  class="image"><img alt="Tract int.png" src="../images/Passing_Arguments_to_OC/Tract_int.png?v=31986" width="319"  /></a></dd></dl>
+<p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#define</span> aa <span style="color: #0000dd;">0.5</span>
+<span style="color: #0000ff;">void</span> main_Data<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> n<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> x<span style="color: #000080;">=</span><span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>, y<span style="color: #000080;">=</span><span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>;
+    hilbert_2D<span style="color: #000000;">&#40;</span>n, x, y<span style="color: #000000;">&#41;</span>;
+    Worksheet wks<span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; 
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>   		
+        Dataset c1<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+        Dataset c2<span style="color: #000000;">&#40;</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;        
+        c1<span style="color: #000080;">=</span>x;
+	c2<span style="color: #000080;">=</span>y;
+    <span style="color: #000000;">&#125;</span>    
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> hilbert_2D<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> n, vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> <span style="color: #000040;">&amp;</span>x, vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> <span style="color: #000040;">&amp;</span>y<span style="color: #000000;">&#41;</span>  <span style="color: #008000;">//create the hilbert curve</span>
+<span style="color: #000000;">&#123;</span>	
+	vector x0 <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>, y0 <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>;	
+	<span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span>n<span style="color: #000040;">--</span><span style="color: #000080;">&gt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>
+		x0<span style="color: #000080;">=</span>x; y0<span style="color: #000080;">=</span>y;
+		x.<span style="color: #000000;">RemoveAll</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		y.<span style="color: #000000;">RemoveAll</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+		x.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span>aa<span style="color: #000040;">+</span>y0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;	
+		x.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span>aa<span style="color: #000040;">+</span>x0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		x.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">+</span>x0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		x.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">-</span>y0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+		y.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span>aa<span style="color: #000040;">+</span>x0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; 
+		y.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">+</span>y0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		y.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">+</span>y0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		y.<span style="color: #000000;">Append</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span>aa<span style="color: #000040;">-</span>x0<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;	
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>  
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Trace_Interp&quot;</span>;
+main_Data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// the 4-th order Hilbert curve  </span>
+interp1trace <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Trace_Interp<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span>A,B<span style="color: #000000;">&#41;</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline;  <span style="color: #008000;">//perform trace interpolate on curve using spline method.</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>,<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// Set line width</span></pre>
+<h3><a name="Pass_double_by_value"></a><span class="mw-headline">Pass double by value</span></h3>
+<p>You can pass a double, int or string variable directly into Origin C function.
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">double</span> GetLarger<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> a, <span style="color: #0000ff;">double</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">return</span> a<span style="color: #000080;">&gt;</span>b?a<span style="color: #000000;">:</span>b;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">double a <span style="color: #000080;">=</span> <span style="color: #0000dd;">3.5</span>, b <span style="color: #000080;">=</span> <span style="color: #0000dd;">8.9</span>;
+double c <span style="color: #000080;">=</span> GetLarger<span style="color: #000000;">&#40;</span>a, b<span style="color: #000000;">&#41;</span>;
+ty <span style="color: #ff00ff;">&quot;The larger value is $(c)&quot;</span>;</pre>
+<h3><a name="Pass_integer_by_reference"></a><span class="mw-headline">Pass integer by reference</span></h3>
+<p>Data type like double, int and string can also be passed by reference:
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> MySwap<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> a, <span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> temp;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>a<span style="color: #000080;">&lt;</span>b<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        temp <span style="color: #000080;">=</span> a;
+        a <span style="color: #000080;">=</span> b;
+        b <span style="color: #000080;">=</span> temp;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">int a <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>, b <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+ty <span style="color: #ff00ff;">&quot;First, a = $(a), and b = $(b)&quot;</span>;
+MySwap<span style="color: #000000;">&#40;</span>a, b<span style="color: #000000;">&#41;</span>;
+ty <span style="color: #ff00ff;">&quot;Then, a = $(a), and b = $(b)&quot;</span>;</pre>
+<h3><a name="Pass_string_by_reference"></a><span class="mw-headline">Pass string by reference</span></h3>
+<p>String variable can be passed directly into Origin C function, and can also be passed by reference:
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">int</span> CheckFile<span style="color: #000000;">&#40;</span>string<span style="color: #000040;">&amp;</span> strFile, string<span style="color: #000040;">&amp;</span> strExt<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	separate_file_name_ext<span style="color: #000000;">&#40;</span>strFile, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>strExt<span style="color: #000000;">&#41;</span>;
+    	strFile <span style="color: #000080;">=</span> GetFileName<span style="color: #000000;">&#40;</span>strFile, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #0000ff;">return</span> nRet;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">string strFile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>Y;
+strFile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span>strFile<span style="color: #000080;">$</span><span style="color: #000080;">+</span><span style="color: #ff00ff;">&quot;origin.ini&quot;</span>;
+string strExt;
+CheckFile<span style="color: #000000;">&#40;</span>strFile<span style="color: #000080;">$</span>, strExt<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+ty <span style="color: #ff00ff;">&quot;strFile=%(strFile$), strExt=%(strExt$)&quot;</span></pre>
+<h3><a name="Pass_string_array"></a><span class="mw-headline">Pass string array</span></h3>
+<p>You can use vector to make a copy of string array or loose dataset inside Origin C. 
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+<span style="color: #0000ff;">void</span> TyMyLove<span style="color: #000000;">&#40;</span>vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> strA<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> strA.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>nSize; i<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;I Love&#160;%s!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strA<span style="color: #000000;">&#91;</span>i<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">stringarray aa;
+aa.<span style="color: #000080;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Boston&quot;</span><span style="color: #000000;">&#41;</span>;
+aa.<span style="color: #000080;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;New York&quot;</span><span style="color: #000000;">&#41;</span>;
+aa.<span style="color: #000080;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Los Angeles&quot;</span><span style="color: #000000;">&#41;</span>;
+TyMyLove<span style="color: #000000;">&#40;</span>aa<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Pass_column_range"></a><span class="mw-headline">Pass column range</span></h3>
+<p>column range variable can be passed directly. 
+</p><p>The following example shows how to pass a column range into Origin C:
+</p>
+<p class="version" >Minimum Origin Version Required: 9.0 SR1</p>
+<p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">double</span> MyMean<span style="color: #000000;">&#40;</span>DataRange dr<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">double</span> dMean;
+        <span style="color: #0000ff;">int</span> nN;	
+	vector vec;
+	dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vec, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_basic_summary_stats<span style="color: #000000;">&#40;</span>vec.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vec, <span style="color: #000040;">&amp;</span>nN, <span style="color: #000040;">&amp;</span>dMean<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> dMean;
+        <span style="color: #0000ff;">return</span> NANUM;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">100</span><span style="color: #000000;">&#41;</span>;
+range rr <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+double Rmean<span style="color: #000080;">=</span>MyMean<span style="color: #000000;">&#40;</span>rr<span style="color: #000000;">&#41;</span>;
+ty <span style="color: #ff00ff;">&quot;The Mean of&#160;%(rr) is $(Rmean)&quot;</span>;</pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>
+<ol>
+<li>The range can refer to one column as well as a range of column(s). For example, range [book1]sheet1!1[2]:2[5] can be resolved inside Origin C function directly.
+
+<li>Before Version 9 Service Release 1, when working with range, you need to pass the range name as string into Origin C functions. See the section below to see how to pass range as string.
+</ol>
+</td></tr></table>
+<h3><a name="Pass_worksheet_range"></a><span class="mw-headline">Pass worksheet range</span></h3>
+<p>When passing with worksheet range, you can pass the worksheet range name, using&#160;%() notation or pass a string variable, as string into Origin C functions. Inside the Origin C function, you can resolve the string into proper object by <i>okxf_resolve_string_get_origin_object()</i> function (should include <i>xfutils.h</i>), or you can also create a proper object from the string. 
+</p><p>Do remember to quote the range name in the LabTalk script, or use a string variable directly, to pass a string explicitly.
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>xfutils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">int</span> MyCopyWks<span style="color: #000000;">&#40;</span>string strSource, string strTarget<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet sWks, tWks;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> okxf_resolve_string_get_origin_object<span style="color: #000000;">&#40;</span>strSource, <span style="color: #000040;">&amp;</span>sWks<span style="color: #000000;">&#41;</span>;
+    nRet <span style="color: #000040;">*</span><span style="color: #000080;">=</span> okxf_resolve_string_get_origin_object<span style="color: #000000;">&#40;</span>strTarget, <span style="color: #000040;">&amp;</span>tWks<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nRet <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Worksheet name is wrong!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    sWks.<span style="color: #000000;">CopyTo</span><span style="color: #000000;">&#40;</span>tWks, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">range ra <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>book1<span style="color: #000000;">&#93;</span>sheet1<span style="color: #000080;">!</span>;
+range rb <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>book2<span style="color: #000000;">&#93;</span>sheet1<span style="color: #000080;">!</span>;
+int nRet <span style="color: #000080;">=</span> MyCopyWks<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%(ra)&quot;</span>, <span style="color: #ff00ff;">&quot;%(rb)&quot;</span><span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Pass_data_plot_range"></a><span class="mw-headline">Pass data plot range</span></h3>
+<p>Similar to working with worksheet range, you can also pass a plot range as string into Origin C. 
+</p><p>When communicating between LabTalk and Origin C, be aware that the starting index are different. 
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>xfutils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">int</span> ChangeDPColor<span style="color: #000000;">&#40;</span>string strDP, <span style="color: #0000ff;">int</span> nColor<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    DataPlot dp;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> okxf_resolve_string_get_origin_object<span style="color: #000000;">&#40;</span>strDP, <span style="color: #000040;">&amp;</span>dp<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nRet <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Not a valid data plot!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nColor <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000040;">||</span> nColor <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">24</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;LabTalk color number sould be 1 ~ 24!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Color index in Origin C starts from 0</span>
+    nColor<span style="color: #000040;">--</span>;
+    dp.<span style="color: #000000;">SetColor</span><span style="color: #000000;">&#40;</span>nColor, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">10</span><span style="color: #000000;">&#41;</span>;
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+white_noise <span style="color: #0000dd;">2</span>;
+plotxy <span style="color: #0000dd;">2</span> <span style="color: #0000dd;">202</span>;
+Range dp <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+string strDP<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>dp<span style="color: #000000;">&#41;</span>;
+int nC <span style="color: #000080;">=</span> color<span style="color: #000000;">&#40;</span>green<span style="color: #000000;">&#41;</span>;
+int nRet <span style="color: #000080;">=</span> ChangeDPColor<span style="color: #000000;">&#40;</span>strDP<span style="color: #000080;">$</span>, nC<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Pass_window_name"></a><span class="mw-headline">Pass window name</span></h3>
+<p>You can pass the window name directly into Origin C function. If there are proper object constructor, you can then create the corresponding object in Origin C.
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">int</span> GetPlotsNum<span style="color: #000000;">&#40;</span>string pName<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nPlots <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    GraphPage gp<span style="color: #000000;">&#40;</span>pName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>gp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Not a valid page!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    foreach<span style="color: #000000;">&#40;</span> GraphLayer gl in gp.<span style="color: #000000;">Layers</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        foreach<span style="color: #000000;">&#40;</span> DataPlot dp in gl.<span style="color: #000000;">DataPlots</span> <span style="color: #000000;">&#41;</span>
+            nPlots<span style="color: #000040;">++</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #0000ff;">return</span> nPlots;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Exponential Decay.dat&quot;</span>; 
+impasc;
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000080;">-</span><span style="color: #0000dd;">1</span>;
+worksheet <span style="color: #000080;">-</span>p <span style="color: #0000dd;">201</span>;
+int nPlots <span style="color: #000080;">=</span> GetPlotsNum<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%H&quot;</span><span style="color: #000000;">&#41;</span>;
+ty <span style="color: #ff00ff;">&quot;There are $(nPlots) plots in&#160;%H&quot;</span>;</pre>
+<h3><a name="Pass_tree"></a><span class="mw-headline">Pass tree</span></h3>
+<p>You can pass the tree directly into Origin C function.
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">#pragma labtalk<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>
+int tt<span style="color: #000000;">&#40;</span>Tree<span style="color: #000080;">&amp;</span> tr, string strAppsPath<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Tree tr1;
+	if<span style="color: #000000;">&#40;</span><span style="color: #000080;">!</span>tr1.<span style="color: #000080;">Load</span><span style="color: #000000;">&#40;</span>strAppsPath<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		return <span style="color: #0000dd;">1</span>;
+	tr.<span style="color: #000080;">Replace</span><span style="color: #000000;">&#40;</span>tr1, TRUE, TRUE<span style="color: #000000;">&#41;</span>;
+	return <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span>
+#pragma labtalk<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">Tree tr1;
+string strApps<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%@AOpxList.xml&quot;</span>;
+if<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000080;">==</span>tt<span style="color: #000000;">&#40;</span>tr1,strApps<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	tr1.<span style="color: #000080;">=</span>;</pre>
+<h3><a name="Construct_LabTalk_Tree_with_XML"></a><span class="mw-headline">Construct LabTalk Tree with XML</span></h3>
+<p>You can construct LabTalk tree with XML
+</p><p><b>Origin C code for XML:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">string st<span style="color: #000000;">&#40;</span>string strAppsPath<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string str;
+	Tree tr;
+	if<span style="color: #000000;">&#40;</span>tr.<span style="color: #000080;">Load</span><span style="color: #000000;">&#40;</span>strAppsPath<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+		tr.<span style="color: #000080;">GetString</span><span style="color: #000000;">&#40;</span>str<span style="color: #000000;">&#41;</span>;
+		return str;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">string strApps<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%@AOpxList.xml&quot;</span>;
+string strXML<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> st<span style="color: #000000;">&#40;</span>strApps<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+Tree tr1 <span style="color: #000080;">=</span> strXML<span style="color: #000080;">$</span>;
+tr1.<span style="color: #000080;">=</span></pre>
+<p>This can be used for Data Connector. For example, after import a CSV file, run the following scripts to get the import dialog settings.
+</p>
+<pre class="lt" style="font-family:monospace;">Tree tr1<span style="color: #000080;">=</span>wks.<span style="color: #000080;">dc</span>.<span style="color: #000080;">optn</span><span style="color: #000080;">$</span>;
+tr1.<span style="color: #000080;">=</span>;</pre>
+<p>And the reverse is also supported:
+</p>
+<pre class="lt" style="font-family:monospace;">string str<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">dc</span>.<span style="color: #000080;">optn</span><span style="color: #000080;">$</span>;
+Tree tr1 <span style="color: #000080;">=</span> str<span style="color: #000080;">$</span>;
+tr1.<span style="color: #000080;">=</span>;</pre>
+<h3><a name="Return_range_by_string"></a><span class="mw-headline">Return range by string</span></h3>
+<p>Most Origin C objects cannot return to LabTalk either. So, if you want to return a range, you can use the <i>GetRangeString()</i> method to return the range string back to LabTalk.
+</p><p><b>Origin C code:</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>xfutils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">// This function insert 3D scatter to layer strGL using data from strWksName</span>
+<span style="color: #0000ff;">int</span> Insert3DScatter<span style="color: #000000;">&#40;</span>string strGL, string strWksName<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Get graph layer object by name</span>
+    GraphLayer gl;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>okxf_resolve_string_get_origin_object<span style="color: #000000;">&#40;</span>strGL, <span style="color: #000040;">&amp;</span>gl<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid graph layer!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Construct worksheet by name</span>
+    Worksheet wks<span style="color: #000000;">&#40;</span>strWksName<span style="color: #000000;">&#41;</span>;
+ 
+    DataRange dr;
+    <span style="color: #0000ff;">int</span> nR <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    nR <span style="color: #000080;">=</span> dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// Add a 3D scatter plot</span>
+    <span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, ID_3D_GRAPH_SCATTER<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nPlot <span style="color: #000080;">==</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Cannot add plot!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span>nPlot<span style="color: #000000;">&#41;</span>;
+    Tree tr;
+    tr <span style="color: #000080;">=</span> dp.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Shape</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Interior</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">EdgeColor</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">15</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">DropLines</span>.<span style="color: #000000;">Z</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Apply format failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// This function create a transparent mesh graph</span>
+<span style="color: #008000;">// The graph layer name, strGLName, is passed by reference, </span>
+<span style="color: #008000;">// we can then reuse this variable in LabTalk</span>
+<span style="color: #0000ff;">int</span> CreateMeshPlot<span style="color: #000000;">&#40;</span>string strMOName, string<span style="color: #000040;">&amp;</span> strGLName<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Get matrix object by name</span>
+    MatrixObject mo<span style="color: #000000;">&#40;</span>strMOName<span style="color: #000000;">&#41;</span>;
+    okxf_resolve_string_get_origin_object<span style="color: #000000;">&#40;</span>strMOName, <span style="color: #000040;">&amp;</span>mo<span style="color: #000000;">&#41;</span>;
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;mesh&quot;</span><span style="color: #000000;">&#41;</span>;
+    GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// Add mesh plot to layer</span>
+    <span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>mo, IDM_PLOT_3D_MESH<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nPlot <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Cannot create 3D mesh!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Fine tune the plot</span>
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span>nPlot<span style="color: #000000;">&#41;</span>;
+    Tree tr;
+    tr <span style="color: #000080;">=</span> dp.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Grids</span>.<span style="color: #000000;">FrontColor</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Grids</span>.<span style="color: #000000;">BackColor</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Grids</span>.<span style="color: #000000;">Width</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.8</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Grids</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">19</span>;
+    tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Grids</span>.<span style="color: #000000;">Transparency</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">70</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Apply format failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">// Return graph layer range string</span>
+    gl.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">&#40;</span>strGLName<span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>LabTalk script:</b>
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Matrix Conversion and Gridding\XYZ Random Gaussian.dat&quot;</span>; 
+impasc;
+range rw <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">3</span>;
+rw.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+xyz_renka iz<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rw rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span> cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span>;
+range rm <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// Passing range as string, and pass string variable by reference</span>
+string strGLName<span style="color: #000080;">$</span>;
+CreateMeshPlot<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%(rm)&quot;</span>, strGLName<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Pause two seconds</span>
+sec <span style="color: #000080;">-</span>p <span style="color: #0000dd;">3</span>;
+string strWksName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rw.<span style="color: #000080;">GetLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// Passing layer name, worksheet name as string</span>
+Insert3DScatter<span style="color: #000000;">&#40;</span>strGLName<span style="color: #000080;">$</span>, strWksName<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

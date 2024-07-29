@@ -1,0 +1,211 @@
+<h1 class="firstHeading">2.12.3 Looping Over Objects</h1><p class='urlname' style='display: none'>Looping-Over-objs</p>
+<p><span class="OIndex" style="display:none">Loop Over Objects</span>There may be instances where it is desirable to perform a certain task or set of tasks on every object of a particular type that exists in the Origin project.  For example, you might want to rescale all of your project graph layers or add a new column to every worksheet in the project.  The LabTalk <a href="../../LabTalk/Category/Document_(command).html" title="Category:Document (command)">document command</a> (or <b>doc</b>) facilitates this type of operation.  Several examples are shown here to illustrate the <b>doc</b> command.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Looping_over_Objects_in_a_Project"><span class="tocnumber">1</span> <span class="toctext">Looping over Objects in a Project</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Looping_over_Workbooks_and_Worksheets"><span class="tocnumber">1.1</span> <span class="toctext">Looping over Workbooks and Worksheets</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Looping_Over_Graph_Windows"><span class="tocnumber">1.2</span> <span class="toctext">Looping Over Graph Windows</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Looping_Over_Workbook_Windows"><span class="tocnumber">1.3</span> <span class="toctext">Looping Over Workbook Windows</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Looping_over_Columns_and_Rows"><span class="tocnumber">1.4</span> <span class="toctext">Looping over Columns and Rows</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Looping_Over_Graphic_Objects"><span class="tocnumber">1.5</span> <span class="toctext">Looping Over Graphic Objects</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Perform_Peak_Analysis_on_All_Layers_in_Graph"><span class="tocnumber">2</span> <span class="toctext">Perform Peak Analysis on All Layers in Graph</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Looping_over_Objects_in_a_Project"></a><span class="mw-headline">Looping over Objects in a Project</span></h2>
+<p>The <a href="../../LabTalk/Category/Document_(command).html" title="Category:Document (command)">document</a> command with the -e or -ef switch (or <a href="../../LabTalk/LabTalk/Document_Options_Others.html#-e" title="LabTalk:Document Options Others"><span class="OIndex">doc -e</span></a> command), is the primary means for looping over various collections of objects in an Origin Project. This command allows user to execute multiple lines of LabTalk script on each instance of the Origin Object found in the collection.
+</p>
+<h3><a name="Looping_over_Workbooks_and_Worksheets"></a><span class="mw-headline">Looping over Workbooks and Worksheets</span></h3>
+<p>You can loop through all worksheets in a project with the doc -e LB command.   The script below loops through all worksheets, skipping the matrix layers:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//loop over all worksheets in project to print their names</span>
+<span style="color: #008000;">//and the number of columns on each sheet</span>
+doc <span style="color: #000080;">-</span>e LB <span style="color: #000000;">&#123;</span>
+	if<span style="color: #000000;">&#40;</span>exist<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//not a workbook, must be a matrix</span>
+		continue;
+	int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+	string str<span style="color: #000080;">=</span>wks.<span style="color: #000080;">Name</span><span style="color: #000080;">$</span>;
+	type <span style="color: #ff00ff;">&quot;[%H]%(str$) has $(nn) columns&quot;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The following example shows how to loop and operate on data columns that reside in different workbooks of a project.
+</p><p>Open the sample project file available since <span style="color:#FF0000"> Origin 8.1 SR2</span>:<br /> 
+<b>\\Samples\LabTalk Script Examples\Loop_wks.opj</b>
+</p><p>In the project there are two folders for two different samples and a  folder named <b>Bgsignal</b> for the background signals alone. Each sample folder contains two folders named <b>Freq1</b> and <b>Freq2</b>, which correspond to data at a set frequency for the specific sample. 
+</p><p>The workbook in each <b>Freq</b> folder contains three columns including <b>DataX</b>, <b>DataY</b> and the frequency, which is a constant. The workbook's name in the <b>Bgsignal</b> folder is <b>Bgsig</b>.  In the <b>Bgsig</b> workbook, there are three columns including <b>DataX</b> and two Y columns whose long names correspond to set frequencies in the workbook in each <b>Freq</b> folder.
+</p><p>The aim is to add a column in each workbook and subtract the background signal for a particular frequency from the sample data for the same frequency.  The following Labtalk script performs this operation.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e LB
+<span style="color: #000000;">&#123;</span> <span style="color: #008000;">//Loop over each worksheet.</span>
+   if<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H <span style="color: #000080;">!</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Bgsig&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//Skip the background signal workbook. </span>
+   <span style="color: #000000;">&#123;</span>
+      Freq<span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">//Get the frequency.</span>
+      wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">+</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">//Add a column in the sample sheet.</span>
+      <span style="color: #008000;">//bg signal column for Freq using long name.</span>
+      range aa<span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Bgsig<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;$(Freq)&quot;</span><span style="color: #000000;">&#41;</span>;
+      wcol<span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">-</span>aa; <span style="color: #008000;">//Subtract the bg signal.</span>
+      wcol<span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Remove bg signal&quot;</span>; <span style="color: #008000;">//Set the long name.</span>
+   <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>For increased control, you may also loop through the books and then loop through the sheets in your code, albeit a bit more slowly than the code above.
+</p><p>The following example shows how to loop over all workbooks in the current/active Project Explorer Folder, and then loop over each sheet inside each book that is found:
+</p>
+<pre class="lt" style="font-family:monospace;">int nbooks <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// Get the name of this folder</span>
+string strPath;
+pe_path path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strPath;
+<span style="color: #008000;">// Loop over all Workbooks ...</span>
+<span style="color: #008000;">// Restricted to the current Project Explorer Folder View</span>
+doc <span style="color: #000080;">-</span>ef W <span style="color: #000000;">&#123;</span>
+   int nsheets <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+   <span style="color: #008000;">// Loop over all worksheets in each workbook</span>
+   doc <span style="color: #000080;">-</span>e LW <span style="color: #000000;">&#123;</span>
+      type Sheet name<span style="color: #000000;">:</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>layer.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+      nsheets<span style="color: #000080;">++</span>;
+   <span style="color: #000000;">&#125;</span>
+   type Found <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nsheets<span style="color: #000000;">&#41;</span> sheet<span style="color: #000000;">&#40;</span>s<span style="color: #000000;">&#41;</span> in <span style="color: #000080;">%</span>H;
+   type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>;
+   nbooks<span style="color: #000080;">++</span>;   
+<span style="color: #000000;">&#125;</span>
+type Found <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nbooks<span style="color: #000000;">&#41;</span> book<span style="color: #000000;">&#40;</span>s<span style="color: #000000;">&#41;</span> in folder <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> of project <span style="color: #000080;">%</span>G;</pre>
+<p>Additionally, we can replace the internal loop using Workbook properties:
+</p>
+<pre class="lt" style="font-family:monospace;">int nbooks <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// Get the name of this folder</span>
+string strPath;
+pe_path path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strPath;
+<span style="color: #008000;">// Loop over all Workbooks ...</span>
+<span style="color: #008000;">// Restricted to the current Project Explorer Folder View</span>
+doc <span style="color: #000080;">-</span>ef W <span style="color: #000000;">&#123;</span>
+   <span style="color: #008000;">// Loop over all worksheets in each workbook</span>
+   loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+      range rW <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Book1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>;
+      type Sheet name<span style="color: #000000;">:</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rw.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+   <span style="color: #000000;">&#125;</span>
+   type Found <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">&#41;</span> sheet<span style="color: #000000;">&#40;</span>s<span style="color: #000000;">&#41;</span> in <span style="color: #000080;">%</span>H;
+   type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>;
+   nbooks<span style="color: #000080;">++</span>;   
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Final report -&#160;%G contains the project name</span>
+type Found <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nbooks<span style="color: #000000;">&#41;</span> book<span style="color: #000000;">&#40;</span>s<span style="color: #000000;">&#41;</span> in folder <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> of project <span style="color: #000080;">%</span>G;</pre>
+<h3><a name="Looping_Over_Graph_Windows"></a><span class="mw-headline">Looping Over Graph Windows</span></h3>
+<p>Usually after importing data files, the workbook long name is the data file name. If there is data imported and plotted, the following script will loop over all graph windows, and will rename graph window's long name to the book's long name, which is the data file name.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">&#123;</span>
+    page.<span style="color: #000080;">label</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, @WL<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Or use page.longname$=%(1, @WL) in older versions</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>The following script prints all the graph windows to the default printer driver.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e P print; <span style="color: #008000;">//Abbreviation of ''document -each Plot Print''</span></pre>
+<p>The following script will loop through all the layers in all graph windows except for the embedded graphs, and dump the graph's window name and layer's name into the Script Window. If there's no graph long name, the graph's short name will be dumped.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e LP
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">//Skip over any embedded graphs or Layout windows</span>
+    if<span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">IsEmbedded</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000080;">&amp;&amp;</span>exist<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #000080;">=</span><span style="color: #0000dd;">11</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">//Assign the graph's long name to the string variable name</span>
+        string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">label</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; 
+        <span style="color: #008000;">//if there's no graph long name, assign the graph's window short name to the string variable name</span>
+        if<span style="color: #000000;">&#40;</span>name.<span style="color: #000080;">Getlength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H; 
+        
+        type <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>name<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>layer.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Looping_Over_Workbook_Windows"></a><span class="mw-headline">Looping Over Workbook Windows</span></h3>
+<p>The <a href="../../LabTalk/LabTalk/Document_Options_Others.html#-e" title="LabTalk:Document Options Others">document -e command</a> can be nested as in this example that loops over all Y datasets within all Worksheets<span class="OIndex" style="display:none">Worksheets, Looping over</span>:
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e W
+<span style="color: #000000;">&#123;</span>
+    int iCount <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    doc <span style="color: #000080;">-</span>e DY
+    <span style="color: #000000;">&#123;</span>
+        iCount<span style="color: #000080;">++</span>;
+    <span style="color: #000000;">&#125;</span>
+    if<span style="color: #000000;">&#40;</span> iCount <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">2</span> <span style="color: #000000;">&#41;</span>
+      <span style="color: #000000;">&#123;</span> type Worksheet <span style="color: #000080;">%</span>H has <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span> columns,; 
+        type <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>iCount<span style="color: #000000;">&#41;</span> of which are Y columns; <span style="color: #000000;">&#125;</span>
+    else
+      <span style="color: #000000;">&#123;</span> type Worksheet <span style="color: #000080;">%</span>H has <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span> columns,; 
+        type <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>iCount<span style="color: #000000;">&#41;</span> of which are Y columns; <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Looping_over_Columns_and_Rows"></a><span class="mw-headline">Looping over Columns and Rows</span></h3>
+<p>This example shows how to loop over all <span class="OIndex">columns</span><span class="OIndex HasShownIndex" style="display:none">Columns, Loop over</span> and delete every nth column
+</p>
+<pre class="lt" style="font-family:monospace;">int ndel <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// change this number as needed;</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+int nlast <span style="color: #000080;">=</span> ncols <span style="color: #000080;">-</span> mod<span style="color: #000000;">&#40;</span>ncols, ndel<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Need to delete from the right to the left</span>
+for<span style="color: #000000;">&#40;</span>int ii <span style="color: #000080;">=</span> nlast; ii <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">-</span><span style="color: #000080;">=</span> ndel<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   delete wcol<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>This example shows how to delete every nth <span class="OIndex">rows</span><span class="OIndex HasShownIndex" style="display:none">Rows, Looping over</span> in a worksheet.
+</p>
+<pre class="lt" style="font-family:monospace;">int ndel <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;           <span style="color: #008000;">// change this number as needed</span>
+range rr <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;      <span style="color: #008000;">// Get a range for column 1</span>
+nrows <span style="color: #000080;">=</span> rr.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// Get the number of rows</span>
+int nlast <span style="color: #000080;">=</span> nrows <span style="color: #000080;">-</span> mod<span style="color: #000000;">&#40;</span>nrows, ndel<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Need to delete from the bottom to the top</span>
+for<span style="color: #000000;">&#40;</span>int ii <span style="color: #000080;">=</span> nlast; ii <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">-</span><span style="color: #000080;">=</span> ndel<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   range rr <span style="color: #000080;">=</span> wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+   mark <span style="color: #000080;">-</span>d rr;
+<span style="color: #000000;">&#125;</span></pre>
+<p>This script calculates the logarithm of four columns on Sheet1, placing the result in the corresponding column of Sheet2:
+</p>
+<pre class="lt" style="font-family:monospace;">for<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">4</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	range ss <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>book1<span style="color: #000000;">&#93;</span>sheet1<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	range dd <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>book1<span style="color: #000000;">&#93;</span>sheet2<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	dd <span style="color: #000080;">=</span> log<span style="color: #000000;">&#40;</span>ss<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Looping_Over_Graphic_Objects"></a><span class="mw-headline">Looping Over Graphic Objects</span></h3>
+<p>You can loop over all <span class="OIndex">Graphic Objects</span><span class="OIndex HasShownIndex" style="display:none">Graphic Objects, Looping over</span> in the active layer. By wrapping this with two other options we can cover an entire project.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// For each Plot</span>
+doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// For each Layer in each Plot</span>
+    doc <span style="color: #000080;">-</span>e LW
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// For each Graphic Object in each Layer in each Plot</span>
+        doc <span style="color: #000080;">-</span>e G
+        <span style="color: #000000;">&#123;</span>   <span style="color: #008000;">// Set Legend background to Shadow</span>
+            if<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;Legend&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">%</span>B.<span style="color: #000080;">background</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+            <span style="color: #008000;">// Set timestamp color to Blue</span>
+            if<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;timestamp&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">%</span>B.<span style="color: #000080;">color</span> <span style="color: #000080;">=</span> color<span style="color: #000000;">&#40;</span>blue<span style="color: #000000;">&#41;</span>;
+            <span style="color: #008000;">// Delete all rectangle objects </span>
+            if<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;rect*&quot;</span><span style="color: #000000;">&#41;</span> label <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>B; 
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Perform_Peak_Analysis_on_All_Layers_in_Graph"></a><span class="mw-headline">Perform Peak Analysis on All Layers in Graph</span></h2>
+<p>This example shows how to loop over all <span class="OIndex">layer</span><span class="OIndex HasShownIndex" style="display:none">Layer, Looping over</span>s in a graph and perform peak analysis on datasets in each layer using a pre-saved Peak Analyzer theme file.  It assumes the active window is a multi-layer graph, and each layer has one data curve.  It further assumes a pre-saved Peak Analyzer theme exists.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Block reminder messages before entering loop.</span>
+<span style="color: #008000;">// This is to avoid either reminder message from popping up</span>
+<span style="color: #008000;">// about Origin switching to the report sheet</span>
+type <span style="color: #000080;">-</span>mb <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// Loop over all layers in graph window</span>
+doc <span style="color: #000080;">-</span>e LW
+<span style="color: #000000;">&#123;</span>
+   <span style="color: #008000;">// Perform peak analysis with preset theme</span>
+   sec; 
+   pa theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;My Peak Fit&quot;</span>; 
+   watch;
+   <span style="color: #008000; font-style: regular;">/* sec and watch are optional, 
+      they print out time taken for fitting data in each layer */</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Un-block reminder message</span>
+type <span style="color: #000080;">-</span>me;</pre>
+
+
+
+
+
+

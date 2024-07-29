@@ -1,0 +1,139 @@
+<h1 class="firstHeading">1.12.5 Peaks and Baseline</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Getting_input_XY_from_Graph_or_Worksheet"><span class="tocnumber">1</span> <span class="toctext">Getting input XY from Graph or Worksheet</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_a_BaselineBaseline.2C_Create"><span class="tocnumber">2</span> <span class="toctext">Creating a Baseline<span class="OIndex" style="display:none">Baseline, Create</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Removing_a_BaselineBaseline.2C_Remove"><span class="tocnumber">3</span> <span class="toctext">Removing a Baseline<span class="OIndex" style="display:none">Baseline, Remove</span></span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Finding_PeaksPeaks.2C_Find"><span class="tocnumber">4</span> <span class="toctext">Finding Peaks<span class="OIndex" style="display:none">Peaks, Find</span></span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Integrating_and_Fitting_PeaksPeaks.2C_IntegratePeaks.2C_Fit"><span class="tocnumber">5</span> <span class="toctext">Integrating and Fitting Peaks<span class="OIndex" style="display:none">Peaks, Integrate</span><span class="OIndex" style="display:none">Peaks, Fit</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Integrate_Peak"><span class="tocnumber">5.1</span> <span class="toctext">Integrate Peak</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Fitting_Peak"><span class="tocnumber">5.2</span> <span class="toctext">Fitting Peak</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Getting_input_XY_from_Graph_or_Worksheet"></a><span class="mw-headline">Getting input XY from Graph or Worksheet</span></h2>
+<p>For the input XY data the following sections mentioned, we can get from Graph or Worksheet. Please click <a href="../../OriginC/OCGuide/Numeric_Data.html#DataRange" title="OCGuide:Numeric Data">here</a> to get the help of getting data from window.
+</p>
+<h2><a name="Creating_a_BaselineBaseline.2C_Create"></a><span class="mw-headline">Creating a Baseline<span class="OIndex" style="display:none">Baseline, Create</span></span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_create_baseline_by_masking_peaks_(global_function).html" title="OriginC:Ocmath create baseline by masking peaks (global function)">ocmath_create_baseline_by_masking_peaks</a></b> function can create a baseline according to only positive peaks, only negative peaks, or both direction peaks. 
+</p><p>The following example shows how to create a baseline for the positive peaks and the negative peaks in input XY data(vx, vy).
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Allocate memory for baseline XY vectors</span>
+vector vxBaseline<span style="color: #000000;">&#40;</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>, vyBaseline<span style="color: #000000;">&#40;</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// find baseline XY data</span>
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_create_baseline_by_masking_peaks<span style="color: #000000;">&#40;</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vx, vy, 
+	vxBaseline.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vxBaseline, vyBaseline, BOTH_DIRECTION<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Ascending sort baseline XY data by X data.</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> OE_NOERROR <span style="color: #000080;">==</span> nRet <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vn;
+	vxBaseline.<span style="color: #000000;">Sort</span><span style="color: #000000;">&#40;</span>SORT_ASCENDING, <span style="color: #0000ff;">true</span>, vn<span style="color: #000000;">&#41;</span>;
+	vyBaseline.<span style="color: #000000;">Reorder</span><span style="color: #000000;">&#40;</span>vn<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Removing_a_BaselineBaseline.2C_Remove"></a><span class="mw-headline">Removing a Baseline<span class="OIndex" style="display:none">Baseline, Remove</span></span></h2>
+<p>If the x coordinate of a baseline is the same as that of the peak curve, you can directly subtract, otherwise you need do interpolation before removing the baseline. The following code shows how to do interpolation and then remove a baseline. Assume the current worksheet has 4 columns in which to put peak XY data and baseline XY data.
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+Column colPeakX<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>, colPeakY<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+Column colBaseLineX<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>, colBaseLineY<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get peak XY data. </span>
+<span style="color: #008000;">// Get Y data by reference since want to subtract baseline on it below.</span>
+vector vPeakX <span style="color: #000080;">=</span> colPeakX.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+vector<span style="color: #000040;">&amp;</span> vPeakY <span style="color: #000080;">=</span> colPeakY.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get base line data</span>
+vector vBaselineX <span style="color: #000080;">=</span> colBaseLineX.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+vector vBaselineY <span style="color: #000080;">=</span> colBaseLineY.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> vPeakY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000040;">||</span> vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> 
+	<span style="color: #000040;">||</span> vBaselineX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>
+<span style="color: #000000;">&#41;</span>
+	<span style="color: #0000ff;">return</span>;
+
+<span style="color: #008000;">// do interpolation on baseline data to keep x coordinate same as peak data.</span>
+vector vyBaseTemp<span style="color: #000000;">&#40;</span>vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>OE_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> ocmath_interpolate<span style="color: #000000;">&#40;</span>vPeakX, vyBaseTemp, vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, 
+	vBaselineX, vBaselineY, vBaselineX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, INTERP_TYPE_LINEAR<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// subtract base line</span>
+vPeakY <span style="color: #000040;">-</span><span style="color: #000080;">=</span> vyBaseTemp;</pre>
+<h2><a name="Finding_PeaksPeaks.2C_Find"></a><span class="mw-headline">Finding Peaks<span class="OIndex" style="display:none">Peaks, Find</span></span></h2>
+<p>The <b>ocmath_find_peaks_*</b> function is used to find peaks by multiple methods. 
+</p><p>The following example shows how to find a local maximum point in a local scope selected by nLocalPts. For a current point marked by nIndex, the scope is [nIndex-nLocalPts, nIndex+nLocalPts]. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Allocate memory for output vectors</span>
+UINT nDataSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+vector vxPeaks<span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>, vyPeaks<span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnIndices<span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// nDataSize, on input, the size of vxData, vyData; </span>
+<span style="color: #008000;">// on output, return number of peaks</span>
+<span style="color: #0000ff;">int</span> nLocalPts <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_find_peaks_by_local_maximum<span style="color: #000000;">&#40;</span> <span style="color: #000040;">&amp;</span>nDataSize, vxData, vyData, 
+	vxPeaks, vyPeaks, vnIndices, 
+	POSITIVE_DIRECTION <span style="color: #000040;">|</span> NEGATIVE_DIRECTION, nLocalPts<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>OE_NOERROR <span style="color: #000080;">==</span> nRet<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Peak Num=%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nDataSize<span style="color: #000000;">&#41;</span>;
+	vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+	vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Origin C supports two functions: <b><a href="../../OriginC/OriginC/Ocmath_test_peaks_by_height_(global_function).html" title="OriginC:Ocmath test peaks by height (global function)">ocmath_test_peaks_by_height</a></b> and <b><a href="../../OriginC/OriginC/Ocmath_test_peaks_by_number_(global_function).html" title="OriginC:Ocmath test peaks by number (global function)">ocmath_test_peaks_by_number</a></b>, to verify peaks by specified height and peak number, respectively.
+</p><p><span class="OIndex" style="display:none">Peaks, Verify Peaks by Minimum Height</span>The following is an example showing how to verify peaks by minimum peak height.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Get minimum and maximum from source Y data</span>
+<span style="color: #0000ff;">double</span> dMin, dMax;
+vyData.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>dMin, dMax<span style="color: #000000;">&#41;</span>; 
+
+<span style="color: #008000;">// Get the bigger value from the highest point or the lowest point.</span>
+<span style="color: #008000;">// And multiply 20% to get the peak minimum height.</span>
+<span style="color: #0000ff;">double</span> dTotalHeight <span style="color: #000080;">=</span> max<span style="color: #000000;">&#40;</span><span style="color: #000000;">abs</span><span style="color: #000000;">&#40;</span>dMax<span style="color: #000000;">&#41;</span>, <span style="color: #000000;">abs</span><span style="color: #000000;">&#40;</span>dMin<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">double</span> dPeakMinHeight <span style="color: #000080;">=</span> dTotalHeight <span style="color: #000040;">*</span> <span style="color: #0000dd;">20</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">100</span>;
+
+<span style="color: #008000;">// Verify peaks by specified minimum height</span>
+nRet <span style="color: #000080;">=</span> ocmath_test_peaks_by_height<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>nDataSize, vxPeaks, vyPeaks, vnIndices, 
+	dPeakMinHeight<span style="color: #000000;">&#41;</span>;	
+
+<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Peak Num =&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nDataSize<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>nDataSize; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Peak&#160;%d: (%f,%f)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, vxPeaks<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, vyPeaks<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Integrating_and_Fitting_PeaksPeaks.2C_IntegratePeaks.2C_Fit"></a><span class="mw-headline">Integrating and Fitting Peaks<span class="OIndex" style="display:none">Peaks, Integrate</span><span class="OIndex" style="display:none">Peaks, Fit</span></span></h2>
+<h3><a name="Integrate_Peak"></a><span class="mw-headline">Integrate Peak</span></h3>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_integrate_(global_function).html" title="OriginC:Ocmath integrate (global function)">ocmath_integrate</a></b> function is used to integrate to find the area under a curve. 
+</p><p>The following example shows how to perform integration on the sub curve of one peak.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> i1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">51</span>, i2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">134</span>; <span style="color: #008000;">// From/to index to set the sub range of one peak</span>
+IntegrationResult IntResult; <span style="color: #008000;">// Output, integration result</span>
+vector vIntegral<span style="color: #000000;">&#40;</span>i2<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Output, integral data</span>
+
+<span style="color: #008000;">// Integrate and output result</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_integrate<span style="color: #000000;">&#40;</span>vx, vy, i1, i2, <span style="color: #000040;">&amp;</span>IntResult, vIntegral, 
+MATHEMATICAL_AREA, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">false</span>, SEARCH_FROM_PEAK<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Peak 1: Peak Index =&#160;%d, Area =&#160;%g, FWHM =&#160;%g, Center =&#160;%g, 
+		Height =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, IntResult.<span style="color: #000000;">iPeak</span>, IntResult.<span style="color: #000000;">Area</span>, IntResult.<span style="color: #000000;">dxPeak</span>, 
+		IntResult.<span style="color: #000000;">xPeak</span>, IntResult.<span style="color: #000000;">yPeak</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Fitting_Peak"></a><span class="mw-headline">Fitting Peak</span></h3>
+<p>The Origin C <b><a href="../../OriginC/Category/NLFitSession_(class).html" title="Category:NLFitSession (class)">NLFitSession</a></b> class supports a method to fit peaks with a different fitting function. 
+</p>
+
+
+
+
+

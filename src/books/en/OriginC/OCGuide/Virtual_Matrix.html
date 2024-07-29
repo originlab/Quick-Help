@@ -1,0 +1,58 @@
+<h1 class="firstHeading">1.6.3.4 Virtual Matrix</h1><p><span class="OIndex" style="display:none">Virtual Matrix</span><span class="OIndex" style="display:none">Plotting, from Virtual Matrix</span>
+You can construct a virtual matrix from a worksheet window. Pick separate data ranges from the worksheet for X, Y, Z data of the virtual matrix. If you do not specify X and Y data, it will automatically use default data. The following code shows how to construct a virtual matrix from an active worksheet window, and then plot this virtual matrix on a graph.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// before running, make sure there is active worksheet window with data. </span>
+<span style="color: #008000;">// For example, new a worksheet window, import XYZ Random Gaussian.dat from</span>
+<span style="color: #008000;">// Origin folder Samples\Matrix Conversion and Gridding subfolder to worksheet.</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">int</span> r1, r2;
+<span style="color: #0000ff;">int</span> c1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, c2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000000;">GetBounds</span><span style="color: #000000;">&#40;</span>r1, c1, r2, c2<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// construct a data range object only with Z data, X and Y data will be auto</span>
+<span style="color: #008000;">// assigned.</span>
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wks, r1, c1, r2, c2<span style="color: #000000;">&#41;</span>;
+
+MatrixObject mo;
+mo.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// get the default x, y range</span>
+<span style="color: #0000ff;">double</span> xmin, xmax, ymin, ymax;
+mo.<span style="color: #000000;">GetXY</span><span style="color: #000000;">&#40;</span>xmin, ymin, xmax, ymax<span style="color: #000000;">&#41;</span>;
+
+GraphPage gp;
+gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;CONTOUR&quot;</span><span style="color: #000000;">&#41;</span>;
+GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>mo, IDM_PLOT_CONTOUR<span style="color: #000000;">&#41;</span>;
+gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+mo.<span style="color: #000000;">Detach</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>If you want to assign X and Y data then the data should be monotone. The following example shows how to construct a virtual matrix with an XYZ data range.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Assume the active layer is a worksheet with 5 columns of data.</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Get min and max row indices for columns 0 to 4.</span>
+<span style="color: #0000ff;">int</span> r1, r2, c1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, c2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+wks.<span style="color: #000000;">GetBounds</span><span style="color: #000000;">&#40;</span>r1, c1, r2, c2<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Create a data range object with XYZ data.</span>
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, c2<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// First row except the first cell</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, r2, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// First column except the first cell</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, r2, c2<span style="color: #000000;">&#41;</span>;
+
+MatrixObject mo;
+mo.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

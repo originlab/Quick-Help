@@ -1,0 +1,439 @@
+<h1 class="firstHeading">2.5.11 GetData</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Remark"><span class="tocnumber">5</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Examples"><span class="tocnumber">6</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#VB"><span class="tocnumber">6.1</span> <span class="toctext">VB</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#C.23"><span class="tocnumber">6.2</span> <span class="toctext">C#</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Version_Information"><span class="tocnumber">7</span> <span class="toctext">Version Information</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_Also"><span class="tocnumber">8</span> <span class="toctext">See Also</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Get a range of values or a single value from a worksheet column.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<code><pre>
+VB: Function GetData(format As ByVal ARRAYDATAFORMAT, [ nStart As ByVal Object ], [ nEnd As ByVal Object ], [ lowbound As ByVal Object ] ) As Object
+</pre></code>
+<code><pre>
+C++: _variant_t GetData(ARRAYDATAFORMAT format, _variant_t nStart, _variant_t nEnd, _variant_t lowbound )
+</pre></code>
+<code><pre>
+C#: var GetData(ARRAYDATAFORMAT format, var nStart, var nEnd, var lowbound )
+</pre></code>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt>format</dt>
+<dd>one of the <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAYDATAFORMAT</a> enumeration. For example ARRAY1D_NUMERIC</dd>
+<dt>nStart</dt>
+<dd>Starting index to get array, default is 0</dd>
+<dt>nEnd</dt>
+<dd>Inclusive ending index to get array, use -1(default) to get all</dd>
+<dt>lowbound</dt>
+<dd>Optional array offset index. This is typically 0, but for VB, user can DIM array with any integer offset, and often it is 1 in VB.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Array as a variant. Actual array type is dependent on the <i>format</i> argument.
+</p>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>Please refer to <a href="../../AutomationServer/OriginCOM/Column-DataFormat.html" title="OriginCOM:Column-DataFormat">DataFormat</a> for sending and getting different types of data to and from an Origin column.
+</p>
+<h3><a name="VB"></a><span class="mw-headline">VB</span></h3>
+<p>Get Integer Data from Origin
+The example will connect to a running Origin and load a specified project file, which was saved by the  <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> example. Once connected it will get the Integer data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format, search for a data value, and if found it will put the row index into the Excel worksheet.
+</p><p>Note: VB does not support the Origin data types CHAR nor USHORT so we can not get data from the first column nor the fourth column of the project file.
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> getData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI     <span style="color: #008000;">'Connect to the running Origin
+</span>    app.Load (app.Path(APPPATH_USER) + <span style="color: #800000;">&quot;COMServerExamples_CI.opj&quot;</span>)     <span style="color: #008000;">'Load the opj file saved by relevant SetData example
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[Book1]Sheet1&quot;</span>)
+ 
+    <span style="color: #008000;">'Data in the second Column are LONG data. Get them as Numeric.
+</span>    Data = Wks.Columns(1).getData(ARRAY1D_NUMERIC, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        <span style="color: #8D38C9; font-weight: bold;">If</span> Data(ii) = 2700 <span style="color: #8D38C9; font-weight: bold;">Then</span> Range(<span style="color: #800000;">&quot;A1&quot;</span>) = ii
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+    <span style="color: #008000;">'Data in the third Column are BYTE data. Get them as Numeric.
+</span>    Data = Wks.Columns(2).getData(ARRAY1D_NUMERIC, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        <span style="color: #8D38C9; font-weight: bold;">If</span> Data(ii) = 55 <span style="color: #8D38C9; font-weight: bold;">Then</span> Range(<span style="color: #800000;">&quot;A2&quot;</span>) = ii
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<p>Get Floating-point Data from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Floating-point data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin, and then search for a float or double data in the data array we got. If found, we'll print the index of the data to Excel sheet. 
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> getData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI     <span style="color: #008000;">'Connect to the running Origin
+</span>    app.Load (app.Path(APPPATH_USER) + <span style="color: #800000;">&quot;COMServerExamples_CF.opj&quot;</span>)     <span style="color: #008000;">'Load the opj file saved by relevant SetData example
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[Book1]Sheet1&quot;</span>)
+ 
+    <span style="color: #008000;">'Data in the first Column are FLOAT data. Get them as Numeric.
+</span>    Data = Wks.Columns(0).getData(ARRAY1D_NUMERIC, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        <span style="color: #8D38C9; font-weight: bold;">If</span> Data(ii) = (17 * 0.01 - 1.23) <span style="color: #8D38C9; font-weight: bold;">Then</span> Range(<span style="color: #800000;">&quot;A1&quot;</span>) = ii
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+    <span style="color: #008000;">'Data in the second Column are DOUBLE data. Get them as Numeric.
+</span>    Data = Wks.Columns(1).getData(ARRAY1D_NUMERIC, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        <span style="color: #8D38C9; font-weight: bold;">If</span> Data(ii) = (53 / 12.8 - 0.75) <span style="color: #8D38C9; font-weight: bold;">Then</span> Range(<span style="color: #800000;">&quot;A2&quot;</span>) = ii
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+ 
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<p>Get Complex Data(as 1D array) from Origin
+Run Origin first. We will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Complex data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin as 1D data array, and then print the data to Excel sheet. 
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> getData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI     <span style="color: #008000;">'Connect to the running Origin
+</span>    app.Load (app.Path(APPPATH_USER) + <span style="color: #800000;">&quot;COMServerExamples_CC1.opj&quot;</span>)     <span style="color: #008000;">'Load the opj file saved by relevant SetData example
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[Book1]Sheet1&quot;</span>)
+ 
+    <span style="color: #008000;">'Data in the first Column are COMPLEX data. Get them as 1D Numeric.
+</span>    <span style="color: #008000;">'Result array is twice the size since complex is 16 byte each while array is double and 8 byte each
+</span>    Data = Wks.Columns(0).GetData(ARRAY1D_NUMERIC, 0, -1)
+    <span style="color: #008000;">'UBound(Data) / 2 is the actual number of complex values
+</span>    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data) / 2
+        Range(<span style="color: #800000;">&quot;A1&quot;</span>).Cells(ii) = Data(2 * ii - 1)
+        Range(<span style="color: #800000;">&quot;B1&quot;</span>).Cells(ii) = Data(2 * ii)
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<p>Get Complex Data(as 2D array) from Origin
+Run Origin first. We will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Complex data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin as 2D data array, and then print the data to Excel sheet. 
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> getData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI     <span style="color: #008000;">'Connect to the running Origin
+</span>    app.Load (app.Path(APPPATH_USER) + <span style="color: #800000;">&quot;COMServerExamples_CC2.opj&quot;</span>)     <span style="color: #008000;">'Load the opj file saved by relevant SetData example
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[Book1]Sheet1&quot;</span>)
+ 
+    <span style="color: #008000;">'Data in the first Column are COMPLEX data. Get them as Numeric.
+</span> 
+    Data = Wks.Columns(1).GetData(ARRAY2D_NUMERIC, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        Range(<span style="color: #800000;">&quot;A1&quot;</span>).Cells(ii) = Data(ii, 1)
+        Range(<span style="color: #800000;">&quot;B1&quot;</span>).Cells(ii) = Data(ii, 2)
+    <span style="color: #8D38C9; font-weight: bold;">Next</span> 
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<p>Get Text from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Text in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_TEXT</a> format from Origin, and then search for a string in the data array we got. If found, we'll print the index of the data to Excel sheet. 
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> getData()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Data <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI     <span style="color: #008000;">'Connect to the running Origin
+</span>    app.Load (app.Path(APPPATH_USER) + <span style="color: #800000;">&quot;COMServerExamples_CT.opj&quot;</span>)     <span style="color: #008000;">'Load the opj file saved by relevant SetData example
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[Book1]Sheet1&quot;</span>)
+ 
+    <span style="color: #008000;">'Data in the first Column are TEXT. Get them as Text.
+</span>    Data = Wks.Columns(0).getData(ARRAY1D_TEXT, 0, -1)
+    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> <span style="color: #151B8D; font-weight: bold;">UBound</span>(Data)
+        <span style="color: #8D38C9; font-weight: bold;">If</span> Data(ii) = <span style="color: #800000;">&quot;abc 11&quot;</span> <span style="color: #8D38C9; font-weight: bold;">Then</span> Range(<span style="color: #800000;">&quot;A1&quot;</span>) = ii
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<p>Get Data from Linked Cells
+When getting data from a linked cell in a column, there are additional complications. A linked cell holds a text which is a reference string to the actual data. To get this link string, you should use ARRAY1D_TEXT. To get the actual text value as you see them in Origin, use ARRAY1D_VARIANT and then convert it to a string. To get the actual numeric value, use ARRAY1D_NUMERIC.
+</p><p>The following example shows how to use a sample Analysis Template to get values from linked cells. This template (ogw) computes basic statistics on data in the first sheet, and update the results in the 2nd sheet as Descriptive Statistics tables. There is a third sheet which pick out a few of the values and display them in a much simpler form, using linked cells.
+</p>
+<pre class="vb" style="font-family:monospace;">Const NUMPTS = 100
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wbk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Col <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> data(NUMPTS, 1) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+
+<span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> LoadOPJ_Click()
+<span style="color: #008000;">'Connect to a running Origin and load a sample Opj file
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    app.Load (app.Path(APPPATH_PROGRAM) + <span style="color: #800000;">&quot;\Samples\COM Server and Client\Basic Stats on Data.opj&quot;</span>)     <span style="color: #008000;">'Load a sample Opj file from the folder under the Origin install folder
+</span>    app.Visible = MAINWND_SHOW     <span style="color: #008000;">'Show the main window of Origin
+</span>        
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+<span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> SetAndGetData_Click()
+<span style="color: #008000;">'Set some data to Origin, and get back the processed data from Origin
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[RawData]Data&quot;</span>)   <span style="color: #008000;">'Select this Worksheet to send data
+</span>    <span style="color: #008000;">'Set data array
+</span>    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+        data(ii, 0) = ii
+        data(ii, 1) = Rnd(100)
+    <span style="color: #8D38C9; font-weight: bold;">Next</span> ii
+    <span style="color: #008000;">'Send data to Origin
+</span>    Wks.SetData (data)
+
+    app.Run     <span style="color: #008000;">'Wait Origin to process the data
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;[RawData]Basic Stats&quot;</span>)     <span style="color: #008000;">'In this sample Opj file, Origin will output the processed data to this Worksheet
+</span>    
+    <span style="color: #008000;">'Get data by different format
+</span>    Range(<span style="color: #800000;">&quot;A1&quot;</span>) = Wks.Columns(0).GetData(ARRAY1D_TEXT, 1, 1)     <span style="color: #008000;">'Get the Link of the data, which is the real content in the Origin column
+</span>    Range(<span style="color: #800000;">&quot;B1&quot;</span>) = Wks.Columns(0).GetData(ARRAY1D_VARIANT, 1, 1)  <span style="color: #008000;">'Get the content as is shown in the Origin column
+</span>    
+    Range(<span style="color: #800000;">&quot;C1&quot;</span>) = Wks.Columns(1).GetData(ARRAY1D_TEXT, 1, 1)     <span style="color: #008000;">'Get the Link of the data, which is the real content in the Origin column
+</span>    Range(<span style="color: #800000;">&quot;D1&quot;</span>) = Wks.Columns(1).GetData(ARRAY1D_NUMERIC, 1, 1)  <span style="color: #008000;">'Get the content as is shown in the Origin column
+</span>    
+    Range(<span style="color: #800000;">&quot;E1&quot;</span>) = Wks.Columns(2).GetData(ARRAY1D_TEXT, 1, 1)
+    Range(<span style="color: #800000;">&quot;F1&quot;</span>) = Wks.Columns(2).GetData(ARRAY1D_NUMERIC, 1, 1)
+    
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h3><a name="C.23"></a><span class="mw-headline">C#</span></h3>
+<p>Get Integer Data from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Integer data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin, and then search for a data in the data array we got. If found, we'll output the index of the data by console. 
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">Using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;COMServerExamples_CI.opj&quot;</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Load the opj file saved by relevant SetData example</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[Book1]Sheet1&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the first Column are Origin CHAR data. Get them as Numeric.</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">sbyte</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result1 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">sbyte</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to sbyte type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result1<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result1<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #FF0000;">17</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the second Column are Origin LONG data. Get them as Numeric.</span>
+    Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">int</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result2 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">int</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to int type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result2<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result2<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #FF0000;">6700</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the third Column are Origin BYTE data. Get them as Numeric.</span>
+    Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">2</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">byte</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result3 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">byte</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to byte type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result3<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result3<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #FF0000;">39</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the forth Column are Origin USHORT data. Get them as Numeric.</span>
+    Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">3</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">ushort</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result4 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">ushort</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to ushort type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result4<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result4<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #FF0000;">210</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>Get Floating-point Data from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Floating-point data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin, and then search for a data in the data array we got. If found, we'll output the index of the data by console. 
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">Using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;COMServerExamples_CF.opj&quot;</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Load the opj file saved by relevant SetData example</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[Book1]Sheet1&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the first Column are Origin FLOAT data. Get them as Numeric.</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result1 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to float type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result1<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result1<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">float</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">17</span> <span style="color: #008000;">*</span> <span style="color: #FF0000;">0.01</span> <span style="color: #008000;">-</span> <span style="color: #FF0000;">1.23</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the second Column are Origin DOUBLE data. Get them as Numeric.</span>
+    Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result2 <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to double type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result2<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>result2<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">==</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">53</span> <span style="color: #008000;">/</span> <span style="color: #FF0000;">12.8</span> <span style="color: #008000;">-</span> <span style="color: #FF0000;">0.75</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>Get Complex Data(as 1D array) from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Complex data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin as 1D data array, and then output the data by console. 
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">Using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;COMServerExamples_CC1.opj&quot;</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Load the opj file saved by relevant SetData example</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[Book1]Sheet1&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the first Column are COMPLEX data. Get them as 1D Numeric.</span>
+    <span style="color: #008080; font-style: italic;">//Result array is twice the size since complex is 16 byte each while array is double and 8 byte each</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to 1D double array</span>
+    <span style="color: #008080; font-style: italic;">//result.GetUpperBound(0) / 2 is the actual number of complex values</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> <span style="color: #008000;">&#40;</span>result<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">/</span> <span style="color: #FF0000;">2</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;: &quot;</span> <span style="color: #008000;">+</span> result<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">2</span> <span style="color: #008000;">*</span> ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, &quot;</span> <span style="color: #008000;">+</span> result<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">2</span> <span style="color: #008000;">*</span> ii <span style="color: #008000;">+</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>Get Complex Data(as 2D array) from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Complex data in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_NUMERIC</a> format from Origin as 2D data array, and then output the data by console. 
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">Using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;COMServerExamples_CC2.opj&quot;</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Load the opj file saved by relevant SetData example</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[Book1]Sheet1&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the first Column are Origin COMPLEX data. Get them as 2D Numeric.</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY2D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> result <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to 2D double array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;: &quot;</span> <span style="color: #008000;">+</span> result<span style="color: #008000;">&#91;</span>ii, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;, &quot;</span> <span style="color: #008000;">+</span> result<span style="color: #008000;">&#91;</span>ii, <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>Get Text from Origin
+Run Origin first. The example will connect to Origin and load a relevant opj file, which was saved by <a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">Column.SetData</a> Examples. We'll get these Text in <a href="../../AutomationServer/OriginCOM/ARRAYDATAFORMAT.html" title="OriginCOM:ARRAYDATAFORMAT">ARRAY1D_TEXT</a> format from Origin, and then search for a data in the data array we got. If found, we'll output the index of the data by console. 
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">Using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;COMServerExamples_CT.opj&quot;</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Load the opj file saved by relevant SetData example</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[Book1]Sheet1&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #008080; font-style: italic;">//Data in the first Column are Origin TEXT. Get them as Text.</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> Data <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_TEXT</span>, <span style="color: #FF0000;">0</span>, <span style="color: #008000;">-</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> result <span style="color: #008000;">=</span> Data <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>                    <span style="color: #008080; font-style: italic;">//Cast object to object type array</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> result<span style="color: #008000;">.</span><span style="color: #0000FF;">GetUpperBound</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Equals</span><span style="color: #008000;">&#40;</span>result<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span>,<span style="color: #666666;">&quot;abc 11&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>ii <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<p>Get Data from Linked Cells
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> Main<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> args<span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span>
+
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> GetData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> <span style="color: #0600FF; font-weight: bold;">Default</span> <span style="color: #008000;">=</span> <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> send <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">100</span>,<span style="color: #FF0000;">2</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> <span style="color: #FF0000;">100</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+    <span style="color: #008000;">&#123;</span>
+        send<span style="color: #008000;">&#91;</span>ii, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii<span style="color: #008000;">;</span>
+        send<span style="color: #008000;">&#91;</span>ii, <span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">*</span> <span style="color: #FF0000;">0.3</span><span style="color: #008000;">;</span>
+    <span style="color: #008000;">&#125;</span>
+
+    <span style="color: #008080; font-style: italic;">//Connect to a running Origin</span>
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008080; font-style: italic;">//Load a sample Opj file from the folder under the Origin install folder</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Load</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>APPPATH_TYPES<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_PROGRAM</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\\</span>Samples<span style="color: #008080; font-weight: bold;">\\</span>COM Server and Client<span style="color: #008080; font-weight: bold;">\\</span>Basic Stats on Data.opj&quot;</span><span style="color: #008000;">&#41;</span>, <span style="color: #0600FF; font-weight: bold;">Default</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Visible</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_VISIBLE</span><span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_SHOW</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Show the main window of Origin</span>
+
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[RawData]Data&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>    <span style="color: #008080; font-style: italic;">//Select this Worksheet to send data</span>
+    <span style="color: #008080; font-style: italic;">//Send data to Origin</span>
+    wks<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>send, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Run</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Wait Origin to process the data</span>
+
+    wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;[RawData]Basic Stats&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//In this sample Opj file, Origin will output the processed data to this Worksheet</span>
+
+    <span style="color: #008080; font-style: italic;">//Get data by different format</span>
+    Column col <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span> <span style="color: #0600FF; font-weight: bold;">get</span><span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_TEXT</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Get the Link of the data, which is the real content in the Origin column</span>
+    <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> data <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_VARIANT</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>        <span style="color: #008080; font-style: italic;">//Get the content as is shown in the Origin column</span>
+    data <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span><span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    col <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_TEXT</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>           <span style="color: #008080; font-style: italic;">//Get the Link of the data, which is the real content in the Origin column</span>
+    data <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>        <span style="color: #008080; font-style: italic;">//Get the content as is shown in the Origin column</span>
+    <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> dataN <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>dataN<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span><span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    col <span style="color: #008000;">=</span> wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">2</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_TEXT</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    data <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">object</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>data<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #008000;">=</span> col<span style="color: #008000;">.</span><span style="color: #0000FF;">GetData</span><span style="color: #008000;">&#40;</span>ARRAYDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">ARRAY1D_NUMERIC</span>, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">4</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    dataN <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">get</span> <span style="color: #0600FF; font-weight: bold;">as</span> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span>dataN<span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;<span style="color: #008080; font-weight: bold;">\n</span><span style="color: #008080; font-weight: bold;">\n</span>&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    Console<span style="color: #008000;">.</span><span style="color: #0000FF;">ReadLine</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+<span style="color: #008000;">&#125;</span></pre>
+<h2><a name="Version_Information"></a><span class="mw-headline">Version Information</span></h2>
+<p>8.0SR2
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../AutomationServer/OriginCOM/Column-SetData.html" title="OriginCOM:Column-SetData">SetData</a> | <a href="../../AutomationServer/OriginCOM/Application-PutWorksheet.html" title="OriginCOM:Application-PutWorksheet">Application.PutWorksheet</a> | <a href="../../AutomationServer/OriginCOM/Application-GetWorksheet.html" title="OriginCOM:Application-GetWorksheet">Application.GetWorksheet</a> | <a href="../../AutomationServer/OriginCOM/Worksheet-SetData.html" title="OriginCOM:Worksheet-SetData">Worksheet.SetData</a> | <a href="../../AutomationServer/OriginCOM/Worksheet-GetData.html" title="OriginCOM:Worksheet-GetData">Worksheet.GetData</a>
+</p>
+
+
+
+
+

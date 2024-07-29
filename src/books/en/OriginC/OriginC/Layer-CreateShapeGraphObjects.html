@@ -1,0 +1,82 @@
+<h1 class="firstHeading">2.2.4.24.3 Layer::CreateShapeGraphObjects</h1><p><span class="OIndex" style="display:none">CreateShapeGraphObjects</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Create multiple shape graphic objects such as polyline, polygon or polypolygon in the layer and put them into different blocks. All the newly created shape graphic objects should be set to attach to <b>Layer</b> and <b>Scale</b> since the coordinates provided are in axes scales.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> CreateShapeGraphObjects<span style="color: #000000;">&#40;</span>
+    <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vxPos,
+    <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vyPos,
+    <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vShapeIndex <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>,
+    <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vBlockIndex <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>,
+    LPCSTR lpcszBasename <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>,
+    DWORD dwState <span style="color: #000080;">=</span> GOC_NO_SELECT <span style="color: #000040;">|</span> GOC_NO_DEL_SEL_PT  <span style="color: #000040;">|</span> GOC_NO_CONTEXT <span style="color: #000040;">|</span> GOC_NO_STATE,
+    DWORD dwCntrl <span style="color: #000080;">=</span> CPO_GROUP
+    <span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> vxPos</dt>
+<dd>[input] X coordinates of each polygons, appended one after another.</dd>
+<dt> vyPos</dt>
+<dd>[input] Y coordinates of each polygons.</dd>
+<dt> vShapeIndex </dt>
+<dd>[input] indices of datasets <i>vxPos</i> and <i>vyPos</i>, used to indicate the start of a polygon/polyline shape object beginning from 0.</dd>
+<dt> vBlockIndex</dt>
+<dd>[input] indices of dataset <i>vShapeIndex</i>, used to indicate the starting index of shape object in a block beginning from 0. The ending index of shape object in a block is the index of next block minus 1. Eg, if the starting index of current block is 2 and the index of next block is 5, the current block will consists of the 2nd, 3rd, 4th shape graphic objects.</dd>
+<dt> lpcszBasename</dt>
+<dd>[input] if NULL, "poly" will be used as the name base of a shape graphic object. Objects will be created using this namebase plus the index of the object as indicated by <i>vIndex</i>. For example the name of first shape object will be "poly0"</dd>
+<dt> dwState</dt>
+<dd> [input] Graph Object states bits: 1 = GOC_NO_RESIZE, 2 = GOC_NO_ROTATE, 4 = GOC_NO_SKEW, 8 = GOC_NO_EDIT, etc, see more GOC_* in oc_const.h file. </dd>
+<dt> dwCntrl</dt>
+<dd> [input] additional control bits: 1 = CPO_GROUP will group all of the newly created objects. 2 = CPO_POLYLINE to indicate polyline or polypolyline. See more CPO_* in oc_const.h file.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>&lt;0 for error codes, otherwise the total number of objects created.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Create 2 polypolygon objects in the active graph.</span>
+
+<span style="color: #0000ff;">void</span> Layer_CreateShapeGraphObjects_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> vX <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#125;</span>;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> vY <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">6</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">8</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">6</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">&#125;</span>;
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vShapeIndex <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">8</span>,<span style="color: #0000dd;">13</span>,<span style="color: #0000dd;">17</span><span style="color: #000000;">&#125;</span>; <span style="color: #008000;">// Create 5 polygons</span>
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vBlockIndex <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#125;</span>; <span style="color: #008000;">// Polygon 0,1 in first block and 2,3,4 in second block</span>
+ 
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    GraphLayer gl<span style="color: #000000;">&#40;</span>gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>,<span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> gl.<span style="color: #000000;">CreateShapeGraphObjects</span><span style="color: #000000;">&#40;</span>vX,vY,vShapeIndex,vBlockIndex,<span style="color: #0000ff;">NULL</span>,<span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+ 
+    gl.<span style="color: #000000;">X</span>.<span style="color: #000000;">From</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    gl.<span style="color: #000000;">X</span>.<span style="color: #000000;">To</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+    gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">From</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">To</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Layer-GraphObjects.html" title="OriginC:Layer-GraphObjects">Layer::GraphObjects</a>
+<a href="../../OriginC/OriginC/Layer-CreateGraphObject.html" title="OriginC:Layer-CreateGraphObject">Layer::CreateGraphObject</a>
+<a href="../../OriginC/OriginC/Layer-RemoveGraphObject.html" title="OriginC:Layer-RemoveGraphObject">Layer::RemoveGraphObject</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

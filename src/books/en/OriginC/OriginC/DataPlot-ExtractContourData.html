@@ -1,0 +1,179 @@
+<h1 class="firstHeading">2.2.4.8.5 DataPlot::ExtractContourData</h1><p><span class="OIndex" style="display:none">ExtractContourData</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Extract the data of contour lines in the contour plot.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ExtractContourData<span style="color: #000000;">&#40;</span>vector<span style="color: #000040;">&amp;</span> vX, vector<span style="color: #000040;">&amp;</span> vY, vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vCounts, vector<span style="color: #000040;">&amp;</span> vLevels<span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> vX</dt>
+<dd>[output] X values of the extracted contour data.</dd>
+<dt> vY</dt>
+<dd>[output] Y values of the extracted contour data.</dd>
+<dt> vCounts</dt>
+<dd>[output] the number of the extracted contour data points for each level.</dd>
+<dt> vLevels</dt>
+<dd>[output] the value of each level.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>If success, return the number of levels, otherwise return 0.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p><p>This example shows how to use this method to extract contour lines from a contour plot, and then put the data to a worksheet. Also, the function <a href="../../OriginC/OriginC/Ocmath_d_polygon_area_(global_function).html" title="OriginC:Ocmath d polygon area (global function)">ocmath_d_polygon_area</a> is used to calculate the area of the extracted contour lines.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// To run this example, import the data &quot;&lt;Origin Installation Directory&gt;\Samples</span>
+<span style="color: #008000;">// \Matrix Conversion and Gridding\3D XYZ.dat&quot; first. Then set column C as Z column</span>
+<span style="color: #008000;">// and highlight it to make a contour graph by selecting menu &quot;Plot: Contour: XYZ Contour&quot;.</span>
+<span style="color: #008000;">// Activate this graph.</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ocmath.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>  <span style="color: #008000;">// need to include this header file for using ocmath_d_polygon_area</span>
+<span style="color: #0000ff;">void</span> DataPlot_ExtractContourData_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get the active graph</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Get no graph!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get the data plot</span>
+	
+	vector vX, vY, vLevels;
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vCounts;
+	
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> dp.<span style="color: #000000;">ExtractContourData</span><span style="color: #000000;">&#40;</span>vX, vY, vCounts, vLevels<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// extract contour data of the plot</span>
+	
+	<span style="color: #008000;">// if success, put contour data to worksheet</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nRet<span style="color: #000080;">&gt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		WorksheetPage wp;  <span style="color: #008000;">// create workbook</span>
+		wp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		Worksheet wks <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get worksheet</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Get no worksheet!&quot;</span><span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">return</span>;
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #008000;">// loop all levels </span>
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iLevel<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iLevel<span style="color: #000080;">&lt;</span>vLevels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iLevel<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			vector vOutputX, vOutputY;
+			<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vCounts<span style="color: #000000;">&#91;</span>iLevel<span style="color: #000000;">&#93;</span>;
+			vOutputX.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nSize<span style="color: #000000;">&#41;</span>;
+			vOutputY.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nSize<span style="color: #000000;">&#41;</span>;
+			
+			<span style="color: #008000;">// get specific level data</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>get_specific_level<span style="color: #000000;">&#40;</span>iLevel, vX, vY, vCounts, vLevels, vOutputX, vOutputY, nSize<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				<span style="color: #008000;">// calculate area, use fabs function to avoid negative area</span>
+				<span style="color: #0000ff;">double</span> dArea <span style="color: #000080;">=</span> <span style="color: #000000;">fabs</span><span style="color: #000000;">&#40;</span>ocmath_d_polygon_area<span style="color: #000000;">&#40;</span>vOutputX, vOutputY, nSize<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+				<span style="color: #008000;">// set data to worksheet</span>
+				set_specific_level_to_worksheet<span style="color: #000000;">&#40;</span>wks, vOutputX, vOutputY, vLevels, iLevel, dArea<span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// get data of specific level from the extracted contour data</span>
+<span style="color: #008000;">// iLevel: int, specific level</span>
+<span style="color: #008000;">// vInputXs, vInputYs: vector, the extracted contour data</span>
+<span style="color: #008000;">// vCounts: vector, nubmer of points in each level</span>
+<span style="color: #008000;">// vLevels: vector, Z values of each level</span>
+<span style="color: #008000;">// vOutputX, vOutputY: vector&amp;, data of the specific level</span>
+<span style="color: #008000;">// nSize: int, number of data in the specific level</span>
+<span style="color: #0000ff;">bool</span> get_specific_level<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iLevel, vector vInputXs, vector vInputYs, vector vCounts, vector vLevels, vector<span style="color: #000040;">&amp;</span> vOutputX, vector<span style="color: #000040;">&amp;</span> vOutputY, <span style="color: #0000ff;">int</span> nSize<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>iLevel<span style="color: #000080;">&gt;=</span>vLevels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> iLevel<span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// invalid level index, return false</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid iLevel!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">int</span> nBeginIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// begin index of the specific level in the extracted contour data</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>iLevel <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// set begin index according to the specific level</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iCount<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iCount<span style="color: #000080;">&lt;</span>iLevel; iCount<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+			nBeginIndex <span style="color: #000080;">=</span> nBeginIndex <span style="color: #000040;">+</span> vCounts<span style="color: #000000;">&#91;</span>iCount<span style="color: #000000;">&#93;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iIndex<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iIndex<span style="color: #000080;">&lt;</span>nSize; iIndex<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// get data of the specific level</span>
+	<span style="color: #000000;">&#123;</span>
+		vOutputX<span style="color: #000000;">&#91;</span>iIndex<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> vInputXs<span style="color: #000000;">&#91;</span>nBeginIndex<span style="color: #000040;">+</span>iIndex<span style="color: #000000;">&#93;</span>;
+		vOutputY<span style="color: #000000;">&#91;</span>iIndex<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> vInputYs<span style="color: #000000;">&#91;</span>nBeginIndex<span style="color: #000040;">+</span>iIndex<span style="color: #000000;">&#93;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// set the data of specific level to worksheet, including data points, Z values of the levels, and areas</span>
+<span style="color: #008000;">// wks: Worksheet, data will be put to this worksheet</span>
+<span style="color: #008000;">// vX, vY: vector, data points of specific level</span>
+<span style="color: #008000;">// vLevels: vector, Z values of all levels</span>
+<span style="color: #008000;">// iLevel: int, the specific level index</span>
+<span style="color: #008000;">// dArea: double, the area of the specific level</span>
+<span style="color: #0000ff;">void</span> set_specific_level_to_worksheet<span style="color: #000000;">&#40;</span>Worksheet wks, vector vX, vector vY, vector vLevels, <span style="color: #0000ff;">int</span> iLevel, <span style="color: #0000ff;">double</span> dArea<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// add two columns for spcific level data</span>
+	<span style="color: #0000ff;">int</span> nColX <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">int</span> nColY <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">bool</span> bLabel <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;  <span style="color: #008000;">// use for checking whether exist Z-Level &amp; Area label</span>
+	Grid grid;  <span style="color: #008000;">// grid of the worksheet</span>
+	grid.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsLabelNames;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>grid.<span style="color: #000000;">GetUserDefinedLabelNames</span><span style="color: #000000;">&#40;</span>vsLabelNames<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// get all user-defined label names</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iName<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iName<span style="color: #000080;">&lt;</span>vsLabelNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iName<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">// if exist Z-Level or Area label</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> vsLabelNames<span style="color: #000000;">&#91;</span>iName<span style="color: #000000;">&#93;</span>.<span style="color: #000000;">CompareNoCase</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z-Level&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> vsLabelNames<span style="color: #000000;">&#91;</span>iName<span style="color: #000000;">&#93;</span>.<span style="color: #000000;">CompareNoCase</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Area&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				bLabel <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+				<span style="color: #0000ff;">break</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bLabel<span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// not exist Z-Level and Area label, create them</span>
+	<span style="color: #000000;">&#123;</span>
+		vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnTypes <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>RCLT_UDL, RCLT_UDL<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>;
+		grid.<span style="color: #000000;">SetShowLabels</span><span style="color: #000000;">&#40;</span>vnTypes<span style="color: #000000;">&#41;</span>;
+		vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsLabel <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Z-Level&quot;</span>, <span style="color: #ff00ff;">&quot;Area&quot;</span><span style="color: #000000;">&#125;</span>;
+		grid.<span style="color: #000000;">SetUserDefinedLabelNames</span><span style="color: #000000;">&#40;</span>vsLabel<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// set data to created two columns</span>
+	XYRange xyDr;
+	xyDr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nColX, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	xyDr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nColY, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	xyDr.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">&#41;</span>;
+	
+	Column colX <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nColX<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// X column</span>
+	Column colY <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span>nColY<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Y column</span>
+	colX.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set type to X</span>
+	colX.<span style="color: #000000;">SetExtendedLabel</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>string<span style="color: #000000;">&#41;</span>vLevels<span style="color: #000000;">&#91;</span>iLevel<span style="color: #000000;">&#93;</span>, RCLT_UDL<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set Z-Level value</span>
+	colX.<span style="color: #000000;">SetExtendedLabel</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>string<span style="color: #000000;">&#41;</span>dArea, RCLT_UDL<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set area</span>
+	colY.<span style="color: #000000;">SetExtendedLabel</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>string<span style="color: #000000;">&#41;</span>vLevels<span style="color: #000000;">&#91;</span>iLevel<span style="color: #000000;">&#93;</span>, RCLT_UDL<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set Z-Level value</span>
+	colY.<span style="color: #000000;">SetExtendedLabel</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span>string<span style="color: #000000;">&#41;</span>dArea, RCLT_UDL<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set area</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

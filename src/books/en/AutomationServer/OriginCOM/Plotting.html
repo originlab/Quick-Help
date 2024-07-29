@@ -1,0 +1,141 @@
+<h1 class="firstHeading">1.2.1 Plotting</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Plotting_Matrix_as_Contour_Plot"><span class="tocnumber">1</span> <span class="toctext">Plotting Matrix as Contour Plot</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Excel_VBA"><span class="tocnumber">1.1</span> <span class="toctext">Excel VBA</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#C.23"><span class="tocnumber">1.2</span> <span class="toctext">C#</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Plotting_Worksheet_XYZ_columns_as_a_Contour_Plot"><span class="tocnumber">2</span> <span class="toctext">Plotting Worksheet XYZ columns as a Contour Plot</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Excel_VBA_2"><span class="tocnumber">2.1</span> <span class="toctext">Excel VBA</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Plotting_Matrix_as_Contour_Plot"></a><span class="mw-headline">Plotting Matrix as Contour Plot</span></h2>
+<h3><a name="Excel_VBA"></a><span class="mw-headline">Excel VBA</span></h3>
+<p>In this example, we take a range from excel sheet1, put the data into an Origin MatrixObject and create a new contour plot.
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CommandButton1_Click()
+    Const nrows = 5
+    Const ncols = 4
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> mobj <span style="color: #151B8D; font-weight: bold;">As</span> Origin.MatrixObject
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> matrixLayer <span style="color: #151B8D; font-weight: bold;">As</span> Origin.matrixSheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> excelRange <span style="color: #151B8D; font-weight: bold;">As</span> Excel.range
+    
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    
+    <span style="color: #008000;">'Add a new MatrixPage which will have by default a MtrixSteet with one MatrixObject
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> matrixLayer = app.MatrixPages.Add(<span style="color: #800000;">&quot;Origin&quot;</span>).Layers(0)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> mobj = matrixLayer.MatrixObjects(0)
+    matrixLayer.Cols = ncols
+    matrixLayer.Rows = nrows
+    
+    <span style="color: #008000;">'Copy a range to the new Matrix
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> excelRange = Worksheets(<span style="color: #800000;">&quot;Sheet1&quot;</span>).range(<span style="color: #800000;">&quot;A1:D5&quot;</span>)
+    mobj.SetData (excelRange.Value)
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> dp <span style="color: #151B8D; font-weight: bold;">As</span> Origin.DataPlot
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> dr <span style="color: #151B8D; font-weight: bold;">As</span> Origin.DataRange
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> glay <span style="color: #151B8D; font-weight: bold;">As</span> Origin.GraphLayer
+    <span style="color: #008000;">'plot the data
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> dr = matrixLayer.NewDataRange(0)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> glay = app.GraphPages.Add(<span style="color: #800000;">&quot;Contour&quot;</span>).Layers(0) <span style="color: #008000;">'Add a graph page with the template &quot;Contour&quot;
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> dp = glay.DataPlots.Add(dr, IDM_PLOT_CONTOUR) <span style="color: #008000;">'Plot the range as a contour plot
+</span><span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h3><a name="C.23"></a><span class="mw-headline">C#</span></h3>
+<p>In the program, we generate a datarange from matrixobject and create a new contour plot on a new graphlayer
+</p>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Collections.Generic</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Linq</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Text</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+
+<span style="color: #0600FF; font-weight: bold;">namespace</span> COMExampleCSharp
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #6666cc; font-weight: bold;">class</span> Program
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">public</span> <span style="color: #6666cc; font-weight: bold;">void</span> check<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">IOApplication</span> pOrigin<span style="color: #008000;">;</span>
+            pOrigin <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationCOMSIClass</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//connect to COM-exclusive Origin instance</span>
+            pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">Visible</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_VISIBLE</span><span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_SHOW</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//make it visible</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixSheet</span> ms<span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixObject</span> mo<span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">GraphLayer</span> gl<span style="color: #008000;">;</span>
+
+            ms <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixSheet</span><span style="color: #008000;">&#41;</span>pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Origin&quot;</span>, <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            mo <span style="color: #008000;">=</span> ms<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixObjects</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">int</span> nCols <span style="color: #008000;">=</span> ms<span style="color: #008000;">.</span><span style="color: #0000FF;">Cols</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">int</span> nRows <span style="color: #008000;">=</span> ms<span style="color: #008000;">.</span><span style="color: #0000FF;">Rows</span><span style="color: #008000;">;</span>
+            <span style="color: #6666cc; font-weight: bold;">double</span> <span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> data <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span><span style="color: #008000;">&#91;</span>nRows, nCols<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span> <span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;</span> nRows<span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #0600FF; font-weight: bold;">for</span><span style="color: #008000;">&#40;</span> <span style="color: #6666cc; font-weight: bold;">int</span> jj <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> jj <span style="color: #008000;">&lt;</span> nCols<span style="color: #008000;">;</span> jj<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                    data<span style="color: #008000;">&#91;</span>ii,jj<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> Math<span style="color: #008000;">.</span><span style="color: #0000FF;">Sin</span><span style="color: #008000;">&#40;</span>ii<span style="color: #008000;">/</span><span style="color: #FF0000;">3.14</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> Math<span style="color: #008000;">.</span><span style="color: #0000FF;">Cos</span><span style="color: #008000;">&#40;</span>jj<span style="color: #008000;">/</span><span style="color: #FF0000;">2.03</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            mo<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>data, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">DataRange</span> dr<span style="color: #008000;">;</span>
+            dr <span style="color: #008000;">=</span> ms<span style="color: #008000;">.</span><span style="color: #0000FF;">NewDataRange</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//create datarange from the first matrixobject</span>
+            gl <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">GraphLayer</span><span style="color: #008000;">&#41;</span>pOrigin<span style="color: #008000;">.</span><span style="color: #0000FF;">GraphPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Contour&quot;</span>, <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;&quot;</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span>, <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            gl<span style="color: #008000;">.</span><span style="color: #0000FF;">DataPlots</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span>dr, Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">PLOTTYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">IDM_PLOT_CONTOUR</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            gl<span style="color: #008000;">.</span><span style="color: #0000FF;">Activate</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//activate it for view</span>
+            <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Console</span><span style="color: #008000;">.</span><span style="color: #0000FF;">ReadKey</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//press key will disconnect from Origin</span>
+            <span style="color: #000000;">System.<span style="color: #0000FF;">Runtime</span><span style="color: #008000;">.</span><span style="color: #0000FF;">InteropServices</span></span><span style="color: #008000;">.</span><span style="color: #0000FF;">Marshal</span><span style="color: #008000;">.</span><span style="color: #0000FF;">ReleaseComObject</span><span style="color: #008000;">&#40;</span>pOrigin<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+        <span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> Main<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">string</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> args<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            Program p <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Program<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            p<span style="color: #008000;">.</span><span style="color: #0000FF;">check</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<h2><a name="Plotting_Worksheet_XYZ_columns_as_a_Contour_Plot"></a><span class="mw-headline">Plotting Worksheet XYZ columns as a Contour Plot</span></h2>
+<h3><a name="Excel_VBA_2"></a><span class="mw-headline">Excel VBA</span></h3>
+<p>In this example, you will fill A,B,C columns in the Excel sheet with XYZ data and we will transfer those data to an Origin worksheet and plot a triangular contour graph.
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CommandButton1_Click()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+   
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    
+    <span style="color: #008000;">'Add a WorksheetPage, which will have one Worksheet by default
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> wks = app.WorksheetPages.Add().Layers(0)
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> bRet <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Boolean</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> exlRange <span style="color: #151B8D; font-weight: bold;">As</span> Excel.range
+    <span style="color: #008000;">'Copy col A,B,C from excel to Origin Wks as XYZ columns
+</span>    <span style="color: #008000;">'col A1 in Excel -&gt; col(1) in Origin
+</span>    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> 3
+        <span style="color: #151B8D; font-weight: bold;">Set</span> exlRange = Worksheets(<span style="color: #800000;">&quot;Sheet1&quot;</span>).Columns(ii)
+        bRet = wks.SetData(exlRange.Value, 0, ii - 1)
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+     
+    <span style="color: #008000;">'set column designations in Origin first before we can plot them
+</span>    wks.Columns(0).<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_X
+    wks.Columns(1).<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_Y
+    wks.Columns(2).<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_Z
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> glay <span style="color: #151B8D; font-weight: bold;">As</span> Origin.GraphLayer
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> dr <span style="color: #151B8D; font-weight: bold;">As</span> Origin.DataRange
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> dp <span style="color: #151B8D; font-weight: bold;">As</span> Origin.DataPlot
+    <span style="color: #008000;">'create a new graph page using TriContour template
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> glay = wks.Application.GraphPages.Add(<span style="color: #800000;">&quot;TriContour&quot;</span>).Layers(0)
+    <span style="color: #151B8D; font-weight: bold;">Set</span> dr = wks.NewDataRange(0, 0, -1, 2) <span style="color: #008000;">'create range to be plotted, all rows,A,B,C
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> dp = glay.DataPlots.Add(dr, IDM_PLOT_XYZ_CONTOUR)
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+
+
+
+
+
+

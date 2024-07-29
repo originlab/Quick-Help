@@ -1,0 +1,377 @@
+<h1 class="firstHeading">1 External Python Code Samples</h1><p><br />
+The following well-documented samples all use the <a class="external text" href="https://pypi.org/project/originpro/" target="_blank"><b>originpro package</b></a> for interacting with Origin via External Python.
+</p><p>The main difference between using External Python and the Embedded Python interpreter is the addition of this "wrapper" code for External Python:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># YOUR CODE HERE</span>
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<p>For reference, API documentation is available via the <a class="external text" href="https://www.originlab.com/python/doc/originpro/annotated.html" target="_blank">Python originpro Reference</a>.
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Code_Samples/Tip_icon.png?v=21427" width="57"  border="0" /></td><td><p>If you ultimately want to hide Origin as part of your script, it is suggested that, during development, you first launch Origin as visible (see Samples below for how to do this). During development, if you have errors in your script, Origin is not always able to shutdown. By developing with Origin visible, it will be much easier to detect this and manually shut down Origin.
+</p></td></tr></table>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Sample_.231"><span class="tocnumber">1</span> <span class="toctext">Sample #1</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Sample_.232"><span class="tocnumber">2</span> <span class="toctext">Sample #2</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Sample_.233"><span class="tocnumber">3</span> <span class="toctext">Sample #3</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Sample_.234"><span class="tocnumber">4</span> <span class="toctext">Sample #4</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Sample_.235"><span class="tocnumber">5</span> <span class="toctext">Sample #5</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Sample_.231"></a><span class="mw-headline">Sample #1</span></h2>
+<p>A sample to illustrate the basics of using the originpro package. It highlights:
+</p>
+<ul><li> Required additions for external Python.</li>
+<li> Opening an existing project and reading data.</li>
+<li> Writing data to a new project.</li></ul>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+
+<span style="color: #d00; font-style: italic;"># Very useful, especially during development, when you are</span>
+<span style="color: #d00; font-style: italic;"># liable to have a few uncaught exceptions.</span>
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #d00; font-style: italic;"># Note: only applicable to external Python.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">'''Ensures Origin gets shut down if an uncaught exception'''</span>
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #d00; font-style: italic;"># Important for only external Python.</span>
+<span style="color: #d00; font-style: italic;"># Should not be used with embedded Python. </span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Example of opening a project and reading data.</span>
+
+<span style="color: #d00; font-style: italic;"># We'll open the Tutorial Data.opju project that ships with Origin.</span>
+src_opju <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span>+ r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\T</span>utorial Data.opju'</span>
+op.<span style="color: #900090;">open</span><span style="color: #000;">&#40;</span><span style="color: #900090;">file</span> <span style="color: #000;">=</span> src_opju<span style="color: #000;">,</span> readonly <span style="color: #000;">=</span> <span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Simple syntax to find a worksheet.</span>
+src_wks <span style="color: #000;">=</span> op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Book1A'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Pull first column data into a list and dump to screen.</span>
+lst <span style="color: #000;">=</span> src_wks.<span style="color: #000;">to_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>*lst<span style="color: #000;">,</span> sep <span style="color: #000;">=</span> <span style="color: #0a0;">&quot;, &quot;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Pull entire worksheet into a pandas DataFrame and partially dump to screen.</span>
+<span style="color: #d00; font-style: italic;"># Column long name will be columns name.</span>
+df <span style="color: #000;">=</span> src_wks.<span style="color: #000;">to_df</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>df.<span style="color: #000;">head</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Start a new project which closes the previous one.</span>
+op.<span style="color: #000;">new</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;">#Examples of writing data to a project and saving it.</span>
+
+<span style="color: #d00; font-style: italic;"># We'll reuse the data objects we previously created.</span>
+
+<span style="color: #d00; font-style: italic;"># Simple syntax to create a new workbook with one sheet</span>
+dest_wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Insert list data into columns 1</span>
+dest_wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> lst<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add another sheet top above workbook and add the DataFrame data.</span>
+<span style="color: #d00; font-style: italic;"># DataFrame column names with be Origin column Long Names.</span>
+dest_wks.<span style="color: #000;">get_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">add_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">from_df</span><span style="color: #000;">&#40;</span>df<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Save the opju to your UFF.</span>
+op.<span style="color: #000;">save</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'u'</span><span style="color: #000;">&#41;</span>+ <span style="color: #0a0;">'Ext Python Example 1.opju'</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #d00; font-style: italic;"># Required for external Python but don't use with embedded Python.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Sample_.232"></a><span class="mw-headline">Sample #2</span></h2>
+<p>A practical example illustrates batch processing of datasets using an analysis template and exporting result graphs.
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">re</span>
+
+
+<span style="color: #d00; font-style: italic;"># Very useful, especially during development, when you are</span>
+<span style="color: #d00; font-style: italic;"># liable to have a few uncaught exceptions.</span>
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #d00; font-style: italic;"># Note: only applicable to external Python.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">'''Ensures Origin gets shut down if an uncaught exception'''</span>
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #d00; font-style: italic;"># Important for only external Python.</span>
+<span style="color: #d00; font-style: italic;"># Should not be used with embedded Python. </span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Load analysis template book that ships with Origin.</span>
+at <span style="color: #000;">=</span> op.<span style="color: #000;">load_book</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\B</span>atch Processing<span style="color: #000099; font-weight: bold;">\S</span>ensor Analysis.ogwu'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Get 1st worksheet in book.</span>
+wks <span style="color: #000;">=</span> at<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #d00; font-style: italic;"># Get folder for data files that ship with Origin.</span>
+data_folder <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting'</span>
+
+<span style="color: #d00; font-style: italic;"># Iterate data file folder for file names to import.</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> <span style="color: #900090;">file</span> <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #000;">os</span>.<span style="color: #000;">listdir</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">&#41;</span>:
+
+    <span style="color: #d00; font-style: italic;"># Filter for specific data files.</span>
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #000;">re</span>.<span style="color: #000;">search</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'^Sensor[0-9]{2}.dat$'</span><span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>:
+
+        <span style="color: #d00; font-style: italic;"># Full path to file to import.</span>
+        imp_file <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Import the file into the worksheet and removing the Data Connector.</span>
+        wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>imp_file<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Wait for analysis operation to complete.</span>
+        op.<span style="color: #000;">wait</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Wait a bit more for the graph to update.</span>
+        op.<span style="color: #000;">wait</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'s'</span><span style="color: #000;">,</span> <span style="color: #000;">0.1</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Get the graph in the analysis template.</span>
+        gp <span style="color: #000;">=</span> op.<span style="color: #000;">find_graph</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Graph2'</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Build a path to the file to export the graph to.</span>
+        exp_file <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'u'</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">splitext</span><span style="color: #000;">&#40;</span><span style="color: #900090;">file</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span> + <span style="color: #0a0;">'.png'</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Export the graph and print the full path to the exported file.</span>
+        gp.<span style="color: #000;">save_fig</span><span style="color: #000;">&#40;</span>exp_file<span style="color: #000;">,</span> width<span style="color: #000;">=</span><span style="color: #000;">800</span><span style="color: #000;">&#41;</span>
+        <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'Graph exported: {exp_file}'</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #d00; font-style: italic;"># Required for external Python but don't use with embedded Python.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Sample_.233"></a><span class="mw-headline">Sample #3</span></h2>
+<p>This sample illustrates setting book, sheet, and columns properties.
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+
+<span style="color: #d00; font-style: italic;"># Very useful, especially during development, when you are</span>
+<span style="color: #d00; font-style: italic;"># liable to have a few uncaught exceptions.</span>
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #d00; font-style: italic;"># Note: only applicable to external Python.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">'''Ensures Origin gets shut down if an uncaught exception'''</span>
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #d00; font-style: italic;"># Important for only external Python.</span>
+<span style="color: #d00; font-style: italic;"># Should not be used with embedded Python. </span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Create a new workbook containing by default 1 sheet with 2 columns.</span>
+book <span style="color: #000;">=</span> op.<span style="color: #000;">new_book</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Set book long name.</span>
+book.<span style="color: #000;">lname</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'Experimental Data'</span>
+
+<span style="color: #d00; font-style: italic;"># Get 1st sheet from book.</span>
+wks_1 <span style="color: #000;">=</span> book<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #d00; font-style: italic;"># Set sheet short name.</span>
+wks_1.<span style="color: #000;">name</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'Data'</span>
+
+<span style="color: #d00; font-style: italic;"># Work at column-level.</span>
+
+<span style="color: #d00; font-style: italic;"># 1st column: set column data, label rows, and designation at one time at one time.</span>
+<span style="color: #d00; font-style: italic;"># Use column index to identify target column.</span>
+wks_1.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">,</span><span style="color: #000;">3</span><span style="color: #000;">,</span><span style="color: #000;">4</span><span style="color: #000;">,</span><span style="color: #000;">5</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> lname <span style="color: #000;">=</span><span style="color: #0a0;">'Time'</span><span style="color: #000;">,</span> units <span style="color: #000;">=</span> <span style="color: #0a0;">'(sec)'</span><span style="color: #000;">,</span> comments <span style="color: #000;">=</span> <span style="color: #0a0;">'Expended time'</span><span style="color: #000;">,</span> axis <span style="color: #000;">=</span> <span style="color: #0a0;">'X'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># 2nd column: set data and properties separately.</span>
+<span style="color: #d00; font-style: italic;"># Use column short name to identify target column.</span>
+wks_1.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">5.7</span><span style="color: #000;">,</span><span style="color: #000;">6.8</span><span style="color: #000;">,</span><span style="color: #000;">7.2</span><span style="color: #000;">,</span><span style="color: #000;">9.9</span><span style="color: #000;">,</span><span style="color: #000;">11.3</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+wks_1.<span style="color: #000;">set_label</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> val<span style="color: #000;">=</span><span style="color: #0a0;">'Intensity'</span><span style="color: #000;">,</span> <span style="color: #900090;">type</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'L'</span><span style="color: #000;">&#41;</span>
+wks_1.<span style="color: #000;">set_label</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'arb. units'</span> <span style="color: #0a0;">'U'</span><span style="color: #000;">&#41;</span>
+wks_1.<span style="color: #000;">set_label</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'After correction'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'C'</span><span style="color: #000;">&#41;</span>
+wks_1.<span style="color: #000;">cols_axis</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Y'</span><span style="color: #000;">,</span> c1 <span style="color: #000;">=</span> <span style="color: #0a0;">'B'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add a new column, setting data and properties.</span>
+<span style="color: #d00; font-style: italic;"># Using an out of range index adds the column.</span>
+wks_1.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">0.1</span><span style="color: #000;">,</span><span style="color: #000;">0.15</span><span style="color: #000;">,</span><span style="color: #000;">0.1</span><span style="color: #000;">,</span><span style="color: #000;">0.2</span><span style="color: #000;">,</span><span style="color: #000;">0.125</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> lname <span style="color: #000;">=</span><span style="color: #0a0;">'Error'</span><span style="color: #000;">,</span> axis <span style="color: #000;">=</span> <span style="color: #0a0;">'E'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add a new sheet to the book, setting it's short name. Don't activate.</span>
+wks_2 <span style="color: #000;">=</span> book.<span style="color: #000;">add_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Addl Data'</span><span style="color: #000;">,</span> active <span style="color: #000;">=</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Set which label rows to display.</span>
+wks_2.<span style="color: #000;">header_rows</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'L'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Use a dataframe to fill the sheet.</span>
+<span style="color: #d00; font-style: italic;"># Uses DataFrame column names as Origin column Long Name.</span>
+df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#123;</span><span style="color: #0a0;">'Time'</span>: <span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">,</span><span style="color: #000;">3</span><span style="color: #000;">,</span><span style="color: #000;">4</span><span style="color: #000;">,</span><span style="color: #000;">5</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span><span style="color: #0a0;">'Dataset 1'</span>: <span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">100.3</span><span style="color: #000;">,</span> <span style="color: #000;">210.7</span><span style="color: #000;">,</span> <span style="color: #000;">343</span><span style="color: #000;">,</span> <span style="color: #000;">4.56</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span><span style="color: #0a0;">'Dataset 2'</span>: <span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">107</span><span style="color: #000;">,</span> <span style="color: #000;">211.3</span><span style="color: #000;">,</span> <span style="color: #000;">307.8</span><span style="color: #000;">,</span> <span style="color: #000;">445</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#125;</span><span style="color: #000;">&#41;</span>
+wks_2.<span style="color: #000;">from_df</span><span style="color: #000;">&#40;</span>df<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Set designations to XYY.</span>
+wks_2.<span style="color: #000;">cols_axis</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'XYY'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Save the opju to your UFF.</span>
+op.<span style="color: #000;">save</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'u'</span><span style="color: #000;">&#41;</span>+ <span style="color: #0a0;">'Ext Python Example 3.opju'</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #d00; font-style: italic;"># Required for external Python but don't use with embedded Python.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Sample_.234"></a><span class="mw-headline">Sample #4</span></h2>
+<p>This sample illustrates plotting into a graph template.
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+
+
+<span style="color: #d00; font-style: italic;"># Very useful, especially during development, when you are</span>
+<span style="color: #d00; font-style: italic;"># liable to have a few uncaught exceptions.</span>
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #d00; font-style: italic;"># Note: only applicable to external Python.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">'''Ensures Origin gets shut down if an uncaught exception'''</span>
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #d00; font-style: italic;"># Important for only external Python.</span>
+<span style="color: #d00; font-style: italic;"># Should not be used with embedded Python. </span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Example of plotting into a graph template.</span>
+
+<span style="color: #d00; font-style: italic;"># Generate some data.</span>
+arr_x <span style="color: #000;">=</span> np.<span style="color: #000;">arange</span><span style="color: #000;">&#40;</span><span style="color: #000;">100</span><span style="color: #000;">&#41;</span>
+arr_y1 <span style="color: #000;">=</span> np.<span style="color: #000;">random</span>.<span style="color: #000;">exponential</span><span style="color: #000;">&#40;</span>scale<span style="color: #000;">=</span><span style="color: #000;">2</span><span style="color: #000;">,</span> size<span style="color: #000;">=</span><span style="color: #000;">100</span><span style="color: #000;">&#41;</span>
+arr_y2 <span style="color: #000;">=</span> np.<span style="color: #000;">random</span>.<span style="color: #000;">exponential</span><span style="color: #000;">&#40;</span>scale<span style="color: #000;">=</span><span style="color: #000;">3</span><span style="color: #000;">,</span> size<span style="color: #000;">=</span><span style="color: #000;">100</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Create a new book with sheet and add generated data.</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> arr_x<span style="color: #000;">,</span> lname<span style="color: #000;">=</span><span style="color: #0a0;">'X Values'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> arr_y1<span style="color: #000;">,</span> lname<span style="color: #000;">=</span><span style="color: #0a0;">'Y1 Values'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">2</span><span style="color: #000;">,</span> arr_y2<span style="color: #000;">,</span> lname<span style="color: #000;">=</span><span style="color: #0a0;">'Y2 Values'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Create a new graph object based on a graph template.</span>
+<span style="color: #d00; font-style: italic;"># Provide path to the template. We'll use a built-in</span>
+<span style="color: #d00; font-style: italic;"># one but you can certainly use your own!</span>
+gr <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'doubley.otp'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add plots with data from worksheet to layer 1 and layer 2</span>
+<span style="color: #d00; font-style: italic;"># and then rescale.</span>
+gl_1 <span style="color: #000;">=</span> gr<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+p1 <span style="color: #000;">=</span> gl_1.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> coly<span style="color: #000;">=</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> colx<span style="color: #000;">=</span><span style="color: #0a0;">'A'</span><span style="color: #000;">,</span> <span style="color: #900090;">type</span><span style="color: #000;">=</span><span style="color: #000;">202</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># X is col A, Y is col B. 202 is Line + Symbol.</span>
+p1.<span style="color: #000;">color</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'#335eff'</span>
+gl_1.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+gl_2 <span style="color: #000;">=</span> gr<span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">&#93;</span>
+p2 <span style="color: #000;">=</span> gl_2.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #0a0;">'C'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'A'</span><span style="color: #000;">,</span> <span style="color: #900090;">type</span><span style="color: #000;">=</span><span style="color: #000;">202</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># X is col A, Y is col C. 202 is Line + Symbol.</span>
+p2.<span style="color: #000;">color</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'#ff5833'</span>
+gl_2.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Save the opju to your UFF.</span>
+op.<span style="color: #000;">save</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'u'</span><span style="color: #000;">&#41;</span>+ <span style="color: #0a0;">'Ext Python Example 4.opju'</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #d00; font-style: italic;"># Required for external Python but don't use with embedded Python.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Sample_.235"></a><span class="mw-headline">Sample #5</span></h2>
+<p>This example plots whole sheet as XY plot and control plots in group
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># Very useful, especially during development, when you are</span>
+<span style="color: #d00; font-style: italic;"># liable to have a few uncaught exceptions.</span>
+<span style="color: #d00; font-style: italic;"># Ensures that the Origin instance gets shut down properly.</span>
+<span style="color: #d00; font-style: italic;"># Note: only applicable to external Python.</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">sys</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> origin_shutdown_exception_hook<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">'''Ensures Origin gets shut down if an uncaught exception'''</span>
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">sys</span>.__excepthook__<span style="color: #000;">&#40;</span>exctype<span style="color: #000;">,</span> value<span style="color: #000;">,</span> <span style="color: #000;">traceback</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op <span style="color: #ff7700;font-weight:bold;">and</span> op.<span style="color: #000;">oext</span>:
+    <span style="color: #000;">sys</span>.<span style="color: #000;">excepthook</span> <span style="color: #000;">=</span> origin_shutdown_exception_hook
+
+
+<span style="color: #d00; font-style: italic;"># Set Origin instance visibility.</span>
+<span style="color: #d00; font-style: italic;"># Important for only external Python.</span>
+<span style="color: #d00; font-style: italic;"># Should not be used with embedded Python. </span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">set_show</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>
+
+
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span><span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Samples'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Graphing'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Group.dat'</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+graph <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'scatter'</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span><span style="color: #000;">=</span>graph<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #d00; font-style: italic;"># plot whole sheet as XY plot</span>
+plot <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'{wks.lt_range()}!(?,1:end)'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># group the plots and control plots setting in group</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">group</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+plot.<span style="color: #000;">colormap</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'Candy'</span>
+plot.<span style="color: #000;">shapelist</span> <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#93;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;"># Exit running instance of Origin.</span>
+<span style="color: #d00; font-style: italic;"># Required for external Python but don't use with embedded Python.</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> op.<span style="color: #000;">oext</span>:
+    op.<span style="color: #000;">exit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+
+

@@ -1,0 +1,87 @@
+<h1 class="firstHeading">2.1.4.1.12 ReadFile</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Reads data from a file, and starts at the position that the file pointer indicates. You can use this function for both synchronous and asynchronous operations.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> ReadFile<span style="color: #000000;">&#40;</span> HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> hFile</dt>
+<dd> [input] A handle to the file to be read. </dd></dl>
+<dl><dd>The file handle must be created with the GENERIC_READ access right. For more information, see File Security and Access Rights.</dd></dl>
+<dl><dd>For asynchronous read operations, hFile can be any handle that is opened with the FILE_FLAG_OVERLAPPED flag by the CreateFile function, or a socket handle returned by the socket or accept function.</dd></dl>
+<dl><dt> lpBuffer</dt>
+<dd> [output] A pointer to the buffer that receives the data read from a file.</dd>
+<dt> nNumberOfBytesToRead</dt>
+<dd> [input] The maximum number of bytes to be read.</dd>
+<dt> lpNumberOfBytesRead</dt>
+<dd> [output] A pointer to the variable that receives the number of bytes read. </dd>
+<dt> lpOverlapped</dt>
+<dd> [input] A pointer to an OVERLAPPED structure. </dd></dl>
+<dl><dd>This structure is required if hFile is created with FILE_FLAG_OVERLAPPED.</dd></dl>
+<dl><dd>If hFile is opened with FILE_FLAG_OVERLAPPED, the lpOverlapped parameter must not be NULL. It must point to a valid OVERLAPPED structure.</dd></dl>
+<dl><dd>If hFile is created with FILE_FLAG_OVERLAPPED and lpOverlapped is NULL, the function can report incorrectly that the read operation is complete.</dd></dl>
+<p><br />
+</p>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>The ReadFile function returns when one of the following conditions occur: 
+</p><p><br />
+A write operation completes on the write end of the pipe. 
+The number of bytes requested is read. 
+An error occurs. 
+</p><p>If the function succeeds, the return value is nonzero.
+</p><p>If the function fails, the return value is zero (0). To get extended error information, call GetLastError.
+</p><p><br />
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>mswin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">// Attempt a synchronous read operation.</span>
+<span style="color: #0000ff;">void</span> ReadFile_Ex1<span style="color: #000000;">&#40;</span>HANDLE hFile, LPVOID lpBuffer, DWORD nBytesToRead, DWORD nBytesRead<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">BOOL</span> bResult <span style="color: #000080;">=</span> ReadFile<span style="color: #000000;">&#40;</span>hFile, 
+                   lpBuffer, 
+                   nBytesToRead, 
+                   <span style="color: #000040;">&amp;</span>nBytesRead, 
+                   <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>&#160;;
+	<span style="color: #008000;">// Check for the end of file. </span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>bResult <span style="color: #000040;">&amp;&amp;</span>  nBytesRead <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span> 
+		<span style="color: #008000;">// This is the end of the file. </span>
+	<span style="color: #000000;">&#125;</span> 
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>If part of a file is locked by another process and the read operation overlaps the locked portion, this function fails.
+</p><p>An application must meet the following specific requirements when working with files that are opened with FILE_FLAG_NO_BUFFERING:
+</p><p><br />
+File access must begin at byte offsets within the file that are integer multiples of the volume sector size. To determine the sector size of a volume, call the GetDiskFreeSpace function. 
+File access must be for numbers of bytes that are integer multiples of the volume sector size. For example, if the sector size is 512 bytes, an application can request read and write operations of 512, 1024, 1536, or 2048 bytes, but not of 335, 981, or 7171 bytes. 
+Buffer addresses for read and write operations must be sector aligned (that is, aligned on addresses in memory that are integer multiples of the volume sector size). 
+One way to sector align buffers is to use the VirtualAlloc function to allocate the buffers. This function allocates memory that is aligned on addresses that are integer multiples of the system page size. Because both page and volume sector sizes are powers of 2 (two), memory aligned by multiples of the system page size is also aligned by multiples of the volume sector size.
+</p><p>Accessing the input buffer while a read operation is using the buffer may lead to corruption of the data read into that buffer. Applications must not read from, write to, reallocate, or free the input buffer that a read operation is using until the read operation completes.
+</p><p><br />
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

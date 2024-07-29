@@ -1,0 +1,142 @@
+<h1 class="firstHeading">18.15.2 Algorithms (2D FFT Filters)</h1><p class='urlname' style='display: none'>2DFFT-Filter-Algorithm</p>
+<p>2D FFT filters are used to process 2D signals, including matrix and image. A two-dimensional fast Fourier transform (2D FFT) is performed first, and then a frequency-domain filter window is applied, and finally 2D IFFT is performed to convert the filtered result back to spatial domain.
+</p><p>Five types of filters and four types of windows are available in the <b>2D FFT Filters</b> tool.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Filter_Types"><span class="tocnumber">1</span> <span class="toctext">Filter Types</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Window_Types"><span class="tocnumber">2</span> <span class="toctext">Window Types</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Butterworth"><span class="tocnumber">2.1</span> <span class="toctext">Butterworth</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Ideal"><span class="tocnumber">2.2</span> <span class="toctext">Ideal</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Gaussian"><span class="tocnumber">2.3</span> <span class="toctext">Gaussian</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Blackman"><span class="tocnumber">2.4</span> <span class="toctext">Blackman</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Cutoff_Value"><span class="tocnumber">3</span> <span class="toctext">Cutoff Value</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Filter_Types"></a><span class="mw-headline">Filter Types</span></h2>
+<p>Filter types include: <b>Low Pass</b>, <b>High Pass</b>, <b>Band Pass</b>, <b>Band Block</b>, and <b>Threshold</b>.
+</p><p>Note that <b>High Pass</b>, <b>Band Pass</b>, and <b>Band Block</b> filters can all be created using <b>Low Pass</b>.
+</p><p>Filter types in <b>2D FFT Filters</b> are listed in the following table. To understand 2D filter types of <b>Low Pass</b>, <b>High Pass</b>, <b>Band Pass</b>, <b>Band Block</b> more easily. Note the <b>Ideal Window</b> is used for each filter type in the table.
+</p><p>For a 2D filter H(u,v), u=0, 1,.., M-1, v=0, 1,..., N-1. Normalize the frequency coordinates: m=(u-M/2)/M, n=(v-N/2)/N, where -0.5&lt;m&lt;0.5    -0.5&lt;n&lt;0.5 . r is defined as: <br />
+<img src="../images/Algorithm_(2D_FFT_Filters)/math-e4ddef8a9ba1e75b5e0eb1125a164426.png?v=0" title="r(u,v)=\sqrt{m^2+n^2}" alt="r(u,v)=\sqrt{m^2+n^2}" class="tex"/> and <img src="../images/Algorithm_(2D_FFT_Filters)/math-7519ce67b604a24947bd69649a8f4608.png?v=0" title="\ F_c" alt="\ F_c" class="tex"/> is the cutoff frequency.
+</p>
+<table class="dialogcontroltable">
+
+<tr>
+<th>Low Pass
+</th>
+<td> Block the frequency components above the cutoff frequency, and allow only the lower frequency components to pass.
+<p><img src="../images/Algorithm_(2D_FFT_Filters)/math-4dc2a9e3317e483036241d5aad569bfa.png?v=0" title="H_{LP}(u,v) = \begin{cases}1, \ r(u,v)&lt; F_{c} \\0, \ otherwise \end{cases}" alt="H_{LP}(u,v) = \begin{cases}1, \ r(u,v)&lt; F_{c} \\0, \ otherwise \end{cases}" class="tex"/>
+</p>
+</td></tr>
+<tr>
+<th>High Pass
+</th>
+<td> Block frequency components that are below the cutoff frequency.
+<p><img src="../images/Algorithm_(2D_FFT_Filters)/math-22300f12140ce300177c7252d9fc7a7a.png?v=0" title="H_{HP}(u,v) = \begin{cases}1, \ r(u,v)&gt; F_{c} \\0, \ otherwise \end{cases}" alt="H_{HP}(u,v) = \begin{cases}1, \ r(u,v)&gt; F_{c} \\0, \ otherwise \end{cases}" class="tex"/>
+</p><p>Note that <img src="../images/Algorithm_(2D_FFT_Filters)/math-c356fc37a2c882cd2354cfebe7513624.png?v=0" title="H_{HP}(u,v)=1\ -H_{LP}(u,v)" alt="H_{HP}(u,v)=1\ -H_{LP}(u,v)" class="tex"/>.
+</p>
+</td></tr>
+<tr>
+<th>Band Pass
+</th>
+<td> Allow frequencies within a specific range determined by the lower and upper cutoff frequencies to pass.
+<p><img src="../images/Algorithm_(2D_FFT_Filters)/math-894b3aae8f24e9e58329f2077718911b.png?v=0" title="H_{BP}(u,v) = \begin{cases}1,\ F_{c1}\le r(u,v)\le F_{c2} \\0, \ otherwise \end{cases}" alt="H_{BP}(u,v) = \begin{cases}1,\ F_{c1}\le r(u,v)\le F_{c2} \\0, \ otherwise \end{cases}" class="tex"/>
+</p><p>Note that <img src="../images/Algorithm_(2D_FFT_Filters)/math-a859b14ffce3b7a14f8ffae4801cfa8e.png?v=0" title="H_{BP}(u,v)=\ H_{LP2}(u,v) -H_{LP1}(u,v)" alt="H_{BP}(u,v)=\ H_{LP2}(u,v) -H_{LP1}(u,v)" class="tex"/>.
+</p><p>where <img src="../images/Algorithm_(2D_FFT_Filters)/math-b959ba913c69ccd750c9af3f46eaf37f.png?v=0" title="\ H_{LP1}(u,v)" alt="\ H_{LP1}(u,v)" class="tex"/> and <img src="../images/Algorithm_(2D_FFT_Filters)/math-10e987dc6c477c6d07eabaf82f40a3ff.png?v=0" title="\ H_{LP2}(u,v)" alt="\ H_{LP2}(u,v)" class="tex"/> are low-pass filters with the lower and upper cutoff frequency Fc1 and Fc2 respectively.
+</p>
+</td></tr>
+<tr>
+<th>Band Block
+</th>
+<td> Remove the frequencies within the chosen range.
+<p><img src="../images/Algorithm_(2D_FFT_Filters)/math-ee3fe8cc5c649dd46ba13113a133ac6a.png?v=0" title="H_{BB}(u,v) = \begin{cases}0,\ F_{c1}\le r(u,v)\le F_{c2} \\1, \ otherwise \end{cases}" alt="H_{BB}(u,v) = \begin{cases}0,\ F_{c1}\le r(u,v)\le F_{c2} \\1, \ otherwise \end{cases}" class="tex"/>
+</p><p>Note that <img src="../images/Algorithm_(2D_FFT_Filters)/math-261886c7d5496c59ffd981f98387ea10.png?v=0" title="H_{BB}(u,v)=\ 1-H_{BP}(u,v)" alt="H_{BB}(u,v)=\ 1-H_{BP}(u,v)" class="tex"/>.
+</p>
+</td></tr>
+<tr>
+<th>Threshold
+</th>
+<td> Allow only frequency components whose amplitudes are between the lower threshold value and the upper threshold value to pass.
+<p><img src="../images/Algorithm_(2D_FFT_Filters)/math-1a952e410fe1ee45d9db272a5ea0f3d1.png?v=0" title="H_{AT}(u,v) = \begin{cases}1,\ TH_1 \cdot max(A(u,v))\le A(u,v)\le TH_2 \cdot max(A(u,v)) \\0, \ otherwise \end{cases}" alt="H_{AT}(u,v) = \begin{cases}1,\ TH_1 \cdot max(A(u,v))\le A(u,v)\le TH_2 \cdot max(A(u,v)) \\0, \ otherwise \end{cases}" class="tex"/>
+</p><p>Where <img src="../images/Algorithm_(2D_FFT_Filters)/math-f3a8b92b0b31597aec06de1f1a9a9d69.png?v=0" title="A(u,v)=\ abs(H(u,v)) " alt="A(u,v)=\ abs(H(u,v)) " class="tex"/>, <img src="../images/Algorithm_(2D_FFT_Filters)/math-d4f94e40b7e91f2a3eff442ad6d3c60d.png?v=0" title="\ TH_1" alt="\ TH_1" class="tex"/> and <img src="../images/Algorithm_(2D_FFT_Filters)/math-dbe93f00eccfb7ae98aa98f14ce04172.png?v=0" title="\ TH_2" alt="\ TH_2" class="tex"/> are lower and upper threshold values.
+</p><p>Note that window will not be used for <b>Threshold</b> filter type.
+</p>
+</td></tr></table>
+<h2><a name="Window_Types"></a><span class="mw-headline">Window Types</span></h2>
+<p>Window types in <b>2D FFT Filters</b> include <b>Butterworth</b>, <b>Ideal</b>, <b>Gaussian</b>, and <b>Blackman</b>.
+</p><p><b>High Pass</b>, <b>Band Pass</b>, and <b>Band Block</b> filters can all be created from the <b>Low Pass</b> option for other window types in the same way as the <b>Ideal</b> window, which is listed in <a href="#Filter_Types">the table in Filter Types</a>. Therefore only <b>Low Pass</b> filters for each window type are described below.
+</p><p>A common way to generate a 2D filter is to rotate the corresponding 1D filter window in the m - n normalized frequency domain, i.e., use <img src="../images/Algorithm_(2D_FFT_Filters)/math-cfede040a7a090c243ebfb3f684821f8.png?v=0" title="r=\sqrt{m^2 + n^2}" alt="r=\sqrt{m^2 + n^2}" class="tex"/> to replace the variable in 1D Butterworth window function. We take the generation of 2D low-pass Butteworth filter as an example to describe the procedure.    
+</p>
+<h3><a name="Butterworth"></a><span class="mw-headline">Butterworth</span></h3>
+<p>1D Butterworth window function is expressed as:
+</p><p><img src="../images/Algorithm_(2D_FFT_Filters)/math-a7d49e67deecbd8600c92a55c1e8e499.png?v=0" title="H(u)=\frac{1}{1 + \left (\frac{m}{F_c} \right )^ {2p} }, u = 0, 1, ..., M-1" alt="H(u)=\frac{1}{1 + \left (\frac{m}{F_c} \right )^ {2p} }, u = 0, 1, ..., M-1" class="tex"/>
+</p><p>Parameters are described as follows:
+</p>
+<ul><li> m = (u - M/2) / M&#160;: the normalized frequency within range [-0.5, 0.5], +/- 0.5 corresponds to the half Nyquist frequency. Note that other normalization methods can also be found. We choose this one because the filter's peak must be aligned with the DC component of the FFT result.</li>
+<li> Fc: the cutoff frequency, which is within the range (0, 0.5], is a key parameter for a filter. For Butterworth, the cutoff frequency is the frequency at which H(u) decreases to half its maximum value. Thus using a larger Fc results in smoother filtering. In general, a smoother filter is better to reduce the negative ringing effect caused by FFT filtering.</li>
+<li> p: the filter order, which is an integer number. The smaller p is, the smoother the filter is.</li></ul>
+<p>For a 2D FFT filter, let m = ( u - M/2 ) / M, n = (v - N/2 ) / N. Both m and n are within the range [-0.5, 0.5]. Rotate the 1D Butterworth window in the m - n normalized frequency domain, and let <img src="../images/Algorithm_(2D_FFT_Filters)/math-91c7eb231be7ddce8f93697c09e53e1e.png?v=0" title="r=\sqrt{m^2+n^2}" alt="r=\sqrt{m^2+n^2}" class="tex"/>, the 2D Butterworth low pass filter can be expressed as:
+</p><p><img src="../images/Algorithm_(2D_FFT_Filters)/math-63baadf6fc31ae558f99f0d515999d19.png?v=0" title="H(u,v)=\frac{1}{1 + \left (\frac{r}{F_c} \right )^ {2p} }, \ u = 0, 1, ..., M-1, \ v = 0, 1, ..., N-1" alt="H(u,v)=\frac{1}{1 + \left (\frac{r}{F_c} \right )^ {2p} }, \ u = 0, 1, ..., M-1, \ v = 0, 1, ..., N-1" class="tex"/>
+</p><p>H(u,v) should only take values within a circular zone, the radius of which is determined by R = max(-m[0], m[M-1], -n[0], n[N-1]). And when r &gt; R, the value of H(u,v) should be set to zero. And the cutoff frequency Fc is within range (0, R].
+</p><p>The cutoff frequency is normalized by 2R so that Fc's value range is always (0, 0.5].
+</p><p>The procedure to create a 2D FFT filter is as below.
+</p>
+<dl><dd><a  class="image"><img alt="Algorithm make 2d filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_make_2d_filter.png?v=87407" width="569"  /></a></dd></dl>
+<p>A 2D Butterworth low pass filter for Fc=0.3, p=1 is shown as follows.
+</p>
+<dl><dd><a  class="image"><img alt="Algorithm bw filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bw_filter.png?v=23890" width="643"  /></a></dd></dl>
+<h3><a name="Ideal"></a><span class="mw-headline">Ideal</span></h3>
+<p>Ideal Filter is introduced in <a href="#Filter_Types">the table in Filter Types</a>.
+</p>
+<h3><a name="Gaussian"></a><span class="mw-headline">Gaussian</span></h3>
+<p>2D Gaussian low pass filter can be expressed as:
+</p><p><img src="../images/Algorithm_(2D_FFT_Filters)/math-5eb02e03fa73259bbff99c38852eaacc.png?v=0" title="H(u,v)=exp(-\frac{r^2}{2 \cdot F_c ^ 2} )" alt="H(u,v)=exp(-\frac{r^2}{2 \cdot F_c ^ 2} )" class="tex"/>
+</p><p>For the 2D Gaussian filter, the cutoff value used is the point at which H(u,v) decreases to 0.607 times its maximum value. Larger values of Fc correspond to a smoother filter.
+</p><p>A 2D Gaussian low pass filter for Fc=0.2 is shown.
+</p>
+<dl><dd><a  class="image"><img alt="Algorithm gau filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_gau_filter.png?v=23900" width="643"  /></a></dd></dl>
+<h3><a name="Blackman"></a><span class="mw-headline">Blackman</span></h3>
+<p>2D Blackman low pass filter can be expressed as:
+<img src="../images/Algorithm_(2D_FFT_Filters)/math-87dc751766a3732ec3de4955b7307b27.png?v=0" title="H(u,v)=\begin{cases}0.42 - 0.5 \cdot cos(2 \pi (r + 0.5) ) + 0.08 \cdot cos(4 \pi (r + 0.5) ),\ r(u,v) \le R\\0, \ r(u,v) &gt; R \end{cases}" alt="H(u,v)=\begin{cases}0.42 - 0.5 \cdot cos(2 \pi (r + 0.5) ) + 0.08 \cdot cos(4 \pi (r + 0.5) ),\ r(u,v) \le R\\0, \ r(u,v) &gt; R \end{cases}" class="tex"/>
+</p><p>Note that this window function is slightly different from the standard form commonly seen, which is high-pass. Here we want a low-pass filter, so we add 0.5 to r to turn the filter into low-pass.
+</p><p><b>2D FFT Filters</b> in OriginPro provide a <b>Truncate Window</b> option to decide whether to cut off the Blackman window.
+</p><p>2D Blackman low pass filters without (first graph) and with (second graph) truncation are shown below.
+</p>
+<dl><dd><a  class="image"><img alt="Algorithm bmn filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmn_filter.png?v=23902" width="643"  /></a> </dd>
+<dd><a  class="image"><img alt="Algorithm bmw filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmw_filter.png?v=23903" width="643"  /></a></dd></dl>
+<h2><a name="Cutoff_Value"></a><span class="mw-headline">Cutoff Value</span></h2>
+<p><b>2D FFT Filters</b> in OriginPro supports four ways to specify the <b>Cutoff Value</b>. They are <b>Fraction</b>, <b>Fourier Pixel</b>, <b>Wavelength</b>, and <b>Hertz</b>. Relations for these four ways are listed as follows.
+</p>
+<table class="dialogcontroltable">
+
+<tr>
+<th>Fourier Pixel
+</th>
+<td>Pixel in the matrix that stores the data. The value can be any positive number of type double.
+</td></tr>
+<tr>
+<th>Fraction
+</th>
+<td>Fraction = Fourier Pixel / sqrt( (cols/2)^2+(rows/2)^2 ), where cols and rows are numbers of columns and rows of the filter, respectively.
+</td></tr>
+<tr>
+<th>Wavelength
+</th>
+<td> Wavelength = (cols-1) / Fourier Pixel
+</td></tr>
+<tr>
+<th>Hertz
+</th>
+<td> Hertz = Fourier Pixel / cols
+</td></tr></table>
+
+
+
+
+
+

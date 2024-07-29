@@ -1,0 +1,100 @@
+<h1 class="firstHeading">3.4 X-Function ReportData Example</h1><p><span class="OIndex" style="display:none">X-Function ReportData</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#You_will_learn"><span class="tocnumber">2</span> <span class="toctext">You will learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Run_the_X-Function"><span class="tocnumber">4</span> <span class="toctext">Run the X-Function</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>This example demonstrates how to get multiple XY data sets, do linear fitting on each XY, and put the fitted data into a new result sheet.
+</p><p>As the output data type is ReportTree, the dialog will have a Recalculate combo box, which can set the recalculate mode of the report sheet to "Manual", "Auto Update" or "None".
+</p>
+<h2><a name="You_will_learn"></a><span class="mw-headline">You will learn</span></h2>
+<ol><li> How to work on multiple XY data sets<span class="OIndex" style="display:none">Multiple XY Datasets</span>.</li>
+<li> How to report data in a new result sheet with a recalculation lock<span class="OIndex" style="display:none">Recalculation</span><span class="OIndex" style="display:none">Result Sheet</span><span class="OIndex" style="display:none">Report with Auto Update</span><span class="OIndex" style="display:none">Auto Update</span>.</li></ol>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<ol start="1">
+<li>
+Hit F10 to open the X-Function Builder, enter the X-Function name and variables, as in the following picture, and then click Save. <a  class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/X-Function_ReportData_Example/Ocguide_xfdialog_savebutton.png?v=77100" width="23"  /></a>.<br /><a  class="image"><img alt="OCguide xf example FitLinearReport.png" src="../images/X-Function_ReportData_Example/OCguide_xf_example_FitLinearReport.png?v=77134" width="478"  /></a></li>
+<li>
+Open this X-Function in Code Builder to edit the source code. First include the needed header file, as below.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ReportTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// needed for ReportTable class</span></pre>
+</li>
+<li>
+Add any needed macros under the line <i>//put your own support static functions here</i>. The macros will be used in the X-Function's main function.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// ID can be any value, but must be unique.</span>
+<span style="color: #0000ff;">#define</span> TABLE_ID			<span style="color: #0000dd;">1</span>
+<span style="color: #0000ff;">#define</span> SUBNODE_ID_BEGIN	<span style="color: #0000dd;">1000</span></pre>
+</li>
+<li>
+In the X-Function's main function, <i>FitLinearReport</i>, add the following code to get the XY data from the specified data range, do linear fitting on each XY, and generate a report sheet.
+<span class="OIndex" style="display:none">X-Function, Fitting</span>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// create report table</span>
+ReportTable	rt;	
+rt <span style="color: #000080;">=</span> rd.<span style="color: #000000;">CreateTable</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ReportData&quot;</span>, <span style="color: #ff00ff;">&quot;Fitted Data&quot;</span>, TABLE_ID<span style="color: #000000;">&#41;</span>;	
+<span style="color: #0000ff;">int</span> nSubID <span style="color: #000080;">=</span> SUBNODE_ID_BEGIN;
+
+DWORD dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+<span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> iy.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>dwRules<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nRange <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nRange <span style="color: #000080;">&lt;</span> nNumData; nRange<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	DataRange drOne;
+	iy.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">&#40;</span>drOne, dwRules, nRange<span style="color: #000000;">&#41;</span>;
+	
+	vector vx, vy;
+	drOne.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>dwRules, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vy, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// there are two parameters in linear fitting</span>
+	FitParameter sFitParameter<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;		
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> STATS_NO_ERROR <span style="color: #000080;">==</span> ocmath_linear_fit<span style="color: #000000;">&#40;</span>vx, vy, 
+	                         vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, sFitParameter<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// add fitted X data to report table</span>
+		string strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;X&quot;</span> <span style="color: #000040;">+</span> <span style="color: #000000;">&#40;</span>nRange<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+		string strLongName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;X&quot;</span>;
+		rt.<span style="color: #000000;">AddColumn</span><span style="color: #000000;">&#40;</span>vx, strName, nSubID<span style="color: #000040;">++</span>, strLongName,
+				OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// calculate fitted Y data</span>
+		<span style="color: #0000ff;">double</span> dIntercept <span style="color: #000080;">=</span> sFitParameter<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span>;
+		<span style="color: #0000ff;">double</span> dSlope <span style="color: #000080;">=</span> sFitParameter<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span>;			
+		vector vFitY;
+		vFitY <span style="color: #000080;">=</span> vx <span style="color: #000040;">*</span> dSlope <span style="color: #000040;">+</span> dIntercept;			
+		
+		<span style="color: #008000;">// add fitted Y data to report table</span>
+		strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Y&quot;</span> <span style="color: #000040;">+</span> <span style="color: #000000;">&#40;</span>nRange<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+		string strRange;
+		strRange <span style="color: #000080;">=</span> drOne.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">&#40;</span>GETLC_COL_LN_ONLY<span style="color: #000000;">&#41;</span>;			
+		strLongName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Fitted data on &quot;</span> <span style="color: #000040;">+</span> strRange;
+		rt.<span style="color: #000000;">AddColumn</span><span style="color: #000000;">&#40;</span>vFitY, strName, nSubID<span style="color: #000040;">++</span>, strLongName, 
+				OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+</ol>
+<h2><a name="Run_the_X-Function"></a><span class="mw-headline">Run the X-Function</span></h2>
+<ol>
+<li>Import Linear Fit.dat from OriginExePath\Samples\Curve Fitting to a Worksheet.
+</li>
+<li>Highlight all columns and run <i>FitLinearReport -d</i> in the Script window, and then you can see the dialog below.
+<div><a  class="image"><img alt="Ocguide xfdialog FitLinearReport display.png" src="../images/X-Function_ReportData_Example/Ocguide_xfdialog_FitLinearReport_display.png?v=77135" width="316"  /></a>
+</div>
+</li>
+<li>Accept the default settings, and click the OK button. A report sheet will be generated with three group-fitting XY data sets.
+<div>
+<p><a  class="image"><img alt="Ocguide xfdialog FitLinearReport result.png" src="../images/X-Function_ReportData_Example/Ocguide_xfdialog_FitLinearReport_result.png?v=77136" width="303"  /></a>
+</p>
+</div>
+</li>
+</ol>
+
+
+
+
+
+

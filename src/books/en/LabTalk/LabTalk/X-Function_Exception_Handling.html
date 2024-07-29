@@ -1,0 +1,47 @@
+<h1 class="firstHeading">2.4.1.4 X-Function Exception Handling</h1><p class='urlname' style='display: none'>XF-Exception-Handling</p>
+<p><span class="OIndex" style="display:none">Exception</span><span class="OIndex" style="display:none">X-Function Exception</span>The example below illustrates trapping an X-Function error with LabTalk, so that an X-Function call that is likely to generate an error does not break your entire script.
+</p><p>For X-Functions that <i><b>do not</b></i> return an <span class="OIndex">error code</span>, two functions exist to check for errors in the last executed X-Function: <b>xf_get_last_error_code()</b> and <b>xf_get_last_error_message()$</b>. These functions should be used in situations where the potential exists that a particular X-Function could fail.
+</p><p>In this example, the user is given the option of selecting a file for import, but if that import fails (e.g. user picked file type inappropriate for the import) we need to handle the remaining code.
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">txt</span>;  <span style="color: #008000;">// Get the file name and path from user</span>
+impasc <span style="color: #000080;">-</span>se;  <span style="color: #008000;">// Need to use -se switch for execution to continue, see note below</span>
+if<span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> xf_get_last_error_code<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    strError<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;XFunction Failed: &quot;</span> <span style="color: #000080;">+</span> xf_get_last_error_message<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+    type strError<span style="color: #000080;">$</span>;
+    break <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// Stop execution</span>
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Data import probably succeeded, so our script can continue</span>
+type continuing...;</pre>
+<p>Note the use of the general X-Function option <b>-se</b> to suppress error messages. You can also use <b>-sl</b> to suppress error logging and <b>-sb</b> to suppress both. It is necessary to use one of these options in order for script execution to continue to the next line when the X-Function call fails. 
+</p>
+<h2><a name="Looping_Over_to_Find_Peaks"></a><span class="mw-headline">Looping Over to Find Peaks</span></h2>
+<p>In the following example, we loop over all columns in a worksheet to find peaks. If no peak is found in a particular column, the script continues with the rest of the columns. It is assumed here that a worksheet with suitable data is active.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//import data</span>
+newbook;
+string fn<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\curve fitting\Asymmetric Gaussian.dat&quot;</span>;
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span>&#160;;
+<span style="color: #008000;">//loop over all columns</span>
+for<span style="color: #000000;">&#40;</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>wks.<span style="color: #000080;">ncols</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  <span style="color: #008000;">// Find peak in current column, suppress error message from XF</span>
+  Dataset mypeaks;
+  pkfind <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span> ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mypeaks <span style="color: #000080;">-</span>se; <span style="color: #008000;">// Need to use -se for execution to continue</span>
+ 
+  <span style="color: #008000;">// Check to see if XF failed</span>
+  if<span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> xf_get_last_error_code<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+  <span style="color: #000000;">&#123;</span>
+    type <span style="color: #ff00ff;">&quot;Failed on column $(ii):&#160;%(xf_get_last_error_message()$)&quot;</span>;
+  <span style="color: #000000;">&#125;</span>
+  else
+  <span style="color: #000000;">&#123;</span>
+    type Found <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>mypeaks.<span style="color: #000080;">getsize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> peaks in column <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+  <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

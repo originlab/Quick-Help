@@ -1,0 +1,200 @@
+<h1 class="firstHeading">3.1.4 Data Selection</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Remark"><span class="tocnumber">2</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Get_Data_from_Worksheet_by_DataRange"><span class="tocnumber">3</span> <span class="toctext">Get Data from Worksheet by DataRange</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Set_Data_to_Worksheet_by_DataRange"><span class="tocnumber">4</span> <span class="toctext">Set Data to Worksheet by DataRange</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Pass_DataRange_Reference_as_Argument"><span class="tocnumber">5</span> <span class="toctext">Pass DataRange Reference as Argument</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Plot_by_DataRange"><span class="tocnumber">6</span> <span class="toctext">Plot by DataRange</span></a></li>
+</ul>
+</div>
+
+<p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin8 SR0</p>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>DataRange class introduced from Origin8.0. The major advantage of this class is to avoid pass large data from workseet or matrix to do analysis, plot and so on, just need pass a data range, for example two columns with XY data, the whole matrix.
+</p><p>More details please reference to the following Origin C Reference sections:
+</p><p><a href="../../OriginC/Category/DataRange_(class).html" title="Category:DataRange (class)">DataRange Class</a>
+</p><p><a href="../../OriginC/Category/XYRange_(class).html" title="Category:XYRange (class)">XYRange Class</a>
+</p><p><a href="../../OriginC/Category/XYZRange_(class).html" title="Category:XYZRange (class)">XYZRange Class</a>
+</p>
+<h2><a name="Get_Data_from_Worksheet_by_DataRange"></a><span class="mw-headline">Get Data from Worksheet by DataRange</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> get_data_from_wks<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please keep a worksheet active with data&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+    
+	<span style="color: #008000;">// The following settings to set range as whole worksheet, index offset is 0, -1 means last row/column.</span>
+	<span style="color: #008000;">// Change r1, c1, r2, c2 to specify worksheet sub range, for example, </span>
+	<span style="color: #008000;">// r1 = 0, c1 = 1, r2 = -1, c2 = 2 to select all rows from column 2 to column 3.</span>
+    <span style="color: #0000ff;">int</span> r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// first row</span>
+    <span style="color: #0000ff;">int</span> c1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// first column</span>
+    <span style="color: #0000ff;">int</span> r2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// last row</span>
+    <span style="color: #0000ff;">int</span> c2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// last column</span>
+    
+    <span style="color: #008000;">//construct a data range object from worksheet all data</span>
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, r1, c1, r2, c2<span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// get data from worksheet to vector by column one by one    </span>
+    matrix mData; 
+    dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>mData<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get all data to matrix</span>
+    
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nColIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nColIndex <span style="color: #000080;">&lt;</span> mData.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nColIndex<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	vector vOneCol;
+    	mData.<span style="color: #000000;">GetColumn</span><span style="color: #000000;">&#40;</span>vOneCol, nColIndex<span style="color: #000000;">&#41;</span>;
+    	
+    	<span style="color: #0000ff;">double</span> min, max;
+    	vOneCol.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>min, max<span style="color: #000000;">&#41;</span>;
+    	
+    	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Maximum value of&#160;%d column =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nColIndex<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, max<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Set_Data_to_Worksheet_by_DataRange"></a><span class="mw-headline">Set Data to Worksheet by DataRange</span></h2>
+<p>Generate xy data and put to worksheet two columns.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> prepare_data<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	XYRange drIn;
+	drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// the first column as X</span>
+	drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// the second column as Y</span>
+	
+	<span style="color: #0000ff;">int</span> nNumPoints <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+	vector vx;
+	vx.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, nNumPoints, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	
+	vector vy<span style="color: #000000;">&#40;</span>nNumPoints<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>nNumPoints; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		vy<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> rnd<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	vy.<span style="color: #000000;">Sort</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	drIn.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vy, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">&#41;</span>;	<span style="color: #008000;">// set vy to the second column, set vx to the first column.</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Pass_DataRange_Reference_as_Argument"></a><span class="mw-headline">Pass DataRange Reference as Argument</span></h2>
+<p>Before running <b>calculate_with_xy_data</b> please run the above <b>prepare_data</b> function to prepare xy data in worksheet.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> calculate_with_xy_data<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		XYRange drIn;
+		drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+		drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #0000ff;">double</span> a, b;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> do_linear_fit<span style="color: #000000;">&#40;</span>drIn, a, b<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;a=%f<span style="color: #666666; font-weight: bold;">\n</span>b=%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// pass source xy data by DataRange reference to do linear fit, and then return a and b parameters.</span>
+<span style="color: #0000ff;">bool</span> do_linear_fit<span style="color: #000000;">&#40;</span>XYRange<span style="color: #000040;">&amp;</span> drIn, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> a, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	vector vx, vy;
+	drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vy, vx<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nSize <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	
+	FitParameter stFitParameters<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> STATS_NO_ERROR <span style="color: #000080;">==</span> ocmath_linear_fit<span style="color: #000000;">&#40;</span>vx, vy, nSize, stFitParameters<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		a <span style="color: #000080;">=</span> stFitParameters<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span>;
+    	b <span style="color: #000080;">=</span> stFitParameters<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span>;
+    	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Plot_by_DataRange"></a><span class="mw-headline">Plot by DataRange</span></h2>
+<p>Plot XY data as scatter.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> plot_scatter<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		XYRange drIn;
+		drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+		drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+		
+		GraphPage gp;
+		gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+		GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>drIn, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span></pre>
+<p>Plot two columns data as box chart in one graph layer.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> plot_box_chart<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	vector vData;
+	vData.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">20</span> ,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; 
+	
+	DataRange dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 0 means the first sub range</span>
+	dr.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vData, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; 
+	
+	vData <span style="color: #000080;">=</span> vData <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.5</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 1: the second sub range</span>
+	dr.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vData, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; 
+	
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Box&quot;</span><span style="color: #000000;">&#41;</span>;
+	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get the first layer</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_BOX<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Plot selected worksheet range.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// this example shows how to plot the selcted xy range from worksheet to a new graph </span>
+<span style="color: #0000ff;">void</span> plot_selection<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	DataRange dr;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> EXIST_WKS <span style="color: #000080;">==</span> Project.<span style="color: #000000;">GetSelection</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		GraphPage gp;
+		gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+				
+		<span style="color: #0000ff;">int</span> nNumRanges <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumRanges</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;		
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nRange <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nRange <span style="color: #000080;">&lt;</span> nNumRanges; nRange<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			Worksheet wks;
+			<span style="color: #0000ff;">int</span> r1, c1, r2, c2;
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> dr.<span style="color: #000000;">GetRange</span><span style="color: #000000;">&#40;</span>nRange, r1, c1, r2, c2, wks<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// return true if has selection in worksheet</span>
+				<span style="color: #000040;">&amp;&amp;</span> <span style="color: #000000;">&#40;</span> c1 <span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">0</span> <span style="color: #000040;">&amp;&amp;</span> c2 <span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">0</span> <span style="color: #000040;">&amp;&amp;</span> c1<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> c2 <span style="color: #000040;">||</span> c1 <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">&amp;&amp;</span> c2 <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">&amp;&amp;</span> c1<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// to check if two columns. One for X, another for Y</span>
+			<span style="color: #000000;">&#123;</span>		
+				XYRange xy;
+				xy.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, r1, c1, r2, c1<span style="color: #000000;">&#41;</span>;
+				xy.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, r1, c2, r2, c2<span style="color: #000000;">&#41;</span>;
+				
+				<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>xy, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+					gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

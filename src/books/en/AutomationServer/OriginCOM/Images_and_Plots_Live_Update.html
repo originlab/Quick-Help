@@ -1,0 +1,394 @@
+<h1 class="firstHeading">1.3.1 Images and Plots Live Update</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Sending_Data_to_a_Matrix_and_See_Image_Live_Update"><span class="tocnumber">1</span> <span class="toctext">Sending Data to a Matrix and See Image Live Update</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#C.23"><span class="tocnumber">1.1</span> <span class="toctext">C#</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#VC.2B.2B"><span class="tocnumber">1.2</span> <span class="toctext">VC++</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#VB"><span class="tocnumber">1.3</span> <span class="toctext">VB</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Sending_Data_to_a_Matrix_and_See_Image_Live_Update"></a><span class="mw-headline">Sending Data to a Matrix and See Image Live Update</span></h2>
+<h3><a name="C.23"></a><span class="mw-headline">C#</span></h3>
+<p>The following code assume a form with the following objects:
+</p>
+<ul><li> a button named "Init" to connect to Origin</li>
+<li> a combo list named "combDelayTime" with values of 300,500,700,1000</li>
+<li> a button named "StartStop" </li>
+<li> a label text named "msgOutBox"</li>
+<li> a Timer object named "timer1"</li></ul>
+<ol><li>You first click the Init button and the StartStop button will enabled and Origin will run and show the single matrix in View Image mode.</li>
+<li>You can then click Start to see the image update with the delay time specified. </li></ol>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Windows.Forms</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span><span style="color: #008080; font-style: italic;">//to allow using MatrixObject etc with Origin.</span>
+
+<span style="color: #0600FF; font-weight: bold;">namespace</span> Realtime_Send_Matrix_View_Image
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #0600FF; font-weight: bold;">public</span> <span style="color: #0600FF; font-weight: bold;">partial</span> <span style="color: #6666cc; font-weight: bold;">class</span> Form1 <span style="color: #008000;">:</span> Form
+    <span style="color: #008000;">&#123;</span>
+        <span style="color: #0600FF; font-weight: bold;">const</span> <span style="color: #6666cc; font-weight: bold;">int</span> NUM_ROWS <span style="color: #008000;">=</span> <span style="color: #FF0000;">480</span><span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">const</span> <span style="color: #6666cc; font-weight: bold;">int</span> NUM_COLS <span style="color: #008000;">=</span> <span style="color: #FF0000;">640</span><span style="color: #008000;">;</span>
+
+        <span style="color: #6666cc; font-weight: bold;">object</span> <span style="color: #0600FF; font-weight: bold;">Default</span> <span style="color: #008000;">=</span> <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> m_app<span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> MatrixPage      m_mpg<span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> MatrixSheet     m_msht<span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> MatrixObject    m_mObj<span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">bool</span>            m_bStarted <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">int</span>             m_nSendCount <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">public</span> Form1<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            InitializeComponent<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            timer1<span style="color: #008000;">.</span><span style="color: #0000FF;">Interval</span> <span style="color: #008000;">=</span> Convert<span style="color: #008000;">.</span><span style="color: #0000FF;">ToInt32</span><span style="color: #008000;">&#40;</span>comboDelayTime<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            timer1<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            StartStop<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span><span style="color: #008080; font-style: italic;">// enable after init</span>
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> Init_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            m_app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            m_app<span style="color: #008000;">.</span><span style="color: #0000FF;">NewProject</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            m_app<span style="color: #008000;">.</span><span style="color: #0000FF;">Visible</span> <span style="color: #008000;">=</span> MAINWND_VISIBLE<span style="color: #008000;">.</span><span style="color: #0000FF;">MAINWND_SHOW</span><span style="color: #008000;">;</span>
+
+            m_mpg <span style="color: #008000;">=</span> m_app<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">Default</span>, <span style="color: #0600FF; font-weight: bold;">Default</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            m_msht <span style="color: #008000;">=</span> m_mpg<span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span> <span style="color: #0600FF; font-weight: bold;">as</span> MatrixSheet<span style="color: #008000;">;</span>
+            m_msht<span style="color: #008000;">.</span><span style="color: #0000FF;">Cols</span> <span style="color: #008000;">=</span> NUM_COLS<span style="color: #008000;">;</span>
+            m_msht<span style="color: #008000;">.</span><span style="color: #0000FF;">Rows</span> <span style="color: #008000;">=</span> NUM_ROWS<span style="color: #008000;">;</span>
+
+            m_mObj <span style="color: #008000;">=</span> m_msht<span style="color: #008000;">.</span><span style="color: #0000FF;">MatrixObjects</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            m_mObj<span style="color: #008000;">.</span><span style="color: #0000FF;">DataFormat</span> <span style="color: #008000;">=</span> COLDATAFORMAT<span style="color: #008000;">.</span><span style="color: #0000FF;">DF_USHORT</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// unsign short</span>
+            <span style="color: #008080; font-style: italic;">//set to view matrix as image, this has to be done by LabTalk for now, until we add the</span>
+            <span style="color: #008080; font-style: italic;">//proper COM method in next SR</span>
+            m_msht<span style="color: #008000;">.</span><span style="color: #0000FF;">Execute</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;matrix -ii&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            StartStop<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            Init<span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span><span style="color: #008080; font-style: italic;">//once init, we will not need to execute this again</span>
+
+        <span style="color: #008000;">&#125;</span>
+
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> StartStop_Click<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span><span style="color: #008000;">!</span>m_bStarted<span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                StartStop<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;Stop&quot;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">this</span><span style="color: #008000;">.</span><span style="color: #0000FF;">timer1</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+                m_bStarted <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">else</span>
+            <span style="color: #008000;">&#123;</span>
+                StartStop<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;Start&quot;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">this</span><span style="color: #008000;">.</span><span style="color: #0000FF;">timer1</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Enabled</span> <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+                m_bStarted <span style="color: #008000;">=</span> <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+        <span style="color: #008000;">&#125;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> comboDelayTime_SelectedIndexChanged<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            timer1<span style="color: #008000;">.</span><span style="color: #0000FF;">Interval</span> <span style="color: #008000;">=</span> Convert<span style="color: #008000;">.</span><span style="color: #0000FF;">ToInt32</span><span style="color: #008000;">&#40;</span>comboDelayTime<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+        <span style="color: #008000;">&#125;</span>
+        <span style="color: #0600FF; font-weight: bold;">private</span> <span style="color: #6666cc; font-weight: bold;">void</span> timer1_Tick<span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">object</span> sender, EventArgs e<span style="color: #008000;">&#41;</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>m_mObj <span style="color: #008000;">!=</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                <span style="color: #008080; font-style: italic;">//send over full range values </span>
+                <span style="color: #6666cc; font-weight: bold;">int</span> nMax <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>NUM_ROWS <span style="color: #008000;">-</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #008000;">&#40;</span>NUM_COLS <span style="color: #008000;">-</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+                <span style="color: #6666cc; font-weight: bold;">ushort</span><span style="color: #008000;">&#91;</span>,<span style="color: #008000;">&#93;</span> usData <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">ushort</span><span style="color: #008000;">&#91;</span>NUM_ROWS, NUM_COLS<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+                <span style="color: #6666cc; font-weight: bold;">int</span> nn <span style="color: #008000;">=</span> m_nSendCount<span style="color: #008000;">++;</span>
+                <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> nr <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> nr <span style="color: #008000;">&lt;</span> NUM_ROWS<span style="color: #008000;">;</span> nr<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                <span style="color: #008000;">&#123;</span>
+                    <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> nc <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> nc <span style="color: #008000;">&lt;</span> NUM_COLS<span style="color: #008000;">;</span> nc<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+                    <span style="color: #008000;">&#123;</span>
+                        <span style="color: #6666cc; font-weight: bold;">int</span> kk <span style="color: #008000;">=</span> nc <span style="color: #008000;">+</span> nr<span style="color: #008000;">;</span>
+                        <span style="color: #6666cc; font-weight: bold;">int</span> even <span style="color: #008000;">=</span> nn <span style="color: #008000;">%</span> <span style="color: #FF0000;">2</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">// every other time will flip the matrix</span>
+                        <span style="color: #0600FF; font-weight: bold;">if</span><span style="color: #008000;">&#40;</span>even <span style="color: #008000;">==</span> <span style="color: #FF0000;">1</span><span style="color: #008000;">&#41;</span>
+                            kk <span style="color: #008000;">=</span> nMax <span style="color: #008000;">-</span> kk<span style="color: #008000;">;</span>
+
+                        usData<span style="color: #008000;">&#91;</span>nr, nc<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">ushort</span><span style="color: #008000;">&#41;</span>kk<span style="color: #008000;">;</span>
+                    <span style="color: #008000;">&#125;</span>
+                <span style="color: #008000;">&#125;</span>
+                m_mObj<span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>usData, <span style="color: #FF0000;">0</span>, <span style="color: #FF0000;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #008080; font-style: italic;">//for now, need to use LabTalk to specify the Z range of the image to be drawn, Z1 and Z2 are LabTalk variables for the given</span>
+                <span style="color: #008080; font-style: italic;">//matrix object to control the Z range to showing the image. Execute for matrixObject is not supported so use matrix sheet</span>
+                <span style="color: #008080; font-style: italic;">//is good enough to affect the active MatrixObject</span>
+                m_msht<span style="color: #008000;">.</span><span style="color: #0000FF;">Execute</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Z1=0;Z2=&quot;</span> <span style="color: #008000;">+</span> nMax<span style="color: #008000;">.</span><span style="color: #0000FF;">ToString</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                msgOutBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> nn<span style="color: #008000;">.</span><span style="color: #0000FF;">ToString</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;. sending...&quot;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">else</span>
+                msgOutBox<span style="color: #008000;">.</span><span style="color: #0000FF;">Text</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;m_mObj is null&quot;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span>
+    <span style="color: #008000;">&#125;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<h3><a name="VC.2B.2B"></a><span class="mw-headline">VC++</span></h3>
+<p>The following code assumes an existing dialog containing three buttons&#160;: IDC_BUTTON_Connect, IDC_BUTTON_Disconnect, IDC_BUTTON_SendData; a checkbox IDC_CHECK_AutoUpdate and a combobox of IDC_COMBO_AutoUpdate. Code assumes that you have added Origin COM to your project correctly.
+</p><p><br />
+</p>
+<ol><li>When run the code, first you can click Connect button to launch an Origin instance, click SendData button to send data manually.</li>
+<li>When Origin is connected, check auto updating checkbox will enable auto updating data to Origin. Image on Matrixsheet will flip at an interval of some value specified by the combobox.</li></ol>
+<p>Main code in Dialog class are as follows:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBnClickedCheckAutoupdate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	UpdateData<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	KillTimer<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//Stop in case already started</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> this<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>m_checkAutoUpdate.<span style="color: #000000;">GetCheck</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		CString strText;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_COMBO_AutoUpdate<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetWindowText<span style="color: #000000;">&#40;</span>strText<span style="color: #000000;">&#41;</span>;
+
+        <span style="color: #0000ff;">wchar_t</span><span style="color: #000040;">*</span> p <span style="color: #000080;">=</span> strText.<span style="color: #000000;">GetBuffer</span><span style="color: #000000;">&#40;</span>strText.<span style="color: #000000;">GetLength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		UINT nElapse;
+		swscanf_s<span style="color: #000000;">&#40;</span>p, L<span style="color: #ff00ff;">&quot;%d&quot;</span>, <span style="color: #000040;">&amp;</span>nElapse<span style="color: #000000;">&#41;</span>;
+
+		SetTimer<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, nElapse, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">else</span>
+		KillTimer<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBnClickedButtonConnect</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	connect<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// connect to Origin</span>
+<span style="color: #0000ff;">bool</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">connect</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">void</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	CoInitialize<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;
+	disconnect<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//disconnect in case connected</span>
+
+	this<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>m_pIOApp.<span style="color: #000000;">CreateInstance</span><span style="color: #000000;">&#40;</span>__uuidof<span style="color: #000000;">&#40;</span>Application<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	m_pIOApp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutVisible<span style="color: #000000;">&#40;</span>Origin<span style="color: #000000;">::</span><span style="color: #000000;">MAINWND_SHOW_BRING_TO_FRONT</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nMatrixPageType <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+	<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nVisible <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	m_pIOApp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>CreatePage<span style="color: #000000;">&#40;</span> nMatrixPageType, <span style="color: #ff00ff;">&quot;Data&quot;</span>, <span style="color: #ff00ff;">&quot;&quot;</span>, nVisible<span style="color: #000000;">&#41;</span>;
+
+	m_pMatrixPage <span style="color: #000080;">=</span> m_pIOApp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetActivePage<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	m_pMatrixSheet <span style="color: #000080;">=</span> m_pMatrixPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetLayers<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_pMatrixSheet <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutCols<span style="color: #000000;">&#40;</span>NUM_COLS<span style="color: #000000;">&#41;</span>;
+		m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>PutRows<span style="color: #000000;">&#40;</span>NUM_ROWS<span style="color: #000000;">&#41;</span>;
+		m_pMatrixObject <span style="color: #000080;">=</span> m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetMatrixObjects<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		m_pMatrixObject<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		m_pMatrixObject<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>DataFormat <span style="color: #000080;">=</span> Origin<span style="color: #000000;">::</span><span style="color: #000000;">COLDATAFORMAT</span><span style="color: #000000;">::</span><span style="color: #000000;">DF_USHORT</span>;
+        <span style="color: #008000;">//set to view matrix as image, this has to be done by LabTalk for now, until we add the</span>
+        <span style="color: #008000;">//proper COM method in next SR</span>
+		m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;matrix -ii&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_pIOApp <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_SendData<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_Disconnect<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_Connect<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+		m_bConnected <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// disconnect</span>
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">disconnect</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">void</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_bConnected <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		KillTimer<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Stop auto sending</span>
+		this<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>m_checkAutoUpdate.<span style="color: #000000;">SetCheck</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_SendData<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_Disconnect<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+		GetDlgItem<span style="color: #000000;">&#40;</span>IDC_BUTTON_Connect<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>EnableWindow<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+		m_bConnected <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+		m_pIOApp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span><span style="color: #000000;">Exit</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		m_pIOApp <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBnClickedButtonDisconnect</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	disconnect<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// send data to Origin</span>
+<span style="color: #0000ff;">bool</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">sendData</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">void</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_pMatrixObject <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		USHORT MAX <span style="color: #000080;">=</span> NUM_ROWS <span style="color: #000040;">+</span> NUM_COLS;
+
+		COleSafeArray csarr;
+		DWORD bounds<span style="color: #000000;">&#91;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>NUM_ROWS, NUM_COLS<span style="color: #000000;">&#125;</span>;
+		csarr.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>VT_UI2, <span style="color: #0000dd;">2</span>, bounds<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//create a safe array of two dimesion of unsigned int type</span>
+		<span style="color: #0000ff;">long</span> index<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> NUM_ROWS; ii<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; jj <span style="color: #000080;">&lt;</span> NUM_COLS; jj<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				USHORT usData <span style="color: #000080;">=</span> ii <span style="color: #000040;">+</span> jj;
+				<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_bFlip <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// every other time will flip the matrix</span>
+					usData <span style="color: #000080;">=</span> MAX <span style="color: #000040;">-</span> usData;
+				index<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ii;
+				index<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> jj;
+				csarr.<span style="color: #000000;">PutElement</span><span style="color: #000000;">&#40;</span>index, <span style="color: #000040;">&amp;</span>usData<span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+		m_bFlip <span style="color: #000080;">=</span> <span style="color: #000040;">!</span>m_bFlip;
+
+		m_pMatrixObject<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetData<span style="color: #000000;">&#40;</span>csarr, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #008000;">//for now, need to use LabTalk to specify the Z range of the image to be drawn, Z1 and Z2 are LabTalk variables for the given</span>
+        <span style="color: #008000;">//matrix object to control the Z range to showing the image. Execute for matrixObject is not supported so use matrix sheet</span>
+        <span style="color: #008000;">//is good enough to affect the active MatrixObject</span>
+		CString strCmd<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z1=0;Z2=&quot;</span> <span style="color: #000040;">+</span> MAX<span style="color: #000000;">&#41;</span>;
+		_bstr_t _bstrCmd<span style="color: #000000;">&#40;</span>strCmd<span style="color: #000000;">&#41;</span>;
+		m_pMatrixSheet<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Execute<span style="color: #000000;">&#40;</span>_bstrCmd<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBnClickedButtonSenddata</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_bConnected <span style="color: #000000;">&#41;</span>
+		sendData<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnTimer</span><span style="color: #000000;">&#40;</span>UINT_PTR nIDEvent<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> m_bConnected <span style="color: #000000;">&#41;</span>
+		sendData<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	CDialog<span style="color: #000000;">::</span><span style="color: #000000;">OnTimer</span><span style="color: #000000;">&#40;</span>nIDEvent<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> CSentDataToMatrixDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnCbnSelchangeComboAutoupdate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	OnBnClickedCheckAutoupdate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Just want to update timer interval</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="VB"></a><span class="mw-headline">VB</span></h3>
+<p>The following code assume existing a form with following controls:
+</p>
+<ul><li> a button named ButtonConnect to connect Origin</li>
+<li> a button named ButtonDisconnect to disconnect Origin</li>
+<li> a button named ButotnSendData to send data manually</li>
+<li> a checkbox named CheckBoxAutoUpdate to allow auto updating.</li>
+<li> a combobox named ComboBoxAutoUpdate to set intervlas for auto updating</li></ul>
+<ol><li>When run the code, first you can click Connect button to launch an Origin instance, click SendData button to send data manually.</li>
+<li>When Origin is connected, check auto updating checkbox will enable auto updating data to Origin. Image on Matrixsheet will flip at an interval of some value specified by the combobox.</li></ol>
+<p>Code assumes you've added Oringin COM objects to your project correctly:
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Public</span> Class Form1
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> OriginApp <span style="color: #151B8D; font-weight: bold;">As</span> IOApplication
+
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> msht <span style="color: #151B8D; font-weight: bold;">As</span> MatrixSheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> mobj <span style="color: #151B8D; font-weight: bold;">As</span> MatrixObject
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> NUM_COLS <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> NUM_ROWS <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> STATUS <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+    Const MATRIXPAGETYPE = 5
+    Const SHOW_WND = 2
+
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> ButtonConnect_Click(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles ButtonConnect.Click
+        OriginApp = <span style="color: #E56717; font-weight: bold;">GetObject</span>(<span style="color: #800000;">&quot;&quot;</span>, <span style="color: #800000;">&quot;Origin.Application&quot;</span>)
+        OriginApp.Visible = MAINWND_VISIBLE.MAINWND_SHOW_BRING_TO_FRONT
+
+        OriginApp.CreatePage(MATRIXPAGETYPE, <span style="color: #800000;">&quot;&quot;</span>, <span style="color: #800000;">&quot;&quot;</span>, SHOW_WND)
+        msht = OriginApp.FindMatrixSheet(<span style="color: #800000;">&quot;&quot;</span>)
+        msht.Cols = NUM_COLS
+        msht.Rows = NUM_ROWS
+
+        msht.MatrixObjects.Add()
+        mobj = msht.MatrixObjects.Item(0)
+        mobj.DataFormat = COLDATAFORMAT.DF_USHORT
+        msht.Execute(<span style="color: #800000;">&quot;matrix -ii&quot;</span>) <span style="color: #008000;">'Currently have to use labtalk command to force Matrix as Image view
+</span>        ButtonConnect.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        ButtonDisconnect.Enabled = <span style="color: #00C2FF; font-weight: bold;">True</span>
+        ButtonSendData.Enabled = <span style="color: #00C2FF; font-weight: bold;">True</span>
+        CheckBoxAutoUpdate.Enabled = <span style="color: #00C2FF; font-weight: bold;">True</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> ButtonDisconnect_Click(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles ButtonDisconnect.Click
+        ButtonConnect.Enabled = <span style="color: #00C2FF; font-weight: bold;">True</span>
+        ButtonDisconnect.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        ButtonSendData.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        CheckBoxAutoUpdate.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        CheckBoxAutoUpdate.Checked = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        mytimer.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+
+        OriginApp.<span style="color: #E56717; font-weight: bold;">Exit</span>()
+        OriginApp = <span style="color: #00C2FF; font-weight: bold;">Nothing</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> Form1_Load(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles MyBase.Load
+        ComboBoxAutoUpdate.SelectedIndex = 0
+        NUM_COLS = 500
+        NUM_ROWS = 500
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> mytimer_Tick(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles mytimer.Tick
+        <span style="color: #8D38C9; font-weight: bold;">If</span> (CheckBoxAutoUpdate.Checked) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+            sendData()
+        <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> sendData()
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> jj <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Integer</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> MAX <span style="color: #151B8D; font-weight: bold;">As</span> UShort
+        MAX = NUM_COLS + NUM_ROWS
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> data(0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUM_ROWS - 1, 0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUM_COLS - 1) <span style="color: #151B8D; font-weight: bold;">As</span> UShort
+
+        <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUM_ROWS - 1
+            <span style="color: #8D38C9; font-weight: bold;">For</span> jj = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUM_COLS - 1
+                data(ii, jj) = Convert.ToUInt16(ii + jj)
+                <span style="color: #8D38C9; font-weight: bold;">If</span> STATUS = 0 <span style="color: #8D38C9; font-weight: bold;">Then</span>
+                    data(ii, jj) = MAX - Convert.ToUInt16(data(ii, jj))
+                <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+            <span style="color: #8D38C9; font-weight: bold;">Next</span>
+        <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+        <span style="color: #8D38C9; font-weight: bold;">If</span> STATUS = 0 <span style="color: #8D38C9; font-weight: bold;">Then</span>
+            STATUS = 1
+        <span style="color: #8D38C9; font-weight: bold;">Else</span>
+            STATUS = 0
+        <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+        mobj.SetData(data, 0, 0)
+        <span style="color: #008000;">'for now, need to use LabTalk to specify the Z range of the image to be drawn, Z1 and Z2 are LabTalk variables for the given
+</span>        <span style="color: #008000;">'matrix object to control the Z range to showing the image. Execute for matrixObject is not supported so use matrix sheet
+</span>        <span style="color: #008000;">'is good enough to affect the active MatrixObject
+</span>        msht.Execute(<span style="color: #800000;">&quot;Z1=0;Z2=&quot;</span> + MAX.ToString)
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> ButtonSendData_Click(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles ButtonSendData.Click
+        sendData()
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CheckBoxAutoUpdate_CheckedChanged(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles CheckBoxAutoUpdate.CheckedChanged
+        <span style="color: #8D38C9; font-weight: bold;">If</span> (CheckBoxAutoUpdate.Checked) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+            mytimer.Enabled = <span style="color: #00C2FF; font-weight: bold;">True</span>
+        <span style="color: #8D38C9; font-weight: bold;">Else</span>
+            mytimer.Enabled = <span style="color: #00C2FF; font-weight: bold;">False</span>
+        <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+
+    <span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> ComboBoxAutoUpdate_SelectedIndexChanged(<span style="color: #151B8D; font-weight: bold;">ByVal</span> sender <span style="color: #151B8D; font-weight: bold;">As</span> System.<span style="color: #F660AB; font-weight: bold;">Object</span>, <span style="color: #151B8D; font-weight: bold;">ByVal</span> e <span style="color: #151B8D; font-weight: bold;">As</span> System.EventArgs) Handles ComboBoxAutoUpdate.SelectedIndexChanged
+        mytimer.Interval = Convert.ToInt32(ComboBoxAutoUpdate.SelectedItem.ToString)
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+<span style="color: #8D38C9; font-weight: bold;">End</span> Class</pre>
+
+
+
+
+
+

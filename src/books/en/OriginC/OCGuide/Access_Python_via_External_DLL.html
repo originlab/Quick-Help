@@ -1,0 +1,235 @@
+<h1 class="firstHeading">1.19.1.3 Access Python via External DLL</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Running_Environment"><span class="tocnumber">1</span> <span class="toctext">Running Environment</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Python_File"><span class="tocnumber">2</span> <span class="toctext">Python File</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Build_DLL"><span class="tocnumber">3</span> <span class="toctext">Build DLL</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Use_the_DLL"><span class="tocnumber">4</span> <span class="toctext">Use the DLL</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Remarks"><span class="tocnumber">5</span> <span class="toctext">Remarks</span></a></li>
+</ul>
+</div>
+
+<p>In Origin C, there is no way to call Python functions directly. However, if you want to reuse your Python code in Origin C, it is recommended to wrap the Python functions in a DLL first, and then expose the functions in the DLL to Origin C code. In the following sections of this chapter, an example will be shown on how to do this step by step.
+</p>
+<table class="note">
+
+<tr>
+<td><b>Notes:</b> From Origin 2015,  we can run python in Origin (support both command line and .py file), and use a <b>PyOrigin</b> module to access Origin from Python. view <a class="external text" href="../../Python/Category/Python_(Python).html">Python.chm</a> for more details.
+</td></tr></table>
+<h2><a name="Running_Environment"></a><span class="mw-headline">Running Environment</span></h2>
+<p>The example shown below is based on the following environment.
+</p>
+<ol><li> Windows 7</li>
+<li> Python 3.3.5 (Assume the Python settings are already OK.)</li>
+<li> Visual Studio 2012</li></ol>
+<h2><a name="Python_File"></a><span class="mw-headline">Python File</span></h2>
+<p>The Python functions defined in the following are going to be reused in Origin C.
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">def</span> SayHello<span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">&quot;Welcome to use Python in your Origin C programs!&quot;</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;">#actually this string will not show in Origin C</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">12345</span>
+
+<span style="color: #ff7700;font-weight:bold;">def</span> Add<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a + b
+
+<span style="color: #ff7700;font-weight:bold;">def</span> Sub<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a - b
+
+<span style="color: #ff7700;font-weight:bold;">def</span> Mult<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a * b
+
+<span style="color: #ff7700;font-weight:bold;">def</span> Div<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a / b
+
+<span style="color: #ff7700;font-weight:bold;">def</span> Mod<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a&#160;% b</pre>
+<ol><li> First of all, go to the Python installed directory, then create a Python file under this directory, say "myLib.py". Then open this newly created file using a text editor, Notepad for example, and put the Python code above to this file, and save.</li>
+<li> Start Windows Console (cmd.exe), and then switch the current path to the directory where Python installed.</li>
+<li> Run the following command to compile the Python file created just now.
+<dl><dd> <pre class="python" style="font-family:monospace;">python -m <span style="color: #000;">py_compile</span> myLib.<span style="color: #000;">py</span></pre></dd>
+<dd> If successfully, there will be a pyc file (myLib.cpython-33.pyc, or something similar with "myLib") under this folder &lt;Python Installation Directory&gt;/__pycache__/ by default.</dd></dl></li></ol>
+<h2><a name="Build_DLL"></a><span class="mw-headline">Build DLL</span></h2>
+<ol>
+<li> Start Visual Studio 2012, and create a new Win32 Project, named OPython.</li>
+<p><a  class="image"><img alt="PythonDLL 1.png" src="../images/Access_Python_via_External_DLL/PythonDLL_1.png?v=44178" width="800"  /></a>
+</p>
+<li> Click OK, and select the Application type to be DLL, and click Finish to create the project.</li>
+<p><a  class="image"><img alt="PythonDLL 2.png" src="../images/Access_Python_via_External_DLL/PythonDLL_2.png?v=44179" width="685"  /></a>
+</p>
+<li> Set the Solution Configurations to be <b>Release</b>. Right click on the project, and choose <b>Property</b> from the context menu, to open the Property dialog.</li>
+<p>Note: Here the 32-bit DLL will be created, and that will be used in 32-bit version of Origin.
+</p>
+<li> In the Property dialog, from the left panel, activate <b>Configuration Properties: VC++ Directories</b>, and then in the right panel, add the Python header file path and library path to <b>Include Directories</b> and <b>Library Directories</b> respectively.</li>
+<p><a  class="image"><img alt="PythonDLL 3.png" src="../images/Access_Python_via_External_DLL/PythonDLL_3.png?v=44180" width="852"  /></a>
+</p>
+<li> From the left panel, activate <b>Configuration Properties: Linker: Input</b>, and then in the right panel, add the Python library to <b>Additional Dependencies</b>, here is <b>python33.lib</b>. Apply all the settings and click OK.</li>
+<p><a  class="image"><img alt="PythonDLL 4.png" src="../images/Access_Python_via_External_DLL/PythonDLL_4.png?v=44181" width="852"  /></a>
+</p>
+<li>Add a header file, named OPython.h, to the project, and put the following code to it.</li>
+<pre class="oc" style="font-family:monospace;">#ifndef	_OPYTHON_H_
+<span style="color: #0000ff;">#define</span>	_OPYTHON_H_
+
+<span style="color: #0000ff;">#ifdef</span>	_OPYTHON_CPP_
+	<span style="color: #0000ff;">#define</span>	OP_API	__declspec<span style="color: #000000;">&#40;</span>dllexport<span style="color: #000000;">&#41;</span>	<span style="color: #008000;">//use in VC</span>
+<span style="color: #0000ff;">#else</span>
+	<span style="color: #0000ff;">#define</span>	OP_API							<span style="color: #008000;">//use in OC</span>
+	<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>OPython<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//this line is important, when use in OC, Origin will find function body by searching in this DLL. Note:OPythonDLL, is the generated dll, without extension name.</span>
+<span style="color: #0000ff;">#endif</span>
+
+OP_API	<span style="color: #0000ff;">int</span>	  PY_SayHello<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Add<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>;
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Sub<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>;
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Mult<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>;
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Div<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>;
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Mod<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">#endif</span>	<span style="color: #008000;">//_OPYTHON_H_</span></pre>
+<li>Open the OPython.cpp, which is created automatically when creating the project (If no such file, create it). Replace the original code by the following code.</li>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;stdafx.h&quot;</span>
+<span style="color: #0000ff;">#define</span>	_OPYTHON_CPP_ <span style="color: #008000;">//use this macro to identify whether OPython.h is included in VC(when create the DLL) or OC(when use the DLL)</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;OPython.h&quot;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Python.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">class</span> PythonManager
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	PythonManager<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//init python environment</span>
+	~PythonManager<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//clean python environment</span>
+<span style="color: #000000;">&#125;</span>;
+
+PythonManager<span style="color: #000000;">::</span><span style="color: #000000;">PythonManager</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Py_Initialize<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+PythonManager<span style="color: #000000;">::</span>~PythonManager<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Py_Finalize<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+OP_API	<span style="color: #0000ff;">int</span>	  PY_SayHello<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	PythonManager pm;
+
+	PyObject<span style="color: #000040;">*</span> pModule;
+	PyObject<span style="color: #000040;">*</span> pFunc;
+	<span style="color: #008000;">//call python function, with no parameters</span>
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	pModule <span style="color: #000080;">=</span> PyImport_ImportModule<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;myLib&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> pModule <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> nRet;
+
+	pFunc <span style="color: #000080;">=</span> PyObject_GetAttrString<span style="color: #000000;">&#40;</span>pModule, <span style="color: #ff00ff;">&quot;SayHello&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pFunc <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		PyObject<span style="color: #000040;">*</span> pRet <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>;
+		pRet <span style="color: #000080;">=</span> PyEval_CallObject<span style="color: #000000;">&#40;</span>pFunc, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;
+
+		PyArg_Parse<span style="color: #000000;">&#40;</span>pRet, <span style="color: #ff00ff;">&quot;i&quot;</span>, <span style="color: #000040;">&amp;</span>nRet<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> nRet;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">static</span>	<span style="color: #0000ff;">float</span>	_call_float_float<span style="color: #000000;">&#40;</span>LPCSTR lpcszFunc, <span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	PythonManager pm;
+
+	PyObject<span style="color: #000040;">*</span> pModule;
+	PyObject<span style="color: #000040;">*</span> pFunc;
+	<span style="color: #008000;">//call python function, with multiple parameters</span>
+	<span style="color: #0000ff;">float</span> fRet <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	pModule <span style="color: #000080;">=</span> PyImport_ImportModule<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;myLib&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> pModule <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> fRet;
+
+	pFunc <span style="color: #000080;">=</span> PyObject_GetAttrString<span style="color: #000000;">&#40;</span>pModule, lpcszFunc<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pFunc <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		PyObject<span style="color: #000040;">*</span> pParams <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>;
+		pParams <span style="color: #000080;">=</span> PyTuple_New<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;		  <span style="color: #008000;">//create tuple to put parameters</span>
+
+		PyTuple_SetItem<span style="color: #000000;">&#40;</span>pParams, <span style="color: #0000dd;">0</span>, Py_BuildValue<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;f&quot;</span>, a<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		PyTuple_SetItem<span style="color: #000000;">&#40;</span>pParams, <span style="color: #0000dd;">1</span>, Py_BuildValue<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;f&quot;</span>, b<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		PyObject<span style="color: #000040;">*</span> pRet <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>;
+		pRet <span style="color: #000080;">=</span> PyEval_CallObject<span style="color: #000000;">&#40;</span>pFunc, pParams<span style="color: #000000;">&#41;</span>;
+
+		PyArg_Parse<span style="color: #000000;">&#40;</span>pRet, <span style="color: #ff00ff;">&quot;f&quot;</span>, <span style="color: #000040;">&amp;</span>fRet<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> fRet;
+<span style="color: #000000;">&#125;</span>
+OP_API	<span style="color: #0000ff;">float</span> PY_Add<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> _call_float_float<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Add&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Sub<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> _call_float_float<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Sub&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Mult<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> _call_float_float<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Mult&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Div<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> _call_float_float<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Div&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+OP_API	<span style="color: #0000ff;">float</span> PY_Mod<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">float</span> a, <span style="color: #0000ff;">float</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> _call_float_float<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Mod&quot;</span>, a, b<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li>Add a Module-Definition File, named OPython.def, to the project, and replace the original code with the code below.</li>
+<pre class="oc" style="font-family:monospace;">LIBRARY	<span style="color: #ff00ff;">&quot;OPython&quot;</span>
+
+EXPORTS
+
+		;Functions to export
+		PY_SayHello
+		PY_Add
+		PY_Sub
+		PY_Mult
+		PY_Div
+		PY_Mod</pre>
+<li>Build the solution to generate the DLL, OPython.dll, by default</li>
+</ol>
+<h2><a name="Use_the_DLL"></a><span class="mw-headline">Use the DLL</span></h2>
+<p>The following code show how to use the DLL generated above in Origin C.
+</p>
+<ol>
+<li>Copy the DLL generated above (OPython.dll), and paste it to the directory where Origin installed.</li>
+<li>Copy the header file created above (OPython.h) to this folder: <b>&lt;User Files Folder&gt;/OriginC/</b>.</li>
+<li>Start 32-bit version of Origin and launch Code Builder. Create a new C file and replace with the following code to it.</li>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;OPython.h&quot;</span> <span style="color: #008000;">//remember to include this header.</span>
+
+<span style="color: #0000ff;">int</span> test_Python<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> PY_SayHello<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">float</span> c <span style="color: #000080;">=</span> PY_Add<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">float</span> d <span style="color: #000080;">=</span> PY_Div<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li>Compile the above code in Code Builder, and then run the following line in <b>LabTalk Console</b> (Open by Code Builder menu View: LabTalk Console).</li>
+<pre class="lt" style="font-family:monospace;">test_Python;</pre>
+</ol>
+<h2><a name="Remarks"></a><span class="mw-headline">Remarks</span></h2>
+<p>The example shown in this page is only to create a simple DLL that can reuse the functions written in Python. If to process a large amount of data in Python, and transfer the data between Origin and Python, a buffer will be recommended. With buffer, when transfer data from Origin's Column, the vector, which contains data, can be passed from Origin C to a DLL function, which receive a pointer (maybe double *pBuffer) as parameter. And any change based on this buffer will take effect immediately on the vector in Origin C. In <b>\Samples\Python</b> folder of your Origin software, you can see code example( CCallPython.cpp , CCallPython.py , and python.h ) to transfer data buffer by two OC API:
+</p>
+<pre class="oc" style="font-family:monospace;">OPYTHON_API OIP OPy_GetItemsFromList<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nType, <span style="color: #0000ff;">void</span><span style="color: #000040;">*</span> pyObj, <span style="color: #0000ff;">void</span><span style="color: #000040;">*</span> pBuffer<span style="color: #000000;">&#41;</span>;
+OPYTHON_API <span style="color: #0000ff;">void</span><span style="color: #000040;">*</span> OPy_SetItemsToList<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nType, <span style="color: #0000ff;">void</span><span style="color: #000040;">*</span> pBuffer, OIP<span style="color: #000040;">*</span> pnDims, <span style="color: #0000ff;">int</span> nDims<span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

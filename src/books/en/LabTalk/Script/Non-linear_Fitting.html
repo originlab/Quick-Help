@@ -1,0 +1,124 @@
+<h1 class="firstHeading">2.13.3.2 Non-linear Fitting</h1><p class='urlname' style='display: none'>Non-linear-Fitting</p>
+<p><span class="OIndex" style="display:none">Fit Non-Linear</span><span class="OIndex" style="display:none">Regression</span><span class="OIndex" style="display:none">Non-linear Fitting</span><span class="OIndex" style="display:none">Script, Fitting</span>Non-linear fitting in LabTalk is X-function based and proceeds in three steps, each calling (at least) one X-function:
+</p>
+<ol>
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbegin.html">nlbegin</a>: Begin the fitting process. Define input data, type of fitting function, and input parameters.
+<li> <a class="external text" href="../../XFunction/X-Function/Nlfit.html">nlfit</a>: Perform the fit calculations
+<li> <a class="external text" href="../../XFunction/X-Function/Nlend.html">nlend</a> Choose which parameters to output and in what format
+</ol>
+<p>Besides <i>nlbegin</i>, you can also start a fitting process according to your fitting model or data by the following X-Functions:
+</p>
+<ul>
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginr.html">nlbeginr</a>: Fitting multiple dependnet/independent variables' model
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginm.html">nlbeginm</a>: Fitting a matrix
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginz.html">nlbeginz</a>: Fitting XYZ worksheet data
+</ul>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Script_Example"><span class="tocnumber">1</span> <span class="toctext">Script Example</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Notes_on_the_Parameter_Tree"><span class="tocnumber">2</span> <span class="toctext">Notes on the Parameter Tree</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Table_of_X-functions_Supporting_Non-Linear_Fitting"><span class="tocnumber">3</span> <span class="toctext">Table of X-functions Supporting Non-Linear Fitting</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Qualitative_Differences_from_Linear_Fitting"><span class="tocnumber">4</span> <span class="toctext">Qualitative Differences from Linear Fitting</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Script_Example"></a><span class="mw-headline">Script Example</span></h2>
+<p>Here is a script example of the steps outlined above:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Begin non-linear fitting, taking input data from Column 1 (X) and </span>
+<span style="color: #008000;">// Column 2 (Y) of the active worksheet,</span>
+<span style="color: #008000;">// specifying the fitting function as Gaussian, </span>
+<span style="color: #008000;">// and creating the input parameter tree named ParamTree:</span>
+nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gauss nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ParamTree;
+<span style="color: #008000;">// Optional: let the peak center be fixed at X = 5 </span>
+ParamTree.<span style="color: #000080;">xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;     <span style="color: #008000;">// Assign the peak center an X-value of 5.</span>
+ParamTree.<span style="color: #000080;">f_xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;   <span style="color: #008000;">// Fix the peak center (f_xc = 0 is unfixed).</span>
+<span style="color: #008000;">// Perform the fit calculations:</span>
+nlfit;
+<span style="color: #008000;">// Optional: report results to the Script Window.</span>
+type Baseline y0 is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">y0</span><span style="color: #000000;">&#41;</span>,; 
+type Peak Center is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">xc</span><span style="color: #000000;">&#41;</span>, and; 
+type Peak width <span style="color: #000000;">&#40;</span>FWHM<span style="color: #000000;">&#41;</span> is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">w</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// end the fitting session without a Report Sheet</span>
+nlend;</pre>
+<h2><a name="Notes_on_the_Parameter_Tree"></a><span class="mw-headline">Notes on the Parameter Tree</span></h2>
+<p>The data tree that stores the fit parameters has many options besides the few mentioned in the example above.  The following script command allows you to see all of the tree nodes (names and values) at one time, displaying them in the <b>Script Window</b>.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// To see the entire tree structure with values:</span>
+ParamTree.<span style="color: #000080;">=</span>;</pre>
+<p>Note: since the non-linear fitting procedure is iterative, parameter values for the fit that are not fixed (by setting the fix option to zero in the parameter tree) can and will change from their initial values.  Initial parameters can be set manually, as illustrated in the example above by accessing individual nodes of the parameter tree, or can be set automatically by Origin (see the <b>nlfn</b> X-function in the table below).
+</p>
+<h2><a name="Table_of_X-functions_Supporting_Non-Linear_Fitting"></a><span class="mw-headline">Table of X-functions Supporting Non-Linear Fitting</span></h2>
+<p>In addition to the three given above, there are a few other X-functions that facilitate non-linear fitting.  The following table summarizes the X-functions used to control non-linear fitting:
+</p>
+<table class="simple">
+<tr>
+<th> Name</th>
+<th> Brief Description
+</th></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbegin.html">nlbegin</a>
+</td>
+<td>
+<p>Start a LabTalk nlfit session on XY data from worksheet or graph.<br />
+<font color="red">Note:</font><br />This X-Function fits one independent/dependent model only. For multiple dependent/independent functions, use <i>nlbeginr</i> instead.
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginr.html">nlbeginr</a>
+</td>
+<td> Start a LabTalk nlfit session on worksheet data. It is used for fitting multiple dependent/independent variables functions.
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginm.html">nlbeginm</a>
+</td>
+<td>
+<p>Start a LabTalk nlfit session on matrix data from matrix object or graph
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginz.html">nlbeginz</a>
+</td>
+<td>
+<p>Start a LabTalk nlfit session on XYZ data from worksheet or graph
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlfn.html">nlfn</a>
+</td>
+<td>
+<p>Set Automatic Parameter Initialization option
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlpara.html">nlpara</a>
+</td>
+<td>
+<p>Open the Parameter dialog for GUI editing of parameter values and bounds
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlfit.html">nlfit</a>
+</td>
+<td>
+<p>Perform iterations to fit the data
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlend.html">nlend</a>
+</td>
+<td>
+<p>End the fitting session and optionally create a report
+</p>
+</td></tr>
+</table>
+<p>For a full description of each of these X-functions and its inputs and outputs, please see the <a class="external text" href="../../XFunction/Category/Fitting.html">X-function Reference</a>.
+</p>
+<h2><a name="Qualitative_Differences_from_Linear_Fitting"></a><span class="mw-headline">Qualitative Differences from Linear Fitting</span></h2>
+<p>Unlike linear fitting, a non-linear fit involves solving equations to which there is no analytical solution, thus requiring an iterative approach. But the idea---calling X-functions to perform the analysis---is the same.  Whereas a linear fit can be performed in just one line of script with just one X-function call (see the <a href="../../LabTalk/Script/Linear_Fitting.html" title="Script:Linear Fitting">Linear Fitting</a> section), a non-linear fit requires calling at least three X-functions.
+</p>
+
+
+
+
+

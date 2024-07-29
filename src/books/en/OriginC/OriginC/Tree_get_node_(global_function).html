@@ -1,0 +1,113 @@
+<h1 class="firstHeading">2.1.26.42 tree_get_node</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Get TreeNode by provided Row and search stop level. Find TreeNode from 0 level.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;">TreeNode tree_get_node<span style="color: #000000;">&#40;</span> TreeNode <span style="color: #000040;">&amp;</span> trRoot, <span style="color: #0000ff;">int</span> nRow, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, LPCSTR lpcszAttribute <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> trRoot</dt>
+<dd>[Input] TreeNode to be searched</dd>
+<dt> nRow</dt>
+<dd>[Input] to find the nRow TreeNode from up to down, 0 based offset</dd>
+<dt> dwCntrl</dt>
+<dd>[Input] rule for getting tree node, See TREENODEAddGetRules</dd></dl>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">enum</span> TREENODEAddGetRules<span style="color: #000000;">&#123;</span>	
+	<span style="color: #008000;">// only go through node with attribute marked. </span>
+	<span style="color: #008000;">// The option work with variable &quot;lpcszAttribute&quot;.</span>
+	ATRN_LOOP_MARDED_NODE_ONLY   <span style="color: #000080;">=</span> 0x00010000,  
+
+	<span style="color: #008000;">// don't go through leafs</span>
+	ATRN_SKIP_LEAFS      <span style="color: #000080;">=</span> 0x00020000,
+
+	<span style="color: #008000;">// use lobyte to indicate level to stop, stop level should &gt;= 0, </span>
+	<span style="color: #008000;">// 0 = show up to 1st child branch</span>
+	ATRN_STOP_LEVEL      <span style="color: #000080;">=</span> 0x00040000	
+<span style="color: #000000;">&#125;</span>;</pre>
+<dl><dt> lpcszAttribute</dt>
+<dd>[Input] work with dwCntrl, ATRN_LOOP_MARDED_NODE_ONLY option.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>found TreeNode, invalid if not found
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> tree_get_node_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Tree tr;
+    tr.<span style="color: #000000;">Math</span>.<span style="color: #000000;">Score</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">90.5</span>;
+    tr.<span style="color: #000000;">Math</span>.<span style="color: #000000;">Score</span>.<span style="color: #000000;">Grade</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Good&quot;</span>;    
+    tr.<span style="color: #000000;">Math</span>.<span style="color: #000000;">Bookname</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Advanced Math&quot;</span>;
+    tr.<span style="color: #000000;">English</span>.<span style="color: #000000;">Score</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">95.5</span>;
+    tr.<span style="color: #000000;">English</span>.<span style="color: #000000;">Score</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_STOP_ATTRIB, <span style="color: #ff00ff;">&quot;stop&quot;</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">English</span>.<span style="color: #000000;">Bookname</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;English 1&quot;</span>;
+    
+    TreeNode trNode <span style="color: #000080;">=</span> tree_get_node<span style="color: #000000;">&#40;</span>tr, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//trNode is Math.Score.Grade</span>
+    out_tree<span style="color: #000000;">&#40;</span>trNode<span style="color: #000000;">&#41;</span>;    
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> tree_get_node_ex2<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+    Tree tr;
+    
+    tr.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Vegetables&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    tr.<span style="color: #000000;">Fruits</span>.<span style="color: #000000;">SubNode1</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Apples&quot;</span>;
+    tr.<span style="color: #000000;">Fruits</span>.<span style="color: #000000;">SubNode2</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Pears&quot;</span>;
+    
+    tr.<span style="color: #000000;">Nuts</span>.<span style="color: #000000;">SubNode1</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Walnuts&quot;</span>;
+    tr.<span style="color: #000000;">Nuts</span>.<span style="color: #000000;">SubNode2</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Cashews&quot;</span>;
+ 
+    <span style="color: #0000ff;">int</span> nRow <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// offset is 0. </span>
+    
+    <span style="color: #008000;">// only access the level 0, for example, </span>
+    <span style="color: #008000;">// tr.Fruits is level 0, tr.Fruits.SubNode1 is level 1.  </span>
+    DWORD dwCntrl <span style="color: #000080;">=</span> ATRN_STOP_LEVEL <span style="color: #000040;">|</span> <span style="color: #0000dd;">0</span>;
+    
+    <span style="color: #008000;">// skip leaf, here will skip tr.Vegetables node.</span>
+    dwCntrl <span style="color: #000040;">|</span><span style="color: #000080;">=</span> ATRN_SKIP_LEAFS; 
+    
+    <span style="color: #008000;">// Get row 2 of tr, to get Nuts tree.</span>
+    TreeNode trNode <span style="color: #000080;">=</span> tree_get_node<span style="color: #000000;">&#40;</span>tr, nRow, dwCntrl<span style="color: #000000;">&#41;</span>;   
+     
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trNode <span style="color: #000000;">&#41;</span>
+    	out_tree<span style="color: #000000;">&#40;</span>trNode<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">else</span>
+    	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid node.&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//output:</span>
+    <span style="color: #008000; font-style: regular;">/*    
+    Nuts
+	+---SubNode1 = Walnuts
+	\---SubNode2 = Cashews	
+    */</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Tree_check_get_node_(global_function).html" title="OriginC:Tree check get node (global function)">tree_check_get_node</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

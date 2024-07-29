@@ -1,0 +1,146 @@
+<h1 class="firstHeading">1.1.6 Creating Custom Dialog</h1><p><span class="OIndex" style="display:none">X-Function Custom Dialog</span>
+X-Functions support custom dialog created in a dialog builder as interface. If the user wants to use the customized dialog, and also wants to support Auto Update in the dialog, or wants to open the dialog from the Origin menu, then they can create an X-Function with customized dialog. And then can create an OPX file to share it to others.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_a_Dailog_Resource_DLL"><span class="tocnumber">1</span> <span class="toctext">Creating a Dailog Resource DLL</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_X-Function"><span class="tocnumber">2</span> <span class="toctext">Creating X-Function</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Using_X-Function"><span class="tocnumber">3</span> <span class="toctext">Using X-Function</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#How_to_share_your_custom_dialog_with_others"><span class="tocnumber">4</span> <span class="toctext">How to share your custom dialog with others</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Creating_a_Dailog_Resource_DLL"></a><span class="mw-headline">Creating a Dailog Resource DLL</span></h2>
+<p>Here is an <a class="external text" href="../../OriginC/OriginC/Open_Customize_Dialog_in_Origin_C.html#Creating_a_Resource-Only_DLL">example</a> to show you how to build a resource-only DLL in Visual Studio 2008 or 2010 which is accessible in Origin C.
+Follow the section <b>Creating a Resource-Only DLL</b>, we will get two files: <b>Welcome.dll</b> and <b>resource.h</b>.
+</p>
+<h2><a name="Creating_X-Function"></a><span class="mw-headline">Creating X-Function</span></h2>
+<ol><li> Copy the above two files Welcome.dll and resource.h to Origin &lt;User files Folder\OriginC\&gt;. Note: the resource DLL file and resource.h file should be saved in the same folder.</li>
+<li>Press F10 to open X-Function Builder. </li>
+<li>Type "CustomDlg" as the X-Function name and set the X-Function variables as below:<div><a  class="image"><img alt="CustomDlg.png" src="../images/Creating_Custom_Dialog/CustomDlg.png?v=77114" width="432"  /></a></div></li>
+<li>Click the Tree View button<a  class="image"><img alt="Ocguide xf treeview button.png" src="../images/Creating_Custom_Dialog/Ocguide_xf_treeview_button.png?v=77098" width="23"  /></a> to switch to Tree View, and choose Usage Context -&gt; Menus -&gt; Auto GetN Dialog to Custom. Then type the custom dialog function name, for example "OpenCustomDlg", into the Custom Dialog Function edit box.  Click Save button to save this X-Function to the <b>default</b>  folder under User Files folder and then close X-Function Builder. <b>Note</b>:X-Function should be save to the X-Functions folder under OriginExe folder or User Files Folder</li>
+<li>Create a new header file named CustomDlg.h and save it to the "OriginC" folder. Type the following code into this file. The code in the CustomDialog construct function is used to show how to get the X-Function settings from the X-Function to the dialog, and how to set back the settings from the dialog to the X-Function by way of the Origin C TreeNode variable.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\DialogEx.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;resource.h&quot;</span>
+<span style="color: #008000;">// file name of the resource without extension, here stand for Welcome.dll, </span>
+<span style="color: #008000;">//and it assume the DLL is in the same folder as this .h file </span>
+<span style="color: #0000ff;">#define</span> STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">&quot;Welcome&quot;</span>
+
+<span style="color: #008000;">// the file name of resource DLL</span>
+<span style="color: #0000ff;">#ifdef</span> _OWIN64
+<span style="color: #0000ff;">#define</span> STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">&quot;Welcome_64&quot;</span> <span style="color: #008000;">// 64 bit DLL</span>
+<span style="color: #0000ff;">#else</span> <span style="color: #008000;">//!_OWIN64</span>
+<span style="color: #0000ff;">#define</span> STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">&quot;Welcome&quot;</span> <span style="color: #008000;">// 32 bit DLL</span>
+<span style="color: #0000ff;">#endif</span><span style="color: #008000;">// _OWIN64</span>
+ 
+ 
+<span style="color: #0000ff;">class</span> CustomDialog <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> ResizeDialog
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+    <span style="color: #008000;">// Important: IDD_MY_DIALOG is the dialog resource ID.</span>
+    <span style="color: #008000;">// STR_DLG_RESOURCE_DLL is the name of the dialog resource DLL file. </span>
+    CustomDialog<span style="color: #000000;">&#40;</span>TreeNode<span style="color: #000040;">&amp;</span> trXFSettings<span style="color: #000000;">&#41;</span> <span style="color: #000000;">:</span> ResizeDialog<span style="color: #000000;">&#40;</span> IDD_MY_DIALOG, STR_DLG_RESOURCE_DLL <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	m_trXFSettings <span style="color: #000080;">=</span> trXFSettings;
+    	
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #0000ff;">int</span> DoModalEx<span style="color: #000000;">&#40;</span>HWND hParent <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	InitMsgMap<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    	<span style="color: #0000ff;">return</span> ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">DoModal</span><span style="color: #000000;">&#40;</span>hParent<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>  
+    
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+EVENTS_BEGIN
+	ON_INIT<span style="color: #000000;">&#40;</span>OnInitDialog<span style="color: #000000;">&#41;</span>
+	ON_OK<span style="color: #000000;">&#40;</span>OnOK<span style="color: #000000;">&#41;</span>
+EVENTS_END
+ 
+	<span style="color: #0000ff;">BOOL</span> OnInitDialog<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>		
+		ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+		Edit	ed;
+		ed <span style="color: #000080;">=</span> GetDlgItem<span style="color: #000000;">&#40;</span>IDC_EDIT1<span style="color: #000000;">&#41;</span>;
+		<span style="color: #008000;">// init dialog control with xf setting	</span>
+		ed.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> ftoa<span style="color: #000000;">&#40;</span>m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span><span style="color: #000000;">&#41;</span>; 
+  		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #000000;">&#125;</span> 
+ 
+	<span style="color: #0000ff;">BOOL</span> OnOK<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Edit	ed;
+		ed <span style="color: #000080;">=</span> GetDlgItem<span style="color: #000000;">&#40;</span>IDC_EDIT1<span style="color: #000000;">&#41;</span>;
+		m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #000000;">atof</span><span style="color: #000000;">&#40;</span>ed.<span style="color: #000000;">Text</span><span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// If the input is 0, it will be changed to 1 automatically.</span>
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+			m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+	TreeNode 	m_trXFSettings;
+<span style="color: #000000;">&#125;</span>;</pre>
+</li>
+<li>Open Origin Code Builder, in the menu choose File -&gt; Open, select your X-Function, make sure the Add to Workspace check box is checked in the Open dialog, and click OK.  CustomDlg.XFC is added to the User folder in Origin C Workspace view and shows the function body in Edit view.</li>
+<li>Add the additional header file after the line <b>//put additional include files here</b>, as in the following.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;CustomDlg.h&quot;</span></pre></li>
+<li>Add a function to open the custom dialog after the line <b>//put your own support static functions here</b>, as below. The function name is input into the Tree View Custom Dialog Function edit box. The function interface, return type, and argument list should remain the same, as in the following.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put your own support static functions here</span>
+<span style="color: #0000ff;">bool</span> OpenCustomDlg<span style="color: #000000;">&#40;</span>TreeNode<span style="color: #000040;">&amp;</span> tr, PEVENT_FUNC pfn, LPCSTR lpcszTitle, LPCSTR 
+lpcszDescription, HWND hWndParent<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	CustomDialog dlg<span style="color: #000000;">&#40;</span>tr<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> dlg.<span style="color: #000000;">DoModal</span><span style="color: #000000;">&#40;</span>GetWindow<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		tr.<span style="color: #000000;">AutoUpdate</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> AU_AUTO; <span style="color: #008000;">// Default is 2(Manual)</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;    
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">else</span> <span style="color: #008000;">// click Cancel button on dialog</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>; <span style="color: #008000;">// will not call main function</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre></li>
+<li>Put the following code into the X-Function's main function - CustomDlg function
+<pre class="oc" style="font-family:monospace;">out <span style="color: #000080;">=</span> in <span style="color: #000040;">*</span> factor;
+
+<span style="color: #008000;">// put comments like &quot;Col(A)*8&quot; on the Comments label of output column</span>
+DataRange drIn;
+drIn <span style="color: #000080;">=</span> in.<span style="color: #000000;">GetSourceDataRange</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+Worksheet wks;
+<span style="color: #0000ff;">int</span> c1, c2;
+drIn.<span style="color: #000000;">GetRange</span><span style="color: #000000;">&#40;</span>wks, c1, c2<span style="color: #000000;">&#41;</span>;
+Column col<span style="color: #000000;">&#40;</span>wks, c1<span style="color: #000000;">&#41;</span>;
+	
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wks <span style="color: #000040;">&amp;&amp;</span> col <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	string strOutputComment;
+	strOutputComment.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Col(%s)*%g&quot;</span>, col.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, factor<span style="color: #000000;">&#41;</span>;
+	out.<span style="color: #000000;">SetOutputComment</span><span style="color: #000000;">&#40;</span>strOutputComment<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre></li>
+<li>Click <a  class="image"><img alt="Ocguide XF Compile Button.PNG" src="../images/Creating_Custom_Dialog/Ocguide_XF_Compile_Button.PNG?v=77099" width="92"  /></a> button. </li>
+</ol>
+<h2><a name="Using_X-Function"></a><span class="mw-headline">Using X-Function</span></h2>
+<ol><li> Create a worksheet with two column and fill some different data. </li>
+<li> Highlight column A and Run "CustomDlg -d" in the Command Window. </li>
+<li> Fill "8" to Factor. </li>
+<li> Click the OK button to close the dialog.</li>
+<li> A new column will be created with an Auto Update lock (Column(A)*factor).</li>
+<li> If the input is 0, it will be changed to 1 automatically.</li>
+<li> Changing any data in column A will trigger Auto Update to update the output column.</li></ol>
+<h2><a name="How_to_share_your_custom_dialog_with_others"></a><span class="mw-headline">How to share your custom dialog with others</span></h2>
+<p>You can use <b>Package Manager</b> to distribute it as a single package file to other Origin users. Then he can install your application  by dropping the package file into Origin directly.
+</p>
+<ol><li> Select menu Tool-&gt;Package Manager. Click Add Files button to add the four files. CustomDlg.XFC, CustomDlg.h, resource.h, Welcome.dll. </li>
+<li> Select File-&gt; Save to save them as "CustomDlg.opx" file and share it with other users.</li></ol>
+
+
+
+
+
+

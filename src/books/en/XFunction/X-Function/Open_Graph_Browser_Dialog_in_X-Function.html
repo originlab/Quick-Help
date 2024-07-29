@@ -1,0 +1,63 @@
+<h1 class="firstHeading">3.2 Open Graph Browser Dialog in X-Function</h1><p><span class="OIndex" style="display:none">X-Function, Create Graph Browser Dialog</span>
+</p>
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>This example demonstrates how to add a button to open the <span class="OIndex">Graph Browser</span> dialog to pick a graph in the X-Function GetN dialog, and then how to customize the Graph Browser dialog by filter function.
+</p>
+<h2><a name="You_will_learn"></a><span class="mw-headline">You will learn</span></h2>
+<ol><li> How to add a button to open a Graph Browser in the X-Function dialog.</li>
+<li> How to customize the Graph Browser dialog by filter function.</li></ol>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<p>The following three steps will show how to add a button in the X-Function dialog to open a Graph Browser dialog without the use of a filter function. This is the simplest process, and all settings in the Graph Browser dialog will be set to their defaults.
+</p>
+<ol start="1">
+<li>
+Select <b>Tools: X-Function Builder</b> from the Origin menu. Create an X-Function <b>GraphFilterTest</b> as follows.<br /><a  class="image"><img alt="XFProgramming Control Graph Browser.png" src="../images/Open_Graph_Browser_Dialog_in_X-Function/XFProgramming_Control_Graph_Browser.png?v=77127" width="510"  /></a><br />Note the control string is <i>...Graph GraphBrowserFilter</i>.</li>
+<li>Click Edit X-Function in the Code Builder toolbar, and type <i>out_str(pages);</i> in the main function, GraphFilterTest. Click the Compile button and then click Return to Dialog.</li>
+<li>Click the Save OXF File toolbar button to save. Run <i>GraphFilterTest -d</i> in the Command window, and when a dialog shows, click the ... button to choose a graph, then click OK to close the dialog. The name of the selected graph window will be printed in the Command window.</li>
+<li> If you do NOT want to customize the Graph Browser Dialog, then there is no need to go on; the following steps are all about customizing the Graph Browser dialog, for example, setting the default view mode to Tree view.  Create a GraphFilter.c file and save it in <i>&lt;Origin installation folder&gt;\OriginC\OriginLab</i>. The source file should include the following code.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\GraphFilter.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// this is an Origin built-in file</span>
+<span style="color: #0000ff;">int</span> GraphBrowserFilter<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nMsg, Page<span style="color: #000040;">&amp;</span> pg <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span> 
+	<span style="color: #0000ff;">switch</span><span style="color: #000000;">&#40;</span>nMsg<span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span> 
+	<span style="color: #0000ff;">case</span> GBFM_IS_USE_PAGE<span style="color: #000000;">:</span> <span style="color: #008000;">// return 1 for true. </span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>pg<span style="color: #000000;">&#41;</span> 
+			<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; 
+		<span style="color: #008000;">// filter page including multiple layers </span>
+		<span style="color: #0000ff;">return</span> pg.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">1</span>? <span style="color: #0000dd;">0</span> <span style="color: #000000;">:</span> <span style="color: #0000dd;">1</span>; 
+		
+	<span style="color: #0000ff;">case</span> GBFM_SHOW_EMBED_PAGE_CHKBOX<span style="color: #000000;">:</span> 
+		<span style="color: #008000;">// see other options in GraphFilter.h</span>
+		<span style="color: #0000ff;">return</span> EMBED_CHECKBOX_ENABLE; 
+		
+	<span style="color: #0000ff;">case</span> GBFM_SHOW_SWITCH_MODE<span style="color: #000000;">:</span> 
+		<span style="color: #008000;">// see other options in GraphFilter.h	</span>
+		<span style="color: #0000ff;">return</span> VIEW_MODE_BOTH_WITH_TREE_DEFAULT; 
+		
+	<span style="color: #0000ff;">case</span> GBFM_SORT_PAGES<span style="color: #000000;">:</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// return 0 or 1</span>
+	<span style="color: #000000;">&#125;</span> 
+	<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// error </span>
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Create a header file named MyGraphFilter.h and save it in <i>&lt;Origin installation folder&gt;\OriginC\OriginLab</i>.</li>
+<li>Open this X-Function in X-Function Builder, and click the <i>Edit X-Function in Code Builder</i> button, to include the newly created header file, from above. Note that MyGraphFilter.c and MyGraphFilter.h can also be put in another folder, but you have to make sure that they are in the same folder as each other. If they are in another folder, an absolute path should be used to include the header file, e.g.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Case 1. if header file is located in the OriginC\Originlab\ folder</span>
+<span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\MyGraphFilter.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> 
+
+<span style="color: #008000;">//Case 2. if header file is NOT located in the OriginC\Originlab\ folder</span>
+<span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\M</span>yFolder<span style="color: #666666; font-weight: bold;">\M</span>yGraphFilter.h&quot;</span></pre> 
+</li>
+<li>Run <i>GraphFilterTest -d</i> in the Command Window, and click the Browse button in the GraphFilterTest dialog. You can see that the <i>Show Embedded Graph</i> check box is enabled and selected, and the embedded graph is listed in the tree browser.<br /><a  class="image"><img alt="XFProgramming Control Graph Browser2.png" src="../images/Open_Graph_Browser_Dialog_in_X-Function/XFProgramming_Control_Graph_Browser2.png?v=77128" width="385"  /></a></li>
+<li>Open MyGraphFilter.c from <i>&lt;Origin installation folder&gt;\OriginC\Originlab\</i> with the Code Builder. Change the return value from <i>EMBED_CHECKBOX_ENABLE</i> to <i>EMBED_CHECKBOX_DISABLE_EMBEDDING_PAGE_NEVER_ENABLE</i> for the GBFM_SHOW_EMBED_PAGE_CHKBOX case. Click the Compile button to compile MyGraphFilter.c. Then run <i>GraphFilterTest -d</i> in the Command Window again. The <i>Show Embedded Graph</i> check box is disabled and unchecked now, and the embedded graph is not listed in the tree browser.<br /><a  class="image"><img alt="XFProgramming Control Graph Browser3.png" src="../images/Open_Graph_Browser_Dialog_in_X-Function/XFProgramming_Control_Graph_Browser3.png?v=77129" width="385"  /></a></li>
+<li>You can try to use other enum values in <i>&lt;Origin installation folder&gt;\OriginC\Originlab\GraphFilter.h</i> as the return value for other cases in MyGraphFilter.c. Please remember to compile MyGraphFilter.c after each change.</li>
+<li>The built-in X-Functions containing Graph Browsers (e.g. Import and Export X-Function <b>expGraph</b>) can be customized using the same method.</li>
+</ol>
+
+
+
+
+
+

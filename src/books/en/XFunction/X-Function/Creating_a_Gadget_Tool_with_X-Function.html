@@ -1,0 +1,341 @@
+<h1 class="firstHeading">1.1.8 Creating a Gadget Tool with X-Function</h1><p><span class="OIndex" style="display:none">Gadget Tool</span>
+Origin offers some gadgets that operate on graphs and matrices. You can find them in the Gadgets menu when a graph or matrix is active. 
+</p><p>When you choose one of the gadgets, Origin adds a rectangle to the graph or matrix, allowing you to choose the region of data to be analyzed. After selecting the region of interest (ROI), you can open the context menu by clicking the <a  class="image"><img alt="OCguide xf gadget tool contextmenu button.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_contextmenu_button.png?v=77119" width="24"  /></a> button and using the preference dialogs or themes to set up the analysis and output the results to desired destinations.
+</p><p><a  class="image"><img alt="OCguide xf gadget tool.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool.png?v=77120" width="496"  /></a>
+</p><p>Origin allows users to add a user-defined gadget tool with an X-Function, and then add this tool to the Origin Gadgets menu.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#How_to_Create_a_Gadget"><span class="tocnumber">1</span> <span class="toctext">How to Create a Gadget</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_an_X-Function"><span class="tocnumber">2</span> <span class="toctext">Creating an X-Function</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Defining_a_Class_Derived_from_GraphObjCurveTool"><span class="tocnumber">3</span> <span class="toctext">Defining a Class Derived from GraphObjCurveTool</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Adding_Event_Functions"><span class="tocnumber">4</span> <span class="toctext">Adding Event Functions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Basic_global_event_function"><span class="tocnumber">4.1</span> <span class="toctext">Basic global event function</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Overload_virtual_event_functions"><span class="tocnumber">4.2</span> <span class="toctext">Overload virtual event functions</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="How_to_Create_a_Gadget"></a><span class="mw-headline">How to Create a Gadget</span></h2>
+<p>The following are the three main steps for creating a gadget tool:
+</p>
+<ol>
+<li>Create an X-Function.<br />The X-Function handles the dialog theme and adds the gadget tool to Origin's Gadget menu.</li>
+<li>Create an Origin C class derived from GraphObjCurveTool or MatObjROITool.
+<br />The GraphObjCurveTool and MatObjROITool classes are Origin C building classes and declared in the file:<br /><i>OriginExeFolder</i>\OriginC\Originlab\GraphObjTools.h<br />These classes are used to create a region of interest (ROI) object and provide default handling for events.  Events include moving and resizing the ROI object and choosing items on the ROI context menu.</li>
+<li>Add event functions.
+<br />The name of the global event function needs to be in the <i>xfname</i>_events format, where <i>xfname</i> is the name of the X-Function. A function's argument list must use the following syntax:
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> xfname_events<span style="color: #000000;">&#40;</span>string strGrName, <span style="color: #0000ff;">int</span> nEvent, <span style="color: #0000ff;">int</span> nMsg <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;</pre></li>
+</ol>
+<p>The next sections will explain these steps in more detail.
+</p>
+<h2><a name="Creating_an_X-Function"></a><span class="mw-headline">Creating an X-Function</span></h2>
+<ol><li>With Origin active, press F10 to open X-Function Builder. Set up your new X-Function's name and variables as shown below.<br /><a  class="image"><img alt="OCguide xf gadget tool xfbuilder.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_xfbuilder.png?v=77121" width="456"  /></a></li>
+<li>Click the <a  class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_savebutton.png?v=77100" width="23"  /></a> button to save the X-Function.</li>
+<li>Click the <a  class="image"><img alt="Ocguide xfdialog codebuilderbutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_codebuilderbutton.png?v=77104" width="23"  /></a> button to open the X-Function's source code in Code Builder.</li>
+<li>Add two additional include statements.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\GraphObjTools.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+</li>
+<li>Find the function named <b>quick_curve_stats_make_tree</b> and replace it's body with the following code for creating a GUI tree. 
+<span class="OIndex" style="display:none">X-Function, make_tree</span>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> <span style="color: #000000;">strcmp</span><span style="color: #000000;">&#40;</span>lpcszVarName, <span style="color: #ff00ff;">&quot;trGUI&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+    GETN_USE<span style="color: #000000;">&#40;</span>tr<span style="color: #000000;">&#41;</span> 
+    GETN_OPTION_BRANCH<span style="color: #000000;">&#40;</span>GETNBRANCH_OPEN<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// default to open branch</span>
+ 
+    <span style="color: #0000ff;">int</span> nUserID <span style="color: #000080;">=</span> GET_USER_DATAID<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nBranchID <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+ 
+    GETN_STR<span style="color: #000000;">&#40;</span>toolname, STR_TOOLNAME, <span style="color: #ff00ff;">&quot;Quick Curve Stats&quot;</span><span style="color: #000000;">&#41;</span>GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span> 
+        <span style="color: #008000;">// the option to add a checkbox control with editbox</span>
+        GETN_CONTROL_OPTION_BOX<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> 
+    GETN_COLOR<span style="color: #000000;">&#40;</span>rectColor, <span style="color: #ff00ff;">&quot;Rectangle Fill Color&quot;</span>, SYSCOLOR_LTYELLOW<span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_COLOR_CHOICE_OPTIONS<span style="color: #000000;">&#40;</span>COLORLIST_CUSTOM <span style="color: #000040;">|</span> COLORLIST_SINGLE<span style="color: #000000;">&#41;</span>
+ 
+    <span style="color: #008000;">// quantities branch, for output result options</span>
+    GETN_BEGIN_BRANCH<span style="color: #000000;">&#40;</span>quantities, <span style="color: #ff00ff;">&quot;Quantities&quot;</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_OPTION_BRANCH<span style="color: #000000;">&#40;</span>GETNBRANCH_OPEN<span style="color: #000040;">|</span>GETNBRANCH_CHECK_CONTROL<span style="color: #000000;">&#41;</span>
+ 
+        GETN_CHECK<span style="color: #000000;">&#40;</span>dataname, <span style="color: #ff00ff;">&quot;Dataset Name&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>n, <span style="color: #ff00ff;">&quot;Total Number&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>sum, <span style="color: #ff00ff;">&quot;Sum&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>mean, <span style="color: #ff00ff;">&quot;Mean&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>sd, <span style="color: #ff00ff;">&quot;Standard Deviation&quot;</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>se, <span style="color: #ff00ff;">&quot;SE of Mean&quot;</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    GETN_END_BRANCH<span style="color: #000000;">&#40;</span>quantities<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// the end of quantities branch    </span>
+ 
+    <span style="color: #008000;">// output branch, the options for output destination</span>
+    GETN_BEGIN_BRANCH<span style="color: #000000;">&#40;</span>output, <span style="color: #ff00ff;">&quot;Output To&quot;</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span> 
+        GETN_CHECK<span style="color: #000000;">&#40;</span>script, <span style="color: #ff00ff;">&quot;Script Window&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>reslog, <span style="color: #ff00ff;">&quot;Results Log&quot;</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        GETN_CHECK<span style="color: #000000;">&#40;</span>outputwks, <span style="color: #ff00ff;">&quot;Output to Worksheet&quot;</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> GETN_ID<span style="color: #000000;">&#40;</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    GETN_END_BRANCH<span style="color: #000000;">&#40;</span>output<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// the end of output branch</span>
+<span style="color: #000000;">&#125;</span>   
+<span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;</pre>
+</li>
+<li>Click the <a  class="image"><img alt="Ocguide XF Compile Button.PNG" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_XF_Compile_Button.PNG?v=77099" width="92"  /></a> button to compile your changes. After successfully compiling, click the <a  class="image"><img alt="Ocguide XF Returntodialog Button.PNG" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_XF_Returntodialog_Button.PNG?v=77108" width="92"  /></a> button to go back to X-Function Builder.</li>
+<li>Click the <a  class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_savebutton.png?v=77100" width="23"  /></a> button to save the X-Function again, then close X-Function Builder.</li>
+<li>Run "quick_curve_stats -d" in the Command window.  The following dialog will display.<br /><a  class="image"><img alt="OCguide xf gadget tool dialog.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_dialog.png?v=77122" width="290"  /></a></li>
+</ol>
+<p>Now you have your X-Function.  In the next section we will show you how to define a new class derived from an Origin C building class.
+</p>
+<h2><a name="Defining_a_Class_Derived_from_GraphObjCurveTool"></a><span class="mw-headline">Defining a Class Derived from GraphObjCurveTool</span></h2>
+<p>This section will show you how to define a new class derived from Origin C's GraphObjCurveTool class.  The GraphObjCurveTool class will help handle most of the work for your new class.
+</p><p>The GraphObjCurveTool class is used when making a gadget that will operate on a graph.  If you are making a gadget that will operate on matrix data then you would derive  your class from the MatObjROITool class.  Both GraphObjCurveTool and MatObjROITool are declared in the GraphObjTools.h header file.
+</p>
+<ol><li>Open quick_curve_stats.XFC in Code Builder.  Near the top of the file we will define our new class.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put additional include files here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>GetNbox.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\GraphObjTools.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#define</span> XF_NAME <span style="color: #ff00ff;">&quot;quick_curve_stats&quot;</span>
+<span style="color: #0000ff;">#define</span> TOOL_PREFERENCES_TITLE _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Statistics&quot;</span><span style="color: #000000;">&#41;</span>
+
+<span style="color: #0000ff;">class</span> QuickCurveStatsTool <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> GraphObjCurveTool
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+	string	GetXFName<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> XF_NAME; <span style="color: #000000;">&#125;</span>
+	string 	GetSignature<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;xf_addtool_quick_curve_stats&quot;</span>; <span style="color: #000000;">&#125;</span>
+	string	GetPreferenceTitle<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span> <span style="color: #0000ff;">return</span> TOOL_PREFERENCES_TITLE; <span style="color: #000000;">&#125;</span>
+
+	<span style="color: #008000;">// Will rewrite this function in Adding Event Functions section below.	</span>
+	<span style="color: #0000ff;">bool</span> DoOutput<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bUpdateLastOutput, <span style="color: #0000ff;">bool</span> bMarkerOnly <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span>
+		LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;type -a&quot;</span><span style="color: #000000;">&#41;</span>;
+		LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;type DoOuput&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span>;</pre>
+</li>
+<li>Go to the X-Function's main function, and use the class defined above to create an ROI on the graph.
+<pre class="oc" style="font-family:monospace;">QuickCurveStatsTool curveTool<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; 
+<span style="color: #0000ff;">int</span> nErr <span style="color: #000080;">=</span> curveTool.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>XF_NAME, <span style="color: #0000dd;">0</span>, trGUI<span style="color: #000000;">&#41;</span>;  
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nErr<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;quick_curve_stats failed to Init!&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+curveTool.<span style="color: #000000;">ExpandFullRange</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;</pre>
+</li>
+<li> Activate a graph window with a curve, and run "quick_curve_stats -d" in the Command window. A rectangle with top text, a title and two mini buttons will be added on the graph.
+</li>
+</ol>
+<h2><a name="Adding_Event_Functions"></a><span class="mw-headline">Adding Event Functions</span></h2>
+<h3><a name="Basic_global_event_function"></a><span class="mw-headline">Basic global event function</span></h3>
+<ol><li>Open quick_curve_stats.XFC in Code Builder, and add the event function as below, after the line <b>//put your own support static functions here</b>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//put your own support static functions here</span>
+<span style="color: #0000ff;">void</span> quick_curve_stats_events<span style="color: #000000;">&#40;</span>string strGrName, <span style="color: #0000ff;">int</span> nEvent, <span style="color: #0000ff;">int</span> nMsg <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	QuickCurveStatsTool sTool;
+	graphobjtool_events<span style="color: #000000;">&#40;</span>sTool, strGrName, nEvent, nMsg<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Run the X-Function, "quick_curve_stats -d", in the Command window and click the OK button to close the dialog. Click the <a  class="image"><img alt="OCguide xf gadget tool contextmenu button.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_contextmenu_button.png?v=77119" width="24"  /></a> button, attached to the ROI, to open the context menu. Click New Output, and DoOutput will be printed on the Script window. Choose Preference, and a dialog with the X-Function's settings will appear.  Change the color in the Rectangle Fill Color control, and update the text in the Show Tool Name control in the opening dialog, then click OK.  The fill color and title text of the rectangle will be changed.
+</li>
+</ol>
+<h3><a name="Overload_virtual_event_functions"></a><span class="mw-headline">Overload virtual event functions</span></h3>
+<p>Run this X-Function, "quick_curve_stats -d", in the Command window to add a ROI.  If you move the ROI on a graph, the Origin status bar on the left will show the current x from/to values and the width of the ROI. The following three steps will show you how to overload the OnMove virtual method to refresh the ROI top text with the curve statistics results, on 'ROI moving'. 
+</p>
+<ol>
+<li>Declare the following two methods in the QuickCurveStatsTool class.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+	<span style="color: #0000ff;">BOOL</span> OnMove<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>	
+		string strTopText <span style="color: #000080;">=</span> getResult<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		UpdateTopLabel<span style="color: #000000;">&#40;</span>strTopText, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;		
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+	string getResult<span style="color: #000000;">&#40;</span>TreeNode<span style="color: #000040;">&amp;</span> trResult <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// Get the data in ROI selected</span>
+		vector vx, vy;
+		GetData<span style="color: #000000;">&#40;</span>vx, vy<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// Calculate statistic on data</span>
+		<span style="color: #0000ff;">int</span> npts;
+		<span style="color: #0000ff;">double</span> sum, mean, sd, se;
+		vy.<span style="color: #000000;">Sum</span><span style="color: #000000;">&#40;</span>sum<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> ocmath_basic_summary_stats<span style="color: #000000;">&#40;</span>vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vy, <span style="color: #000040;">&amp;</span>npts, 
+			<span style="color: #000040;">&amp;</span>mean, <span style="color: #000040;">&amp;</span>sd, <span style="color: #000040;">&amp;</span>se<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">return</span> <span style="color: #ff00ff;">&quot;Error in calculation!&quot;</span>;
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #008000;">// Get output options from GUI</span>
+		Tree trGUI;
+		GetGUITree<span style="color: #000000;">&#40;</span>trGUI<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">bool</span> 	bDatasetName <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">dataname</span>.<span style="color: #000000;">nVal</span>,
+				bPoints <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">n</span>.<span style="color: #000000;">nVal</span>,
+				bSum <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">sum</span>.<span style="color: #000000;">nVal</span>,
+				bMean <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">mean</span>.<span style="color: #000000;">nVal</span>,
+				bSD <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">sd</span>.<span style="color: #000000;">nVal</span>,
+				bSE <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">se</span>.<span style="color: #000000;">nVal</span>;			
+		
+		string strDatasetName;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bDatasetName <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			m_dp.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">&#40;</span>strDatasetName<span style="color: #000000;">&#41;</span>;		
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #008000;">// Put result to string</span>
+		string strText;
+		string strNumDec <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;*&quot;</span>, strNextLine <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\r</span><span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bDatasetName <span style="color: #000000;">&#41;</span>
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Dataset Name: &quot;</span> <span style="color: #000040;">+</span> strDatasetName <span style="color: #000040;">+</span> strNextLine;		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bPoints <span style="color: #000000;">&#41;</span>
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;N = &quot;</span> <span style="color: #000040;">+</span> npts <span style="color: #000040;">+</span> strNextLine;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSum <span style="color: #000000;">&#41;</span>
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Sum = &quot;</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">&#40;</span>sum, strNumDec<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strNextLine;		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bMean <span style="color: #000000;">&#41;</span>		
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Mean = &quot;</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">&#40;</span>mean, strNumDec<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strNextLine;	
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSD <span style="color: #000000;">&#41;</span>
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;SD = &quot;</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">&#40;</span>sd, strNumDec<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strNextLine;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSE <span style="color: #000000;">&#41;</span>
+			strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;SE = &quot;</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">&#40;</span>se, strNumDec<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strNextLine;
+		strText.<span style="color: #000000;">TrimRight</span><span style="color: #000000;">&#40;</span>strNextLine<span style="color: #000000;">&#41;</span>;	
+		
+		<span style="color: #008000;">// Put result to tree</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trResult <span style="color: #000040;">&amp;&amp;</span> trResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			GETN_USE<span style="color: #000000;">&#40;</span>trResult<span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bDatasetName <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				GETN_STR<span style="color: #000000;">&#40;</span>DatasetName, <span style="color: #ff00ff;">&quot;Dataset Name&quot;</span>, strDatasetName<span style="color: #000000;">&#41;</span>
+				GETN_CURRENT_SUBNODE.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_TYPE_ATTRIB,
+					TNVAL_TYPE_CSTRING<span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bPoints <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				GETN_NUM<span style="color: #000000;">&#40;</span>N, <span style="color: #ff00ff;">&quot;Number of Points&quot;</span>, npts<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSum <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				GETN_NUM<span style="color: #000000;">&#40;</span>Sum, <span style="color: #ff00ff;">&quot;Sum&quot;</span>, sum<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bMean <span style="color: #000000;">&#41;</span>		
+			<span style="color: #000000;">&#123;</span>
+				GETN_NUM<span style="color: #000000;">&#40;</span>Mean, <span style="color: #ff00ff;">&quot;Mean&quot;</span>, mean<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSD <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				GETN_NUM<span style="color: #000000;">&#40;</span>SD, <span style="color: #ff00ff;">&quot;SD&quot;</span>, sd<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bSE <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				GETN_NUM<span style="color: #000000;">&#40;</span>SE, <span style="color: #ff00ff;">&quot;SE&quot;</span>, se<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#125;</span>		
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #0000ff;">return</span> strText;
+	<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Run the X-Function to add a ROI on your graph.  Move the ROI, and the top text will be updated with the current statistics results of the selected Y data. </li>
+<li>The following shows how to make the context menu items "New Output" and "Go to Report Worksheet" work.  You need to overload the DoOutput and GetReportWorksheet virtual functions in the derived class QuickCurveStatsTool, and add a private function, acessBinaryInfo, to set and get the report worksheet name in the rectangle's binary storage. If you fail to get the report worksheet name from the rectangle, or the report worksheet name represents an invalid worksheet, the "Go to Report Worksheet" context menu item will be gray. Add the following methods to the QuickCurveStatsTool class.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+	<span style="color: #0000ff;">bool</span> DoOutput<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bUpdateLastOutput, <span style="color: #0000ff;">bool</span> bMarkerOnly <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Tree trGUI;
+		GetGUITree<span style="color: #000000;">&#40;</span>trGUI<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// Get output result to string and treenode</span>
+		Tree tr;
+		TreeNode trResult;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">outputwks</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+			trResult <span style="color: #000080;">=</span> tr.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Result&quot;</span><span style="color: #000000;">&#41;</span>;	
+		string strResult <span style="color: #000080;">=</span> getResult<span style="color: #000000;">&#40;</span>trResult<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #008000;">// Output to Script window, optional</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">script</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;type -a&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// to open Script window if closed</span>
+			LT_set_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;strResult$&quot;</span>, strResult<span style="color: #000000;">&#41;</span>;
+			LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;type strResult$&quot;</span><span style="color: #000000;">&#41;</span>;		
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #008000;">// Output to Result Log, optional</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">reslog</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			Project.<span style="color: #000000;">OutStringToResultsLog</span><span style="color: #000000;">&#40;</span>strResult<span style="color: #000000;">&#41;</span>;		
+		<span style="color: #000000;">&#125;</span>
+		
+		<span style="color: #008000;">// Output to worksheet, optional</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">outputwks</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">// To check output worksheet if already existed</span>
+			Worksheet wks;
+			string strOutputWks;
+			<span style="color: #0000ff;">bool</span> bCreateNew <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> acessBinaryInfo<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span>, strOutputWks<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				wks.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>strOutputWks<span style="color: #000000;">&#41;</span>;
+				bCreateNew <span style="color: #000080;">=</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+			
+			<span style="color: #008000;">// If it doesn't exist, you need to create a new one, </span>
+			<span style="color: #008000;">// then put worksheet name into rectangle binary storage</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bCreateNew <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>			
+				wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, CREATE_HIDDEN<span style="color: #000000;">&#41;</span>;
+				wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+				
+				wks.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">&#40;</span>strOutputWks<span style="color: #000000;">&#41;</span>;
+				acessBinaryInfo<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span>, strOutputWks<span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>		
+			out_tree_to_wks<span style="color: #000000;">&#40;</span>trResult, wks<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #0000ff;">BOOL</span> GetReportWorksheet<span style="color: #000000;">&#40;</span>Worksheet<span style="color: #000040;">&amp;</span> wksReport<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		string strWks;
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> acessBinaryInfo<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span>, strWks<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			wksReport.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>strWks<span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">return</span> wksReport.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+	<span style="color: #0000ff;">bool</span> acessBinaryInfo<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bGet, string<span style="color: #000040;">&amp;</span> strInfo<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		string strStorageName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Info&quot;</span>;
+		Tree tr;
+		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> bGet <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">// To get output worksheet name from rectangle binary storage</span>
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_go.<span style="color: #000000;">GetBinaryStorage</span><span style="color: #000000;">&#40;</span>strStorageName, tr<span style="color: #000000;">&#41;</span> 
+				<span style="color: #000040;">&amp;&amp;</span> tr.<span style="color: #000000;">OutputWks</span> 
+				<span style="color: #000040;">&amp;&amp;</span> <span style="color: #000040;">!</span>tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				strInfo <span style="color: #000080;">=</span> tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">strVal</span>;
+				<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+			<span style="color: #000000;">&#125;</span>
+			<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">else</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">// Save output worksheet name to rectangle binary storage</span>
+			tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> strInfo;
+			<span style="color: #0000ff;">return</span> m_go.<span style="color: #000000;">PutBinaryStorage</span><span style="color: #000000;">&#40;</span>strStorageName, tr<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>	
+	<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li> Prepare a graph with a data plot set as active, and run "quick_curve_stats -d" in the Command window to add a ROI. Move the ROI to an interesting area on the graph, open the context menu, and choose Preferences to open a dialog.  Select all the check boxes in the Quantities and Output To branch, and click OK to close the dialog. Open the context menu again, and notice the Go to Report Worksheet menu item is gray.  Click the New Output menu, and the result string will be outputted to a Script window and a Result Log, and a hidden worksheet will be created. Choose the Go to Report Worksheet menu, and the report worksheet displays.  The columns in the worksheet hold the results.
+</li>
+<ol></ol>
+</ol>
+
+
+
+
+
+

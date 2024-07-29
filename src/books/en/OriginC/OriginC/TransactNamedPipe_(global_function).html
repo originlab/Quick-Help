@@ -1,0 +1,68 @@
+<h1 class="firstHeading">2.1.4.1.15 TransactNamedPipe</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Combines the functions that write a message to and read a message from the specified named pipe into a single network operation.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> TransactNamedPipe<span style="color: #000000;">&#40;</span> HANDLE hNamedPipe, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesRead, LPOVERLAPPED lpOverlapped <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> hNamedPipe</dt>
+<dd> [input] A handle to the named pipe returned by the CreateNamedPipe or CreateFile function. </dd></dl>
+<dl><dd>This parameter can also be a handle to an anonymous pipe, as returned by the CreatePipe function.</dd>
+<dt> lpInBuffer</dt>
+<dd> [input] A pointer to the buffer containing the data to be written to the pipe.</dd>
+<dt> nInBufferSize</dt>
+<dd> [input] The size of the input buffer, in bytes.</dd>
+<dt> lpOutBuffer</dt>
+<dd> [output] A pointer to the buffer that receives the data read from the pipe.</dd>
+<dt> nOutBufferSize</dt>
+<dd> [input] The size of the output buffer, in bytes.</dd>
+<dt> lpBytesRead</dt>
+<dd> [output] A pointer to the variable that receives the number of bytes read from the pipe. </dd></dl>
+<dl><dd>If lpOverlapped is NULL, lpBytesRead cannot be NULL.</dd></dl>
+<dl><dt> lpOverlapped</dt>
+<dd> [input] A pointer to an OVERLAPPED structure. This structure is required if hNamedPipe was opened with FILE_FLAG_OVERLAPPED. </dd></dl>
+<dl><dd>If hNamedPipe was opened with FILE_FLAG_OVERLAPPED, the lpOverlapped parameter must not be NULL. It must point to a valid OVERLAPPED structure. If hNamedPipe was created with FILE_FLAG_OVERLAPPED and lpOverlapped is NULL, the function can incorrectly report that the operation is complete.</dd></dl>
+<dl><dd>If hNamedPipe was opened with FILE_FLAG_OVERLAPPED and lpOverlapped is not NULL, TransactNamedPipe is executed as an overlapped operation. The OVERLAPPED structure should contain a manual-reset event object (which can be created by using the CreateEvent function). If the operation cannot be completed immediately, TransactNamedPipe returns FALSE and GetLastError returns ERROR_IO_PENDING. In this situation, the event object is set to the nonsignaled state before TransactNamedPipe returns, and it is set to the signaled state when the transaction has finished. For more information about overlapped operations, see Pipes.</dd></dl>
+<dl><dd>If hNamedPipe was not opened with FILE_FLAG_OVERLAPPED, TransactNamedPipe does not return until the operation is complete.</dd></dl>
+<p><br />
+</p>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>If the function succeeds, the return value is nonzero.
+</p><p>If the function fails, the return value is zero. To get extended error information, call GetLastError.
+</p><p>If the message to be read is longer than the buffer specified by the nOutBufferSize parameter, TransactNamedPipe returns FALSE and the GetLastError function returns ERROR_MORE_DATA. The remainder of the message can be read by a subsequent call to ReadFile, or PeekNamedPipe.
+</p><p><br />
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>TransactNamedPipe fails if the server did not create the pipe as a message-type pipe or if the pipe handle is not in message-read mode. For example, if a client is running on the same machine as the server and uses the \\.\pipe\pipename format to open the pipe, the pipe is opened in byte mode by the named pipe file system (NPFS). If the client uses the form \\server\pipe\pipename, the redirector opens the pipe in message mode. A byte mode pipe handle can be changed to message-read mode with the SetNamedPipeHandleState function.
+</p><p>The function cannot be completed successfully until data is written into the buffer specified by the lpOutBuffer parameter. The lpOverlapped parameter is available to enable the calling thread to perform other tasks while the operation is executing in the background.
+</p><p><br />
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/PeekNamedPipe_(global_function).html" title="OriginC:PeekNamedPipe (global function)">PeekNamedPipe</a>,<a href="../../OriginC/OriginC/SetNamedPipeHandleState_(global_function).html" title="OriginC:SetNamedPipeHandleState (global function)">SetNamedPipeHandleState</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

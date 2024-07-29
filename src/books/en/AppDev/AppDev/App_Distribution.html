@@ -1,0 +1,85 @@
+<h1 class="firstHeading">2 App Distribution</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Protecting_App_Code"><span class="tocnumber">1</span> <span class="toctext">Protecting App Code</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#When_Developing_Apps_with_2017"><span class="tocnumber">1.1</span> <span class="toctext">When Developing Apps with 2017</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#When_Developing_Apps_with_2018_and_Later"><span class="tocnumber">1.2</span> <span class="toctext">When Developing Apps with 2018 and Later</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Specifying_the_Version_for_an_App"><span class="tocnumber">2</span> <span class="toctext">Specifying the Version for an App</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Specifying_an_Origin_Pro-Only_App"><span class="tocnumber">3</span> <span class="toctext">Specifying an Origin Pro-Only App</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#When_Developing_Apps_with_2017_2"><span class="tocnumber">3.1</span> <span class="toctext">When Developing Apps with 2017</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#When_Developing_Apps_with_2018_and_Later_2"><span class="tocnumber">3.2</span> <span class="toctext">When Developing Apps with 2018 and Later</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Providing_Documentation_for_an_App"><span class="tocnumber">4</span> <span class="toctext">Providing Documentation for an App</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Distributing_an_App"><span class="tocnumber">5</span> <span class="toctext">Distributing an App</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Internationalizing_an_App"><span class="tocnumber">6</span> <span class="toctext">Internationalizing an App</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Protecting_App_Code"></a><span class="mw-headline">Protecting App Code</span></h2>
+<h3><a name="When_Developing_Apps_with_2017"></a><span class="mw-headline">When Developing Apps with 2017</span></h3>
+<p>If there is a desire to protect the Origin C code for an App from viewing or alteration by others, the code requiring protection must be placed into a special password-protected Origin C file called an *.OCZ file. A new OCZ file can be created using Code Builder in the same manner as creating other files. An existing Origin C file can be changed to an OCZ file by selecting <b>Save As Encrypted...</b> and saving it to the App folder. One can then follow the steps in <a href="../../AppDev/AppDev/Introduction.html#Adding_and_Deleting_Files_in_an_App" title="AppDev:Introduction">Adding and Deleting Files in an App</a> to change which file will be packaged with the App.
+</p><p>OCZ files can be saved without a password but this defeats their purpose. So one should always set a password when saving the OCZ file. Make sure to record this password somewhere secure because if it is forgotten, there is no way to open the file again. (OriginLab cannot even open an OCZ file without a password.)
+</p><p>Note: If there is any possibility that the App may be distributed to others, make sure not to check <b>Current User Only</b> when saving an OCZ file. This effectively prevents any other user from being able to run the code in the file.
+</p>
+<h3><a name="When_Developing_Apps_with_2018_and_Later"></a><span class="mw-headline">When Developing Apps with 2018 and Later</span></h3>
+<p>Unlike developing Apps with Origin 2017, Origin 2018 has made it much easier to protect Origin C code from viewing or alteration by others. Rather than manually adding an *.OCZ file to the App during development, Package Manager has a new setting <b>Encrypt C and CPP Files</b> that, when checked, will automatically convert *.C or *.CPP files included in the App package into OCZ files <i>"on the fly"</i>. The Original C or CPP files still exist as part of the App during development, but they are not packaged into the generated OPX file. This means that when users install the App, the original C or CPP files aren't installed- only the OCZ files are installed on their machines.
+</p><p>Note: When toggling <b>Encrypt C and CPP Files</b> either on or off, you must click the <b>Repack</b> button afterwards in order for the OCZ file to be generated or not generated.
+</p><p>Additionally: If you use run.LoadOC() to load and compile your C or CPP files and have enabled this feature, you must modify your run.LoadOC() call(s) to remove the .C or .CPP file extension for the feature to work correctly. For example, change:
+</p><p><code>run.LoadOC("%@ACD Test App\Source.cpp", 16);</code>
+</p><p>To:
+</p><p><code>run.LoadOC("%@ACD Test App\Source", 16);</code>
+</p>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> Starting with <b>Origin 2019b</b>, you can replace the App folder name with the <code>%@X</code> string register as follows and it will all magically work:
+<p><code>run.LoadOC("%@A%@X\Source", 16);</code>
+</p>
+</td></tr></table>
+<p>In this case, Origin will find your source code file automatically.
+</p><p>Finally, when utilizing this feature, it is strongly encouraged that backups be made of any Origin C sources files (C or CPP files). Though the files are not removed from the App folder during OPX generation, if the App is later uninstalled from the development machine, the source code files will be permanently lost and there is no way to extract them from a previously generated OPX.
+</p>
+<h2><a name="Specifying_the_Version_for_an_App"></a><span class="mw-headline">Specifying the Version for an App</span></h2>
+<p>Origin accepts an App version specifier as <code>#.##</code>.  That is, a floating point value limited to two decimal places. For example, <code>1.23</code> is a valid version while <code>1.234</code> will be treated as <code>1.23</code>.
+</p>
+<h2><a name="Specifying_an_Origin_Pro-Only_App"></a><span class="mw-headline">Specifying an Origin Pro-Only App</span></h2>
+<p>There are a number of methods for creating an App that is meant for <a class="external text" href="http://www.originlab.com/index.aspx?go=Products/Origin" target="_blank">OriginPro</a> only. Generally, one must develop an OriginPro-only App using OriginPro.
+</p>
+<h3><a name="When_Developing_Apps_with_2017_2"></a><span class="mw-headline">When Developing Apps with 2017</span></h3>
+<p>If one is going to distribute the App on <a class="external text" href="http://www.originlab.com/fileexchange/index.aspx" target="_blank">OriginLab's File Exchange</a>, one can specify that the App <b>Requires OriginPro</b> at the time of File Exchange submission. This can prevent the App from being installed by non-Pro users. For more information see <a class="external text" href="http://www.originlab.com/fileexchange/SubmissionHelp.aspx" target="_blank">Guidelines to Submit a File</a>.
+</p><p>Another method for preventing App installation by non-Pro users is to add the following line of code to the <b>Before Installation</b> script field in Package Manager when generating the App OPX file:
+</p><p><code>if (@VLP==0) { type -b "This App requires OriginPro. Installation aborted."; break 1;}</code>
+</p><p>That simply checks if OriginPro is running and, if not, aborts the installation.
+</p><p>The most secure method to prevent Pro-only App usage by non-Pro users is to put the important code logic into a password-protected OCZ file specified as "Pro Only". Without the password, the file cannot be modified and only Pro users will be able to run it. One could even combine this with one of the aforementioned installation prevention steps to ensure non-Pro users are fully aware that they must have OriginPro.
+</p><p>Finally, <a class="external text" href="../../XFunction/Category/X-Functions.html">X-Functions</a> can be specified as OriginPro only. This is done in <a class="external text" href="../../XFunction/X-Function/X-Function_Builder.html">X-Function Builder</a> by enabling <a class="external text" href="../../XFunction/X-Function/X-Function_Builder.html#X-Function_Tree_ViewTree_View">Tree View</a> and scrolling down to the <b>Module</b> field and setting the value to <b>Pro</b>. While this is an option, it should be noted that another OriginPro user can simply open the X-function and remove that setting. The most secure way to ensure an X-Function is Pro-only is to put the major code logic for the X-function in a Pro-only OCZ file and include that OCZ file in the X-Function.
+</p>
+<h3><a name="When_Developing_Apps_with_2018_and_Later_2"></a><span class="mw-headline">When Developing Apps with 2018 and Later</span></h3>
+<p>Origin 2018 makes it much easier to specify that an App be OriginPro only. In Package Manager, when the setting <b>OriginPro Required</b> is checked, a flag is set in the generated OPX file that will prevent the OPX file from being installed by non-Pro users.
+</p><p>If the OPX file is uploaded to File Exchange, the app will automatically be listed as OriginPro only.
+</p><p>As well, if the <b>Encrypt C and CPP Files</b> setting is also checked in Package Manager, the OCZ generated <i>"on the fly"</i> will be set to OriginPro only. See <a href="#Protecting_App_Code">Protecting App Code</a> for more information about that setting.
+</p>
+<h2><a name="Providing_Documentation_for_an_App"></a><span class="mw-headline">Providing Documentation for an App</span></h2>
+<p>Documentation for an App can take a few forms.
+</p><p>If an App is uploaded to File Exchange for distribution, the File Exchange page can be used to provide documentation. When a user clicks on the Help button in an App dialog, the associated File Exchange page will open in a web browser.
+</p><p>Alternatively, documentation in the form of a .*PDF, *CHM, *TXT or similar file format can be included in the folder for the App. This is useful when a App may not be distributed via the File Exchange. If one uses a dialog in an App (whether it be a LabTalk GetNumber dialog, an Origin C dialog or X-Function) the Help button in the dialog can be made to open the relevant documentation file in the folder for the App. 
+</p><p>Note: Links to arbitrary web sites are not allowed to be used for the Help button in dialogs.
+</p>
+<h2><a name="Distributing_an_App"></a><span class="mw-headline">Distributing an App</span></h2>
+<p>Once an App has been finished and a OPX file generated, the App may be distributed to others. If one wants to distribute it only to colleagues, it is simply a matter of providing them the OPX file and having them install it in Origin via drag and drop.
+</p><p>However, if there is a desire to distribute the App to the public at large, it can be listed in <a class="external text" href="http://www.originlab.com/fileexchange/index.aspx" target="_blank">the OriginLab File Exchange</a>.
+</p><p>For more information about distributing an App via File Exchange, see <a class="external text" href="http://www.originlab.com/fileexchange/SubmissionHelp.aspx" target="_blank">Guidelines to Submit a File</a>.
+</p>
+<h2><a name="Internationalizing_an_App"></a><span class="mw-headline">Internationalizing an App</span></h2>
+<p>Apps can optionally be internationalized to any of the languages supported by Origin including (English, German, and Japanese). For assistance with internationalizing an App being developed, please contact <a class="external text" href="http://www.originlab.com/index.aspx?go=SUPPORT" target="_blank">OriginLab Technical Support</a>.
+</p>
+
+
+
+
+

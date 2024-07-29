@@ -1,0 +1,290 @@
+<h1 class="firstHeading">1.12.1 Mathematics</h1><p><span class="OIndex" style="display:none">Mathematics</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Normalize"><span class="tocnumber">1</span> <span class="toctext"><span class="OIndex">Normalize</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#InterpolationExtrapolationInterpolation.2FExtrapolation"><span class="tocnumber">2</span> <span class="toctext"><span class="OIndex" style="display:none">Interpolation</span><span class="OIndex" style="display:none">Extrapolation</span>Interpolation/Extrapolation</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Integration"><span class="tocnumber">3</span> <span class="toctext"><span class="OIndex">Integration</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Simple_Integral_Function"><span class="tocnumber">3.1</span> <span class="toctext">Simple Integral Function</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Integral_Function_with_Parameters"><span class="tocnumber">3.2</span> <span class="toctext">Integral Function with Parameters</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Multi-dimension_Integral_Function"><span class="tocnumber">3.3</span> <span class="toctext">Multi-dimension Integral Function</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Differentiation"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex">Differentiation</span></span></a></li>
+</ul>
+</div>
+
+<h2><a name="Normalize"></a><span class="mw-headline"><span class="OIndex">Normalize</span></span></h2>
+<p>The following example shows how to pick a point in a data plot (curve) and then normalize all curves in the layer to the same value at that point.  This snippet of code assumes a graph layer with multiple curves is active and all curves share the same X values.  This assumption is typical in spectroscopy.
+</p>
+<pre class="oc" style="font-family:monospace;">GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">&#41;</span>
+    <span style="color: #0000ff;">return</span>;
+
+<span style="color: #008000;">// Allow user to click and select one particular point of one particular curve</span>
+GetGraphPoints mypts;
+mypts.<span style="color: #000000;">SetFollowData</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+mypts.<span style="color: #000000;">GetPoints</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, gl<span style="color: #000000;">&#41;</span>;
+
+vector vx, vy;
+vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vn;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>mypts.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vx, vy, vn<span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Save index and y value of picked point</span>
+    <span style="color: #0000ff;">int</span> nxpicked <span style="color: #000080;">=</span> vn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #0000ff;">double</span> dypicked <span style="color: #000080;">=</span> vy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>;
+    
+    <span style="color: #008000;">// Loop over all data plots in layer</span>
+    foreach<span style="color: #000000;">&#40;</span> DataPlot dp in gl.<span style="color: #000000;">DataPlots</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// Get the data range and then the y column for current plot</span>
+        XYRange xy;
+        Column cy;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">&#40;</span>xy<span style="color: #000000;">&#41;</span> <span style="color: #000040;">&amp;&amp;</span> xy.<span style="color: #000000;">GetYColumn</span><span style="color: #000000;">&#40;</span>cy<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #008000;">// Get a vector reference to y values from the y column                </span>
+            vectorbase <span style="color: #000040;">&amp;</span>vycurrent <span style="color: #000080;">=</span> cy.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+            
+            <span style="color: #008000;">// Scale vector so y value matches user-picked point</span>
+            vycurrent <span style="color: #000040;">*</span><span style="color: #000080;">=</span> dypicked<span style="color: #000040;">/</span>vycurrent<span style="color: #000000;">&#91;</span>nxpicked<span style="color: #000000;">&#93;</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="InterpolationExtrapolationInterpolation.2FExtrapolation"></a><span class="mw-headline"><span class="OIndex" style="display:none">Interpolation</span><span class="OIndex" style="display:none">Extrapolation</span>Interpolation/Extrapolation</span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_interpolate_(global_function).html" title="OriginC:Ocmath interpolate (global function)">ocmath_interpolate</a></b> function is used to do interpolation/extrapolation with modes of Linear, Spline and B-Spline.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Make sure there are 4 columns in active worksheet</span>
+<span style="color: #008000;">// The first two columns are source xy data, </span>
+<span style="color: #008000;">// 3rd column has input x data, 4th column to put output y.</span>
+Worksheet    wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>; 
+
+DataRange drSource;
+drSource.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 1st column - source x data</span>
+drSource.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 2nd column - source y data</span>
+
+vector vSrcx, vSrcy;
+drSource.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vSrcx, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+drSource.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vSrcy, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+
+DataRange drOut;
+drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 3rd column - input x data</span>
+drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 4th column - interpolated y data</span>
+
+vector vOutx, vOuty;
+drOut.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vOutx, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">int</span>    nSrcSize <span style="color: #000080;">=</span> vSrcx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">int</span>    nOutSize <span style="color: #000080;">=</span> vOutx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+vOuty.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nOutSize<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">int</span> nMode <span style="color: #000080;">=</span> INTERP_TYPE_BSPLINE;
+<span style="color: #0000ff;">double</span> dSmoothingFactor <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> ocmath_interpolate<span style="color: #000000;">&#40;</span>vOutx, vOuty, nOutSize, vSrcx, vSrcy, nSrcSize, 
+nMode, dSmoothingFactor<span style="color: #000000;">&#41;</span>;
+
+drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vOuty, <span style="color: #000040;">&amp;</span>vOutx<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Integration"></a><span class="mw-headline"><span class="OIndex">Integration</span></span></h2>
+<p>Origin C provides access to NAG's integral routines to perform integration.  With Origin C and NAG you can do integration on a normal integrand, an integrand with parameters, an integrand with oscillation, an infinite integral, higher dimension integration, and more.  The following examples show how to do integration with NAG.
+</p><p>Your Origin C code will need to include the NAG header file at least once before your code calls any NAG functions.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// NAG declarations</span></pre>
+<h3><a name="Simple_Integral_Function"></a><span class="mw-headline">Simple Integral Function</span></h3>
+<p><span class="OIndex" style="display:none">Integral, with One Integration Variable</span>
+The first example shows how to do a basic integration on a simple integrand with only one integration variable.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// NAG_CALL denotes proper calling convention. You may treat it </span>
+<span style="color: #008000;">// like a function pointer and define your own integrand</span>
+<span style="color: #0000ff;">double</span> NAG_CALL func<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> x,Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span>use_comm <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p;
+        <span style="color: #0000ff;">return</span> <span style="color: #000000;">&#40;</span>x<span style="color: #000040;">*</span><span style="color: #000000;">sin</span><span style="color: #000000;">&#40;</span>x<span style="color: #000040;">*</span><span style="color: #0000dd;">30.0</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">sqrt</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">-</span>x<span style="color: #000040;">*</span>x<span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span>PI<span style="color: #000040;">*</span>PI<span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+	<span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> PI <span style="color: #000040;">*</span> <span style="color: #0000dd;">2.0</span>;  <span style="color: #008000;">// integration interval</span>
+	
+	<span style="color: #0000ff;">double</span> epsabs, abserr, epsrel, result;
+	<span style="color: #008000;">// you may use epsabs and epsrel and this quantity to enhance your desired </span>
+	<span style="color: #008000;">// precision when not enough precision encountered</span>
+	epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+	epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;
+	
+	<span style="color: #008000;">// The max number of sub-intervals needed to evaluate the function in the </span>
+	<span style="color: #008000;">// integral. For most cases 200 to 500 is adequate and recommmended.</span>
+	<span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>;
+	
+	Nag_QuadProgress qp;
+	NagError fail;   
+	
+        Nag_User comm;
+	<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">int</span> use_comm<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>;
+	comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Pointer<span style="color: #000000;">&#41;</span><span style="color: #000040;">&amp;</span>use_comm;
+        d01sjc<span style="color: #000000;">&#40;</span>func, a, b, epsabs, epsrel, max_num_subint, <span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, 
+	<span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+	
+	
+	<span style="color: #008000;">// For the error other than the following three errors which are due to </span>
+	<span style="color: #008000;">// bad input parameters or allocation failure. You will need to free</span>
+	<span style="color: #008000;">// the memory allocation before calling the integration routine again</span>
+	<span style="color: #008000;">// to avoid memory leakage</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM <span style="color: #000040;">&amp;&amp;</span> 
+	    fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span>  NE_ALLOC_FAIL<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">&#41;</span>;
+		NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">&#41;</span>;
+		NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">&#41;</span>;
+		NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result<span style="color: #000000;">&#41;</span>; 
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Integral_Function_with_Parameters"></a><span class="mw-headline">Integral Function with Parameters</span></h3>
+<p><span class="OIndex" style="display:none">Integral, with Multiple Parameters</span>
+The next example shows how to define and perform integration on an integrand with parameters.  Notice that the parameters are passed to the integrator by a user-defined structure.  This avoids having to use static variables as parameters of the integrand, and makes it thread-safe. 
+</p><p>This example can also be adapted to use NAG's infinite integrator. For instance, by enabling the line calling the infinite integrator <b>d01smc</b> function, the example can be used to perform infinite integration.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">struct</span> user <span style="color: #008000;">// integrand parameters</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">double</span> A;
+    <span style="color: #0000ff;">double</span> Xc;
+    <span style="color: #0000ff;">double</span> W; 
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">// Function supplied by user, return the value of the integrand at a given x.</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f_callback<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> x, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span>param <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p<span style="color: #000000;">&#41;</span>;
+	
+    <span style="color: #0000ff;">return</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>A <span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> <span style="color: #000000;">&#40;</span>x <span style="color: #000040;">-</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Xc<span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #000000;">&#40;</span>x <span style="color: #000040;">-</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Xc<span style="color: #000000;">&#41;</span>
+        <span style="color: #000040;">/</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W <span style="color: #000040;">/</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W<span style="color: #000000;">&#41;</span> <span style="color: #000040;">/</span> <span style="color: #000000;">&#40;</span>param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W <span style="color: #000040;">*</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">&#40;</span>PI <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Now, we set parameter values for the function and define the additional parameters necessary to perform the integration.  The integration is then performed by a single function call, passing the parameters as arguments.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    <span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.0</span>; <span style="color: #008000;">// integration interval</span>
+    
+    <span style="color: #008000;">// The following variables are used to control</span>
+    <span style="color: #008000;">// the accuracy and precision of the integration.</span>
+    <span style="color: #0000ff;">double</span> epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;      <span style="color: #008000;">// absolute accuracy, set negative to use relative</span>
+    <span style="color: #0000ff;">double</span> epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;   <span style="color: #008000;">// relative accuracy, set negative to use absolute</span>
+    <span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>; <span style="color: #008000;">// max sub-intervals, 200 to 500 is recommended</span>
+    
+    <span style="color: #008000;">// Result keeps the approximate integral value returned by the algorithm</span>
+    <span style="color: #008000;">// abserr is an estimate of the error which should be an upper bound </span>
+    <span style="color: #008000;">// for |I - result| where I is the integral value</span>
+    <span style="color: #0000ff;">double</span> result, abserr;
+    
+    <span style="color: #008000;">// The structure of type Nag_QuadProgress, it contains pointers </span>
+    <span style="color: #008000;">// allocated memory internally with max_num_subint elements</span>
+    Nag_QuadProgress qp;
+    
+    <span style="color: #008000;">// The NAG error parameter (structure)</span>
+    NagError fail;
+    
+    <span style="color: #008000;">// Parameters passed to integrand by NAG user communication struct</span>
+    <span style="color: #0000ff;">struct</span> user param;
+    param.<span style="color: #000000;">A</span>  <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+    param.<span style="color: #000000;">Xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    param.<span style="color: #000000;">W</span>  <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+
+    Nag_User comm;
+    comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>Pointer<span style="color: #000000;">&#41;</span><span style="color: #000040;">&amp;</span>param;
+    
+    <span style="color: #008000;">// Perform integration</span>
+    <span style="color: #008000;">// There are 3 kinds of infinite boundary types you can use in Nag infinite </span>
+    <span style="color: #008000;">// integrator Nag_LowerSemiInfinite, Nag_UpperSemiInfinite, Nag_Infinite</span>
+    <span style="color: #008000; font-style: regular;">/*
+    d01smc(f_callback, Nag_LowerSemiInfinite, b, epsabs, epsrel, max_num_subint, 
+    &amp;result, &amp;abserr, &amp;qp, &amp;comm, &amp;fail);
+    */</span>
+    d01sjc<span style="color: #000000;">&#40;</span>f_callback, a, b, epsabs, epsrel, max_num_subint, 
+    <span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, <span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+        
+    <span style="color: #008000;">// check the error by printing out error message</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// For errors other than the following three errors which are due to </span>
+    <span style="color: #008000;">// bad input parameters, or allocation failure,</span>
+    <span style="color: #008000;">// you will need to free the memory allocation before calling the </span>
+    <span style="color: #008000;">// integration routine again to avoid memory leakage.</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM 
+        <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_ALLOC_FAIL<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">&#41;</span>;
+        NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">&#41;</span>;
+        NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">&#41;</span>;
+        NAG_FREE<span style="color: #000000;">&#40;</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Multi-dimension_Integral_Function"></a><span class="mw-headline">Multi-dimension Integral Function</span></h3>
+<p><span class="OIndex" style="display:none">Integral, Multi-dimension</span>
+For integrals of dimension higher than 2, you can call the NAG integrator function <b>d01wcc</b> to perform the integration.
+</p><p>Our user defined call back function will be passed to the NAG <b>d01wcc</b> function.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL f_callback<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> n, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> z, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span> 
+	<span style="color: #0000ff;">double</span> tmp_pwr;
+	tmp_pwr <span style="color: #000080;">=</span> z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">+</span>z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>;
+	<span style="color: #0000ff;">return</span> z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span>z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span><span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span>z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span>tmp_pwr<span style="color: #000040;">*</span>tmp_pwr<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Main function:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01wcc_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	<span style="color: #008000;">// Input variables</span>
+	<span style="color: #0000ff;">int</span> ndim <span style="color: #000080;">=</span> NDIM;  <span style="color: #008000;">// the integral dimension</span>
+	<span style="color: #0000ff;">double</span> a<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span>, b<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span>; <span style="color: #000040;">++</span>ii<span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// integration interval</span>
+	<span style="color: #000000;">&#123;</span>
+		a<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+		b<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">int</span> minpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;	
+	<span style="color: #0000ff;">int</span> maxpts <span style="color: #000080;">=</span> MAXPTS;  <span style="color: #008000;">// maximum number of function evaluation </span>
+	<span style="color: #0000ff;">double</span> eps <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>; <span style="color: #008000;">// set the precision</span>
+	
+	<span style="color: #008000;">// Output variable</span>
+	<span style="color: #0000ff;">double</span> finval, acc;
+	Nag_User comm;	
+	NagError fail;	
+	
+	d01wcc<span style="color: #000000;">&#40;</span>ndim, f_callback, a, b, <span style="color: #000040;">&amp;</span>minpts, maxpts, eps, <span style="color: #000040;">&amp;</span>finval, <span style="color: #000040;">&amp;</span>acc, 
+	<span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_NOERROR <span style="color: #000040;">||</span> fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_QUAD_MAX_INTEGRAND_EVAL<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Requested accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, eps<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Estimated value    =%12.4f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, finval<span style="color: #000000;">&#41;</span>;  
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Estimated accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, acc<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Differentiation"></a><span class="mw-headline"><span class="OIndex">Differentiation</span></span></h2>
+<p>The <b><a href="../../OriginC/OriginC/Ocmath_derivative_(global_function).html" title="OriginC:Ocmath derivative (global function)">ocmath_derivative</a></b> function is used to do simple derivative calculations without smoothing.  The function is declared in ocmath.h as shown below.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_derivative<span style="color: #000000;">&#40;</span>
+    <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> pXData, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> pYData, uint nSize, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>The function ignores all missing values and computes the derivative by taking the average of the two slopes between the point and each of its neighboring data points.  If the dwCntrl argument uses the default value of 0, the function fills in the average when data changes direction.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_derivative<span style="color: #000000;">&#40;</span>vx, vy, vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;successfully&quot;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>If dwCntrl is set to DERV_PEAK_AS_ZERO, the function fills in zero if data changes direction.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_derivative<span style="color: #000000;">&#40;</span>vx, vy, vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, DERV_PEAK_AS_ZERO<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;successfully&quot;</span><span style="color: #000000;">&#41;</span>;</pre>
+
+
+
+
+
+

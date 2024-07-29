@@ -1,0 +1,72 @@
+<h1 class="firstHeading">3.7.1 Export ASCII</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Exporting_Worksheet_Data_as_ASCII_File"><span class="tocnumber">2</span> <span class="toctext">Exporting Worksheet Data as ASCII File</span></a></li>
+</ul>
+</div>
+
+<p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR1</p>
+<h2><a name="Exporting_Worksheet_Data_as_ASCII_File"></a><span class="mw-headline">Exporting Worksheet Data as ASCII File</span></h2>
+<p>The following example illustrates how to export the active worksheet data to an ASCII file. Labels are included are included in the resulting file and the missing values are treated as blank.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> export_worksheet_as_ascii<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  <span style="color: #008000;">// get active worksheet</span>
+  Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+  <span style="color: #000000;">&#123;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate a worksheet!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+  <span style="color: #000000;">&#125;</span>
+
+  <span style="color: #008000;">// file type filter</span>
+  StringArray saFileTypes;  
+  saFileTypes.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+  saFileTypes<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;[*.dat] *.dat&quot;</span>;
+  saFileTypes<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;[Text File (*.txt)] *.txt&quot;</span>;
+  saFileTypes<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;[Comma Delimited *.csv] *.csv&quot;</span>;
+  saFileTypes<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;[All Files (*.*)] *.*&quot;</span>;
+	
+  <span style="color: #008000;">// default file name</span>
+  string strFileName;  
+
+  <span style="color: #008000;">// worksheet name</span>
+  wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span>strFileName<span style="color: #000000;">&#41;</span>;  
+
+  <span style="color: #008000;">// default file path</span>
+  string strFilePath; 
+
+  <span style="color: #008000;">// user files path</span>
+  strFilePath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">FALSE</span><span style="color: #000000;">&#41;</span>;  
+
+  <span style="color: #008000;">// full file path,including file name</span>
+  string strFullPath; 
+
+  <span style="color: #008000;">// open SaveAs dialog</span>
+  strFullPath <span style="color: #000080;">=</span> GetSaveAsBox<span style="color: #000000;">&#40;</span>saFileTypes, strFilePath, strFileName<span style="color: #000000;">&#41;</span>;  
+	
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>strFullPath.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;User has cancelled the SaveAs dialog box!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+  <span style="color: #0000ff;">else</span>
+  <span style="color: #000000;">&#123;</span>
+   <span style="color: #008000;">// export worksheet data, including data, labels, stored missing value as blank</span>
+   <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">ExportASCII</span><span style="color: #000000;">&#40;</span>strFullPath, WKS_EXPORT_ALL <span style="color: #000040;">|</span> WKS_EXPORT_LABELS <span style="color: #000040;">|</span> 
+             WKS_EXPORT_MISSING_AS_BLANK<span style="color: #000000;">&#41;</span>;
+
+   <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nRet <span style="color: #000080;">==</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+     out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to export!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+   <span style="color: #0000ff;">else</span>
+     <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The exported file size is&#160;%d.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+  <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

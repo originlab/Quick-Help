@@ -1,0 +1,151 @@
+<h1 class="firstHeading">5.8 Miscellaneous</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Export_Graphs_as_Images_from_Sample_Projects"><span class="tocnumber">1</span> <span class="toctext">Export Graphs as Images from Sample Projects</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Extract_Image_Colors"><span class="tocnumber">2</span> <span class="toctext">Extract Image Colors</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Loop_through_worksheets"><span class="tocnumber">3</span> <span class="toctext">Loop through worksheets</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Manage_Project_Explorer"><span class="tocnumber">4</span> <span class="toctext">Manage Project Explorer</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Multi_Threading"><span class="tocnumber">5</span> <span class="toctext">Multi Threading</span></a></li>
+</ul>
+</div>
+
+<p>
+<p>This folder contains examples related to folder management, color management in Origin with <strong>originpro</strong> package.</p>
+
+</p>
+<h2><a name="Export_Graphs_as_Images_from_Sample_Projects"></a><span class="mw-headline">Export Graphs as Images from Sample Projects</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample generate an image from a graph from a sample project. 
+Please note that a file named my_py_test.png will be replaced by running this sample.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;">#from Learning Center folder</span>
+op.<span style="color: #900090;">open</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'c'</span><span style="color: #000;">&#41;</span>+ r<span style="color: #0a0;">'<span style="color: #000099; font-weight: bold;">\G</span>raphing<span style="color: #000099; font-weight: bold;">\M</span>ulti-Panel Graphs - Trellis Box Plot.opju'</span><span style="color: #000;">&#41;</span>
+
+gg<span style="color: #000;">=</span>op.<span style="color: #000;">find_graph</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># export graph to an image</span>
+f<span style="color: #000;">=</span><span style="color: #0a0;">''</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> gg:
+    f<span style="color: #000;">=</span>gg.<span style="color: #000;">save_fig</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>+<span style="color: #0a0;">'my_py_test.png'</span><span style="color: #000;">,</span>width<span style="color: #000;">=</span><span style="color: #000;">500</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>f<span style="color: #000;">&#41;</span>:
+    <span style="color: #000;">os</span>.<span style="color: #000;">startfile</span><span style="color: #000;">&#40;</span>f<span style="color: #000;">&#41;</span></pre>
+<h2><a name="Extract_Image_Colors"></a><span class="mw-headline">Extract Image Colors</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample picks all colors from an image. 
+The RGB values for each color is output to a worksheet. 
+This example requires Python package extcolors to be preinstalled.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> extcolors
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># choose an image to extract colors</span>
+file_path <span style="color: #000;">=</span> op.<span style="color: #000;">file_dialog</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'*.png;*.jpg;*.bmp'</span><span style="color: #000;">,</span><span style="color: #0a0;">'Select an Image'</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>file_path<span style="color: #000;">&#41;</span> <span style="color: #000;">==</span><span style="color: #000;">0</span>:
+    <span style="color: #ff7700;font-weight:bold;">raise</span> <span style="color: #900090;">ValueError</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'user cancel'</span><span style="color: #000;">&#41;</span>
+    
+colors <span style="color: #000;">=</span> extcolors.<span style="color: #000;">extract_from_path</span><span style="color: #000;">&#40;</span>file_path<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># rgb = colors[:,0]</span>
+rgb <span style="color: #000;">=</span> <span style="color: #900090;">map</span><span style="color: #000;">&#40;</span><span style="color: #900090;">list</span><span style="color: #000;">,</span> <span style="color: #900090;">zip</span><span style="color: #000;">&#40;</span>*colors<span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># print(rgb)</span>
+r <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+g <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+b <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> row <span style="color: #ff7700;font-weight:bold;">in</span> rgb:
+    r.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>row<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+    g.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>row<span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+    b.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>row<span style="color: #000;">&#91;</span><span style="color: #000;">2</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># output colors</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> r<span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> g<span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">2</span><span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span></pre>
+<h2><a name="Loop_through_worksheets"></a><span class="mw-headline">Loop through worksheets</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample loops through all the worksheets in the project,
+print out the number of rows of each sheet.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #ff7700;font-weight:bold;">for</span> wb <span style="color: #ff7700;font-weight:bold;">in</span> op.<span style="color: #000;">pages</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">for</span> wks <span style="color: #ff7700;font-weight:bold;">in</span> wb:
+        <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'Worksheet {wks.lt_range()} has {wks.rows} rows'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Manage_Project_Explorer"></a><span class="mw-headline">Manage Project Explorer</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample shows the management of folders under Project Explorer. It sets up same
+folder structure as the /Sample/Python/ and create a workbook under each sub folder. 
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># Get the path string of a folder</span>
+path <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Samples'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Python'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Start a new project and go to the root folder in Project Explorer</span>
+op.<span style="color: #000;">new</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span> 
+op.<span style="color: #000;">pe</span>.<span style="color: #000;">cd</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'/UNTITLED'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Loop over subfolders under /Samples/Python/ and create subfolders with same name.</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> f <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #000;">os</span>.<span style="color: #000;">listdir</span><span style="color: #000;">&#40;</span>path<span style="color: #000;">&#41;</span>:
+    fd <span style="color: #000;">=</span> f<span style="color: #0a0;">'{os.path.splitext(f)[0]}'</span>
+    op.<span style="color: #000;">pe</span>.<span style="color: #000;">mkdir</span><span style="color: #000;">&#40;</span>fd<span style="color: #000;">&#41;</span>
+    op.<span style="color: #000;">pe</span>.<span style="color: #000;">cd</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'&quot;{fd}&quot;'</span><span style="color: #000;">&#41;</span>
+    op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span>fd<span style="color: #000;">&#41;</span>
+    op.<span style="color: #000;">pe</span>.<span style="color: #000;">cd</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'/UNTITLED'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Multi_Threading"></a><span class="mw-headline">Multi Threading</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">threading</span>
+<span style="color: #ff7700;font-weight:bold;">from</span> <span style="color: #000;">datetime</span> <span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">datetime</span>
+<span style="color: #ff7700;font-weight:bold;">from</span> <span style="color: #000;">time</span> <span style="color: #ff7700;font-weight:bold;">import</span> sleep
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;">#critical section to global data</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> write<span style="color: #000;">&#40;</span>tt<span style="color: #000;">,</span> name<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">global</span> v1<span style="color: #000;">,</span> v2
+    v1.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>name<span style="color: #000;">&#41;</span>
+    v2.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>tt<span style="color: #000;">&#41;</span>
+    
+<span style="color: #d00; font-style: italic;">#must not do print or anything related to Origin inside the thread function</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> thread_task<span style="color: #000;">&#40;</span>lock<span style="color: #000;">,</span> name<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">for</span> _ <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">&#40;</span><span style="color: #000;">5</span><span style="color: #000;">&#41;</span>:
+        sleep<span style="color: #000;">&#40;</span><span style="color: #000;">0.5</span><span style="color: #000;">&#41;</span>
+        now <span style="color: #000;">=</span> <span style="color: #000;">datetime</span>.<span style="color: #000;">now</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+        tt <span style="color: #000;">=</span> now.<span style="color: #000;">strftime</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">&quot;%H:%M:%S.%f&quot;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#91;</span>:-<span style="color: #000;">3</span><span style="color: #000;">&#93;</span>
+        lock.<span style="color: #000;">acquire</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+        write<span style="color: #000;">&#40;</span>tt<span style="color: #000;">,</span> name<span style="color: #000;">&#41;</span>
+        lock.<span style="color: #000;">release</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#global variables to be used inside thread task</span>
+v1<span style="color: #000;">=</span><span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+v2<span style="color: #000;">=</span><span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+<span style="color: #d00; font-style: italic;">#we need to have criticlal section for any access to shared data</span>
+lock <span style="color: #000;">=</span> <span style="color: #000;">threading</span>.<span style="color: #000;">Lock</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+t1 <span style="color: #000;">=</span> <span style="color: #000;">threading</span>.<span style="color: #000;">Thread</span><span style="color: #000;">&#40;</span>target<span style="color: #000;">=</span>thread_task<span style="color: #000;">,</span> args<span style="color: #000;">=</span><span style="color: #000;">&#40;</span>lock<span style="color: #000;">,</span><span style="color: #0a0;">'a'</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+t2 <span style="color: #000;">=</span> <span style="color: #000;">threading</span>.<span style="color: #000;">Thread</span><span style="color: #000;">&#40;</span>target<span style="color: #000;">=</span>thread_task<span style="color: #000;">,</span> args<span style="color: #000;">=</span><span style="color: #000;">&#40;</span>lock<span style="color: #000;">,</span><span style="color: #0a0;">'b'</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+t1.<span style="color: #000;">start</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+t2.<span style="color: #000;">start</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+t1.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+t2.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#threads done, we can put data to a worksheet</span>
+wks<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#need to set col(2) as time format before putting data into it</span>
+wks.<span style="color: #000;">cols</span> <span style="color: #000;">=</span> <span style="color: #000;">2</span>
+wks.<span style="color: #000;">as_time</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span>
+
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> v1<span style="color: #000;">,</span> <span style="color: #0a0;">'Name'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> v2<span style="color: #000;">,</span> <span style="color: #0a0;">'Time'</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#has to use LabTalk for setting column width</span>
+wks.<span style="color: #000;">lt_exec</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">&quot;wks.col2.width=9&quot;</span><span style="color: #000;">&#41;</span></pre>
+
+
+
+
+
+

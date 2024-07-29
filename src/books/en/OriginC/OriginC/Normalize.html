@@ -1,0 +1,50 @@
+<h1 class="firstHeading">3.9.1.3 Normalize</h1><p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR5</p>
+<h2><a name="Normalize_Multiple_Curves_in_a_Graph_at_User-Specified_Point"></a><span class="mw-headline">Normalize Multiple Curves in a Graph at User-Specified Point</span></h2>
+<p>This example shows how to allow user to pick a particular point in a particular data plot (curve) and then normalize all curves in the layer to the same value at that point.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> normalize_multiple_curves<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Assume graph layer with multiple curves is active</span>
+	<span style="color: #008000;">// It is also assumed all curves share same X values, typical in spectroscopy</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	<span style="color: #008000;">// Allow user to click and select one particular point of one particular curve</span>
+	GetGraphPoints mypts;
+	mypts.<span style="color: #000000;">SetFollowData</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+	mypts.<span style="color: #000000;">GetPoints</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, gl<span style="color: #000000;">&#41;</span>;
+	vector vx, vy;
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vn;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>mypts.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vx, vy, vn<span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// Save index and y value of picked point</span>
+		<span style="color: #0000ff;">int</span> nxpicked <span style="color: #000080;">=</span> vn<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+		<span style="color: #0000ff;">double</span> dypicked <span style="color: #000080;">=</span> vy<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>;
+		<span style="color: #008000;">// Loop over all data plots in layer</span>
+		foreach<span style="color: #000000;">&#40;</span> DataPlot dp in gl.<span style="color: #000000;">DataPlots</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #008000;">// Get the data range and then the y column for current plot</span>
+			XYRange xy;
+			Column cy;
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">&#40;</span>xy<span style="color: #000000;">&#41;</span> <span style="color: #000040;">&amp;&amp;</span> xy.<span style="color: #000000;">GetYColumn</span><span style="color: #000000;">&#40;</span>cy<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				<span style="color: #008000;">// Get a vector reference to y values from the y column</span>
+				vectorbase <span style="color: #000040;">&amp;</span>vycurrent <span style="color: #000080;">=</span> cy.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+				<span style="color: #008000;">// Scale vector so y value matches user-picked point</span>
+				vycurrent <span style="color: #000040;">*</span><span style="color: #000080;">=</span> dypicked<span style="color: #000040;">/</span>vycurrent<span style="color: #000000;">&#91;</span>nxpicked<span style="color: #000000;">&#93;</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

@@ -1,0 +1,145 @@
+<h1 class="firstHeading">1.4.8 Read and Write Recordset in workshhet</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Example_Codes"><span class="tocnumber">1</span> <span class="toctext">Example Codes</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#open_method_prototype_and_its_explaination"><span class="tocnumber">2</span> <span class="toctext">open method prototype and its explaination</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Example_Codes"></a><span class="mw-headline">Example Codes</span></h2>
+<p>Running "ReadRecordset2Wks" to find all entrys from stars access database Stars table and put into one worksheet. 
+</p><p>Then do some change in this worksheet and run "WriteWks2Recordset" to put back this change to table; 
+</p><p>However, if run "WriteWks2Recordset 0" will append all rows from worksheet to table. NOTE if you wants to use append, and there is a Key field which not allow duplicate data, then you have to make sure after appending no duplicate data in key field/column. 
+</p><p><br />
+</p>
+<ul><li> ---The example will update build-in database Samples\Import and Export\stars.mdb, so please backup this file before running the following codes.</li></ul>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#define</span> DB_SETUP_STR			<span style="color: #ff00ff;">&quot;Provider=Microsoft.Jet.OLEDB.4.0;Password=&quot;</span><span style="color: #ff00ff;">&quot;;User ID=Admin;Data Source=&quot;</span>
+<span style="color: #0000ff;">#define</span> DB_FILE_FULLPATH		GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\I</span>mport and Export<span style="color: #666666; font-weight: bold;">\s</span>tars.mdb&quot;</span>
+<span style="color: #0000ff;">#define</span> TABLE_NAME 				<span style="color: #ff00ff;">&quot;Stars&quot;</span>
+
+ 
+<span style="color: #008000;">//function to retrieve data and put into a worksheet</span>
+<span style="color: #0000ff;">int</span> ReadRecordset2Wks<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	<span style="color: #008000;">//create the ADODB.Recorset object</span>
+	Object ocrs <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>ocrs <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot; ADO init error!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+	<span style="color: #008000;">// prepare and open database recordset</span>
+	string strConn <span style="color: #000080;">=</span> DB_SETUP_STR <span style="color: #000040;">+</span> DB_FILE_FULLPATH <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;;&quot;</span>;
+	string strQuery <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;select * from &quot;</span><span style="color: #000040;">+</span> TABLE_NAME <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;;&quot;</span>;
+	ocrs.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+	ocrs.<span style="color: #000000;">open</span><span style="color: #000000;">&#40;</span>strQuery, strConn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;	
+ 
+	<span style="color: #008000;">//prepare worksheet</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+ 
+	<span style="color: #008000;">//read data into the worksheet.</span>
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">ReadRecordset</span><span style="color: #000000;">&#40;</span>ocrs<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> nRet <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> nRet;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>ocrs.<span style="color: #000000;">State</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//adStateOpen</span>
+         ocrs.<span style="color: #000000;">Close</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span>
+ 
+ 
+<span style="color: #008000;">// when bReplace is true, it will delete all entry firstly then copy data from current worksheet to table.</span>
+<span style="color: #008000;">// NOTE if you wants to use append, and there is a Key field which not allow duplicate data, then you have to make sure after appending no duplicate data in key field/column. </span>
+<span style="color: #0000ff;">int</span>  WriteWks2Recordset<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bReplace <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet		wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// assume use active wks</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;NO active wks!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+	Object ocrs;
+	ocrs <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>ocrs <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot; ADO init error!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// Get Access file name</span>
+	string strDBFileName <span style="color: #000080;">=</span> DB_FILE_FULLPATH;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>strDBFileName.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid database file path!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; 
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #008000;">// prepare and open database recordset</span>
+	string strConn <span style="color: #000080;">=</span> DB_SETUP_STR <span style="color: #000040;">+</span> strDBFileName; 
+	ocrs.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+	string strQuery <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Select * From &quot;</span><span style="color: #000040;">+</span> TABLE_NAME  <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;;&quot;</span>;
+	ocrs.<span style="color: #000000;">open</span><span style="color: #000000;">&#40;</span> strQuery, strConn, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+ 
+	<span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_APPEND;	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bReplace <span style="color: #000000;">&#41;</span>
+		nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_REPLACE;
+
+	<span style="color: #008000;">//write worksheet data to recordset.</span>
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">WriteRecordset</span><span style="color: #000000;">&#40;</span>ocrs,nOption <span style="color: #000000;">&#41;</span>;
+	out_int<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;nRet = &quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> nRet <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> nRet;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>ocrs.<span style="color: #000000;">State</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//adStateOpen</span>
+         ocrs.<span style="color: #000000;">Close</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="open_method_prototype_and_its_explaination"></a><span class="mw-headline">open method prototype and its explaination</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/**
+QueryString&#160;: Query string build by user using SQL language
+
+ActiveConnectionString&#160;: The string to indicate the connection method to a database. This sample only shows a string using SQLOLEDB as provider to connect to an access database.
+
+CursorType&#160;: [optional]
+= 2 
+	Uses a dynamic cursor. Additions, changes, and deletions by other users are visible, 
+	and all types of movement through the Recordset are allowed, except for bookmarks, 
+	if the provider doesn't support them. 
+= 0 
+	Default. Uses a forward-only cursor. Identical to a static cursor, except that you 
+	can only scroll forward through records. This improves performance when you need to 
+	make only one pass through a Recordset. 
+= 1 
+	Uses a keyset cursor. Like a dynamic cursor, except that you can't see records that 
+	other users add, although records that other users delete are inaccessible from your Recordset. 
+	Data changes by other users are still visible. 
+= 3 
+	Uses a static cursor. A static copy of a set of records that you can use to find data 
+	or generate reports. Additions, changes, or deletions by other users are not visible. 
+= -1 
+	Does not specify the type of cursor.
+
+LockType&#160;: [optional]	
+= 4 
+	Indicates optimistic batch updates. Required for batch update mode. 
+= 3 
+	Indicates optimistic locking, record by record. The provider uses optimistic locking, locking records 
+	only when you call the Update method. 
+= 2 
+	Indicates pessimistic locking, record by record. The provider does what is necessary to ensure successful 
+	editing of the records, usually by locking records at the data source 
+	immediately after editing. 
+= 1 
+	Indicates read-only records. You cannot alter the data. 
+= -1 
+	Does not specify a type of lock. For clones, the clone is created with the same lock type as the original. 
+
+*/</span>
+recordset.<span style="color: #000000;">Open</span><span style="color: #000000;">&#40;</span>QueryString, ActiveConnectionString, CursorType, LockType, Options<span style="color: #000000;">&#41;</span></pre>
+
+
+
+
+
+

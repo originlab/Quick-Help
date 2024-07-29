@@ -1,0 +1,93 @@
+<h1 class="firstHeading">3.9.2.2.6 Fit with matrix</h1><h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8.0 SR0</p>
+<h2><a name="Before_running"></a><span class="mw-headline">Before running</span></h2>
+<p>The following code shows how to use NLFit to fit matrix data<span class="OIndex" style="display:none">Matrix Fit</span>.
+</p>
+<ol><li> Open a matrix from <i>&lt;Origin Installation Directory&gt;\Samples\Matrix Conversion and Gridding\2D Gaussian.ogm</i>.</li>
+<li> Copy and compile the following codes in Code Builder, and then run below <i>matrix_fit</i> function in Command Window.</li></ol>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">bool</span> matrix_fit<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Get Matrix Object data into matrix</span>
+	MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>ml <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	matrix mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+	<span style="color: #008000;">// Get X and Y minimum and maximum respectively</span>
+	<span style="color: #008000;">// and then gerenate X and Y vectors for the same size of matrix</span>
+	<span style="color: #0000ff;">double</span> xmin, ymin, xmax, ymax;
+	mo.<span style="color: #000000;">GetXY</span><span style="color: #000000;">&#40;</span>xmin, ymin, xmax, ymax<span style="color: #000000;">&#41;</span>;	
+	<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	vector vX<span style="color: #000000;">&#40;</span>nCols<span style="color: #000040;">*</span>nRows<span style="color: #000000;">&#41;</span>, vY<span style="color: #000000;">&#40;</span>nCols<span style="color: #000040;">*</span>nRows<span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// Get X and Y vectos by equi-spaced gridding with specified minimum and maximum</span>
+	ocmath_mat_to_regular_xyz<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, xmin, xmax, ymin, ymax, vX, vY, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+ 
+	<span style="color: #008000;">// Load function from FDF file to tree</span>
+	string strFDF <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">&#40;</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">&quot;FitFunc&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Gauss2D.FDF&quot;</span>;
+	Tree trFF;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">&#40;</span>strFDF, <span style="color: #000040;">&amp;</span>trFF<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;	
+ 
+	<span style="color: #008000;">// NLFit object</span>
+	NLFit fit;
+	<span style="color: #008000;">// Set function 	</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span>trFF<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// If error</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+	<span style="color: #008000;">// Set data</span>
+	NLSFONEDATA arrstDep; <span style="color: #008000;">// Dependent</span>
+	arrstDep.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> mat;
+	arrstDep.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> nRows<span style="color: #000040;">*</span>nCols;
+ 
+	NLSFONEDATA arrstIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">// Independents, here are two, X and Y</span>
+	arrstIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX;
+	arrstIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	arrstIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY;
+	arrstIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">&amp;</span>arrstDep, arrstIndep<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// 0 means OK</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+	<span style="color: #008000;">// Run parameter init code to get parameter init values	</span>
+	vector vZ;
+	mat.<span style="color: #000000;">GetAsVector</span><span style="color: #000000;">&#40;</span>vZ, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Convert the matrix to vector</span>
+	NumericFunction NF;
+	NF.<span style="color: #000000;">SetTree</span><span style="color: #000000;">&#40;</span>trFF<span style="color: #000000;">&#41;</span>;
+	vector vParameters;  <span style="color: #008000;">// z0, A, xc, w1, yc, w2		</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>NF.<span style="color: #000000;">ParamInit</span><span style="color: #000000;">&#40;</span>vParameters, vX, vY, vZ<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// Initialize</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+	<span style="color: #008000;">// Output patatmer init values</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;--- Paramter init values --- &quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> vParameters.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;param index =&#160;%d value is  =&#160;%1f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, ii, vParameters<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+	<span style="color: #008000;">// Set paremter values</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetParams</span><span style="color: #000000;">&#40;</span>vParameters.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vParameters<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// 0 means OK</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+	<span style="color: #008000;">// Perform fitting</span>
+	<span style="color: #0000ff;">int</span> nMaxNumIterations <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;	
+	fit.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span>nMaxNumIterations<span style="color: #000000;">&#41;</span>;
+ 
+	<span style="color: #008000;">// Output the fitted parameter results</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;--- Paramter result values --- &quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span>ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> vParameters.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;param index =&#160;%d value is  =&#160;%1f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, ii, vParameters<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

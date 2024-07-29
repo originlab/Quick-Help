@@ -1,0 +1,76 @@
+<h1 class="firstHeading">3.2.7.6 Fill Extracted Data Cells with Color</h1><h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8.0 SR0</p>
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>The following example shows how to find cells with LabTalk testing condition expression from a worksheet. And then fill these cells with specified color, also set the font color.
+</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>In the example, the string variable <b>strLTRunBeforeLoop</b> is used to set LabTalk script command before running the testing condition. Here it is defined as each column dynamically in the for-loop. The <b>strCondition</b> is used to specified LabTalk testing condition expression.
+</p><p>Before running this example, run the function <b>Before_Running</b> first to create a worksheet with uniform data. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> Fill_Cell_Color<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get the active worksheet</span>
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>   <span style="color: #008000;">// if the active worksheet not exist, return</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">int</span> nNumCols <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">// get column number</span>
+	
+	DataRange dr;   <span style="color: #008000;">// data range to hold the items which satisfy condition</span>
+	
+	<span style="color: #008000;">// loop each column to find those items that satisfy the condition</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nCol<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; nCol<span style="color: #000080;">&lt;</span>nNumCols; nCol<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// LabTalk script to be executed before the looping start</span>
+		string strLTRunBeforeLoop <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;range a = &quot;</span> <span style="color: #000040;">+</span> <span style="color: #000000;">&#40;</span>string<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span>nCol<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// define each column range for LabTalk</span>
+		
+		<span style="color: #008000;">// LabTalk conditional expression involving columns in the worksheet</span>
+		string strCondition <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;a&gt;=0.2 &amp;&amp; a&lt;=0.6&quot;</span>;
+		
+		vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vuRowIndices;   <span style="color: #008000;">// vector for row indices</span>
+		
+		<span style="color: #008000;">// get the row indices which satisfy the condition</span>
+		<span style="color: #0000ff;">int</span> nNumRowIndices <span style="color: #000080;">=</span> wks.<span style="color: #000000;">SelectRows</span><span style="color: #000000;">&#40;</span>strCondition, vuRowIndices, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, strLTRunBeforeLoop<span style="color: #000000;">&#41;</span>;
+		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nNumRowIndices<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>    <span style="color: #008000;">// no item satisfies the condition</span>
+			<span style="color: #0000ff;">continue</span>;
+		<span style="color: #0000ff;">else</span>
+		<span style="color: #000000;">&#123;</span>	
+			<span style="color: #008000;">// add those items, which satisfy the condition, to the data range</span>
+			<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nRowIndex<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; nRowIndex<span style="color: #000080;">&lt;</span>vuRowIndices.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nRowIndex<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;&quot;</span>, wks, vuRowIndices<span style="color: #000000;">&#91;</span>nRowIndex<span style="color: #000000;">&#93;</span>, nCol, vuRowIndices<span style="color: #000000;">&#91;</span>nRowIndex<span style="color: #000000;">&#93;</span>, nCol<span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	
+	Tree trFormat;    <span style="color: #008000;">// define format tree</span>
+	trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">CommonStyle</span>.<span style="color: #000000;">Fill</span>.<span style="color: #000000;">FillColor</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> SYSCOLOR_RED;   <span style="color: #008000;">// fill color = red</span>
+	trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">CommonStyle</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> SYSCOLOR_BLUE; <span style="color: #008000;">// font color = blue</span>
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000080;">==</span>dr.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>   <span style="color: #008000;">// no error</span>
+		<span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> dr.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// return true if apply format successfully</span>
+<span style="color: #000000;">&#125;</span></pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> Before_Running<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// prepare worksheet with data to do extract</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">30</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// set worksheet with 3o rows and 5 columns	</span>
+ 
+	<span style="color: #008000;">// set uniform data for all columns</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nCol<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; nCol<span style="color: #000080;">&lt;</span>wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nCol<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Dataset ds<span style="color: #000000;">&#40;</span>wks, nCol<span style="color: #000000;">&#41;</span>;
+		ds.<span style="color: #000000;">Uniform</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

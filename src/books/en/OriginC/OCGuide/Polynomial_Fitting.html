@@ -1,0 +1,51 @@
+<h1 class="firstHeading">1.12.3.2 Polynomial Fitting</h1><p>To perform a polynomial fitting routine in Origin C, you can use the <b><a href="../../OriginC/OriginC/Ocmath_polynomial_fit_(global_function).html" title="OriginC:Ocmath polynomial fit (global function)">ocmath_polynomial_fit</a></b> function. With this function, you can do polynomial fitting with weight, and then you can get the fitting results, including parameter values, statistical information, etc.
+</p><p>The following procedure will show how to perform polynomial fitting in Origin C by using this function.
+</p>
+<h2><a name="Perform_Polynomial_Fitting"></a><span class="mw-headline">Perform <span class="OIndex">Polynomial Fitting</span></span></h2>
+<p>Before doing polynomial fitting, please import the desired data, here need one independent and one dependent.
+</p><p>The procedure of performing polynomial fitting needs three steps.
+</p><p>1. Get the data from the worksheet for polynomial fit. Both independent and dependent are using vector variables. 
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+	<span style="color: #0000ff;">return</span>;  <span style="color: #008000;">// invalid worksheet</span>
+
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// x column</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// y column</span>
+
+vector vX, vY;
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vX, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get data of x column to vector</span>
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get data of y column to vector</span></pre>
+<p>2. Define the structure variables and other data types as parameters for passing to the function. It also can initialize some fitting settings. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// here just define the structure for output results</span>
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nOrder <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// order</span>
+
+<span style="color: #0000ff;">int</span> nSizeFitParams <span style="color: #000080;">=</span> nOrder<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;
+FitParameter psFitParameter<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// number of parameter = nOrder+1</span>
+
+RegStats psRegStats;  <span style="color: #008000;">// regression statistics</span>
+RegANOVA psRegANOVA;  <span style="color: #008000;">// anova statistics</span></pre>
+<p>3. Pass the desired arguments and perform polynomial fitting on the data.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// polynomial fitting, using the default options, 2 order</span>
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_polynomial_fit<span style="color: #000000;">&#40;</span>nSize, vX, vY, <span style="color: #0000ff;">NULL</span>, nOrder, <span style="color: #0000ff;">NULL</span>, psFitParameter, 
+									nSizeFitParams, <span style="color: #000040;">&amp;</span>psRegStats, <span style="color: #000040;">&amp;</span>psRegANOVA<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// check error</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nRet<span style="color: #000040;">!</span><span style="color: #000080;">=</span>STATS_NO_ERROR<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Output_the_Results"></a><span class="mw-headline">Output the Results</span></h2>
+<p>After finishing the calculation, the results may need to output to somewhere for presentation, such as Script Window, Result Log, Worksheet, etc.
+</p><p>Please refer to the <b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Output_Window" title="OCGuide:Linear Fitting">Result to Output Window</a></b> and <b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Worksheet" title="OCGuide:Linear Fitting">Result to Worksheet</a></b> section in the chapter <b><a href="../../OriginC/OCGuide/Linear_Fitting.html" title="OCGuide:Linear Fitting">Analysis and Applications: Curve Fitting: Linear Fitting</a></b> for more details about how to output the results.
+</p>
+
+
+
+
+

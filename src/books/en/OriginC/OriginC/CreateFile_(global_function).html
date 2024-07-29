@@ -1,0 +1,102 @@
+<h1 class="firstHeading">2.1.10.7 CreateFile</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>This function creates or opens an object and returns a handle that can be used to access the object.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;">HANDLE CreateFile<span style="color: #000000;">&#40;</span> LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, SECURITY_ATTRIBUTES <span style="color: #000040;">*</span> lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpFileName</dt>
+<dd>[input] A fullpath file name</dd>
+<dt> dwDesiredAccess</dt>
+<dd>[input] Specifies the type of access to the object. This parameter can be 0, GENERIC_READ, GENERIC_WRITE</dd>
+<dt> dwShareMode</dt>
+<dd>[input] Specifies how the object can be shared. If dwShareMode is 0, and CreateFile succeeds, the object cannot be shared and cannot be opened again until the handle is closed.</dd>
+<dt> lpSecurityAttributes</dt>
+<dd>[input] Pointer to a SECURITY_ATTRIBUTES structure that determines whether the returned handle can be inherited by child processes. Use NULL if no need for the handle to be inherited.</dd>
+<dt> dwCreationDisposition</dt>
+<dd>[input] Specifies which action to take on files that exist, and which action to take when files do not exist. Can be CREATE_NEW, CREATE_ALWAYS, OPEN_EXISTING, OPEN_ALWAYS, TRUNCATE_EXISTING</dd>
+<dt> dwFlagsAndAttributes</dt>
+<dd>[input] Specifies the file attributes and flags for the file.</dd>
+<dt> hTemplateFile</dt>
+<dd>[input] Specifies a handle with GENERIC_READ access to a template file. The template file supplies file attributes and extended attributes for the file being created.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>If the function succeeds, the return value is an open handle to the specified file.
+</p><p>If the function fails, the return value is INVALID_HANDLE_VALUE.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> CreateFile_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string strNewFilePath <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;c:<span style="color: #666666; font-weight: bold;">\\</span>temp.txt&quot;</span>;
+    <span style="color: #008000;">///Create new file or open an exist file.</span>
+    HANDLE hFile;
+    hFile <span style="color: #000080;">=</span> CreateFile<span style="color: #000000;">&#40;</span> strNewFilePath,
+                        GENERIC_READ,
+                        FILE_SHARE_READ,
+                        <span style="color: #0000ff;">NULL</span>,
+                        CREATE_NEW ,
+                        FILE_ATTRIBUTE_NORMAL,
+                        <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>hFile <span style="color: #000080;">==</span> INVALID_HANDLE_VALUE<span style="color: #000000;">&#41;</span> 
+    <span style="color: #000000;">&#123;</span> 
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Could not Create file.&quot;</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// process error</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span> 
+
+    <span style="color: #008000;">// codes to read the file</span>
+    CloseHandle<span style="color: #000000;">&#40;</span>hFile<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">// must close file after reading</span>
+    
+     <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>test_read_file<span style="color: #000000;">&#40;</span>strNewFilePath<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">//opens an existing file for reading.</span>
+<span style="color: #0000ff;">bool</span> test_read_file<span style="color: #000000;">&#40;</span>LPCSTR lpcszFilename<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    HANDLE hFile; 
+    hFile <span style="color: #000080;">=</span> CreateFile<span style="color: #000000;">&#40;</span>lpcszFilename, 
+                    GENERIC_READ,              <span style="color: #008000;">// open for reading </span>
+                    FILE_SHARE_READ,           <span style="color: #008000;">// share for reading </span>
+                    <span style="color: #0000ff;">NULL</span>,                      <span style="color: #008000;">// no security </span>
+                    OPEN_EXISTING,             <span style="color: #008000;">// existing file only </span>
+                    FILE_ATTRIBUTE_NORMAL,     <span style="color: #008000;">// normal file </span>
+                    <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;                     <span style="color: #008000;">// no attr. template </span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>hFile <span style="color: #000080;">==</span> INVALID_HANDLE_VALUE<span style="color: #000000;">&#41;</span> 
+    <span style="color: #000000;">&#123;</span> 
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Could not open file.&quot;</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// process error</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span> 
+    <span style="color: #008000;">// codes to read the file</span>
+    CloseHandle<span style="color: #000000;">&#40;</span>hFile<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">// must close file after reading</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/CloseHandle_(global_function).html" title="OriginC:CloseHandle (global function)">CloseHandle</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

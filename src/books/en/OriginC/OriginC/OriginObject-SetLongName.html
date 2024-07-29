@@ -1,0 +1,75 @@
+<h1 class="firstHeading">2.2.4.32.44 OriginObject::SetLongName</h1><p><span class="OIndex" style="display:none">SetLongName</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Sets the long name of an object
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> SetLongName<span style="color: #000000;">&#40;</span> LPCSTR lpcszLongName, <span style="color: #0000ff;">BOOL</span> bUpdateShortName <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">BOOL</span> bUpdateDisplay <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpcszLongName</dt>
+<dd>[input] pointer to the long name to set</dd>
+<dt> bUpdateShortName</dt>
+<dd>[input] true will also update the short name, false if not changing short name</dd>
+<dt> bUpdateDisplay</dt>
+<dd>[input] true will update display, false will not update, which might be faster if calling in a loop and to update later</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>TRUE if OK. FALSE if object does not have long name support
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Standard, two-column worksheet should be active</span>
+<span style="color: #0000ff;">void</span> OriginObject_SetLongName_Ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Active workbook</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Active worksheet</span>
+    Column col<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+ 
+    pg.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;A workbook can have both Long and Short Names&quot;</span><span style="color: #000000;">&#41;</span>;
+    string str <span style="color: #000080;">=</span> pg.<span style="color: #000000;">GetLongName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    out_str<span style="color: #000000;">&#40;</span>str<span style="color: #000000;">&#41;</span>;
+ 
+    col.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;A Column can have both Long and Short Names&quot;</span><span style="color: #000000;">&#41;</span>;
+    str <span style="color: #000080;">=</span> col.<span style="color: #000000;">GetLongName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    out_str<span style="color: #000000;">&#40;</span>str<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// A worksheet Long Name was added in Origin 9.1</span>
+    string strLN <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Sheet Long Name supports more characters [some not allowed in Short Name]&quot;</span>;
+    <span style="color: #0000ff;">BOOL</span> bb <span style="color: #000080;">=</span> wks.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">&#40;</span>strLN<span style="color: #000000;">&#41;</span>;
+    str <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetLongName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// A worksheet Short Name can include up to 31 characters</span>
+    <span style="color: #008000;">// and can not include `!%|&quot;&lt;&gt;()[]{ or }</span>
+    wks.<span style="color: #000000;">SetName</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Worksheet name can have 31 char&quot;</span><span style="color: #000000;">&#41;</span>;
+    str <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    pg.<span style="color: #000000;">Refresh</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Sets the long name of an object that supports both long and short names
+</p><p>Only Column and Page objects support long name
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/OriginObject-GetLongName.html" title="OriginC:OriginObject-GetLongName">OriginObject::GetLongName</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

@@ -1,0 +1,218 @@
+<h1 class="firstHeading">5.9 Curve Fitting and Batch Processing with LabTalk</h1><p class='urlname' style='display: none'>Tutorial-Curve-Fitting-and-Batch-Processing-with-LT</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#What_you_will_learn"><span class="tocnumber">2</span> <span class="toctext">What you will learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Importing_Data"><span class="tocnumber">3</span> <span class="toctext">Importing Data</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Importing_a_.2A.dat_File"><span class="tocnumber">3.1</span> <span class="toctext">Importing a *.dat File</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#ImpASC_Options_TreeNode"><span class="tocnumber">3.2</span> <span class="toctext">ImpASC Options TreeNode</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Fitting_your_data"><span class="tocnumber">4</span> <span class="toctext">Fitting your data</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#NLBEGIN_x-function"><span class="tocnumber">4.1</span> <span class="toctext">NLBEGIN x-function</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#NLFIT_x-function"><span class="tocnumber">4.2</span> <span class="toctext">NLFIT x-function</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#NLEND_x-function"><span class="tocnumber">4.3</span> <span class="toctext">NLEND x-function</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Gaussian_Fitting_Complete_Example"><span class="tocnumber">4.4</span> <span class="toctext">Gaussian Fitting Complete Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Batch_Process"><span class="tocnumber">5</span> <span class="toctext">Batch Process</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Batch_Nonlinear_Curve_Fitting"><span class="tocnumber">5.1</span> <span class="toctext">Batch Nonlinear Curve Fitting</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Batch_Linear_Fit_Analysis"><span class="tocnumber">5.2</span> <span class="toctext">Batch Linear Fit Analysis</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Processing_Each_Dataset_in_a_Loop"><span class="tocnumber">5.3</span> <span class="toctext">Processing Each Dataset in a Loop</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>In this tutorial, there are a number of script examples that show how to import data, perform data manipulation, curve fit and batch process multiple sets of data in a loop. 
+</p>
+<h2><a name="What_you_will_learn"></a><span class="mw-headline">What you will learn</span></h2>
+<p>This tutorial will show you how to: 
+</p>
+<ol><li>Import Data</li>
+<li>Perform Nonlinear Regression</li>
+<li>Perform Linear Regression</li>
+<li>Batch Process</li></ol>
+<h2><a name="Importing_Data"></a><span class="mw-headline">Importing Data</span></h2>
+<p>Some LabTalk scripts you write will operate on data that has already been imported or entered in your worksheet.  
+</p><p>Often times you may need to write LabTalk script to import selected data files.
+</p><p>Every file type supported by Origin for import has its own x-function.  For example when you select the <b>Data: Import from File:CSV</b> menu option, choose your data file(s) in the dialog that opens and then make sure the Show Options Dialog checkbox is checked when you click OK, the Import and Export: impCSV dialog will open.  The title of this dialog informs you of the name of the x-function used for import.
+</p><p>Another example, to import pCLAMP files use the imppClamp x-function.
+</p><p><br />
+</p>
+<h3><a name="Importing_a_.2A.dat_File"></a><span class="mw-headline">Importing a *.dat File</span></h3>
+<p>To import an ASCII file, use the impASC x-function.
+</p>
+<pre> string fname$ = system.path.program$ + "Samples\Curve Fitting\Multiple Gaussians.dat";
+ impASC fname:=fname$;
+</pre>
+<h3><a name="ImpASC_Options_TreeNode"></a><span class="mw-headline">ImpASC Options TreeNode</span></h3>
+<p>When you do an import from the menu, you have the option of opening up the Options dialog.  The settings in this dialog are accessed by the Treenode variable type.
+</p><p>The impASC x-function has an input variable as follows:
+</p>
+<pre> options: [in] 
+   type=TreeNode
+   default=&lt;unassigned&gt;
+   description=Specify the import options in the dialog.
+</pre>
+<p>This example makes use of many advanced options of the impASC X-Function.  Notice that there is only one semi-colon (following all options assignments) indicating that all are part of the call to impASC. 
+</p>
+<pre> string fn$=system.path.program$ + "Samples\Spectroscopy\HiddenPeaks.dat"; 
+ impasc fname:=fn$ 
+ options.ImpMode:=3                        /* start with a new book */
+ options.Sparklines:=0                     /* turn off sparklines */
+ options.Names.AutoNames:=0                /* turn off auto rename */
+ options.Names.FNameToSht:=1               /* rename sheet to file name */
+ options.Miscellaneous.LeadingZeros:=1;    /* remove leading zeros */
+</pre>
+<h2><a name="Fitting_your_data"></a><span class="mw-headline">Fitting your data</span></h2>
+<p>Fitting in LabTalk requires the following three x-functions and used in that order:
+</p>
+<ul><li>nlbegin</li>
+<li>nlfit</li>
+<li>nlend</li></ul>
+<h3><a name="NLBEGIN_x-function"></a><span class="mw-headline">NLBEGIN x-function</span></h3>
+<p>Begin the fitting process. Define input data, type of fitting function, and input parameters.
+</p><p>This function has many input variables.  The only one that has no default value is the <b>func</b> variable, so when you use nlbegin at the very least you need to specify your function.  The function you specify will be used to fit the active XY Range, just like when you fit from the <b>Analysis:Fitting:Nonlinear Curve Fit</b> menu.
+</p>
+<pre>// initialize fitting the active plot using gauss model
+nlbegin iy:=1 func:=gauss nltree:=tt; 
+</pre>
+<pre>// initialize expgrow1 model to fit data with column 1 as X and column 2 as Y
+nlbegin iy:=(1,2) func:=expgrow1 nltree:=tt;
+</pre>
+<p>The nltree variable is an important one:
+</p>
+<pre> nltree: [in/out] 
+ type=TreeNode
+ default=nlt
+ description=Tree containing the information of fitting such as parameter values, standard 
+               error, etc.
+</pre>
+<h3><a name="NLFIT_x-function"></a><span class="mw-headline">NLFIT x-function</span></h3>
+<p>This function performs the fit calculations.  It has two input variables:
+</p><p>Variables:
+</p>
+<pre> n: [in] 
+   type=int
+   default=-1
+   description=Number of Iterations
+ method: [in] 
+   type=int
+   default=0
+   description=Iteration Method
+   allowed values: 0=lm:LM, 1=s:Simplex
+</pre>
+<p>Script Usage Examples:
+</p>
+<pre> nlfit 0; // update fit cuves and recalculate chisqr
+ nlfit 1; // do only one iteration
+ nlfit; // fit until converge
+</pre>
+<h3><a name="NLEND_x-function"></a><span class="mw-headline">NLEND x-function</span></h3>
+<p>This x-function ends the fitting process and outputs parameter values. 
+</p>
+<pre> nlend output:=1 autoupdate:=1
+</pre>
+<h3><a name="Gaussian_Fitting_Complete_Example"></a><span class="mw-headline">Gaussian Fitting Complete Example</span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Begin non-linear fitting, taking input data from Column 1 (X) and </span>
+<span style="color: #008000;">// Column 2 (Y) of the active worksheet,</span>
+<span style="color: #008000;">// specifying the fitting function as Gaussian, </span>
+<span style="color: #008000;">// and creating the input parameter tree named ParamTree:</span>
+nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gauss nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ParamTree;
+<span style="color: #008000;">// Optional: let the peak center be fixed at X = 5 </span>
+ParamTree.<span style="color: #000080;">xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">25</span>;     <span style="color: #008000;">// Assign the peak center an X-value of 5.</span>
+ParamTree.<span style="color: #000080;">f_xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;   <span style="color: #008000;">// Fix the peak center (f_xc = 0 is unfixed).</span>
+<span style="color: #008000;">// Perform the fit calculations:</span>
+nlfit;
+<span style="color: #008000;">// Optional: report results to the Script Window.</span>
+type Baseline y0 is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">y0</span><span style="color: #000000;">&#41;</span>,; 
+type Peak Center is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">xc</span><span style="color: #000000;">&#41;</span>, and; 
+type Peak width <span style="color: #000000;">&#40;</span>FWHM<span style="color: #000000;">&#41;</span> is <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ParamTree.<span style="color: #000080;">w</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// end the fitting session without a Report Sheet</span>
+nlend;</pre>
+<p><br />
+</p>
+<h2><a name="Batch_Process"></a><span class="mw-headline">Batch Process</span></h2>
+<p>One way to achieve batch processing is to loop over multiple files or datasets, and within the loop process each dataset by calling appropriate X-Functions and other script commands to perform the necessary data processing. 
+</p>
+<h3><a name="Batch_Nonlinear_Curve_Fitting"></a><span class="mw-headline">Batch Nonlinear Curve Fitting</span></h3>
+<p>The following example shows how to import 10 files and perform a curve fit operation and print out the fitting results: 
+</p>
+<pre class="lt" style="font-family:monospace;"> <span style="color: #008000;">// Find all files using wild card</span>
+ string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Batch Processing&quot;</span>;
+ findFiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;T*.csv&quot;</span>;
+ 
+ <span style="color: #008000;">// Start a new book with no sheets</span>
+ newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+ <span style="color: #008000;">// Loop over all files</span>
+ for<span style="color: #000000;">&#40;</span>int iFile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; iFile <span style="color: #000080;">&lt;=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>; iFile<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+ <span style="color: #000000;">&#123;</span>
+     <span style="color: #008000;">// Get file name</span>
+     string file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetToken</span><span style="color: #000000;">&#40;</span>iFile, CRLF<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+     <span style="color: #008000;">// Import file into a new sheet</span>
+     newsheet;
+     impasc file<span style="color: #000080;">$</span>;
+     <span style="color: #008000;">// Perform gaussian fitting to col 2 of the current data</span>
+     nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gaussamp nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfitresult;
+     <span style="color: #008000;">// Just fit and end with no report</span>
+     nlfit;
+     nlend;
+     <span style="color: #008000;">// Print out file name and results</span>
+     type <span style="color: #ff00ff;">&quot;File Name:&#160;%(file$)&quot;</span>;
+     type <span style="color: #ff00ff;">&quot;   Peak Center= $(myfitresult.xc)&quot;</span>;	
+     type <span style="color: #ff00ff;">&quot;   Peak Height= $(myfitresult.A)&quot;</span>;	
+     type <span style="color: #ff00ff;">&quot;   Peak Width=  $(myfitresult.w)&quot;</span>;	
+ <span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Batch_Linear_Fit_Analysis"></a><span class="mw-headline">Batch Linear Fit Analysis</span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Select all files using wild card</span>
+ string strpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting&quot;</span>;
+ dlgfile group<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Sensor*.dat&quot;</span> init<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strpath<span style="color: #000080;">$</span> multi<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">//Get the number of files </span>
+ int nfiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Define a variable to store the slope for linear fit result</span>
+ double dslope; 
+<span style="color: #008000;">//Define a string variable to store the file name</span>
+ string strFile<span style="color: #000080;">$</span>;
+<span style="color: #008000;">//loop over all selected files</span>
+ loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,nfiles<span style="color: #000000;">&#41;</span>
+ <span style="color: #000000;">&#123;</span>
+<span style="color: #008000;">//Get the file name</span>
+  strFile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetToken</span><span style="color: #000000;">&#40;</span>ii, CRLF<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">//Import the file into new sheet</span>
+  impASC strFile<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">//Use fitlr x-function to fit the dataset and output slope</span>
+  fitlr <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> b<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bslope;
+<span style="color: #008000;">//Print the result string to script window</span>
+  type <span style="color: #000080;">-</span>a <span style="color: #ff00ff;">&quot;Slope for&#160;%(strFile$) is $(bslope)&quot;</span>;
+ <span style="color: #000000;">&#125;</span></pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Curve_Fitting_and_Batch_Processing_with_LabTalk/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>It is also possible to create an Analysis Template in advance and call the <b>batchProcess</b> X-Function to do batch processing. By doing this, less coding work will be required.  
+</p></td></tr></table>
+<h3><a name="Processing_Each_Dataset_in_a_Loop"></a><span class="mw-headline">Processing Each Dataset in a Loop</span></h3>
+<p>Open the project Samples\Data Manipulation\Setting Column Values.OPJ and switch to the Columns from Other Sheets subfolder. 
+</p><p>We will subtract a value, which is the first value of the reference subtracted from the first value of the sample, from the entire sample data.  There are multiple transducers, so we can perform this calculation in a loop.
+</p>
+<pre class="lt" style="font-family:monospace;"> <span style="color: #008000;">//Reference worksheet range</span>
+ range rReference <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;
+ <span style="color: #008000;">//Sample worksheet range</span>
+ range rSample <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>;
+ <span style="color: #008000;">//Time data range</span>
+ range rTime <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span>Time<span style="color: #000000;">&#41;</span>;
+ <span style="color: #008000;">//create a new worksheet</span>
+ newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Corrected Sample&quot;</span>;
+ <span style="color: #008000;">//fill the first column in this new worksheet with the time data range</span>
+ wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> rTime;
+ <span style="color: #008000;">//loop over all Transducer columns</span>
+ loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">2</span>,rSample.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span>
+ <span style="color: #000000;">&#123;</span>
+ range rS<span style="color: #000080;">=</span>rSample<span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+ range rR <span style="color: #000080;">=</span> rReference<span style="color: #000080;">!</span>wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+ wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> rS <span style="color: #000080;">-</span> <span style="color: #000000;">&#40;</span> rS<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">-</span> rR<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#41;</span>;
+ <span style="color: #000000;">&#125;</span></pre>
+
+

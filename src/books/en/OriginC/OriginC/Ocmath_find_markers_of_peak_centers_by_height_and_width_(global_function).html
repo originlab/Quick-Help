@@ -1,0 +1,160 @@
+<h1 class="firstHeading">2.1.23.2.7 ocmath_find_markers_of_peak_centers_by_height_and_width</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Find feets of the peaks by user settings
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_find_markers_of_peak_centers_by_height_and_width<span style="color: #000000;">&#40;</span> UINT lSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> px, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> py, <span style="color: #0000ff;">int</span> nPeakNum, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pPeakX, <span style="color: #0000ff;">int</span> nMarkersNum, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span> pMarkersIndices, <span style="color: #0000ff;">double</span> dMarkerHeight, <span style="color: #0000ff;">double</span> dMaxWidth, <span style="color: #0000ff;">double</span> dMinWidth <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lSize</dt>
+<dd>[input] size of px, py</dd>
+<dt> px</dt>
+<dd>[input] it contains curve's X coordinate's datas</dd>
+<dt> py</dt>
+<dd>[input] it contains curve's Y coordinate's datas</dd>
+<dt> nPeakNum</dt>
+<dd>[input] size of pPeakIndices</dd>
+<dt> pPeakX</dt>
+<dd>[input] X coordinates of peak centers</dd>
+<dt> nMarkersNum</dt>
+<dd>[input] size of pMarkersIndices, its initial value should larger than 2*nPeakNum</dd>
+<dt> pMarkersIndices</dt>
+<dd>[output] the indices of peaks' feets, its initial size is nMarkersNum, if nMarkersNum</dd>
+<dd>is more than 2*nPeakNum, fill the excrescent elements with NANUM after pMarkersIndices[2*nPeakNum-1]</dd>
+<dt> dMarkerHeight</dt>
+<dd>[input] the estimated feet height of peaks, which will be marked</dd>
+<dt> dMaxWidth</dt>
+<dd>[input] the maximum width of peaks, which will be marked</dd>
+<dt> dMinWidth</dt>
+<dd>[input] the minimum width of peaks, which will be marked</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Return OE_NOERROR if succeed, otherwise, non-zero error code is returned.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Assume in the current graph, curve's XY data is in the first data plot. This piece</span>
+<span style="color: #008000;">//of code get the XY data of the curve from the first data plot and find the feets of</span>
+<span style="color: #008000;">//the peaks. The result is output in a new worksheet and the feets will plot in the </span>
+<span style="color: #008000;">//original data plot.</span>
+<span style="color: #0000ff;">void</span> ocmath_find_markers_of_peak_centers_by_height_and_width_ex1<span style="color: #000000;">&#40;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #008000;">//get plot data of curve from the first dataplot</span>
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;        
+    DataRange dr;
+    vector vxData, vyData;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">&#40;</span>dr<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        DWORD dwPlotID;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vyData, <span style="color: #000040;">&amp;</span>vxData<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;get_plot_data failed GetData&quot;</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+ 
+    uint nDataSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    vector vxPeaks, vyPeaks;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnIndices;
+ 
+    vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vnIndices.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+ 
+    ocmath_find_peaks_1st_derivative<span style="color: #000000;">&#40;</span> <span style="color: #000040;">&amp;</span>nDataSize, vxData, vyData, vxPeaks, vyPeaks, vnIndices, POSITIVE_DIRECTION <span style="color: #000040;">|</span> NEGATIVE_DIRECTION,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    vnIndices.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nDataSize<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> lSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> peakNum<span style="color: #000080;">=</span>vnIndices.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">double</span> dMarkerHeight <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;
+    <span style="color: #0000ff;">double</span> dMaxWidth<span style="color: #000080;">=</span><span style="color: #0000dd;">30</span>;
+    <span style="color: #0000ff;">double</span> dMinWidth<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> markeIndices;
+    markeIndices.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000040;">*</span>peakNum<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_find_markers_of_peak_centers_by_height_and_width<span style="color: #000000;">&#40;</span>vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vxData, vyData, peakNum, 
+                                                        vxPeaks, <span style="color: #0000dd;">2</span><span style="color: #000040;">*</span>peakNum, markeIndices,  
+                                                        dMarkerHeight, dMaxWidth, dMinWidth<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nRet <span style="color: #000080;">&lt;</span> OE_NOERROR <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;error code:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nRet<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    vector vxMarker, vyMarker;
+    <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> markeIndices.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    vxMarker.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nSize<span style="color: #000000;">&#41;</span>;
+    vyMarker.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nSize<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> markeIndices.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>markeIndices<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            vxMarker<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> vxData<span style="color: #000000;">&#91;</span>markeIndices<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#93;</span>;
+            vyMarker<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> vyData<span style="color: #000000;">&#91;</span>markeIndices<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#93;</span>;
+        <span style="color: #000000;">&#125;</span>
+        <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">&#123;</span>
+            vxMarker<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> NANUM;
+            vyMarker<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> NANUM;
+        <span style="color: #000000;">&#125;</span>        
+    <span style="color: #000000;">&#125;</span>
+    vxMarker.<span style="color: #000000;">Trim</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    vyMarker.<span style="color: #000000;">Trim</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//new a worksheet to show the result</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Worksheet wksResult <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">//wksResult.AddCol(&quot;Indices&quot;);</span>
+    <span style="color: #0000ff;">int</span> nXCol, nYCol;
+    nXCol <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Marker X&quot;</span><span style="color: #000000;">&#41;</span>;
+    nYCol <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Marker Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">//wksResult.Columns(0).SetType(OKDATAOBJ_DESIGNATION_X);</span>
+    wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+    wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//plot the feets in the original data plot</span>
+    DataRange drOut;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nXCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nXCol<span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wksResult, <span style="color: #0000dd;">0</span>, nYCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nYCol<span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vyMarker, <span style="color: #000040;">&amp;</span>vxMarker<span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>drOut, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Find feets of the peaks, whose height is greater than dMarkerHeight(means abs of the points' y values are greater than dMarkerHeight) and width is between dMinWidth and dMaxWidth, then record peaks' left and right feets in pMarkersIndices.
+</p><p>pMarkersIndices contains the indices of peaks' feets.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Ocmath_find_peaks_1st_derivative_(global_function).html" title="OriginC:Ocmath find peaks 1st derivative (global function)">ocmath_find_peaks_1st_derivative</a>, <a href="../../OriginC/OriginC/Ocmath_find_peaks_2nd_derivative_(global_function).html" title="OriginC:Ocmath find peaks 2nd derivative (global function)">ocmath_find_peaks_2nd_derivative</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

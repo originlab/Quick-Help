@@ -1,0 +1,223 @@
+<h1 class="firstHeading">1.12.6 Using NAG Functions</h1><p><span class="OIndex" style="display:none">Using NAG Functions</span><span class="OIndex" style="display:none">NAG Functions</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Header_FilesNAG_Header_Files"><span class="tocnumber">1</span> <span class="toctext">Header Files<span class="OIndex" style="display:none">NAG Header Files</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Error_StructureNAG_Error_Structure"><span class="tocnumber">2</span> <span class="toctext">Error Structure<span class="OIndex" style="display:none">NAG Error Structure</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Callback_FunctionsNAG_Callback_Functions"><span class="tocnumber">3</span> <span class="toctext">Callback Functions<span class="OIndex" style="display:none">NAG Callback Functions</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Calling_c05adc_Example"><span class="tocnumber">3.1</span> <span class="toctext">Calling c05adc Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#NAG_Get_Data_From_Origin"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex">NAG Get Data From Origin</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Dataset"><span class="tocnumber">4.1</span> <span class="toctext">Dataset</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#DataRange"><span class="tocnumber">4.2</span> <span class="toctext">DataRange</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#How_to_Call_NAG_e04_Functions"><span class="tocnumber">5</span> <span class="toctext">How to Call NAG e04 Functions</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Header_FilesNAG_Header_Files"></a><span class="mw-headline">Header Files<span class="OIndex" style="display:none">NAG Header Files</span></span></h2>
+<p>To call any NAG function, you need to include the header file or files where the NAG function is declared.
+</p><p>A single header file, which includes all the commonly used NAG header files, is provided below. Usually, you can just include this header file in your code. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// includes all common NAG header files</span></pre>
+<p>If only a single NAG function or just a few are used, you can also just include its (their) own individual NAG header file(s). For example, if the NAG function <i>f02abc</i> is called in the code, then two related NAG header files need to be included.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>NAG\nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>    <span style="color: #008000;">// NAG struct and type definitions</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>NAG\nagf02.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// contains the f02 function declarations</span></pre>
+<h2><a name="Error_StructureNAG_Error_Structure"></a><span class="mw-headline">Error Structure<span class="OIndex" style="display:none">NAG Error Structure</span></span></h2>
+<p>All NAG functions accept one argument, which is a pointer of NagError structure. This structure is used to test whether the NAG function is executing successfully or not.
+</p><p>The example below shows whether the NAG function <i>f02abc</i> works successfully.
+</p>
+<pre class="oc" style="font-family:monospace;">NagError err;                    <span style="color: #008000;">// Declare an error structure</span>
+f02abc<span style="color: #000000;">&#40;</span>n, mx, n, r, v, n, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Call NAG f02abc function</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> err.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR <span style="color: #000000;">&#41;</span>     <span style="color: #008000;">// If an error occurred</span>
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span>err.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;         <span style="color: #008000;">// Output error message</span></pre>
+<p>If you don't need to know whether the call is successful or not, the error structure declaration is not needed. And the <b>NAGERR_DEFAULT</b> macro can be passed instead. This macro is a NULL pointer. To ensure compatibility with future versions of NAG functions, it will be better to use this macro if you can work without error structure.
+</p>
+<pre class="oc" style="font-family:monospace;">f02abc<span style="color: #000000;">&#40;</span>n, mx, n, r, v, n, NAGERR_DEFAULT<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Callback_FunctionsNAG_Callback_Functions"></a><span class="mw-headline">Callback Functions<span class="OIndex" style="display:none">NAG Callback Functions</span></span></h2>
+<p>In the NAG Library, most of the routines involve callback functions. Before defining a callback function, you need to know the return type and argument types of the callback function that NAG will expect when calling it.
+</p><p>Take the NAG function <i>d01ajc</i> for example. In the header file <i>nagd01.h</i>, we can see that the first argument is <b>NAG_D01AJC_FUN f</b>. This argument is a callback function. Then in <i>nag_types.h</i>, we find that <b>NAG_D01AJC_FUN</b> is a type of <b>NAG_D01_FUN</b>, which is defined as:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">typedef</span> <span style="color: #0000ff;">double</span> <span style="color: #000000;">&#40;</span>NAG_CALL <span style="color: #000040;">*</span> NAG_D01_FUN<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>Then we can define the callback function as follows:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL myFunc<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> x<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">double</span> result;
+    <span style="color: #008000;">// Do processing on 'x'</span>
+    <span style="color: #0000ff;">return</span> result;
+<span style="color: #000000;">&#125;</span></pre>
+<p>When calling the NAG function <i>d01ajc</i>, <i>myFunc</i> (defined above) can be passed as the first argument.
+</p>
+<h3><a name="Calling_c05adc_Example"></a><span class="mw-headline">Calling c05adc Example</span></h3>
+<p>This example will show how to call the NAG function <i>c05adc</i>, the fourth argument of which is the callback function argument. This callback function of type <b>NAG_C05ADC_FUN</b> is defined in <i>nag_types.h</i>.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">typedef</span> <span style="color: #0000ff;">double</span> <span style="color: #000000;">&#40;</span>NAG_CALL <span style="color: #000040;">*</span> NAG_C05ADC_FUN<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>From the definition, we know that both the return type and the only argument type are double. So we define the callback function as follows:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL myC05ADCfunc<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> x<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span>x<span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span>x;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The following code shows how to call the <i>c05adc</i> function by passing the <i>myC05ADCfunc</i> callback function.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>, b <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>, x, ftol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>, xtol <span style="color: #000080;">=</span> 1e<span style="color: #000040;">-</span>05;
+NagError err;
+
+c05adc<span style="color: #000000;">&#40;</span>a, b, <span style="color: #000040;">&amp;</span>x, myC05ADCfunc, xtol, ftol, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="NAG_Get_Data_From_Origin"></a><span class="mw-headline"><span class="OIndex">NAG Get Data From Origin</span></span></h2>
+<p>Many NAG functions take a pointer to an array of numeric data. Both Origin worksheets and matrixsheets allow getting a pointer to their data. This pointer can be passed to NAG functions. In Origin C, data is commonly passed using Dataset or DataRange objects. The sections below will show how to pass data from a worksheet by using Dataset and DataRange. The DataRange way is recommended.
+</p>
+<h3><a name="Dataset"></a><span class="mw-headline">Dataset</span></h3>
+<p>A Dataset object can be passed to a NAG function as long as the Dataset is of the data type expected by the NAG function. The data type of an Origin worksheet column is <b>Text &amp; Numeric</b> by default. For most, but not all, NAG functions, this data type is not allowed to be passed, because NAG functions expect floating or integer pointers.
+</p><p>If you make sure that the Dataset is of the type expected by the NAG function, the following code can be used to pass a Dataset object to a NAG function.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Get access to the active worksheet.</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Construct Datasets to get access to the wks data.</span>
+Dataset dsX, dsY;
+dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Call NAG's nag_1d_spline_interpolant(e01bac) function.</span>
+NagError err;
+Nag_Spline spline;
+e01bac<span style="color: #000000;">&#40;</span>m, dsX, dsY, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="DataRange"></a><span class="mw-headline">DataRange</span></h3>
+<p>The DataRange class provides the GetData method for getting data from a worksheet into a vector, even if the worksheet columns are of the <b>Text &amp; Numeric</b> data type. The GetData method can also ignore the rows with missing values easily, which is very important when passing data to NAG functions. 
+</p><p><span class="OIndex" style="display:none">NAG, Memory Free</span>Using DataRange to pass data from Origin to NAG functions is much safer, and is recommended. The following example demonstrates how to do that.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> call_NAG_example<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> i, numPoints <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+
+	<span style="color: #008000;">// Create a new worksheet page.</span>
+	WorksheetPage pg;
+	pg.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Get access to the active worksheet and add two more columns.</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// Add X2 column</span>
+	i <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	Column col<span style="color: #000000;">&#40;</span>wks, i<span style="color: #000000;">&#41;</span>;
+	col.<span style="color: #000000;">SetType</span><span style="color: #000000;">&#40;</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// Add Y2 column</span>
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Create some starting XY values in first two columns</span>
+	Dataset dsX, dsY;
+	dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span>i <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; i <span style="color: #000080;">&lt;</span> numPoints; i<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">int</span> r <span style="color: #000080;">=</span> rnd<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">10</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>r <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+			r <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>i <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+			r <span style="color: #000040;">+</span><span style="color: #000080;">=</span> dsX<span style="color: #000000;">&#91;</span>i <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>;
+		dsX.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>r<span style="color: #000000;">&#41;</span>;
+		dsY.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>rnd<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #008000;">// Create data range object.</span>
+	DataRange dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Copy data from wks to vector using data range.</span>
+	<span style="color: #008000;">// This copy will ignore rows with missing values.</span>
+	vector vX1, vY1;
+	dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY1, <span style="color: #000040;">&amp;</span>vX1<span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Call NAG to calculate coefficients.</span>
+	NagError err;
+	Nag_Spline spline;
+	e01bac<span style="color: #000000;">&#40;</span>vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vX1, vY1, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Get the spline's XY values</span>
+	vector vX2, vY2;
+	<span style="color: #0000ff;">double</span> fit, xarg;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span>i <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; i <span style="color: #000080;">&lt;</span> vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		vX2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>vX1<span style="color: #000000;">&#91;</span>i<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+		vY2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>vY1<span style="color: #000000;">&#91;</span>i<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>i <span style="color: #000080;">&lt;</span> vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			xarg <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>vX1<span style="color: #000000;">&#91;</span>i<span style="color: #000000;">&#93;</span> <span style="color: #000040;">+</span> vX1<span style="color: #000000;">&#91;</span>i <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.5</span>;
+			e02bbc<span style="color: #000000;">&#40;</span>xarg, <span style="color: #000040;">&amp;</span>fit, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>;
+			vX2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>xarg<span style="color: #000000;">&#41;</span>;
+			vY2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>fit<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+
+	<span style="color: #008000;">// Free memory allocated by NAG</span>
+	NAG_FREE<span style="color: #000000;">&#40;</span>spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">&#41;</span>;
+	NAG_FREE<span style="color: #000000;">&#40;</span>spline.<span style="color: #000000;">c</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// Copy spline values to worksheet</span>
+	dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	dsX <span style="color: #000080;">=</span> vX2;
+
+	dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	dsY <span style="color: #000080;">=</span> vY2;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="How_to_Call_NAG_e04_Functions"></a><span class="mw-headline">How to Call NAG e04 Functions</span></h2>
+<p>The following example will show how to call the NAG function, <b>nag_opt_simplex_easy</b>, safely. And the results will output to a file.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#define</span> NULLFN <span style="color: #0000ff;">NULL</span>
+
+<span style="color: #0000ff;">void</span> text_e04cbc<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">double</span> objf;
+	<span style="color: #0000ff;">double</span> x<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	Integer maxcal, n;
+        NagError fail; 
+
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>e04cbc example: <span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+
+        maxcal <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+	n <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	x<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.4</span>;
+	x<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">0.8</span>;
+        tolf <span style="color: #000080;">=</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">&#40;</span>nag_machine_precision<span style="color: #000000;">&#41;</span>;
+	tolx <span style="color: #000080;">=</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">&#40;</span>tolf<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">try</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// call the NAG function, e04cbc = nag_opt_simplex_easy</span>
+		nag_opt_simplex_easy<span style="color: #000000;">&#40;</span>n, x, <span style="color: #000040;">&amp;</span>objf, tolf, tolx, funct, NULLFN, maxcal, NAGCOMM_NULL, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;  
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">catch</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> err<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>error =&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// if there is an exception</span>
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail-&gt;code =&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">code</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// error code</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail-&gt;message =&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// error message</span>
+
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The final function value is&#160;%12.4f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, objf<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;at the point&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii <span style="color: #000080;">&lt;=</span> n; <span style="color: #000040;">++</span>ii<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;&#160;%12.4f&quot;</span>, x<span style="color: #000000;">&#91;</span>ii<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// call back function for nag_opt_simplex_easy</span>
+<span style="color: #0000ff;">void</span> NAG_CALL funct<span style="color: #000000;">&#40;</span>Integer n, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> xc, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> objf, Nag_Comm<span style="color: #000040;">*</span> comm<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #000040;">*</span>objf <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">+</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">+</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2.0</span><span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>xc<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

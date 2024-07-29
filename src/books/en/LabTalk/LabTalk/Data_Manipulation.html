@@ -1,0 +1,321 @@
+<h1 class="firstHeading">4.1.1 Data Manipulation</h1><p class='urlname' style='display: none'>Data-Manipulation</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Worksheet"><span class="tocnumber">1</span> <span class="toctext">Worksheet</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Selecting_and_Coloring_Worksheet_Cells"><span class="tocnumber">1.1</span> <span class="toctext">Selecting and Coloring Worksheet Cells</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Coloring_Worksheet_Rows_by_wxt"><span class="tocnumber">1.2</span> <span class="toctext">Coloring Worksheet Rows by wxt</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Using_wxt_with_Text_Columns"><span class="tocnumber">1.3</span> <span class="toctext">Using wxt with Text Columns</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Copy_and_Paste_Data_to_New_Sheet_and_Apply_Transpose"><span class="tocnumber">1.4</span> <span class="toctext">Copy and Paste Data to New Sheet and Apply Transpose</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Splitting_and_Extracting_Data_to_New_Sheets"><span class="tocnumber">1.5</span> <span class="toctext">Splitting and Extracting Data to New Sheets</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Subgroup_a_Worksheet_to_New_Worksheets"><span class="tocnumber">1.6</span> <span class="toctext">Subgroup a Worksheet to New Worksheets</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Masking_the_Outliers"><span class="tocnumber">1.7</span> <span class="toctext">Masking the Outliers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Matrix"><span class="tocnumber">2</span> <span class="toctext">Matrix</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#RGB_Image_Matrix"><span class="tocnumber">2.1</span> <span class="toctext">RGB Image Matrix</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Convert_Multiple_Matrices_into_Worksheets"><span class="tocnumber">2.2</span> <span class="toctext">Convert Multiple Matrices into Worksheets</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Normalize_a_Matrix"><span class="tocnumber">2.3</span> <span class="toctext">Normalize a Matrix</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Worksheet"></a><span class="mw-headline">Worksheet</span></h2>
+<h3><a name="Selecting_and_Coloring_Worksheet_Cells"></a><span class="mw-headline">Selecting and Coloring Worksheet Cells</span></h3>
+<p>Origin has two x-functions for conditional selection - <b>wcellsel</b> and <b>wxt</b>; The former(wcellsel) is cell-based on an arbitrary range of cells in a worksheet. The latter(wxt) is equivalent to the worksheet extract dialog that works at the column level.
+</p><p>The following code uses wcellsel X-function to select cells that meet a condition, and then uses wcellcolor to color them.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// create new book with some columns and fill with random data</span>
+newbook;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+loop<span style="color: #000000;">&#40;</span>i,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">100</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#125;</span>;
+<span style="color: #008000;">// select all cells with value greater than or equal to 0.5 and color them</span>
+wcellsel <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ge v<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>green<span style="color: #000000;">&#41;</span>;
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>red<span style="color: #000000;">&#41;</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+wcellsel; <span style="color: #008000;">// this deselects cells so colors show</span></pre>
+<h3><a name="Coloring_Worksheet_Rows_by_wxt"></a><span class="mw-headline">Coloring Worksheet Rows by wxt</span></h3>
+<p>While the wcellsel function can select any worksheet cells, it can only select those cells with a simple condition for the entire range of cells. If you only need to select rows, and you need  more precise conditions, then you can use the wxt X-Function, which is basically the LabTalk version of the Worksheet Query dialog. Fill two column with random numbers before running the following example:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//select rows (sel:=1) that meet condition</span>
+<span style="color: #008000;">//col(2)&gt;0.3 for the active worksheet</span>
+wxt <span style="color: #ff00ff;">&quot;col(2)&gt;0.3&quot;</span> sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">//change the color of the rows of the selected cells  </span>
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>green<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//reset the worksheet selection so you can see the colors correctly  </span>
+wcellsel;</pre>
+<h3><a name="Using_wxt_with_Text_Columns"></a><span class="mw-headline">Using wxt with Text Columns</span></h3>
+<p>There are special considerations when the condition involves text strings. The following example shows a more complicated condition to select based on both a text column and a numeric column.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//import a sample file that has make of cars and their various characteristics</span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\automobile.dat&quot;</span>;
+newbook;
+impasc options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// Select all rows in worksheet with make=Acura and Gas Mileage &gt; 11</span>
+<span style="color: #008000;">// Use range variable to make query more readable than &quot;col(Make)[i]$&quot;</span>
+range car<span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Make<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Using string variable to avoid having to write &quot;Acura&quot; inside &quot; &quot; </span>
+string str<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Acura&quot;</span>;
+<span style="color: #008000;">//wxt will translate &quot;=&quot; to &quot;==&quot;, &quot;and&quot; to &quot;&amp;&amp;&quot;</span>
+wxt <span style="color: #ff00ff;">&quot;car=str$ and col(Gas Mileage)&gt;11&quot;</span> sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Select the rows</span>
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">&#40;</span>green<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Color those rows</span>
+wcellsel; <span style="color: #008000;">// Clear the selection</span></pre>
+<h3><a name="Copy_and_Paste_Data_to_New_Sheet_and_Apply_Transpose"></a><span class="mw-headline">Copy and Paste Data to New Sheet and Apply Transpose</span></h3>
+<p>This code uses <b>copydata</b> X-function to copy a block of numeric data to a new worksheet and then use <b>wtranspose</b> X-function to transpose the data.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create a new worksheet with six columns of random number </span>
+newbook;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+loop<span style="color: #000000;">&#40;</span>i,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>wcol<span style="color: #000000;">&#40;</span>i<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">100</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#125;</span>;
+<span style="color: #008000;">//Highlight a block in the worksheet</span>
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">4</span> <span style="color: #0000dd;">6</span>;  
+<span style="color: #008000;">//Copy the highlighted block into a new worksheet</span>
+copydata  orng<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span> clear<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">//Transpose the resulting worksheet</span>
+wtranspose;</pre>
+<p><b>copydata</b> X-Function doesn't work for text data. So if the data block has both numeric and string data, please use <b>range -v</b> notation to define blocks as range variables and assign original block to new block to paste the value. Then use wtranspose to transpose the data.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Import a sample data into a new book</span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;\Samples\Statistics\Protein Consumption in Europe.dat&quot;</span>;
+newbook;
+impasc;
+<span style="color: #008000;">//Define a block of string data;</span>
+int nc <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// number of columns in the block</span>
+int nr <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>; <span style="color: #008000;">// number of rows in the block</span>
+int fi <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span> <span style="color: #000080;">+</span> nr; <span style="color: #008000;">// final row index of the block</span>
+range <span style="color: #000080;">-</span>v r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nc<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>fi<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">// Set input range</span>
+<span style="color: #008000;">//Create a new worksheet&#160;;</span>
+newsheet;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc; 
+int fo <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">+</span> nr; <span style="color: #008000;">// final row index of result range</span>
+range <span style="color: #000080;">-</span>v r2<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nc<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>fo<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// Set result range</span>
+<span style="color: #008000;">//assign values in r1 to r2</span>
+r2<span style="color: #000080;">=</span>r1; 
+<span style="color: #008000;">//Transpose the block</span>
+wtranspose;
+<span style="color: #008000;">// Set the first row as Long name</span>
+wrow2label longname<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span></pre>
+<h3><a name="Splitting_and_Extracting_Data_to_New_Sheets"></a><span class="mw-headline">Splitting and Extracting Data to New Sheets</span></h3>
+<p>This code demonstrates the use of the discfreqs and wxt X-Functions as well as simpler data manipulation to extract data from a worksheet and place each discrete set into its own sheet. The discfreqs X-Function is an <b>OriginPro</b>-only feature.
+</p>
+<pre class="lt" style="font-family:monospace;"> 
+<span style="color: #008000;">//create a new book and import data file</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; 
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Data Manipulation\US Metropolitan Area Population.dat&quot;</span>;
+impASC;
+ 
+<span style="color: #008000;">//store the values of the desired column in a range</span>
+range cc <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>; 
+string originalsheet<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+ 
+
+<span style="color: #008000;">// create two new columns for our split variables</span>
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000080;">col5</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>City&#160;;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>State;
+
+ 
+<span style="color: #008000;">// Read over each entry in the range...</span>
+ 
+for <span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>cc.<span style="color: #000080;">getsize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	initialItem<span style="color: #000080;">$</span><span style="color: #000080;">=</span>cc<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>; <span style="color: #008000;">//create a string of the cell...</span>
+	<span style="color: #008000;">// write the variables to the iith cell of our two new columns...</span>
+	Col<span style="color: #000000;">&#40;</span>City<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>initialitem.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">','</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>; 
+	Col<span style="color: #000000;">&#40;</span>State<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>initialitem.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">','</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #000000;">&#125;</span>
+ 
+<span style="color: #008000;">// Analyze the new &quot;State&quot; row to find the discrete &quot;State&quot; designations</span>
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>State<span style="color: #000000;">&#41;</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>Frequency<span style="color: #000080;">!</span>;
+ 
+<span style="color: #008000;">// Store the designations in a range</span>
+range ff <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>Frequency<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+ 
+<span style="color: #008000;">// Loop over each unique State value from the discrete frequency output</span>
+for <span style="color: #000000;">&#40;</span>jj<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; jj<span style="color: #000080;">&lt;=</span>ff.<span style="color: #000080;">getsize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; jj<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// This string allows the conditional to point to a different</span>
+	<span style="color: #008000;">//  row of the frequency table with each iteration</span>
+	string state<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>jj<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>; 
+	<span style="color: #008000;">// The wxt X-Function requires that the user inclue the &quot;[i]&quot; term</span>
+	<span style="color: #008000;">//  when using a string as part of the conditional test</span>
+	string statequote<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>state<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #ff00ff;">&quot;&quot;</span>; 
+        string cond<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;col(6)[i]$==&quot;</span> <span style="color: #000080;">+</span> statequote<span style="color: #000080;">$</span>; 
+	<span style="color: #008000;">// Wxt extracts each row of the original sheet corresponding</span>
+	<span style="color: #008000;">//  to the currently tested state to a new sheet</span>
+	wxt test<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cond<span style="color: #000080;">$</span> iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%(state$)&quot;</span>; 
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Subgroup_a_Worksheet_to_New_Worksheets"></a><span class="mw-headline">Subgroup a Worksheet to New Worksheets</span></h3>
+<p>This code demonstrates the use of the discfreqs and wxt X-Functions as well as simpler data manipulation to extract data from a worksheet and place each discrete set into its own sheet. Tree and StringArray variables are used to hold the results of discrete frequency count. The discfreqs X-Function is an <b>OriginPro</b>-only feature. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//create a new book and import data file</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\automobile.dat&quot;</span>;
+impASC;
+
+<span style="color: #008000;">//store the values of the desired column in a range</span>
+range makeCol <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span>make<span style="color: #000000;">&#41;</span>;
+range sourceWks <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span>;
+
+<span style="color: #008000;">//create a tree to hold the result of frequency count and do frequency</span>
+<span style="color: #008000;">//count to &quot;Make&quot; column to find the discrete &quot;Make&quot; designations</span>
+<span style="color: #008000;">//this X-Function is only available in OriginPro</span>
+tree tr;
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>makeCol rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>tr;
+
+<span style="color: #008000;">//create a string array and put the &quot;Make&quot; designations into it</span>
+StringArray sa;
+sa.<span style="color: #000080;">append</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000080;">FreqCount1</span>.<span style="color: #000080;">Data1</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//if sa contains data</span>
+<span style="color: #008000;">//loop over each unique &quot;Make&quot; designation</span>
+<span style="color: #008000;">//and extract data from original worksheet to new worksheets</span>
+if <span style="color: #000000;">&#40;</span>sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> NANUM<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	for <span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">//this string is used to generate condition to </span>
+		<span style="color: #008000;">//point to different &quot;Make&quot; designation stored</span>
+		<span style="color: #008000;">//in string array for each iteration</span>
+		string newWk<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> sa.<span style="color: #000080;">GetAt</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+
+		<span style="color: #008000;">//construct tested condition for wxt</span>
+		string cond<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;makeCol$==&quot;</span> <span style="color: #000080;">+</span> newWk<span style="color: #000080;">$</span>;
+
+		<span style="color: #008000;">//wxt extracts rows of the original sheet according to </span>
+		<span style="color: #008000;">//the currently tested state and put them to a new </span>
+		<span style="color: #008000;">//worksheet named by the corresponding designation</span>
+		wxt test<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cond<span style="color: #000080;">$</span> iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sourceWks ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>new <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>newWk<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">&gt;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Masking_the_Outliers"></a><span class="mw-headline">Masking the Outliers</span></h3>
+<p>This script demonstrates the use of rowstats and wcellmask X-Functions to perform descriptive statistics on rows and mask the cell whose value is defined as outlier. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// create a new book and import data file</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Contour.dat&quot;</span>;
+impASC;
+
+<span style="color: #008000;">// get number of columns and rows</span>
+int nCols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+int nRows <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nRows</span>;
+
+<span style="color: #008000;">// add two columns for mean and sd</span>
+col<span style="color: #000000;">&#40;</span>nCols<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Mean;
+col<span style="color: #000000;">&#40;</span>nCols<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>SD;
+
+<span style="color: #008000;">// perform row stats</span>
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">0</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">:</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nCols<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>nRows<span style="color: #000000;">&#93;</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Mean<span style="color: #000000;">&#41;</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>SD<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// mask outlier</span>
+for<span style="color: #000000;">&#40;</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nRows; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	double dLower <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span>Mean<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>col<span style="color: #000000;">&#40;</span>SD<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// mean-sd</span>
+	double dUpper <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span>Mean<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">+</span>col<span style="color: #000000;">&#40;</span>SD<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// mean+sd</span>
+	for<span style="color: #000000;">&#40;</span>int jj<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; jj<span style="color: #000080;">&lt;=</span>nCols; jj<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		double dOutlier <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// get cell value</span>
+		if<span style="color: #000000;">&#40;</span>dOutlier<span style="color: #000080;">&lt;</span>dLower <span style="color: #000080;">||</span> dOutlier<span style="color: #000080;">&gt;</span>dUpper<span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			wcellmask irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>jj<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// mask the cell</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Matrix"></a><span class="mw-headline">Matrix</span></h2>
+<h3><a name="RGB_Image_Matrix"></a><span class="mw-headline">RGB Image Matrix</span></h3>
+<p>While a matrix contains information on how many rows and columns to display, it is internally stored as a linear array. This fact can be used to copy data from a matrix to a worksheet column as in this instance where we
+</p>
+<ol><li>Import an image file</li>
+<li>Extract the Red, Green and Blue (RGB) channels (matrix to matrix)</li>
+<li>Copy the channel data (matrix to column)</li>
+<li>Construct a string representation of the RGB values</li>
+<li>Calculate a histogram of RGB values</li></ol>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Point to a sample image and import</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SYSTEM.<span style="color: #000080;">PATH</span>.<span style="color: #000080;">PROGRAM</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Image Processing and Analysis\Flower.jpg&quot;</span>;
+impImage;
+<span style="color: #008000;">// Split the RGB into separate Red, Green and Blue matrices</span>
+imgRGBsplit r<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>RED<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span> g<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>GREEN<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span> b<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>BLUE<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// Create a new Workbook</span>
+newbook;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Red;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Green;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Blue;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> RGB;
+wks.<span style="color: #000080;">col5</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Value;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Count;
+<span style="color: #008000;">// Worksheet ranges</span>
+range raDR <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, raDG <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, raDB <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, raDRGB <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">// Matrix ranges</span>
+range raR <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>RED<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+range raG <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>GREEN<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+range raB <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>RGBOUT<span style="color: #000000;">&#93;</span>BLUE<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// Copy data from Matrix to Workbook by range assignment</span>
+raDR <span style="color: #000080;">=</span> raR;
+raDG <span style="color: #000080;">=</span> raG;
+raDB <span style="color: #000080;">=</span> raB;
+<span style="color: #008000;">// Create a string showing the RGB triplet</span>
+col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// Calculate the histogram</span>
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raDRGB rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>Value<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Convert_Multiple_Matrices_into_Worksheets"></a><span class="mw-headline">Convert Multiple Matrices into Worksheets</span></h3>
+<p>Suppose we have scanned <i>X</i>, <i>Y</i>, and <i>Intensity</i> data stored in a matrixbook for every height <i>Z</i>, and we have 20 such matrixbooks (scaen at 20 heights in Z direction) with Long Name as "Z2um", "Z4um", "Z6um"..., in which the number between "Z" and "um" means the Z height. Now we want to combine all scanned <i>X</i>, <i>Y</i>, <i>Intensity</i> matrices into one worksheet of <i>XYZI</i> structure. 
+</p><p>This is common routine for 3D confocal microscopy images and time-lapse images.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e M 
+<span style="color: #000000;">&#123;</span>
+	string strMat<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span>;
+	strMat<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strMat.<span style="color: #000080;">Between</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Z&quot;</span>,<span style="color: #ff00ff;">&quot;um&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// Get Z Values from Matrixbook Long Name</span>
+	int ZHeight <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strMat<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+	m2w method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xyz; <span style="color: #008000;">// Convert Matrix to XYZ</span>
+	wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Add Z column</span>
+	csetvalue col<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> formula<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;ZHeight&quot;</span>; <span style="color: #008000;">// Set Value from Numeric Extracted from Matrix Long Name</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Append converted worksheets into one</span>
+string strPWKB<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// Let Current Workbook as Parent Workbook</span>
+string strPWKS<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// Remember Current Worksheet for Appending Other Sheets</span>
+
+doc <span style="color: #000080;">-</span>e W
+<span style="color: #000000;">&#123;</span>
+	string strTempWKB<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// Book Short Name of Current Workbook</span>
+	if <span style="color: #000000;">&#40;</span>strTempWKB<span style="color: #000080;">$</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// If not Parent Workbook, Start Appending</span>
+	<span style="color: #000000;">&#123;</span>
+		wAppend irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>, <span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strTempWKB<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">&#41;</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>row ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>; <span style="color: #008000;">// Appending</span>
+		win <span style="color: #000080;">-</span>c <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>strTempWKB<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Delete Appended Worksheets</span>
+	<span style="color: #000000;">&#125;</span>
+	else
+		continue;
+<span style="color: #000000;">&#125;</span>
+
+dataset sps <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>;
+dataset sodr <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>;
+wsort nestcols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sps order<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sodr; <span style="color: #008000;">// Sort Appened Worksheets by Z (Height)</span>
+colmove rng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> operation<span style="color: #000000;">:</span><span style="color: #000080;">=</span>left; <span style="color: #008000;">// Move Z column to be 3rd Column</span>
+
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;X&quot;</span>;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Z&quot;</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Intensity&quot;</span>;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;XYZI Table&quot;</span>;
+page.<span style="color: #000080;">title</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Naming</span></pre>
+<h3><a name="Normalize_a_Matrix"></a><span class="mw-headline">Normalize a Matrix</span></h3>
+<p>Internally, Origin'x matrices are one dimensional vector-like arrays. Therefore mathematical operations performed are them are similar to those of vectors rather than true matrices.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Create a matrix</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+mdim cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span> rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span>;
+msetvalue formula<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;rnd()&quot;</span>;
+
+<span style="color: #008000;">// Normalize it to [0, 1]</span>
+vnormalize ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mat<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>range ox<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>input<span style="color: #000080;">&gt;</span>;</pre>
+
+
+
+
+
+

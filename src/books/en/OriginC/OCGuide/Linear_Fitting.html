@@ -1,0 +1,224 @@
+<h1 class="firstHeading">1.12.3.1 Linear Fitting</h1><p>To perform a linear fitting routine in Origin C, you can use the <b><a href="../../OriginC/OriginC/Ocmath_linear_fit_(global_function).html" title="OriginC:Ocmath linear fit (global function)">ocmath_linear_fit</a></b> function. With this function, you can do linear fitting with weight, and then you can get the fitting results, including parameter values, statistical information, etc.
+</p><p>The following procedure will show how to perform linear fitting in Origin C by using this function, and the results will output to the specified windows and worksheet.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Perform_Linear_Fitting"><span class="tocnumber">1</span> <span class="toctext">Perform <span class="OIndex">Linear Fitting</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Result_to_Output_Window"><span class="tocnumber">2</span> <span class="toctext">Result to Output Window</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Result_to_Worksheet"><span class="tocnumber">3</span> <span class="toctext">Result to Worksheet</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Output_to_Normal_Worksheet"><span class="tocnumber">3.1</span> <span class="toctext">Output to Normal Worksheet</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Output_to_Tree_Format_Worksheet"><span class="tocnumber">3.2</span> <span class="toctext">Output to Tree Format Worksheet</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Perform_Linear_Fitting"></a><span class="mw-headline">Perform <span class="OIndex">Linear Fitting</span></span></h2>
+<p>Before starting linear fitting, please import the desired data, here need one independent and one dependent.
+</p><p>Now, begin the Origin C routine. Three steps are needed.
+</p>
+<ol>
+<li>New a c file and add an empty function as the below. Copy the codes from the following steps into this function.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>GetNBox.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// used for GETN_ macros</span>
+<span style="color: #0000ff;">void</span> linearfit<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+<span style="color: #000000;">&#125;</span></pre></li>
+<li>Get the data from the worksheet for linear fit. Both independent and dependent are using vector variables.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Get XY data from worksheet window</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+    <span style="color: #0000ff;">return</span>;  <span style="color: #008000;">// need to activate a worksheet with data</span>
+WorksheetPage wp <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// x column</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// y column</span>
+ 
+vector vX;  
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vX, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get data of x column to vector</span>
+ 
+vector vY;
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get data of y column to vector</span></pre></li>
+<li>Show GetN dialog to control fit options and call ocmath_linear_fit function to do linear fit with these options.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Prepare GUI tree to show fit options in GetN dialog</span>
+GETN_TREE<span style="color: #000000;">&#40;</span>trGUI<span style="color: #000000;">&#41;</span>	
+GETN_BEGIN_BRANCH<span style="color: #000000;">&#40;</span>Fit, _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fit Options&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+GETN_ID_BRANCH<span style="color: #000000;">&#40;</span>IDST_LR_OPTIONS<span style="color: #000000;">&#41;</span> GETN_OPTION_BRANCH<span style="color: #000000;">&#40;</span>GETNBRANCH_OPEN<span style="color: #000000;">&#41;</span>
+	GETN_CHECK<span style="color: #000000;">&#40;</span>FixIntercept, _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fix Intercept&quot;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+		GETN_ID<span style="color: #000000;">&#40;</span>IDE_LR_FIX_INTCPT<span style="color: #000000;">&#41;</span>
+	GETN_NUM<span style="color: #000000;">&#40;</span>FixInterceptAt, _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fix Intercept at&quot;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+		GETN_ID<span style="color: #000000;">&#40;</span>IDE_LR_FIX_INTCPT_AT<span style="color: #000000;">&#41;</span>
+	GETN_CHECK<span style="color: #000000;">&#40;</span>FixSlope, _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fix Slope&quot;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+		GETN_ID<span style="color: #000000;">&#40;</span>IDE_LR_FIX_SLOPE<span style="color: #000000;">&#41;</span>
+	GETN_NUM<span style="color: #000000;">&#40;</span>FixSlopeAt, _L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fix Slope at&quot;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> 
+		GETN_ID<span style="color: #000000;">&#40;</span>IDE_LR_FIX_SLOPE_AT<span style="color: #000000;">&#41;</span>
+	GETN_CHECK<span style="color: #000000;">&#40;</span>UseReducedChiSq, STR_FITTING_CHECKBOX_USE_RED_CHI_SQR, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> 
+		GETN_ID<span style="color: #000000;">&#40;</span>IDE_FIT_REDUCED_CHISQR<span style="color: #000000;">&#41;</span>
+GETN_END_BRANCH<span style="color: #000000;">&#40;</span>Fit<span style="color: #000000;">&#41;</span>	
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>GetNBox<span style="color: #000000;">&#40;</span>trGUI<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span>; <span style="color: #008000;">// clicked Cancel button</span>
+<span style="color: #000000;">&#125;</span>	
+LROptions stLROptions;
+stLROptions <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">Fit</span>; <span style="color: #008000;">// assign value from GUI tree to struct</span>
+
+<span style="color: #008000;">// Do linear fit with the above input dataset and fit option settings</span>
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// data size</span>
+FitParameter psFitParameter<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;  <span style="color: #008000;">// two parameters	 </span>
+RegStats stRegStats;  <span style="color: #008000;">// regression statistics</span>
+RegANOVA stRegANOVA;  <span style="color: #008000;">// anova statistics	</span>
+
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_linear_fit<span style="color: #000000;">&#40;</span>vX, vY, nSize, psFitParameter, <span style="color: #0000ff;">NULL</span>, 
+                        <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>stLROptions, <span style="color: #000040;">&amp;</span>stRegStats, <span style="color: #000040;">&amp;</span>stRegANOVA<span style="color: #000000;">&#41;</span>;	
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> STATS_NO_ERROR<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span></pre></li>
+</ol>
+<h2><a name="Result_to_Output_Window"></a><span class="mw-headline">Result to Output Window</span></h2>
+<p>Once the computation is finished, the fitting results can be output to the specified windows. Here the values of parameters will <a href="../../OriginC/OCGuide/Script_Window.html" title="OCGuide:Script Window">output to the Script Window</a> and the statistical information will <a href="../../OriginC/OCGuide/Results_Log.html" title="OCGuide:Results Log">output to the Result Log window</a> as a tree.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> put_to_output_window<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> FitParameter<span style="color: #000040;">*</span> psFitParameter, 
+			<span style="color: #0000ff;">const</span> RegStats<span style="color: #000040;">&amp;</span> stRegStats, <span style="color: #0000ff;">const</span> RegANOVA<span style="color: #000040;">&amp;</span> stRegANOVA<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	<span style="color: #008000;">// Output analysis result to Script window, Result Log and Worksheet</span>
+	<span style="color: #008000;">// print the values of fitting parameters to the Script Window</span>
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParams <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Intercept&quot;</span>, <span style="color: #ff00ff;">&quot;Slope&quot;</span><span style="color: #000000;">&#125;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iPara <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iPara <span style="color: #000080;">&lt;</span> vsParams.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iPara<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParams<span style="color: #000000;">&#91;</span>iPara<span style="color: #000000;">&#93;</span>, psFitParameter<span style="color: #000000;">&#91;</span>iPara<span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// Put the statistical results to Result Log</span>
+	Tree trResults;
+	TreeNode trResult <span style="color: #000080;">=</span> trResults.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;LinearFit&quot;</span><span style="color: #000000;">&#41;</span>;
+	TreeNode trStats <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Stats&quot;</span><span style="color: #000000;">&#41;</span>;
+	trStats <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegStats;  <span style="color: #008000;">// add regression statistics to tree node</span>
+	 
+	TreeNode trANOVA <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ANOVA&quot;</span><span style="color: #000000;">&#41;</span>;
+	trANOVA <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegANOVA;  <span style="color: #008000;">// add anova statistics to tree node</span>
+	 
+	string strResult;
+	tree_to_str<span style="color: #000000;">&#40;</span>trResult, strResult<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// convert tree to string</span>
+	
+	Project.<span style="color: #000000;">OutStringToResultsLog</span><span style="color: #000000;">&#40;</span>strResult<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// output to Result Log</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Result_to_Worksheet"></a><span class="mw-headline"><a href="../../OriginC/OCGuide/Report_Sheet.html" title="OCGuide:Report Sheet">Result to Worksheet</a></span></h2>
+<p>You can output the fitting result to the specified Worksheet as well. And the results can be organized in normal column format or tree view format in Worksheet window.
+</p><p>The following two ways both used <b><a href="../../OriginC/OriginC/Datasheet-SetReportTree.html" title="OriginC:Datasheet-SetReportTree">Datasheet::SetReportTree</a></b> method to put result in Worksheet by tree variable. The difference is the option bit WP_SHEET_HIERARCHY when create worksheet, see the 2nd variable used <b>AddLayer</b> method below.
+</p>
+<h3><a name="Output_to_Normal_Worksheet"></a><span class="mw-headline">Output to Normal Worksheet</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> output_to_wks<span style="color: #000000;">&#40;</span>WorksheetPage wp, <span style="color: #0000ff;">const</span> FitParameter<span style="color: #000040;">*</span> psFitParameter<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// prepare report tree		</span>
+	<span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique</span>
+	Tree tr;
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	TreeNode trReport <span style="color: #000080;">=</span> tr.<span style="color: #000000;">Report</span>;
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, GETNBRANCH_TRANSPOSE<span style="color: #000000;">&#41;</span>;		
+	
+	<span style="color: #008000;">// column 1</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Parameter&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// column label</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// column 2</span>
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Value&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// column label</span>
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// column 3</span>
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Prob&gt;|t|&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// column label</span>
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>;	
+	
+	<span style="color: #008000;">// prepare the vectors to show in the table</span>
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParamNames <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Intercept&quot;</span>, <span style="color: #ff00ff;">&quot;Slope&quot;</span><span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">// parameter name</span>
+	vector vValues, vProbs;  <span style="color: #008000;">// parameter value and prob</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vsParamNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	    vValues.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>psFitParameter<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Value</span><span style="color: #000000;">&#41;</span>;
+	    vProbs.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>psFitParameter<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span>.<span style="color: #000000;">Prob</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// assign the vectors to tree node</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">strVals</span> <span style="color: #000080;">=</span> vsParamNames;
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vValues;
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vProbs;
+	
+	<span style="color: #008000;">// report tree to worksheet</span>
+	<span style="color: #0000ff;">int</span> iLayer <span style="color: #000080;">=</span> wp.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Linear Fit Params&quot;</span><span style="color: #000000;">&#41;</span>; 
+	Worksheet wksResult <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>iLayer<span style="color: #000000;">&#41;</span>;		 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wksResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> wksResult.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>trReport<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree. <span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	    <span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	wksResult.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Output_to_Tree_Format_Worksheet"></a><span class="mw-headline">Output to Tree Format Worksheet</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> output_to_tree_view_wks<span style="color: #000000;">&#40;</span>WorksheetPage<span style="color: #000040;">&amp;</span> wp, <span style="color: #0000ff;">const</span> RegStats<span style="color: #000040;">&amp;</span> stRegStats<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Tree tr;
+	<span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique</span>
+	uint nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN	
+						<span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_HEADINGS 
+						<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_HEADINGS 
+						<span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH 
+						<span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+	
+	<span style="color: #008000;">// prepare root table node</span>
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// add Report treenode and assign node id</span>
+	TreeNode trReport <span style="color: #000080;">=</span> tr.<span style="color: #000000;">Report</span>; 
+	<span style="color: #008000;">// need set table attribute for table node</span>
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 
+	<span style="color: #008000;">// the title of root table</span>
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Linear Fit Stats&quot;</span><span style="color: #000000;">&#41;</span>; 
+	
+	<span style="color: #008000;">// prepare stats table node</span>
+	trReport.<span style="color: #000000;">Table</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// add Table treenode and assign node id</span>
+	TreeNode trTable <span style="color: #000080;">=</span> trReport.<span style="color: #000000;">Table</span>;
+	<span style="color: #008000;">// need set table attribute for table node</span>
+	trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000040;">|</span>GETNBRANCH_TRANSPOSE<span style="color: #000000;">&#41;</span>; 
+	<span style="color: #008000;">// the title of stats table</span>
+	trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Regression Statistics&quot;</span><span style="color: #000000;">&#41;</span>; 
+	
+	<span style="color: #008000;">// prepare result node</span>
+	trTable.<span style="color: #000000;">Stats</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// add Stats treenode and assign node id</span>
+	TreeNode trStats <span style="color: #000080;">=</span> trTable.<span style="color: #000000;">Stats</span>;		
+	trStats <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegStats; <span style="color: #008000;">// support adding result from sturct to treenode</span>
+	
+	<span style="color: #008000;">// set label, those text will show in row header in table</span>
+	trStats.<span style="color: #000000;">N</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Number of Points&quot;</span><span style="color: #000000;">&#41;</span>;
+	trStats.<span style="color: #000000;">DOF</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Degrees of Freedom&quot;</span><span style="color: #000000;">&#41;</span>;
+	trStats.<span style="color: #000000;">SSR</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Residual Sum of Squares&quot;</span><span style="color: #000000;">&#41;</span>;
+	trStats.<span style="color: #000000;">AdjRSq</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Adj. R-Square&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// to hide other nodes</span>
+	trStats.<span style="color: #000000;">ReducedChiSq</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">Correlation</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">Rvalue</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">RSqCOD</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">RMSESD</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">NormResiduals</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	
+	<span style="color: #008000;">// the bits to control the newly created worksheet as hierarchy format</span>
+	DWORD   dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE; 
+	<span style="color: #0000ff;">int</span> iLayer <span style="color: #000080;">=</span> wp.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Linear Fit Stats&quot;</span>, dwOptions<span style="color: #000000;">&#41;</span>; 
+	
+	Worksheet wksResult <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>iLayer<span style="color: #000000;">&#41;</span>;		 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wksResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> wksResult.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>trReport<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	    <span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	wksResult.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+<h1 class="firstHeading">2.1.5.3 curve_duplicate_active</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>duplicate the active curve in the active graph layer so that analysis routine like derivatives and
+smoothing can be performed on the copied curve
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;">curvebase <span style="color: #000040;">&amp;</span> curve_duplicate_active<span style="color: #000000;">&#40;</span> LPCSTR lpcszNewColName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">bool</span> bReuseIfInWks <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpcszNewColName</dt>
+<dd>[input] name of the Y column for the copied curve</dd>
+<dt> bReuseIfInWks</dt>
+<dd>[input] option to always create new copy of can reuse if named column is already in the same worksheet as the original</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>NULL if no active graph layer with active curve found, or if the operation failed
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//This example copy the active curve with the data of column B from the Graph.</span>
+<span style="color: #0000ff;">void</span> curve_duplicate_active_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    WorksheetPage wksPage <span style="color: #000080;">=</span> Project.<span style="color: #000000;">WorksheetPages</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    Worksheet wks <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>        
+        GraphPage  gp;
+        gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+        
+        Curve crv<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>crv <span style="color: #000040;">&amp;&amp;</span> gl<span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            add_curve_to_graph_layer<span style="color: #000000;">&#40;</span>crv, gl<span style="color: #000000;">&#41;</span>;            <span style="color: #008000;">// add the curve to the graphlayer</span>
+            gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+            
+           	set_active_layer<span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>;                     <span style="color: #008000;">// set the graphlayer to active</span>
+           	gp.<span style="color: #000000;">Refresh</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;           		  <span style="color: #008000;">// need do refresh after set acitve	</span>
+            
+            <span style="color: #008000;">// get curve from active graph layer to copy</span>
+            curvebase<span style="color: #000040;">&amp;</span> crvCopy <span style="color: #000080;">=</span> curve_duplicate_active<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>crvCopy <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>
+            <span style="color: #000000;">&#123;</span>
+                out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Copy successfully.&quot;</span><span style="color: #000000;">&#41;</span>;
+            <span style="color: #000000;">&#125;</span>
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

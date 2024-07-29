@@ -1,0 +1,120 @@
+<h1 class="firstHeading">2.1.18.11 ocmath_mesh_in_polygon</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>The function generates a triangular mesh of a closed polygonal region.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_mesh_in_polygon<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nVertices, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pxVertices, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pyVertices, <span style="color: #0000ff;">int</span> nEdgePts, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span> nMeshPts, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pxMesh, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pyMesh <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> nVertices</dt>
+<dd>[input] the number of vertices in the input boundary.</dd>
+<dt> pxVertices</dt>
+<dd>[input] the X coordinates in the input boundary.</dd>
+<dt> pyVertices</dt>
+<dd>[input] the Y coordinates in the input boundary.</dd>
+<dt> nEdgePts</dt>
+<dd>[input] how many points are interpolated in the boundary; more boundary points, finer the mesh.</dd>
+<dt> nMeshPts</dt>
+<dd>[modify] on input, the size of pxMesh and pyMesh buffer; on output, the total number of mesh points.</dd>
+<dt> pxMesh</dt>
+<dd>[output] the buffer to receive X coordinates of mesh, the initial size is nMeshPts.</dd>
+<dt> pyMesh</dt>
+<dd>[output] the buffer to receive Y coordinates of mesh, the initial size is nMeshPts.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>OE_NOERROR = 0 Succeed.
+</p><p>OE_SIZE_LT = -1 nEdgePts is smaller than *nMeshPts, or nEdgePts is too small to generate interior points.
+</p><p>OE_NULL_POINTER = -11 pxVertices, pyVertices, pxMesh, or pyMesh must not be NULL.
+</p><p>NE_MESH_ERROR = 2099 Inccorrect boundary input, or nMeshPts is not large enough.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#define</span> MAX_MESH_PTS    <span style="color: #0000dd;">2000</span>
+<span style="color: #0000ff;">int</span> ocmath_mesh_in_polygon_ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nEdgePts <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>, <span style="color: #0000ff;">double</span> dSmooth <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.02</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>    
+    <span style="color: #0000ff;">int</span> iRet;
+    <span style="color: #008000;">// Step1. Generating mesh in the given polygon.</span>
+    <span style="color: #008000;">// Assume there is worksheet named &quot;Boundary&quot;, which contains boundary data.</span>
+    vector vxMesh, vyMesh;
+    <span style="color: #0000ff;">int</span> nvmax <span style="color: #000080;">=</span> MAX_MESH_PTS;
+    
+    Worksheet wksBd<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Boundary&quot;</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsX<span style="color: #000000;">&#40;</span>wksBd, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsY<span style="color: #000000;">&#40;</span>wksBd, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    vector vxVertices<span style="color: #000000;">&#40;</span>dsX<span style="color: #000000;">&#41;</span>, vyVertices<span style="color: #000000;">&#40;</span>dsY<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nvb <span style="color: #000080;">=</span> vxVertices.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    vxMesh.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nvmax<span style="color: #000000;">&#41;</span>;
+    vyMesh.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nvmax<span style="color: #000000;">&#41;</span>;
+    iRet <span style="color: #000080;">=</span> ocmath_mesh_in_polygon<span style="color: #000000;">&#40;</span>nvb, vxVertices, vyVertices, nEdgePts, <span style="color: #000040;">&amp;</span>nvmax, vxMesh, vyMesh<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>OE_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> iRet<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error occurs when calling nag mesh funcion!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">&#125;</span>
+    vxMesh.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nvmax<span style="color: #000000;">&#41;</span>;
+    vyMesh.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nvmax<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// Step2. Gridding XYZ triplets on the generated mesh by using TPS method.</span>
+    <span style="color: #008000;">// Assume that XYZ triplets are contained in the active layer.</span>
+    vector vX, vY, vZ;
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Dataset ds1<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>, ds2<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>, ds3<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+    vX<span style="color: #000080;">=</span>ds1; vY<span style="color: #000080;">=</span>ds2; vZ<span style="color: #000080;">=</span>ds3;
+    
+    ocmath_strTPS strTPS;
+    <span style="color: #0000ff;">double</span> dReg;
+    vector vzMesh<span style="color: #000000;">&#40;</span>nvmax<span style="color: #000000;">&#41;</span>;
+    iRet <span style="color: #000080;">=</span> ocmath_tps_fit<span style="color: #000000;">&#40;</span>vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, vX, vY, vZ, dSmooth, <span style="color: #000040;">&amp;</span>strTPS, <span style="color: #000040;">&amp;</span>dReg<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> iRet <span style="color: #000080;">==</span> OE_NOERROR <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        iRet <span style="color: #000080;">=</span> ocmath_tps_eval<span style="color: #000000;">&#40;</span>nvmax, vxMesh, vyMesh, vzMesh, <span style="color: #000040;">&amp;</span>strTPS<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    ocmath_tps_free<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>strTPS<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// Step3. Put result data to a new worksheet</span>
+    Worksheet wksResult;
+    wksResult.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    wksResult.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    Dataset d1<span style="color: #000000;">&#40;</span>wksResult,<span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>, d2<span style="color: #000000;">&#40;</span>wksResult,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>, d3<span style="color: #000000;">&#40;</span>wksResult,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+    d1 <span style="color: #000080;">=</span> vxMesh;
+    d2 <span style="color: #000080;">=</span> vyMesh;
+    d3 <span style="color: #000080;">=</span> vzMesh;
+
+    <span style="color: #0000ff;">return</span> iRet;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>The function generates a triangular mesh of a closed polygonal region.
+</p><p>It uses an Advancing Front process from NAG (d06acc), based on an incremental method.
+</p><p>The orientation of input boundary vertices must be counter-clockwise.
+</p><p>One can specify the numer of points on boundary. More points on boundary will result finer mesh in interior region of polygon.
+</p><p>On input, one must allocate memory buffer large enough to receive resulting mesh points.
+</p><p>The number of mesh points is determined internally. 
+</p><p>On output, nMeshPts is the total number of vertices in the mesh (including boundary).
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>wks2mat.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

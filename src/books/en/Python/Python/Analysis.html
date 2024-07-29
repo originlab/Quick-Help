@@ -1,0 +1,391 @@
+<h1 class="firstHeading">5.5 Analysis</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Batch_Fitting_Multiple_Data_Files"><span class="tocnumber">1</span> <span class="toctext">Batch Fitting Multiple Data Files</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Extract_Values_from_NLFit_Report_Tables"><span class="tocnumber">2</span> <span class="toctext">Extract Values from NLFit Report Tables</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Fit_2_Indepedents_and_2_Dependents"><span class="tocnumber">3</span> <span class="toctext">Fit 2 Indepedents and 2 Dependents</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Linear_Regression_and_Plot"><span class="tocnumber">4</span> <span class="toctext">Linear Regression and Plot</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Load_and_Run_Multiple_Linear_Fit_Templates"><span class="tocnumber">5</span> <span class="toctext">Load and Run Multiple Linear Fit Templates</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Open_Dialog_for_Interactive_Control_of_the_Fitting"><span class="tocnumber">6</span> <span class="toctext">Open Dialog for Interactive Control of the Fitting</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Sequential_Fit_Multiple_Files"><span class="tocnumber">7</span> <span class="toctext">Sequential Fit Multiple Files</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Simple_Curve_Fit_on_a_Graph"><span class="tocnumber">8</span> <span class="toctext">Simple Curve Fit on a Graph</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Simple_Curve_Fit_to_XY_Data"><span class="tocnumber">9</span> <span class="toctext">Simple Curve Fit to XY Data</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Simple_Curve_Fit_with_Report"><span class="tocnumber">10</span> <span class="toctext">Simple Curve Fit with Report</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Tabulate_Multiple_Nonlinear_Fit_Results"><span class="tocnumber">11</span> <span class="toctext">Tabulate Multiple Nonlinear Fit Results</span></a></li>
+</ul>
+</div>
+
+<p>
+<p>This folder contains examples of performing curve fitting and generating analysis report with <strong>originpro</strong> package.   </p>
+
+</p>
+<h2><a name="Batch_Fitting_Multiple_Data_Files"></a><span class="mw-headline">Batch Fitting Multiple Data Files</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample is to show how to run gaussian peak fit on multiple data files. 
+Then the fitted peak parameters xc, w, A are plotted as a function of temperature
+in a three Y axes graph.
+'''</span>
+
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+
+<span style="color: #d00; font-style: italic;"># One worksheet for imported data, one worksheet for peak fitting result</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks_result <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+
+wts <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">25</span><span style="color: #000;">,</span> <span style="color: #000;">100</span><span style="color: #000;">,</span> <span style="color: #000;">150</span><span style="color: #000;">,</span> <span style="color: #000;">200</span><span style="color: #000;">&#93;</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> i<span style="color: #000;">,</span> wt <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">enumerate</span><span style="color: #000;">&#40;</span>wts<span style="color: #000;">&#41;</span>:    
+    <span style="color: #d00; font-style: italic;"># Import each data file into wks</span>
+    fd <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\B</span>atch2'</span>
+    fn <span style="color: #000;">=</span> f<span style="color: #0a0;">'{fd}<span style="color: #000099; font-weight: bold;">\S</span>ample 2 {wt} wt.txt'</span>
+    wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> keep_DC<span style="color: #000;">=</span><span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+    
+    <span style="color: #d00; font-style: italic;"># Baseline subtraction</span>
+    spec <span style="color: #000;">=</span> wks.<span style="color: #000;">to_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+    spec <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span>spec<span style="color: #000;">&#41;</span>
+    base <span style="color: #000;">=</span> np.<span style="color: #000;">linspace</span><span style="color: #000;">&#40;</span>spec<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> spec<span style="color: #000;">&#91;</span>-<span style="color: #000;">1</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>spec<span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># straight line connecting start and end point as baseline</span>
+    spec <span style="color: #000;">=</span> spec - base
+    wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> spec<span style="color: #000;">&#41;</span>      
+    
+    <span style="color: #d00; font-style: italic;"># Run Gaussian fit on subtracted spectrum</span>
+    model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gaussian'</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">set_data</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">fix_param</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'y0'</span><span style="color: #000;">,</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    ret <span style="color: #000;">=</span> model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    
+    <span style="color: #d00; font-style: italic;"># Fitting result is saved to each row of wks_result</span>
+    wks_result.<span style="color: #000;">from_list2</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>wt<span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'xc'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'A'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'adjr'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> i<span style="color: #000;">&#41;</span> 
+    
+wks_result.<span style="color: #000;">set_labels</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span><span style="color: #0a0;">'temperature'</span><span style="color: #000;">,</span><span style="color: #0a0;">'fit x'</span><span style="color: #000;">,</span><span style="color: #0a0;">'fit width'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'fit area'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Adj. R-Square'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Plot the data</span>
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'3Ys_Y-YY'</span><span style="color: #000;">&#41;</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> i <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">&#40;</span><span style="color: #000;">3</span><span style="color: #000;">&#41;</span>:    
+    gp<span style="color: #000;">&#91;</span>i<span style="color: #000;">&#93;</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks_result<span style="color: #000;">,</span><span style="color: #000;">1</span>+i<span style="color: #000;">,</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+    gp<span style="color: #000;">&#91;</span>i<span style="color: #000;">&#93;</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Customize Legend</span>
+lgnd <span style="color: #000;">=</span> gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>.<span style="color: #000;">label</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Legend'</span><span style="color: #000;">&#41;</span>
+lgnd.<span style="color: #000;">text</span><span style="color: #000;">=</span><span style="color: #0a0;">'<span style="color: #000099; font-weight: bold;">\l</span>(1.1)&#160;%(1.1)   <span style="color: #000099; font-weight: bold;">\l</span>(2.1)&#160;%(2.1)   <span style="color: #000099; font-weight: bold;">\l</span>(3.1)&#160;%(3.1)'</span>
+lgnd.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'fsize'</span><span style="color: #000;">,</span> <span style="color: #000;">27</span><span style="color: #000;">&#41;</span>
+lgnd.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'top'</span><span style="color: #000;">,</span> <span style="color: #000;">400</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Extract_Values_from_NLFit_Report_Tables"></a><span class="mw-headline">Extract Values from NLFit Report Tables</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample shows how to use report_table function to
+access a table in an Analysis Report Sheet
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">re</span>
+
+<span style="color: #d00; font-style: italic;"># Load analysis template book that ships with Origin.</span>
+at <span style="color: #000;">=</span> op.<span style="color: #000;">load_book</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\B</span>atch Processing<span style="color: #000099; font-weight: bold;">\S</span>ensor Analysis.ogw'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Get 1st worksheet in book.</span>
+wks <span style="color: #000;">=</span> at<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+wks_table <span style="color: #000;">=</span> at<span style="color: #000;">&#91;</span><span style="color: #000;">1</span><span style="color: #000;">&#93;</span>
+df_list <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #d00; font-style: italic;"># Get folder for data files that ship with Origin.</span>
+data_folder <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting'</span>
+
+<span style="color: #d00; font-style: italic;"># Iterate data file folder for file names to import.</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> <span style="color: #900090;">file</span> <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #000;">os</span>.<span style="color: #000;">listdir</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">&#41;</span>:
+
+    <span style="color: #d00; font-style: italic;"># Filter for specific data files.</span>
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #000;">re</span>.<span style="color: #000;">search</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'^Sensor[0-9]{2}.dat$'</span><span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>:
+
+        <span style="color: #d00; font-style: italic;"># Full path to file to import.</span>
+        imp_file <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Import the file into the worksheet and removing the Data Connector.</span>
+        wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>imp_file<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Wait for analysis operation to complete.</span>
+        op.<span style="color: #000;">wait</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># If  you want to see live updates of the graph, add the line below.</span>
+        <span style="color: #d00; font-style: italic;">#op.wait('s', 0.1)</span>
+        
+        df <span style="color: #000;">=</span> wks_table.<span style="color: #000;">report_table</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Summary'</span><span style="color: #000;">&#41;</span>
+        df.<span style="color: #000;">iloc</span><span style="color: #000;">&#91;</span>:<span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#93;</span> <span style="color: #000;">=</span> <span style="color: #900090;">file</span>
+        
+        df_list.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>df<span style="color: #000;">&#41;</span>
+
+        <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'working on {file}'</span><span style="color: #000;">&#41;</span>
+        
+result <span style="color: #000;">=</span> pd.<span style="color: #000;">concat</span><span style="color: #000;">&#40;</span>df_list<span style="color: #000;">&#41;</span>
+wks_result <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks_result.<span style="color: #000;">from_df</span><span style="color: #000;">&#40;</span>result<span style="color: #000;">&#41;</span></pre>
+<h2><a name="Fit_2_Indepedents_and_2_Dependents"></a><span class="mw-headline">Fit 2 Indepedents and 2 Dependents</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\E</span>nzyme2.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">cols_axis</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'x'</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#Specify the input data range, which follows </span>
+<span style="color: #d00; font-style: italic;">#the independent/dependent order in FDF (x1, x2, v1, v2)</span>
+<span style="color: #900090;">range</span><span style="color: #000;">=</span>f<span style="color: #0a0;">'{wks.lt_range()}!(1,3,2,4)'</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'HillBurk'</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">set_range</span><span style="color: #000;">&#40;</span><span style="color: #900090;">range</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">report</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Linear_Regression_and_Plot"></a><span class="mw-headline">Linear Regression and Plot</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample is to show how to run linear regression with Python in Origin. The fitted curve 
+and prediction band are then plotted out.
+'''</span>
+
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># Import data file</span>
+wb <span style="color: #000;">=</span> op.<span style="color: #000;">new_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks <span style="color: #000;">=</span> wb<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\L</span>inear Fit.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span><span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#Perform linear fit </span>
+lr <span style="color: #000;">=</span> op.<span style="color: #000;">LinearFit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+lr.<span style="color: #000;">set_data</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+lr.<span style="color: #000;">fix_intercept</span><span style="color: #000;">&#40;</span>-<span style="color: #000;">0.7</span><span style="color: #000;">&#41;</span>
+r<span style="color: #000;">,</span> c <span style="color: #000;">=</span> lr.<span style="color: #000;">report</span><span style="color: #000;">&#40;</span><span style="color: #000;">3</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># Return the result report sheet and fitted curve sheet.</span>
+wReport<span style="color: #000;">=</span>op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> r<span style="color: #000;">&#41;</span>
+wCurves<span style="color: #000;">=</span>op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> c<span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Plot the data and fitted curve and confidence band</span>
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span> <span style="color: #000;">=</span> gp<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #d00; font-style: italic;"># Plot data as scatter plot</span>
+pltdata <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #900090;">type</span><span style="color: #000;">=</span><span style="color: #0a0;">'s'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Add the confidence band</span>
+conf <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wCurves<span style="color: #000;">,</span> <span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span> 
+<span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wCurves<span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Group the newly added plots, starting from 1 to skip the scatter data</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">group</span><span style="color: #000;">&#40;</span><span style="color: #900090;">True</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+conf.<span style="color: #000;">colorinc</span><span style="color: #000;">=</span><span style="color: #000;">0</span>
+conf.<span style="color: #000;">transparency</span> <span style="color: #000;">=</span> <span style="color: #000;">80</span>
+conf.<span style="color: #000;">set_fill_area</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">ocolor</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Red'</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># fill the color to the next plot</span>
+
+<span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wCurves<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span> <span style="color: #d00; font-style: italic;"># Plot the fitted line</span>
+
+<span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Customize legend</span>
+lgnd <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">label</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Legend'</span><span style="color: #000;">&#41;</span>
+lgnd.<span style="color: #000;">text</span><span style="color: #000;">=</span><span style="color: #0a0;">'<span style="color: #000099; font-weight: bold;">\\</span>l(4) Linear Fit<span style="color: #000099; font-weight: bold;">\n</span><span style="color: #000099; font-weight: bold;">\\</span>l(2) Confidence Band'</span>
+lgnd.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'left'</span><span style="color: #000;">,</span><span style="color: #000;">1400</span><span style="color: #000;">&#41;</span>
+lgnd.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'top'</span><span style="color: #000;">,</span><span style="color: #000;">700</span><span style="color: #000;">&#41;</span>
+lgnd.<span style="color: #000;">set_int</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'showframe'</span><span style="color: #000;">,</span><span style="color: #000;">0</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Load_and_Run_Multiple_Linear_Fit_Templates"></a><span class="mw-headline">Load and Run Multiple Linear Fit Templates</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+Import each data file in a sample folder into an Analysis Template and
+perform the fitting and update the reports with graphs, so you end up
+with a book for each file in the Origin workspace for further examination
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">re</span>
+
+
+<span style="color: #d00; font-style: italic;"># location of sample data files that ship with Origin.</span>
+data_folder <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting'</span>
+
+<span style="color: #d00; font-style: italic;"># Iterate data file folder for file names to import.</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> <span style="color: #900090;">file</span> <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #000;">os</span>.<span style="color: #000;">listdir</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #000;">re</span>.<span style="color: #000;">search</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'^Sensor[0-9]{2}.dat$'</span><span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>:
+        <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'working on {file}'</span><span style="color: #000;">&#41;</span>
+        imp_file <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>
+        <span style="color: #d00; font-style: italic;"># Load analysis template book that ships with Origin.</span>
+        at <span style="color: #000;">=</span> op.<span style="color: #000;">load_book</span><span style="color: #000;">&#40;</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\B</span>atch Processing<span style="color: #000099; font-weight: bold;">\S</span>ensor Analysis.ogw'</span><span style="color: #000;">&#41;</span>
+        <span style="color: #d00; font-style: italic;"># This template put Data sheet as 1st worksheet in book.</span>
+        wks <span style="color: #000;">=</span> at<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+        <span style="color: #d00; font-style: italic;"># Import the file into the worksheet and removing the Data Connector.</span>
+        wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>imp_file<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+        <span style="color: #d00; font-style: italic;"># Wait for analysis operation to complete.</span>
+        op.<span style="color: #000;">wait</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Open_Dialog_for_Interactive_Control_of_the_Fitting"></a><span class="mw-headline">Open Dialog for Interactive Control of the Fitting</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">&quot;&quot;&quot;
+Fitting a curve on a graph and open dialog to adjust the parameters before final fitting
+&quot;&quot;&quot;</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\G</span>aussian.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+graph <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'scatter'</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span><span style="color: #000;">=</span>graph<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+dp <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gauss'</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">set_range</span><span style="color: #000;">&#40;</span>dp.<span style="color: #000;">lt_range</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+<span style="color: #0a0;">&quot;&quot;&quot;
+dialog is modal, so wont close until OK, but you can use Minimize button 
+to rollup the dialog and interact with the graph, then click Minimize again 
+to open the dialog to continue
+&quot;&quot;&quot;</span>
+model.<span style="color: #000;">param_box</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#after the dialog, still need to call Fit for final processing</span>
+model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+rr<span style="color: #000;">=</span>model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+<span style="color: #d00; font-style: italic;">#accessing parameters and errors</span>
+xc<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'xc'</span><span style="color: #000;">&#93;</span>
+xc_err<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'e_xc'</span><span style="color: #000;">&#93;</span>
+<span style="color: #d00; font-style: italic;">#accessing other fitting stats</span>
+chisqr<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'chisqr'</span><span style="color: #000;">&#93;</span>
+adjr<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'adjr'</span><span style="color: #000;">&#93;</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'AdjR2={adjr}, xc={xc}+-{xc_err}'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Sequential_Fit_Multiple_Files"></a><span class="mw-headline">Sequential Fit Multiple Files</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+Import each data file in a sample folder into and perform fitting with parameters dialog
+to check each fit and generate a sheet with result parameters and stats.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">os</span>
+
+data_folder <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\B</span>atch Processing'</span>
+<span style="color: #d00; font-style: italic;">#only to process 3 files</span>
+names <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #0a0;">'T285K.csv'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'T305K.csv'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'T345K.csv'</span><span style="color: #000;">&#93;</span>
+pk_centers<span style="color: #000;">=</span><span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+Rsqrs<span style="color: #000;">=</span><span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+wdata <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+graph <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'scatter'</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span><span style="color: #000;">=</span>graph<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gauss'</span><span style="color: #000;">&#41;</span>
+show_hint<span style="color: #000;">=</span><span style="color: #900090;">True</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> <span style="color: #900090;">file</span> <span style="color: #ff7700;font-weight:bold;">in</span> names:
+    f <span style="color: #000;">=</span> <span style="color: #000;">os</span>.<span style="color: #000;">path</span>.<span style="color: #000;">join</span><span style="color: #000;">&#40;</span>data_folder<span style="color: #000;">,</span> <span style="color: #900090;">file</span><span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'working on {f}'</span><span style="color: #000;">&#41;</span>
+    wdata.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>f<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+    dp <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wdata<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">set_range</span><span style="color: #000;">&#40;</span>dp.<span style="color: #000;">lt_range</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">if</span> show_hint:
+        op.<span style="color: #000;">messagebox</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'You can click the Minimize button on the Parameters Dialog to manipulate the graph'</span><span style="color: #000;">&#41;</span>
+        show_hint <span style="color: #000;">=</span> <span style="color: #900090;">False</span>
+    model.<span style="color: #000;">param_box</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #ff7700;font-weight:bold;">not</span> op.<span style="color: #000;">messagebox</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Take a look at the fit'</span><span style="color: #000;">,</span> <span style="color: #900090;">True</span><span style="color: #000;">&#41;</span>:
+        model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #d00; font-style: italic;">#must call either result or report to end the fitting</span>
+        <span style="color: #ff7700;font-weight:bold;">break</span>
+        
+    rr<span style="color: #000;">=</span>model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    <span style="color: #000;">gl</span>.<span style="color: #000;">remove</span><span style="color: #000;">&#40;</span>dp<span style="color: #000;">&#41;</span>
+    Rsqrs.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'adjr'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+    pk_centers.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'xc'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+    
+wdata.<span style="color: #000;">get_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">destroy</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>    
+graph.<span style="color: #000;">destroy</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">0</span><span style="color: #000;">,</span> names<span style="color: #000;">,</span> <span style="color: #0a0;">'File Name'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">1</span><span style="color: #000;">,</span> pk_centers<span style="color: #000;">,</span> <span style="color: #0a0;">'Peak Center'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">&#40;</span><span style="color: #000;">2</span><span style="color: #000;">,</span> Rsqrs<span style="color: #000;">,</span> <span style="color: #0a0;">'R-sqr'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Simple_Curve_Fit_on_a_Graph"></a><span class="mw-headline">Simple Curve Fit on a Graph</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">&quot;&quot;&quot;
+Simple example of doing a non-linear fitting with a report sheet
+&quot;&quot;&quot;</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\G</span>aussian.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+graph <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">&#40;</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'scatter'</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span><span style="color: #000;">=</span>graph<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+dp <span style="color: #000;">=</span> <span style="color: #000;">gl</span>.<span style="color: #000;">add_plot</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+<span style="color: #000;">gl</span>.<span style="color: #000;">rescale</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#do the fitting and generate report</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gauss'</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">set_range</span><span style="color: #000;">&#40;</span>dp.<span style="color: #000;">lt_range</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+r<span style="color: #000;">,</span> c <span style="color: #000;">=</span> model.<span style="color: #000;">report</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wReport<span style="color: #000;">=</span>op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> r<span style="color: #000;">&#41;</span>
+wReport.<span style="color: #000;">activate</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Simple_Curve_Fit_to_XY_Data"></a><span class="mw-headline">Simple Curve Fit to XY Data</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">&quot;&quot;&quot;
+Simple example of doing a non-linear fitting without creating report sheet
+&quot;&quot;&quot;</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\G</span>aussian.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+
+<span style="color: #d00; font-style: italic;">#do the fitting and receive fitting parameters. No report will be generated</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gauss'</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">set_data</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">fix_param</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'y0'</span><span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+rr<span style="color: #000;">=</span>model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#accessing parameters and errors</span>
+xc<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'xc'</span><span style="color: #000;">&#93;</span>
+xc_err<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'e_xc'</span><span style="color: #000;">&#93;</span>
+<span style="color: #d00; font-style: italic;">#accessing other fitting stats</span>
+chisqr<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'chisqr'</span><span style="color: #000;">&#93;</span>
+adjr<span style="color: #000;">=</span>rr<span style="color: #000;">&#91;</span><span style="color: #0a0;">'adjr'</span><span style="color: #000;">&#93;</span>
+
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span>f<span style="color: #0a0;">'xc={xc}+-{xc_err}'</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Simple_Curve_Fit_with_Report"></a><span class="mw-headline">Simple Curve Fit with Report</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">&quot;&quot;&quot;
+Simple example of doing a non-linear fitting with a report sheet
+&quot;&quot;&quot;</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\G</span>aussian.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;">#do the fitting and generate report</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Gauss'</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">set_data</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+r<span style="color: #000;">,</span> c <span style="color: #000;">=</span> model.<span style="color: #000;">report</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wReport<span style="color: #000;">=</span>op.<span style="color: #000;">find_sheet</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> r<span style="color: #000;">&#41;</span>
+wReport.<span style="color: #000;">activate</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span></pre>
+<h2><a name="Tabulate_Multiple_Nonlinear_Fit_Results"></a><span class="mw-headline">Tabulate Multiple Nonlinear Fit Results</span></h2>
+<pre class="python" style="font-family:monospace;"><span style="color: #0a0;">'''
+This sample is to show how to run non-linear regression on multiple datasets and output 
+the fitted result.
+'''</span>
+
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #d00; font-style: italic;"># Import data file</span>
+wb <span style="color: #000;">=</span> op.<span style="color: #000;">new_book</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+wks <span style="color: #000;">=</span> wb<span style="color: #000;">&#91;</span><span style="color: #000;">0</span><span style="color: #000;">&#93;</span>
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'e'</span><span style="color: #000;">&#41;</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\S</span>tep01.dat'</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">&#40;</span>fn<span style="color: #000;">,</span> dctype<span style="color: #000;">=</span><span style="color: #0a0;">'Import Filter'</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Perform nonlinear curve fit on each dataset</span>
+model <span style="color: #000;">=</span> op.<span style="color: #000;">NLFit</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'Asymptotic1'</span><span style="color: #000;">&#41;</span>
+nn <span style="color: #000;">=</span> <span style="color: #900090;">int</span><span style="color: #000;">&#40;</span>wks.<span style="color: #000;">cols</span>/<span style="color: #000;">2</span><span style="color: #000;">&#41;</span>
+result <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> i <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">&#40;</span>nn<span style="color: #000;">&#41;</span>:
+    col_name <span style="color: #000;">=</span> wks.<span style="color: #000;">get_label</span><span style="color: #000;">&#40;</span><span style="color: #000;">2</span>*i<span style="color: #000;">,</span> <span style="color: #0a0;">'L'</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">set_data</span><span style="color: #000;">&#40;</span>wks<span style="color: #000;">,</span> <span style="color: #000;">2</span>*i<span style="color: #000;">,</span> <span style="color: #000;">2</span>*i+<span style="color: #000;">1</span><span style="color: #000;">&#41;</span>
+    model.<span style="color: #000;">fit</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    ret <span style="color: #000;">=</span> model.<span style="color: #000;">result</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>
+    result.<span style="color: #000;">append</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>col_name<span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'a'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'b'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'c'</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> ret<span style="color: #000;">&#91;</span><span style="color: #0a0;">'adjr'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>    
+df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">&#40;</span>result<span style="color: #000;">,</span> columns<span style="color: #000;">=</span><span style="color: #000;">&#91;</span><span style="color: #0a0;">'data'</span><span style="color: #000;">,</span><span style="color: #0a0;">'fit a'</span><span style="color: #000;">,</span><span style="color: #0a0;">'fit b'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'fit c'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Adj. R-Square'</span><span style="color: #000;">&#93;</span><span style="color: #000;">&#41;</span>
+
+<span style="color: #d00; font-style: italic;"># Generate the result</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">&#40;</span>lname<span style="color: #000;">=</span><span style="color: #0a0;">'Result'</span><span style="color: #000;">&#41;</span>
+wks.<span style="color: #000;">from_df</span><span style="color: #000;">&#40;</span>df<span style="color: #000;">&#41;</span></pre>
+
+
+
+
+
+

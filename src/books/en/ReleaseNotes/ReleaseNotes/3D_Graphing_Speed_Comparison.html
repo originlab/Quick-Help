@@ -1,0 +1,460 @@
+<h1 class="firstHeading">3D Graphing Speed Comparison</h1><p><br />
+</p>
+<h2><a name="Main_Result_Table"></a><span class="mw-headline">Main Result Table</span></h2>
+<table class="simple">
+<caption><b>Origin 9 offers ultrafast 3D graphing</b>
+</caption>
+<tr style="background: #DDFFDD;">
+<th> Task to Measure Time
+</th>
+<th> Origin 8.6 (sec)
+</th>
+<th> Origin 9 OpenGL (sec)
+</th>
+<th> Origin 9 Improvement
+</th></tr>
+<tr valign="top">
+<td> <a href="#Creation">Creating a colormap surface plot </a>
+</td>
+<td> 13.91
+</td>
+<td> 0.84
+</td>
+<td> 17 times faster
+</td></tr>
+<tr valign="top">
+<td> <a href="#Update">Graph redraw after changes </a>
+</td>
+<td> 13.83
+</td>
+<td> 0.48
+</td>
+<td> 29 times faster
+</td></tr>
+<tr valign="top">
+<td> <a href="#Repaint">Graph redraw without changes </a>
+</td>
+<td> 2.6
+</td>
+<td> 0.039
+</td>
+<td> 67 times faster
+</td></tr>
+<tr valign="top">
+<td> <a href="#Rotation">Rotating the graph by 5 degrees </a>
+</td>
+<td> 13.61
+</td>
+<td> 0.044
+</td>
+<td> 309 times faster
+</td></tr>
+</table>
+<p><br />
+</p>
+<h3><a name="Testing_Environment_Foot_Note"></a><span class="mw-headline">Testing Environment Foot Note</span></h3>
+<ul><li> OS:Ewin7_64</li>
+<li> Hardware: AMD Radeon HD 7570, OpenGL:4.1.11251, CPU:Intel i7 3770, Memory:16G </li>
+<li> Both Origin 9 and 8.6 are using 64 bit versions.</li>
+<li> 1000x1000 Matirx</li>
+<li> Origin 9 OpenGL graph tested with anti-alias enabled, a feature not found in older 3D before OpenGL. When anti-alias is turned off, OpenGL will be even faster, but not by much.</li></ul>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Main_Result_Table"><span class="tocnumber">1</span> <span class="toctext">Main Result Table</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Testing_Environment_Foot_Note"><span class="tocnumber">1.1</span> <span class="toctext">Testing Environment Foot Note</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Preparation"><span class="tocnumber">2</span> <span class="toctext">Preparation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Save_template_so_we_are_comparing_the_same_plot_type"><span class="tocnumber">2.1</span> <span class="toctext">Save template so we are comparing the same plot type</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Turn_on_or_off_Anti-aliasing_in_9.0"><span class="tocnumber">2.2</span> <span class="toctext">Turn on or off Anti-aliasing in 9.0</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Create_1000x1000_Matrix"><span class="tocnumber">2.3</span> <span class="toctext">Create 1000x1000 Matrix</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Testing_Cases"><span class="tocnumber">3</span> <span class="toctext">Testing Cases</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Creation"><span class="tocnumber">3.1</span> <span class="toctext">Creation</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Update"><span class="tocnumber">3.2</span> <span class="toctext">Update</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Rotation"><span class="tocnumber">3.3</span> <span class="toctext">Rotation</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Repaint"><span class="tocnumber">3.4</span> <span class="toctext">Repaint</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#Testing_Results_for_Inhouse_Use"><span class="tocnumber">4</span> <span class="toctext">Testing Results for Inhouse Use</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#500x500_Matrix_to_make_colormap_surface_plot_without_speed_mode"><span class="tocnumber">4.1</span> <span class="toctext">500x500 Matrix to make colormap surface plot without speed mode</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Test_1"><span class="tocnumber">4.1.1</span> <span class="toctext">Test 1</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Test_2"><span class="tocnumber">4.1.2</span> <span class="toctext">Test 2</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-16"><a href="#1000x1000_Matrix_to_make_colormap_surface_plot_without_speed_mode"><span class="tocnumber">4.2</span> <span class="toctext">1000x1000 Matrix to make colormap surface plot without speed mode</span></a>
+<ul>
+<li class="toclevel-3 tocsection-17"><a href="#Test1"><span class="tocnumber">4.2.1</span> <span class="toctext">Test1</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Test2"><span class="tocnumber">4.2.2</span> <span class="toctext">Test2</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Preparation"></a><span class="mw-headline">Preparation</span></h2>
+<h3><a name="Save_template_so_we_are_comparing_the_same_plot_type"></a><span class="mw-headline">Save template so we are comparing the same plot type</span></h3>
+<p>We use 3D Colormap Surface. Turn off Speed mode. Turn off Contour lines. Set Colormap level to be 8. Then saved it as the default 3D Colormap Surface template under User Files Folder.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//LT code for 8.6</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;	
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>Plot3D,ColorMap<span style="color: #000000;">&#41;</span>;
+
+speedmode sm<span style="color: #000000;">:</span><span style="color: #000080;">=</span>off;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">numMajorLevels</span><span style="color: #000080;">=</span><span style="color: #0000dd;">8</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">numMinorLevels</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">showLines</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+
+save <span style="color: #000080;">-</span>t <span style="color: #000080;">%</span>H <span style="color: #000080;">%</span>YCMAP.<span style="color: #000080;">otp</span>;
+
+<span style="color: #008000;">//LT code for 9.0</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;	
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>Plot3DGL,ColorMap<span style="color: #000000;">&#41;</span>;
+
+speedmode sm<span style="color: #000000;">:</span><span style="color: #000080;">=</span>off;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">numMajorLevels</span><span style="color: #000080;">=</span><span style="color: #0000dd;">8</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">numMinorLevels</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">showLines</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+
+save <span style="color: #000080;">-</span>t <span style="color: #000080;">%</span>H <span style="color: #000080;">%</span>YglCMAP.<span style="color: #000080;">otp</span>;</pre>
+<h3><a name="Turn_on_or_off_Anti-aliasing_in_9.0"></a><span class="mw-headline">Turn on or off Anti-aliasing in 9.0</span></h3>
+<p>9.0 support Anti-aliasing. By default it's enabled. We compared result with Anti-aliasing on (new in 9.0). In some table below, we also compared with Anti-aliasing off. Without Anti-aliasing, Origin 9.0 is even faster. 
+</p>
+<pre class="lt" style="font-family:monospace;">@oglfa<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">//Disable Anti-aliasing</span>
+@oglfa<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">//Enable Anti-aliasing. This is default.</span></pre>
+<h3><a name="Create_1000x1000_Matrix"></a><span class="mw-headline">Create 1000x1000 Matrix</span></h3>
+<p>In both 9.0 and 8.6, Start a new project, and create 1000x1000 matrix. Set Matrix Value to be sin(x ) + cos( y) /y.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>s;
+doc <span style="color: #000080;">-</span>n;
+<span style="color: #008000;">///Create matrix</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;	
+mdim cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1000</span> rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1000</span>; 
+msetvalue im<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Mat<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> formula<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;sin(x) + cos(y) /y&quot;</span>;</pre>
+<h2><a name="Testing_Cases"></a><span class="mw-headline">Testing Cases</span></h2>
+<h3><a name="Creation"></a><span class="mw-headline">Creation</span></h3>
+<p>How long does it take to create a new 3D colormap surface plot from a template with speed mode turned off, 8 color levels and no contour lines.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//LT code for 8.6</span>
+<span style="color: #008000;">//With Matrix prepared in Preparation part active</span>
+type <span style="color: #000080;">-</span>mb <span style="color: #0000dd;">1</span>;<span style="color: #008000;">//to prevent reminder message box</span>
+sec <span style="color: #000080;">-</span>ab; 
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>Plot3D,ColorMap<span style="color: #000000;">&#41;</span>;
+queue<span style="color: #000000;">&#123;</span>sec <span style="color: #000080;">-</span>ae nn; ty <span style="color: #ff00ff;">&quot;Plot Colormap Surface Elapsed Ttime=$(nn)&quot;</span>;<span style="color: #000000;">&#125;</span>;
+
+
+<span style="color: #008000;">//LT code for 90 OpenGL</span>
+<span style="color: #008000;">//With Matrix prepared in Preparation part active</span>
+type <span style="color: #000080;">-</span>mb <span style="color: #0000dd;">1</span>;;<span style="color: #008000;">//to prevent reminder message box</span>
+sec <span style="color: #000080;">-</span>ab; 
+run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>Plot3DGL,ColorMap<span style="color: #000000;">&#41;</span>;
+queue<span style="color: #000000;">&#123;</span>sec <span style="color: #000080;">-</span>ae nn; ty <span style="color: #ff00ff;">&quot;Plot Colormap Surface Elapsed Time=$(nn)&quot;</span>;<span style="color: #000000;">&#125;</span>;</pre>
+<h3><a name="Update"></a><span class="mw-headline">Update</span></h3>
+<p>How long does it take to reconstruct the graph after some changes. The code below will trigger scale change which will result in complete reconstruction of the graph.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//same code can be used for 86 and 90</span>
+sec <span style="color: #000080;">-</span>ab;
+x1<span style="color: #000080;">=</span>x1;
+queue<span style="color: #000000;">&#123;</span>sec <span style="color: #000080;">-</span>ae nn; ty <span style="color: #ff00ff;">&quot;Redraw Ggraph Elapsed Time=$(nn)&quot;</span>;<span style="color: #000000;">&#125;</span>;</pre>
+<h3><a name="Rotation"></a><span class="mw-headline">Rotation</span></h3>
+<p>How long does it take to rotate a 3D colormap surface plot by 5 degrees.
+</p><p>openGL rotation will directly render the graph and the rendering code is built into the layer -3D RA labtalk command in SR1 so that there is no need to use plot -L to redraw he layer after rotation.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">///rotation code for version 86</span>
+sec <span style="color: #000080;">-</span>ab;
+layer <span style="color: #000080;">-</span>3D R Z <span style="color: #0000dd;">5</span>;Plot <span style="color: #000080;">-</span>L;
+sec <span style="color: #000080;">-</span>ae nn; ty <span style="color: #ff00ff;">&quot;Rotation Elapsed time=$(nn)&quot;</span>;
+
+
+<span style="color: #008000;">///rotation code for version 9.0 SR1, rotation speed is the same between 90SR0 and SR1 but the LT RA switch was added in SR1, so </span>
+<span style="color: #008000;">///this code requires SR1 to run</span>
+sec <span style="color: #000080;">-</span>ab;
+layer <span style="color: #000080;">-</span>3D RA Z <span style="color: #0000dd;">5</span>;
+sec <span style="color: #000080;">-</span>ae nn; ty <span style="color: #ff00ff;">&quot;Rotation Elapsed time=$(nn)&quot;</span>;</pre>
+<h3><a name="Repaint"></a><span class="mw-headline">Repaint</span></h3>
+<p>This is the basic graph repaint time when nothing is changed. Typically when a graph is uncovered and it needs to repaint the area that is uncovered.
+</p><p>We need to keep the graph the same size. The LT command that works in both 86 and 90 to trigger a repaint of the active window is doc -uwfp. This command will repaint immediately, so no queue command is needed.
+</p>
+<pre class="lt" style="font-family:monospace;">sec <span style="color: #000080;">-</span>ab;doc <span style="color: #000080;">-</span>uwfp;sec <span style="color: #000080;">-</span>ae v1;
+ty <span style="color: #ff00ff;">&quot;Repaint Elapsed Time is $(v1,*2*) sec.&quot;</span>;</pre>
+<h2><a name="Testing_Results_for_Inhouse_Use"></a><span class="mw-headline">Testing Results for Inhouse Use</span></h2>
+<p>For each testing cases, we need to give the following before the table
+</p>
+<ol><li> Machine description, OS, Origin 64 or 32. We need to first test only 64 bits</li>
+<li> Location of the machine, Noho, GZ etc</li>
+<li> Who did the test and the date of the test</li></ol>
+<p><br />
+Each table will report the <b>Testing Cases</b> above. These are all single words, since details has been documented.
+The table will list the cases in rows and have the following columns:
+</p>
+<ol><li> Task</li>
+<li> 90 OpenGL</li>
+<li> 86 Vector Caching</li>
+<li> Improvement Factor</li></ol>
+<p><br />
+</p>
+<h3><a name="500x500_Matrix_to_make_colormap_surface_plot_without_speed_mode"></a><span class="mw-headline">500x500 Matrix to make colormap surface plot without speed mode</span></h3>
+<h4><a name="Test_1"></a><span class="mw-headline">Test 1</span></h4>
+<p><b>OS:Ewin7_64</b>
+</p><p><b>System configuration: NV520GT, OpenGL 4.2, CPU:Intel i7 3770, Memory: 8G </b>
+</p><p><b>Testing Build:IR90Sr1_49 and 8.6Sr3</b>
+</p>
+<table class="simple">
+<tr>
+<th width="240"> Task
+</th>
+<th width="180"> 9.0_64bit OpenGL
+</th>
+<th width="180"> 8.6_64bit Vector Caching
+</th>
+<th width="180"> Improvement Factor
+</th></tr>
+<tr valign="top">
+<td> <a href="#Creation">Create Colormap Surface</a>
+</td>
+<td> 0.343
+</td>
+<td> 4.438
+</td>
+<td> 13
+</td></tr>
+<tr valign="top">
+<td> <a href="#Update">Redraw graph</a>
+</td>
+<td> 0.146
+</td>
+<td> 4.338
+</td>
+<td> 30
+</td></tr>
+<tr valign="top">
+<td> <a href="#Rotation">Rotation</a>
+</td>
+<td> 0.020
+</td>
+<td> 4.288
+</td>
+<td> 214
+</td></tr>
+<tr valign="top">
+<td> <a href="#Repaint">Repaint</a>
+</td>
+<td> 0.022
+</td>
+<td> 1.5
+</td>
+<td> 68
+</td></tr>
+</table>
+<h4><a name="Test_2"></a><span class="mw-headline">Test 2</span></h4>
+<p><b>OS:Ewin7_64</b>
+</p><p><b>System configuration: AMD Radeon HD 7570, OpenGL:4.1.11251, CPU:Intel i7 3770, Memory:16G </b>
+</p><p><b>Testing Build:IR90Sr1_49 and 8.6Sr3</b>
+</p>
+<table class="simple">
+<tr>
+<th width="240"> Task
+</th>
+<th width="180"> 8.6_64bit Vector Caching
+</th>
+<th width="180"> 9.0_64bit OpenGL(No Anti-Aliasing)
+</th>
+<th width="180"> Improvement Factor()
+</th>
+<th width="180"> 9.0_64bit OpenGL(Enable Anti-aliasing)
+</th>
+<th width="180"> Improvement Factor
+</th></tr>
+<tr valign="top">
+<td> <a href="#Creation">Create Colormap Surface</a>
+</td>
+<td> 4.19
+</td>
+<td> 0.41
+</td>
+<td> 10
+</td>
+<td> 0.41
+</td>
+<td> 10
+</td></tr>
+<tr valign="top">
+<td> <a href="#Update">Redraw graph</a>
+</td>
+<td> 4.11
+</td>
+<td> 0.15
+</td>
+<td> 27
+</td>
+<td> 0.15
+</td>
+<td> 27
+</td></tr>
+<tr valign="top">
+<td> <a href="#Rotation">Rotation</a>
+</td>
+<td> 4.042
+</td>
+<td> 0.014
+</td>
+<td> 289
+</td>
+<td> 0.015
+</td>
+<td> 269
+</td></tr>
+<tr valign="top">
+<td> <a href="#Repaint">Repaint</a>
+</td>
+<td> 1.1
+</td>
+<td> 0.015
+</td>
+<td> 73
+</td>
+<td> 0.019
+</td>
+<td> 58
+</td></tr>
+</table>
+<h3><a name="1000x1000_Matrix_to_make_colormap_surface_plot_without_speed_mode"></a><span class="mw-headline">1000x1000 Matrix to make colormap surface plot without speed mode</span></h3>
+<h4><a name="Test1"></a><span class="mw-headline">Test1</span></h4>
+<p><b>OS:Ewin7_64</b>
+</p><p><b>System configuration: NV520GT, OpenGL 4.2, CPU:Intel i7 3770, Memory: 8G </b>
+</p><p><b>Testing Build:IR90Sr1_49 and 8.6Sr3</b>
+</p>
+<table class="simple">
+<tr>
+<th width="240"> Task
+</th>
+<th width="180"> 9.0_64bit OpenGL
+</th>
+<th width="180"> 8.6_64bit Vector Caching
+</th>
+<th width="180"> Improvement Factor
+</th></tr>
+<tr valign="top">
+<td> <a href="#Create">Creation Colormap Surface</a>
+</td>
+<td> 0.745
+</td>
+<td> 10.583
+</td>
+<td> 14
+</td></tr>
+<tr valign="top">
+<td> <a href="#Update">Redraw graph</a>
+</td>
+<td> 0.422
+</td>
+<td> 10.234
+</td>
+<td> 24
+</td></tr>
+<tr valign="top">
+<td> <a href="#Rotation">Rotation</a>
+</td>
+<td> 0.0347
+</td>
+<td> 10.102
+</td>
+<td> 291
+</td></tr>
+<tr valign="top">
+<td> <a href="#Repaint">Repaint</a>
+</td>
+<td> 0.033
+</td>
+<td> 4.4
+</td>
+<td> 133
+</td></tr>
+</table>
+<h4><a name="Test2"></a><span class="mw-headline">Test2</span></h4>
+<p><b>OS:Ewin7_64</b>
+</p><p><b>System configuration: AMD Radeon HD 7570, OpenGL:4.1.11251, CPU:Intel i7 3770, Memory:16G </b>
+</p><p><b>Testing Build:IR90Sr1_49 and 8.6Sr3</b>
+</p>
+<table class="simple">
+<tr>
+<th width="240"> Task
+</th>
+<th width="180"> 8.6_64bit Vector Caching
+</th>
+<th width="180"> 9.0_64bit OpenGL(No Anti-Aliasing)
+</th>
+<th width="180"> Improvement Factor()
+</th>
+<th width="180"> 9.0_64bit OpenGL(Enable Anti-aliasing)
+</th>
+<th width="180"> Improvement Factor
+</th></tr>
+<tr valign="top">
+<td> <a href="#Creation">Create Colormap Surface</a>
+</td>
+<td> 13.91
+</td>
+<td> 0.80
+</td>
+<td> 17
+</td>
+<td> 0.84
+</td>
+<td> 17
+</td></tr>
+<tr valign="top">
+<td> <a href="#Update">Redraw graph</a>
+</td>
+<td> 13.83
+</td>
+<td> 0.48
+</td>
+<td> 29
+</td>
+<td> 0.48
+</td>
+<td> 29
+</td></tr>
+<tr valign="top">
+<td> <a href="#Rotation">Rotation</a>
+</td>
+<td> 13.61
+</td>
+<td> 0.035
+</td>
+<td> 389
+</td>
+<td> 0.044
+</td>
+<td> 309
+</td></tr>
+<tr valign="top">
+<td> <a href="#Repaint">Repaint</a>
+</td>
+<td> 2.6
+</td>
+<td> 0.037
+</td>
+<td> 70
+</td>
+<td> 0.039
+</td>
+<td> 67
+</td></tr>
+</table>
+
+
+
+
+
+

@@ -1,0 +1,182 @@
+<h1 class="firstHeading">1.3.1 Calling X-Functions from Script</h1><p><span class="OIndex" style="display:none">X-Function, Execution from Script</span><span class="OIndex" style="display:none">X-Function, Execution without Dialog</span>
+</p><p>Most built-in <b>X-Functions</b> can be called in <b>LabTalk</b> by default. This means you can call it from anywhere LabTalk Script can be executed, such as <b>Command Window</b>, <b>Script Window</b>, Toolbar buttons, Script embedded in worksheet, Script behind button, etc. 
+<br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Syntax_to_Call_X-Functions"><span class="tocnumber">1</span> <span class="toctext">Syntax to Call X-Functions</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Use_File_Metadata_as_Input"><span class="tocnumber">2</span> <span class="toctext">Use File Metadata as Input</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Access_Input_and_Output_Variable_Values_after_Execution"><span class="tocnumber">3</span> <span class="toctext">Access Input and Output Variable Values after Execution</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Quick_Way_in_Command_Window"><span class="tocnumber">4</span> <span class="toctext">Quick Way in Command Window</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Save_X-Function_settings_as_a_Dialog_Theme_File_and_Call_it"><span class="tocnumber">5</span> <span class="toctext">Save X-Function settings as a Dialog Theme File and Call it</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Generate_Script_from_X-Function_Dialog"><span class="tocnumber">6</span> <span class="toctext">Generate Script from X-Function Dialog</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Make_an_X-Function_not_callable_in_LabTalk"><span class="tocnumber">7</span> <span class="toctext">Make an X-Function not callable in LabTalk</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Related_Links"><span class="tocnumber">8</span> <span class="toctext">Related Links</span></a></li>
+</ul>
+</div>
+
+<h3><a name="Syntax_to_Call_X-Functions"></a><span class="mw-headline">Syntax to Call X-Functions</span></h3>
+<p>Each X-Function has its own set of input and output variables of different <a class="external text" href="../../LabTalk/LabTalk/Data_Types_and_Variables.html">data types</a>, such as int, double, string, range, and even tree, etc. The syntax to call All the X-Functions is the same. <br /> 
+<i><b>&lt;xfunction&gt; -&lt;option1&gt; option1value -&lt;option2&gt; option2value var1:=value1 var2:=value2  ....</b></i>
+</p><p><br />
+Here we will use X-Function <i>smooth</i> to help user get started. <br />
+</p>
+<ul><li> Support option full name or shortened name. E.g. both scripts below dump help of smooth</li></ul>
+<p><code>
+smooth -h
+</p><p>smooth -help
+</code>
+</p>
+<ul><li> Support variable full name or shortened name. E.g. both scripts below specify method 1 <b>Savitzky-Golay</b>, (indexing starts at 0) for <i>method</i> variable</li></ul>
+<p><code>
+smooth m:=1 
+</p><p>smooth method:=1 
+</code>
+</p>
+<ul><li> For some variables, support value as string or indexing number. E.g. both scripts below specify method 1 <b>Savitzky-Golay</b> for <i>method</i> variable</li></ul>
+<p><code>
+smooth method:=1
+</p><p>smooth method:=sg
+</code>
+</p>
+<ul><li> Option and variable orders can be mixed up. E.g. Both scripts below specify method 1, and number of points as 5 and recalculation option is set to auto.</li></ul>
+<p><code>
+smooth -r 1 method:=1 npts:=5
+</p><p>smooth  method:=1 -r 1 npts:=5
+</code>
+</p>
+<ul><li> There are default values for most variables. No need to specify var1:=value if you want to use default values. E.g. default <i>iy</i> (input) variable is &lt;active&gt; (active plot in graph or selected data in worksheet). All the scripts below do smoothing on active plot in graph or selected data in worksheet.</li></ul>
+<p><code>
+smooth //smooth on active plot or selected data with all default smoothing settings
+</p><p>smooth m:=2 //smooth on on active plot or selected data with method 2
+</p><p>smooth npt:=7 //smooth on active plot with default method 1, but set points of window to 7
+</code>
+</p>
+<ul><li> Variable name part <i>var1:=</i> can be skipped if you type variable values by order. E.g. if you type smooth -h to see all variables, you will see 1st variable is <i>iy</i>, second is <i>method</i>. Both scripts below is the same as <i>smooth iy:=(1,2) method:=2</i>, smooth on dataset (x is 1st column, y is 2nd column of active worksheet) with method 2.</li></ul>
+<p><code>
+smooth (1,2) 2 //iy:= is skipped, method:= is skipped. It's same as smooth iy:=(1,2) method:=2
+</p><p>smooth (1,2) method:=2 //iy:= is skipped. It's same as smooth iy:=(1,2) method:=2
+</code>
+</p>
+<ul><li> Run -d to open X-Function dialog. Most X-Functions has corresponding dialog. You can run the following Script to easily specify variables and execute.</li></ul>
+<p><code>
+smooth -d //opens smooth dialog with all default settings.
+</p><p>smooth method:=2 -d //opens smooth dialog with method set to method 2
+</code>
+</p>
+<ul><li> Run -db to open X-Function dialog and dock it in current window. You can then save the window with dockable dialog for future use.</li></ul>
+<p><code>
+smooth -db //opens smooth dialog with default settings and the dialog is docked to the left of active window
+</code>
+</p>
+<ul><li> Run -u to support undo.</li></ul>
+<p><code>
+smooth -u // X-Function become undoable, i.e. you can undo by Ctrl + Z or select Undo from Edit menu 
+</code>
+</p>
+<h3><a name="Use_File_Metadata_as_Input"></a><span class="mw-headline">Use File Metadata as Input</span></h3>
+<p>You can reference file metadata in the X-Function. Open the Script Window (<b>Window: Script Window</b>) and type the following:
+<code>
+page.info.=
+</code>
+This dumps a listing of file metadata, including user variables that can be used when executing your X-Function.
+</p><p><code>
+rnormalize -r 2 method:=specify val:=page.info.USER.VARIABLES.NOOFPOINTS; // runs the X-Function rnormalize, dividing values in the selected column by the value of page.info.USER.VARIABLES.NOOFPOINTS.
+</code>
+</p><p>As an alternative to dumping variables to the Script Window, you can right-click in the gray area to the right of import file worksheet columns and choose <b>Show Organizer</b>. Expand <b>page.info</b>, then right-click on a node and <b>Copy Node Path</b>.
+</p>
+<h3><a name="Access_Input_and_Output_Variable_Values_after_Execution"></a><span class="mw-headline">Access Input and Output Variable Values after Execution</span></h3>
+<p>After X-Function is called, you can access variable values, no matter it's input or output. Some X-Function output will need to be put to a tree variable and then access it. Here we will only show some simple examples.
+</p>
+<ul><li> Highlight a Y column and run <i>smooth</i> to execute it first. Then try the following Script</li></ul>
+<p><code>
+smooth.= //gives all variables and corresponding values
+</p><p>smooth.method= //gives method number
+</code>
+</p>
+<ul><li> Highlight a column and run <i>stats</i> to execute it first. Then try the following Script</li></ul>
+<p><code>
+stats.= //gives all output values
+</p><p>stats.min= //gives the calculated mean value
+</code>
+</p><p><br />
+To access a report tree, ANOVA for example, you can use <a href="../../XFunction/X-Function/Getresults.html" title="X-Function:Getresults">Getresults</a> XF.
+</p><p>To get the config tree for an existing operation, you can use <a href="../../XFunction/X-Function/Op_change.html" title="X-Function:Op change"> Op_change</a> XF.
+</p>
+<h3><a name="Quick_Way_in_Command_Window"></a><span class="mw-headline">Quick Way in Command Window</span></h3>
+<p>An easier way to learn how to call X-Function is via Command Window (Window: Command Window) since X-Function name, options and variables can be auto filled as you type.
+Try this:
+</p>
+<ol><li> In a worksheet, fill first column with row numbers and fill 2nd column with random numbers. Highlight the 2nd column. </li>
+<li> Choose <b>Window: Command Window</b> to open Command Window.</li>
+<li> Type s, you will see an Auto fill list of X-functions starting with <b>s</b>
+<dl><dd> <a  class="image"><img alt="Cm1.png" src="../images/Calling_X-Functions_from_Script/Cm1.png?v=80862" width="440"  /></a></dd></dl></li>
+<li> Press <b>Down</b> key to <b>smooth</b> and press <b>Enter</b> to select it. You can also double click mouse to select <b>smooth</b>.</li>
+<li> Now smooth shows in Command line. Press <b>Space</b> key. You will see all variables for smooth.
+<dl><dd> <a  class="image"><img alt="Cm2.png" src="../images/Calling_X-Functions_from_Script/Cm2.png?v=80864" width="442"  /></a></dd></dl></li>
+<li> Press <b>Down</b> key to <b>method:=1</b>and press <b>Enter</b> to select it. </li>
+<li> You will see all methods you can pick
+<dl><dd> <a  class="image"><img alt="Cm3.png" src="../images/Calling_X-Functions_from_Script/Cm3.png?v=80866" width="438"  /></a></dd></dl></li>
+<li> Press <b>Down</b> key to <b>pf=2 Percentile Filter</b> and press <b>Enter</b> to select it.</li>
+<li> Press <b>Space</b> key and then press <b>-</b> key. You will see all options.
+<dl><dd> <a  class="image"><img alt="Cm4.png" src="../images/Calling_X-Functions_from_Script/Cm4.png?v=80867" width="443"  /></a></dd></dl></li>
+<li> Press <b>Down</b> key to <b>recalculate</b> and press <b>Enter</b> to select it.</li>
+<li> Press <b>Space</b> key and then 1 to specify recalculate option to be 1, which means auto recalculation if input data change. </li>
+<li> Press <b>Enter</b> to execute it. You will see smoothing result shows in 3rd column.
+<dl><dd> <a  class="image"><img alt="Cm5.png" src="../images/Calling_X-Functions_from_Script/Cm5.png?v=80871" width="848"  /></a></dd></dl></li>
+<li> In Command window, type smooth.= and press ENTER to see all the variable values specified in the executed X-Function.
+<dl><dd> <a  class="image"><img alt="Cm6.png" src="../images/Calling_X-Functions_from_Script/Cm6.png?v=80872" width="525"  /></a></dd></dl></li>
+<li> run smooth.method= to get the method value.</li></ol>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Calling_X-Functions_from_Script/Tip_icon.png?v=0" width="57"  border="0" /></td><td><ol><li> Use <b>Up</b> and <b>Down</b> keys to scroll backwards and forwards through previous commands you’ve typed in the current session.</li>
+<li> On left panel of <b>Command Window</b>, you can see all executed commands in current session. You can put cursor there and press <b>Enter</b> to execute that command line again.</li></ol>
+</td></tr></table>
+<h3><a name="Save_X-Function_settings_as_a_Dialog_Theme_File_and_Call_it"></a><span class="mw-headline">Save X-Function settings as a Dialog Theme File and Call it</span></h3>
+<p>The variable settings for an X-Function can be saved into a theme file. You can call an X-Function and use settings saved in the theme file by using the <b>-theme</b> or <b>-t</b> option.
+</p><p><b>Example:</b>
+</p>
+<ol><li> In Script window, run smooth -d to open smooth dialog or use <b>Analysis: Signal Processing: Smoothing</b> menu to open it.</li>
+<li> Change some settings, e.g. Method and Recalculation Mode. </li>
+<li> Click &gt; button next to <b>Dialog Theme</b> on the top of the dialog and choose <b>Save as...</b>. Give a name e.g. <b>mytheme</b></li>
+<li> The file will be saved under &lt;User Files Folder&gt;\Themes\AnalysisAndReportTable\, e.g. 0-smooth-mytheme.ois. Origin adds some pre-fix so user can tell it's for smooth X-Function. </li>
+<li> In Script window, run the following to do smoothing on active data with <b>mytheme</b> theme</li></ol>
+<p><code>
+1. smooth -t mytheme //Do smoothing with mytheme
+</p><p>2. smooth -t mytheme -d; // Open smooth dialog with mytheme loaded. 
+</code>
+</p>
+<h3><a name="Generate_Script_from_X-Function_Dialog"></a><span class="mw-headline">Generate Script from X-Function Dialog</span></h3>
+<p>For some X-Functions, there is an option to <b>Generate Script</b> found in the context menu that will display underlying code for X-Function Scripts.
+</p>
+<ol><li> In Script window, run smooth -d to open smooth dialog or use <b>Analysis: Signal Processing: Smoothing</b> menu to open it.</li>
+<li> Change some settings, e.g. Method and Recalculation mode. </li>
+<li> Click &gt; button next to <b>Dialog Theme</b> on the top of the dialog and choose <b>Generate Script". </b>
+<dl><dd><a  class="image"><img alt="Smooth GS.png" src="../images/Calling_X-Functions_from_Script/Smooth_GS.png?v=80887" width="806"  /></a></dd></dl></li>
+<li> The script is dumped in Script window</li></ol>
+<pre class="lt" style="font-family:monospace;">smooth <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fft;</pre>
+<p><b>Note:</b> The <b>Dialog Theme</b> box and corresponding <b>Generate Script</b> fly-out menu item are not available from all X-Function dialogs that you open with the <i>-d</i> option (for instance, compare <b>fitpoly -d</b> with <b>rnormalize -d</b>).
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Calling_X-Functions_from_Script/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>The amount of information that is displayed using the <b>Generate Script</b> feature is controlled by a <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#F.2CG">System Variable</a> <b>@GAS</b>. By default, <b>@GAS = 0</b> but this value may be changed via <b>System Variables...</b> in the <b>Preferences</b> menu.
+</p></td></tr></table>
+<h3><a name="Make_an_X-Function_not_callable_in_LabTalk"></a><span class="mw-headline">Make an X-Function not callable in LabTalk</span></h3>
+<p>As we said at the beginning, most X-Functions are callable in LabTalk. To prohibit it from calling, 
+</p>
+<ol><li> Choose <b>Tools: X-Function Builder...</b> menu.</li>
+<li> Use <b>File:</b> menu to open the X-Function.</li>
+<li> Choose <b>Tools: Tree View</b> menu (or the Tree View button) to see tree view of the X-Function.</li>
+<li> Expand the <b>Usage Context</b> branch</li>
+<li> Uncheck the checkbox in front of <b>LabTalk</b></li>
+<li> Save the X-Function. </li></ol>
+<p>Note: For built-in functions, you can't overwrite it. So you have to save it as a User-defined X-Function. When there are X-Functions with same name in User Files folder and System folder, the one under User Files folder will be used.
+</p><p><br />
+</p>
+<h3><a name="Related_Links"></a><span class="mw-headline">Related Links</span></h3>
+<ul><li> <a class="external text" href="../../LabTalk/Script/X-Functions_Overview.html">X-Function Overview</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Input_and_Output.html">X-Function Input and Output</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">X-Function Execution Options</a> </li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Exception_Handling.html">X-Function Exception Handling</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/Tutorial_X-Function.html">Use X-Function in LabTalk Tutorial</a></li>
+<li> <a href="../../XFunction/X-Function/Calling_X-Functions_in_Origin_C.html" title="X-Function:Calling X-Functions in Origin C">Calling X-Functions in Origin C</a></li></ul>
+
+

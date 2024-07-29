@@ -1,0 +1,116 @@
+<h1 class="firstHeading">2.2.1.2.10 NLFitSession::ParamsInitValues</h1><p><span class="OIndex" style="display:none">ParamsInitValues</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Initialize parameters by parameter initialization code in FDF file.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">bool</span> ParamsInitValues<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bRunParamInit <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>, DWORD dwInitCtrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nFunc <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> bRunParamInit</dt>
+<dd> [input] if true will run parameter initializetion code, else the parameter value will be the default value defined in FDF file.</dd>
+<dt> dwInitCtrl</dt>
+<dd> [input] can be 0 to specify nothing. The enum like NLF_FUNC_CHANGE, NLF_RESET_SHARE_FIX, NLF_KEEP_OLD_DATASET.</dd>
+<dt> nFunc</dt>
+<dd> [input] the index of function, -1 for all functions. To specify initialize the parameters of which function.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>return ture if set function successfully.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<ol><li> Prior to running the following example, the nlsf_utils.c file need to be loaded and compiled. This can be done from script with the command run.LoadOC(Originlab\nlsf_utils.c) or just add this file to your workspace. </li>
+<li> New a worksheet and import \Samples\Curve Fitting\Gaussian.dat. </li>
+<li> Copy and compile the following codes, and run "NLFitSession_ParamsInitValues_ex" in Command window. </li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> 
+<span style="color: #0000ff;">void</span> NLFitSession_ParamsInitValues_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span>;
+    
+    XYRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    vector vX1, vY1, vX2, vY2;
+    dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vY1, vX1, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span>vY2, vX2, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">int</span> nNumDataset <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>DRR_GET_DEPENDENT<span style="color: #000000;">&#41;</span>;
+    
+    NLFitSession    FitSession;    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Gauss&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// set function as Gauss, category name can be ignore</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;invalid fit function&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>    
+    
+    <span style="color: #008000;">// set first dataset</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vY1, vX1, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">0</span>, nNumDataset<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail to set data&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>   
+    
+    <span style="color: #008000;">// set second dataset</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vY2, vX2, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">1</span>, nNumDataset<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail to set data&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>   
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">ParamsInitValues</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fail to initialize parameters&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>   
+    
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Parameter initialized successfully!&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// get parameter values after initialization</span>
+    vector      vParamValues;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnParamsOffsets; <span style="color: #008000;">// the begin index of one group of parameters, normally one group for one dataset</span>
+    FitSession.<span style="color: #000000;">GetParamValuesAndOffsets</span><span style="color: #000000;">&#40;</span>vParamValues, vnParamsOffsets<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// output parameter values with names</span>
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParamNames;
+    FitSession.<span style="color: #000000;">GetParamNamesInFunction</span><span style="color: #000000;">&#40;</span>vsParamNames<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nDataset <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nDataset <span style="color: #000080;">&lt;</span> nNumDataset; nDataset<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;---The parameters of data&#160;%d---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nDataset<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> vnParamsOffsets<span style="color: #000000;">&#91;</span>nDataset<span style="color: #000000;">&#93;</span>, ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vnParamsOffsets<span style="color: #000000;">&#91;</span>nDataset<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>; nParam<span style="color: #000040;">++</span>, ii<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParamNames<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, vParamValues<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>   
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/NLFitSession-SetData.html" title="OriginC:NLFitSession-SetData"> SetData</a>, <a href="../../OriginC/OriginC/NLFitSession-SetFunction.html" title="OriginC:NLFitSession-SetFunction"> SetFunction</a>, <a href="../../OriginC/OriginC/NLFitSession-Fit.html" title="OriginC:NLFitSession-Fit"> Fit</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>Originlab\NLFitSession.h
+</p>
+
+
+
+
+

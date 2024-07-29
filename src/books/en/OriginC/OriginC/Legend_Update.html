@@ -1,0 +1,127 @@
+<h1 class="firstHeading">3.4.7 Legend Update</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Refresh_Legend"><span class="tocnumber">2</span> <span class="toctext">Refresh Legend</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Combine_Multiple_Legends_to_One"><span class="tocnumber">3</span> <span class="toctext">Combine Multiple Legends to One</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Change_Legend_Mode"><span class="tocnumber">4</span> <span class="toctext">Change Legend Mode</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Set_Page_Legend_Mode"><span class="tocnumber">4.1</span> <span class="toctext">Set Page Legend Mode</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Set_Page_Custom_Legend_Mode"><span class="tocnumber">4.2</span> <span class="toctext">Set Page Custom Legend Mode</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<p>This page shows how to update graph legend by Origin C code.
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Refresh_Legend"></a><span class="mw-headline">Refresh Legend</span></h2>
+<p>This example shows how to refresh legend for active graph layer. Please follow the following steps to try.
+</p>
+<ol><li> Copy the following function to one c file in Code Builder, add to current workspace and compile it.</li>
+<li> New a worksheet and import \Samples\Curve Fitting\Linear Fit.dat.</li>
+<li> Highlight column B and plot as Line. Right click Layer Icon and choose Layer Contents, select linearfit_c to right list and click OK button. You will see Column C has been added to graph but still only B on legend.</li>
+<li> Run the function below <b>legend_update</b> in Command Window, C will be added to legend as a new line.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> legend_update<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate one graph layer&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+
+	<span style="color: #008000;">// no need to specified any option arguments since here just refresh legend on data plotting</span>
+	legend_update<span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Combine_Multiple_Legends_to_One"></a><span class="mw-headline">Combine Multiple Legends to One</span></h2>
+<p>This example shows how to combine the legend from multiple layers in one page to one legend. Please follow the following steps to try.
+</p>
+<ol><li> Copy the following function to one c file in Code Builder, add to current workspace and compile it.</li>
+<li> New a worksheet and import \Samples\Curve Fitting\Exponential Decay.dat.</li>
+<li> Highlight all columns and plot by menu Plot -&gt; Multi-Curve -&gt; 4 Panel. There are 3 legends in this graph window, one legend for one data plot.</li>
+<li> Run <b>combile_page_legends</b> in Command Window, you will see legends in each layer have been combined to one legend on the first layer.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> combile_page_legends<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate one graph window&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+	GraphPage gp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	
+	<span style="color: #0000ff;">int</span> 	nMode <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// ignore if &lt;0 otherwise to set the corresponding graph page's Auto Legend mode </span>
+	<span style="color: #0000ff;">bool</span> 	bCreate <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #0000ff;">bool</span> 	bReconstruct <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; 
+	<span style="color: #0000ff;">bool</span>	bOneForAll <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; <span style="color: #008000;">// if true only create one legend for all layers</span>
+	<span style="color: #0000ff;">bool</span>	bAscending <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+	foreach <span style="color: #000000;">&#40;</span>gl in gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		legend_update<span style="color: #000000;">&#40;</span>gl, nMode, bCreate, bReconstruct, <span style="color: #0000ff;">NULL</span>, bOneForAll, bAscending<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">bool</span> bCombine <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bReconstruct <span style="color: #000040;">&amp;&amp;</span> bCombine<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span> 
+		legend_combine<span style="color: #000000;">&#40;</span>gp, <span style="color: #0000dd;">0</span>, bAscending<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Change_Legend_Mode"></a><span class="mw-headline">Change Legend Mode</span></h2>
+<p>This example functions show how to change legend mode for one graph page, not for layer. Please copy the functions below to one c file, add file to Code Builder Workspace and compile it.
+</p><p>There is a way to set the legend mode of one graph on GUI:
+</p>
+<ol><li> Right click graph window gray area and choose Properties to bring up Plot Details dialog.</li>
+<li> Choose Legends/Titles Tab, in Auto Legend group, the option of <b>Translation mode of&#160;%(1),&#160;%(2)</b> is the legend mode.</li></ol>
+<h3><a name="Set_Page_Legend_Mode"></a><span class="mw-headline">Set Page Legend Mode</span></h3>
+<p>This example shows how to set legend mode to Data Range for all legends on the page of the active graph layer. 
+</p><p>Activate one graph and then run <b>set_page_legend_mode</b> in Command Window, legend should display full data range of each plotting.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> set_page_legend_mode<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate one graph window&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+	
+	legend_update<span style="color: #000000;">&#40;</span>gl, ALM_RANGE<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Set_Page_Custom_Legend_Mode"></a><span class="mw-headline">Set Page Custom Legend Mode</span></h3>
+<ol><li> New a worksheet and import \Samples\Curve Fitting\Enzyme.dat to worksheet.</li>
+<li> Highlight all columns and make a Line plot. At this time show Column Long Name on legend.</li>
+<li> Run <b>set_page_legend_custom_mode</b> in Command Window, will show Column Units label on legend.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> set_page_legend_custom_mode<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please activate one graph window&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>		
+	
+	<span style="color: #0000ff;">int</span> 	nMode <span style="color: #000080;">=</span> ALM_CUSTOM; 
+	<span style="color: #0000ff;">bool</span> 	bCreate <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; <span style="color: #008000;">// true, if no legend will create one</span>
+	<span style="color: #0000ff;">bool</span>	bReconstruct <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>; <span style="color: #008000;">// true, if always delete the original legend and create a new one; false, not delete old one just update</span>
+	string 	strCustomMode <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;@U&quot;</span>;  <span style="color: #008000;">// use Column Units label as legend</span>
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> legend_update<span style="color: #000000;">&#40;</span>gl, nMode, bCreate, bReconstruct, strCustomMode<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Set layer mode successfully&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">else</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set layer mode&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

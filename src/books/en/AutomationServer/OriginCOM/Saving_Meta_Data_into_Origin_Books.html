@@ -1,0 +1,179 @@
+<h1 class="firstHeading">1.4.7 Saving Meta Data into Origin Books</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Passing_XML_to_Origin_Workbook"><span class="tocnumber">1</span> <span class="toctext">Passing XML to Origin Workbook</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#VBA"><span class="tocnumber">1.1</span> <span class="toctext">VBA</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#C.23"><span class="tocnumber">1.2</span> <span class="toctext">C#</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#VC.2B.2B"><span class="tocnumber">1.3</span> <span class="toctext">VC++</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Passing_XML_to_Origin_Workbook"></a><span class="mw-headline">Passing XML to Origin Workbook</span></h2>
+<h3><a name="VBA"></a><span class="mw-headline">VBA</span></h3>
+<pre class="vb" style="font-family:monospace;">    <span style="color: #008000;">'First add Reference to Microsoft XML v2.6 or later
+</span>    <span style="color: #008000;">'Before running, first run Origin with default workbook which you can open Workbook Organizer
+</span>    <span style="color: #008000;">'to examine the result
+</span>    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> WkBk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> strXML <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> tree <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.DOMDocument
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> treeNodeTop <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.IXMLDOMElement
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> treeNode <span style="color: #151B8D; font-weight: bold;">As</span> MSXML2.IXMLDOMElement
+    <span style="color: #151B8D; font-weight: bold;">Set</span> tree = <span style="color: #E56717; font-weight: bold;">New</span> MSXML2.DOMDocument
+ 
+    <span style="color: #008000;">'Set XML String, which has two branch and some nodes.
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNodeTop = tree.appendChild(tree.createElement(<span style="color: #800000;">&quot;OriginStorage&quot;</span>))
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNodeTop.appendChild(tree.createElement(<span style="color: #800000;">&quot;data&quot;</span>))
+    <span style="color: #008000;">'make the data branch Read Only with blue text, 0=disable, 1 = enable, 2 = read-only blue text, 3=read-only normal text
+</span>    treeNode.setAttribute <span style="color: #800000;">&quot;Enable&quot;</span>, 2
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.appendChild(tree.createElement(<span style="color: #800000;">&quot;StartTime&quot;</span>))
+    treeNode.Text = <span style="color: #800000;">&quot;2007-03-05 09:15:06.345&quot;</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.parentNode
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.appendChild(tree.createElement(<span style="color: #800000;">&quot;StopTime&quot;</span>))
+    treeNode.Text = <span style="color: #800000;">&quot;2007-03-05 11:37:43.123&quot;</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.parentNode
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.appendChild(tree.createElement(<span style="color: #800000;">&quot;Operator&quot;</span>))
+    treeNode.Text = <span style="color: #800000;">&quot;John Smith&quot;</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNodeTop.appendChild(tree.createElement(<span style="color: #800000;">&quot;Instrument&quot;</span>))
+    <span style="color: #008000;">'make the Instrument branch Read Only with normal text
+</span>    treeNode.setAttribute <span style="color: #800000;">&quot;Enable&quot;</span>, 3
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.appendChild(tree.createElement(<span style="color: #800000;">&quot;SerialNumber&quot;</span>))
+    treeNode.Text = <span style="color: #800000;">&quot;EQR-23456&quot;</span>
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.parentNode
+    <span style="color: #151B8D; font-weight: bold;">Set</span> treeNode = treeNode.appendChild(tree.createElement(<span style="color: #800000;">&quot;UsageCount&quot;</span>))
+    treeNode.Text = <span style="color: #800000;">&quot;2345&quot;</span>
+ 
+    strXML = treeNodeTop.XML
+ 
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = app.FindWorksheet(<span style="color: #800000;">&quot;&quot;</span>)   <span style="color: #008000;">'Set Wks as the active Worksheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> WkBk = Wks.Parent   <span style="color: #008000;">'Set WkBk as the active Workbook
+</span>    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> bRet <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Boolean</span>
+    
+    bRet = Wks.Columns(0).SetMetaData(strXML, <span style="color: #800000;">&quot;UserColInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">True</span>)  <span style="color: #008000;">'Set XML to Column
+</span>    bRet = Wks.SetMetaData(strXML, <span style="color: #800000;">&quot;UserSheetInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">True</span>)   <span style="color: #008000;">'Set XML to Worksheet
+</span>    bRet = WkBk.SetMetaData(strXML, <span style="color: #800000;">&quot;UserBookInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">True</span>)   <span style="color: #008000;">'Set XML to Workbook
+</span>    bRet = WkBk.SetMetaData(strXML, <span style="color: #800000;">&quot;CustomInfo&quot;</span>, <span style="color: #00C2FF; font-weight: bold;">False</span>)   'hide this from user, should <span style="color: #8D38C9; font-weight: bold;">not</span> see this from Workbook Organizer, but can see by page.info listing</pre>
+<h3><a name="C.23"></a><span class="mw-headline">C#</span></h3>
+<pre class="csharp" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">Origin</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">using</span> <span style="color: #008080;">System.Xml</span><span style="color: #008000;">;</span>
+<span style="color: #0600FF; font-weight: bold;">static</span> <span style="color: #6666cc; font-weight: bold;">void</span> SetMetaData<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#123;</span>
+    <span style="color: #008080; font-style: italic;">//Set XML String, which has two branch and some nodes.</span>
+    XmlDocument xmlDoc <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> XmlDocument<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    XmlNode Node<span style="color: #008000;">;</span>
+    XmlElement topXML<span style="color: #008000;">;</span>
+    XmlElement Element<span style="color: #008000;">;</span>
+
+    topXML <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;DAQ&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008080; font-style: italic;">//make the data branch Read Only with blue text, 0=disable, 1 = enable, 2 = read-only blue text, 3=read-only normal text</span>
+    topXML<span style="color: #008000;">.</span><span style="color: #0000FF;">SetAttribute</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Enable&quot;</span>, <span style="color: #666666;">&quot;2&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>topXML<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Data&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;StartTime&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;2007-03-05 09:15:06.345&quot;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>Element<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;StopTime&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;2007-03-05 09:15:06.345&quot;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">ParentNode</span><span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>Element<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Operator&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;John Smith&quot;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">ParentNode</span><span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>Element<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">ParentNode</span><span style="color: #008000;">.</span><span style="color: #0000FF;">ParentNode</span><span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Instrument&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    <span style="color: #008080; font-style: italic;">//make the Instrument branch Read Only with normal text</span>
+    topXML<span style="color: #008000;">.</span><span style="color: #0000FF;">SetAttribute</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Enable&quot;</span>, <span style="color: #666666;">&quot;3&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;SerialNumber&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;EQR-23456&quot;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>Element<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element <span style="color: #008000;">=</span> xmlDoc<span style="color: #008000;">.</span><span style="color: #0000FF;">CreateElement</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;UsageCount&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+    Element<span style="color: #008000;">.</span><span style="color: #0000FF;">InnerText</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;2345&quot;</span><span style="color: #008000;">;</span>
+    Node <span style="color: #008000;">=</span> Node<span style="color: #008000;">.</span><span style="color: #0000FF;">ParentNode</span><span style="color: #008000;">.</span><span style="color: #0000FF;">AppendChild</span><span style="color: #008000;">&#40;</span>Element<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+    <span style="color: #6666cc; font-weight: bold;">string</span> strXML <span style="color: #008000;">=</span> topXML<span style="color: #008000;">.</span><span style="color: #0000FF;">OuterXml</span><span style="color: #008000;">;</span>
+
+    Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span> app <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">ApplicationSI</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Connect to the running Origin</span>
+    Worksheet wks <span style="color: #008000;">=</span> app<span style="color: #008000;">.</span><span style="color: #0000FF;">FindWorksheet</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set wks as the active Worksheet</span>
+    WorksheetPage wkbk <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>WorksheetPage<span style="color: #008000;">&#41;</span>wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Parent</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set wkbk as the active Workbook</span>
+
+    wks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetMetaData</span><span style="color: #008000;">&#40;</span>strXML, <span style="color: #666666;">&quot;UserColInfo&quot;</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set XML to Column</span>
+    wks<span style="color: #008000;">.</span><span style="color: #0000FF;">SetMetaData</span><span style="color: #008000;">&#40;</span>strXML, <span style="color: #666666;">&quot;UserSheetInfo&quot;</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set XML to Worksheet</span>
+    wkbk<span style="color: #008000;">.</span><span style="color: #0000FF;">SetMetaData</span><span style="color: #008000;">&#40;</span>strXML, <span style="color: #666666;">&quot;UserBookInfo&quot;</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set XML to Workbook</span>
+    wkbk<span style="color: #008000;">.</span><span style="color: #0000FF;">SetMetaData</span><span style="color: #008000;">&#40;</span>strXML, <span style="color: #666666;">&quot;CustomTree&quot;</span>, <span style="color: #0600FF; font-weight: bold;">false</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>     <span style="color: #008080; font-style: italic;">//Set XML to Workbook. This will no longer be visible from book organizer, but can be accessed from Origin C program</span>
+
+    <span style="color: #008080; font-style: italic;">//Save the project</span>
+    app<span style="color: #008000;">.</span><span style="color: #0000FF;">Save</span><span style="color: #008000;">&#40;</span>app<span style="color: #008000;">.</span><span style="color: #0000FF;">path</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_TYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">APPPATH_USER</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">+</span> <span style="color: #666666;">&quot;SetMetaData.opj&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<h3><a name="VC.2B.2B"></a><span class="mw-headline">VC++</span></h3>
+<pre class="oc" style="font-family:monospace;">#import <span style="color: #ff00ff;">&quot;Origin8.tlb&quot;</span> rename_namespace<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span> Origin;
+<span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span> <span style="color: #000000;">System</span><span style="color: #000000;">::</span><span style="color: #000000;">Xml</span>;
+
+<span style="color: #0000ff;">#define</span>	PAGE_TYPE_WKS	<span style="color: #0000dd;">2</span>
+<span style="color: #0000ff;">#define</span>	PAGE_VISIBLE	<span style="color: #0000dd;">2</span> 
+<span style="color: #0000ff;">bool</span> saveMetaDataToWks<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	XmlDocument xmlDoc;
+	XmlElement<span style="color: #000040;">^</span> xmlEleTop <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;DAQ&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">//make the data branch Read Only with blue text, 0=disable, 1 = enable, 2 = read-only blue text, 3=read-only normal text</span>
+	xmlEleTop<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetAttribute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Enable&quot;</span>, <span style="color: #ff00ff;">&quot;2&quot;</span><span style="color: #000000;">&#41;</span>;
+
+	XmlNode<span style="color: #000040;">^</span> xmlNode <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">AppendChild</span><span style="color: #000000;">&#40;</span>xmlEleTop<span style="color: #000000;">&#41;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Data&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+	XmlNode<span style="color: #000040;">^</span> xmlEle <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;StartTime&quot;</span><span style="color: #000000;">&#41;</span>;
+	xmlEle<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>InnerText <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;2008-12-25 15:35:36.222&quot;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlEle<span style="color: #000000;">&#41;</span>;
+
+	xmlEle <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;StopTime&quot;</span><span style="color: #000000;">&#41;</span>;
+	xmlEle<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>InnerText <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;2008-12-25 15:40:40.125&quot;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>ParentNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlEle<span style="color: #000000;">&#41;</span>;
+
+	xmlEle <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Operator&quot;</span><span style="color: #000000;">&#41;</span>;
+	xmlEle<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>InnerText <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Sophy Huang&quot;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>ParentNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlEle<span style="color: #000000;">&#41;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>ParentNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>ParentNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Instrument&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">//make the Instrument branch Read Only with normal text</span>
+	xmlEleTop<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetAttribute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Enable&quot;</span>, <span style="color: #ff00ff;">&quot;3&quot;</span><span style="color: #000000;">&#41;</span>;
+
+	xmlEle <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;SerialNumber&quot;</span><span style="color: #000000;">&#41;</span>;
+	xmlEle<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>InnerText <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;EQR-23456&quot;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlEle<span style="color: #000000;">&#41;</span>;
+	xmlEle <span style="color: #000080;">=</span> xmlDoc.<span style="color: #000000;">CreateElement</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;UsageCount&quot;</span><span style="color: #000000;">&#41;</span>;
+	xmlEle<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>InnerText <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;2345&quot;</span>;
+	xmlNode <span style="color: #000080;">=</span> xmlNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>ParentNode<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>AppendChild<span style="color: #000000;">&#40;</span>xmlEle<span style="color: #000000;">&#41;</span>;
+
+ 
+	CString str <span style="color: #000080;">=</span> xmlEleTop<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>OuterXml;
+	_bstr_t strXML <span style="color: #000080;">=</span> str.<span style="color: #000000;">GetString</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">IOApplicationPtr</span> pOrigin;
+	pOrigin.<span style="color: #000000;">CreateInstance</span><span style="color: #000000;">&#40;</span>__uuidof<span style="color: #000000;">&#40;</span>ApplicationSI<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//connect to running Origin instance</span>
+
+	<span style="color: #008000;">//Origin::WorksheetPtr pwks = pOrigin-&gt;; //get active worksheet</span>
+	pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>CreatePage<span style="color: #000000;">&#40;</span> PAGE_TYPE_WKS, <span style="color: #ff00ff;">&quot;CustomerBook&quot;</span>, <span style="color: #ff00ff;">&quot;w&quot;</span>, PAGE_VISIBLE<span style="color: #000000;">&#41;</span>;
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">WorksheetPagePtr</span> pWksPage <span style="color: #000080;">=</span> pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetActivePage<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	Origin<span style="color: #000000;">::</span><span style="color: #000000;">WorksheetPtr</span> pwks <span style="color: #000080;">=</span> pWksPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetLayers<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;UserData&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pwks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		pwks<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Activate<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		Origin<span style="color: #000000;">::</span><span style="color: #000000;">ColumnPtr</span> pCol <span style="color: #000080;">=</span> pwks<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetColumns<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Add<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;MyVC++&quot;</span><span style="color: #000000;">&#41;</span>;
+
+		pCol<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetMetaData<span style="color: #000000;">&#40;</span>strXML, <span style="color: #ff00ff;">&quot;UserColInfo&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//set XML to Column</span>
+		pwks<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetMetaData<span style="color: #000000;">&#40;</span>strXML, <span style="color: #ff00ff;">&quot;UserSheetInfo&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//set XML to worksheet</span>
+		pWksPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetMetaData<span style="color: #000000;">&#40;</span>strXML, <span style="color: #ff00ff;">&quot;UserBookInfo&quot;</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//set XML to workbook</span>
+		pWksPage<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetMetaData<span style="color: #000000;">&#40;</span>strXML, <span style="color: #ff00ff;">&quot;CustomTree&quot;</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//set XML to workbook, this will no longer be visible from book organizer but can be accessed by OC code</span>
+		pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Save<span style="color: #000000;">&#40;</span>pOrigin<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Path<span style="color: #000000;">&#40;</span>Origin<span style="color: #000000;">::</span><span style="color: #000000;">APPPATH_USER</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;SetMetaData.opj&quot;</span> <span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//save project for check whether it is successfully set</span>
+
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

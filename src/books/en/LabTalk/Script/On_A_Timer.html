@@ -1,0 +1,46 @@
+<h1 class="firstHeading">2.5.1.12 On A Timer</h1><p class='urlname' style='display: none'>On-A-Timer</p>
+<p><span class="OIndex" style="display:none">Run Script On a Timer</span>The <a href="../../LabTalk/LabTalk/Timer_(command).html" title="LabTalk:Timer (command)"><b>Timer</b> (Command)</a> executes the <b>TimerProc</b> macro, and the combination can be used to run a <span class="OIndex">script</span> every <b>n</b> seconds.  
+</p><p>The following example shows a <span class="OIndex">timer</span> procedure that runs every 2 seconds to check if a data file on disk has been modified, and it is then re-imported if new.
+</p><p>In order to run this scipt example, perform the following steps first:
+</p>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/On_A_Timer/Tutorial_icon.png?v=0" width="57"  border="0" />
+	</td>
+	<td><ol><li> Create a simple two-column ascii file <b>c:\temp\mydata.dat</b> or any other desired name and location</li>
+<li> Start a new project and import the file into a new book with default ascii settings. The book short name changes to <b>mydata</b></li>
+<li> Create a line+symbol plot of the data, and set the graph x and y axis rescale property to auto so that graph updates when new data is added</li>
+<li> Keep the graph as the active window</li>
+<li> Save the script below to the [AfterOpenDoc] section of the ProjectEvents.OGS file attached to the project.</li>
+<li> Add the following command to the [BeforeCloseDoc] section of ProjectEvents.OGS: <pre class="lt" style="font-family:monospace;">timer <span style="color: #000080;">-</span>k;</pre> </li>
+<li> Save the Origin Project, close, and then re-open the project. Now any time the project is opened, the timer will start, and when the project is closed the timer will stop executing.</li>
+<li> Go to the data file on disk and edit and add a few more data points</li>
+<li> The timer procedure will trigger a re-import and the graph will update with the additional new data</li></ol>
+</td></tr></table>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Set up the TimerProc macro</span>
+def TimerProc <span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Check if file exists, and quit if it does not</span>
+	string str<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;c:\temp\mydata.dat&quot;</span>;
+	if<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> exist<span style="color: #000000;">&#40;</span>str<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> return;
+
+	<span style="color: #008000;">// Get date/time of file on disk </span>
+	double dtDisk <span style="color: #000080;">=</span> exist<span style="color: #000000;">&#40;</span>str<span style="color: #000080;">$</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// Run script on data book</span>
+	<span style="color: #008000;">// Assuming here that book short name is mydata</span>
+	win <span style="color: #000080;">-</span>o mydata <span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// Get date/time of last import</span>
+		double dtLast <span style="color: #000080;">=</span> page.<span style="color: #000080;">info</span>.<span style="color: #000080;">system</span>.<span style="color: #000080;">import</span>.<span style="color: #000080;">filedate</span>;
+	
+		<span style="color: #008000;">// If file on disk is newer, then re-import the file</span>
+		if<span style="color: #000000;">&#40;</span> dtDisk <span style="color: #000080;">&gt;</span> dtLast <span style="color: #000000;">&#41;</span> reimport;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// Set TimerProc to be executed every 2 seconds</span>
+timer <span style="color: #0000dd;">2</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/On_A_Timer/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>The <b>Samples\LabTalk Script Examples</b> subfolder has a sample Origin Project named <b>Reimport File Using Timer.OPJ</b> which has script similar to above set up. You can open this OPJ to view the script and try this feature.
+</p></td></tr></table>
+
+

@@ -1,0 +1,115 @@
+<h1 class="firstHeading">2.1.17.5.15 ocmath_interpolate</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Do interpolation with mode of  Linear, Spline or B-Spline.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_interpolate<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, UINT nSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcY, UINT nSrcSize, <span style="color: #0000ff;">int</span> nMode <span style="color: #000080;">=</span> INTERP_TYPE_LINEAR, <span style="color: #0000ff;">double</span> dSmoothingFactor <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pWeights <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pCof <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nSplBoundType <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> iOption <span style="color: #000080;">=</span> OPTION_EXTRAPOLATE <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pX</dt>
+<dd>[input] pointer to X coordinate to be evaluated. size is nSize</dd>
+<dt> pY</dt>
+<dd>[output] pointer to the interpolation values at evaluation points. size is nSize</dd>
+<dd>if pX[i] is invalid(e.g, out of the range of pSrcX[0] to pSrcX[nSrcSize-1] in linear interpolation), set pY[i] to NANUM.</dd>
+<dt> nSize</dt>
+<dd>[input] size of pX and pY, nSize &gt; 0</dd>
+<dt> pSrcX</dt>
+<dd>[input] pointer to the X value of the curve, must be in strictly ascending order, otherwise it should be sorted before calling this function. size is nSrcSize.</dd>
+<dt> pSrcY</dt>
+<dd>[input] pointer to the Y value of the curve. size is nSrcSize.</dd>
+<dt> nSrcSize</dt>
+<dd>[input] size of pSrcX and pSrcY. if nMode = INTERP_TYPE_LINEAR, nSrcSize &gt;= 1; otherwise nSrcSize &gt;= 4.</dd>
+<dt> nMode</dt>
+<dd>[input] interpolation method. Must be one of the three modes:</dd>
+<dd>INTERP_TYPE_LINEAR(linear interpolation),</dd>
+<dd>INTERP_TYPE_SPLINE(cubic spline interpolation with not-a-knot boundary condition, and the not-a-knot boundary condition assume that the 3rd order derivative are continuous on the 2nd and last 2nd points),</dd>
+<dd>INTERP_TYPE_BSPLINE(B-Spline curve fitting using method by Dierckx.P)</dd>
+<dt> dSmoothingFactor</dt>
+<dd>[input] This argument specifies the closeness to the original data. It is only useful when nMode = INTERP_TYPE_BSPLINE. dSmoothingFactor &gt;= 0.</dd>
+<dd>By means of this parameter, the user can control the tradeoff between closeness of fit and smoothness of fit of the approximation.</dd>
+<dd>If dSmoothingFactor is too large, the spline will be too smooth and signal will be lost&#160;; if it is too small the spline will pick up too much noise.</dd>
+<dd>In the extreme cases the program will return an interpolating spline if  dSmoothingFactor=0 and the weighted least-squares polynomial of degree 3 if s is very large.</dd>
+<dt> pWeights</dt>
+<dd>[input] pointer to weights, which is only used in method INTERP_TYPE_BSPLINE, by default(pWeights = NULL) all weights are 1. size is nSrcSize</dd>
+<dt> pCof</dt>
+<dd>[output] pointer to coefficients, which are used in method INTERP_TYPE_SPLINE and INTERP_TYPE_BSPLINE, by default(pCof = Null), size is nSrcSize</dd>
+<dt> dwCntrl</dt>
+<dd>[input] indicates do sorting or not before doing interpolation, when it equals OCMATH_SRCDATA_X_MONOTONIC, don't sort.</dd>
+<dt> nSplBoundType</dt>
+<dd>[input] enumeration, indicate the boundary condition for spline (cubic spline), 0 for natural boundary condition, 1 for not_a_knot (currently only support these 2 kinds)</dd>
+<dt> iOption</dt>
+<dd>[input] enumeration, specify how to extrapolate Y values in extrapolated range. Must be one of the three values:</dd>
+<dd>OPTION_EXTRAPOLATE(extrapolate Y using the last two points),</dd>
+<dd>OPTION_SET_MISSING(set all Y values in the extrapolated range to be missing values),</dd>
+<dd>OPTION_REPEAT_LAST(use the Y value of the closest input X value for all values in the extrapolated range)</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>OE_NOERROR: Success
+</p><p>OE_BAD_PARAM (error code: -18): invalid argument of nMode
+</p><p>OE_INT_ARG_LT (error code: -15): invalid argument of nSize of nSrcSize
+</p><p>OE_NOT_STRICTLY_INCREASING (error code: -17): pSrcX[i], i=0,1,...,nSrcSize-1 not strictly increasing
+</p><p>OE_REAL_ARG_LT(error code: -14): invalid dSmoothingFactor
+</p><p>OE_ALLOC_FAIL (error code: -19): memory allocation failed
+</p><p>OE_COEFF_CONV (error code: - 23): the iterative process has failed to converge using method INTERP_TYPE_BSPLINE. Possibly dSmoothingFactor is too small
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Assume that Active worksheet has 4 columns A,B,C and D. Column C and D are x and y data of curve. Column C is in ascending order.</span>
+<span style="color: #008000;">//Column A is x data to be evaluated, interpolation result will be output into column B.</span>
+    <span style="color: #0000ff;">void</span>    ocmath_interpolate_ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> dd <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #0000ff;">int</span> nMode <span style="color: #000080;">=</span> INTERP_TYPE_BSPLINE;
+        <span style="color: #0000ff;">double</span> dSmoothingFactor <span style="color: #000080;">=</span> dd;
+        Worksheet    wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+        DataRange drIn;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    
+        vector vx, vy, vSrcx, vSrcy;
+        drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vx, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #008000;">//drIn.GetData(&amp;vy, 1);</span>
+        drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vSrcx, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+        drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vSrcy, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #0000ff;">int</span>    nSize <span style="color: #000080;">=</span> vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">int</span>    nSrcSize <span style="color: #000080;">=</span> vSrcx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        vy.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nSize<span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> ocmath_interpolate<span style="color: #000000;">&#40;</span>vx, vy, nSize, vSrcx, vSrcy, nSrcSize, nMode, dSmoothingFactor<span style="color: #000000;">&#41;</span>;
+        drIn.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vy, <span style="color: #0000ff;">true</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//interpolation result </span>
+    <span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<dl><dd>Interpolation. Three modes are available: Linear, Spline, B-Spline.</dd>
+<dd>When the mode is B-Spline, if your data, which will be interpolated or extrapolated, is in the interval of the B-Spline, this function calls B-Spline functions of nag to interpolate it, otherwise this function uses the nearest two end points to extend the B-Spline polynomial by linear interpolation.</dd>
+<dd>cf. Dierckx P: an algorithm for smoothing, differentiation and integration of experimental data using spline functions, J.Comp.Appl.Maths 1 (1975) 165-184.</dd></dl>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Ocmath_2d_interpolate_(global_function).html" title="OriginC:Ocmath 2d interpolate (global function)">ocmath_2d_interpolate</a>, <a href="../../OriginC/OriginC/Ocmath_3d_interpolate_(global_function).html" title="OriginC:Ocmath 3d interpolate (global function)">ocmath_3d_interpolate</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+<p>nag_1d_spline_fit(e02bec)nag_1d_spline_fit(e02bec), Nag Manual
+</p>
+
+
+
+
+

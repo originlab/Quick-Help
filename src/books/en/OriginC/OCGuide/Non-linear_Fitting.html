@@ -1,0 +1,138 @@
+<h1 class="firstHeading">1.12.3.4 Non-linear Fitting</h1><p><span class="OIndex" style="display:none">Curve Fitting</span>
+NLFit is the new fitter starting with Origin version 8. This new fitter handles the fitting process with a copy of the data while performing iterations. This results in faster operation compared to older versions where the fitter directly accessed data repeatedly from the worksheet.
+</p><p>There are two classes available to perform nonlinear fitting:
+</p>
+<dl><dt>NLFit</dt>
+<dd> This is the Origin C class that wraps the low level API from the new fitting engine. This class has no knowledge of Origin and works with copies of data in buffers. In order to use this class, you will be responsible in preparing all necessary buffers (pointers). This separation prepares for the future implementation of performing fitting as a background process.</dd></dl>
+<dl><dt>NLFitSession</dt>
+<dd> This is a higher level Origin C class with a friendly interface that wraps the NLFit class to Origin objects. This class is the kernel in the new NLFit Dialog. We recommend that you use this class in your Origin C code, as the process to interface to Origin is rather complicated and the NLFitSession class<span class="OIndex" style="display:none">NLFitSession Class</span>takes care of this complexity for you.</dd></dl>
+<h2><a name="Nonlinear_Fitting"></a><span class="mw-headline"><span class="OIndex">Nonlinear Fitting</span></span></h2>
+<p>Before you use the NLFitSession class, you need to include a specific header file:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<p>You also need to include and compile the <i>OriginC\Originlab\nlsf_utils.c</i> file to your current workspace. Run the Labtalk command below in the Command window, or from your script file, to programmatically add the file:
+</p>
+<pre class="lt" style="font-family:monospace;">Run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\nlsf_utils.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">&#41;</span></pre>
+<p>Define an NLFitSession object, and set the fitting function as Gauss:
+<span class="OIndex" style="display:none">NLFitSession, Set Fitting Function</span><span class="OIndex" style="display:none">NLFit, Get Number of Parameters</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Set Function</span>
+NLFitSession nlfSession;
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Gauss&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set function!&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">// Get parameter names and number:</span>
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>  vsParamNames;
+<span style="color: #0000ff;">int</span> nNumParamsInFunction <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">GetParamNamesInFunction</span><span style="color: #000000;">&#40;</span>vsParamNames<span style="color: #000000;">&#41;</span>;</pre>
+<p>Set two XY datasets with DATA_MODE_GLOBAL mode, to perform global fitting with sharing of parameters:
+<span class="OIndex" style="display:none">NLFitSession, Set Fitting Data</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// Set the first dataset</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vY1, vX1, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">0</span>, nNumData<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set data for the first dataset!&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>    	
+
+<span style="color: #008000;">// Set the second dataset</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span>vY2, vX2, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">1</span>, nNumData, DATA_MODE_GLOBAL<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set data for the second dataset!&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Run parameter initialization code to initialize parameter values:
+<span class="OIndex" style="display:none">NLFitSession, Run Code to Initialize Parameter Values</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Parameter initialization</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">ParamsInitValues</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to init parameters values!&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><span class="OIndex" style="display:none">NLFit, Set Parameter Values</span>Alternately, you can directly set parameter values one by one:
+</p>
+<pre class="oc" style="font-family:monospace;">vector vParams<span style="color: #000000;">&#40;</span>nNumParamsInFunction<span style="color: #000040;">*</span>nNumData<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// set parameter value for the first dataset</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.5</span>; <span style="color: #008000;">// y0</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>; <span style="color: #008000;">// A</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>; <span style="color: #008000;">// xc</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">976</span>; <span style="color: #008000;">// w</span>
+
+<span style="color: #008000;">// set parameter value for the second dataset</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.3</span>; <span style="color: #008000;">// y0</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>; <span style="color: #008000;">// A</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">10.3</span>; <span style="color: #008000;">// xc</span>
+vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">102</span>; <span style="color: #008000;">// w</span>
+
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">SetParamValues</span><span style="color: #000000;">&#40;</span>vParams<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// 0 means no error</span>
+    <span style="color: #0000ff;">return</span>;</pre>
+<p>Share xc parameter between the two datasets:
+<span class="OIndex" style="display:none">NLFitSession, Share Parameters</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nSharedParamIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 1, the index of xc in Gauss function</span>
+nlfSession.<span style="color: #000000;">SetParamShare</span><span style="color: #000000;">&#40;</span>nSharedParamIndex<span style="color: #000000;">&#41;</span>;</pre>
+<p>Perform the fit and output status message:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Do fit</span>
+<span style="color: #0000ff;">int</span> nFitOutcome;
+nlfSession.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>nFitOutcome<span style="color: #000000;">&#41;</span>;    
+
+string strOutcome <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">GetFitOutCome</span><span style="color: #000000;">&#40;</span>nFitOutcome<span style="color: #000000;">&#41;</span>;
+out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Outcome of the fitting session&#160;: &quot;</span> <span style="color: #000040;">+</span> strOutcome<span style="color: #000000;">&#41;</span>;</pre>
+<p>Get fit statistic result:
+<span class="OIndex" style="display:none">NLFitSession, Statistic Result</span><span class="OIndex" style="display:none">NLFitSession, Get Fitted Data</span><span class="OIndex" style="display:none">NLFitSession, Get Reduced Chisqr</span><span class="OIndex" style="display:none">NLFitSession, Get Number of Iterations</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nDataIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+RegStats        fitStats;
+NLSFFitInfo     fitInfo;
+nlfSession.<span style="color: #000000;">GetFitResultsStats</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>fitStats, <span style="color: #000040;">&amp;</span>fitInfo, <span style="color: #0000ff;">false</span>, nDataIndex<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;# Iterations=%d, Reduced Chisqr=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fitInfo.<span style="color: #000000;">Iterations</span>,
+ fitStats.<span style="color: #000000;">ReducedChiSq</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>Get final fit parameter values:
+</p>
+<pre class="oc" style="font-family:monospace;">vector          vFittedParamValues, vErrors;
+nlfSession.<span style="color: #000000;">GetFitResultsParams</span><span style="color: #000000;">&#40;</span>vFittedParamValues, vErrors<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// The parameter xc is shared in two input data.</span>
+<span style="color: #008000;">// So the value of xc is same for all data sets, and it only appears one time</span>
+<span style="color: #008000;">// in the fitted parameter values - vParamValues.	</span>
+<span style="color: #008000;">// vsParamNames contains the parameter names in Gauss function - y0, xc, w, A.</span>
+<span style="color: #008000;">// The following to add parameter names for the second dataset without xc.</span>
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;y0&quot;</span><span style="color: #000000;">&#41;</span>;
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;w&quot;</span><span style="color: #000000;">&#41;</span>;
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;A&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vFittedParamValues.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>    	
+    <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParamNames<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span>, vFittedParamValues<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Calculate fit curve Y values using the final fit parameters:
+</p>
+<pre class="oc" style="font-family:monospace;">vector vFitY1<span style="color: #000000;">&#40;</span>vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>, vFitY2<span style="color: #000000;">&#40;</span>vX2.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Get fitted Y for the first dataset</span>
+nlfSession.<span style="color: #000000;">GetYFromX</span><span style="color: #000000;">&#40;</span>vX1, vFitY1, vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Get fitted Y for the second dataset</span>
+nlfSession.<span style="color: #000000;">GetYFromX</span><span style="color: #000000;">&#40;</span>vX2, vFitY2, vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Accessing_FDF_FileFDF_File"></a><span class="mw-headline">Accessing FDF File<span class="OIndex" style="display:none">FDF File</span></span></h2>
+<p>Fitting function settings stored in an FDF file can be loaded into a tree variable.  You will need to include the <i>OriginC\system\FDFTree.h</i> file:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<p>Then use the <i>nlsf_FDF_to_tree</i> function:
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;*.FDF&quot;</span><span style="color: #000000;">&#41;</span>;
+Tree tr;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nlsf_FDF_to_tree<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>tr<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	out_tree<span style="color: #000000;">&#40;</span>tr<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

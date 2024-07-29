@@ -1,0 +1,33 @@
+<h1 class="firstHeading">6 Calling X-Functions</h1><p><br />
+</p>
+<h2><a name="Waiting_for_Startup_Origin_C_Compile_after_Launch"></a><span class="mw-headline">Waiting for Startup Origin C Compile after Launch</span></h2>
+<p>Before you can make any Origin C or X-Function call from a COM server, you need to check and wait for Origin C startup compile to finish, which will typically take a fraction of a second, but nevertheless the waiting is needed. 
+</p><p>Currently, there is no exposed COM property or method for this checking, but there exists a LabTalk command to wait up to a specified length of time (timeout in seconds), as shown below:
+</p>
+<pre class="lt" style="font-family:monospace;">sec <span style="color: #000080;">-</span>poc <span style="color: #0000dd;">3</span>;<span style="color: #008000;">//wait up to 3 sec for OC to be ready</span></pre>
+<p>The actual waiting time varies but the LabTalk command will return as soon as OC is ready. You can try to use a shorter timeout value like 2 but it would be safer to use a longer timeout.
+</p><p>The following small VBA example illustrates how this work:
+</p>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Private</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CommandButton_Click()
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> app <span style="color: #151B8D; font-weight: bold;">As</span> Origin.ApplicationSI
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> wbk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> Wks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Set</span> app = <span style="color: #E56717; font-weight: bold;">New</span> Origin.ApplicationSI
+    app.NewProject
+    <span style="color: #008000;">'wait for OC to be ready
+</span>    app.Execute (<span style="color: #800000;">&quot;sec -poc 3.5&quot;</span>)
+    <span style="color: #008000;">'call built-in XF to create a new folder called test and change to it
+</span>    app.Execute (<span style="color: #800000;">&quot;pe_mkdir test;pe_cd test&quot;</span>)
+    <span style="color: #008000;">'add new book in this new folder and set active sheet to 5 columns
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> wbk = app.WorksheetPages.Add
+    <span style="color: #151B8D; font-weight: bold;">Set</span> Wks = wbk.Layers(0)
+    Wks.Cols = 5
+    <span style="color: #008000;">'in case Origin was hidden, show it now
+</span>    app.Visible = MAINWND_SHOW
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+
+
+
+
+
+

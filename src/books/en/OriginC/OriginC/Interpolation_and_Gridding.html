@@ -1,0 +1,107 @@
+<h1 class="firstHeading">3.9.5.3 OriginC: Interpolation and Gridding</h1><p><br />
+</p><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#XYZ_Gridding_by_Renka_Cline_Method.28Origin80_SR0.29"><span class="tocnumber">1</span> <span class="toctext">XYZ Gridding by Renka Cline Method(Origin80 SR0)</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#1d_Spline_and_NAG_FREE.28Origin80_SR4.29"><span class="tocnumber">2</span> <span class="toctext">1d Spline and NAG_FREE(Origin80 SR4)</span></a></li>
+</ul>
+</div>
+
+<h2><a name="XYZ_Gridding_by_Renka_Cline_Method.28Origin80_SR0.29"></a><span class="mw-headline">XYZ Gridding by Renka Cline Method(Origin80 SR0)</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">int</span> xyz_gridding_in_renka_cline<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vx, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vy, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vz, 
+                                <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vxGrid, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vyGrid, matrix<span style="color: #000040;">&amp;</span> mat<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	Nag_Scat_Struct  comm;
+	NagError  fail;
+	<span style="color: #008000;">//INIT_FAIL</span>
+	fail.<span style="color: #000000;">code</span> <span style="color: #000080;">=</span> NE_NOERROR;
+	fail.<span style="color: #000000;">print</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+	<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> triang<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000040;">*</span>nSize<span style="color: #000000;">&#41;</span>;
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> grads<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000040;">*</span>nSize<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">//nag_2d_scat_interpolan</span>
+        <span style="color: #008000;">//nag_2d_scat_interpolant (e01sac) has been replaced by nag_2d_triang_interp (e01sjc) at Mark 25</span>
+	e01sjc<span style="color: #000000;">&#40;</span>nSize, vx, vy, vz, triang, grads, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error from e01sjc:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> fail.<span style="color: #000000;">code</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">//nag_2d_scat_eval</span>
+        <span style="color: #008000;">//nag_2d_scat_eval (e01sbc) has been replaced by nag_2d_triang_eval (e01skc) at Mark 25	</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> nRows; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> jj<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; jj <span style="color: #000080;">&lt;</span> nCols; jj<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			e01skc<span style="color: #000000;">&#40;</span>nSize,vx, vy, vz, triang, grads, vxGrid<span style="color: #000000;">&#91;</span>jj<span style="color: #000000;">&#93;</span>, vyGrid<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, <span style="color: #000040;">&amp;</span>mat<span style="color: #000000;">&#91;</span>jj<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NW_VALUE_EXTRAPOLATED<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error from e01skc:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> fail.<span style="color: #000000;">code</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">return</span> OE_NOERROR;	
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="1d_Spline_and_NAG_FREE.28Origin80_SR4.29"></a><span class="mw-headline">1d Spline and NAG_FREE(Origin80 SR4)</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// must include this to see nag related macros and prototypes</span>
+
+<span style="color: #008000;">// to run this example, you need to have 4 columns in the active</span>
+<span style="color: #008000;">// worksheet and fill col(A) with a few rows by row number and col(B) by same</span>
+<span style="color: #008000;">// number of rows of random values.</span>
+<span style="color: #008000;">// This function will generate results in col(C) and col(D)</span>
+<span style="color: #0000ff;">void</span> test_e01bac<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nX <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nY <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nXFit <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, <span style="color: #0000ff;">int</span> nYFit <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// the knots in nX and nY</span>
+	Dataset aa<span style="color: #000000;">&#40;</span>wks, nX<span style="color: #000000;">&#41;</span>;
+	Dataset bb<span style="color: #000000;">&#40;</span>wks, nY<span style="color: #000000;">&#41;</span>;
+	vector vx, vy;
+	vx <span style="color: #000080;">=</span> aa;
+	vy <span style="color: #000080;">=</span> bb;
+	Nag_Spline spline;
+	<span style="color: #0000ff;">int</span> m <span style="color: #000080;">=</span> vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	NagError fail <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>;
+	e01bac<span style="color: #000000;">&#40;</span>m, vx, vy, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Number of distinct knots =&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, m<span style="color: #000040;">-</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Distinct knots located at<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> j <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; j <span style="color: #000080;">&lt;</span>m<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>; j<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%8.4f%s&quot;</span>, spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">&#91;</span>j<span style="color: #000000;">&#93;</span>, <span style="color: #000000;">&#40;</span>j<span style="color: #000040;">-</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">%</span>5<span style="color: #000080;">==</span><span style="color: #0000dd;">4</span> <span style="color: #000040;">||</span> j<span style="color: #000080;">==</span>m? <span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">:</span><span style="color: #ff00ff;">&quot; &quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span><span style="color: #666666; font-weight: bold;">\n</span>   J B-spline coeff c<span style="color: #666666; font-weight: bold;">\n</span><span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; j <span style="color: #000080;">&lt;</span>m; j<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>  &#160;%d &#160;%13.4f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, j<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, spline.<span style="color: #000000;">c</span><span style="color: #000000;">&#91;</span>j<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">// put fit into col(nYFit) from x=col(nXFit)</span>
+	Dataset fitx<span style="color: #000000;">&#40;</span>wks, nXFit<span style="color: #000000;">&#41;</span>;
+	Dataset fity<span style="color: #000000;">&#40;</span>wks, nYFit<span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// generate the X from original X by using each mid point, so total m-1 new points</span>
+	fitx.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>m<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> m <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		fitx<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>aa<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000040;">+</span> aa<span style="color: #000000;">&#91;</span>ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.5</span>;
+	<span style="color: #008000;">//now we can get the spline fit</span>
+	fity.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>fitx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000080;">&lt;</span>fity.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; j<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">double</span> yy <span style="color: #000080;">=</span> NANUM;
+		NagError fail <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#125;</span>;
+		e02bbc<span style="color: #000000;">&#40;</span>fitx<span style="color: #000000;">&#91;</span>j<span style="color: #000000;">&#93;</span>, <span style="color: #000040;">&amp;</span>yy, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">&#41;</span>;
+		fity<span style="color: #000000;">&#91;</span>j<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> yy;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">//Free memory allocated by e01bac</span>
+	NAG_FREE<span style="color: #000000;">&#40;</span>spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">&#41;</span>;
+	NAG_FREE<span style="color: #000000;">&#40;</span>spline.<span style="color: #000000;">c</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

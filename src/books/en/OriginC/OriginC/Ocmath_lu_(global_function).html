@@ -1,0 +1,70 @@
+<h1 class="firstHeading">2.1.17.6.3 ocmath_lu</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Uses partial pivoting, with row interchanges.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_lu<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pMatIO, <span style="color: #0000ff;">long</span> <span style="color: #000040;">*</span> pIpiv, <span style="color: #0000ff;">int</span> m, <span style="color: #0000ff;">int</span> n <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pMatIO</dt>
+<dd>[modify] input:pointer to original matrix, of size m by n</dd>
+<dd>output: overwritten by the factors L and U; the unit diagonal</dd>
+<dd>elements of L are not stored.</dd>
+<dt> pIpiv</dt>
+<dd>[output] pointer to the pivot indices of size min(m, n) by 1.</dd>
+<dd>Row i of the original matrix is interchanged</dd>
+<dd>with row pIpiv[i - 1] for i = 1,2, ..., min(m, n).</dd>
+<dt> m</dt>
+<dd>[input] row number of matrix</dd>
+<dt> n</dt>
+<dd>[input] column number of matrix</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<dl><dd>= OE_NOERROR(0):  successful exit</dd>
+<dd>= -1:  m or n is less than 1</dd>
+<dd>= NE_SINGULAR: u(&lt;value&gt;, &lt;value&gt;) is exactly zero. The factorization has been completed but the factor U is exactly singular, and division by zero will occur if it is subsequently used to solve a system of linear equations or to invert A.</dd>
+<dd>= NE_ALLOC_FAIL: Memory allocation failed.</dd>
+<dd>= NE_BAD_PARAM: On entry, parameter had an illegal value.</dd>
+<dd>= NE_INTERNAL_ERROR: An internal error has occurred in this function. Check the function call and any array sizes. If the call is correct then please consult NAG for assistance.</dd></dl>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> ocmath_lu_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">//assume Matrix1(datatype: double) contains data</span>
+    Matrix    matIO<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;MBook1&quot;</span><span style="color: #000000;">&#41;</span>;
+    matrix<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">long</span><span style="color: #000080;">&gt;</span> matIPIV;
+    <span style="color: #0000ff;">int</span> m <span style="color: #000080;">=</span> matIO.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> n <span style="color: #000080;">=</span> matIO.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    matIPIV.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>min<span style="color: #000000;">&#40;</span>m,n<span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    ocmath_lu<span style="color: #000000;">&#40;</span>matIO, matIPIV, m, n<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<dl><dd>Forms the LU factorization of a real m by n matrix A as A = PLU, where P is a permutation matrix, L is lower triangular with unit diagonal elements (lower trapezoidal if m &gt; n) and U is upper triangular (upper trapezoidal if m &lt; n).</dd>
+<dd>Usually A is square(m = n), and both L and U  are triangular.</dd>
+<dd>The function uses partial pivoting, with row interchanges.</dd></dl>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+<p>nag_dgetrf(f07adc)nag_dgetrf(f07adc), Nag Manual
+</p>
+
+
+
+
+

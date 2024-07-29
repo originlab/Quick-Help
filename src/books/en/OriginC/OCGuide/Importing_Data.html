@@ -1,0 +1,205 @@
+<h1 class="firstHeading">1.10.1 Importing Data</h1><p><br />
+The Worksheet and MatrixLayer classes are derived from the Datasheet class.  The Datasheet class has a method named ImportASCII.  The ImportASCII method is used for importing ASCII data files.  There are also ImportExcel and ImportSPC methods for importing Microsoft Excel and spectroscopic data files, respectively.
+</p><p><span class="OIndex" style="display:none">Import ASCII Data File to Worksheet</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Import_ASCII_Data_File_into_Worksheet"><span class="tocnumber">1</span> <span class="toctext">Import ASCII Data File into Worksheet</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Import_ASCII_Data_File_into_Matrixsheet"><span class="tocnumber">2</span> <span class="toctext">Import ASCII Data File into Matrixsheet</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Import_Data_Using_an_Import_FilterImport_Data_with_Filter"><span class="tocnumber">3</span> <span class="toctext">Import Data Using an Import Filter<span class="OIndex" style="display:none">Import Data with Filter</span></span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Import_Files_with_Import_Wizard"><span class="tocnumber">4</span> <span class="toctext">Import Files with Import Wizard</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Variable_Extraction_in_Import_Wizard"><span class="tocnumber">4.1</span> <span class="toctext">Variable Extraction in Import Wizard</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Import_ASCII_Data_File_into_Worksheet"></a><span class="mw-headline">Import ASCII Data File into Worksheet</span></h2>
+<p>The first example will import an ASCII data file into the active worksheet of the active workbook.  It will first call the AscImpReadFileStruct global function to detect the file's format.  The format information is stored in an ASCIMP structure.  The structure will then be passed to the ImportASCII method to do the actual importing.
+<span class="OIndex" style="display:none">Import ASCII Data File to Worksheet</span>
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>data.dat&quot;</span>; <span style="color: #008000;">// some data file name</span>
+ASCIMP	ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// In this example we will disable the ASCII import progress</span>
+    <span style="color: #008000;">// bar by setting the LabTalk System Variable @NPO to zero.</span>
+    <span style="color: #008000;">// This is optional and is done here to show it is possible.</span>
+    <span style="color: #008000;">// The LTVarTempChange class makes setting and restoring a</span>
+    <span style="color: #008000;">// LabTalk variable easy.  See the Accessing LabTalk section</span>
+    <span style="color: #008000;">// for more details about the LTVarTempChange class.</span>
+    LTVarTempChange progressBar<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// 0 = disable progress bar</span>
+
+    <span style="color: #008000;">// Get active worksheet from active work book.</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">&#40;</span>strFile, ai<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Import data successful.&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The next example will also import an ASCII data file into a worksheet but it will also obtain additional information about each column from the file, and set up the worksheet columns.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Prompt user with a File Open dialog to choose a file to import.</span>
+string 	strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;*.dat&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #0000ff;">return</span>; <span style="color: #008000;">// User canceled or error</span>
+
+ASCIMP	ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    ai.<span style="color: #000000;">iAutoSubHeaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Disable auto detect sub header </span>
+
+    <span style="color: #008000;">// 1, LongName </span>
+    <span style="color: #008000;">// 2. Units	</span>
+    <span style="color: #008000;">// 3. Expanded Description(User defined)	</span>
+    <span style="color: #008000;">// 4. Type Indication(User defined)</span>
+    ai.<span style="color: #000000;">iSubHeaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+
+    <span style="color: #008000;">// When iAutoSubHeaderLines is false(0), the beginning index of ai.nLongName, </span>
+    <span style="color: #008000;">// ai.nUnits and ai.nFirstUserParams are from main header</span>
+    ai.<span style="color: #000000;">nLongNames</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iHeaderLines</span>; 
+    ai.<span style="color: #000000;">nUnits</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iHeaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;  
+
+    <span style="color: #008000;">// Set the index for the first user params</span>
+    ai.<span style="color: #000000;">nFirstUserParams</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iHeaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>; 
+    ai.<span style="color: #000000;">nNumUserParams</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// Set the number of user params		</span>
+
+    <span style="color: #008000;">// Not set any header to Comments label</span>
+    ai.<span style="color: #000000;">iMaxLabels</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; 
+
+    <span style="color: #008000;">// Get active worksheet from active work book.</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">&#40;</span>strFile, ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Return 0 for no error</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// The names of the user parameter labels</span>
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsUserLabels <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Expanded Description&quot;</span>, <span style="color: #ff00ff;">&quot;Type Indication&quot;</span><span style="color: #000000;">&#125;</span>;
+
+        <span style="color: #008000;">// Set user parameter labels to specified names</span>
+        Grid grid;
+        grid.<span style="color: #000000;">Attach</span><span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>;
+        grid.<span style="color: #000000;">SetUserDefinedLabelNames</span><span style="color: #000000;">&#40;</span>vsUserLabels<span style="color: #000000;">&#41;</span>;
+
+        wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Resize column widths to best fit their contents.</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Import_ASCII_Data_File_into_Matrixsheet"></a><span class="mw-headline">Import ASCII Data File into Matrixsheet</span></h2>
+<p><span class="OIndex" style="display:none">Import ASCII Data File to Matrixsheet</span>
+Importing data into a matrixsheet is very similar to importing into a worksheet.  This example is almost identical to the first worksheet example.  The only difference is we get the active matrixsheet from the active matrixbook using the MatrixLayer class instead of the Worksheet class.
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>someData.dat&quot;</span>;
+ASCIMP ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> ml.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">&#40;</span>strFile, ai<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Data imported successfully.&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Import_Data_Using_an_Import_FilterImport_Data_with_Filter"></a><span class="mw-headline">Import Data Using an Import Filter<span class="OIndex" style="display:none">Import Data with Filter</span></span></h2>
+<p>Functions for importing files are declared in the <b>OriginC\Originlab\FileImport.h</b> file. These functions are also documented in the Origin C Language Reference help file.
+</p><p>Prior to calling the import file functions, you need to first programmatically load and compile <b>FileImport.c</b>. This can be done from script using the command:
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\FileImport.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Option 16 ensures that all dependent Origin C files are loaded,</span>
+<span style="color: #008000;">// by scanning for the corresponding .h in FileImport.c</span></pre>
+<p>The following example shows importing data with a filter file.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> import_with_filter_file<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Active Page</span>
+ 
+    <span style="color: #008000;">// Get page book name</span>
+    string strPageName <span style="color: #000080;">=</span> pg.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// Get page active layer index</span>
+    <span style="color: #0000ff;">int</span> nIndexLayer <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// Get Origin sample folder</span>
+    string strPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Signal Processing<span style="color: #666666; font-weight: bold;">\\</span>&quot;</span>;
+ 
+    <span style="color: #008000;">// specify .oif filter name</span>
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;TR Data Files&quot;</span>;
+ 
+    import_file<span style="color: #000000;">&#40;</span>strPageName, nIndexLayer, strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;TR2MM.dat&quot;</span>, strFilterName<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Sometimes the existing filter might need to be modified to meet the requirements of the data format, so you need to load the filter from the file and configure it. See the following case:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span>    config_filter_tree<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Step01.dat&quot;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span>;  
+ 
+    <span style="color: #008000;">// load filter to tree</span>
+    Tree trFilter;    
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;ASCII&quot;</span>;
+    <span style="color: #0000ff;">int</span> nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// build-in Filters folder</span>
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+    WorksheetPage wp <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    string strPageName <span style="color: #000080;">=</span> wp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">&#40;</span>strFilterName, strFile,
+                                strPageName, nLocation, trFilter<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">&#41;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to load import filter&quot;</span><span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// update filter tree</span>
+    trFilter.<span style="color: #000000;">iRenameCols</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0 to keep default column name, 1 to rename column </span>
+    
+    <span style="color: #008000;">// import data file with filter tree. </span>
+    <span style="color: #008000;">// import_files function supports import multiple files one time.</span>
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsDataFileName;
+    vsDataFileName.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>strFile<span style="color: #000000;">&#41;</span>;    
+    nRet <span style="color: #000080;">=</span> import_files<span style="color: #000000;">&#40;</span>vsDataFileName, strPageName, wks.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, trFilter<span style="color: #000000;">&#41;</span>;	
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">&#41;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed to import file&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Import_Files_with_Import_Wizard"></a><span class="mw-headline">Import Files with Import Wizard</span></h2>
+<p><span class="OIndex" style="display:none">Import Files with Import Wizard</span>
+There are times when the data files are neither ASCII nor simple binary files or there is no existing filter for importing a data file, in these cases you can use Origin C and impFile X-Functions to import the files with the Import Wizard.
+</p><p>The <b>Origin C</b> function should have either of the following prototypes:
+</p><p>int YourFunctionName(Page&amp; pgTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)
+</p><p>where:
+</p>
+<ul><li><b>pgTarget:</b> A reference to a Page object of type worksheet or Matrix.  This would be what you defined in your filter or on the Source page of the Import Wizard, as the target window.</li></ul>
+<ul><li><b>trFilter:</b> A reference to a TreeNode object that holds all the filter settings from your filter file, or from your wizard specifications, in a tree structure.</li></ul>
+<ul><li><b>lpcszFile:</b> The full path and name of the file that is being imported.</li></ul>
+<ul><li><b>nFile:</b> The file index number in an ordered sequence of imported files (e.g. If you import n files, your function gets called n times, and nFile is the file count for the file being processed).</li></ul>
+<p>Or
+</p><p>int YourFunctionName(Layer&amp; lyTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)
+</p><p>where:
+</p>
+<ul><li><b>lyTarget:</b> A reference to a Layer object of type worksheet or Matrix.  This would be what you defined in your filter or on the Source page of the Import Wizard, as the target window.</li></ul>
+<ul><li><b>trFilter:</b> A reference to a TreeNode object that holds all the filter settings from your filter file, or from your wizard specifications, in a tree structure.</li></ul>
+<ul><li><b>lpcszFile:</b> The full path and name of the file that is being imported.</li></ul>
+<ul><li><b>nFile:</b> The file index number in an ordered sequence of imported files (e.g. If you import n files, your function gets called n times, and nFile is the file count for the file being processed).</li></ul>
+<p>See an example in the \Samples\Import and Export\User Defined folder, found in the Origin installation folder. 
+</p>
+<table class="note">
+
+<tr>
+<td>
+<p><b>Note:</b>  The target window template named on the first page of the Import Wizard (<b>Source</b> page) is only used when creating new windows (as would happen under some conditions during drag-and-drop importing).  When choosing <b>File: Import</b>, if your active window is consistent with your import filter's  <b>Target Window</b> specification, no new window is created and a reference to the page object for the active window is passed to your function.  If the active window is of a different type, a new window is created using the specified template, and the page reference to this new window is passed.
+</p>
+</td></tr></table>
+<p><br />
+</p>
+<h3><a name="Variable_Extraction_in_Import_Wizard"></a><span class="mw-headline">Variable Extraction in Import Wizard</span></h3>
+<p><span class="OIndex" style="display:none">Variable Extraction in Import Wizard</span>
+When importing ASCII files with the Import Wizard, you can extract variables from the file headers using user-defined Origin C functions.
+</p><p>Your custom Origin C function should have the following prototype:
+</p><p>int FuncName(StringArray&amp; saVarNames, StringArray&amp; saVarValues, const StringArray&amp; saHdrLines, const TreeNode &amp;trFilter);
+</p><p>where: 
+</p>
+<ul><li><b>saVarNames</b>: An string array where the user should put the variable names.</li>
+<li><b>saVarValues</b>: An string array where the user should put the variable values.</li>
+<li><b>saHdrLines</b>: A reference to an string array that contains the header lines.  Note that the Origin C function does not need to read the data file because the header lines are automatically passed into the function.</li>
+<li><b>trFilter</b>: A reference to a TreeNode object that holds all the filter settings from your filter file, or from your wizard specifications, in a tree structure.</li></ul>
+
+
+
+
+
+

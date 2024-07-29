@@ -1,0 +1,95 @@
+<h1 class="firstHeading">3.3.16 Contour Plot from Matrix</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 7.5</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>This example to show how to add contour plotting and then use the following two functions to custom Z levels and fill colors. Please refer to <a href="../../OriginC/OriginC/DataPlot-SetColormap.html" title="OriginC:DataPlot-SetColormap">DataPlot::SetColormap</a> for more information.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> plot_contour<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	MatrixPage mp;
+	mp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	MatrixLayer ml <span style="color: #000080;">=</span> mp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	Matrix mat<span style="color: #000000;">&#40;</span>ml<span style="color: #000000;">&#41;</span>;
+	mat.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">10</span>, <span style="color: #0000dd;">10</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>mat.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> jj<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; jj<span style="color: #000080;">&lt;</span>mat.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;jj<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+			mat<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#91;</span>jj<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">sin</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000040;">+</span>jj<span style="color: #000000;">&#41;</span>;
+		
+	MatrixObject mobj <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;contour&quot;</span>, CREATE_HIDDEN<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// use template, create as hidden to avoid unneeded drawing	</span>
+	GraphLayer glay <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	<span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> glay.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>mobj, IDM_PLOT_CONTOUR<span style="color: #000000;">&#41;</span>;	
+	glay.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	DataPlot dp <span style="color: #000080;">=</span> glay.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span>nPlot<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		set_contour_colormap<span style="color: #000000;">&#40;</span>dp<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	gp.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> set_contour_colormap<span style="color: #000000;">&#40;</span>DataPlot<span style="color: #000040;">&amp;</span> dp<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>	
+	vector vLevels;
+	<span style="color: #0000ff;">BOOL</span> bLogScale;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp.<span style="color: #000000;">GetColormap</span><span style="color: #000000;">&#40;</span>vLevels, bLogScale<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	<span style="color: #008000;">// shrink or extend z levels </span>
+	<span style="color: #0000ff;">int</span> nLevels <span style="color: #000080;">=</span> vLevels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nLevels <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>
+		nLevels <span style="color: #000040;">-</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	<span style="color: #0000ff;">else</span>
+		nLevels <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	
+	<span style="color: #0000ff;">double</span> min <span style="color: #000080;">=</span> vLevels<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>, max <span style="color: #000080;">=</span> vLevels<span style="color: #000000;">&#91;</span>nLevels<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>;	
+	<span style="color: #0000ff;">double</span> step <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>max <span style="color: #000040;">-</span> min<span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span>nLevels<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+	vLevels.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span>min, max, step<span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// set z levels</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp.<span style="color: #000000;">SetColormap</span><span style="color: #000000;">&#40;</span>vLevels<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;	
+	
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vColors<span style="color: #000000;">&#40;</span>nLevels<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// the size  of vColors must be nLevels-1</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> vColors.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">int</span> gg <span style="color: #000080;">=</span> <span style="color: #0000dd;">255</span><span style="color: #000040;">*</span> ii <span style="color: #000040;">/</span> <span style="color: #000000;">&#40;</span>nLevels<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">int</span> bb <span style="color: #000080;">=</span> <span style="color: #0000dd;">255</span> <span style="color: #000040;">*</span> <span style="color: #000000;">&#40;</span>nLevels<span style="color: #000040;">-</span>ii<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span>nLevels<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">int</span> nRGB <span style="color: #000080;">=</span> RGB<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, gg, bb<span style="color: #000000;">&#41;</span>;
+		vColors<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> RGB2OCOLOR<span style="color: #000000;">&#40;</span>nRGB<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// call DataPlot::SetColormap(const vector&lt;double&gt;&amp; vz, BOOL bLogScale=FALSE) to set z levels</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp.<span style="color: #000000;">SetColormap</span><span style="color: #000000;">&#40;</span>vLevels<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set z levels<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// call DataPlot::SetColormap(TreeNode&amp; trColormap) to set colormap</span>
+	Tree tr; 
+	tr.<span style="color: #000000;">ColorMap</span>.<span style="color: #000000;">Details</span>.<span style="color: #000000;">Colors</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vColors;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>dp.<span style="color: #000000;">SetColormap</span><span style="color: #000000;">&#40;</span>tr<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set colormap<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;	
+	<span style="color: #000000;">&#125;</span>
+	
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

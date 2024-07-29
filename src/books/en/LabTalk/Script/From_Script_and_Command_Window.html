@@ -1,0 +1,52 @@
+<h1 class="firstHeading">2.5.1.1 From Script and Command Window</h1><p class='urlname' style='display: none'>From-Script-and-Command-Window</p>
+<p><span class="OIndex" style="display:none">Run Script from Command Window</span>Two Windows exist for direct execution of LabTalk: the (older) <span class="OIndex">Script Window</span> and the (newer) <span class="OIndex">Command Window</span>.
+Each window can execute single or multiple lines of script.
+</p>
+<ul><li> The Command Window has a prompt and will execute all code entered at the prompt.</li>
+<li> The Script Window has only a cursor and will execute highlighted code or code at the current cursor position when you press Enter.</li>
+<li> Both windows accept Ctrl+Enter without executing. When using Ctrl+Enter to add additional lines, you must include a semicolon (<b>;</b>) at the end of the statement for multiple-line execution. </li>
+<li> In the Script Window, you can use the menu item <b>Edit: Insert newline</b> to insert a new line; You can also turn Script Execution off or on in the <b>Edit</b> menu by checking or unchecking <b>Script Execution</b>.</li>
+<li> Both the Script Window and Command Window support <span class="OIndex">Intellisense</span> for auto-completion of X-Functions; only the Command Window includes a <span class="OIndex">command history</span> and recall of line history (Up and Down Arrows).</li>
+<li> The Script Window allows for easier editing of multiline commands and longer scripts.</li></ul>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>Origin 2023 added a Scintilla-based Script Window with support for Unicode, auto-completion, syntax-coloring, font-size control (zoom using Ctrl + mouse). The change should improve usability, particularly for those with 4k monitors. Roll back to the original Script Window by setting <a href="../../LabTalk/LabTalk/System_Variable_List.html#N" title="LabTalk:System Variable List"><b>@NSW=0</b></a>.
+</p></td></tr></table>
+<p><br />
+Below is an example script that expects a worksheet with data in the form of one X column and multiple Y columns.  The code finds the highest and lowest Y values from all the Y data, then normalizes all the Y's to that range.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Find the lowest minimum and the highest maximun</span>
+double absMin <span style="color: #000080;">=</span> 1E300;
+double absMax <span style="color: #000080;">=</span> <span style="color: #000080;">-</span>1E300;
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">2</span>,wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    stats <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+    if<span style="color: #000000;">&#40;</span>absMin <span style="color: #000080;">&gt;</span> stats.<span style="color: #000080;">min</span><span style="color: #000000;">&#41;</span> absMin <span style="color: #000080;">=</span> stats.<span style="color: #000080;">min</span>;
+    if<span style="color: #000000;">&#40;</span>absMax <span style="color: #000080;">&lt;</span> stats.<span style="color: #000080;">max</span><span style="color: #000000;">&#41;</span> absMax <span style="color: #000080;">=</span> stats.<span style="color: #000080;">max</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// Now normalize each column to that range</span>
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">2</span>,wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    stats <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+    wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span>stats.<span style="color: #000080;">min</span>;                 <span style="color: #008000;">// Shift to minimum of zero</span>
+    wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">/</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>stats.<span style="color: #000080;">max</span> <span style="color: #000080;">-</span> stats.<span style="color: #000080;">min</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// Normalize to 1</span>
+    wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>absMax <span style="color: #000080;">-</span> absMin<span style="color: #000000;">&#41;</span>;         <span style="color: #008000;">// Normalize to range</span>
+    wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span>absMin;                    <span style="color: #008000;">// Shift to minimum</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>To execute in the Script Window, paste the code, then select all the code with the cursor (selected text will be highlighted), and press Enter.
+</p><p>To execute the script in the Command Window, paste the code then press Enter. Note that if there were a mistake in the code, you would have it all available for editing in the Script Window, whereas the Command Window history is not editable and the line history does not recall the entire script.
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>Origin also has a native script editor, Code Builder, which is designed for editing and debugging both LabTalk and Origin C code. To access Code Builder, enter <b>ed.open()</b> into the script or command window, or select the <a  class="image"><img alt="Button Code Builder.png" src="../images/From_Script_and_Command_Window/Button_Code_Builder.png?v=0" width="23"  /></a> button from the Standard Toolbar.
+</p></td></tr></table>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>The font in <span class="OIndex">Script Window</span> can be customized in this way:
+</p>
+<ol><li>Open the Origin.ini file in User Files Folder, search for the [font] section: paste the contents below in [font] section.</li>
+<li>Restart the Origin and check the <span class="OIndex">Script Window</span> again, the font and size both changed.</li></ol>
+<pre class="lt" style="font-family:monospace;">ScriptWindowFontHeight<span style="color: #000080;">=</span><span style="color: #0000dd;">24</span>
+ScriptWindowCharset<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>
+ScriptWindowFaceName<span style="color: #000080;">=</span>Times New Roman</pre>
+<p>For more charset value, see <a class="external free" href="http://msdn.microsoft.com/en-us/library/cc250412.aspx" target="_blank">http://msdn.microsoft.com/en-us/library/cc250412.aspx</a>
+</p></td></tr></table>
+
+

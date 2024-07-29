@@ -1,0 +1,126 @@
+<h1 class="firstHeading">5.8 Mathematical Analysis with LabTalk</h1><p class='urlname' style='display: none'>Tutorial-Mathematical-Analysis</p>
+<p><br />
+</p>
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>Many mathematical analysis tools in Origin is accessible from LabTalk script, for example, differentiation, integration, interpolation, averaging multiple curves .etc. Most of these analysis has one or more associated X-Functions, and many commands, objects or arithmetic operators work as an implement to these X-Functions.
+</p><p>When carrying out mathematical analysis, it is sometimes very useful to create a user-interactive dialog to get user input and use the input value(s) for further calculation.
+</p>
+<h2><a name="What_You_Will_Learn"></a><span class="mw-headline">What You Will Learn</span></h2>
+<p>This tutorial will show you how to:
+</p>
+<ul><li>subtract a line from source data</li>
+<li>create a user-interactive dialog (getn) to get input from user and make use of the input values</li>
+<li>use interpolation to compute the Y value for given X </li>
+<li>normalize a data column</li>
+<li>calculate average for multiple curves</li></ul>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<ol>
+<li>Import the data file <b>Waterfall.dat</b> under <i>&lt;Origin EXE folder&gt;\Samples\Graphing</i> folder with the associated import filter into the workbook <b>Waterfall</b>.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Create a newbook and name it Waterfall (both long and short name)</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Waterfall&quot;</span> option<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lsname;
+<span style="color: #008000;">// Define the file name and filter name</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Waterfall.dat&quot;</span>;
+string filtername<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;waterfall.oif&quot;</span>;  
+<span style="color: #008000;">// Use the impfile x-function to import the specified file with the import filter</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filtername<span style="color: #000080;">$</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span>data orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;</pre>
+<li>Use a loop and the <a class="external text" href="../../XFunction/X-Function/Subtract_line.html">subtract_line</a> X-Function to subtract a simple baseline of end points connection.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create new sheet named as SubtractedData</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData;
+<span style="color: #008000;">//Define the newly created worksheet(current active) as a range variable</span>
+range sdwk <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+<span style="color: #008000;">//Active the &quot;Waterfall&quot; worksheet by its name</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Waterfall&quot;</span>;
+<span style="color: #008000;">//Define a integral to hold the number of columns in Waterfall sheet</span>
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+<span style="color: #008000;">//Set the number of columns in SubtractedData sheet to be the same </span>
+sdwk.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> nc;
+<span style="color: #008000;">//Use the loop and subtract_line x-function to subtract baseline</span>
+<span style="color: #008000;">//The first and last data points are found and connected linearly</span>
+<span style="color: #008000;">//This line will be subtracted as baseline from source data</span>
+<span style="color: #008000;">//Subtracted data will be named by excitation wavelength of source data</span>
+loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  range rx <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+  range ry <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+  subtract_line iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+  x1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the X value of the first point*/</span>
+  y1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the Y value of the first point*/</span>
+  x2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the X value of the last point*/</span>
+  y2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the Y value of the last point*/</span>
+  oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Rename the column long names in SubtractedData sheet</span>
+<span style="color: #008000;">//Use the User Defined Parameter Wavelength in Waterfall sheet </span>
+ <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>D1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><br />
+</p>
+<li>Use a <a href="../../LabTalk/Script/Getting_Numeric_and_String_Input.html" title="Script:Getting Numeric and String Input">getn</a> dialog to get some user input, let user decide whether to use the peak height at a reference position, or simply the maximum peak height for normalization. </li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create a dialog to get user input of reference peak position X value</span>
+double xx;<span style="color: #008000;">//give an initial value</span>
+<span style="color: #008000;">//Create getn dialog</span>
+int n;
+getn
+<span style="color: #000000;">&#40;</span>Use Specified Reference Peak for Normalization<span style="color: #000000;">&#41;</span> n<span style="color: #000000;">:</span>2s
+<span style="color: #000000;">&#40;</span>Reference Peak Position X Value<span style="color: #000000;">&#41;</span> xx
+<span style="color: #000000;">&#40;</span>If not specified, the data will be normalized based on maximum Y value<span style="color: #000000;">&#41;</span>;</pre>
+<li>Based on the user input from the previous step, loop over all Y columns to do data normalization.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create a new worksheet Normalized</span>
+<span style="color: #008000;">//And set the number of columns to be the same as previous worksheets</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Normalized cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nc outname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname1<span style="color: #000080;">$</span>;
+<span style="color: #008000;">//Fill in column A with the same data of column A in SubtractedData worksheet</span>
+range r1 <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+range r2 <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+r1 <span style="color: #000080;">=</span> r2;
+
+if<span style="color: #000000;">&#40;</span>n<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span><span style="color: #008000; font-style: regular;">/*If user hasn't chosen &quot;Use Specified Reference Peak for Normalization&quot;*/</span>
+  <span style="color: #000000;">&#123;</span>
+    loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">&#41;</span>
+       <span style="color: #000000;">&#123;</span>
+         <span style="color: #008000;">//Use the rnormalize x-function to normalize the columns</span>
+         rnormalize <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> 
+         irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+         method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>max <span style="color: #008000; font-style: regular;">/*Use &quot;Divided by Maximum&quot; as Normalization method&quot; */</span>
+         orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+         wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> ii;
+         col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>D1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+       <span style="color: #000000;">&#125;</span>
+  <span style="color: #000000;">&#125;</span>
+if<span style="color: #000000;">&#40;</span>n<span style="color: #000080;">==</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #008000; font-style: regular;">/*If user has chosen &quot;Use Specified Reference Peak for Normalization&quot;*/</span>
+  <span style="color: #000000;">&#123;</span>
+     loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">&#41;</span>
+       <span style="color: #000000;">&#123;</span>
+         range rr<span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #008000;">//Use interpolation to compute the Y value for given X</span>
+        double yy <span style="color: #000080;">=</span> rr<span style="color: #000000;">&#40;</span>xx<span style="color: #000000;">&#41;</span>;
+        <span style="color: #008000;">//Use the rnormalize x-function to normalize the columns</span>
+        rnormalize <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> 
+        irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+        method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>specify <span style="color: #008000; font-style: regular;">/*Use &quot;Divided by a specified value&quot; as Normalization method&quot; */</span>
+        val<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy <span style="color: #008000; font-style: regular;">/*Use the computed Y value from interpolation as reference value*/</span>
+        orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+        wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> ii;
+        col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>D1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+       <span style="color: #000000;">&#125;</span>
+  <span style="color: #000000;">&#125;</span></pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Mathematical_Analysis/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>Except for the range( ) syntax, several X-Functions can be used for interpolation, e.g. <a class="external text" href="../../XFunction/X-Function/Interp1.html">interp1</a>(interpolate Y from X), <a class="external text" href="../../XFunction/X-Function/Interp1q.html">interp1q</a>(linear interpolation and extrapolation), <a class="external text" href="../../XFunction/X-Function/Interp1xy.html">interp1xy</a>(1D interpolation/extrapolation on a group of XY data).etc 
+</p></td></tr></table>
+<li>Plot the normalized data as grouped line plots.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Plot the normalized data as grouped line plots, no legend</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;</pre>
+<li>Calculate the average of multiple curves with the <a class="external text" href="../../XFunction/X-Function/Avecurves.html">avecurves</a> X-Function.</li>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>a Waterfall;
+<span style="color: #008000;">//Create new sheet named as Avecurve</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Avecurve;
+<span style="color: #008000;">//Use a loop to calculate the average for every 4 curves</span>
+for<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; ii<span style="color: #000080;">&lt;</span>nc; ii<span style="color: #000080;">=</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+avecurves <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Avecurve<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">/</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li>Plot the average curve results as another grouped line plot.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Select the whole worksheet of Avecurve</span>
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">//Plot the active range as grouped line plot</span>
+plotxy plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;</pre></ol>
+
+

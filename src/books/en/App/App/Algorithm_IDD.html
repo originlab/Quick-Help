@@ -1,0 +1,349 @@
+<h1 class="firstHeading">2.65.1.2 Algorithm for Identify Data Distribution</h1><p class='urlname' style='display: none'>Algorithm-IDD</p>
+<p>In this app, <b>MLE</b> (maximum likelihood estimation) method is used to estimate parameters for each distribution except <b>Gaussian Mixture</b> distribution, and the latter uses <b>EM</b> (expectation maximization) algorithm.
+</p><p>In the <b>MLE</b> method, for input data <img src="../images/Algorithm_IDD/math-971f2023c1f5f54b8bd389bb06fa6d86.png?v=0" title="\mathbf{y}" alt="\mathbf{y}" class="tex"/>, parameters vector <img src="../images/Algorithm_IDD/math-2554a2bb846cffd697389e5dc8912759.png?v=0" title="\theta" alt="\theta" class="tex"/>:
+</p>
+<ol><li> First calculate the likelihood function <img src="../images/Algorithm_IDD/math-fe3b9dbc75d8f03ade8118ca4b756b94.png?v=0" title="\mathcal{L}_{n}( \theta \,;\mathbf {y} )" alt="\mathcal{L}_{n}( \theta \,;\mathbf {y} )" class="tex"/> for the distribution, which is the product of probability density functions of input data.</li>
+<li> Then maximize the logarithm of the likelihood function <img src="../images/Algorithm_IDD/math-70530e0ec41574aaa7fe48ee90755ce0.png?v=0" title="\ell ( \theta \,;\mathbf {y} )" alt="\ell ( \theta \,;\mathbf {y} )" class="tex"/> by setting its partial derivatives equal to zero with respect to parameters.</li>
+<li> Use Newton-Raphson method to solve these parameters in step 2.</li></ol>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Distributions"><span class="tocnumber">1</span> <span class="toctext">Distributions</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Goodness_of_Fit"><span class="tocnumber">2</span> <span class="toctext">Goodness of Fit</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Anderson-Darling_Test"><span class="tocnumber">2.1</span> <span class="toctext">Anderson-Darling Test</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#BIC"><span class="tocnumber">2.2</span> <span class="toctext">BIC</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Likelihood-ratio_Test.28LRT.29"><span class="tocnumber">2.3</span> <span class="toctext">Likelihood-ratio Test(LRT)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Estimate_Parameter.27s_Standard_Error"><span class="tocnumber">3</span> <span class="toctext">Estimate Parameter's Standard Error</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Probability_Plot"><span class="tocnumber">4</span> <span class="toctext">Probability Plot</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Reference"><span class="tocnumber">5</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h1><a name="Distributions"></a><span class="mw-headline">Distributions</span></h1>
+<p>In this app, distributions include:
+</p>
+<table class="simple">
+<tr>
+<th> Distribution
+</th>
+<th> Parameters
+</th>
+<th> Probability density function
+</th>
+<th> Cumulative distribution function
+</th>
+<th> Inverse cumulative distribution function
+</th></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Normal</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-dd0b4503231b3d96841234da78d1c8d5.png?v=0" title="f(x)=\frac{1}{ \sqrt{2 \pi} \sigma } e^{ -\frac{( x - \mu )^2}{2 \sigma^2} }, \; \sigma &gt; 0" alt="f(x)=\frac{1}{ \sqrt{2 \pi} \sigma } e^{ -\frac{( x - \mu )^2}{2 \sigma^2} }, \; \sigma &gt; 0" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-0ecfa2eaf628d5f8570f0f5735e63bed.png?v=0" title="P(x) = \Phi \left( \frac{x - \mu}{\sigma} \right)" alt="P(x) = \Phi \left( \frac{x - \mu}{\sigma} \right)" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-f320a88c837b20c83dccf72c6ef93ede.png?v=0" title="x = \mu + \sigma \Phi^{-1}(p)" alt="x = \mu + \sigma \Phi^{-1}(p)" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"><b>Lognormal</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-97af0b3d9ff969dedee52abf2c10dedf.png?v=0" title="f(x)=\frac{1}{ \sqrt{2 \pi} \sigma x } e^{ -\frac{( \text{ln}(x) - \mu )^2}{2 \sigma^2} }, " alt="f(x)=\frac{1}{ \sqrt{2 \pi} \sigma x } e^{ -\frac{( \text{ln}(x) - \mu )^2}{2 \sigma^2} }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-2584193c841be1b6c8109e46bdd8f1af.png?v=0" title=" x&gt;0 , \; \sigma &gt; 0" alt=" x&gt;0 , \; \sigma &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-b163b3708f2b48c7add12eaceb796ad2.png?v=0" title="P(x) = \Phi \left( \frac{\text{ln}(x) - \mu}{\sigma} \right)" alt="P(x) = \Phi \left( \frac{\text{ln}(x) - \mu}{\sigma} \right)" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-af9c4f1d32b5945cc292a35c3d9512b7.png?v=0" title="\text{ln}(x) = \mu + \sigma \Phi^{-1}(p)" alt="\text{ln}(x) = \mu + \sigma \Phi^{-1}(p)" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>3-Parameter Lognormal</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/> <br /> threshold: <img src="../images/Algorithm_IDD/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-5f5e2bace3cfc8b4c8f3aa8e054ac5da.png?v=0" title="f(x)=\frac{1}{\sqrt{2 \pi} \sigma (x -\lambda)} e^{ -\frac{( \text{ln}(x -\lambda) - \mu )^2}{2 \sigma^2} }, " alt="f(x)=\frac{1}{\sqrt{2 \pi} \sigma (x -\lambda)} e^{ -\frac{( \text{ln}(x -\lambda) - \mu )^2}{2 \sigma^2} }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-f7d0955194d3354f721284c43579bfad.png?v=0" title="x &gt; \lambda , \; \sigma &gt; 0" alt="x &gt; \lambda , \; \sigma &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-9bdde2279bb757dcf91551ebe676eb3a.png?v=0" title="P(x) = \Phi \left( \frac{\text{ln}(x - \lambda) - \mu}{\sigma} \right)" alt="P(x) = \Phi \left( \frac{\text{ln}(x - \lambda) - \mu}{\sigma} \right)" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-bdcf96d346a7b673b0db55ede73d4177.png?v=0" title="\text{ln}(x - \lambda) = \mu + \sigma \Phi^{-1}(p)" alt="\text{ln}(x - \lambda) = \mu + \sigma \Phi^{-1}(p)" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Gamma</b>
+</td>
+<td> shape: <img src="../images/Algorithm_IDD/math-7b7f9dbfea05c83784f8b85149852f08.png?v=0" title="\alpha" alt="\alpha" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-b0603860fcffe94e5b8eec59ed813421.png?v=0" title="\beta" alt="\beta" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-ef158173a8269b095a0651433198e405.png?v=0" title="f(x) = \frac{ x^{\alpha-1} e^{-\frac{x}{\beta}}}{ \beta^{\alpha} \Gamma(\alpha) }, " alt="f(x) = \frac{ x^{\alpha-1} e^{-\frac{x}{\beta}}}{ \beta^{\alpha} \Gamma(\alpha) }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-6bb6718f66e81b029690a18f1d28b93b.png?v=0" title="x &gt; 0, \; \alpha &gt; 0, \; \beta &gt; 0" alt="x &gt; 0, \; \alpha &gt; 0, \; \beta &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-59507e64cdfe8070439eb3b549182cdb.png?v=0" title="P(x) = \frac{1}{ \Gamma(\alpha) } \gamma( \alpha, \frac{x}{\beta})" alt="P(x) = \frac{1}{ \Gamma(\alpha) } \gamma( \alpha, \frac{x}{\beta})" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-744e18f50bcf323e49893a8736f6e4c6.png?v=0" title="x = \beta  \gamma^{-1}( \alpha, \Gamma(\alpha) p )" alt="x = \beta  \gamma^{-1}( \alpha, \Gamma(\alpha) p )" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Exponential</b>
+</td>
+<td> scale: <img src="../images/Algorithm_IDD/math-2554a2bb846cffd697389e5dc8912759.png?v=0" title="\theta" alt="\theta" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-b493f44c68a9f05c00458b5e0bcee4f2.png?v=0" title="f(x) = \frac{ 1 }{ \theta } e^{-\frac{x}{\theta}}, \; x &gt; 0, \; \theta &gt; 0" alt="f(x) = \frac{ 1 }{ \theta } e^{-\frac{x}{\theta}}, \; x &gt; 0, \; \theta &gt; 0" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-3d45d0cd9cca2f2751ab3e526cebd042.png?v=0" title="P(x) = 1- e^{ -\frac{x}{\theta} }" alt="P(x) = 1- e^{ -\frac{x}{\theta} }" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-6de03f88391fb1bc9fe6d70b530b18d4.png?v=0" title=" x = \theta ( - \text{ln}(1-p) ) " alt=" x = \theta ( - \text{ln}(1-p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>2-Parameter Exponential</b>
+</td>
+<td> scale: <img src="../images/Algorithm_IDD/math-2554a2bb846cffd697389e5dc8912759.png?v=0" title="\theta" alt="\theta" class="tex"/> <br /> threshold: <img src="../images/Algorithm_IDD/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-c7b9f090a53c486633c6a15032a2761b.png?v=0" title="f(x) = \frac{ 1 }{ \theta } e^{-\frac{x - \lambda}{\theta}}, \; x &gt; \lambda, \; \theta &gt; 0" alt="f(x) = \frac{ 1 }{ \theta } e^{-\frac{x - \lambda}{\theta}}, \; x &gt; \lambda, \; \theta &gt; 0" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-71a5312238c1de5d7fdba7312b4518d6.png?v=0" title="P(x) = 1- e^{ -\frac{x - \lambda}{\theta} }" alt="P(x) = 1- e^{ -\frac{x - \lambda}{\theta} }" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-8feec3fec364b3201dc5f40ffe8c181c.png?v=0" title=" x = \lambda + \theta ( - \text{ln}(1-p) ) " alt=" x = \lambda + \theta ( - \text{ln}(1-p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Smallest Extreme Value</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-7b7f9dbfea05c83784f8b85149852f08.png?v=0" title="\alpha" alt="\alpha" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-b0603860fcffe94e5b8eec59ed813421.png?v=0" title="\beta" alt="\beta" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-4acbf7fc65918d40c06c09fa0a97df1a.png?v=0" title="f(x) = \frac{1}{\beta } e^{ \frac{x- \alpha}{\beta}} e^{ - e^{ \frac{x- \alpha}{\beta} } }, " alt="f(x) = \frac{1}{\beta } e^{ \frac{x- \alpha}{\beta}} e^{ - e^{ \frac{x- \alpha}{\beta} } }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-959608edfbfa8f188b3603c664aecb17.png?v=0" title="\beta &gt; 0" alt="\beta &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-31937787d6a372fd064cbbe718d1f9af.png?v=0" title="P(x) = 1- e^{-e^{\frac{x-\alpha}{\beta}}}" alt="P(x) = 1- e^{-e^{\frac{x-\alpha}{\beta}}}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-14ace0bfb2ef9d225c5aef20625c6d86.png?v=0" title=" x = \alpha + \beta \text{ln}( - \text{ln}(1-p) ) " alt=" x = \alpha + \beta \text{ln}( - \text{ln}(1-p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Weibull</b>
+</td>
+<td> scale: <img src="../images/Algorithm_IDD/math-7b7f9dbfea05c83784f8b85149852f08.png?v=0" title="\alpha" alt="\alpha" class="tex"/> <br /> shape: <img src="../images/Algorithm_IDD/math-b0603860fcffe94e5b8eec59ed813421.png?v=0" title="\beta" alt="\beta" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-aa547ed0006f0e3f488ad3f34ed82917.png?v=0" title="f(x) = \frac{\beta}{\alpha} \left(\frac{ x }{ \alpha }\right)^{\beta - 1} e^{ -(\frac{ x }{ \alpha })^\beta }, " alt="f(x) = \frac{\beta}{\alpha} \left(\frac{ x }{ \alpha }\right)^{\beta - 1} e^{ -(\frac{ x }{ \alpha })^\beta }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-6bb6718f66e81b029690a18f1d28b93b.png?v=0" title="x &gt; 0, \; \alpha &gt; 0, \; \beta &gt; 0" alt="x &gt; 0, \; \alpha &gt; 0, \; \beta &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-fdafe5d6e0d49974103dda67a8a4df29.png?v=0" title="P(x) = 1 - e^{ -(\frac{ x }{ \alpha })^\beta }" alt="P(x) = 1 - e^{ -(\frac{ x }{ \alpha })^\beta }" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-2f9380efad44358a1e9ac6424ce996df.png?v=0" title=" \text{ln}(x) = \text{ln}(\alpha) + \frac{1}{\beta} \text{ln}( - \text{ln}(1-p) ) " alt=" \text{ln}(x) = \text{ln}(\alpha) + \frac{1}{\beta} \text{ln}( - \text{ln}(1-p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>3-Parameter Weibull</b>
+</td>
+<td> scale: <img src="../images/Algorithm_IDD/math-7b7f9dbfea05c83784f8b85149852f08.png?v=0" title="\alpha" alt="\alpha" class="tex"/> <br /> shape: <img src="../images/Algorithm_IDD/math-b0603860fcffe94e5b8eec59ed813421.png?v=0" title="\beta" alt="\beta" class="tex"/> <br /> threshold: <img src="../images/Algorithm_IDD/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-fc290e1e70c261f1e7915ab0cac564d6.png?v=0" title="f(x) = \frac{\beta}{\alpha} \left(\frac{ x - \lambda }{ \alpha }\right)^{\beta - 1} e^{ -\left(\frac{ x - \lambda }{ \alpha }\right)^\beta }, " alt="f(x) = \frac{\beta}{\alpha} \left(\frac{ x - \lambda }{ \alpha }\right)^{\beta - 1} e^{ -\left(\frac{ x - \lambda }{ \alpha }\right)^\beta }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-6b2b0275a33ef89c0bf76e1a52fac12f.png?v=0" title="x &gt; \lambda, \; \alpha &gt; 0, \; \beta &gt; 0" alt="x &gt; \lambda, \; \alpha &gt; 0, \; \beta &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-660a67edd4191e7b1015e5f6a664e613.png?v=0" title="P(x) = 1 - e^{ -\left(\frac{ x - \lambda }{ \alpha }\right)^\beta }" alt="P(x) = 1 - e^{ -\left(\frac{ x - \lambda }{ \alpha }\right)^\beta }" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-e6dd56c24522b2ccf1cd17b98b78c762.png?v=0" title=" \text{ln}(x - \lambda) = \text{ln}(\alpha) + \frac{1}{\beta} \text{ln}( - \text{ln}(1-p) ) " alt=" \text{ln}(x - \lambda) = \text{ln}(\alpha) + \frac{1}{\beta} \text{ln}( - \text{ln}(1-p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Largest Extreme Value</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-7b7f9dbfea05c83784f8b85149852f08.png?v=0" title="\alpha" alt="\alpha" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-b0603860fcffe94e5b8eec59ed813421.png?v=0" title="\beta" alt="\beta" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-bc8cc86e92bc2c8db8812fe7e08dcf56.png?v=0" title="f(x) =  \frac{1}{\beta } e^{- \frac{x- \alpha}{\beta}} e^{ - e^{ -\frac{x- \alpha}{\beta} } }, " alt="f(x) =  \frac{1}{\beta } e^{- \frac{x- \alpha}{\beta}} e^{ - e^{ -\frac{x- \alpha}{\beta} } }, " class="tex"/>
+<p><img src="../images/Algorithm_IDD/math-959608edfbfa8f188b3603c664aecb17.png?v=0" title="\beta &gt; 0" alt="\beta &gt; 0" class="tex"/>
+</p>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-c6511bc8f3ff0fecd98ef2a8aa3a703d.png?v=0" title="P(x) = e^{-e^{-\frac{x-\alpha}{\beta}}}" alt="P(x) = e^{-e^{-\frac{x-\alpha}{\beta}}}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-a669e7fe085ed08dffa4a964621f75b2.png?v=0" title=" x = \alpha - \beta \text{ln}( - \text{ln}(p) ) " alt=" x = \alpha - \beta \text{ln}( - \text{ln}(p) ) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Logistic</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-89865729c7d780680d4adef0c01e71a4.png?v=0" title="f(x) =  \frac{e^{\frac{x- \mu}{\sigma}}}{\sigma(1+e^{\frac{x- \mu}{\sigma}})^2 },\sigma &gt; 0" alt="f(x) =  \frac{e^{\frac{x- \mu}{\sigma}}}{\sigma(1+e^{\frac{x- \mu}{\sigma}})^2 },\sigma &gt; 0" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-c6bb3dc6debfeaa99b4314e06a8b24f4.png?v=0" title="P(x) =  \frac{1}{1+e^{-\frac{x- \mu}{\sigma}}} " alt="P(x) =  \frac{1}{1+e^{-\frac{x- \mu}{\sigma}}} " class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-c437ff773fba50e00e33e6f22c83a707.png?v=0" title="x =\mu+  \sigma\text{ln}(\frac{p}{1-p}) " alt="x =\mu+  \sigma\text{ln}(\frac{p}{1-p}) " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Loglogistic</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-9b0a3b30d5c4f3f4269584fc03851e1f.png?v=0" title="\begin{array}{l}f(x) =  \frac{e^{\frac{\text{ln}(x)- \mu}{\sigma}}}{x\sigma(1+e^{\frac{\text{ln}(x)- \mu}{\sigma}})^2 } , \\ x&gt;0, \sigma &gt; 0\end{array}" alt="\begin{array}{l}f(x) =  \frac{e^{\frac{\text{ln}(x)- \mu}{\sigma}}}{x\sigma(1+e^{\frac{\text{ln}(x)- \mu}{\sigma}})^2 } , \\ x&gt;0, \sigma &gt; 0\end{array}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-b0f7e273ee5fedfd0edd81cabde12954.png?v=0" title="P(x) =  \frac{1}{1+e^{-\frac{\text{ln}(x)- \mu}{\sigma}}} " alt="P(x) =  \frac{1}{1+e^{-\frac{\text{ln}(x)- \mu}{\sigma}}} " class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-0c8c6ff2ecc5df5a07607b43cbc7972a.png?v=0" title="x =e^{\mu+  \sigma\text{ln}(\frac{p}{1-p})} " alt="x =e^{\mu+  \sigma\text{ln}(\frac{p}{1-p})} " class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Folded Normal</b>
+</td>
+<td> location: <img src="../images/Algorithm_IDD/math-c9faf6ead2cd2c2187bd943488de1d0a.png?v=0" title="\mu" alt="\mu" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-ccf83d2a949d0b7113dd997f7c491bef.png?v=0" title="\begin{array}{l}f(x) = \frac{1}{ \sqrt{ 2 \pi } \sigma} e^{ - \frac{(x - \mu)^2}{ 2 \sigma^2 } } \\ + \frac{1}{ \sqrt{ 2 \pi } \sigma} e^{ - \frac{(x + \mu)^2}{ 2 \sigma^2 } }, x \geqslant 0, \; \sigma &gt; 0\end{array}" alt="\begin{array}{l}f(x) = \frac{1}{ \sqrt{ 2 \pi } \sigma} e^{ - \frac{(x - \mu)^2}{ 2 \sigma^2 } } \\ + \frac{1}{ \sqrt{ 2 \pi } \sigma} e^{ - \frac{(x + \mu)^2}{ 2 \sigma^2 } }, x \geqslant 0, \; \sigma &gt; 0\end{array}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-bf9697785c17541da8af7dfcfb90ef41.png?v=0" title="\begin{matrix}P(x) =  \Phi \left( \frac{x + \mu}{\sigma} \right) \\ - \Phi \left( \frac{\mu - x}{\sigma} \right)\end{matrix}" alt="\begin{matrix}P(x) =  \Phi \left( \frac{x + \mu}{\sigma} \right) \\ - \Phi \left( \frac{\mu - x}{\sigma} \right)\end{matrix}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-692b9c4bbd05936bbc0e2d7187fc85d7.png?v=0" title="x = \text{foldnorminv}(p, \, \mu, \, \sigma)" alt="x = \text{foldnorminv}(p, \, \mu, \, \sigma)" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Rayleigh</b>
+</td>
+<td> scale: <img src="../images/Algorithm_IDD/math-a2ab7d71a0f07f388ff823293c147d21.png?v=0" title="\sigma" alt="\sigma" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-149387e397f4d1b13024596012b90bc7.png?v=0" title="f(x) =  \frac{x}{\sigma^2}e^{-\frac{x^2}{2\sigma^2}},x\geqslant0, \sigma &gt; 0" alt="f(x) =  \frac{x}{\sigma^2}e^{-\frac{x^2}{2\sigma^2}},x\geqslant0, \sigma &gt; 0" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-903b2707ecaff9e0bbfd4d1f2a3d0cbf.png?v=0" title="P(x) =  1-e^{-\frac{x^2}{2\sigma^2}} " alt="P(x) =  1-e^{-\frac{x^2}{2\sigma^2}} " class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-8a88f01613ecc5ddad47ac2630b59e1f.png?v=0" title="x=\sqrt{2}\sigma \sqrt{-\text{ln}(1-p)}" alt="x=\sqrt{2}\sigma \sqrt{-\text{ln}(1-p)}" class="tex"/>
+</td></tr>
+<tr>
+<td style="background-color: #F0F0F0"> <b>Gaussian Mixture</b>
+</td>
+<td> Number of components: <img src="../images/Algorithm_IDD/math-b2f5ff47436671b6e533d8dc3614845d.png?v=0" title="g" alt="g" class="tex"/>, For <i>i</i>th component, <br /> weight: <img src="../images/Algorithm_IDD/math-aa38f107289d4d73d516190581397349.png?v=0" title="w_i" alt="w_i" class="tex"/> <br /> location: <img src="../images/Algorithm_IDD/math-262d5ec61d4727236470a56c2e8433ef.png?v=0" title="\mu_i" alt="\mu_i" class="tex"/> <br /> scale: <img src="../images/Algorithm_IDD/math-65445646e7a531a2185d03b58b4d60e1.png?v=0" title="\sigma_i" alt="\sigma_i" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-93b360aa4d76621eafa5cc7ad8cf36f8.png?v=0" title="\begin{array}{l}f(x) = \sum_{i=1}^g \frac{w_i}{ \sqrt{2 \pi} \sigma_i } e^{ -\frac{( x - \mu_i )^2}{2 \sigma_i^2} }, \\ 0 &lt; w_i &lt; 1, \; \sigma &gt; 0\end{array}" alt="\begin{array}{l}f(x) = \sum_{i=1}^g \frac{w_i}{ \sqrt{2 \pi} \sigma_i } e^{ -\frac{( x - \mu_i )^2}{2 \sigma_i^2} }, \\ 0 &lt; w_i &lt; 1, \; \sigma &gt; 0\end{array}" class="tex"/>
+</td>
+<td> <img src="../images/Algorithm_IDD/math-458c400b6fb5fa9345c12b2189d2010e.png?v=0" title="P(x) = \sum_{i=1}^g w_i \Phi \left( \frac{x - \mu_i}{\sigma_i} \right)" alt="P(x) = \sum_{i=1}^g w_i \Phi \left( \frac{x - \mu_i}{\sigma_i} \right)" class="tex"/>
+</td>
+<td> No explicit solution. It can be calculated by interpolation.
+</td></tr></table>
+<p>where &#934; is the CDF function for the standard normal distribution, and &#947; is the lower incomplete gamma function.
+</p><p>Note:
+</p>
+<ul><li> <b>Box-Cox Transformation</b>, <b>Johnson Transformation</b> and <b>Yeo-Johnson Transformation</b> distributions transform data first, and then use <b>Normal</b> distribution to fit. For more, see <a href="../../App/App/Algorithm_DT.html" title="App:Algorithm DT">Algorithm for Data Transformation</a>.</li>
+<li> The scale parameter in <b>Normal</b> and <b>Lognormal</b> distributions is corrected to the unbiased standard deviation, i.e. divided by <i>n</i>-1 instead of <i>n</i>, where <i>n</i> is the number of points.</li>
+<li> The threshold parameter &#955; in <b>2-Parameter Exponential</b> distribution is estimated as below:</li></ul>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-b4153b3897a0c70c1f85da8a051f7326.png?v=0" title="\lambda = X_{(1)} - \frac{\bar{X} - X_{(1)}}{n-1}" alt="\lambda = X_{(1)} - \frac{\bar{X} - X_{(1)}}{n-1}" class="tex"/> ,
+</p>
+</div>
+<dl><dd> where <i>X</i><sub>(1)</sub> is the minimum of <i>X</i>, and <span style="text-decoration:overline;">X</span> is the mean of X.</dd></dl>
+<h1><a name="Goodness_of_Fit"></a><span class="mw-headline">Goodness of Fit</span></h1>
+<h2><a name="Anderson-Darling_Test"></a><span class="mw-headline">Anderson-Darling Test</span></h2>
+<p>The hypotheses for Anderson-Darling test are:<br />
+</p>
+<dl><dd> H<sub>0</sub>: Input data follows the distribution.</dd>
+<dd> H<sub>1</sub>: Input data doesn't follow the distribution.</dd></dl>
+<ul><li> Anderson-Darling Statistic</li></ul>
+<dl><dd> Input data is sorted first, and use CDF function to calculate the probability Z<sub>i</sub> for each point. Anderson-Darling statistic A<sup>2</sup> is calculated as below:</dd></dl>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-357f698fe24462674573818b846d3954.png?v=0" title=" A^2 = -n -(1/n) \sum_{i=1}^n \left[ (2i-1) \text{ln} (Z_i) + ( 2n+1-i ) \text{ln} (1 - Z_i) \right]" alt=" A^2 = -n -(1/n) \sum_{i=1}^n \left[ (2i-1) \text{ln} (Z_i) + ( 2n+1-i ) \text{ln} (1 - Z_i) \right]" class="tex"/>
+</p>
+</div>
+<dl><dd> A<sup>2</sup> value can be used to assess the fit. The smaller the value is, the better the model will be.</dd></dl>
+<ul><li> P-value for Anderson-Darling Test</li></ul>
+<dl><dd> P-value is calculated by interpolating the statistic A<sup>2</sup> on tables in the reference [<a href="#Ref1">1</a>] and [<a href="#Ref2">2</a>]. If P-value is less than the critical value, e.g. 0.05, H<sub>0</sub> will be rejected.</dd></dl>
+<dl><dd> For some distributions, no reference is available, their P-values are missing. e.g. <b>3-Parameter Lognormal</b> distribution.</dd></dl>
+<dl><dd> For <b>Folded Normal</b>, <b>Gaussian Mixture</b> and <b>3-Parameter Weibull</b> with fixed shape distributions, P-value is calculated by the Monte Carlo method. 1000 samples are drawn to produce the statistic for the null hypothesized distribution with estimated parameters. The P-value is the proportion of samples whose A<sup>2</sup> statistic values are greater than or equal to input data's [<a href="#Ref4">4</a>]. i.e.</dd></dl>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-5aafe4961d846b5d8b54682361add61a.png?v=0" title="\text{P-value} = \frac{b + 1}{N + 1}" alt="\text{P-value} = \frac{b + 1}{N + 1}" class="tex"/> ,
+</p>
+</div>
+<dl><dd> where <i>b</i> is the number of statistic values that are greater than or equal to input data's, and <i>N</i> is the number of samples, here <i>N</i>=1000.</dd></dl>
+<h2><a name="BIC"></a><span class="mw-headline">BIC</span></h2>
+<p>In <b>Gaussian Mixture</b> distribution, BIC value is calculated as follows:
+</p>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-afa84169bdc71bd535d2358c3d17d352.png?v=0" title="\text{BIC} = -2 \, \ell + k \text{ln}(n)" alt="\text{BIC} = -2 \, \ell + k \text{ln}(n)" class="tex"/> ,
+</p>
+</div>
+<p>where <i>&#x2113;</i> is the logarithm of the likelihood in the estimation, <i>k</i> is the number of parameters, and <i>n</i> is the number of points.
+</p><p><br />
+The smaller the BIC value is, the better the model will be.
+</p>
+<h2><a name="Likelihood-ratio_Test.28LRT.29"></a><span class="mw-headline">Likelihood-ratio Test(LRT)</span></h2>
+<p>Likelihood-ratio test(LRT) is used to compare two models: a simple model A and a complex model B, and model A is the subset of model B, e.g. model A is Weibull, and model B is 3-Parameter Weibull. It can determine whether the complex model B is significantly better than the simple model A. In this app, likelihood-ratio test supports to compare <b>Lognormal</b> vs <b>3-Parameter Lognormal</b>, <b>Exponential</b> vs <b>2-Parameter Exponential</b>, and <b>Weibull</b> vs <b>3-Parameter Weibull</b>.
+</p><p>The hypotheses for the likelihood-ratio test are:<br />
+</p>
+<dl><dd> H<sub>0</sub>: The complex model B is the same as the simple model A.</dd>
+<dd> H<sub>1</sub>: The complex model B is significantly better than the simple model A.</dd></dl>
+<p>If P-value for the likelihood-ratio test is less than the critical value, e.g. 0.05, reject H<sub>0</sub>, and it indicates that the complex model B is significantly better than the simple model A
+</p>
+<ul><li> Likelihood-ratio test statistic</li></ul>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-39a8835235a9ef3c3a4c76b7821c0ae8.png?v=0" title="\text{LRT} = -2 \, ( \ell(A) - \ell(B) )" alt="\text{LRT} = -2 \, ( \ell(A) - \ell(B) )" class="tex"/> ,
+</p>
+</div>
+<dl><dd> where <i>&#x2113;</i>(<i>A</i>) and <i>&#x2113;</i>(<i>B</i>) are log likelihoods for the model A and the model B respectively.</dd></dl>
+<ul><li> Likelihood-ratio test P-value</li></ul>
+<p>Likelihood-ratio test statistic follows Chi-squared distribution with the degrees of freedom df, and df is the difference of number of parameters in the model B and the model A. Thus likelihood-ratio test P-value can be calculated as follows:
+</p>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-7c8e72f93154bb73f952701705522890.png?v=0" title="\text{P-val} = \text{chi2cdf}( LRT, 1, 1)" alt="\text{P-val} = \text{chi2cdf}( LRT, 1, 1)" class="tex"/> ,
+</p>
+</div>
+<dl><dd> where <b>chi2cdf</b> is the upper tail (The third parameter 1 means the upper tail) CDF function for the &#x1d712;<sup>2</sup> distribution.</dd></dl>
+<h1><a name="Estimate_Parameter.27s_Standard_Error"></a><span class="mw-headline">Estimate Parameter's Standard Error</span></h1>
+<p>Once parameters are estimated by <b>MLE</b> method, the <b>Fisher information matrix</b> (FIM) can be calculated by <b>Hessian</b> matrix:
+</p>
+<div align="center"><img src="../images/Algorithm_IDD/math-6570a497242843315319018ce522ae59.png?v=0" title=" [\mathcal{I}(\theta)]_{i,j} = - E\left[ \frac{\partial^2}{\partial \theta_i \, \partial \theta_j} \text{ln}\left( f(Y; \theta) \right) \, \Big| \, \theta \right] " alt=" [\mathcal{I}(\theta)]_{i,j} = - E\left[ \frac{\partial^2}{\partial \theta_i \, \partial \theta_j} \text{ln}\left( f(Y; \theta) \right) \, \Big| \, \theta \right] " class="tex"/></div>
+<p><b>Covariance</b> matrix of parameters can be expressed as:<br />
+</p>
+<div align="center"><img src="../images/Algorithm_IDD/math-3cfd72a2f45e25e64a7ecf4bced12d4c.png?v=0" title="C = (n \mathcal{I} )^{-1}" alt="C = (n \mathcal{I} )^{-1}" class="tex"/></div>
+<p>where <i>n</i> is the number of points.
+</p><p>Parameter's standard error is the square root of the diagonal elements in the covariance matrix <i>C</i>.
+</p>
+<h1><a name="Probability_Plot"></a><span class="mw-headline">Probability Plot</span></h1>
+<p>Points in the probability plot are sorted in ascending order, for the <i>i</i>th point, its probability is calculated by the median rank (Benard's method):
+</p>
+<div align="center"><img src="../images/Algorithm_IDD/math-0a8b5adcd69409f0e96c35ce4ffec01f.png?v=0" title="P = \frac{i - 0.3}{n + 0.4}" alt="P = \frac{i - 0.3}{n + 0.4}" class="tex"/></div>
+<p><br />
+The middle line is the expected percentiles for given probabilities in terms of <a href="#Distributions"> the inverse cumulative distribution function</a> using parameters from the <b>MLE</b> method.
+</p><p>To estimate confidence limits of percentiles, variance of percentiles is calculated by propagation of error:
+</p>
+<div align="center"><img src="../images/Algorithm_IDD/math-aa57591709c3821a7a029fcd7548c46d.png?v=0" title="\sigma^2_{x_p} = \left( \frac{\partial x_p}{\partial \theta} \right)^T C \left( \frac{\partial x_p}{\partial \theta} \right)" alt="\sigma^2_{x_p} = \left( \frac{\partial x_p}{\partial \theta} \right)^T C \left( \frac{\partial x_p}{\partial \theta} \right)" class="tex"/></div>
+<p>where <i>x<sub>p</sub></i> is the percentile for a given probability <i>p</i>, and (.)<sup><i>T</i></sup> denotes the transpose of a vector.
+</p>
+<ul><li> Confidence limits of percentiles can be calculated as below:</li></ul>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-9e85b4b0dd8a64e3f6e9ff42f5196c09.png?v=0" title="x_{pL} = x_p - Z_{\alpha} \sigma_{x_p}" alt="x_{pL} = x_p - Z_{\alpha} \sigma_{x_p}" class="tex"/>
+</p><p><img src="../images/Algorithm_IDD/math-19271d42d85941c01b491a2b0d6e4f60.png?v=0" title="x_{pU} = x_p + Z_{\alpha} \sigma_{x_p}" alt="x_{pU} = x_p + Z_{\alpha} \sigma_{x_p}" class="tex"/>
+</p>
+</div>
+<p>where <img src="../images/Algorithm_IDD/math-2bbe5c188bbbcef2af97b3989c60ec92.png?v=0" title="Z_{\alpha} = \Phi^{-1}(1- \alpha / 2)" alt="Z_{\alpha} = \Phi^{-1}(1- \alpha / 2)" class="tex"/> .
+</p>
+<ul><li> For some positive random variables, e.g. in <b>Lognormal</b>, <b>Gamma</b>, <b>Exponential</b>, <b>Weibull</b>, <b>Loglogistic</b>, <b>Folded Normal</b> and <b>Rayleigh</b> distributions, confidence limits are:</li></ul>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-22018614b3fe041b7946fea48b62d87b.png?v=0" title="x_{pL} = e^{ \text{ln}(x_p) - Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" alt="x_{pL} = e^{ \text{ln}(x_p) - Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" class="tex"/>
+</p><p><img src="../images/Algorithm_IDD/math-4a37f192aa56efc83eeed215104ef9d9.png?v=0" title="x_{pU} = e^{ \text{ln}(x_p) + Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" alt="x_{pU} = e^{ \text{ln}(x_p) + Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" class="tex"/>
+</p>
+</div>
+<ul><li> For some random variables with a threshold parameter &#955;, e.g. in <b>3-Parameter Lognormal</b>, <b>2-Parameter Exponential</b> and <b>3-Parameter Weibull</b> distributions, confidence limits are:</li></ul>
+<dl><dd> If <img src="../images/Algorithm_IDD/math-088aa33c190e59659b39778bd19b5986.png?v=0" title="\lambda &lt; 0" alt="\lambda &lt; 0" class="tex"/> ,</dd></dl>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-9e85b4b0dd8a64e3f6e9ff42f5196c09.png?v=0" title="x_{pL} = x_p - Z_{\alpha} \sigma_{x_p}" alt="x_{pL} = x_p - Z_{\alpha} \sigma_{x_p}" class="tex"/>
+</p><p><img src="../images/Algorithm_IDD/math-19271d42d85941c01b491a2b0d6e4f60.png?v=0" title="x_{pU} = x_p + Z_{\alpha} \sigma_{x_p}" alt="x_{pU} = x_p + Z_{\alpha} \sigma_{x_p}" class="tex"/>
+</p>
+</div>
+<dl><dd> If <img src="../images/Algorithm_IDD/math-848493156d199c8b35106431b2781e8a.png?v=0" title="\lambda \ge 0" alt="\lambda \ge 0" class="tex"/> ,</dd></dl>
+<div align="center">
+<p><img src="../images/Algorithm_IDD/math-22018614b3fe041b7946fea48b62d87b.png?v=0" title="x_{pL} = e^{ \text{ln}(x_p) - Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" alt="x_{pL} = e^{ \text{ln}(x_p) - Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" class="tex"/>
+</p><p><img src="../images/Algorithm_IDD/math-4a37f192aa56efc83eeed215104ef9d9.png?v=0" title="x_{pU} = e^{ \text{ln}(x_p) + Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" alt="x_{pU} = e^{ \text{ln}(x_p) + Z_{\alpha} \frac{\sigma_{x_p}}{x_p} }" class="tex"/>
+</p>
+</div>
+<dl><dd> If <img src="../images/Algorithm_IDD/math-547e6473fd72f3f2ac9704a7e1b253a5.png?v=0" title=" x_{pL} &lt; \lambda " alt=" x_{pL} &lt; \lambda " class="tex"/> , <i>x<sub>pL</sub></i> value will be corrected to &#955; .</dd></dl>
+<ul><li> Q-Q plot is shown for <b>Gaussian Mixture</b> distribution. Its expected percentiles are calculated by interpolation.</li></ul>
+<h1><a name="Reference"></a><span class="mw-headline">Reference</span></h1>
+<ol><li> <span id="Ref1"><span> R.A. Lockhart and M.A. Stephens (1994). "Estimation and Tests of Fit for the Three-parameter Weibull Distribution". <i>Journal of the Royal Statistical Society</i>, Vol. 56, No. 3, pp. 491-500.</li>
+<li> <span id="Ref2"><span> Ralph B. D'Agostino, Michael A. Stephens (Eds.) (1986). <i>Goodness-of-Fit Techniques</i>. New York: Marcel Dekker</li>
+<li> Hartigan J A (1975). <i>Clustering Algorithms</i>. Wiley</li>
+<li> <span id="Ref4"><span> W. Stute, W. G. Manteiga, and M. P. Quindimil (1993). “Bootstrap based goodness-of-fit-tests”. <i>Metrika</i>, 40.1: pp. 243-256.</span></li></ol>
+<p></span>
+</span>
+</span>
+</span>
+</span>
+</p>
+
+
+
+
+

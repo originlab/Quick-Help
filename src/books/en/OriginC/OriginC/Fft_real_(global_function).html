@@ -1,0 +1,102 @@
+<h1 class="firstHeading">2.1.22.2.1.39 fft_real</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Performs nFFT-point discrete Fourier transform or inverse Fourier transform.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> fft_real<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nFFT, vector <span style="color: #000040;">&amp;</span> vSig, FFT_SIGN iSign <span style="color: #000080;">=</span> FFT_FORWARD <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> nFFT</dt>
+<dd>[input]number of points to do Fourier transform.</dd>
+<dt> vSig</dt>
+<dd>[modify]For forward transform, it contains real signal to be transformed.</dd>
+<dd>For backward transform, it contains complex signal in Hermitian form.</dd>
+<dd>For forward transform, it contains the result of DFT in Hermitian form.</dd>
+<dd>For backward transform, it contains the result of IDFT.</dd>
+<dt> iSign</dt>
+<dd>[input] the transformation to carry out</dd>
+<dd>  = FFT_FORWARD: FFT (by default) </dd>
+<dd>  = FFT_BACKWARD: IFFT.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns OE_NOERROR for success or error codes for failure.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>Prior to compilation, load fft_utils.c to the workspace by executing the following LabTalk command:
+</p>
+<pre class="lt" style="font-family:monospace;">Run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Originlab\fft_utils.c&quot;</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>To retain fft_utils.c in the workspace for successive sessions, drag and drop the file from the Temporary folder to the System folder.
+</p><p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//This example assumes a worksheet is active with four columns, where</span>
+<span style="color: #008000;">//column 2 has the signal. Column 3 will be filled with the foward FFT result</span>
+<span style="color: #008000;">//and column 4 will have the result of the IFFT. Column 4 should then have</span>
+<span style="color: #008000;">//the same numbers as column 2.</span>
+ 
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>fft_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> 
+<span style="color: #0000ff;">void</span> fft_real_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsData<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsFFT<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+    Dataset dsIFFT<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// If all datasets are valid, then proceed</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> dsData <span style="color: #000040;">&amp;&amp;</span> dsFFT <span style="color: #000040;">&amp;&amp;</span> dsIFFT <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        vector vec;
+        vec <span style="color: #000080;">=</span> dsData;
+        <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vec.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #008000;">// Perform forward FFT with exact size of signal</span>
+        <span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> fft_real<span style="color: #000000;">&#40;</span>nSize, vec<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> iRet <span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Forward FFT returned error:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet <span style="color: #000000;">&#41;</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">&#125;</span>
+        <span style="color: #008000;">// Store forward FFT result</span>
+        dsFFT <span style="color: #000080;">=</span> vec;
+        <span style="color: #008000;">// Perform backward FFT from the forward FFT result</span>
+        iRet <span style="color: #000080;">=</span> fft_real<span style="color: #000000;">&#40;</span>nSize, vec, FFT_BACKWARD<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> iRet <span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Backward FFT returned error:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet <span style="color: #000000;">&#41;</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">&#125;</span>
+        <span style="color: #008000;">// Store the backward FFT result</span>
+        dsIFFT <span style="color: #000080;">=</span> vec;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>Performs nFFT-point discrete Fourier transform (real-&gt;complex) or inverse Fourier transform (complex-&gt;real).
+</p><p>vSig will be padded with zeros if it has less than nFFT points and truncated if it has more.
+</p><p>Padding with zeroes, or zero-filling, results in an FFT spectrum with higher resolution. This works best
+</p><p>when the original signal ends in value at, or close to, zero.
+</p><p>For forward FT, the output is in Hermitian form;
+</p><p>For backward FT, the input sequence is in Hermitian form.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Fft_complex_(global_function).html" title="OriginC:Fft complex (global function)">fft_complex</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>fft_utils.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

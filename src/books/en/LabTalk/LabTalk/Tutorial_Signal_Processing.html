@@ -1,0 +1,183 @@
+<h1 class="firstHeading">5.12 Signal Processing with LabTalk</h1><p class='urlname' style='display: none'>Tutorial-Signal-Processing</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#What_You_Will_Learn"><span class="tocnumber">2</span> <span class="toctext">What You Will Learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Create_a_result_sheet"><span class="tocnumber">3.1</span> <span class="toctext">Create a result sheet</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Searches_the_files_with_the_string"><span class="tocnumber">3.2</span> <span class="toctext">Searches the files with the string</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Perform_FFT_on_files_by_loop_script"><span class="tocnumber">3.3</span> <span class="toctext">Perform FFT on files by loop script</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Create_a_new_graph_by_result_sheet"><span class="tocnumber">3.4</span> <span class="toctext">Create a new graph by result sheet</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Linear_Fit"><span class="tocnumber">3.5</span> <span class="toctext">Linear Fit</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>Origin provides a collection of X-functions for signal processing, ranging from smoothing noisy data to Fourier Transform (FFT), Short-time FFT, Convolution and Correlation, FFT Filtering, and Wavelet analysis. In this tutorial, using an example shows how to perform 1D FFT on the data.
+</p>
+<h2><a name="What_You_Will_Learn"></a><span class="mw-headline">What You Will Learn</span></h2>
+<p>This tutorial will show you how to use Labtalk script to:
+</p>
+<ul><li>Import the specified files with a pre-defined filter</li>
+<li>Perform FFT (Fast Fourier Transform) on multiple files</li>
+<li>Loop all the files</li>
+<li>Save location of FFT peak to a summary sheet, and plot the peak locations as a function of variable from file name</li>
+<li>Performs a linear fit, and then return the value of slope and intercept</li></ul>
+<p><br />
+</p>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<h3><a name="Create_a_result_sheet"></a><span class="mw-headline">Create a result sheet</span></h3>
+<p>Run the script below to change the Project Explorer directory and open a new workbook using the <a class="external text" href="../../XFunction/X-Function/Pe_cd.html">pe_cd</a> and <a class="external text" href="../../XFunction/X-Function/Newbook.html">newbook</a> x-functions. Then define ranges for columns and assign long names and units.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Set Project Explorer folder to root</span>
+pe_cd <span style="color: #000080;">/</span>;
+<span style="color: #008000;">// Create a new book to hold result from FFT analysis,</span>
+<span style="color: #008000;">// and the short name of the new book will be stored to the string '''ResultBook'''</span>
+newbook result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ResultBook<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// Define ranges for columns 1 and 2 to save results later. </span>
+<span style="color: #008000;">// (Multiple range variables can be declared on the same line, separated by comma.)</span>
+range rx <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rp <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// Set long name and units for the columns 1 and 2</span>
+rx<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;X&quot;</span>;
+rx<span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;mm&quot;</span>;
+rp<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Frequency&quot;</span>;
+rp<span style="color: #000000;">&#91;</span>U<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;kHz&quot;</span>;</pre>
+<h3><a name="Searches_the_files_with_the_string"></a><span class="mw-headline">Searches the files with the string</span></h3>
+<p>Using a wildcard, searches for files in the path <i>&lt;Origin EXE Folder&gt;\Samples\Signal Processing\ </i> using the <a class="external text" href="../../XFunction/X-Function/FindFiles.html">findfiles</a> x-function. Count the files. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Point to where the data files are</span>
+string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\&quot;</span>;
+<span style="color: #008000;">// Find all files ''TR*.dat''</span>
+findfiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR*.dat&quot;</span>;
+<span style="color: #008000;">// Get the number of files. LF means Line feed.</span>
+int numFiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">&#40;</span>LF<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Perform_FFT_on_files_by_loop_script"></a><span class="mw-headline">Perform FFT on files by loop script</span></h3>
+<p><b>Perform FFT on one file</b>
+<br />
+After finding the <i>TR*.dat</i> files, you import them, perform FFT and save the location of FFT peak to a summary sheet. This example details steps for executing these actions on one data file.
+</p>
+<ol>
+<li>
+Get the file name and import data file using an import filter <i>TR Data Files.oif</i> that exists in data folder. The filter does some post processing of the data by creating frequency column and setting values etc. 
+<br />
+The x-function <a class="external text" href="../../XFunction/X-Function/Pe_mkdir.html">pe_mkdir</a> and <a class="external text" href="../../XFunction/X-Function/ImpFile.html">impFile</a> are used in this case.
+
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Declare ''ifile'' integer variable as the files index. </span>
+<span style="color: #008000;">// For the first file, here set this variable to 1</span>
+int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">// Create two string variables </span>
+string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>;	
+<span style="color: #008000;">// Get file name </span>
+filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span>ifile,LF<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// Parse out just file name without path and without extension</span>
+file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> filepath.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span>filepath.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">&#40;</span>\<span style="color: #000000;">&#41;</span>,\<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,.<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	
+<span style="color: #008000;">// Make a new Project Explorer subfolder and set it active</span>
+pe_mkdir file<span style="color: #000080;">$</span> cd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+	
+<span style="color: #008000;">// Add a new book for importing data file</span>
+newbook;
+<span style="color: #008000;">// Import file with pre-defined filter that exists in data folder.</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR Data Files.oif&quot;</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;</pre>
+<li>
+Perform <a class="external text" href="../../XFunction/X-Function/Fft1.html">FFT</a>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Perform FFT on the columns 2 and 3 of imported data by default in the dialog</span>
+fft1 <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;</pre>
+<li>
+Find the max peak location, then output the associated frequency value and parse the file name to the ResultBook.
+<br />
+Use <a href="../../LabTalk/LabTalk/Wks_(object).html" title="LabTalk:Wks (object)">wks.ncols</a> to get the number of columns in the worksheet, and use the <a href="../../LabTalk/LabTalk/Limit_(command).html" title="LabTalk:Limit (command)">limit</a> command to find limiting values for the dataset.
+ 
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Set FFT result sheet active - this should be sheet2 </span>
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// Add a new column in the activate worksheet</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// The new column is the last column in this sheet, </span>
+<span style="color: #008000;">// so the column index equals the number of columns in the worksheet</span>
+<span style="color: #008000;">// Declare a new integer variable ''nmag'' with the number of columns in the worksheet.</span>
+int nmag <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+<span style="color: #008000;">// Column 2 should contain complex data, so use that to compute magnitude and find peak location</span>
+<span style="color: #008000;">// Put the absolute value of the column 2 to the last column</span>
+wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> abs<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Find max peak location in last column using limit command</span>
+limit wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Save associated frequency value from column 1 to ResultBook sheet1 column 2 in the PE folder</span>
+<span style="color: #008000;">// limit.imax means corresponding index for maximum Y value. </span>
+rp<span style="color: #000000;">&#91;</span>ifile<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>limit.<span style="color: #000080;">imax</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+<span style="color: #008000;">// Delete the last column</span>
+delete wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span>;
+	
+<span style="color: #008000;">// Parse filename and get a string value ''aa''</span>
+string aa<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">'R'</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span>aa.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">'M'</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// Save ''aa'' value to ResultBook sheet1 column 1</span>
+rx<span style="color: #000000;">&#91;</span>ifile<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Set PE folder to previous level</span>
+pe_cd ..;</pre>
+</ol>
+<p><br />
+<b>Perform FFT on the multiple files</b>
+<br />
+To repeat actions on multiple files, you can use the <a href="../../LabTalk/LabTalk/For_(command).html" title="LabTalk:For (command)">for</a> loop command. This section shows the complete loop script for importing files, performing FFT and saving the location of FFT peak to a summary sheet.
+<br />
+<b>Note:</b> When you run the loop script in the Script Window, please highlight the entire script, then press the Enter key.
+</p>
+<pre class="lt" style="font-family:monospace;">for<span style="color: #000000;">&#40;</span>int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ifile <span style="color: #000080;">&lt;=</span> numFiles; ifile<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>;
+	filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span>ifile,LF<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> filepath.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span>filepath.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">&#40;</span>\<span style="color: #000000;">&#41;</span>,\<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,.<span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	pe_mkdir file<span style="color: #000080;">$</span> cd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+	newbook;
+	impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR Data Files.oif&quot;</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+	
+	fft1 <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	
+	page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	int nmag <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+	wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> abs<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	limit wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span>;
+	rp<span style="color: #000000;">&#91;</span>ifile<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>limit.<span style="color: #000080;">imax</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+	delete wcol<span style="color: #000000;">&#40;</span>nmag<span style="color: #000000;">&#41;</span>;
+	string aa<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">'R'</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span>aa.<span style="color: #000080;">gettoken</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">'M'</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">$</span>;
+	rx<span style="color: #000000;">&#91;</span>ifile<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>aa<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+	
+	pe_cd ..; 
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Create_a_new_graph_by_result_sheet"></a><span class="mw-headline">Create a new graph by result sheet</span></h3>
+<p>After performing FFT on all files, create a scatter plot with X values extracted from the file name and the Peak Frequency value, using the <a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a> x-function
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Make ResultBook active</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>ResultBook<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">// Plot XY data with column 1 and 2. </span>
+plotxy <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Linear_Fit"></a><span class="mw-headline">Linear Fit</span></h3>
+<p>Do a linear regression on the result data and report the slope and intercept.
+The <a href="../../LabTalk/LabTalk/LR_(commmand).html" title="LabTalk:LR (commmand)">LR</a> command is used in this case.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Performs a linear fit on ResultBook sheet1 column2</span>
+range bb <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>ResultBook<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;
+Lr bb;
+<span style="color: #008000;">//''lr.b'' is returned the value of slope</span>
+type <span style="color: #ff00ff;">&quot;Slope is $(lr.b)&quot;</span>; 
+<span style="color: #008000;">//''lr.a'' is returned the value of intercept </span>
+type <span style="color: #ff00ff;">&quot;Intercept is $(lr.a)&quot;</span>;</pre>
+
+
+
+
+
+

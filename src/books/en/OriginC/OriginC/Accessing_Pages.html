@@ -1,0 +1,97 @@
+<h1 class="firstHeading">3.8.3 Accessing Pages</h1><h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR1</p>
+<h2><a name="Loop_Over_All_Worksheets_and_Create_Graphs"></a><span class="mw-headline">Loop Over All Worksheets and Create Graphs</span></h2>
+<p>This example is capable of looping all the worksheets in the project, and then create a graph with the data in each worksheet. Also, all the graphs in the project are looping to print the information.
+</p><p>Before running the example, please execute the LabTalk script to import the required data.
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>n;  <span style="color: #008000;">// create a new project</span>
+win <span style="color: #000080;">-</span>c book1;  <span style="color: #008000;">// delete book1</span>
+for<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">12</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// import 12 files</span>
+<span style="color: #000000;">&#123;</span>
+	newbook;  <span style="color: #008000;">// create a new workbook</span>
+	strNum<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// file number</span>
+	if<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">&lt;</span><span style="color: #0000dd;">10</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// define file path according to file number</span>
+	<span style="color: #000000;">&#123;</span>
+		fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Step0&quot;</span> <span style="color: #000080;">+</span> strNum<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;.dat&quot;</span>;  <span style="color: #008000;">// file path</span>
+		impASC options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// import, turn sparkline off</span>
+	<span style="color: #000000;">&#125;</span>
+	else
+	<span style="color: #000000;">&#123;</span>
+		fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Step&quot;</span> <span style="color: #000080;">+</span> strNum<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;.dat&quot;</span>;  <span style="color: #008000;">// file path</span>
+		impASC options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// import, turn sparkline off</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> accessing_pages<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// loop all worksheet pages in project, add plots to graph</span>
+	foreach<span style="color: #000000;">&#40;</span>WorksheetPage wp in Project.<span style="color: #000000;">WorksheetPages</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>wp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iWks<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iWks<span style="color: #000080;">&lt;</span>wp.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iWks<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>  <span style="color: #008000;">// all worksheets in worksheet page</span>
+			<span style="color: #000000;">&#123;</span>
+				Worksheet wks <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>iWks<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get worksheet</span>
+				<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+				<span style="color: #000000;">&#123;</span>
+					GraphPage gp;
+					gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// create graph page</span>
+					gp.<span style="color: #000000;">SetName</span><span style="color: #000000;">&#40;</span>wp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">+</span><span style="color: #ff00ff;">&quot;_&quot;</span><span style="color: #000040;">+</span>wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// set graph page name</span>
+					GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get graph layer in graph page</span>
+					
+					<span style="color: #008000;">// loop over columns in worksheet and add plots to graph layer</span>
+					<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iCol<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; iCol<span style="color: #000080;">&lt;</span>wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iCol<span style="color: #000040;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>
+					<span style="color: #000000;">&#123;</span>
+						DataRange dr;
+						dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, iCol, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+						dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, iCol<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// data range</span>
+						gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// add line plot</span>
+					<span style="color: #000000;">&#125;</span>
+					gl.<span style="color: #000000;">GroupPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// group all plots in the graph layer</span>
+					gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// rescale graph layer</span>
+				<span style="color: #000000;">&#125;</span>
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// number of graph pages in project</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;There are&#160;%d graph pages in the project.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, Project.<span style="color: #000000;">GraphPages</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">// loop all graph pages in project and print their information</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iGP<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iGP<span style="color: #000080;">&lt;</span>Project.<span style="color: #000000;">GraphPages</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iGP<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		GraphPage gp <span style="color: #000080;">=</span> Project.<span style="color: #000000;">GraphPages</span><span style="color: #000000;">&#40;</span>iGP<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// get graph page</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>gp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Graph Page&#160;%d:<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iGP<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// index of graph page</span>
+			<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\t</span>Name is:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// name of graph page</span>
+			<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\t</span>Number of Graph Layers:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, gp.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// number of graph layers in graph page</span>
+			
+			<span style="color: #008000;">// loop all graph layers in graph page</span>
+			<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iGL<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; iGL<span style="color: #000080;">&lt;</span>gp.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; iGL<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				<span style="color: #008000;">// print the nubmer of plots in the iGLth graph layer</span>
+				<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\t</span>Number of Plots in Graph Layer&#160;%d is:&#160;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iGL, gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>iGL<span style="color: #000000;">&#41;</span>.<span style="color: #000000;">DataPlots</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Loop_Over_All_Notes_and_Print_Out_Contents"></a><span class="mw-headline">Loop Over All Notes and Print Out Contents</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This function prints out the paths and contents of all the notes of current project. </span>
+<span style="color: #008000;">// If a folder location is input as an argument, only notes of that folder is printed. </span>
+<span style="color: #0000ff;">void</span> accessing_notes<span style="color: #000000;">&#40;</span>string FdName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	foreach <span style="color: #000000;">&#40;</span> Note nte in Project.<span style="color: #000000;">Notes</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nte.<span style="color: #000000;">GetFolder</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetPath</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> FdName <span style="color: #000040;">||</span> FdName <span style="color: #000080;">==</span> <span style="color: #ff00ff;">&quot;&quot;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The location of&#160;%s:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nte.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, nte.<span style="color: #000000;">GetFolder</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetPath</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The content of&#160;%s:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span><span style="color: #666666; font-weight: bold;">\n</span>&quot;</span> ,nte.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, nte.<span style="color: #000000;">Text</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

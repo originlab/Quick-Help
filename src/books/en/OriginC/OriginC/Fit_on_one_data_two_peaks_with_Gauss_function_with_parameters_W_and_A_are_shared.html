@@ -1,0 +1,171 @@
+<h1 class="firstHeading">3.9.2.2.3 Fit on one data two peaks with Gauss function with parameters W and A are shared</h1><h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// before running this function, import \Samples\Curve Fitting\Multiple Peaks.dat to worksheet.</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span>	NLFit_example3<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string			strFDF <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">&#40;</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">&quot;FitFunc&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Gauss.FDF&quot;</span>;
+	Tree			trFF;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">&#40;</span> strFDF, <span style="color: #000040;">&amp;</span>trFF <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to load FDF function file&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">//////////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 1. Setting the fitting function and parameter sharing for multipeak fit  //</span>
+	<span style="color: #008000;">// The fit object:</span>
+	NLFit			fit;
+				
+	<span style="color: #008000;">// We will fit two peaks using the same fitting function. We call this &quot;one-replica&quot; case.</span>
+	<span style="color: #008000;">// This means that in addition to one full set of paramaters for the first peak, there are</span>
+	<span style="color: #008000;">// also additional paramaters, but only those within the &quot;replicas unit&quot;, for the second peak.</span>
+	<span style="color: #008000;">// Only the fitting functions that allow replicas in its .FDF file can be used for multipeak fitting.</span>
+	<span style="color: #008000;">// The [CONTROLS] section of the .FDF file must contain the following two entries to enable replicas:</span>
+	<span style="color: #008000;">//		Duplicate Offset=2</span>
+	<span style="color: #008000;">//		Duplicate Unit=3</span>
+	<span style="color: #008000;">// (the actual values may be different for different functions). The value Duplicate Offset is the 1-offset index</span>
+	<span style="color: #008000;">// of the first function paramater which belongs to the replicas unit. Duplicate Unit is the size of the replicas</span>
+	<span style="color: #008000;">// unit. The following must hold for all such functions:</span>
+	<span style="color: #008000;">//		total number of parameters for the function = Duplicate Offset - 1 + Duplicate Unit</span>
+	<span style="color: #008000;">// If the above two entries are not present, then the following two entries must be present to allow</span>
+	<span style="color: #008000;">// multipeak fitting:</span>
+	<span style="color: #008000;">//		Replicas Offset=2</span>
+	<span style="color: #008000;">//		Replicas Unit=3</span>
+	<span style="color: #008000;">// The meanings are the same as described above. If you create your own fitting function that you wish</span>
+	<span style="color: #008000;">// to use for multipeak fitting, you MUST use the latter entries.</span>
+
+	<span style="color: #008000;">//</span>
+	<span style="color: #008000;">// The multiplicity of the function is equal to the number of peaks.</span>
+	<span style="color: #0000ff;">int</span>				nFitFunctionMultiplicity <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+
+	
+	<span style="color: #008000;">// We want also to specify parameter sharing between peaks. This is accomplished via the following array:</span>
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span>		vnSharingGroups<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">// The size of this vector for specifying sharing between peaks must be equal to:</span>
+	<span style="color: #008000;">// 		replicas Offset - 1 + nFitFunctionMultiplicity * replicas unit</span>
+	<span style="color: #008000;">// In the case of the Gauss function with one replica (i.e. with two peaks) this is:</span>
+	<span style="color: #008000;">//		2 - 1 + 2 * 3 = 7</span>
+	<span style="color: #008000;">// This means that in the vector vnSharingGroups there is one element for each function parameter, including</span>
+	<span style="color: #008000;">// replicas, if any: first all the function parameters for the first peak, followed by only the replicated</span>
+	<span style="color: #008000;">// parameters (i.e. those in the replicas unit) for the additional peaks.</span>
+	<span style="color: #008000;">// The meaning of the array vnSharingGroups: for each function paramater including replicas the value</span>
+	<span style="color: #008000;">// says whether the argument is shared or not, and if shared, how it is shared.</span>
+	<span style="color: #008000;">//		If the value for a particular argument is 0 or less, the parameter is not shared between replicas.</span>
+	<span style="color: #008000;">//		If the value is greater than 0, it is shared with all the other paramaters whose value in this vector</span>
+	<span style="color: #008000;">//		is the same. This value is the so-called group index. The concrete value is not important, as long as</span>
+	<span style="color: #008000;">//		it is greater than 0.</span>
+	
+	<span style="color: #008000;">// We will share paramaters w and A (they are offset 2 and offset 3 in the parameter list for the Gauss function)</span>
+	<span style="color: #008000;">// respectively, that is: w from the first peak will be the same as w for the second peak, whereas</span>
+	<span style="color: #008000;">// A for the first peak will be the same as A for the second peak:</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;			<span style="color: #008000;">// y0 (&quot;baseline&quot;), not shared</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;			<span style="color: #008000;">// xc for the first peak, not shared</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;			<span style="color: #008000;">// w, shared (group index 1) with vnSharingGroups[5] </span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;			<span style="color: #008000;">// A, shared (group index 2) with vnSharingGroups[6]</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;			<span style="color: #008000;">// xc for the second peak (i.e. for the first replica), not shared</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;			<span style="color: #008000;">// w, shared (group index 1) with vnSharingGroups[2]</span>
+	vnSharingGroups<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;			<span style="color: #008000;">// A, shared (group index 2) with vnSharingGroups[3]</span>
+	<span style="color: #008000;">// Set the fitting function with the multiplicity of 2 (i.e. one replica).</span>
+	<span style="color: #0000ff;">int</span>				nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span>trFF, nFitFunctionMultiplicity, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, vnSharingGroups, vnSharingGroups.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nn <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed setting fitting function!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+
+	
+	
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 2. Setting data for fitting ////////////////////////////////////////////</span>
+	Worksheet 	wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No active worksheet to get input data&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	DataRange 	dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">4</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Y data from 5th column (Column E) has two peaks</span>
+	
+	DWORD 		dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+	<span style="color: #0000ff;">int</span> 		nNumData <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>dwRules<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> nNumData <span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nNumData <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> nNumData <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Not proper input data to do fit&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;	
+	<span style="color: #000000;">&#125;</span>
+	
+	DWORD			dwPlotID;
+	vector			vX, vY;
+	dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span> dwRules, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">&#41;</span>;
+	
+	NLSFONEDATA		stDep, stIndep;	
+	stIndep.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX;
+	stIndep.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	stDep.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY;
+	stDep.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">&amp;</span>stDep, <span style="color: #000040;">&amp;</span>stIndep<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nn <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;SetData() failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 3. Setting paramaters //////////////////////////////////////////////////</span>
+
+	<span style="color: #008000;">// Total number of fitting parameters is 5, which is 7 (see above) reduced by two due to two</span>
+	<span style="color: #008000;">// shared paramaters.</span>
+	<span style="color: #0000ff;">int</span>				nNumParams <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+	
+	vector			vParams<span style="color: #000000;">&#40;</span>nNumParams<span style="color: #000000;">&#41;</span>;			<span style="color: #008000;">// this vector should be initialized to the total number of paramaters</span>
+	<span style="color: #008000;">// This vector will be used both to set initial paramater values, and</span>
+	<span style="color: #008000;">// to receive the parameter values after fitting:</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.66</span>;				<span style="color: #008000;">// y0, not shared </span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.5</span>;				<span style="color: #008000;">// xc, not shared</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.3</span>;				<span style="color: #008000;">// w, shared (group 1)</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span>;				<span style="color: #008000;">// A, shared (group 2)</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">7.5</span>;				<span style="color: #008000;">// xc for the second peak, not shared</span>
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetParams</span><span style="color: #000000;">&#40;</span>nNumParams, vParams<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nn <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid paramater setting!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>	
+	
+	
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 4. Fitting /////////////////////////////////////////////////////////////</span>
+	<span style="color: #0000ff;">int</span>				nMaxNumIterations <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span>nMaxNumIterations<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fit(%ld) returned:&#160;%ld<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nMaxNumIterations, nn<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nn <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fit Done!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 5. Dump all the results and compare with what was expected /////////////</span>
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iparam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iparam <span style="color: #000080;">&lt;</span> nNumParams; iparam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;param index =&#160;%d   value obtained =&#160;%lf<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iparam <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, vParams<span style="color: #000000;">&#91;</span>iparam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">return</span>;
+	
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

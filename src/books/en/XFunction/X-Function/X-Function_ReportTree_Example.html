@@ -1,0 +1,166 @@
+<h1 class="firstHeading">3.3 X-Function ReportTree Example</h1><p><span class="OIndex" style="display:none">X-Function ReportTree</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#You_will_learn"><span class="tocnumber">2</span> <span class="toctext">You will learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Run_the_X-Function"><span class="tocnumber">4</span> <span class="toctext">Run the X-Function</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>In this example, we will show how to do statistics on the selected data in a worksheet, and generate a report in a new hierarchy sheet. The selected data can be one column, multiple columns, or any one subrange in the worksheet.
+</p><p>As the output data type is ReportTree, the dialog will have a Recalculate combo box, which can set the recalculate mode of the report sheet to "Manual", "Auto Update" or "None".
+</p>
+<h2><a name="You_will_learn"></a><span class="mw-headline">You will learn</span></h2>
+<ol><li> How to get data from the selected data range<span class="OIndex" style="display:none">Select Data Range</span>.</li>
+<li> How to do error handling in event1, before_execute and the main function.</li>
+<li> How to generate report tables in a hierarchy sheet with a recalculation lock<span class="OIndex" style="display:none">Hierarchy Sheet</span><span class="OIndex" style="display:none">Report Table</span><span class="OIndex" style="display:none">Report with Auto Update</span><span class="OIndex" style="display:none">Auto Update</span><span class="OIndex" style="display:none">Recalculation</span>.</li></ol>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<ol>
+<li>Hit F10 to open X-Function Builder, enter the X-Function name and variables, as in the following picture, and then click Save. <a  class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_savebutton.png?v=77100" width="23"  /></a>.<br /><a  class="image"><img alt="OCguide xf example StatsReport.png" src="../images/X-Function_ReportTree_Example/OCguide_xf_example_StatsReport.png?v=77130" width="516"  /></a></li>
+<li>Open this X-Function in Code Builder to edit the source code. First include the needed header file, as below.
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ReportTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// needed for ReportTable class</span></pre>
+</li>
+<li>Add error checking code into <i>StatsReport_event1</i> to check the input data range, like in the following.
+<pre class="oc" style="font-family:monospace;">DataRange drInput;
+drInput.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>trGetN.<span style="color: #000000;">iy</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// if input is invalid, show error message </span>
+<span style="color: #008000;">// on the bottom of dialog</span>
+<span style="color: #008000;">// and disable OK button</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>drInput.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> drInput.<span style="color: #000000;">GetNumRanges</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	strErrMsg <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Please select valid data for input&quot;</span>;
+	bOKEnable <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Add error checking code in <i>report_stats_before_execute</i>.
+<pre class="oc" style="font-family:monospace;">DataRange drInput;
+drInput.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>trGetN.<span style="color: #000000;">iy</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// if input is invalid, print out error message</span>
+<span style="color: #008000;">// and abort the X-Function execution</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>drInput.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> drInput.<span style="color: #000000;">GetNumRanges</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid Input Data&quot;</span><span style="color: #000000;">&#41;</span>;
+	nRet <span style="color: #000080;">=</span> XFEVT_ABORT;
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Add a static function to check the input range after the line <i>//put your own support static functions here</i>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">static</span>	<span style="color: #0000ff;">bool</span>	_check_input<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> Range<span style="color: #000040;">&amp;</span> iy<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> nRanges;
+
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>iy.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+	nRanges <span style="color: #000080;">=</span> iy.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+ 	                        DRR_NO_FACTORS<span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> nRanges <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+<li>Add any needed macros under the static function. The macros will be used in the X-Function main function.
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// ID can be any value, but must be unique.</span>
+<span style="color: #0000ff;">#define</span>	TABLE_ID_BEGIN		0x1000
+<span style="color: #0000ff;">#define</span>	ROW_ID_BEGIN		0x0001</pre>
+</li>
+<li>In the X-Function main function <i>StatsReport</i>, add the following code to get the data from the specified data range, do statistics, and generate a report sheet.
+<span class="OIndex" style="display:none">X-Function, Statistics</span>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>_check_input<span style="color: #000000;">&#40;</span>iy<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// if input is not valid, </span>
+	<span style="color: #008000;">// show error message and </span>
+	<span style="color: #008000;">// abort X-Function execution.</span>
+	XF_THROW<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid input data&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">&#125;</span>	
+
+<span style="color: #008000;">//create table to show statistics summary.</span>
+ReportTable rt <span style="color: #000080;">=</span> report.<span style="color: #000000;">CreateTable</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Summary&quot;</span>,_L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Summary&quot;</span><span style="color: #000000;">&#41;</span>, 
+                                    TABLE_ID_BEGIN<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//report table's column headers.</span>
+<span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsColLabels <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span>
+	<span style="color: #ff00ff;">&quot;N&quot;</span>,
+	<span style="color: #ff00ff;">&quot;Number of Missing&quot;</span>,
+	<span style="color: #ff00ff;">&quot;Mean&quot;</span>,
+	<span style="color: #ff00ff;">&quot;SD&quot;</span>,
+	<span style="color: #ff00ff;">&quot;SEM&quot;</span>,
+	<span style="color: #ff00ff;">&quot;Sum&quot;</span>,
+	<span style="color: #ff00ff;">&quot;Variance&quot;</span>
+<span style="color: #000000;">&#125;</span>;	
+<span style="color: #0000ff;">int</span> nRowID <span style="color: #000080;">=</span> ROW_ID_BEGIN;
+<span style="color: #0000ff;">int</span> nRanges <span style="color: #000080;">=</span> iy.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+                            DRR_NO_FACTORS<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nRange <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nRange <span style="color: #000080;">&lt;</span> nRanges; nRange<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// get the subrange - one column</span>
+	DataRange drOne;
+	iy.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">&#40;</span>drOne, DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+                       DRR_NO_FACTORS, nRange<span style="color: #000000;">&#41;</span>;		
+	
+	<span style="color: #008000;">// get range string, like [Book1]Sheet1!A</span>
+	string strDataLabel;
+	drOne.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">&#40;</span>strDataLabel<span style="color: #000000;">&#41;</span>;
+
+	vector vInput;
+	drOne.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vInput, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;		
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> vInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// print out warning message when column is empty</span>
+		<span style="color: #008000;">// and then go to the next column</span>
+		warning_msg_box<span style="color: #000000;">&#40;</span>
+                   strDataLabel <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;, empty column found.&quot;</span>, 
+                   <span style="color: #0000ff;">false</span>, <span style="color: #ff00ff;">'W'</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">continue</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">int</span> N, Missing;
+	<span style="color: #0000ff;">double</span> dMean, dSum, dVariance, dSD, dSE;
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_basic_summary_stats<span style="color: #000000;">&#40;</span>vInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, 
+			vInput,
+			<span style="color: #000040;">&amp;</span>N, <span style="color: #000040;">&amp;</span>dMean, <span style="color: #000040;">&amp;</span>dSD, <span style="color: #000040;">&amp;</span>dSE, <span style="color: #000040;">&amp;</span>dVariance, <span style="color: #000040;">&amp;</span>dSum,
+			<span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>Missing<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> STATS_NO_ERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #008000;">// print out warning message when</span>
+		<span style="color: #008000;">// statistics function failed.</span>
+		warning_msg_box<span style="color: #000000;">&#40;</span>
+                   strDataLabel <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;, statistics fails.&quot;</span>, 
+                   <span style="color: #0000ff;">false</span>, <span style="color: #ff00ff;">'W'</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">continue</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	vector vResults<span style="color: #000000;">&#40;</span>vsColLabels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> N;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> Missing;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dMean;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dSD;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dSE;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dSum;
+	vResults<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> dVariance;
+	
+	<span style="color: #008000;">//add new row to report table.</span>
+	string strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data&quot;</span> <span style="color: #000040;">+</span> nRange;
+	rt.<span style="color: #000000;">AddRow</span><span style="color: #000000;">&#40;</span>strName, vResults, strDataLabel, 
+	          vsColLabels, <span style="color: #0000ff;">NULL</span>, nRowID<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+</li>
+</ol>
+<h2><a name="Run_the_X-Function"></a><span class="mw-headline">Run the X-Function</span></h2>
+<p>Keep one Worksheet active with some data, highlight two columns, and type <i>StatsReport -d</i> in the Script Window to open the X-Function dialog. 
+</p><p><a  class="image"><img alt="Ocguide xfdialog StatsReport display.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_StatsReport_display.png?v=77131" width="308"  /></a>
+</p><p>Click OK , and a new report sheet will be generated.
+</p><p><a  class="image"><img alt="Ocguide xfdialog StatsReport result.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_StatsReport_result.png?v=77132" width="459"  /></a>
+</p>
+
+
+
+
+

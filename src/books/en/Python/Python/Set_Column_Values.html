@@ -1,0 +1,218 @@
+<h1 class="firstHeading">4.1 Set Column Values</h1><p><br />
+Python functions can be called from LabTalk, such as from Set Column Values dialog, Script Window, script associated with a button, or anywhere else in Origin with access to LabTalk scripting.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Using_Python_Functions_in_Column_Formula"><span class="tocnumber">1</span> <span class="toctext">Using Python Functions in Column Formula</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Example_1"><span class="tocnumber">1.1</span> <span class="toctext">Example 1</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Example_2"><span class="tocnumber">1.2</span> <span class="toctext">Example 2</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Example_3"><span class="tocnumber">1.3</span> <span class="toctext">Example 3</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Calling_Python_Functions_from_External_Files"><span class="tocnumber">2</span> <span class="toctext">Calling Python Functions from External Files</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Specifying_Input_and_Output_Types"><span class="tocnumber">2.1</span> <span class="toctext">Specifying Input and Output Types</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Returning_Multiple_Values_or_Arrays"><span class="tocnumber">2.2</span> <span class="toctext">Returning Multiple Values or Arrays</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Calling_Functions_from_File_Attached_to_Project"><span class="tocnumber">3</span> <span class="toctext">Calling Functions from File Attached to Project</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Using_Python_Functions_in_Column_Formula"></a><span class="mw-headline">Using Python Functions in Column Formula</span></h2>
+<p>Python functions can be defined and accessed in the <b>Set Values</b> dialog for both Worksheets and Matrixsheets. The Python function should be defined in the <b>Python Function</b> tab. The function can then be called from the formula edit box or from the <b>Before Formula Scripts</b> tab.
+</p><p>If your Python function requires other packages, they need to be installed prior to defining and accessing the function from the Set Values dialog.
+</p><p>With column formula, the function should be defined to return a list of floats or strings in order to have optimal performance. If the function is defined to return a single float or a string, then the function will be called for each row involved in the calculation.
+</p>
+<h4><a name="Example_1"></a><span class="mw-headline">Example 1</span></h4>
+<p>In this example, a Python function is used in column formula of column C to smooth noisy data from column B. The function is defined as:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> scipy <span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">signal</span>
+
+<span style="color: #ff7700;font-weight:bold;">def</span> smooth<span style="color: #000;">&#40;</span>y<span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder<span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;
+    F:Fii
+    &quot;&quot;&quot;</span>
+    y<span style="color: #000;">=</span><span style="color: #000;">signal</span>.<span style="color: #000;">savgol_filter</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span>y<span style="color: #000;">&#41;</span><span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder<span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> y</pre>
+<p>This function accepts a list of floats and two integers that specify the smoothing window and polynomial order, and returns a list of floats. The input and output types are specified using docstring as <b>F:Fii</b>. It is assumed here that NumPy and SciPy packages are already installed.
+</p><p>To access the function from the formula edit box, the function name needs to be pre-pended with <b>py...</b>:
+</p>
+<pre class="lt" style="font-family:monospace;">py.<span style="color: #000080;">smooth</span><span style="color: #000000;">&#40;</span>B, <span style="color: #0000dd;">51</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span></pre>
+<p>The image below shows the worksheet with the raw data and results, and the <b>Set Values</b> dialog with the <b>Python Function</b> tab.
+<a  class="image"><img alt="Scv python smooth.png" src="../images/Set_Column_Values/600px-Scv_python_smooth.png?v=53216" width="600"   /></a>
+</p>
+<h4><a name="Example_2"></a><span class="mw-headline">Example 2</span></h4>
+<p>In this example, a Python function is used to perform group statistics on data columns. The function accepts three columns of data and returns three columns with the results. The function therefore cannot be directly called from the Formula box. Instead, the <b>Before Formula Scripts</b> tab is used to call the function.
+</p><p>The function is defined as:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #ff7700;font-weight:bold;">def</span> groupstats<span style="color: #000;">&#40;</span>ID<span style="color: #000;">,</span> x<span style="color: #000;">,</span> y<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>ID<span style="color: #000;">&#41;</span> <span style="color: #000;">==</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>x<span style="color: #000;">&#41;</span> <span style="color: #ff7700;font-weight:bold;">and</span> <span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>ID<span style="color: #000;">&#41;</span><span style="color: #000;">==</span><span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>y<span style="color: #000;">&#41;</span>:
+        df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#123;</span><span style="color: #0a0;">'ID'</span>:ID<span style="color: #000;">,</span><span style="color: #0a0;">'x'</span>:x<span style="color: #000;">,</span><span style="color: #0a0;">'y'</span>:y<span style="color: #000;">&#125;</span><span style="color: #000;">&#41;</span>
+        df1 <span style="color: #000;">=</span> df.<span style="color: #000;">groupby</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'ID'</span><span style="color: #000;">&#41;</span>.<span style="color: #000;">mean</span><span style="color: #000;">&#40;</span><span style="color: #000;">&#41;</span>  
+        <span style="color: #ff7700;font-weight:bold;">return</span> df1.<span style="color: #000;">index</span><span style="color: #000;">,</span> df1.<span style="color: #000;">x</span><span style="color: #000;">,</span> df1.<span style="color: #000;">y</span>
+    <span style="color: #ff7700;font-weight:bold;">else</span>:
+        <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span><span style="color: #000;">&#93;</span></pre>
+<p>Note that the input and output types are not explicitly defined in this function. The three input columns passed to the function are converted to lists. The computation is performed using dataframe, and the function returns three lists.
+The values returned are placed in three output columns using the script command in the <b>Before Formula Scripts</b> tab:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>E<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>F<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> py.<span style="color: #000080;">groupstats</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<p><a  class="image"><img alt="Scv python groupstats.png" src="../images/Set_Column_Values/600px-Scv_python_groupstats.png?v=53220" width="600"   /></a>
+</p>
+<h4><a name="Example_3"></a><span class="mw-headline">Example 3</span></h4>
+<p>In the previous two examples, the Python function was defined in the <b>Set Values</b> dialog. The worksheet could then be saved as a template along with the Python function and then a new instance of the template can be opened for future use.
+</p><p>Python functions can also be defined in external files and then accessed in column or cell formula. In the following example, a function defined in the file <b>labTalk.py</b> is called. More details on defining functions in external files are available in the sections that follow.
+</p><p><br />
+<a  class="image"><img alt="Scv python funcfromfile.png" src="../images/Set_Column_Values/600px-Scv_python_funcfromfile.png?v=53222" width="600"   /></a>
+</p><p><br />
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Set_Column_Values/Tip_icon.png?v=21427" width="57"  border="0" /></td><td><ul><li> You can save a column formula, along with <b>Before Formula Scripts</b> and <b>Python Formula</b> codes by (1) clicking <b>Formula: Save As</b> on the Set Values menu bar, (2) by clicking <a class="external text" href="../../UserGuide/UserGuide/Quick_Start_SetColumnValues.html#Set_Values_Dialog_Box_Key_Features">the <b>Save Formula</b> button</a> in Set Values or (3) by right-clicking on the column label row <b>F(x)=</b> cell and choosing <b>Save As</b>. You can later load the formula from the Origin menu: <b>Column: Fill with User Formula</b> and select your saved formula from the fly-out menu.</li>
+<li> If <a class="external text" href="../../UserGuide/UserGuide/Displaying_Supporting_Data_in_Worksheet_Header_Rows.html#F.28x.29.3D">the worksheet <b>F(x)=</b> cell</a> begins "<b>py.</b>" and calls a Python function defined in an external file, you can right-click on the <b>F(x)=</b> cell and choose <b>Open Python File</b> to open the Python function in <a class="external text" href="https://www.originlab.com/python/doc/originpro/annotated.html" target="_blank">the <b>Code Builder</b> IDE</a></li></ul>
+</td></tr></table>
+<h2><a name="Calling_Python_Functions_from_External_Files"></a><span class="mw-headline">Calling Python Functions from External Files</span></h2>
+<p>Python functions can be defined in external <b>.py</b> files. By default Origin will look for the function in a file named <b>labtalk.py</b> located in your User Files Folder (UFF). You can open this file from the Origin menu <b>Connectivity: Open Default Python Functions...</b>.
+</p><p>Functions defined in the <b>labtalk.py</b> file can be called from LabTalk script using syntax such as:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">f1</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>where <b>f1</b> is the function name.
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Set_Column_Values/Tip_icon.png?v=21427" width="57"  border="0" /></td><td><p>The file <b>examples.py</b> has several examples of defining Python functions. You can open this file from the Origin menu <b>Connectivity: Open examples.py. Copy the desired function from this file to </b>labtalk.py<b>.</b>
+</p></td></tr></table> 
+<p>If you define functions in other <b>.py</b> files, you can access them with syntax such as:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>b<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> py.<span style="color: #000080;">myfuncs</span>.<span style="color: #000080;">sort</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre> 
+<p>where the function <i>sort()</i> is defined in a file named <i>myfuncs.py</i>.
+</p><p>Origin will look for the <b>.py</b> file in the User Files Folder (UFF) by default. A different working directory can be set using the Python object property: <b>Python.LTwd$</b>. 
+</p><p>The file name can be left out when calling functions by setting the Python object property: <b>Python.LTwf$</b>.
+</p>
+<pre class="lt" style="font-family:monospace;">Python.<span style="color: #000080;">LTwd</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;D:\Python&quot;</span>;
+Python.<span style="color: #000080;">LTwf</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>MyFunctions.<span style="color: #000080;">py</span>;
+col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">sort</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// call function sort from file MyFunctions.py located in D:\Python folder</span></pre>
+<p>The object properties used above are empty, and not set by default. The default python file location is internally set to UFF folder, and the default file name is internally set to <b>labtalk.py</b> Once you assign a value to either of these properties, the value is saved in the Origin.ini file located in the UFF.
+</p>
+<h3><a name="Specifying_Input_and_Output_Types"></a><span class="mw-headline">Specifying Input and Output Types</span></h3>
+<p>Python functions can be defined with specific input and output argument types. There are two ways to specify types:
+</p>
+<ul><li> Using Function annotation</li>
+<li> Using Docstrings</li></ul>
+<p>Here are several examples:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #d00; font-style: italic;"># Examples where function annotation is used to specify type</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> k:<span style="color: #900090;">int</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a + k
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> a2<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">int</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a + b
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> ss1<span style="color: #000;">&#40;</span>a:<span style="color: #900090;">str</span><span style="color: #000;">,</span> b:<span style="color: #900090;">str</span><span style="color: #000;">&#41;</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">str</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;using function annotations&quot;&quot;&quot;</span>
+    c <span style="color: #000;">=</span> a + b
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #ff7700;font-weight:bold;">def</span> ss3<span style="color: #000;">&#40;</span>a:<span style="color: #900090;">list</span><span style="color: #000;">&#41;</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">list</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">&#91;</span><span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>x<span style="color: #000;">&#41;</span> <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">&#93;</span>
+
+<span style="color: #ff7700;font-weight:bold;">def</span> ss2<span style="color: #000;">&#40;</span>a:<span style="color: #900090;">list</span><span style="color: #000;">,</span> b:<span style="color: #900090;">list</span><span style="color: #000;">&#41;</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">list</span>:
+    c <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span> x + y <span style="color: #ff7700;font-weight:bold;">for</span> x<span style="color: #000;">,</span>y <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">zip</span><span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span><span style="color: #000;">&#93;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #d00; font-style: italic;"># Examples where docstring is used to specify type</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> s2<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span>b<span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;
+    S:SS
+    concatenate strings, array version
+    &quot;&quot;&quot;</span>
+    c <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span> x + y <span style="color: #ff7700;font-weight:bold;">for</span> x<span style="color: #000;">,</span>y <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">zip</span><span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span><span style="color: #000;">&#93;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> c    
+
+<span style="color: #ff7700;font-weight:bold;">def</span> s1<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;
+    s:ss
+    concatenate strings, scaler version
+    &quot;&quot;&quot;</span>
+    c <span style="color: #000;">=</span> a + b
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #ff7700;font-weight:bold;">def</span> s3<span style="color: #000;">&#40;</span>a<span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;
+    F:S
+    intput string list and return float list
+    &quot;&quot;&quot;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">&#91;</span><span style="color: #900090;">len</span><span style="color: #000;">&#40;</span>x<span style="color: #000;">&#41;</span> <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">&#93;</span>
+
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> sin<span style="color: #000;">&#40;</span>a<span style="color: #000;">&#41;</span>:
+    <span style="color: #0a0;">&quot;&quot;&quot;
+    F:F
+    return sine
+    &quot;&quot;&quot;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> np.<span style="color: #000;">sin</span><span style="color: #000;">&#40;</span>np.<span style="color: #000;">asarray</span><span style="color: #000;">&#40;</span>a<span style="color: #000;">&#41;</span><span style="color: #000;">&#41;</span></pre>
+<p>This function accepts a list of float and two integers as input, and returns a list of float. It also uses NumPy and SciPy packages:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> scipy <span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">signal</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> smooth<span style="color: #000;">&#40;</span>y<span style="color: #000;">,</span>npts<span style="color: #000;">,</span> norder<span style="color: #000;">&#41;</span>:
+     <span style="color: #0a0;">&quot;&quot;&quot;
+     F:Fii
+     Perform Savitzky-Golay smoothing using scipy signal
+     &quot;&quot;&quot;</span>
+     <span style="color: #d00; font-style: italic;">#npts: number of points for smoothing window</span>
+     <span style="color: #d00; font-style: italic;">#norder: polynomial order</span>
+     y<span style="color: #000;">=</span><span style="color: #000;">signal</span>.<span style="color: #000;">savgol_filter</span><span style="color: #000;">&#40;</span> np.<span style="color: #000;">array</span><span style="color: #000;">&#40;</span>y<span style="color: #000;">&#41;</span><span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder <span style="color: #000;">&#41;</span>
+     <span style="color: #ff7700;font-weight:bold;">return</span> y</pre>
+<p>However whether the function can be accessed from column formula will depend on how the function is defined.
+</p><p>If it is defined as a scalar function and will be called for each row, the input/output type needs to be specified, such as:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">&#40;</span>a:<span style="color: #900090;">float</span><span style="color: #000;">,</span> b:<span style="color: #900090;">int</span> <span style="color: #000;">=</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">float</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a+b</pre>
+<p>If it is defined as a vector function, input/output type does not need to be specified, such as
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b:<span style="color: #900090;">int</span> <span style="color: #000;">=</span> <span style="color: #000;">10</span><span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">&#91;</span>x + b <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">&#93;</span></pre>
+<p>Here, the input/output type is assumed as list.
+</p><p>Either way, the function can be used in column formula or from script as in <i>col(B)=py.a1(col(A))</i>.
+</p>
+<h3><a name="Returning_Multiple_Values_or_Arrays"></a><span class="mw-headline">Returning Multiple Values or Arrays</span></h3>
+<p>Multiple values or lists can be returned to LabTalk from Python functions.
+</p><p>This function accepts a list and two floats as input, and returns two lists:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">def</span> f3<span style="color: #000;">&#40;</span>a<span style="color: #000;">,</span> b<span style="color: #000;">=</span><span style="color: #000;">5</span><span style="color: #000;">,</span> c<span style="color: #000;">=</span><span style="color: #000;">10</span><span style="color: #000;">&#41;</span>:
+    b <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span>x + b <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">&#93;</span>
+    c <span style="color: #000;">=</span> <span style="color: #000;">&#91;</span>x + c <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">&#93;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> b<span style="color: #000;">,</span> c</pre>
+<p>In a new worksheet, fill col(A) with some numbers. Then from script, you can access the function such as:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>b<span style="color: #000000;">&#41;</span>,col<span style="color: #000000;">&#40;</span>c<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">f3</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<p><br />
+<i><b>Tuple-returning example:</b></i>
+</p><p>You could add the following to the file <b>labtalk.py</b> in your <a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">User Files Folder</a>, then save the file:
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">def</span> TestReturnTuple<span style="color: #000;">&#40;</span>arg1<span style="color: #000;">,</span> arg2<span style="color: #000;">,</span> arg3<span style="color: #000;">&#41;</span>:
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'TestReturnTuple11: arg1 = '</span><span style="color: #000;">,</span> arg1<span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'TestReturnTuple11: arg2 = '</span><span style="color: #000;">,</span> arg2<span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">&#40;</span><span style="color: #0a0;">'TestReturnTuple11: arg3 = '</span><span style="color: #000;">,</span> arg3<span style="color: #000;">&#41;</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">&#40;</span><span style="color: #000;">&#91;</span>arg1<span style="color: #000;">,</span> <span style="color: #000;">10</span>*arg1<span style="color: #000;">,</span> <span style="color: #000;">100</span>*arg1<span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">&#91;</span>arg2<span style="color: #000;">,</span> arg2/<span style="color: #000;">10</span>.<span style="color: #000;">,</span> arg2/<span style="color: #000;">100</span>.<span style="color: #000;">,</span> arg2/<span style="color: #000;">1000</span>.<span style="color: #000;">&#93;</span><span style="color: #000;">,</span> <span style="color: #000;">1000</span> * arg3<span style="color: #000;">&#41;</span></pre>
+<p>To run the example, do the following:
+</p>
+<ol><li> From the main menu, choose <b>Window: Script Window</b>.</li>
+<li> Open a new workbook then, copy the following to the Script Window, select the entire script and press Enter:</li></ol>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span>, myvar<span style="color: #000080;">=</span> py.<span style="color: #000080;">TestReturnTuple</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span>., <span style="color: #0000dd;">45</span>., <span style="color: #0000dd;">66</span><span style="color: #000000;">&#41;</span>;
+myvar<span style="color: #000080;">=</span>;</pre>
+<p>The function returns a tuple with two lists -- one to col(A) and one to col(B) -- and one numeric scalar that is written to the LabTalk variable, <code>myvar</code>.
+</p>
+<h2><a name="Calling_Functions_from_File_Attached_to_Project"></a><span class="mw-headline">Calling Functions from File Attached to Project</span></h2>
+<p>Python functions can also be defined in <b>.py</b> file that are attached to the Origin project (OPJU). The functions in attached files can be accessed with the notation such as:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>b<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>py.@filename.<span style="color: #000080;">func</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<p>The <b>@</b> character in front of the file name indicates to Origin that the file is attached to the project.
+</p><p>If there is only one <b>.py</b> file attached to the project, which is recommended, then the file name can be dropped when accessing the function, such as:
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">&#40;</span>b<span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>py.@func<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+
+

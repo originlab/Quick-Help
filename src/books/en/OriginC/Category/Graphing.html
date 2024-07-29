@@ -1,0 +1,83 @@
+<h1 class="firstHeading">3.5 Graphing</h1><p><br />
+This category list examples to demonstrate how to create a graph window, adding new layer, arrange layers in one graph, legend update and other graphing manipulation.
+</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>The following example shows how to plot multiple data to multiple layers in one graph, rearrange the layers, and then combine all legends from each layer into a single legend and put it on the first layer.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Before running the following code, please new a worksheet and import \Samples\Curve Fitting\Multiple Gaussians.dat to worksheet.</span>
+
+<span style="color: #0000ff;">void</span> graph_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error. Please active worksheet before running&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>    
+    
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// In worksheet, there should be at least 5 columns like XYYYY to create four xy range for plotting.</span>
+    <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nNumYs <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> nNumYs <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Please make an active worksheet with columns like XYYYY first!&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #008000;">// Plot each data to separate layers</span>
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> iData <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, iLayer <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iData <span style="color: #000080;">&lt;</span> nNumYs; iData<span style="color: #000040;">++</span>, iLayer<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// Create one XY data range for plotting.</span>
+        XYRange dr;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, iData <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> gp.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;=</span> iLayer <span style="color: #000000;">&#41;</span>
+            iLayer <span style="color: #000080;">=</span> gp.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>iLayer<span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #008000;">// Plot data range on graph layer</span>
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> nRet <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to plot data range&#160;%d onto layer&#160;%d!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iData, iLayer<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">else</span>
+            gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #008000;">// Arrange layers to 2x2</span>
+    <span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+    <span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+    <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> page_arrange_layers<span style="color: #000000;">&#40;</span>gp, nRows, nCols<span style="color: #000000;">&#41;</span>; 
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>bRet <span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to rearrange layers!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">// Combine all legends to a single legend on the first layer.</span>
+    <span style="color: #0000ff;">int</span> iLegendLayer <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">//the index of the layer on which to put the combined legend;</span>
+    <span style="color: #0000ff;">bool</span> bAscending <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; <span style="color: #008000;">//sort the legends ascending before combine into one legend</span>
+    legend_combine<span style="color: #000000;">&#40;</span>gp, iLegendLayer, bAscending<span style="color: #000000;">&#41;</span>;
+    
+<span style="color: #000000;">&#125;</span></pre>
+<table class="catlist">
+
+<tr>
+<td><i><b>This section covers the following topics:</b></i>
+<div class="CategoryTreeTag" data-ct-mode="20" data-ct-options="{&quot;mode&quot;:20,&quot;hideprefix&quot;:10,&quot;showcount&quot;:false,&quot;namespaces&quot;:false}"><li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Axes_Formatting.html">Axes Formatting</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Accessing_Graph_Format_with_Theme_Tree.html">Accessing Graph Format with Theme Tree</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Layers_Manipulation.html">Layers Manipulation</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Adding_Tags_to_Imported_Data_and_Displaying_on_Plots.html">Adding Tags to Imported Data and Displaying on Plots</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Accessing_Group_Plots_Format.html">Accessing Group Plots Format</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs102 CategoryTreeLabelPage" href="../../OriginC/OriginC/Show_Active_Layer_Only.html">Show Active Layer Only</a></li>
+		
+		</div>
+</td></tr></table>
+
+
+
+

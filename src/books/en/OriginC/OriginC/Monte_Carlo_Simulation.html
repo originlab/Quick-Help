@@ -1,0 +1,145 @@
+<h1 class="firstHeading">3.9.1.1 Monte Carlo Simulation</h1><p><br />
+Origin C allows you to program simulations using the Monte Carlo methods in Origin. Two samples are provided below:
+</p>
+<ul><li>Integration</li>
+<li>Sampling from mixture of distributions</li></ul>
+<p>The two simple examples below serve to illustrate how we can draw samples from a specific distribution. These examples belong to Markov chain Monte Carlo (MCMC). In the first example, we try to evaluate an integral which in turn can be used to obtain an approximate value for PI. Many computations of integral require drawing samples from a Uniform distribution. In the second example, we demonstrate how to draw a sample from a mixture of distributions.
+</p><p><br />
+</p>
+<h2><a name="Monte_Carlo_Simulation"></a><span class="mw-headline">Monte Carlo Simulation</span></h2>
+<p>If we want to calculate the integral
+</p><p><img src="../images/Monte_Carlo_Simulation/math-0ad00adfdab8eb89b6bea4a6dbeb43a0.png?v=0" title="I=\int_{-r}^{r}\int_{-r}^{r}I\left ( x^{2} + y^{2} \leq r^{2} \right )dxdy" alt="I=\int_{-r}^{r}\int_{-r}^{r}I\left ( x^{2} + y^{2} \leq r^{2} \right )dxdy" class="tex"/>
+</p><p>It might be easy to calculate this integral directly. However, with simulation method, we can also reach a satisfying result. In fact, it turns out many integrals can be evaluated by Monte Carlo simulation. 
+</p><p>In order to evaluate the integral 
+</p><p><img src="../images/Monte_Carlo_Simulation/math-2339fbe3524520fd8c482400da2598be.png?v=0" title="I = \int_{a}^{b}g\left ( x \right )dx" alt="I = \int_{a}^{b}g\left ( x \right )dx" class="tex"/>
+</p><p>We can rewrite it as 
+</p><p><img src="../images/Monte_Carlo_Simulation/math-0c9c7feb61629fc46fc524af685530b0.png?v=0" title="I = \int_{a}^{b}g\left ( x \right )dx = \int_{a}^{b}\omega \left ( x \right )p\left(x \right )dx = E_{p}\left [ \omega\left ( X \right ) \right ]" alt="I = \int_{a}^{b}g\left ( x \right )dx = \int_{a}^{b}\omega \left ( x \right )p\left(x \right )dx = E_{p}\left [ \omega\left ( X \right ) \right ]" class="tex"/>
+</p><p>where
+</p><p><img src="../images/Monte_Carlo_Simulation/math-d473e81a3e27c607ae1cede5e4713c77.png?v=0" title="\omega \left (x \right ) = g \left(x \right )\left(b-a \right )" alt="\omega \left (x \right ) = g \left(x \right )\left(b-a \right )" class="tex"/>
+</p><p><img src="../images/Monte_Carlo_Simulation/math-05f166dd211684a42da2be9e1b25be83.png?v=0" title="p\left(x \right ) = 1/\left(b-a \right )" alt="p\left(x \right ) = 1/\left(b-a \right )" class="tex"/>
+</p><p>So this integral is actually an expectation of a function of a random variable with uniform distribution over (a,b). By law of large number, we can use average to approximate expectation. 
+</p><p>Thus we can evaluate that specified integral by following OC code.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This function calculates a specific integral</span>
+<span style="color: #0000ff;">int</span> MC_integral<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> S <span style="color: #000080;">=</span> <span style="color: #0000dd;">100000</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> r <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+    vector xs<span style="color: #000000;">&#40;</span>S<span style="color: #000000;">&#41;</span>, ys<span style="color: #000000;">&#40;</span>S<span style="color: #000000;">&#41;</span>;
+    unifrnd<span style="color: #000000;">&#40;</span>xs, S, <span style="color: #000040;">-</span>r, r<span style="color: #000000;">&#41;</span>;
+    unifrnd<span style="color: #000000;">&#40;</span>ys, S, <span style="color: #000040;">-</span>r, r<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// count the number of points (xs[i], ys[i]) that lies inside the circle</span>
+    <span style="color: #008000;">//      xs[ii]*xs[ii]+ys[ii]*ys[ii]&lt;=r*r</span>
+    <span style="color: #0000ff;">int</span> sum;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>S; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>xs<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span>xs<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000040;">+</span>ys<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span>ys<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;=</span>r<span style="color: #000040;">*</span>r<span style="color: #000000;">&#41;</span>
+            sum<span style="color: #000040;">++</span>;
+     
+    <span style="color: #0000ff;">double</span> I_hat <span style="color: #000080;">=</span> sum<span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span>r<span style="color: #000040;">*</span>r<span style="color: #000040;">/</span>S;
+     
+    <span style="color: #008000;">// output the result to the screen </span>
+    out_double<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;The value of Integral is I_hat = &quot;</span>,I_hat<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The result is I_hat = 12.5664.  Looking at the below figure, we can easily see what we really calculated is the area of a circle (the blue region). Therefore we can use this method to obtain the approximate value of PI, which is 3.1416 in this case (note that I_hat = PI*r*r).
+</p><p><a  class="image"><img alt="Monte Carlo OCEX 01.png" src="../images/Monte_Carlo_Simulation/Monte_Carlo_OCEX_01.png?v=43455" width="215"  /></a>
+</p>
+<h2><a name="Sampling_From_Mixture_of_Two_Gaussians"></a><span class="mw-headline">Sampling From Mixture of Two Gaussians</span></h2>
+<p>Sampling from a Gaussian distribution is easy, but it might be tricky to generate a sample from mixture of Gaussians. For example, 
+</p><p><img src="../images/Monte_Carlo_Simulation/math-5014e1aee666e873a0e86b462d861bb0.png?v=0" title="\pi \left(x \right ) = \omega_{1}\mathcal{N}\left(x\mid \mu_{1}, \sigma_{1}^{2} \right ) + \omega_{2}\mathcal{N}\left(x\mid \mu_{2}, \sigma_{2}^{2}  \right )" alt="\pi \left(x \right ) = \omega_{1}\mathcal{N}\left(x\mid \mu_{1}, \sigma_{1}^{2} \right ) + \omega_{2}\mathcal{N}\left(x\mid \mu_{2}, \sigma_{2}^{2}  \right )" class="tex"/>
+</p><p>where
+</p><p><img src="../images/Monte_Carlo_Simulation/math-c6b1ba413aefa31f1cbac45deccaf3d0.png?v=0" title="\omega_{1} + \omega_{2} = 1" alt="\omega_{1} + \omega_{2} = 1" class="tex"/>
+</p><p>We cannot simply draw two random values from the two Gaussian distribution respectively, and then sum them up in a weighted way. We can however use the Metropolis Hastings (MH) algorithm to do this job.
+</p><p>Select arbitrarily an irreducible transition probability q(x,x'), which is often called proposal distribution, and a function α(x,x') valued in (0,1]. For any pair (x,x') (x is not equal to x'), define p(x,x') = q(x,x')α(x,x'). In this way, we get a transition kernel p(x,x'). What we are really interested in is the case in which target distribution π(x) is stationary (in Bayesian inference, we know this distribution is typically a posterior). A useful choice of α(x,x') is α(x,x') = min{1, π(x')q(x',x)/π(x)q(x,x')}, which would help to make π(x) be stationary. If the proposal distribution is symmetric, i.e. q(x',x)=q(x,x'), we have Metropolis Hastings algorithm, in which α(x,x') = min{1, π(x')/π(x)}.
+</p><p>You can convince yourself by executing the following code with a worksheet active in Origin. The results will be placed in the active worksheet.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This function served to draw sample from a mixture of two Gaussians.</span>
+<span style="color: #008000;">// the Parameter &quot;Nsamples&quot; specifies the number of simulation sample</span>
+<span style="color: #0000ff;">int</span> MC_mix<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> Nsamples <span style="color: #000080;">=</span> <span style="color: #0000dd;">5000</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> ii;
+    vector xtemp<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #008000;">// specify target model: eg.</span>
+    <span style="color: #008000;">// in this case, it's weights[0]*normal(mu[0],sigma[0]^2)+weights[1]*normal(mu[1],sigma[1]^2)</span>
+    vector weights <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0.3</span>,<span style="color: #0000dd;">0.7</span><span style="color: #000000;">&#125;</span>;
+    vector mu <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">10</span><span style="color: #000000;">&#125;</span>;
+    vector sigma <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#125;</span>;
+ 
+    <span style="color: #008000;">// specify proposal distribution: normal(0,sigma_prop^2)</span>
+    <span style="color: #008000;">// you can use other &quot;sigma_prop&quot;, but make sure it's suitable(&quot;similar&quot; to the target distribution)</span>
+    <span style="color: #0000ff;">double</span> sigma_prop <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+ 
+    <span style="color: #008000;">// initial state of Markov Chain</span>
+    <span style="color: #008000;">// you can also use other initial states</span>
+    <span style="color: #0000ff;">double</span> xinit;
+    unifrnd<span style="color: #000000;">&#40;</span>xtemp, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    xinit <span style="color: #000080;">=</span> <span style="color: #0000dd;">20.0</span><span style="color: #000040;">*</span>xtemp<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>;
+ 
+    <span style="color: #008000;">//////////////////////////////////////////////</span>
+    <span style="color: #008000;">// Metropolis-Hastings algorithm</span>
+    vector samples<span style="color: #000000;">&#40;</span>Nsamples<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">double</span> logpOld, xprime, logpNew, alpha;
+    target_log<span style="color: #000000;">&#40;</span>xinit, weights, mu, sigma, logpOld<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get probability of target distribution at initial state</span>
+    <span style="color: #0000ff;">double</span> x <span style="color: #000080;">=</span> xinit;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>Nsamples; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        proposal<span style="color: #000000;">&#40;</span>x, sigma_prop, xprime<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get probability of proposal distribution when at state &quot;x&quot;</span>
+        target_log<span style="color: #000000;">&#40;</span>xprime, weights, mu, sigma, logpNew<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// get probability of target distribution when at state &quot;xprime&quot;</span>
+        alpha <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span>logpNew<span style="color: #000040;">-</span>logpOld<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// calculate function alpha(logpNew,logpOld)</span>
+        <span style="color: #0000ff;">double</span> r <span style="color: #000080;">=</span> min<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1.0</span>, alpha<span style="color: #000000;">&#41;</span>;
+        unifrnd<span style="color: #000000;">&#40;</span>xtemp, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>xtemp<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">&lt;</span>r<span style="color: #000000;">&#41;</span>
+        <span style="color: #000000;">&#123;</span>
+            x <span style="color: #000080;">=</span> xprime;
+            logpOld <span style="color: #000080;">=</span> logpNew;
+        <span style="color: #000000;">&#125;</span>
+        samples<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> x;
+    <span style="color: #000000;">&#125;</span>
+ 
+    <span style="color: #008000;">//output the &quot;samples&quot; to a worksheet</span>
+    Worksheet wks <span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    Dataset ds<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    ds <span style="color: #000080;">=</span> samples;
+ 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// calculate log-transformation of probability of target distribution</span>
+<span style="color: #0000ff;">int</span> target_log<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> x, <span style="color: #0000ff;">const</span> vector mixWeight, <span style="color: #0000ff;">const</span> vector mu, <span style="color: #0000ff;">const</span> vector sigma, <span style="color: #0000ff;">double</span> <span style="color: #000040;">&amp;</span>p<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    p <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    <span style="color: #0000ff;">double</span> ptemp;
+    <span style="color: #0000ff;">int</span> k <span style="color: #000080;">=</span> mixWeight.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>k; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        normpdf<span style="color: #000000;">&#40;</span>x, mu<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, sigma<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span>, ptemp<span style="color: #000000;">&#41;</span>;
+        p <span style="color: #000080;">=</span> p <span style="color: #000040;">+</span> mixWeight<span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000040;">*</span> ptemp;
+    <span style="color: #000000;">&#125;</span>
+    p <span style="color: #000080;">=</span> <span style="color: #000000;">log</span><span style="color: #000000;">&#40;</span>p<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// generate random value of proposal distribution</span>
+<span style="color: #0000ff;">int</span> proposal<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> x, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> sigma_prop, <span style="color: #0000ff;">double</span> <span style="color: #000040;">&amp;</span>xp<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    vector rx<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    normrnd<span style="color: #000000;">&#40;</span>rx, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    xp <span style="color: #000080;">=</span> x <span style="color: #000040;">+</span> rx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span><span style="color: #000040;">*</span>sigma_prop;
+ 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span>
+<span style="color: #008000;">// calculate propability of normal distribution</span>
+<span style="color: #0000ff;">int</span> normpdf<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> x, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> mu, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> sigma, <span style="color: #0000ff;">double</span> <span style="color: #000040;">&amp;</span>p<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    p <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">-</span><span style="color: #000000;">&#40;</span>x<span style="color: #000040;">-</span>mu<span style="color: #000000;">&#41;</span><span style="color: #000040;">*</span><span style="color: #000000;">&#40;</span>x<span style="color: #000040;">-</span>mu<span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000040;">*</span>sigma<span style="color: #000040;">*</span>sigma<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000040;">/</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">sqrt</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000040;">*</span>pi<span style="color: #000000;">&#41;</span><span style="color: #000040;">*</span>sigma<span style="color: #000000;">&#41;</span>;
+ 
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p><a  class="image"><img alt="Monte Carlo OCEX 02.png" src="../images/Monte_Carlo_Simulation/Monte_Carlo_OCEX_02.png?v=43456" width="535"  /></a>
+</p><p>We show the result in the following figure. The line represents the target distribution, i.e. π(x)=0.3*N(0,2) + 0.7*N(10,4). The four bar plots represent sample with N = 100, 500, 1000, 5000, respectively. With N = 5000, the sample we got fits the target distribution well.
+</p>
+
+
+
+
+

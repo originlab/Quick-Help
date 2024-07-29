@@ -1,0 +1,315 @@
+<h1 class="firstHeading">4.5.4 Peaks Analysis</h1><p class='urlname' style='display: none'>Peaks-and-Baseline</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Integrate_Active_Curve_in_Graph_over_a_Specific_X_Range"><span class="tocnumber">1</span> <span class="toctext">Integrate Active Curve in Graph over a Specific X Range</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Subtract_Baseline_and_Integrate_Peaks"><span class="tocnumber">2</span> <span class="toctext">Subtract Baseline and Integrate Peaks</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Process_Multiple_DSC_Files_to_Find_and_Integrate_Peaks"><span class="tocnumber">3</span> <span class="toctext">Process Multiple DSC Files to Find and Integrate Peaks</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Compare_Fitting_Results_of_PA"><span class="tocnumber">4</span> <span class="toctext">Compare Fitting Results of PA</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Integrate_Active_Curve_in_Graph_over_a_Specific_X_Range"></a><span class="mw-headline">Integrate Active Curve in Graph over a Specific X Range</span></h2>
+<p>The following example shows how to integrate the active curve in a graph over a specific range of x values, using the integ1 X-Function.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Purpose: This example demonstrates the following:</span>
+<span style="color: #008000;">//	1. import a file</span>
+<span style="color: #008000;">//	2. create a graph </span>
+<span style="color: #008000;">//	3. integrate the curve over a specific x range</span>
+
+
+<span style="color: #008000;">// Create new book and import a sample file</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;samples\curve fitting\multiple peaks.dat&quot;</span>;
+impasc;
+
+<span style="color: #008000;">// Plot 4th column against 1st column as a line plot</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+<span style="color: #008000;">// Get row index for x values of 6.5 and 9.5, which covers the 3rd peak in the graph</span>
+int ix1<span style="color: #000080;">=</span>xindex<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">6.5</span>,<span style="color: #000080;">%</span>c<span style="color: #000000;">&#41;</span>;
+int ix2<span style="color: #000080;">=</span>xindex<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">9.5</span>,<span style="color: #000080;">%</span>c<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Integrate this range of the curve, and list the results of integration</span>
+range rr<span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>c<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ix1<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ix2<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>;
+integ1 rr;
+integ1.<span style="color: #000080;">=</span>;</pre>
+<h2><a name="Subtract_Baseline_and_Integrate_Peaks"></a><span class="mw-headline">Subtract Baseline and Integrate Peaks</span></h2>
+<p>The following example process a single file but it can be easily modify to loop through to process multiple files.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Purpose:		This example demonstrates the following:</span>
+<span style="color: #008000;">//	1. import a file</span>
+<span style="color: #008000;">//	2. find and subtract baseline </span>
+<span style="color: #008000;">//	3. find peaks</span>
+<span style="color: #008000;">//	4. integrate each peaks</span>
+<span style="color: #008000;">//	5. put integration area of each peak to append to a summary sheet</span>
+
+<span style="color: #008000;">//clean the project to start with empty space</span>
+doc <span style="color: #000080;">-</span>s;doc <span style="color: #000080;">-</span>n;<span style="color: #000000;">&#123;</span>win <span style="color: #000080;">-</span>cd<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">// Create new book to save results from analysis of multiple peaks</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Integ Peaks&quot;</span> sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+string result<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>h;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;NXYXY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Results&quot;</span>;
+<span style="color: #008000;">// Define ranges for all cols and give names to the columns</span>
+range rFilename<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>, rPkindex<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>, rArea<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>, rCenter<span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>, rHeight<span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+rFilename<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;File Name&quot;</span>;
+rPkindex<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+rArea<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Area&quot;</span>;
+rCenter<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Center&quot;</span>;
+rHeight<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Height&quot;</span>;
+<span style="color: #008000;">// filename col need to be wider</span>
+wcolwidth irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> width<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span>;
+
+<span style="color: #008000;">// Find data files </span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\Peaks with Base.dat&quot;</span>; 
+
+newbook;<span style="color: #008000;">// use a new book to store data, so results book can be in separate book</span>
+
+<span style="color: #008000;">//impfile filtername:=&quot;ASCII.oif&quot;;</span>
+impASC;
+<span style="color: #008000;">// we will use only the 1st two col</span>
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+range baseline<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;<span style="color: #008000;">// put before anchor XY so we can share data's X of col(1)</span>
+range subtracted<span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;<span style="color: #008000;">// data subtracted to find peaks and integrate</span>
+range <span style="color: #000080;">-</span>x anchors <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//columns to hold peak finding results</span>
+range pcenter<span style="color: #000080;">=</span><span style="color: #0000dd;">7</span>, pleft<span style="color: #000080;">=</span><span style="color: #0000dd;">8</span>, pright<span style="color: #000080;">=</span><span style="color: #0000dd;">9</span>;
+<span style="color: #008000;">// Find baseline anchor points to put into col(5),(6)</span>
+blauto iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors;
+
+<span style="color: #008000;">// Interpolate with Cubic B-Spline to put into col(5)</span>
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>baseline;
+baseline<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Baseline&quot;</span>;
+baseline<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Interpolated from Found Anchor Pts&quot;</span>;
+<span style="color: #008000;">//Subtract baseline</span>
+subtracted <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">-</span> baseline;
+subtracted<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Subtracted&quot;</span>;
+
+<span style="color: #008000;">//Find peak</span>
+pkfind subtracted ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright;
+
+<span style="color: #008000;">//loop each peak to compute area</span>
+for<span style="color: #000000;">&#40;</span>int ipeak <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ipeak <span style="color: #000080;">&lt;=</span> pcenter.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; ipeak<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	range rint <span style="color: #000080;">=</span> subtracted<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n1<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n2<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">// range of data to be integrated</span>
+	double aa, x0, y0;
+	integ1 rint oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span> area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xx y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy;
+	
+	rFilename<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">info</span>.<span style="color: #000080;">system</span>.<span style="color: #000080;">import</span>.<span style="color: #000080;">filename</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+	rPkindex<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ipeak;
+	rArea<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> aa;
+	rCenter<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> xx;
+	rHeight<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> yy;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Process_Multiple_DSC_Files_to_Find_and_Integrate_Peaks"></a><span class="mw-headline">Process Multiple DSC Files to Find and Integrate Peaks</span></h2>
+<p>In this example, we find all files under a sample subfolder to loop over each and process them and generate a summary sheet.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">///////////////////////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// Purpose:	This example demonstrates the following:</span>
+<span style="color: #008000;">//	1. Import files with dsc extension</span>
+<span style="color: #008000;">//	2. Loop through each data to&#160;: find and subtract baseline;</span>
+<span style="color: #008000;">//	   find peaks; integrate peaks;  put integration area and other result in a separate worksheet</span>
+<span style="color: #008000;">//	3. Sort summary sheet by indices of peaks.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">//	Note that this code is in 'OGS' style with various sections that can be independently accessed.</span>
+<span style="color: #008000;">//	Save the code as a file with OGS extension to your User Files Folder.</span>
+<span style="color: #008000;">//	Run with run.section(filename,Main)</span>
+<span style="color: #008000;">//	OR</span>
+<span style="color: #008000;">//	Type DIR *.OGS&lt;Enter&gt; to scan for OGS files then type filename&lt;Enter&gt; to run.</span>
+<span style="color: #008000;">/////////////////////////////////////////////////////////////////////////////////////////////////////////</span>
+
+<span style="color: #000000;">&#91;</span>Help<span style="color: #000000;">&#93;</span>
+type Load one more files with dsc extension and then integrate area of each peak.;
+type One argument <span style="color: #000000;">:</span> <span style="color: #000080;">%</span>1 <span style="color: #000080;">=</span> number of files to load, <span style="color: #0000dd;">0</span> to load all.;
+
+<span style="color: #000000;">&#91;</span>Main<span style="color: #000000;">&#93;</span>
+int nfiles <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1;
+
+string LoadDSCogsPath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\LoadDSC.ogs&quot;</span>;
+<span style="color: #000080;">%</span>A<span style="color: #000080;">=</span>LoadDSCogsPath<span style="color: #000080;">$</span>;
+if<span style="color: #000000;">&#40;</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>A, Main, nfiles<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	return <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// load success, data should be loaded into active book</span>
+string dscBook<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+if<span style="color: #000000;">&#40;</span>dscBook.<span style="color: #000080;">GetLength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  type <span style="color: #ff00ff;">&quot;new book &quot;</span> <span style="color: #000080;">+</span> dscBook<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; is not valid&quot;</span>;
+  return <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span>
+nfiles <span style="color: #000080;">=</span> page.<span style="color: #000080;">nLayers</span>;
+
+<span style="color: #008000;">// Create new sheet for summary report and define ranges</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">8</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;LYYYYYYY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Summary&quot;</span>;
+range rColName <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, rCntrInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, rLtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>, rRtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+range rArea <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>, rCntr <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>, rHt <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+rColName<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data Name&quot;</span>;
+rIndex<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+rCntrInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+rLtInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+rRtInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+rArea<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Area&quot;</span>;
+rCntr<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center&quot;</span>;
+rHt<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>      <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Height&quot;</span>;
+
+
+for<span style="color: #000000;">&#40;</span>int ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span> nfiles; ii<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   if<span style="color: #000000;">&#40;</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">&#40;</span>, IntegOneData, <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	return <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">&#125;</span>
+
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>page.<span style="color: #000080;">nLayers</span><span style="color: #000000;">&#41;</span>;
+dataset sbc <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">//Select indecies of peaks for the primary sort order </span>
+dataset sodr<span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#125;</span>;  <span style="color: #008000;">//Ascending</span>
+wsort nestcols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sbc order<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sodr; <span style="color: #008000;">//Perform the sorting</span>
+
+return <span style="color: #0000dd;">1</span>;<span style="color: #008000;">// for success</span>
+
+<span style="color: #000000;">&#91;</span>IntegOneData<span style="color: #000000;">&#93;</span>
+int sheet <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1;
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>sheet<span style="color: #000000;">&#41;</span>;
+range rinput <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>sheet<span style="color: #000000;">&#41;</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;
+string strData<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rinput<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">//alloc space for baseline and subtracted with same X of data</span>
+wks.<span style="color: #000080;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+int n <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+range baseline <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n<span style="color: #000000;">&#41;</span>;
+baseline<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Baseline&quot;</span>;
+baseline<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Interpolated from Found Anchor Pts&quot;</span>;
+wks.<span style="color: #000080;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+n <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+range subtracted <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n<span style="color: #000000;">&#41;</span>;
+subtracted<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Subtracted&quot;</span>;
+
+<span style="color: #008000;">// Find baseline anchor points </span>
+range <span style="color: #000080;">-</span>x anchors <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>AnchorX, AnchorsY<span style="color: #000000;">&#41;</span>;
+blauto iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rinput  oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors;
+
+	
+<span style="color: #008000;">// Interpolate with Spline</span>
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>baseline;
+
+<span style="color: #008000;">//Subtract baseline</span>
+subtracted <span style="color: #000080;">=</span> rinput <span style="color: #000080;">-</span> baseline;
+
+
+<span style="color: #008000;">//columns to hold peak finding results</span>
+int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+loop<span style="color: #000000;">&#40;</span>cc, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Find peak</span>
+range pindex <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>, pcenter<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>, pleft<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>, pright<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>, parea<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>, px <span style="color: #000080;">=</span>  <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span><span style="color: #000000;">&#41;</span>, py <span style="color: #000080;">=</span>  <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>;
+pkfind subtracted ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright;
+
+<span style="color: #008000;">//loop each peak to compute area</span>
+int nNumPeaks <span style="color: #000080;">=</span> pcenter.<span style="color: #000080;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+for<span style="color: #000000;">&#40;</span>int ipeak <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ipeak <span style="color: #000080;">&lt;=</span> nNumPeaks; ipeak<span style="color: #000080;">++</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	range rint <span style="color: #000080;">=</span> subtracted<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n1<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n2<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">// range of data to be integrated</span>
+	double aa, x0, y0;
+	integ1 rint area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xx y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+	
+	pindex<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ipeak;
+	parea<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> aa;
+	px<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> xx;
+	py<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> yy;
+	
+	<span style="color: #008000;">// Copy results for current peak, to the summary sheet</span>
+	int irow <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>sheet<span style="color: #000000;">&#41;</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nNumPeaks<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">+</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ipeak<span style="color: #000000;">&#41;</span>&#160;;
+	rColName<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rinput<span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;
+	rIndex<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> ipeak;
+	rCntrInd<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> pcenter<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	rLtInd<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> pleft<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	rRtInd<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> pright<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	rArea<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> parea<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	rCntr<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> px<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+	rHt<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>irow<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> py<span style="color: #000000;">&#91;</span>ipeak<span style="color: #000000;">&#93;</span>;
+<span style="color: #000000;">&#125;</span>
+
+pindex<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+pcenter<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+pleft<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+pright<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+parea<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Area&quot;</span>;
+px<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Center&quot;</span>;
+py<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Height&quot;</span>;
+
+return <span style="color: #0000dd;">1</span>;</pre>
+<h2><a name="Compare_Fitting_Results_of_PA"></a><span class="mw-headline">Compare Fitting Results of PA</span></h2>
+<p>This example shows how to compare a particular peak with its fit after running PA on a series of sample data.
+</p><p>(Please unzip the dialog theme from <a class="external text" href="http://www.originlab.com/ftp/the3ndpeak.zip" target="_blank">this zip file</a> to your User Files Folder\Themes\AnalysisAndReportTable\ in advance.)
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Purpose:		This example demonstrates the following:</span>
+<span style="color: #008000;">//	1. import a series of dsc files</span>
+<span style="color: #008000;">//	2. auto find and subtract baseline </span>
+<span style="color: #008000;">//	3. find peaks and fit peaks with same setting loading form theme file.</span>
+<span style="color: #008000;">//	4. Plot the fit curve of third peak to the first sheet</span>
+<span style="color: #008000;">//	5. Append primary parameters of this peak under the graph cell.</span>
+<span style="color: #008000;">//      6. At the end, get the comparsion sheet about the same peak in the source data.</span>
+
+path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\DSC\Data\&quot;</span>;
+
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bkn<span style="color: #000080;">$</span>;
+int nfrom <span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;
+int nto<span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+range ww <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+ww.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nto <span style="color: #000080;">-</span> nfrom <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//the first column is for label of variable list</span>
+	
+<span style="color: #008000;">//format comparison variables</span>
+range rLabel <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+rLabel<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Curve&quot;</span>;
+rLabel<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;xc&quot;</span>;
+rLabel<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;A&quot;</span>;
+rLabel<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;w&quot;</span>;
+
+int ii;
+loop<span style="color: #000000;">&#40;</span>ii,nfrom,nto<span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">//1, import two data files in a series</span>
+        ind<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;
+        filename<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;tcal&quot;</span><span style="color: #000080;">+</span> ind<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #ff00ff;">&quot;.dsc&quot;</span>;
+        file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> path<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filename<span style="color: #000080;">$</span>;
+	newsheet bkn<span style="color: #000080;">$</span>;
+	impfile file<span style="color: #000080;">$</span>&#160;;
+		
+	<span style="color: #008000;">//2, run pa script mode and save result wks name and report tree.</span>
+	aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;(1,2)&quot;</span>;
+	pa iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span> theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span>the3ndpeaks;
+		
+	<span style="color: #008000;">//3, get result and make plot of the 3nd peak</span>
+	string pp, fitc, resid, peak3;
+	pp<span style="color: #000080;">$</span> <span style="color: #000080;">=</span>__PEAK<span style="color: #000080;">$</span>;
+	fitc<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> __FITCURVE<span style="color: #000080;">$</span>;
+	resid<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> __RESIDUAL<span style="color: #000080;">$</span>;
+	getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>trRes iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>__REPORT<span style="color: #000080;">$</span>;
+		
+	<span style="color: #008000;">//4, plot the 3nd peak to sheet1 for comparison</span>
+	range r_peak <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>;
+	peak3<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fitc<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;(7,8)&quot;</span>;
+		
+	plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>peak3<span style="color: #000080;">$</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+	graphname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;	
+	insertGraph gname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>graphname<span style="color: #000080;">$</span> embed<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> resizecell<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> cell<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r_peak;
+		
+	<span style="color: #008000;">//5, append peak information</span>
+	range r_info <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">:</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#93;</span>;
+	r_info<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">xc__3</span>.<span style="color: #000080;">Value</span>;
+	r_info<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">A__3</span>.<span style="color: #000080;">Value</span>;
+	r_info<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">w__3</span>.<span style="color: #000080;">Value</span>;
+
+<span style="color: #000000;">&#125;</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+
+
+
+
+
+

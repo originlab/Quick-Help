@@ -1,0 +1,54 @@
+<h1 class="firstHeading">1.19.1 Calling Third Party DLL Functions</h1><p><span class="OIndex" style="display:none">External DLL, Access</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Declaration"><span class="tocnumber">1</span> <span class="toctext">Declaration</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Loading_DLL"><span class="tocnumber">2</span> <span class="toctext">Loading DLL</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Version_Control"><span class="tocnumber">3</span> <span class="toctext">Version Control</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">Examples</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Declaration"></a><span class="mw-headline">Declaration</span></h2>
+<p>Origin C can make calls to functions <b>( C linkage only )</b> in external DLLs created by C, C++, C++(.Net)<span class="OIndex" style="display:none">C++(.Net) DLL</span>, C#<span class="OIndex" style="display:none">C# DLL</span> or <span class="OIndex">Fortran</span> compilers. To do this, you need to provide the prototype of a function in a header file and tell Origin C which DLL file contains the function body. Assume the functions are declared in a header file named <b>myFunc.h</b>.  You should <b>include</b> this file in your Origin C file where you want to call those functions, like:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>myFunc.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">//in the \OriginC\System folder</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;myFunc.h&quot;</span> <span style="color: #008000;">//in the same folder as your Origin C code</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;C:<span style="color: #666666; font-weight: bold;">\m</span>yFile.h&quot;</span> <span style="color: #008000;">//in specified path</span></pre>
+<h2><a name="Loading_DLL"></a><span class="mw-headline">Loading DLL</span></h2>
+<p>Then you should tell Origin C where to link the function body, and you must include the following Origin C <b><span class="OIndex">pragma</span></b> directive in the header file <b>myFunc.h</b>, just before your external DLL function declarations. Assume your DLL file is <b>UserFunc.dll</b>:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>UserFunc<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//in the Origin exe folder</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">:</span>\UserFunc<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//in specified path</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>UserFunc, header<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//in the same folder as this .h file</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>UserFunc, <span style="color: #000000;">system</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//in the Windows system folder</span></pre>
+<p>The Origin C compiler supports three calling conventions: <b>__cdecl</b>(default), <b>__stdcall</b> and <b>__fastcall</b>. These calling conventions determine the order in which arguments are passed to the stack as well as whether the calling function or the called external function cleans the arguments from the stack.
+</p><p>Notes: you don't need to include the .dll extension in the file name. And all function declarations after the <b>pragma</b> directive will be considered external and from the specified DLL. This assumption is made until a second <b>#pragma dll(filename)</b> directive appears, or the end of the file is reached.
+</p>
+<h2><a name="Version_Control"></a><span class="mw-headline">Version Control</span></h2>
+<p>To make sure the external dll works correctly, the 32-bit dll is for 32-bit version of Origin, and the same for the 64-bit version. <b>#ifdef _OWIN64</b> is used to detect which version (32-bit or 64-bit) of current Origin is, so to determine which version of dll to be loaded. For example, 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#ifdef</span>	_OWIN64
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>UserFunc_64, header<span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">#else</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">&#40;</span>UserFunc, header<span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">#endif</span>	<span style="color: #008000;">//_OWIN64</span></pre>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>A good and complete example of how to access an external DLL is <a href="../../OriginC/OCGuide/Accessing_SQLite_Database.html" title="OCGuide:Accessing SQLite Database">Accessing SQLite Database</a>. There are other Origin sample projects demonstrating how to call a function from a C dll, a Matlab dll or a Fortran dll in Origin C. These examples can be found in <a class="external text" href="https://blog.originlab.com/wp-content/uploads/2017/01/OriginCExamples.zip" target="_blank">this zip file</a>, under the <i>\Programming Guide\Calling Fortran</i>, <i>\Programming Guide\Calling MATLAB DLL</i> and <i>\Programming Guide\Calling C DLL</i> subfolders.
+</p>
+<table class="catlist">
+
+<tr>
+<td><i><b>This section covers the following topics:</b></i>
+<div class="CategoryTreeTag" data-ct-mode="20" data-ct-options="{&quot;mode&quot;:20,&quot;hideprefix&quot;:10,&quot;showcount&quot;:false,&quot;namespaces&quot;:false}"><li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Calling_GNU_Scientific_Library.html">Calling GNU Scientific Library</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Access_CPlusPlus(.Net)_And_CSharp_DLL.html">Access CPlusPlus(.Net) And CSharp DLL</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Access_Python_via_External_DLL.html">Access Python via External DLL</a></li>
+		
+		</div>
+</td></tr></table>
+
+
+
+

@@ -1,0 +1,117 @@
+<h1 class="firstHeading">2.14.2.21 pe_move</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Brief_Information"><span class="tocnumber">1</span> <span class="toctext">Brief Information</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Command_Line_Usage"><span class="tocnumber">2</span> <span class="toctext">Command Line Usage</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#X-Function_Execution_Options"><span class="tocnumber">3</span> <span class="toctext">X-Function Execution Options</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Variables"><span class="tocnumber">4</span> <span class="toctext">Variables</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Description"><span class="tocnumber">5</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Examples"><span class="tocnumber">6</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Related_X-Functions"><span class="tocnumber">7</span> <span class="toctext">Related X-Functions</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Brief_Information"></a><span class="mw-headline">Brief Information</span></h2>
+<p>Move page or folder to specified folder in Project Explorer
+</p>
+<h2><a name="Command_Line_Usage"></a><span class="mw-headline">Command Line Usage</span></h2>
+<p><code>
+1. pe_move move:=Book1 path:="/My Books"; // Moves workbook Book1 to the subfolder named "My Books" under the Project Explorer root folder.
+</p><p>2. pe_move move:="My Books" path:="/Assets"; // Moves the folder entitled "My Books" from under the active folder to a subfolder in the "Assets" folder under the project root.
+</code>
+</p>
+<h2><a name="X-Function_Execution_Options"></a><span class="mw-headline">X-Function Execution Options</span></h2>
+<p><a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">Please refer to the page for additional option switches when accessing the x-function from script</a>
+</p>
+<h2><a name="Variables"></a><span class="mw-headline">Variables</span></h2>
+<table class="xfvar">
+<tr>
+<th width="8%">Display<br />Name
+</th>
+<th width="8%">Variable<br />Name
+</th>
+<th width="8%">I/O<br />and<br />Type
+</th>
+<th width="8%">Default<br />Value
+</th>
+<th>Description
+</th></tr>
+<tr>
+<td>Page/Folder
+</td>
+<td>move
+</td>
+<td>
+<p>Input
+</p><p>string
+</p>
+</td>
+<td> <center></center>
+</td>
+<td>
+<p>Name of the window or folder to move.
+</p>
+</td></tr>
+<tr>
+<td>Path
+</td>
+<td>path
+</td>
+<td>
+<p>Input
+</p><p>string
+</p>
+</td>
+<td> <center></center>
+</td>
+<td>
+<p>Path to Project Explorer folder to move the window or folder to.
+</p>
+</td></tr></table>
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>If the <b>path</b> variable is the name of a window(graph, workbook, etc), it will move the window from one folder in Project Explorer to another folder. If it is the same folder, then an error will be thrown that cannot be avoided. So care must be taken to ensure that the two folders are not the same if the X-Function is used in a script.
+</p><p>If the <b>path</b> variable is the name of a subfolder of the currently active folder in Project Explorer, it will move the folder to be under the folder specified by the <b>path</b> variable.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>The example below utilizes four related X-Functions to reorganize an Origin project by creating and moving workbooks of imported data into folders that are named after the file extension of the files that were imported into the workbooks. The X-Functions that are used include: <b><a href="../../XFunction/X-Function/Pe_cd.html" title="X-Function:Pe cd">pe_cd</a></b>, <b><a href="../../XFunction/X-Function/Pe_mkdir.html" title="X-Function:Pe mkdir">pe_mkdir</a></b>, <b><a href="../../XFunction/X-Function/Pe_path.html" title="X-Function:Pe path">pe_path</a></b>, and <b><strong class="selflink">pe_move</strong></b>. Also illustrated is using the LabTalk <b><a class="external text" href="../../LabTalk/LabTalk/Document_(command).html#-e_object_.7Bscript.7D.3B_Execute_the_given_script_for_all_objects">document</a></b> command as well as the <b><a class="external text" href="../../LabTalk/LabTalk/String_(object).html#GetFileExt">String::GetFileExt()$</a></b> method.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Use pe_cd X-function to change Project Explorer folder to the root folder for the Project.</span>
+pe_cd path<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;/&quot;</span>;
+
+<span style="color: #008000;">// Loop through every workbook in the project.</span>
+document <span style="color: #000080;">-</span>e W
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">// Get the imported file name from page info tree of workbook (if it exists).</span>
+	string strFileName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">info</span>.<span style="color: #000080;">system</span>.<span style="color: #000080;">import</span>.<span style="color: #000080;">filename</span><span style="color: #000080;">$</span>;
+	
+	<span style="color: #008000;">// If the workboox does not contain imported data, the go to next workbook in loop.</span>
+	if <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strFileName.<span style="color: #000080;">GetLength</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		continue;
+		
+	<span style="color: #008000;">// Use the pe_mkdir X-Function to create a subfolder in the Project Explorer root folder named</span>
+	<span style="color: #008000;">// after the file extension of the imported file. Note, the X-Function is specified to check</span>
+	<span style="color: #008000;">// if the folder already exists before creating it.</span>
+	<span style="color: #008000;">// strFolderPath$ will contain the full path once the X-Function returns.</span>
+	string strFolderPath<span style="color: #000080;">$</span>;
+	pe_mkdir folder<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Imported&#160;%(strFileName.GetFileExt()$) Files&quot;</span> chk<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> cd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strFolderPath<span style="color: #000080;">$</span>;
+	
+	<span style="color: #008000;">// Now use the pe_path X-Function to get the full Project Explorer path to where the workbook currently resides.</span>
+	<span style="color: #008000;">// strBookPath$ will contain the full path once the X-Function returns.</span>
+	string strBookPath<span style="color: #000080;">$</span>;
+	pe_path page<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%(page.name$)&quot;</span> path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strBookPath<span style="color: #000080;">$</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> active<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+	<span style="color: #008000;">// Check to see if the workbook is already in the newly-created (or existing) folder by comparing the two paths.</span>
+	<span style="color: #008000;">// If it is not, then use the pe_move X-Function to move the workbook into the folder from its current location.</span>
+	if <span style="color: #000000;">&#40;</span>strBookPath<span style="color: #000080;">$</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> strFolderPath<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>
+		pe_move <span style="color: #000080;">-</span>sb move<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%(page.name$)&quot;</span> path<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%(strFolderPath$)&quot;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Related_X-Functions"></a><span class="mw-headline">Related X-Functions</span></h2>
+<p><a href="../../XFunction/X-Function/Pe_cd.html" title="X-Function:Pe cd">pe_cd</a>
+<a href="../../XFunction/X-Function/Pe_dir.html" title="X-Function:Pe dir">pe_dir</a>
+<a href="../../XFunction/X-Function/Pe_mkdir.html" title="X-Function:Pe mkdir">pe_mkdir</a>
+<a href="../../XFunction/X-Function/Pe_path.html" title="X-Function:Pe path">pe_path</a>
+</p>
+
+
+
+
+

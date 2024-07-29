@@ -1,0 +1,66 @@
+<h1 class="firstHeading">3.3.4 Plot All Worksheets in One Graph</h1><p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+<p>In Origin C, customer can use <a href="../../OriginC/OriginC/GraphLayer-AddPlot.html" title="OriginC:GraphLayer-AddPlot">GraphLayer::AddPlot</a> to plot all <b>Y</b> columns existing on a <b>Worksheet</b>. e.g. If there are four columns ABCD with designation as XYYY on sheet <b>Sheet1</b> of book <b>Book1</b>, then this method will plot three dataplots on a graphlayer with names like B, C, D.
+</p><p>The following example show how to plot all worksheets in current project on one graph, and group all the dataplots on the graph to apply a color palette to it. To run it, please new an Orgin C file in <b>Code Builder</b> and paste the following code in it, build all files in workspace, type <b>Plot_all_worksheets_in_project_ex</b> in <b>LabTalk Console</b> in <b>Code Builder</b> and press enter, you will see in active folder a newly created graph with grouped plots on it.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> Plot_all_worksheets_in_project_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Folder rootFdr <span style="color: #000080;">=</span> Project.<span style="color: #000000;">RootFolder</span>;
+	
+	<span style="color: #008000;">//Create Graph for plotting</span>
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> gp <span style="color: #000040;">&amp;&amp;</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">bool</span> bRecursive <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>; <span style="color: #008000;">//check whether to loop all subfolders</span>
+		GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//get the first layer to plot data on it</span>
+		
+		<span style="color: #008000;">//call auxiliary recursively to plot all worksheets in this project.</span>
+		Plot_all_worksheets_in_folder<span style="color: #000000;">&#40;</span>rootFdr, gl, bRecursive<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//the function is defined at the end of this example</span>
+		
+		<span style="color: #008000;">//group all plots</span>
+		gl.<span style="color: #000000;">GroupPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//from first to end</span>
+		
+		<span style="color: #008000;">//refresh the graphlayer to make it more visible</span>
+		gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+		legend_update<span style="color: #000000;">&#40;</span>gl, ALM_RANGE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//set legend to show page name, layer name, column name and row range</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #0000ff;">void</span> Plot_all_worksheets_in_folder<span style="color: #000000;">&#40;</span>Folder<span style="color: #000040;">&amp;</span> fdr, GraphLayer<span style="color: #000040;">&amp;</span> gl, <span style="color: #0000ff;">bool</span> bRecursive <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>fdr <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	<span style="color: #008000;">//loop all pages and plot data on worksheets</span>
+	foreach<span style="color: #000000;">&#40;</span>PageBase pg in fdr.<span style="color: #000000;">Pages</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> pg.<span style="color: #000000;">GetType</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> EXIST_WKS <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//check whether is WorksheetPage</span>
+		<span style="color: #000000;">&#123;</span>
+			WorksheetPage wksPage<span style="color: #000000;">&#40;</span>pg<span style="color: #000000;">&#41;</span>;
+			foreach<span style="color: #000000;">&#40;</span>Layer wkslyr in wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				Worksheet wks<span style="color: #000000;">&#40;</span>wkslyr<span style="color: #000000;">&#41;</span>;
+				gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>wks, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//plot all curves from wks to gl, as line</span>
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">//if need to loop all subfolders</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> bRecursive <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		foreach<span style="color: #000000;">&#40;</span>Folder SubFdr in fdr.<span style="color: #000000;">Subfolders</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			Plot_all_worksheets_in_folder<span style="color: #000000;">&#40;</span>SubFdr, gl, bRecursive<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

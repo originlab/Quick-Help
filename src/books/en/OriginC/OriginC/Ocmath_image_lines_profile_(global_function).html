@@ -1,0 +1,133 @@
+<h1 class="firstHeading">2.1.17.5.14 ocmath_image_lines_profile</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Computes the intensity along a straight line or a polyline in an image.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_image_lines_profile<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nRows, <span style="color: #0000ff;">int</span> nCols, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pMat, <span style="color: #0000ff;">int</span> nVertices, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pxVertices, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pyVertices, <span style="color: #0000ff;">int</span> nPoints, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pxPoints, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pyPoints, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pIntensity, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> <span style="color: #000000;">pError</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">int</span> nWidth <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> iMethod <span style="color: #000080;">=</span> INTERP2_NEAREST, <span style="color: #0000ff;">int</span> iProjection <span style="color: #000080;">=</span> PROJECTION_NONE <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> nRows</dt>
+<dd>[input] The number of rows.</dd>
+<dt> nCols</dt>
+<dd>[input] The number of columns.</dd>
+<dt> pMat</dt>
+<dd>[input] The input matrix of size nRows*nCols.</dd>
+<dt> nVertices</dt>
+<dd>[input] The number of vertices contained in the polyline path. Constraint: nVertices &gt;= 2.</dd>
+<dt> pxVertices</dt>
+<dd>[input] The X coordinates of polyline path.</dd>
+<dt> pyVertices</dt>
+<dd>[input] The Y cooridnates of polyline path.</dd>
+<dt> nPoints</dt>
+<dd>[input] The number of points to be interpolated.</dd>
+<dt> pxPoints</dt>
+<dd>[output] The X coordinates of size nPionts.</dd>
+<dt> pyPoints</dt>
+<dd>[output] The Y Coordinates of size nPoints.</dd>
+<dt> pIntensity</dt>
+<dd>[output] The output intensities of size nPoints. If nWidth &gt; 1, the function will average pixels in a direction perpendicular to the path.</dd>
+<dt> pError</dt>
+<dd>[output] Standear error of mean for averaging for nWidth &gt; 1.</dd>
+<dt> nWidth</dt>
+<dd>[input] The width of the polyline, in the unit of matrix index. nWdith = (nWidth%2 == 1)&#160;? nWidth&#160;: nWidth +1.</dd>
+<dt> iMethod</dt>
+<dd>[input] The interpolation methods: 	INTERP2_NEAREST, INTERP2_BILINEAR, INTERP2_BICUBIC, INTERP2_SPLINE.</dd>
+<dt> iProjection</dt>
+<dd>[input] Projects to X or Y axis when equally distributing interpolation points.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns OE_NOERROR if succeed, error codes otherwise.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Before running, make sure a matrixlayer exists and activated in current project</span>
+<span style="color: #0000ff;">#define</span> NUM_PTS_IN_LINES    <span style="color: #0000dd;">200</span>
+<span style="color: #0000ff;">#define</span> LINE_WIDTH            <span style="color: #0000dd;">3</span>
+<span style="color: #0000ff;">void</span> ocmath_image_lines_profile_ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> x1, <span style="color: #0000ff;">int</span> y1, <span style="color: #0000ff;">int</span> x2, <span style="color: #0000ff;">int</span> y2<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    matrixbase<span style="color: #000040;">&amp;</span> matbase <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    matrix mat <span style="color: #000080;">=</span> matbase;
+
+    <span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> mat.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+
+    vector vx, vy;
+    vx.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>x1<span style="color: #000000;">&#41;</span>;
+    vx.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>x2<span style="color: #000000;">&#41;</span>;
+    vy.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>y1<span style="color: #000000;">&#41;</span>;
+    vy.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>y2<span style="color: #000000;">&#41;</span>;
+
+    vector vIntensity<span style="color: #000000;">&#40;</span>NUM_PTS_IN_LINES<span style="color: #000000;">&#41;</span>;
+    vector vError<span style="color: #000000;">&#40;</span>NUM_PTS_IN_LINES<span style="color: #000000;">&#41;</span>;    
+    vector vXPoints<span style="color: #000000;">&#40;</span>NUM_PTS_IN_LINES<span style="color: #000000;">&#41;</span>;
+    vector vYPoints<span style="color: #000000;">&#40;</span>NUM_PTS_IN_LINES<span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_image_lines_profile<span style="color: #000000;">&#40;</span>nRows, nCols, mat,
+        nSize, vx, vy,
+        NUM_PTS_IN_LINES, vXPoints, vYPoints, vIntensity, <span style="color: #0000ff;">NULL</span>,
+        LINE_WIDTH, INTERP2_NEAREST, PROJECTION_NONE<span style="color: #000000;">&#41;</span>; 
+        
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> OE_NOERROR<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Error occurs when calling ocmath function!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #0000ff;">static</span> GraphPage gp;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Line&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    vector vPlotX;
+    vPlotX.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, NUM_PTS_IN_LINES<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">static</span> Worksheet wks;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span>, CREATE_HIDDEN<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    DataRange drOut;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>vIntensity, <span style="color: #000040;">&amp;</span>vPlotX<span style="color: #000000;">&#41;</span>;
+
+    GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>drOut, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<dl><dd>Computes the intensity along a straight line or a polyline in an image.</dd>
+<dd>The function chooses equally spaced points along the line that you specified, or along the horizontal or vertical direction specified by iProjection.</dd>
+<dd>Two dimensional interpolations are used to find intensity value for every point.</dd>
+<dd>When the line width is larger than 1 pixel, the function averages points on a line perpendicular to the current point on path; standard deviation from computation is given.</dd>
+<dd>The function works in matrix index space, and users may want to map the result intensities back into XYZ space after calling.</dd></dl>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/Ocmath_2d_interpolate_(global_function).html" title="OriginC:Ocmath 2d interpolate (global function)">ocmath_2d_interpolate</a>
+</p>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

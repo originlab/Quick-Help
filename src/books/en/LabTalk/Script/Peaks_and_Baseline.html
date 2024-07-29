@@ -1,0 +1,125 @@
+<h1 class="firstHeading">2.13.5 Peaks and Baseline</h1><p class='urlname' style='display: none'>Peaks-and-Baseline</p>
+<p>This section deals with Origin's X-Functions that perform peak and baseline calculations, especially valuable for analyses pertaining to <span class="OIndex">spectroscopy</span>.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#X-Functions_For_Peak_Analysis"><span class="tocnumber">1</span> <span class="toctext">X-Functions For Peak Analysis</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_a_Baseline"><span class="tocnumber">2</span> <span class="toctext">Creating a Baseline</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Finding_Peaks"><span class="tocnumber">3</span> <span class="toctext">Finding Peaks</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Integrating_and_Fitting_Peaks"><span class="tocnumber">4</span> <span class="toctext">Integrating and Fitting Peaks</span></a></li>
+</ul>
+</div>
+
+<h2><a name="X-Functions_For_Peak_Analysis"></a><span class="mw-headline">X-Functions For Peak Analysis</span></h2>
+<p>The following table lists the X-Functions available for <span class="OIndex">peak analysis</span>. You can obtain more information on these functions from the X-Function Reference help file.
+</p>
+<table class="simple">
+<tr>
+<th> Name</th>
+<th> Brief Description
+</th></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Pa.html">pa</a>
+</td>
+<td>
+<p>Perform peak analysis with a pre-saved <b>Peak Analyzer</b> theme file.
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/PaMultiY.html">paMultiY</a>
+</td>
+<td> Perform batch processing of peak analysis on multiple Y datasets
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/PkFind.html">pkFind</a>
+</td>
+<td>
+<p>Pick peaks. 
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Fitpeaks.html">fitpeaks</a>
+</td>
+<td>
+<p>Fit multiple peaks.
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Blauto.html">blauto</a>
+</td>
+<td>
+<p>Create baseline anchor points.
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Interp1xy.html">interp1xy</a>
+</td>
+<td>
+<p>Interpolate the baseline anchor points to create baseline. 
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Subtract_ref.html">subtract_ref</a>
+</td>
+<td>
+<p>Subtract existing baseline dataset from source data. 
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Smooth.html">smooth</a>
+</td>
+<td>
+<p>Smooth the input prior to performing peak analysis. 
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Integ1.html">integ1</a>
+</td>
+<td>
+<p>Perform integration on the selected range or peak. 
+</p>
+</td></tr></table>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Peaks_and_Baseline/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>For peaks that do not require baseline treatment or other advanced options, you can also use peak functions to perform nonlinear fitting. For more information on non-linear fitting from script, please see the <a href="../../LabTalk/Category/LT_Curve_Fitting.html" title="Category:LT Curve Fitting">Curve Fitting</a> section.
+</p></td></tr></table>
+<p>The following sections provide examples on peak analysis.
+</p>
+<h2><a name="Creating_a_Baseline"></a><span class="mw-headline">Creating a Baseline</span></h2>
+<p><span class="OIndex" style="display:none">Create Baseline</span>This example imports a sample data file and creates <span class="OIndex">baseline</span> anchor points using the <b><a class="external text" href="../../XFunction/X-Function/Blauto.html">blauto</a></b> X-Function.
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+filepath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\Peaks on Exponential Baseline.dat&quot;</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filepath<span style="color: #000080;">$</span>;
+impASC;
+ 
+<span style="color: #008000;">//Create 20 baseline anchor points</span>
+range rData <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>, rBase <span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;
+blauto iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rData number<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rBase;</pre>
+<p>Plot the data and anchor points in same graph:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// plot a line graph of the data</span>
+plotxy rData <span style="color: #0000dd;">200</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>;
+<span style="color: #008000;">// plot baseline pts to same layer as scatter </span>
+plotxy rBase <span style="color: #0000dd;">201</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;</pre>
+<h2><a name="Finding_Peaks"></a><span class="mw-headline">Finding Peaks</span></h2>
+<p>This example uses the <b><a class="external text" href="../../XFunction/X-Function/PkFind.html">pkFind</a></b> X-Function to <span class="OIndex">find peak</span>s in XY data:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Import sample pulse data</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\Sample Pulses.dat&quot;</span>;
+impASC;
+<span style="color: #008000;">// Find all positive peaks above a peak height value of 0.2</span>
+range rin<span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+range routx <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, routy<span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+pkfind iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rin dir<span style="color: #000000;">:</span><span style="color: #000080;">=</span>p method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>max npts<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> filter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>h value<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.2</span>
+       ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span> ocenter_x<span style="color: #000000;">:</span><span style="color: #000080;">=</span>routx ocenter_y<span style="color: #000000;">:</span><span style="color: #000080;">=</span>routy;</pre>
+<p>Now graph the data as line plot and the peak x,y as scatter:
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rin plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+<span style="color: #008000;">// Set x output column as type X and plot the Y column</span>
+routx.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>routy plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">201</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+<h2><a name="Integrating_and_Fitting_Peaks"></a><span class="mw-headline">Integrating and Fitting Peaks</span></h2>
+<p>X-Functions specific to the goals of directly <span class="OIndex">integrating peak</span>s, or fitting multiple peaks, do not exist. Therefore, to perform peak fitting or integration, one must first use the <b>Peak Analyzer</b> dialog to create and save a theme file. Once a theme file has been saved, the <b><a class="external text" href="../../XFunction/X-Function/Pa.html">pa</a></b> or <b><a class="external text" href="../../XFunction/X-Function/PaMultiY.html">paMultiY</a></b> X-Functions can be utilized to perform integration and peak fitting from script.
+</p>
+

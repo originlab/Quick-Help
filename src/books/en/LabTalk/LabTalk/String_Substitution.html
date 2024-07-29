@@ -1,0 +1,881 @@
+<h1 class="firstHeading">2.3.2.2.2 %( ) Substitution - String Substitution</h1><p class='urlname' style='display: none'>string-substitution</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#String_Expression_SubstitutionString_Expression_Substitution"><span class="tocnumber">1</span> <span class="toctext">String Expression Substitution<span class="OIndex" style="display:none">String Expression Substitution</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Range_Expression_Substitution"><span class="tocnumber">2</span> <span class="toctext">Range Expression Substitution</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Worksheet_Column_and_Cell_Substitution"><span class="tocnumber">3</span> <span class="toctext">Worksheet Column and Cell Substitution</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Dataset_SubstitutionDataset_Substitution"><span class="tocnumber">3.1</span> <span class="toctext">Dataset Substitution<span class="OIndex" style="display:none">Dataset Substitution</span></span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Cell_Contents"><span class="tocnumber">3.2</span> <span class="toctext">Cell Contents</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Workbook_Information_Substitution"><span class="tocnumber">4</span> <span class="toctext">Workbook Information Substitution</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Column_Label_Row_Information"><span class="tocnumber">4.1</span> <span class="toctext">Column Label Row Information</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Worksheet_Information"><span class="tocnumber">4.2</span> <span class="toctext">Worksheet Information</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Workbook_Information"><span class="tocnumber">4.3</span> <span class="toctext">Workbook Information</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Information_Storage_and_Imported_File_Information"><span class="tocnumber">4.4</span> <span class="toctext">Information Storage and Imported File Information</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Legend_and_Axis_Title_SubstitutionLegend_Substitution_Axis_Title_Substitution"><span class="tocnumber">5</span> <span class="toctext">Legend and Axis Title Substitution<span class="OIndex" style="display:none">Legend Substitution</span> <span class="OIndex" style="display:none">Axis Title Substitution</span></span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Keyword_Substitution"><span class="tocnumber">6</span> <span class="toctext">Keyword Substitution</span></a></li>
+</ul>
+</div>
+
+<h2><a name="String_Expression_SubstitutionString_Expression_Substitution"></a><span class="mw-headline">String Expression Substitution<span class="OIndex" style="display:none">String Expression Substitution</span></span></h2>
+<p><b>%(str$)</b>
+<br />
+</p><p><b>Pass String to Command</b>
+<br />
+LabTalk command accepts both numeric argument and string arguments. 
+Numeric variable or expression can be passed directly e.g. <i>worksheet -a 2*2</i> will add 4 new columns. While string argument must be surrounded by&#160;%( ) to pass the real-time resolved string to the command. E.g.
+</p>
+<pre class="lt" style="font-family:monospace;">string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Book1&quot;</span>;
+<span style="color: #008000;">//Make some other window in Origin active, then run the following to activate Book1</span>
+win <span style="color: #000080;">-</span>a name<span style="color: #000080;">$</span>; <span style="color: #008000;">//not work since it's trying to active a window named &quot;bookname$&quot;</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>name<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">//works</span></pre>
+<p><b>Concatenate Strings within " "</b>
+<br />
+Use&#160;%(str$) substitution when concatenating multiple strings with in " ". 
+</p><p>Suppose current window is Book1 with Sheet1 active
+</p>
+<pre class="lt" style="font-family:monospace;">string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;wks.name$ in page.name$&quot;</span>; 
+name<span style="color: #000080;">$</span><span style="color: #000080;">=</span>; <span style="color: #008000;">//dumps exactly &quot;wks.name$ in page.name$&quot;</span>
+string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;%(wks.name$) in&#160;%(page.name$)&quot;</span>;
+name<span style="color: #000080;">$</span><span style="color: #000080;">=</span>; <span style="color: #008000;">//dumps Sheet1 in Book1</span>
+
+<span style="color: #008000;">//no need to add&#160;%( ) if it's not in &quot; &quot;</span>
+string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; in &quot;</span> <span style="color: #000080;">+</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; 
+name<span style="color: #000080;">$</span><span style="color: #000080;">=</span>; <span style="color: #008000;">//dumps Sheet1 in Book1</span></pre>
+<p><b>Convert String to Number</b>
+<br />
+For string that contains number only, use&#160;%(str$) to convert it to number. This is the reverse of $( ) which converts number to string
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Convert the string &quot;456&quot; to number 456</span>
+string myString<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;456&quot;</span>;
+int myNum<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>myString<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Range_Expression_Substitution"></a><span class="mw-headline">Range Expression Substitution</span></h2>
+<p><b>%(rangeVariable)</b>
+<br />
+When the&#160;%( ) substitution is used on a range variable, it always resolves it to a rangestring.
+</p>
+<pre class="lt" style="font-family:monospace;">range rA<span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Book1<span style="color: #000000;">&#93;</span>Sheet1<span style="color: #000080;">!</span>A;
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rA<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//output the rangestring</span></pre>
+<p><br />
+Because of this, ser can construct new range based on existing range variable, which helps to centralize code.  
+</p>
+<pre class="lt" style="font-family:monospace;">range rwks <span style="color: #000080;">=</span> sheet1<span style="color: #000080;">!</span>; <span style="color: #008000;">//rwks points to sheet1 of current book</span>
+range r1<span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rwks<span style="color: #000000;">&#41;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//r1 points to column A on the sheet</span>
+r1<span style="color: #000080;">=</span>data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">100</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//fill r1 with 0, 1, ..., 100;</span>
+rwks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//add a column to the sheet</span>
+range r2 <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rwks<span style="color: #000000;">&#41;</span>wcol<span style="color: #000000;">&#40;</span> rwks.<span style="color: #000080;">ncols</span> <span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//r2 points to the newly added col, last column</span>
+r2<span style="color: #000080;">=</span>r1<span style="color: #000080;">/</span><span style="color: #0000dd;">10</span>; calculated r2 based on r1, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0.1</span>, ..., <span style="color: #0000dd;">10</span></pre>
+<h2><a name="Worksheet_Column_and_Cell_Substitution"></a><span class="mw-headline">Worksheet Column and Cell Substitution</span></h2>
+<h3><a name="Dataset_SubstitutionDataset_Substitution"></a><span class="mw-headline">Dataset Substitution<span class="OIndex" style="display:none">Dataset Substitution</span></span></h3>
+<p><b>%(workbookName, column)</b> or <b>%([workbookName]sheet, column)</b>
+<br />
+where
+</p>
+<ul><li> <b>workbookname</b> is workbook shortname</li>
+<li> <b>sheet</b> can be either sheet name, label or index</li>
+<li> <b>column</b> can be either column short name, long name or index</li></ul>
+<p>Two syntaxes are supported because before Origin 8, there is only one sheet per workbook, therefore you only need to specify workbookName in 1st argument. Newer versions support multiple worksheets so both book and sheet should be specified in the 1st argument. If you are referring to column on active sheet, you can still use the 1st syntax.
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 200">Syntax
+</th>
+<th style="width: 200">Description
+</th>
+<th style="width: 400">Examples
+</th></tr>
+<tr>
+<td> <i><b>%(workbookName, column)</b></i>
+</td>
+<td> column on active sheet of book
+</td>
+<td>
+<pre>%(Book1, B) //using column short name
+%(%H,""Average Temp") //using column long name
+winName$="Book1";&#160;%(%(winName$), 2); //using column index
+</pre>
+</td></tr>
+<tr>
+<td> <i><b>%([workbookName]sheet, column)</b></i>
+</td>
+<td> column on specified sheet of book
+</td>
+<td>
+<pre>%([Book1]Sheet1, B) //using sheet name and column short name
+%([%H]"test result",""Average Temp") //using sheet label and column long name
+winName$="Book1";&#160;%([%(str$)]3, 2); //using sheet and column index
+</pre>
+</td></tr></table>
+<p>For example: the name of column on right side will be substituted and assigned to&#160;%A and&#160;%B. In the second case, if the named book or sheet does not exist, no error occurs but the substitution will be invalid. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H, B<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column B of active sheet of active book</span>
+type <span style="color: #000080;">%</span>A; <span style="color: #008000;">//return column name, if active sheet is 2nd, will return Book1_B@2</span>
+type <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>A<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//return column values</span>
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book1<span style="color: #000000;">&#93;</span>Sheet3,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column 2 of Book1, Sheet3</span>
+type <span style="color: #000080;">%</span>B; <span style="color: #008000;">//return column name e.g. Book1_B@3</span>
+type <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>B<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//return column values</span></pre>
+<p>Note: You can use parentheses to force assignment to be performed on the dataset whose name is contained in a string register variable instead of performing the assignment on the string register variable itself. 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// Assign column 2 dataset name to&#160;%A</span>
+<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>A<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1,<span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Copy column 1 data to column 2</span></pre>
+<p><b>Column Calculation with Column Substitution</b>
+</p><p>The ability to get a dataset name from any book or sheet can be very useful in doing calculations involving columns in different sheets, like:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Sum col(1) from sheet2 and 3 and place the result into col(1) of the active sheet </span>
+col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span>sheet2, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">+</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span>sheet3, <span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// subtract by col &quot;signal&quot; in the 1st sheet of book2 and </span>
+<span style="color: #008000;">// put result into the active book's sheet3, &quot;calibrated&quot; col</span>
+<span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span>sheet3, <span style="color: #ff00ff;">&quot;calibrated&quot;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>col<span style="color: #000000;">&#40;</span>signal<span style="color: #000000;">&#41;</span> <span style="color: #000080;">-</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book2<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span>,signal<span style="color: #000000;">&#41;</span>;</pre>
+<p>The <i><b>column</b></i> name should be quoted if using long name. If not quoted, then Origin will first assume short name, if not found, then it will try using long name. So in the example above, 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span>sheet3, <span style="color: #ff00ff;">&quot;calibrated&quot;</span><span style="color: #000000;">&#41;</span></pre>
+<p>will force a long name search, while
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book2<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span>,signal<span style="color: #000000;">&#41;</span></pre>
+<p>will use long name only if there is no column with such a short name.
+</p>
+<h3><a name="Cell_Contents"></a><span class="mw-headline">Cell Contents</span></h3>
+<p><b>%(workbookName, column,row<i>[,format]</i>)</b> or <b>%([workbookName]sheetName, column,row<i>[,format]</i>)</b>
+<br />
+</p>
+<dl><dd><ul><li> <b>workbookname</b> is workbook shortname</li>
+<li> <b>sheet</b> can be either sheet name, label or index</li>
+<li> <b>column</b> can be either column short name, long name or index</li>
+<li> <b>row</b> is row index</li>
+<li> <b>format</b>, optional, introduced in Origin 8.1
+<ul><li> no format - full precision</li>
+<li> W = WYSIWYG based on cell format or column format </li>
+<li> custom format (see <a href="../../LabTalk/LabTalk/Origin_Formats.html" title="LabTalk:Origin Formats">Origin Formats</a>)</li></ul></li></ul></dd></dl>
+<p><br />
+</p><p>Note: Another variation of the cell substitution syntax <b>%([workbookName]sheetName, @WL, column[row][,format])</b> is supported to get value from a cell. It can't be used to assign a value to a cell.
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 30%">Syntax
+</th>
+<th style="width: 30%">Description
+</th>
+<th style="width: 40%">Examples
+</th></tr>
+<tr>
+<td> <b>%(<i>workbookName</i>, <i>column</i>, <i>row</i>)</b>
+</td>
+<td> cell on active sheet in the named book, full precicion
+</td>
+<td>
+<pre>%(Book1, B, 4) //using column short name
+%(%H,""Average Temp", 4) //using column long name
+winName$="Book1";&#160;%(%(winName$), 2, 4); //using column index
+</pre>
+</td></tr>
+<tr>
+<td> <b>%([<i>workbookname</i>]<i>sheetname</i>, <i>column</i>, <i>row</i>)</b>
+</td>
+<td> cell on specifies book and sheet, full precicion
+</td>
+<td>
+<pre>//using sheet name and column short name
+%([Book1]Sheet1, B, 4) 
+//using sheet label and column long name
+%([%H]"test result",""Average Temp", 4) 
+//using sheet and column index
+winName$="Book1";&#160;%([%(winName$)]3, 2, 4); 
+</pre>
+</td></tr>
+<tr>
+<td> <b>%(<i>workbookName</i>, <i>column</i>, <i>row</i>, format)</b>
+</td>
+<td> cell on active sheet in the named book, with format
+</td>
+<td>
+<pre>//using column short name, WYSIWYG
+%(Book1, B, 4, W) 
+//using column long name, 2 decimal places
+%(%H,""Average Temp", 4, .2) 
+//using column index, 3 significant digits
+winName$="Book1";&#160;%(%(winName$), 2, 4, *3); 
+</pre>
+</td></tr>
+<tr>
+<td> <b>%([<i>workbookname</i>]<i>sheetname</i>, <i>column</i>, <i>row</i>, format)</b>
+</td>
+<td> cell on specifies book and sheet, with format
+</td>
+<td>
+<pre>//using sheet name and column short name, WYSIWYG
+%([Book1]Sheet1, B, 4, W) 
+//using sheet label and column long name, 2 decimal places
+%([%H]"test result",""Average Temp", .2) 
+//using sheet and column index, 3 significant digits
+winName$="Book1";&#160;%([%(winName$)]3, 2, *3); 
+</pre>
+</td></tr></table>
+<p><br />
+For example, if the third cell in the fourth column in the active worksheet of Book1 contains the value 25, then entering the following statement in the Script window will set A to 25 and put double that value into column 1, row 4 of the sheet named "Results" in the same book. 
+</p>
+<pre class="lt" style="font-family:monospace;">value <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, <span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book1<span style="color: #000000;">&#93;</span>Results, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span> <span style="color: #000080;">*</span> value;
+<span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book1<span style="color: #000000;">&#93;</span>Results, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">=</span>;</pre>
+<p><br />
+To return the contents of a text cell, use a string variable:
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//no $ needed at the end</span>
+string strVar<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//no $ needed at the end</span>
+strVar<span style="color: #000080;">$</span> <span style="color: #000080;">=</span>&#160;;</pre>
+<p><br />
+If the name of the workbook/worksheet you are referring to is stored in a worksheet cell, e.g., if the reference workbook name is in column A, 1st cell of current worksheet, you can use following cell formula
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Book<span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>i<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>A1</pre>
+<p>to set value of B1 cell to A1 cell in the 1st sheet of reference book.
+</p><p>However, if you want to use “A1” in&#160;%() substitution notation, please use double equal sign syntax with string concatenation, 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;[Book&quot;</span> <span style="color: #000080;">+</span> A1<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;]1!A1&quot;</span></pre>
+<p>Please note that autofill and formula update will also work for such notation.
+</p><p><br />
+Assume Book1, Sheet1, column B, row 3, has a numeric value of 12.3456789, but only 2 decimal places are displayed in the worksheet (e.g. (e.g. as set in the <a class="external text" href="../../UserGuide/UserGuide/The_(Column_Properties)_Properties_Tab.html#Display"><b>Column Properties</b> dialog</a>)).
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Return value with current column format</span>
+type <span style="color: #ff00ff;">&quot;Displayed value:&#160;%([Book1]Sheet1,B,3,W)&quot;</span>;
+<span style="color: #008000;">//Return full precision value</span>
+type <span style="color: #ff00ff;">&quot;Full precision:&#160;%([Book1]Sheet1,B,3)&quot;</span>;
+<span style="color: #008000;">//Return custom Origin format</span>
+type <span style="color: #ff00ff;">&quot;3 decimal places:&#160;%([Book1]Sheet1,B,3, .3)&quot;</span>;
+<span style="color: #008000;">//Or use another expression with @WL option to keep the display format </span>
+type <span style="color: #ff00ff;">&quot;Displayed value with @WL syntax: &#160;%([Book1]Sheet1, @WL, B[3],W)&quot;</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/String_Substitution/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>The format character <i>W</i> was introduced in Origin 9.1 to replace the usage of "C" in previous versions (i.e.&#160;%([workbookName]sheetName, column, row,C)). The "C" format parameter is no longer supported.
+</p></td></tr></table>
+<h2><a name="Workbook_Information_Substitution"></a><span class="mw-headline">Workbook Information Substitution</span></h2>
+<p>As with the <b>Worksheet Column and Worksheet Cell Substitution</b> notation described above, there are two syntaxes for worksheet information substitution since one is for old one-sheet workbook/active sheet in book, while the other is for specified sheet in book.
+</p>
+<h3><a name="Column_Label_Row_Information"></a><span class="mw-headline">Column Label Row Information</span></h3>
+<p><b>%(workbookName, @option, columnNumber]<i>)</i></b><i> or <b>%([workbookName]worksheetName, @option, columnNumber)</b></i>
+</p><p>This notation allows access to column label row information.
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 50%">Syntax
+</th>
+<th style="width: 40%">Description
+</th></tr>
+<tr>
+<td> <b>%(<i>workbookName</i>, @<i>option</i>, <i>columnNumber</i>)</b>
+</td>
+<td> column info. of the active sheet in the named book
+</td></tr>
+<tr>
+<td> <b>%([<i>workbookName</i>]<i>worksheetName</i>, @<i>option</i>, <i>columnNumber</i>)</b>
+</td>
+<td> column info. of specified book and sheet
+</td></tr></table>
+<p>Those column label row related <i>options</i> from <a href="../../LabTalk/LabTalk/Text_Label_Options.html#List_of_.40Options" title="LabTalk:Text Label Options">"@" Options for Text Labels</a> are used.
+</p>
+<table class="simple">
+<tr>
+<th style="width: 8%">Option
+</th>
+<th style="width: 50%">Description
+</th></tr>
+<tr>
+<td> @C
+</td>
+<td> Returns column short name
+</td></tr>
+<tr>
+<td> @D
+</td>
+<td> Returns column dataset name
+</td></tr>
+<tr>
+<td> @L
+</td>
+<td> Returns column long name
+</td></tr>
+<tr>
+<td> @LA
+</td>
+<td> Returns column long name. Returns short name if no long name
+</td></tr>
+<tr>
+<td> @LC<i>n</i>
+</td>
+<td> Returns column comments (nth row). Returns 1st line comment if <i>n</i> is skipped
+</td></tr>
+<tr>
+<td> @LD<i>n</i>
+</td>
+<td> Returns contents of column's nth user-defined parameter. <i>n</i>=1 if skipped
+</td></tr>
+<tr>
+<td> @LD"<i>paraname</i>"
+</td>
+<td> Returns contents of column's user-defined parameter with name "paraname"
+</td></tr>
+<tr>
+<td> @LG
+</td>
+<td> Returns column long name (unit). Returns short name and unit if no long name
+</td></tr>
+<tr>
+<td> @LP<i>n</i>
+</td>
+<td> Returns contents of column's nth system parameter. <i>n</i>=1 if  skipped
+</td></tr>
+<tr>
+<td> @LS
+</td>
+<td> Returns column short name. same as @C
+</td></tr>
+<tr>
+<td> @LU
+</td>
+<td> Returns column unit
+</td></tr>
+<tr>
+<td> @F<i>n</i>
+</td>
+<td> Returns <i>n</i>th row of column Filter information. Return full filter info. if <i>n</i> is skipped
+</td></tr>
+<tr>
+<td> @T
+</td>
+<td> Returns column type. 1 = Y , 2 = disregarded, 3 = Y error, 4 = X , 5 = label, 6 = Z, and 7 = X error.
+</td></tr>
+<tr>
+<td> @U
+</td>
+<td> Returns column long name (unit). Returns short name and unit if no long name. Same as @LG,
+</td></tr></table>
+<p><b>Examples</b>
+<br />
+The script below returns the column name of the first column in the current selection range (for information on the <b>selc1</b> numeric system variable, see <a href="../../LabTalk/LabTalk/System_Variables.html" title="LabTalk:System Variables">System Variables</a>):
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>N <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H, @C, selc1<span style="color: #000000;">&#41;</span>;  <span style="color: #000080;">%</span>N <span style="color: #000080;">=</span>;</pre>
+<p>The script below returns the column type for the fourth column in Book 2, Sheet 3:
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book2<span style="color: #000000;">&#93;</span>Sheet3, @T, <span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Worksheet_Information"></a><span class="mw-headline">Worksheet Information</span></h3>
+<p><b>%(workbookName, @option <i>[,argument]</i>)</b> or <b>%([workbookName]worksheetName, @option<i>[, argument]</i>)</b>
+<br />
+This notation allows access to worksheet info and metadata.
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 50%">Syntax
+</th>
+<th style="width: 40%">Description
+</th></tr>
+<tr>
+<td> <b>%(workbookName, @option<i>[,argument]</i>)</b>
+</td>
+<td> worksheet info. of the active sheet in the specified book
+</td></tr>
+<tr>
+<td> <b>%([workbookName]worksheetName<i>[, @option, argument]</i>)</b>
+</td>
+<td> worksheet info. of specified book and sheet
+</td></tr></table>
+<p><br />
+</p><p>Available options are listed below, including a few from <a href="../../LabTalk/LabTalk/Text_Label_Options.html#.40Options_for_Text_Labels" title="LabTalk:Text Label Options">"@" Options for Text Labels</a>.
+</p>
+<table class="simple">
+<tr>
+<th style="width: 8%">Option
+</th>
+<th style="width: 12%">Argument
+</th>
+<th style="width: 60%">Description
+</th></tr>
+<tr>
+<td> @#
+</td>
+<td> Not needed
+</td>
+<td> Returns the total number of columns in worksheet.
+</td></tr>
+<tr>
+<td> @CS
+</td>
+<td> columnNumber
+</td>
+<td> Returns the column index of the first selected column to the right of (and including) <i>n</i>th column. Return 0 if not found
+</td></tr>
+<tr>
+<td> @E#
+</td>
+<td> Optional
+</td>
+<td> If <i>argument</i> = 1, returns the number of Y error columns in the worksheet.  If <i>argument</i> = 2, returns the number of Y error columns in the current selection range.  If <i>argument</i> is omitted, it's assumed to be 1.
+</td></tr>
+<tr>
+<td> @H#
+</td>
+<td> Optional
+</td>
+<td> If <i>argument</i> = 1, returns the number of X error columns in the worksheet.  If <i>argument</i> = 2, returns the number of X error columns in the current selection range.  If <i>argument</i> is omitted, it's assumed to be 1.
+</td></tr>
+<tr>
+<td> @OY
+</td>
+<td> columnNumber
+</td>
+<td> Returns the offset from the 1st selected Y column to the <i>n</i>th Y column to its right in selection. The <i>n</i>th Y must be in selection as well.
+</td></tr>
+<tr>
+<td> @OYX
+</td>
+<td> columnNumber
+</td>
+<td> Returns the offset from the left-most selected Y column to the <i>n+1</i>th selected X column to its right in selection. The <i>n</i>th X must be in selection as well.
+</td></tr>
+<tr>
+<td> @OYY
+</td>
+<td> columnNumber
+</td>
+<td> Returns the offset from the 1st selected Y column to the <i>n</i>th Y column to its right in selection. The <i>n</i>th Y must be in selection as well. Equivalent to @OY
+</td></tr>
+<tr>
+<td> @SC<i>n</i>
+</td>
+<td> Not needed
+</td>
+<td> Returns the nth row of worksheet comments. If n is skipped, it's the 1st row of comments
+</td></tr>
+<tr>
+<td> @SN
+</td>
+<td> Not needed
+</td>
+<td> Returns worksheet name
+</td></tr>
+<tr>
+<td> @SNL
+</td>
+<td> Not needed
+</td>
+<td> Returns worksheet label
+</td></tr>
+<tr>
+<td> @X
+</td>
+<td> Not needed
+</td>
+<td> Returns the column index of the first X column in worksheet,
+</td></tr>
+<tr>
+<td> @Xn
+</td>
+<td> Not needed
+</td>
+<td> Returns the column short name of the first X column in worksheet.
+</td></tr>
+<tr>
+<td> @Y-
+</td>
+<td> Needed
+</td>
+<td> Returns the column index of the closest Y column to the left of <i>n</i>th column.  Returns 0 if not found.
+</td></tr>
+<tr>
+<td> @Y#
+</td>
+<td> Optional
+</td>
+<td> If <i>argument</i> = 1, returns the number of Y columns in the worksheet.  If <i>argument</i> = 2, returns the number of Y columns in the current selection range.  If <i>argument</i> is omitted, it's is assumed to be 1.
+</td></tr>
+<tr>
+<td> @Y+
+</td>
+<td> Needed
+</td>
+<td> Returns the column index of the closest Y column to the right of <i>n</i>th column. Returns 0 if not found.
+</td></tr>
+<tr>
+<td> @YS
+</td>
+<td> Needed
+</td>
+<td> Returns the column index of the first Y column in selection range to the right of (and including) the <i>n</i>th column.
+</td></tr>
+<tr>
+<td> @Z#
+</td>
+<td> Optional
+</td>
+<td> If <i>argument</i> = 1, returns the number of Z columns in the worksheet.  If <i>argument</i> = 2, returns the number of Z columns in the current selection range.  If <i>argument</i> is omitted, it'ss assumed to be 1.
+</td></tr></table>
+<p><b>Examples</b>
+<br />
+The script below returns the worksheet display name
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H, @SN<span style="color: #000000;">&#41;</span>;</pre>
+<p>In Book2, Sheet3, set some column as YError bars. Select several columns, including some YError bar columns. 
+The script below will return the number of YError columns in selection
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span>Book2<span style="color: #000000;">&#93;</span>Sheet3, @E#, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>If the currently active worksheet window has six columns (XYXYXY) and columns 2, 4, and 5 are selected, then the following script shows the number of the first selected Y column to the right of (and including) the iith column (the third argument):
+</p>
+<pre class="lt" style="font-family:monospace;">loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    type <span style="color: #000080;">-</span>l <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H, @YS, ii<span style="color: #000000;">&#41;</span>,;
+<span style="color: #000000;">&#125;</span></pre>
+<p>This outputs:
+</p>
+<pre>   <b>2,2,4,4,0,0,</b>
+</pre>
+<p><br />
+</p>
+<h3><a name="Workbook_Information"></a><span class="mw-headline">Workbook Information</span></h3>
+<p><b>%(workbookName, @option)</b> <b>%([workbookName], @option)</b> 
+<br />
+This notation allows access to workbook info and metadata. 
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 50%">Syntax
+</th>
+<th style="width: 40%">Description
+</th></tr>
+<tr>
+<td> <b>%(<i>workbookName</i>, @<i>option</i>)</b>
+</td>
+<td> Workbook info of named book
+</td></tr></table>
+<p>It's OK to have <i>[workbookName]Sheet!Column</i> in 1st argument. e.g. <b>[%H]Sheet1!A</b>. Sheet and column part will be ignored. 
+</p><p><br />
+</p><p>Available options are listed below, including a few from <a href="../../LabTalk/LabTalk/Text_Label_Options.html#.40Options_for_Text_Labels" title="LabTalk:Text Label Options">"@" Options for Text Labels</a>.
+</p>
+<table class="simple">
+<tr>
+<th style="width: 8%">Option
+</th>
+<th style="width: 60%">Description
+</th></tr>
+<tr>
+<td> @PN
+</td>
+<td> Returns workbook window short name.
+</td></tr>
+<tr>
+<td> @PL
+</td>
+<td> Returns workbook window long name.
+</td></tr>
+<tr>
+<td> @PC<i>n</i>
+</td>
+<td> Returns the nth line of workbook window comments. @PC for all comments
+</td></tr></table>
+<p><b>Examples</b>
+<br />
+The script below returns the workbook short name
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H, @PN<span style="color: #000000;">&#41;</span>;</pre>
+<h3><a name="Information_Storage_and_Imported_File_Information"></a><span class="mw-headline">Information Storage and Imported File Information</span></h3>
+<p><b>%([workbookName]<i>Sheet!Column</i>, @Woption, varOrNodeName<i>,[format]</i>)</b>
+where
+</p>
+<dl><dd><ul><li> Sheet can be sheet short name, long name or index.</li>
+<li> Column can be column short name, long name or index.</li>
+<li> format is optional (see <a href="../../LabTalk/LabTalk/Origin_Formats.html" title="LabTalk:Origin Formats">Origin Formats</a>)</li></ul></dd></dl>
+<p><br />
+Access metadata stored within Origin workbooks, worksheets, or columns, as well as information stored about imported files.
+</p>
+<dl><dd><a  class="image"><img alt="String substitution systemdotimport.png" src="../images/String_Substitution/String_substitution_systemdotimport.png?v=37801" width="819"  /></a></dd></dl>
+<table class="simple" style="width: 95%">
+<tr>
+<th style="width: 55%">Syntax
+</th>
+<th style="width: 40%">Description
+</th></tr>
+<tr>
+<td> <b>%([<i>workbookName</i>]<i>sheet</i>!<i>column</i>, @<i>Woption</i>, <i>varOrNodeName</i>)</b>
+</td>
+<td> Return variable or Node information without format
+</td></tr>
+<tr>
+<td> <b>%([<i>workbookName</i>]<i>sheet</i>!<i>column</i>, @<i>Woption</i>, <i>varOrNodeName</i>, [format])</b>
+</td>
+<td> Return variable or Node information with format
+</td></tr></table>
+<p><b>@Woptions</b> explanation
+</p>
+<table class="simple">
+<tr>
+<th> Option
+</th>
+<th> Return Value
+</th></tr>
+<tr>
+<td> @W
+</td>
+<td> Returns the information in <i>varOrNodeName</i> under <b>page.info</b> or <b>User Tree</b> in the <a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>Workbook Organizer</b></a>. No need to specify <i>Sheet!Column</i>.
+</td></tr>
+<tr>
+<td> @WF<i>n</i>
+</td>
+<td> Returns the information in <i>varOrNodeName</i> under the <i>n</i>th <b>Imported Files</b> in the <a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>Workbook Organizer</b></a>.  No need to specify <i>Sheet!Column</i>.
+</td></tr>
+<tr>
+<td> @WS
+</td>
+<td> Returns the information in <i>varOrNodeName</i> of the <i>n</i>th sheet under <b>Data Sheets</b> in the <a class="external text" href="../../UserGuide/UserGuide/The_Workbook_Organizer.html"><b>Workbook Organizer</b></a>. No need to specify <i>Column</i>.
+</td></tr>
+<tr>
+<td> @WC
+</td>
+<td> Returns the information in <i>varOrNodeName</i> of User Tree at the column level, which can be seen in the <a class="external text" href="../../UserGuide/UserGuide/The_(Column_Properties)_User_Tree_Tab.html"><b>Column Properties</b></a> dialog.
+</td></tr></table>
+<p><br />
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/String_Substitution/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>One way to see this syntax at work is to import a file into a workbook, then use the <b>Text</b> tool to start a text label in the gray space to the right of the worksheet columns. Right-click and choose <b>Insert Info Variable</b>. Click the <b>Info</b> tab, expand a node under SYSTEM.IMPORT, choose a variable and click <b>Insert</b>. Here, you'll be able to see the "@W" option in use, as well as the information stored in <i>varOrNodeName</i>. When you close the Insert Variables dialog and click outside the label, the notation is resolved to create a text label that displays workbook metadata.
+</p>
+<dl><dd><a  class="image"><img alt="LT Information Storage Substitution.png" src="../images/String_Substitution/LT_Information_Storage_Substitution.png?v=37666" width="792"  /></a></dd></dl>
+</td></tr></table>
+<p><br />
+<b>Examples</b>
+The following example shows how to access imported file information, extracted variable during import, and user-trees stored on page (book), sheet and  column levels.
+<br />
+</p><p>Use <b>Data: Import from File: Import Wizard...</b>. Pick the 3 <i>S*.dat</i> under <i>\Samples\Import and Export\</i>, and choose <b>Import Mode</b> to <i>Start New Sheets</i> to import 3 files into Book1. These files will be imported into workbook with some user variable extracted. Expand <b>Workbook Organizer</b>. 
+</p>
+<dl><dd><ul><li> page.info node: only contains last imported file related information and variable.  @W</li>
+<li> User Tree node: Add User Tree and node on page(book) level. Access by @W</li>
+<li> Imported Files: Add variable on Imported files level. Access by @WF<i>n</i></li>
+<li> Data Sheets: Add User Tree and node on sheet level. Access by @WS</li></ul></dd></dl>
+<p>Access file and extracted variable info. of last imported files
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Returns last imported filename</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@W,system.<span style="color: #000080;">import</span>.<span style="color: #000080;">filename</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Returns last imported filedate using mm/dd/yyyy format</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, @W,system.<span style="color: #000080;">import</span>.<span style="color: #000080;">filedate</span>, D0<span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Return the BatchNo variable extracted in the last imported file</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, @W,user.<span style="color: #000080;">variables</span>.<span style="color: #000080;">batchno</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Return the Sample variable extracted in the last imported file</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>Book1, @W,user.<span style="color: #000080;">variables</span>.<span style="color: #000080;">sampleID</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;</pre>
+<p><br />
+In Workbook Organizer, right click <b>User Tree</b> node on the left, choose <b>Add Tree</b> to add a tree named <b>Cate</b>. Select <b>User Tree -&gt; Cate</b> on the left. Add two nodes. a numeric node with name <b>Depth</b>. a text node with name "Direction". Please don't enter Label for tree and nodes since otherwise that label shows in Workbook Organizer instead of name, which will be confusing to user. 
+Set <b>Depth</b> value to be <i>127.2</i>, set <b>Direction</b> value as <i>East</i>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Returns Depth and Direction info under User Tree -&gt; Cate</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@W,tree.<span style="color: #000080;">cate</span>.<span style="color: #000080;">depth</span>, .0<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//format to no decimal places</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@W,tree.<span style="color: #000080;">cate</span>.<span style="color: #000080;">direction</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//use $ at the end for string</span></pre>
+<p><br />
+In Workbook Organizer, go to <b>Imported Files -&gt; S21-235-07.dat</b> (2nd one) to take a look of trees and nodes of the file.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Returns file information and extracted variable of 2nd imported file</span>
+<span style="color: #008000;">//Don't add $ at the end of variable or node name</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@WF2,info.<span style="color: #000080;">filename</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//get 2nd imported file name</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@WF2,header<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//don't add $ for string varible</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@WF2,Variables.<span style="color: #000080;">Header</span>.<span style="color: #000080;">noofpoints</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//get extracted varible No. of points info</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span>H,@WF2,Variables.<span style="color: #000080;">FileName</span>.<span style="color: #000080;">SampleID</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//get extracted varible SampleID</span></pre>
+<p><br />
+In Workbook Organizer, go to <b>Data Sheets -&gt; Trial Run2</b> (2nd sheet)
+Right click <b>User Tree</b> node and add a tree named <b>Condition</b>. Add a numeric node named <b>Temp</b> and value <i>98.6</i>. Add a text node called <b>Result</b> with value <i>Failed</i>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Returns Depth and Direction info under User Tree -&gt; Cate</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Trial Run 2&quot;</span><span style="color: #000080;">!</span>,@WS,tree.<span style="color: #000080;">condition</span>.<span style="color: #000080;">temp</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//skipped book info. if it's current book</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>,@WS,tree.<span style="color: #000080;">condition</span>.<span style="color: #000080;">result</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//using sheet index, add $ at the end for string</span></pre>
+<p><br />
+Create <b>User Tree</b> on column level and access by @WC
+</p><p>With <b>Trial Run 1</b> worksheet active, double click column <b>D</b> header to open <b>Column Properties</b> dialog.
+Go to <b>User Tree</b> tab. Right click to add a tree named<b>Machine</b>.  Add a numeric node named <b>Speed</b> and value <i>42.65</i>. Add a text node called <b>Type</b> with value <i>MD4</i> 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Return Type info under Column User Tree</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #ff00ff;">&quot;Trial Run 1&quot;</span><span style="color: #000080;">!</span><span style="color: #ff00ff;">&quot;Position&quot;</span>,@WC,tree.<span style="color: #000080;">Machine</span>.<span style="color: #000080;">type</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//using long name of sheet and column</span>
+<span style="color: #008000;">//If Position not quoted, first search column short name, if not found, search long name</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">%</span>H<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>Position,@WC,tree.<span style="color: #000080;">Machine</span>.<span style="color: #000080;">type</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Return Speed info under Column User Tree</span>
+<span style="color: #008000;">//Using sheet and column index, skip book info. if it's current book</span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">4</span>,@WC,tree.<span style="color: #000080;">Machine</span>.<span style="color: #000080;">speed</span><span style="color: #000000;">&#41;</span> 
+
+<span style="color: #008000;">//using sheet index and column short name, format to show 0 decimal places </span>
+type <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>D,@WC,tree.<span style="color: #000080;">Machine</span>.<span style="color: #000080;">speed</span>, .0<span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Legend_and_Axis_Title_SubstitutionLegend_Substitution_Axis_Title_Substitution"></a><span class="mw-headline">Legend and Axis Title Substitution<span class="OIndex" style="display:none">Legend Substitution</span> <span class="OIndex" style="display:none">Axis Title Substitution</span></span></h2>
+<p><b>%(PlotSpecifier<i>[, @option, argument1, argument2, ...]</i>)</b>
+<br />
+The first argument must start with number or&#160;? to differentiate it from the other&#160;%( ) notations, e.g. worksheet substitution notation, where the 1st argument is usually a workbook&amp;worksheet specifier. 
+</p>
+<table class="simple" style="width: 90%">
+<tr>
+<th style="width: 15%">PlotSpecifier
+</th>
+<th style="width: 40%">Description
+</th>
+<th style="width: 35%">Example
+</th></tr>
+<tr>
+<td> <b>&lt;plotIndex&gt;</b>
+</td>
+<td> <i>n</i>th plot in current layer, Y info for 2D and Z info for 3D
+</td>
+<td>&#160;%(3) //current layer, 3rd plot's Y info
+</td></tr>
+<tr>
+<td> <b>[layerIndex.]&lt;plotIndex&gt;</b>
+</td>
+<td> <i>n</i>th plot in specified layer, Y info for 2D and Z info for 3D
+</td>
+<td>&#160;%(2.3) // 2nd layer, 3rd plot's Y info.
+</td></tr>
+<tr>
+<td> <b>&lt;plotindex&gt;&lt;plotdesignation&gt;</b>
+</td>
+<td> X, Y or Z of <i>n</i>th plot in current layer.
+</td>
+<td>&#160;%(1X) //current layer, 1st plot's X info
+</td></tr>
+<tr>
+<td> <b>[layerIndex.]&lt;plotindex&gt;&lt;plotdesignation&gt;</b>
+</td>
+<td> X, Y or Z of <i>n</i>th plot in specified layer.
+</td>
+<td>&#160;%(2.1X) //2nd layer, 1st plot's X info
+</td></tr>
+<tr>
+<td> <b>?&lt;plotdesignation&gt;</b>
+</td>
+<td> X, Y or Z of auto assigned plot index in current layer
+</td>
+<td>&#160;%(?Y) //current layer, 1st plot Y info by default, e.g. see Y axis title
+</td></tr>
+<tr>
+<td> <b>[layerIndex.]?&lt;plotdesignation&gt;</b>
+</td>
+<td> X, Y or Z of auto assigned plot index in specified layer
+</td>
+<td>&#160;%(2.?Y) //2nd layer, 1st plot Y info by default
+</td></tr></table>
+<p><br />
+All plot related options from <a href="../../LabTalk/LabTalk/Text_Label_Options.html#.40Options_for_Text_Labels" title="LabTalk:Text Label Options">"@" Options for Text Labels</a> can be used. Some examples:
+</p>
+<table class="simple">
+<tr>
+<th style="width: 10%"><b>@Option</b>
+</th>
+<th style="width: 10%"><b>Arguments</b>
+</th>
+<th style="width: 35%"><b>Description</b>
+</th>
+<th style="width: 35%"><b>Example</b>
+</th></tr>
+<tr>
+<td> @C
+</td>
+<td> NA
+</td>
+<td> Column Short Name. Equivalent to @LS.
+</td>
+<td> <i>%(1,@C)</i>
+</td></tr>
+<tr>
+<td> @LD"<i>name</i>"
+</td>
+<td> NA
+</td>
+<td> The user-defined parameter of specified <i>name</i>.
+</td>
+<td> <i>%(1,@LD"RunNo")</i>
+</td></tr>
+<tr>
+<td> @LG
+</td>
+<td> NA
+</td>
+<td> Long Name (if not available then Short Name) and Units (if present). Equivalent to @U.
+</td>
+<td> <i>%(1,@LG)</i>
+</td></tr>
+<tr>
+<td> @V
+</td>
+<td> <i>RowIndex</i>
+</td>
+<td> The data value at specified row index in plot's Y data
+</td>
+<td>
+<ul><li> <i>&#160;%(1Y, @V, 2)</i> 
+<dl><dd> the 1st plot's Y data's 2nd row value</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td> @WT
+</td>
+<td> <i>ColIndex</i>/<i>ColName</i>, <i>RowIndex</i>[<i>, format]</i>
+</td>
+<td> The sheet cell value specified by the column index (or short name) and row index, with optional format (see <a href="../../LabTalk/LabTalk/Origin_Formats.html" title="LabTalk:Origin Formats">Origin Formats</a>).
+</td>
+<td>
+<ul><li><i>%(1, @WT, 2, 3)</i> 
+<dl><dd>the cell value at column 2, row 3 in the source sheet (worksheet, matrix) of the 1st data plot. </dd></dl></li>
+<li><i>$(&#160;%(1, @WT, 2, 3,.4 ) * 100, .2 )</i>
+<dl><dd> Because it's numeric, get column 2, row 3 value, keep 4 decimal places, times by 100, then format to show 2 decimal places</dd></dl></li>
+<li><i>%(1, @WT, B, 3)</i> 
+<dl><dd>the cell value at column B, row 3 in the source worksheet of the 1st data plot.</dd></dl></li>
+<li><i>%(1, @WT, B, 3, .0)</i> 
+<dl><dd>the cell value at column B, row 3 in the source worksheet of the 1st data plot, show 0 decimal places.</dd></dl></li></ul>
+</td></tr>
+<tr>
+<td> @WT
+</td>
+<td> <i>ColIndex</i>/<i>ColName</i>, <i>ColLabelRowCharacter</i>[<i>, format]</i>
+</td>
+<td> The worksheet cell value specified by the column index (or short name) and <a href="../../LabTalk/LabTalk/Column_Label_Row_Characters.html" title="LabTalk:Column Label Row Characters">column label row character</a>, with optional format for numeric value (see <a href="../../LabTalk/LabTalk/Origin_Formats.html" title="LabTalk:Origin Formats">Origin Formats</a>).
+</td>
+<td>
+<ul><li><i>%(1, @WT, B, C)</i> 
+<dl><dd>Similar to <a href="../../LabTalk/LabTalk/Column_Label_Row_Characters.html#Examples" title="LabTalk:Column Label Row Characters">B[C]$</a>, this will get the Comment from column B, in the source worksheet of the 1st data plot.</dd></dl></li>
+<li> <i>%(1, @WT, 2, D1, *3)</i>
+<dl><dd> get 1st user-defined parameter info. from 2nd column, in the source worksheet of 1st data plot. Suppose it's numeric value, format to show 3 significant digits</dd></dl></li></ul>
+</td></tr></table>
+<p><b>Examples</b>
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Display 1st user parameter info. of 1st plot (Y data for 2d by default)</span>
+legend.<span style="color: #000080;">text</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> \l<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, @LD1<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Ok to skip quotes on right if LHS ends with $</span>
+
+<span style="color: #008000;">//Display 1st plot's Y dataset long name vs X dataset long name</span>
+legend.<span style="color: #000080;">text</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;\l(1)&#160;%(1Y, @LA) vs&#160;%(1X, @LA)&quot;</span>;
+
+<span style="color: #008000;">//Suppose 3 plots are from different sheets, </span>
+<span style="color: #008000;">//Display worksheet name for each plot</span>
+legend.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;\l(1)&#160;%(1,@WS)
+\l(2)&#160;%(2,@WS)
+\l(3)&#160;%(3,@WS)&quot;</span></pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/String_Substitution/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>There is drawback to last script above since all legends must be included in the legend.text$. The <a href="../../LabTalk/Script/Creating_and_Accessing_Graphical_Objects.html#Graph_Legend" title="Script:Creating and Accessing Graphical Objects">legendupdate X-Function</a> provides an easier and more comprehensive way to modify or redraw a legend from Script! E.g.
+</p>
+<dl><dd> legendupdate mode:=custom custom:=@WS</dd></dl>
+</td></tr></table>
+<p>The&#160;%(?Y) for Axis title is a special syntax that allows the text label to default to a pre-specified data plot index (which can be set in <a class="external text" href="../../UserGuide/UserGuide/The_(Plot_Details)_Legends_Titles_Tab.html#Data_Plot_Index_for_Auto_Axis_Titles"><b>Plot Details: Legends/Titles: Data Plot Index for Auto Axis Titles</b></a>), instead of an index (1, 2, ... n) that you supply.
+To display Y data long name followed by units in &lt;&gt; as left Y axis title, use:
+</p>
+<pre class="lt" style="font-family:monospace;">yl.<span style="color: #000080;">text</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>?Y,@<span style="color: #000000;">&#40;</span>@LL<span style="color: #000080;">&lt;</span>@LU<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;</pre>
+<p>Graph legends and axis titles are specialized text labels. For more in-depth discussions of both, see these LabTalk Reference pages:
+</p>
+<ul><li> <a href="../../LabTalk/LabTalk/Text_Label_Options.html" title="LabTalk:Text Label Options">Text Label Substitution</a></li>
+<li> <a href="../../LabTalk/LabTalk/Legend_Substitution_Notation.html" title="LabTalk:Legend Substitution Notation">Legend Substitution Notation</a></li></ul>
+<h2><a name="Keyword_Substitution"></a><span class="mw-headline">Keyword Substitution</span></h2>
+<p>The&#160;%( ) substitution notation is also used to insert <span class="OIndex">non-printing characters</span> (also called <span class="OIndex">control characters</span>), such as tabs or carriage returns into strings.  Use <a href="../../LabTalk/LabTalk/LabTalk_Keywords.html" title="LabTalk:LabTalk Keywords">LabTalk keywords</a> to access these non-printing characters.  For example,
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Insert a carriage-return, line-feed (CRLF) into a string:</span>
+string ss<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Hello%(CRLF)Goodbye&quot;</span>;
+ss<span style="color: #000080;">$</span><span style="color: #000080;">=</span>;     <span style="color: #008000;">// ANS: 'Hello', 'Goodbye' printed on separate lines</span>
+<span style="color: #008000;">// Can be typed directly</span>
+type ss<span style="color: #000080;">$</span>;
+<span style="color: #008000;">// But use&#160;%() substitution when mixed with literals</span>
+ty I say <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>ss<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>CRLF<span style="color: #000000;">&#41;</span>to you;</pre>
+<p>Show legends horizontally, separated by Tab
+</p>
+<pre class="lt" style="font-family:monospace;">legend.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;\l(1)&#160;%(1)%(TAB)\l(2)&#160;%(2)%(TAB)\l(3)&#160;%(3)&quot;</span>;</pre>
+
+

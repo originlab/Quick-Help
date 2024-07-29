@@ -1,0 +1,121 @@
+<h1 class="firstHeading">4.6.8.4 Create a User-Defined Function for the Set Column Values dialog</h1><p class='urlname' style='display: none'>Wks-SetColVal-UserDefFunc</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Supporting_Numeric_.26_String_types_with_data_in_Columns"><span class="tocnumber">2</span> <span class="toctext">Supporting Numeric &amp; String types with data in Columns</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#String"><span class="tocnumber">2.1</span> <span class="toctext">String</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Numeric"><span class="tocnumber">2.2</span> <span class="toctext">Numeric</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Controlling_Access_of_OC_Functions_from_LabTalk"><span class="tocnumber">3</span> <span class="toctext">Controlling Access of OC Functions from LabTalk</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Setting_Category_for_the_Function_in_Function_Menu"><span class="tocnumber">4</span> <span class="toctext">Setting Category for the Function in Function Menu</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Tutorial"><span class="tocnumber">5</span> <span class="toctext">Tutorial</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Introduction"></a><span class="mw-headline">Introduction</span></h2>
+<p>This topic describes how to write an <a class="external text" href="../../OriginC/OCGuide/Basic_Features.html"><b>Origin C</b></a> function so that it can be listed in <a href="../../UserGuide/UserGuide/Menu_Options_and_Dialog_Controls.html#Function_Menu" title="UserGuide:Menu Options and Dialog Controls">the <b>Function</b> menu of <b>Set Column Values</b> dialog</a>.
+</p><p>For general information on how to add your own OC functions to Origin, please refer to this topic: 
+<a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">Calling OC Functions from LabTalk</a>.
+</p><p>For the OC function to be accessible from the <b>Set Column Values</b> dialog, the following additional conditions should be met:
+</p>
+<ul><li> The return type of the function cannot be void.</li>
+<li> The function should not have reference or pointer for variable type</li></ul>
+<p>Once the function is compiled, it will be available in the <b>Function</b> menu drop-down of the <b>Set Column Values</b> dialog.
+</p>
+<h2><a name="Supporting_Numeric_.26_String_types_with_data_in_Columns"></a><span class="mw-headline">Supporting Numeric &amp; String types with data in Columns</span></h2>
+<h3><a name="String"></a><span class="mw-headline">String</span></h3>
+<p>The following is an example of a string function:
+</p>
+<pre class="oc" style="font-family:monospace;">string AddSomethingToStr<span style="color: #000000;">&#40;</span>string str<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  str <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot; test&quot;</span>;
+  <span style="color: #0000ff;">return</span> str;
+<span style="color: #000000;">&#125;</span></pre>
+<p>Once compiled, this function could then be used in the <b>Set Column Values</b> dialog like below:
+</p>
+<pre>
+Col(B) = AddSomethingToStr(Col(A))$; 
+</pre>
+<h3><a name="Numeric"></a><span class="mw-headline">Numeric</span></h3>
+<p>The following is an example of a function that returns an integer:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> CopyNumeric<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nn<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">return</span> nn;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The function can then be accessed from <b>Set Column Values</b> dialog to copy numeric data from one column to another such as:
+</p>
+<pre>
+Col(B) = CopyNumeric(Col(A));
+</pre>
+<h2><a name="Controlling_Access_of_OC_Functions_from_LabTalk"></a><span class="mw-headline">Controlling Access of OC Functions from LabTalk</span></h2>
+<p>Add one of the following #pragma directive to your OC source file to disable, allow, or limit access to your OC functions from LabTalk
+</p>
+<ul><li> #pragma labtalk(0) // disable running OC functions in LabTalk</li>
+<li> #pragma labtalk(1) // default, allow calling OC functions in LabTalk</li>
+<li> #pragma labtalk(2) // run OC functions by run -oc</li></ul>
+<p>Since the default Origin behavior is to allow calling OC functions from LabTalk, <i>#pragma labtalk(1)</i> is not really needed in your OC code. Note that <i>#pragma labtalk(...)</i> affects all functions in that file until another <i>#pragma labtalk(...)</i>. Therefore, if you don't want to put some C functions in the <b>Function</b> menu, you can put <i>#pragma labtalk(0)</i> before the function, and you can put <i>#pragma labtalk(1)</i> again to resume putting the functions in the <b>Function</b> menu. By using this method, you can control and manage the function names in the <b>Function</b> menu.
+</p>
+<h2><a name="Setting_Category_for_the_Function_in_Function_Menu"></a><span class="mw-headline">Setting Category for the Function in Function Menu</span></h2>
+<p>In order for your OC functions to appear in the <b>Function</b> menu under an appropriate category, you should add a pragma statement such as below:
+</p>
+<ul><li> #pragma labtalk(1, Date and Time) // set category name to Date and Time</li></ul>
+<p>The function(s) will then appear in the <b>Function</b> menu of <b>Set Column Values</b> like below, where the example here represents a function that accepts and returns a string:
+</p>
+<pre>
+Date and Time&#160;: FunctionName(str)$
+</pre>
+<p>If no category is specified for your OC function, the function will be shown under the <b>User Origin C</b> category. 
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Create_a_User_Defined_Function_for_Set_Column_Values/Tip_icon.png?v=9614" width="57"  border="0" /></td><td><p>Selecting a built-in function from the <b>Function</b> menu displays a "smart-hint" with basic function information (prototype, what is returned, etc.). You can add such hints to your Origin C functions (<b>Tutorial</b>, below) by inserting comments between <i>/*$$$</i> and <i>$$$*/</i>, as shown:
+</p>
+<dl><dd><a  class="image"><img alt="Smart hints UD OC func.png" src="../images/Create_a_User_Defined_Function_for_Set_Column_Values/Smart_hints_UD_OC_func.png?v=89207" width="752"  /></a></dd></dl>
+<p><br />
+</p></td></tr></table>
+<h2><a name="Tutorial"></a><span class="mw-headline">Tutorial</span></h2>
+<p>The following procedure is a tutorial to add a user-defined function in the <b>Function</b> menu of the <b>Set Values</b> dialog. You can also find the sample codes in <b>internal.c</b> in the <b>\OriginC\System\</b> subfolder in your Origin program directory.
+</p><p><b>Steps:</b>
+</p>
+<ol><li><b>[Open CodeBuilder]:</b> Choose <b>View: Code Builder</b> from the main menu to open <a href="../../UserGuide/UserGuide/The_Code_Builder.html" title="UserGuide:The Code Builder">the Code Builder</a>.</li>
+<li><b>[Enter the File Name]:</b> Choose <b>File: New</b> from the menu in the Code Builder. The <b>New File</b> dialog opens. Choose <b>C File</b> as the file type in the dialog, and enter <b>test</b> in the <b>File Name</b> field (The extension ".c" will be automatically added.) Note that the default location is &lt;User Files Folder&gt;\OriginC\ . Click <b>OK</b>. The dialog is closed, and you see the "test.c" window appears in the editing box.</li>
+<li><b>[Enter the Code]:</b> Enter the following Origin C code at the bottom of this editing window:</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#pragma</span> labtalk<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,Math<span style="color: #000000;">&#41;</span>
+<span style="color: #0000ff;">double</span> add2num<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">double</span> a, <span style="color: #0000ff;">double</span> b<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	  <span style="color: #0000ff;">return</span> a <span style="color: #000040;">+</span> b;
+<span style="color: #000000;">&#125;</span></pre>
+<table class="note">
+
+<tr>
+<td>
+<p><b>Note:</b> The "pragma" line before the function definition is for placing the function in the Math category in <b>Function</b> menu.
+</p>
+</td></tr></table>
+<ol start="4">
+<li><b>[Make Build]:</b> Choose <b>Build: Build</b> from the Code Builder menu to compile the code. Make sure that no errors occurred. If the code compiled successfully, close Code Builder to return to the Origin main window. If error occurred, correct and compile it again.
+</ol>
+<table class="note">
+
+<tr>
+<td><b>Note</b>: See the more information on compiling in: <a class="external text" href="../../OriginC/OCGuide/Compiling,_Linking_and_Loading.html">"Four Methods of Building the Code Builder Workspace"</a> and <a class="external text" href="../../LabTalk/LabTalk/Loading_and_Compiling_Origin_C_Function.html">"Loading and Compiling Origin C Function"</a>.
+</td></tr></table>
+<ol start="5">
+<li> <b>[Open the Set Values dialog]:</b> Go back to the Origin workspace. Create a new workbook. Select <b>Column: Add New Columns</b> from the Origin menu to add a third column to the worksheet in this workbook. Fill the first two columns with any numbers. Highlight the third column by clicking its column header, and choose <b>Column: Set Column Values</b> from the short cut menu to open the <b>Set Values</b> dialog. 
+
+<li><b>[Enter the New Function from Function Menu]</b>: Click the <i>Function</i> menu in the dialog. Under the <b>Math</b> category, you can see the entry: <b>add2num(d1, d2)</b>. Choose the function by clicking it. The text "add2num(a,b)" is inserted into the column formula text box. Edit and modify the inserted text to: 
+<pre class="lt" style="font-family:monospace;">add2num<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>,col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span></pre>
+<li><b>[Run the Set Values]:</b> Click OK, and you will see the sum of the first and second columns in each row in the third column as the result.
+</ol>
+<table class="note">
+<tr>
+<td>
+<p><b>Note:</b> Although this function "add2num" has two (double) scalar arguments, and returns a scalar value, when you run this function in <b>Set Values</b> dialog with two columns (i.e., vectors) as its arguments, the results are filled in the target column because <b>Set Values</b> dialog applies the formula to each element (indexed by <b>i</b> implicitly) automatically.
+</p>
+</td></tr></table>
+
+

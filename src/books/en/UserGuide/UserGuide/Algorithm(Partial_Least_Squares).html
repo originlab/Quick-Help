@@ -1,0 +1,138 @@
+<h1 class="firstHeading">17.7.2.3 Algorithms (Partial Least Squares)</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Partial_Least_Squares_Method"><span class="tocnumber">1</span> <span class="toctext">Partial Least Squares Method</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Wold.27s_Iterative"><span class="tocnumber">1.1</span> <span class="toctext">Wold's Iterative</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#SVD"><span class="tocnumber">1.2</span> <span class="toctext">SVD</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Cross_Validation"><span class="tocnumber">2</span> <span class="toctext">Cross Validation</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Response_Prediction"><span class="tocnumber">3</span> <span class="toctext">Response Prediction</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Quantities"><span class="tocnumber">4</span> <span class="toctext">Quantities</span></a></li>
+</ul>
+</div>
+
+<p class='urlname' style='display: none'>PLS-Algorithm</p>
+<p><br />
+<b>Partial Least Squares</b> is used to construct a model where there is a large number of correlated predictor variables or when the number of predictor variables exceeds the number of observations. In these cases, use of multiple linear regression techniques often fails to produce a predictive model, due to over-fitting. Partial least squares finds a use in modeling industrial processes and for such things as calibrating and predicting component amounts in spectral analysis.
+</p><p>Partial least squares extracts factors by linear combinations of predictor variables, and projects predictor variables and response variables onto the extracted factor space.
+</p><p>An observation containing one or more missing values will be excluded from the analysis, i.e. excluded in a listwise way.
+</p><p>Let numbers of observations, predictor variables and response variables be <b>n</b>, <b>m</b> and <b>r</b> respectively. Predictor variables are denoted by the matrix <b>X</b> with size of <img src="../images/Algorithm(Partial_Least_Squares)/math-6bfb727b656d02ac43818be9f0eb9951.png?v=0" title="n \times m" alt="n \times m" class="tex"/>, and response variables by <b>Y</b> with size of <img src="../images/Algorithm(Partial_Least_Squares)/math-af98676085fb502b67ab7824d5d311ab.png?v=0" title="n \times r" alt="n \times r" class="tex"/>. Subtract the mean from each column in matrices <b>X</b> and <b>Y</b>, and let them be <img src="../images/Algorithm(Partial_Least_Squares)/math-7204a8dfdb61b3496295b04c057e337d.png?v=0" title="X_0" alt="X_0" class="tex"/> and <img src="../images/Algorithm(Partial_Least_Squares)/math-85e22683116ee1466ea1a9ec5036fc20.png?v=0" title="Y_0" alt="Y_0" class="tex"/>.
+</p>
+<ul><li> Scale Variables</li></ul>
+<p>Each column in the matrix <img src="../images/Algorithm(Partial_Least_Squares)/math-7204a8dfdb61b3496295b04c057e337d.png?v=0" title="X_0" alt="X_0" class="tex"/> is divided by the standard deviation.
+</p>
+<h2><a name="Partial_Least_Squares_Method"></a><span class="mw-headline">Partial Least Squares Method</span></h2>
+<p>Origin supports two methods to compute extracted factors: <b>Wold's Iterative</b> and <b>Singular Value Decomposition (SVD)</b>.
+</p>
+<h3><a name="Wold.27s_Iterative"></a><span class="mw-headline">Wold's Iterative</span></h3>
+<p>Use the initial vector <b>u</b>. If r=1, initialize u=Y, otherwise u can be a vector of random values.
+</p>
+<ul><li> Repeat each iteration until <b>w</b> converges.</li></ul>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-b6b50101810e64cf8accaa230ecdb182.png?v=0" title="w=X_0^Tu" alt="w=X_0^Tu" class="tex"/>, and normalize w by <img src="../images/Algorithm(Partial_Least_Squares)/math-b66a5ae450a857691794bb99dcfbfb49.png?v=0" title="w=w/|| w ||" alt="w=w/|| w ||" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-38f9932f42606abf00f0c4b37a0e8a1c.png?v=0" title="t=X_0w" alt="t=X_0w" class="tex"/>, and normalize t by <img src="../images/Algorithm(Partial_Least_Squares)/math-bdb5de551100700f2538f41d5d7e4568.png?v=0" title="t=t/|| t ||" alt="t=t/|| t ||" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-8af0e35756f39c13f5e14818e651daf8.png?v=0" title="q=Y_0^Tt" alt="q=Y_0^Tt" class="tex"/>, and normalize q by <img src="../images/Algorithm(Partial_Least_Squares)/math-122282269731d839a51bb2afdea640f9.png?v=0" title="q=q/|| q ||" alt="q=q/|| q ||" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-ccf5221c571441660f8e3c74bca4b9ed.png?v=0" title="u=Y_0q" alt="u=Y_0q" class="tex"/></dd></dl>
+<p>After <b>w</b> converges, update
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-38f9932f42606abf00f0c4b37a0e8a1c.png?v=0" title="t=X_0w" alt="t=X_0w" class="tex"/>, and normalize t by <img src="../images/Algorithm(Partial_Least_Squares)/math-bdb5de551100700f2538f41d5d7e4568.png?v=0" title="t=t/|| t ||" alt="t=t/|| t ||" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-730e6da5ac16fd9ceefe41c082da1252.png?v=0" title="p=X_0^Tt" alt="p=X_0^Tt" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-8af0e35756f39c13f5e14818e651daf8.png?v=0" title="q=Y_0^Tt" alt="q=Y_0^Tt" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-ccf5221c571441660f8e3c74bca4b9ed.png?v=0" title="u=Y_0q" alt="u=Y_0q" class="tex"/></dd></dl>
+<dl><dd> where <b>w</b>, <b>t</b>, <b>u</b>, <b>p</b>, <b>q</b> are x weights, x scores, y scores, x loadings and y loadings for the first factor. </dd></dl>
+<ul><li> Repeat the above process with the residual matrices <b>k</b> times:</li></ul>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-93d56c341b0ca427c9f7726ae13b7422.png?v=0" title="\hat{X}_0=X_0-tp^T" alt="\hat{X}_0=X_0-tp^T" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-51e61b0988638a3c901508377b8abf9a.png?v=0" title="\hat{Y}_0=Y_0-tq^T" alt="\hat{Y}_0=Y_0-tq^T" class="tex"/></dd></dl>
+<p>and <b>k</b> factors can be constructed. x weights, x scores, y scores, x loadings and y loadings for <b>k</b> factors can be denoted by matrices: <b>W</b>, <b>T</b>, <b>U</b>, <b>P</b>, and <b>Q</b>.
+</p><p>Note that in Origin signs of x scores, y scores, x loadings and y loadings for each factor are normalized by forcing the sum of x weights for each factor to be positive.
+</p>
+<h3><a name="SVD"></a><span class="mw-headline">SVD</span></h3>
+<ul><li> X Weights for the First Factor</li></ul>
+<p><b>w</b> is the normalized first left singular vector of <img src="../images/Algorithm(Partial_Least_Squares)/math-d3b7fcc35bfc8a4c8754ac87eb445dce.png?v=0" title="X_0^TY_0" alt="X_0^TY_0" class="tex"/>, and,
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-38f9932f42606abf00f0c4b37a0e8a1c.png?v=0" title="t=X_0w" alt="t=X_0w" class="tex"/>, and normalize t by <img src="../images/Algorithm(Partial_Least_Squares)/math-bdb5de551100700f2538f41d5d7e4568.png?v=0" title="t=t/|| t ||" alt="t=t/|| t ||" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-730e6da5ac16fd9ceefe41c082da1252.png?v=0" title="p=X_0^Tt" alt="p=X_0^Tt" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-8af0e35756f39c13f5e14818e651daf8.png?v=0" title="q=Y_0^Tt" alt="q=Y_0^Tt" class="tex"/></dd>
+<dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-ccf5221c571441660f8e3c74bca4b9ed.png?v=0" title="u=Y_0q" alt="u=Y_0q" class="tex"/></dd></dl>
+<ul><li> Repeat the above process with the residual matrices <b>k</b> times.</li></ul>
+<p>And <b>k</b> factors can be extracted.
+</p>
+<h2><a name="Cross_Validation"></a><span class="mw-headline">Cross Validation</span></h2>
+<p>Origin uses "leave-one-out" to find the optimal number of factors. It leaves out one observation each time and uses other observations to construct the model and predict responses for the observation.
+</p>
+<ul><li> PRESS</li></ul>
+<p><b>PRESS</b> is the predicted residual sum of squares. It can be calculated by:
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-2bb99673c7dae505a5074d37a34238cc.png?v=0" title="\text{PRESS} = \sum_{i=1}^n \sum_{j=1}^r (Y_{ij} - \hat{Y}_{ij})^2" alt="\text{PRESS} = \sum_{i=1}^n \sum_{j=1}^r (Y_{ij} - \hat{Y}_{ij})^2" class="tex"/></dd>
+<dd> where <img src="../images/Algorithm(Partial_Least_Squares)/math-d338719f401d4c4ebc7500be0b29514f.png?v=0" title="\hat{Y}_{ij}" alt="\hat{Y}_{ij}" class="tex"/> is the predicted Y value by leave-one-out.</dd></dl>
+<p><b>Note</b> that if variables are scaled, PRESS is the scaled result.
+</p><p>If maximum number of factors is <b>k</b>, then it will calculate PRESS for 0, 1, ... <b>k</b> factors. For 0 factor,
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-b7d18e5222c06e7b0e22724d6663c1a0.png?v=0" title="\text{PRESS} = \sum_{i=1}^n \sum_{j=1}^r (Y_{ij} - \bar{Y}_{j})^2" alt="\text{PRESS} = \sum_{i=1}^n \sum_{j=1}^r (Y_{ij} - \bar{Y}_{j})^2" class="tex"/></dd>
+<dd> where <img src="../images/Algorithm(Partial_Least_Squares)/math-8c45df17a99a3ed466ee1e93bd254c0b.png?v=0" title="\bar{Y}_{j}" alt="\bar{Y}_{j}" class="tex"/> is the mean value for <b>j</b>th Y variable.</dd></dl>
+<ul><li> Root Mean PRESS</li></ul>
+<p>Root mean PRESS is the root mean of PRESS. It is defined by:
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-c89e91c6b17eb49a2f586459c42e1a28.png?v=0" title="\text{Root Mean PRESS} = \sqrt{ \frac{\text{PRESS}}{ (n-1)r } }" alt="\text{Root Mean PRESS} = \sqrt{ \frac{\text{PRESS}}{ (n-1)r } }" class="tex"/></dd></dl>
+<p>Origin uses the minimum <b>Root Mean PRESS</b> to find the optimal number of factors in <b>Cross Validation</b>.
+</p>
+<h2><a name="Response_Prediction"></a><span class="mw-headline">Response Prediction</span></h2>
+<p>Once the model is constructed, responses can be predicted by coefficients of the fitted model. Coefficients are calculated from weights and loadings matrix:
+</p>
+<dl><dd> <img src="../images/Algorithm(Partial_Least_Squares)/math-02f4f161619c2ac7b8f60b1a8ec75377.png?v=0" title=" C = W(P^TW)^{-1}Q^T" alt=" C = W(P^TW)^{-1}Q^T" class="tex"/></dd></dl>
+<p>And the predicted responses are calculated as:
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-863ee5c8217b01dc657f2a57041bf0c4.png?v=0" title="\hat{Y}_0 = C X_{0}" alt="\hat{Y}_0 = C X_{0}" class="tex"/></dd></dl>
+<p>Note that here variables are centered. If variables are also scaled, responses should be scaled back.
+</p>
+<h2><a name="Quantities"></a><span class="mw-headline">Quantities</span></h2>
+<ul><li> Variance Explained for X Effects</li></ul>
+<p>Variance Explained for the <i>l</i>th X variable,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-9454ddb3b66073775022dfe4c601d7e6.png?v=0" title="\frac{ \sum_{j=1}^{k} P_{lj}^2 }{ \sum_{i=1}^{n} {X_0}_{il}^2 }" alt="\frac{ \sum_{j=1}^{k} P_{lj}^2 }{ \sum_{i=1}^{n} {X_0}_{il}^2 }" class="tex"/></dd></dl>
+<p>Variance Explained for X variables,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-e227ae838508b8c3dbe33344011b25cf.png?v=0" title="\frac{ \sum_{l=1}^{m} \sum_{j=1}^{k} P_{lj}^2 }{ \sum_{l=1}^{m} \sum_{i=1}^{n} {X_0}_{il}^2 }" alt="\frac{ \sum_{l=1}^{m} \sum_{j=1}^{k} P_{lj}^2 }{ \sum_{l=1}^{m} \sum_{i=1}^{n} {X_0}_{il}^2 }" class="tex"/></dd></dl>
+<ul><li> Variance Explained for Y Responses</li></ul>
+<p>Variance Explained for the <i>l</i>th Y variable,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-e484a3503851dbdad1acb9ab9d2669e5.png?v=0" title="\frac{ \sum_{j=1}^{k} Q_{lj}^2 }{ \sum_{i=1}^{n} {Y_0}_{il}^2 }" alt="\frac{ \sum_{j=1}^{k} Q_{lj}^2 }{ \sum_{i=1}^{n} {Y_0}_{il}^2 }" class="tex"/></dd></dl>
+<p>Variance Explained for Y variables,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-8fa4ab98f0ecff18c88fde7a722e512b.png?v=0" title="\frac{ \sum_{l=1}^{r} \sum_{j=1}^{k} Q_{lj}^2 }{ \sum_{l=1}^{r} \sum_{i=1}^{n} {Y_0}_{il}^2 }" alt="\frac{ \sum_{l=1}^{r} \sum_{j=1}^{k} Q_{lj}^2 }{ \sum_{l=1}^{r} \sum_{i=1}^{n} {Y_0}_{il}^2 }" class="tex"/></dd></dl>
+<ul><li> VIP Statistic</li></ul>
+<p>VIP (variable influence on projections) explains each predictor variable using the mean variance in responses.
+</p>
+<ul><li> Residual</li></ul>
+<p>X Residuals,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-39aea3e39f856d1056159322814df5be.png?v=0" title="X_r = X_0 - TP^T" alt="X_r = X_0 - TP^T" class="tex"/></dd></dl>
+<p>Y Residuals,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-9a5df1c150cac2d9932562fb94f2bb68.png?v=0" title="Y_r = Y_0 - TQ^T" alt="Y_r = Y_0 - TQ^T" class="tex"/></dd></dl>
+<p>When variables are scaled, residuals should be scaled back.
+</p>
+<ul><li> Distances</li></ul>
+<p>Distances to X model for the ith observation,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-d6dc7ff1a8b24c9af5825689cecd65bf.png?v=0" title="\text{Dist}_x = \sqrt{ \sum_{j=1}^m X_{rij}^2 }" alt="\text{Dist}_x = \sqrt{ \sum_{j=1}^m X_{rij}^2 }" class="tex"/></dd></dl>
+<p>Distances to Y model for the ith observation,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-b570af1cb5d8f2d9d602291ffffcda89.png?v=0" title="\text{Dist}_y = \sqrt{ \sum_{j=1}^r Y_{rij}^2 }" alt="\text{Dist}_y = \sqrt{ \sum_{j=1}^r Y_{rij}^2 }" class="tex"/></dd></dl>
+<ul><li> T Square</li></ul>
+<p>T Square for the ith observation,
+</p>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-485318be3ff60bd28173132ec5f68bac.png?v=0" title="T^2=\sum_{j=1}^k \frac{T_{ij}}{\text{Var}_j}" alt="T^2=\sum_{j=1}^k \frac{T_{ij}}{\text{Var}_j}" class="tex"/></dd></dl>
+<p>where <img src="../images/Algorithm(Partial_Least_Squares)/math-fb263895839a43be9f27e4303d05371b.png?v=0" title="\text{Var}_j" alt="\text{Var}_j" class="tex"/> is the variance for X scores of the jth factor.
+</p>
+<ul><li> Control Limit for T Square</li></ul>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-f0892d0e56f3583c093037f56a0a205b.png?v=0" title="n(n-1)^2\text{betainv}(0.95,k/2.0,(n-k-1)/2.0)" alt="n(n-1)^2\text{betainv}(0.95,k/2.0,(n-k-1)/2.0)" class="tex"/></dd></dl>
+<ul><li> Radius for Confidence Ellipse in Scores Plot</li></ul>
+<dl><dd><img src="../images/Algorithm(Partial_Least_Squares)/math-5875c784787a0d8a31f68b77e53eccf9.png?v=0" title="\sqrt{(n-1)^2/n \cdot \text{betainv}(0.95,1,(n-3)/2.0) \cdot \text{Var}_j}" alt="\sqrt{(n-1)^2/n \cdot \text{betainv}(0.95,1,(n-3)/2.0) \cdot \text{Var}_j}" class="tex"/></dd></dl>
+<p>where <img src="../images/Algorithm(Partial_Least_Squares)/math-fb263895839a43be9f27e4303d05371b.png?v=0" title="\text{Var}_j" alt="\text{Var}_j" class="tex"/> is the variance for X scores or Y scores of the jth factor.
+</p>
+
+
+
+
+

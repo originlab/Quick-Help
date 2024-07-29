@@ -1,0 +1,110 @@
+<h1 class="firstHeading">2.7.3.3 Date and Time Data</h1><p class='urlname' style='display: none'>Date-and-Time-Data</p>
+<p><span class="OIndex" style="display:none">Time</span><span class="OIndex" style="display:none">Date</span>While the various string formats used for displaying date and time information are useful in conveying information to users, a mathematical basis for these values is needed to support plotting and analysis involving date-time data. 
+</p><p>Origin's <a class="external text" href="../../UserGuide/UserGuide/Dates_and_Times_in_Origin.html#Origin.27s_Mathematical_System_for_Date_and_Time">default date-time system</a> is a modification of the Astronomical Julian Date system to store dates and time. In this system, time zero is 12 noon on January 1, 4713 BCE. The integer part of the number represents the number of days since time zero and the fractional part is the fraction of a 24 hour day. Origin offsets this value by subtracting 12 hours (0.50 days) to put day transitions at midnight, rather than noon. It should also be noted that Origin supports two <a class="external text" href="../../UserGuide/UserGuide/Dates_and_Times_in_Origin.html#Alternate_Date-Time_Systems_in_Origin">alternate date-time systems</a>.
+</p><p>The next few examples are dedicated to dealing with <span class="OIndex">date and time data</span> in your LabTalk scripts.
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Date_and_Time_Data/Tip_icon.png?v=0" width="57"  border="0" /></td><td><p>You can opt not to display missing values in your date-time data by setting the value of system variable <a href="../../LabTalk/LabTalk/System_Variable_List.html#H.2CI.2CJ.2CK" title="LabTalk:System Variable List"><b>@JM</b></a>.
+</p></td></tr></table>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Dates_and_Times"><span class="tocnumber">1</span> <span class="toctext">Dates and Times</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Formatting_for_Output"><span class="tocnumber">2</span> <span class="toctext">Formatting for Output</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Available_Formats"><span class="tocnumber">2.1</span> <span class="toctext">Available Formats</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Custom_Formats"><span class="tocnumber">2.2</span> <span class="toctext">Custom Formats</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Dnn_notation"><span class="tocnumber">2.2.1</span> <span class="toctext">D<i>nn</i> notation</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Wks.Col.SetFormat_object_method"><span class="tocnumber">2.2.2</span> <span class="toctext">Wks.Col.SetFormat object method</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Dates_and_Times"></a><span class="mw-headline">Dates and Times</span></h2>
+<p>As an example, say you have Date data in Column 1 of your active sheet and Time data in Column 2. You would like to store the combined date-time as a single column.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/* Since both date and time have a mathematical basis, 
+   they can be added: */</span>
+Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">+</span> Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// By default, the new column will display as a number of days ...</span>
+<span style="color: #008000; font-style: regular;">/* Use format and subformat methods to set 
+   the date/time display of your choice: */</span>
+
+<span style="color: #008000;">// Format #4 is the date format</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #008000;">// Subformat #11 is MM/dd/yyyy hh:mm:ss              </span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;</pre>
+<p>The column number above was hard-coded into the format statement; if instead you had the column number as a variable named <b>cn</b>, you could replace the number <b>3</b> with <b>$(cn)</b> as in <b>wks.col$(cn).format = 4</b>.  For other <b>format</b> and <b>subformat</b> options, see <a href="../../LabTalk/LabTalk/Wks.Col_(object)&amp;action=edit&amp;redlink=1.html" class="new" title="LabTalk:Wks.Col (object) (page does not exist)">LabTalk Language Reference: Object Reference: Wks.col (object)</a>.
+</p><p>If our date and time column are just text with a <b>MM/dd/yyyy</b> format in Column 1 and <b>hh:mm:ss</b> format in Column 2, the same operation is possible with a few more lines of code:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Get the number of rows to loop over.</span>
+int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span>;                 
+
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,nn<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#123;</span>                           
+  string dd<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;
+  string tt<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;
+  <span style="color: #008000;">// Store the combined date-time string just as text</span>
+  Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> dd<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> tt<span style="color: #000080;">$</span>;  
+  <span style="color: #008000;">// Date function converts the date-time string to a numeric date value</span>
+  Col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>ii<span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> date<span style="color: #000000;">&#40;</span><span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>dd<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>tt<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;  
+<span style="color: #000000;">&#125;</span>;
+<span style="color: #008000;">// Now we can convert column 4 to a true Date column</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// Convert to a Date column</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>; <span style="color: #008000;">// Display as M/d/yyyy hh:mm:ss</span></pre>
+<p>Here, an intermediate column has been formed to hold the combined date-time as a string, with the resulting date-time (numeric) value stored in a fourth column.
+While they appear to be the same text, column C is literally just text and column D is a true Date.
+</p><p>Given this mathematical system, you can calculate the difference between two Date values which will result in a Time value (the number of days, hours and minutes between the two dates) and you can add a Time value to a Date value to calculate a new Date value. You can also add Time data to Time data and get valid Time data, but you cannot add Date data to Date data.
+</p>
+<h2><a name="Formatting_for_Output"></a><span class="mw-headline">Formatting for Output</span></h2>
+<h3><a name="Available_Formats"></a><span class="mw-headline">Available Formats</span></h3>
+<p>Use the <span class="OIndex" style="display:none">Date format notation</span><span class="OIndex" style="display:none">D notation</span><b>D</b> notation to <span class="OIndex">convert a numeric date value</span> into a <span class="OIndex">date-time string</span> using one of Origin's built-in Date subformats:
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(@D, D10)&quot;</span>;</pre>
+<p>returns the current date and time (stored in the system variable <b>@D</b>) as a readable string:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #0000dd;">7</span><span style="color: #000080;">/</span><span style="color: #0000dd;">20</span><span style="color: #000080;">/</span><span style="color: #0000dd;">2009</span> <span style="color: #0000dd;">10</span><span style="color: #000000;">:</span><span style="color: #0000dd;">30</span><span style="color: #000000;">:</span><span style="color: #0000dd;">48</span></pre>
+<p>The <b>D10</b> option corresponds to the <b>MM/dd/yyyy hh:mm:ss</b> format. Many other output formats are available by changing the number after the D character, which is the index entry (from 0) in the <b>Date Format</b> drop down list of the Worksheet Column Format dialog box, in the line of script above. The first entry (index = 0) is the Windows Short Date format, while the second is the Windows Long Date format.
+</p><p><b>Note&#160;:</b> <i>The <b>D</b> must be uppercase. When setting a worksheet subformat as in wks.col3.subformat = #, these values are indexed from 1.</i>
+</p><p>For instance
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(date(7/20/2009), D1)&quot;</span>;</pre>
+<p>produces, using U.S. Regional settings,
+</p>
+<pre class="lt" style="font-family:monospace;">Monday, July <span style="color: #0000dd;">20</span>, <span style="color: #0000dd;">2009</span></pre>
+<p>Similarly, for time values alone, there is an analagous <span class="OIndex">T notation</span><span class="OIndex" style="display:none">Time format notation</span>, to format output:
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(time(12:04:14), T5)&quot;</span>;   <span style="color: #008000;">// ANS: 12:04 PM</span></pre>
+<p>Formatting dates and times in this way uses one specific form of the more general <a href="../../LabTalk/LabTalk/Numeric_to_String_Conversion.html" title="LabTalk:Numeric to String Conversion">$() Substitution</a> notation.
+</p>
+<h3><a name="Custom_Formats"></a><span class="mw-headline">Custom Formats</span></h3>
+<p>There are three custom date and time formats - two of which are script editable properties and one which is editable in the Column Properties dialog or using a worksheet column object method.
+</p>
+<ol><li> <b>system.date.customformat<i>n</i>$</b></li>
+<li> <b>wks.col.SetFormat</b> object method.</li></ol>
+<p>Both methods use date-time specifiers, such as <b>yyyy'.'MM'.'dd</b>, to designate the custom format.  Please observe that:
+</p>
+<ul><li> The text portions (non-space delimiters) of the date-time specifier can be changed as required, but must be surrounded by single quotes.  </li>
+<li> The specifier tokens themselves (i.e., yyyy, HH, etc.) are case sensitive and need to be used exactly as shown&#8212; all possible specifier tokens can be found in the <a href="../../LabTalk/LabTalk/Date_and_Time_Format_Specifiers.html" title="LabTalk:Date and Time Format Specifiers">Reference Tables: Date and Time Format Specifiers</a>.</li>
+<li> The first two formats store their descriptions in local file storage and as such may appear different in other login accounts. The third format stores its description in the column itself.</li></ul>
+<h4><a name="Dnn_notation"></a><span class="mw-headline">D<i>nn</i> notation</span></h4>
+<p>Origin has reserved <b>D19</b> to <b>D21</b> (subformats 20 to 22, since the integer after D starts its count from 0) for these custom date displays.  The options D19 and D20 are controlled by system variables <b>system.date.customformat1$</b> and <b>system.date.customformat2$</b>, respectively.  To use this option for output, follow the example below:
+</p>
+<pre class="lt" style="font-family:monospace;"> 
+system.<span style="color: #000080;">date</span>.<span style="color: #000080;">customformat1</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> MMM dd hh<span style="color: #ff00ff;">'.'</span>mm tt;
+type <span style="color: #ff00ff;">&quot;$(Date(7/25/09 14:47:21),D19)&quot;</span>;      <span style="color: #008000;">// Output: Jul 25 02.47 PM </span>
+
+system.<span style="color: #000080;">date</span>.<span style="color: #000080;">customformat2</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> yy<span style="color: #ff00ff;">','</span>MM<span style="color: #ff00ff;">','</span>dd H<span style="color: #ff00ff;">'.'</span>mm<span style="color: #ff00ff;">'.'</span>ss<span style="color: #ff00ff;">'.'</span>####;
+type <span style="color: #ff00ff;">&quot;$(Date(7/27/09 8:22:37.75234),D20)&quot;</span>; <span style="color: #008000;">// Output: 09,07,27 8.22.37.7523</span></pre>
+<h4><a name="Wks.Col.SetFormat_object_method"></a><span class="mw-headline">Wks.Col.SetFormat object method</span></h4>
+<p>To specify a custom date display for a date column which is stored in the worksheet column, use the <a href="../../LabTalk/LabTalk/Wks.Col_(object)&amp;action=edit&amp;redlink=1.html" class="new" title="LabTalk:Wks.Col (object) (page does not exist)">Wks.Col.SetFormat</a> object method.  When entering the custom date format specifier, be sure to surround any non-date characters with single quotes.  Also note that this object method works on columns of the active worksheet only.
+</p><p>In the following example, column 4 of the active worksheet is set to display a custom date/time format:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// wks.format=4 (date), wks.subformat=22 (custom)</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">SetFormat</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">22</span>, yyyy<span style="color: #ff00ff;">'-'</span>MM<span style="color: #ff00ff;">'-'</span>dd HH<span style="color: #ff00ff;">':'</span>mm<span style="color: #ff00ff;">':'</span>ss<span style="color: #ff00ff;">'.'</span>###<span style="color: #000000;">&#41;</span>;
+doc <span style="color: #000080;">-</span>uw; <span style="color: #008000;">// Refresh the worksheet to show the change</span></pre>
+
+

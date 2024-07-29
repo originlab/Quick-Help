@@ -1,0 +1,72 @@
+<h1 class="firstHeading">2.1.1.1 okoc_out_msg</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Origin's general message output function
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> okoc_out_msg<span style="color: #000000;">&#40;</span> LPCSTR lpcsz, <span style="color: #0000ff;">char</span> cMsgType <span style="color: #000080;">=</span> <span style="color: #ff00ff;">'E'</span>, <span style="color: #0000ff;">BOOL</span> bAddCRLF <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpcsz</dt>
+<dd>[input] the string to print. If lpcsz is NULL, it only tests current output setting which is one of the values from the enumeration below</dd></dl>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">enum</span> <span style="color: #000000;">&#123;</span>
+	OUTMSG_NONE,
+	OUTMSG_CMD_OUT,	 <span style="color: #008000;">// current command prompt output, can be Command Window or Script Window</span>
+	OUTMSG_CMD_OUT_OPEN_SCRIPT_WIN,	<span style="color: #008000;">// if no current command prompt output, will open Script Window</span>
+	OUTMSG_CB_CMD_OUT,		  <span style="color: #008000;">// CodeBuilder command output</span>
+	OUTMSG_CB_COMPILER_OUT,	  
+
+	OUTMSG_SCRIPT_WIN,		<span style="color: #008000;">// classic script window regardless of current command prompt</span>
+	OUTMSG_SCRIPT_WIN_FORCE_OPEN,
+<span style="color: #000000;">&#125;</span>;</pre>
+<dl><dt> cMsgType</dt>
+<dd>[input] </dd>
+<dd>'W' for warning message, controlled by Labtalk system variable @NOW, default = 2(OUTMSG_CMD_OUT_OPEN_SCRIPT_WIN)</dd>
+<dd>'I' for info message, controlled by Labtalk system variable @NOI, default = 6(OUTMSG_SCRIPT_WIN_FORCE_OPEN)</dd>
+<dd>'E' for error message, controlled by Labtalk system variable @NOE, default = 6(OUTMSG_SCRIPT_WIN_FORCE_OPEN)</dd>
+<dd>'R' for result message, controlled by Labtalk system variable @NOR, default = 2(OUTMSG_CMD_OUT_OPEN_SCRIPT_WIN)</dd>
+<dd>'D' for debug message, controlled by Labtalk system variable @NOD, default = 3(OUTMSG_CB_CMD_OUT)</dd>
+<dd>Type @NOE= in script window to get the value; type @NOE=2 in script window to change the value.</dd></dl>
+<dl><dt> bAddCRLF</dt>
+<dd>[input] continue adding to the same line if  FALSE, otherwise adding to a new line.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>return OUTMSG_NONE if that type of msg output has been turned off
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>okocUtils.<span style="color: #000000;">h</span> <span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> okoc_out_msg_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string strMsg <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Error! Please check your input data.&quot;</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> okoc_out_msg<span style="color: #000000;">&#40;</span>strMsg, <span style="color: #ff00ff;">'E'</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;    
+    out_int<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;output window type = &quot;</span>, nRet<span style="color: #000000;">&#41;</span>;  
+
+    <span style="color: #008000;">// &quot;Error! Please check your input data.&quot; output in script window, </span>
+    <span style="color: #008000;">// and in default case, the output window type should be 6.    </span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>okocUtils.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+

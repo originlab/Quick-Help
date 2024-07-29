@@ -1,0 +1,98 @@
+<h1 class="firstHeading">3.13.1 Pipe Client example</h1><p><br />
+</p>
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>This sample, read data from the pipe server and put them to worksheet directly. Here, for demo, use LT command to delay .3 seceond between read data from pipe. See <a href="../../OriginC/OriginC/Pipe_Server_example.html" title="OriginC:Pipe Server example"> Server Sample </a>
+</p>
+<h2><a name="Sample_codes"></a><span class="mw-headline">Sample codes</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#define</span> PIPE_BUFFER_SIZE <span style="color: #0000dd;">1024</span>
+<span style="color: #008000;">// if server is at a remote machine named dev4</span>
+<span style="color: #008000;">//#define PIPENAME  &quot;\\\\dev4\\pipe\\OriginTestPipe&quot;</span>
+<span style="color: #008000;">// for local server</span>
+<span style="color: #0000ff;">#define</span> PIPENAME  <span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\\</span><span style="color: #666666; font-weight: bold;">\\</span>.<span style="color: #666666; font-weight: bold;">\\</span>pipe<span style="color: #666666; font-weight: bold;">\\</span>OriginTestPipe&quot;</span> 
+  
+<span style="color: #0000ff;">int</span> testpipe_client<span style="color: #000000;">&#40;</span>string strPipeName <span style="color: #000080;">=</span> PIPENAME, <span style="color: #0000ff;">int</span> nWaitLoops <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;no active worksheet, abort.&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+    HANDLE hPipe; 
+    string strMessage; 
+    <span style="color: #0000ff;">BOOL</span> fSuccess; 
+    <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span> 
+        <span style="color: #008000;">// Try to open a named pipe; wait for it, if necessary. </span>
+        hPipe <span style="color: #000080;">=</span> CreateFile<span style="color: #000000;">&#40;</span> 
+             strPipeName, 
+             GENERIC_READ <span style="color: #000040;">|</span> GENERIC_WRITE, 
+             <span style="color: #0000dd;">0</span>,              <span style="color: #008000;">// no sharing </span>
+             <span style="color: #0000ff;">NULL</span>,           <span style="color: #008000;">// no security attributes</span>
+             OPEN_EXISTING,  <span style="color: #008000;">// opens existing pipe </span>
+             <span style="color: #0000dd;">0</span>,              <span style="color: #008000;">// default attributes </span>
+             <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;          <span style="color: #008000;">// no template file </span>
+    
+        <span style="color: #008000;">// Break if the pipe handle is valid. </span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>hPipe <span style="color: #000040;">!</span><span style="color: #000080;">=</span> INVALID_HANDLE_VALUE<span style="color: #000000;">&#41;</span> 
+            <span style="color: #0000ff;">break</span>; 
+     
+        <span style="color: #008000;">// All pipe instances are busy, so wait for 20 seconds. </span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>WaitNamedPipe<span style="color: #000000;">&#40;</span>strPipeName, <span style="color: #0000dd;">20000</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">||</span> <span style="color: #000040;">++</span>ii <span style="color: #000080;">&gt;</span> nWaitLoops<span style="color: #000000;">&#41;</span> 
+        <span style="color: #000000;">&#123;</span>
+            out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Could not open pipe &quot;</span> <span style="color: #000040;">+</span> strPipeName<span style="color: #000000;">&#41;</span>; 
+            <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span>;          
+        <span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span> 
+    
+    <span style="color: #008000;">// The pipe connected; change to message-read mode. </span>
+    DWORD dwMode <span style="color: #000080;">=</span> PIPE_READMODE_MESSAGE; 
+    fSuccess <span style="color: #000080;">=</span> SetNamedPipeHandleState<span style="color: #000000;">&#40;</span> 
+      hPipe,    <span style="color: #008000;">// pipe handle </span>
+      <span style="color: #000040;">&amp;</span>dwMode,  <span style="color: #008000;">// new pipe mode </span>
+      <span style="color: #0000ff;">NULL</span>,     <span style="color: #008000;">// don't set maximum bytes </span>
+      <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">// don't set maximum time </span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>fSuccess<span style="color: #000000;">&#41;</span> 
+    <span style="color: #000000;">&#123;</span>
+		CloseHandle<span style="color: #000000;">&#40;</span>hPipe<span style="color: #000000;">&#41;</span>; 
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;failed at SetNamedPipeHandleState&quot;</span><span style="color: #000000;">&#41;</span>; 
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>;          
+    <span style="color: #000000;">&#125;</span>
+    
+	<span style="color: #0000ff;">char</span> chBuf<span style="color: #000000;">&#91;</span>PIPE_BUFFER_SIZE<span style="color: #000000;">&#93;</span>; 
+    DWORD cbRead, cbWritten;
+    
+	<span style="color: #0000ff;">while</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> 
+    <span style="color: #000000;">&#123;</span> 
+        <span style="color: #008000;">// Read from the server pipe. </span>
+        fSuccess <span style="color: #000080;">=</span> ReadFile<span style="color: #000000;">&#40;</span> 
+             hPipe,    <span style="color: #008000;">// pipe handle </span>
+             chBuf,    <span style="color: #008000;">// buffer to receive reply </span>
+             PIPE_BUFFER_SIZE,      <span style="color: #008000;">// size of buffer </span>
+             <span style="color: #000040;">&amp;</span>cbRead,  <span style="color: #008000;">// number of bytes read </span>
+             <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">// not overlapped </span>
+    
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span> fSuccess <span style="color: #000000;">&#41;</span> <span style="color: #008000;">//nothing more to read, quit</span>
+            <span style="color: #0000ff;">break</span>; 
+    
+        <span style="color: #008000;">// put data to worksheet</span>
+        wks.<span style="color: #000000;">PasteData</span><span style="color: #000000;">&#40;</span>chBuf<span style="color: #000000;">&#41;</span>;
+        
+        <span style="color: #008000;">// delay .3 second </span>
+        LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;sec -p 0.3&quot;</span><span style="color: #000000;">&#41;</span>;
+        
+    <span style="color: #000000;">&#125;</span> 
+    CloseHandle<span style="color: #000000;">&#40;</span>hPipe<span style="color: #000000;">&#41;</span>; 
+    
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Done!&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>; 
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

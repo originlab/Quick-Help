@@ -1,0 +1,153 @@
+<h1 class="firstHeading">5.10 Peak Analysis with Labtalk</h1><p class='urlname' style='display: none'>Tutorial-Peak-Analysis</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#What_You_Will_Learn"><span class="tocnumber">2</span> <span class="toctext">What You Will Learn</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Example_1:_Peak_Analysis_with_Scripts"><span class="tocnumber">3.1</span> <span class="toctext">Example 1: Peak Analysis with Scripts</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Example_2:_Running_Batch_Processing_with_pre-saved_Theme"><span class="tocnumber">3.2</span> <span class="toctext">Example 2: Running Batch Processing with pre-saved Theme</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>This tutorial demonstrates using labtalk for peak analysis.
+</p>
+<h2><a name="What_You_Will_Learn"></a><span class="mw-headline">What You Will Learn</span></h2>
+<p>This tutorial will show you how to use Labtalk script to:
+</p>
+<ul><li> Subtract a line from source data</li>
+<li> Find the highest peaks of each dataset</li>
+<li> Calculate the area, height and FWHM of the highest peak</li>
+<li> Create a graph of the quantities of the peak</li>
+<li> Create a theme of Peak Analyzer and run batch processing with the pre-saved theme</li></ul>
+<h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+<h3><a name="Example_1:_Peak_Analysis_with_Scripts"></a><span class="mw-headline">Example 1: Peak Analysis with Scripts</span></h3>
+<ol>
+<li>Import the data file <b>Waterfall.dat</b> under <i>&lt;Origin EXE folder&gt;\Samples\Graphing</i> folder with the associated import filter into the workbook <b>Waterfall</b>.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Create a newbook and name it Waterfall (both long and short name)</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Waterfall&quot;</span> option<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lsname;
+<span style="color: #008000;">// Define the file name and filter name</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Waterfall.dat&quot;</span>;
+string filtername<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;waterfall.oif&quot;</span>;  
+<span style="color: #008000;">// Use the impfile x-function to import the specified file with the import filter</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filtername<span style="color: #000080;">$</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span>data orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;</pre>
+<li>Use a loop and the <a class="external text" href="../../XFunction/X-Function/Subtract_line.html">subtract_line</a> X-Function to subtract a simple baseline of end points connection.</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Create new sheet named as SubtractedData</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData;
+<span style="color: #008000;">//Define the newly created worksheet(current active) as a range variable</span>
+range sdwk <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+<span style="color: #008000;">//Active the &quot;Waterfall&quot; worksheet by its name</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Waterfall&quot;</span>;
+<span style="color: #008000;">//Define an integer to hold the number of columns in Waterfall sheet</span>
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+
+<span style="color: #008000;">//Find out the columns for excitation wavelength = 600, 610, 620, 630 ect</span>
+<span style="color: #008000;">//Use the loop and subtract_line x-function to subtract baseline</span>
+<span style="color: #008000;">//The first and last data points are found and connected linearly</span>
+<span style="color: #008000;">//This line will be subtracted as baseline from source data</span>
+<span style="color: #008000;">//Subtracted data will be named by excitation wavelength of source data</span>
+int nexc;
+loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	range ry <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	int nWave <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>ry<span style="color: #000000;">&#91;</span>D1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+	if <span style="color: #000000;">&#40;</span>mod<span style="color: #000000;">&#40;</span>nWave, <span style="color: #0000dd;">10</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		nexc <span style="color: #000080;">=</span> nexc <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span>;
+		range rx <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>;
+		range rr <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>Waterfall<span style="color: #000000;">&#93;</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nexc<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+		subtract_line iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry 
+		x1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the X value of the first point*/</span>
+		y1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the Y value of the first point*/</span>
+		x2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the X value of the last point*/</span>
+		y2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #008000; font-style: regular;">/* Specifies the Y value of the last point*/</span>
+		oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rr;
+	<span style="color: #008000;">//Rename the column long names in SubtractedData sheet</span>
+	<span style="color: #008000;">//Use the User Defined Parameter Wavelength in Waterfall sheet </span>
+	 rr<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> ry<span style="color: #000000;">&#91;</span>D1<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>;
+	 
+	 <span style="color: #008000;">//add a new column for next loop</span>
+	 wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	else
+	<span style="color: #000000;">&#123;</span>
+		continue;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<li>
+Create new sheet for summary report
+</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Create new sheet for summary report and define ranges</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">7</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYYYYYY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Summary&quot;</span>;
+range rWaveLength <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rCntrInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, rLtInd <span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>, rRtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+range rArea <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>, rCntr <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>, rHt <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>, rFWHM <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+rWaveLength<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;WaveLength&quot;</span>;
+rCntrInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+rLtInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+rRtInd<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+rArea<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Area&quot;</span>;
+rCntr<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center&quot;</span>;
+rHt<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>      <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Height&quot;</span>;
+rFWHM<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span>	 <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;FWHM&quot;</span>;</pre>
+<li>
+To calculate the quantities of the highest peak of the data, we should find the highest peak with the <a class="external text" href="../../XFunction/X-Function/PkFind.html">pkfind</a> X-Function and then calculate the quantities of the peak with the <a class="external text" href="../../XFunction/X-Function/Integ1.html">integ1</a> X-Function
+</li>
+<pre class="lt" style="font-family:monospace;"> <span style="color: #008000;">//active the SubtractedData sheet</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;SubtractedData&quot;</span>;
+
+<span style="color: #008000;">//add columns for temp results of the finded peaks</span>
+loop<span style="color: #000000;">&#40;</span>cc, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>;
+
+loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">2</span>, nexc<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span> 
+	<span style="color: #008000;">//find the highest peak</span>
+	range rData <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+	range pcenter<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>, pleft<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>, pright<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>;
+	pkfind rData filter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>num value<span style="color: #000000;">:</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright; <span style="color: #008000;">//find a highest peak</span>
+
+	<span style="color: #008000;">//copy the result from the temp columns to summary sheet</span>
+	wrcopy iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Summary c1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> c2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> r1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> r2<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> dc1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> dr1<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span>;
+	
+	<span style="color: #008000;">//compute the quantities of the highest peak with integ1</span>
+	int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">//specify the peak left index </span>
+	int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">//specify the peak right index </span>
+	range rint <span style="color: #000080;">=</span> rData<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n1<span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>n2<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span>; <span style="color: #008000;">// range of data to be integrated</span>
+	double aa, cc, hh, fw; 
+	integ1 iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rint area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cc y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>hh dx<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fw oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+	<span style="color: #008000;">//put the quantities to summary sheet</span>
+	rArea<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> aa;
+	rCntr<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> cc;
+	rHt<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> hh;
+	rFWHM<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span>fw;
+	<span style="color: #008000;">//copy the longname of calculated data to summary sheet</span>
+	rWaveLength<span style="color: #000000;">&#91;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>rData<span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<li>
+Create a graph of the quantities as a function of excitation wavelength with the <a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a> X-Function
+</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//create a graph of the quantities as a function of excitation wavelength</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>rWaveLength, rArea<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>rWaveLength, rHt<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>rWaveLength, rFWHM<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>;</pre>
+</ol>
+<h3><a name="Example_2:_Running_Batch_Processing_with_pre-saved_Theme"></a><span class="mw-headline">Example 2: Running Batch Processing with pre-saved Theme</span></h3>
+<ol>
+<li>Drag and drop the prepared theme,0-PA-BatchPA.ois, under the <i>&lt;Origin EXE folder&gt;\Samples\Batch Processing</i> folder into Origin.</li>
+<li>Open the project file with data for peak analysis</li>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Open an Origin Project file</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Batch Processing\Batch Peak Analysis.opj&quot;</span>;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">&#40;</span>fname<span style="color: #000080;">$</span><span style="color: #000000;">&#41;</span>;   <span style="color: #008000;">// Abbreviation of ''document -open''</span></pre>
+<li>Perform the peak analysis batch processing with the pre-saved theme with the <a class="external text" href="../../XFunction/X-Function/PaMultiY.html">pamultiY</a> X-Function</li>
+<pre class="lt" style="font-family:monospace;">paMultiY iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>end theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;BatchPA&quot;</span> append<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> dataid<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;My Parameter&quot;</span>;</pre></ol>
+
+
+
+
+
+

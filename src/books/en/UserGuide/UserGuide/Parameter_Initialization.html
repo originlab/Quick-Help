@@ -1,0 +1,401 @@
+<h1 class="firstHeading">15.3.6.1 Parameter Initialization</h1><p class='urlname' style='display: none'>FitPara-INI</p>
+<p>The Levenberg-Marquardt iterative algorithm requires initial values to start the fitting procedure. Good parameter initialization results in fast and reliable model/data convergence. When defining a fitting function in the Function Organizer, you can assign the initial values in the Parameter Settings box, or enter an Origin C routine in the Parameter Initialization box with which the initial values can be estimated. 
+</p><p>The NLFit in Origin provides automatic parameter initialization code for all built-in functions. For user-defined functions, you must add your own parameter initialization code. If no parameter initialization code is provided, all parameter values will be missing values when NLFit starts. In this case, you must enter "guesstimated" parameter values to start the iterative fitting process.
+</p><p>Note that initial parameter values estimated by parameter initial routines will be used even if different initial values are specified in Parameter Settings.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Set_initial_values_in_Parameter_Settings_dialog"><span class="tocnumber">1</span> <span class="toctext">Set initial values in Parameter Settings dialog</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Estimate_parameter_initial_values_by_Origin_C_code"><span class="tocnumber">2</span> <span class="toctext">Estimate parameter initial values by Origin C code</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Frequently_Used_Origin_C_Function_for_Parameter_Initialization"><span class="tocnumber">3</span> <span class="toctext">Frequently Used Origin C Function for Parameter Initialization</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#More_Parameter_Initialization_Examples"><span class="tocnumber">4</span> <span class="toctext">More Parameter Initialization Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Exponent_function"><span class="tocnumber">4.1</span> <span class="toctext">Exponent function</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Peak_function"><span class="tocnumber">4.2</span> <span class="toctext">Peak function</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Sigmoidal_Function"><span class="tocnumber">4.3</span> <span class="toctext">Sigmoidal Function</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Surface_Function"><span class="tocnumber">4.4</span> <span class="toctext">Surface Function</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Set_initial_values_in_Parameter_Settings_dialog"></a><span class="mw-headline">Set initial values in Parameter Settings dialog</span></h2>
+<p>Click the <a  class="image"><img alt="Parameter Initialization button.png" src="../images/Parameter_Initialization/Parameter_Initialization_button.png?v=10496" width="18"  /></a> button beside <b>Parameter Settings</b> box to bring up the <b>Parameter Settings</b> dialog. Then you can enter proper initial values for the parameters in the Value column of <b>Parameters</b> tab:
+</p>
+<dl><dd><a  class="image"><img alt="Parameter Initialization 01.png" src="../images/Parameter_Initialization/Parameter_Initialization_01.png?v=74430" width="850"  /></a></dd></dl>
+<p>To initialize parameters by initial formula (column statistics values, label rows, .etc), you can check the <b>Initial Formula</b> column check box and select the desired initial formula or metadata from the fly-out menu.
+</p>
+<h2><a name="Estimate_parameter_initial_values_by_Origin_C_code"></a><span class="mw-headline">Estimate parameter initial values by Origin C code</span></h2>
+<p>The text box in Parameter Initialization contains the parameter initialization code. For built-in functions, these routines can effectively estimate parameter values prior to fitting by generating dataset-specific parameter estimates. When defining a new Origin C fitting function, you can edit the initial codes in the code builder by clicking the <a  class="image"><img alt="Parameter Initialization button.png" src="../images/Parameter_Initialization/Parameter_Initialization_button.png?v=10496" width="18"  /></a> button.
+</p><p>Although there many methods to estimate the parameter initial values, in general we will transform the function and deduce the value based on the raw data. For example, we can define a fitting model, named MyFunc, as:
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-94dcae711817b2f2065c011e106c9b86.png?v=0" title="y=ax^b\,\!" alt="y=ax^b\,\!" class="tex"/></dd></dl>
+<p>(This is the same function like the built-in Allometric1 function in Origin) 
+</p><p>And then transform the equation by:
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-49d5d1f50379e7b6263ece1f1f70c0fe.png?v=0" title="\ln (y)=\ln (ax^b)\,\!" alt="\ln (y)=\ln (ax^b)\,\!" class="tex"/></dd>
+<dd><img src="../images/Parameter_Initialization/math-84d594c8d89dc8cbfef59cdd4c6d0c16.png?v=0" title="\ln (y)=\ln (a)+b\ln (x)\,\!" alt="\ln (y)=\ln (a)+b\ln (x)\,\!" class="tex"/></dd></dl>
+<p>After the transformation, we will have a linear relationship between ln(y) and ln(x), and the intercept and slope is ln(a) and b respectively. Then we just need to do a simple linear fitting to get the estimated parameter values. The initial code can be:
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> _nlsfParamMyFunc<span style="color: #000000;">&#40;</span>
+<span style="color: #008000;">// Fit Parameter(s):</span>
+<span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> a, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> b,
+<span style="color: #008000;">// Independent Dataset(s):</span>
+vector<span style="color: #000040;">&amp;</span> x_data,
+<span style="color: #008000;">// Dependent Dataset(s):</span>
+vector<span style="color: #000040;">&amp;</span> y_data,
+<span style="color: #008000;">// Curve(s):</span>
+Curve x_y_curve,
+<span style="color: #008000;">// Auxilary error code:</span>
+<span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> nErr<span style="color: #000000;">&#41;</span>
+
+<span style="color: #000000;">&#123;</span>                                                  <span style="color: #008000;">// Beginning of editable part</span>
+	sort<span style="color: #000000;">&#40;</span> x_y_curve <span style="color: #000000;">&#41;</span>;                         <span style="color: #008000;">// Sort the curve</span>
+	Dataset dx;
+	x_y_curve.<span style="color: #000000;">AttachX</span><span style="color: #000000;">&#40;</span>dx<span style="color: #000000;">&#41;</span>;                     <span style="color: #008000;">// Attach an Dataset object to the X data</span>
+	dx <span style="color: #000080;">=</span> ln<span style="color: #000000;">&#40;</span>dx<span style="color: #000000;">&#41;</span>;                               <span style="color: #008000;">// Set x = ln(x)</span>
+	x_y_curve <span style="color: #000080;">=</span> ln<span style="color: #000000;">&#40;</span> x_y_curve <span style="color: #000000;">&#41;</span>;               <span style="color: #008000;">// Set y = ln(y)</span>
+	vector coeff<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	fitpoly<span style="color: #000000;">&#40;</span>x_data, y_data, <span style="color: #0000dd;">1</span>, coeff<span style="color: #000000;">&#41;</span>;         <span style="color: #008000;">// One order (simple linear) polynomial fit</span>
+	a <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span> coeff<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#41;</span>;                       <span style="color: #008000;">// Estimate parameter a</span>
+	b <span style="color: #000080;">=</span> coeff<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>;                              <span style="color: #008000;">// Estimate parameter b</span>
+                                                   <span style="color: #008000;">// End of editable part</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p>In the Code Builder, you just need to edit the function body. The parameters, independent variables and dependent variables are declared in the function definition. In addition, a few Origin objects are also declared: A dataset object is declared for each of the independent and dependent variables and a curve object is declared for each xy data pair:
+</p>
+<pre class="oc" style="font-family:monospace;">vector<span style="color: #000040;">&amp;</span> x_data;
+vector<span style="color: #000040;">&amp;</span> y_data;
+Curve x_y_curve;</pre>
+<p>The vectors represent cached input x and y values, which should never be changed. And the curve object is a copy of the dataset curve that is comprised of an x dataset and a y dataset for which you are trying to find a best fit. 
+</p><p>Below these declaration statements, there is an editable section; the white area; which is reserved for the initialization code. Note that the function definition follows the C syntax.  
+</p>
+<table class="note">
+<tr>
+<td>Note: The function is of type void, which means that our function returns no values.  The parameter variables are stored in the function code.
+</td></tr></table>
+<p>Initialization is accomplished by calling built-in functions that take a vector or a curve object as an argument. Once the initialization function is defined, you should verify that the syntax is correct. To do this, click the Compile button at the top of the workspace. This compiles the function code using the Origin C compiler. Any errors generated in the compile process are reported in the Code Builder Output window at the bottom of the workspace.
+</p><p>Once the initialization code has been defined and compiled, you can return to the Function Organizer interface by clicking on the <b>Return to Dialog</b> button at the top of the workspace.
+</p>
+<table class="note">
+<tr>
+<td>Note: If you wish to debug your code, you can open the initialization code in <b>Code Builder</b> from <a class="external text" href="../../UserGuide/UserGuide/Code_Tab_Upper_Panel.html">Code Tab of NLFit dialog</a> and set break points. Then click <b>Initialize Parameters</b> button <a  class="image"><img alt="Button Initialize Parameters.png" src="../images/Parameter_Initialization/Button_Initialize_Parameters.png?v=1810" width="26"  /></a> to call and debug initialization code. For further information on debugging, select <b>Help:Programming:Code Builder…</b> from the Origin menu and search on debug.
+</td></tr></table>
+<h2><a name="Frequently_Used_Origin_C_Function_for_Parameter_Initialization"></a><span class="mw-headline">Frequently Used Origin C Function for Parameter Initialization</span></h2>
+<table class="simple">
+<tr>
+<th width="100pt">Function
+</th>
+<th width="500pt">Description
+</th></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Area_(global_function).html">area</a></b>
+</p>
+</td>
+<td>
+<p>Get the area under a curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Curve_MinMax_(global_function).html">Curve_MinMax</a></b>
+</p>
+</td>
+<td>
+<p>Get X and Y range of the Curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Curve_x_(global_function).html">Curve_x</a></b>
+</p>
+</td>
+<td>
+<p>Get X value of Curve at specified index. 
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Curve_xfromY_(global_function).html">Curve_xfromY</a></b>
+</p>
+</td>
+<td>
+<p>Get interpolated/extrapolated X value of Curve at specified Y value.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Curve_y_(global_function).html">Curve_y</a></b>
+</p>
+</td>
+<td>
+<p>Get Y value of Curve at specified index.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Curve_yfromX_(global_function).html">Curve_yfromX</a></b>
+</p>
+</td>
+<td>
+<p>For given Curve returns interpolated/extrapolated value of Y at specified value of X.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Fitpoly_(global_function).html">fitpoly</a></b>
+</p>
+</td>
+<td>
+<p>Fit a polynomial equation to a curve (or XY vector) and return the coefficients and statistical results.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Fit_polyline_(global_function).html">fit_polyline</a></b>
+</p>
+</td>
+<td>
+<p>Fit the curve to a polyline, where n is the number of sections, and get the average value of X-coordinates of each section.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Fitpoly_range_(global_function).html">fitpoly_range</a></b>
+</p>
+</td>
+<td>
+<p>Fit a polynomial equation to a range of a curve. 
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Find_roots_(global_function).html">find_roots</a></b>
+</p>
+</td>
+<td>
+<p>Find the points with specified height.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Fwhm_(global_function).html">fwhm</a></b>
+</p>
+</td>
+<td>
+<p>Get the peak width of a curve at half the maximum Y value.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Get_exponent_(global_function).html">get_exponent</a></b>
+</p>
+</td>
+<td>
+<p>This functions is used to estimate y0, R0 and A in y = y0 + A*exp(R0*x). 
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Get_interpolated_xz_yz_curves_from_3D_data_(global_function).html">get_interpolated_xz_yz_curves_from_3D_data</a></b>
+</p>
+</td>
+<td>
+<p>Interperate 3D data and returns smoothed xz, yz curves.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Ocmath_xatasymt_(global_function).html">ocmath_xatasymt</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of X at a vertical asymptote.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Ocmath_yatasymt_(global_function).html">ocmath_yatasymt</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of Y at a horizontal asymptote. 
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a></b>
+</p>
+</td>
+<td>
+<p>This function is used to estimate the peak's XY coordinate, peak's width, area.etc.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Sort_(global_function).html">sort</a></b>
+</p>
+</td>
+<td>
+<p>Use a Curve object to sort a Y data set according to an X data set.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Vectorbase-GetMinMax.html">Vectorbase::GetMinMax</a></b>
+</p>
+</td>
+<td>
+<p>Get min and max values and their indices from the vector
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Xatasymt_(global_function).html">xatasymt</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of X at a vertical asymptote.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Xaty50_(global_function).html">xaty50</a></b>
+</p>
+</td>
+<td>
+<p>Get the interpolated value of X at the average of minimum and maximum of Y values of a curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Xatymax_(global_function).html">xatymax</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of X at the maximum Y value of a curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Xatymin_(global_function).html">xatymin</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of X at the minimum Y value of a curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Yatasymt_(global_function).html">yatasymt</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of Y at a horizontal asymptote.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Yatxmax_(global_function).html">yatxmax</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of Y at the maximum X value of a curve.
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b><a class="external text" href="../../OriginC/OriginC/Yatxmin_(global_function).html">yatxmin</a></b>
+</p>
+</td>
+<td>
+<p>Get the value of Y at the minimum X value of a curve.
+</p>
+</td></tr></table>
+<h2><a name="More_Parameter_Initialization_Examples"></a><span class="mw-headline">More Parameter Initialization Examples</span></h2>
+<h3><a name="Exponent_function"></a><span class="mw-headline">Exponent function</span></h3>
+<p><b><i>Sample Function</i></b>
+</p>
+<dl><dd>EXPDEC2</dd></dl>
+<p><b><i>Equation</i></b>
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-6970073dbaf58ac427944e7a57e39314.png?v=0" title="y = y_0 + A_1e^{-x/t_1} + A_2e^{-x/t_2}" alt="y = y_0 + A_1e^{-x/t_1} + A_2e^{-x/t_2}" class="tex"/></dd></dl>
+<p><b><i>Initialization Code</i></b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> sign;
+t1 <span style="color: #000080;">=</span> get_exponent<span style="color: #000000;">&#40;</span>x_data, y_data, <span style="color: #000040;">&amp;</span>y0, <span style="color: #000040;">&amp;</span>A1, <span style="color: #000040;">&amp;</span>sign<span style="color: #000000;">&#41;</span>;
+t1 <span style="color: #000080;">=</span> t2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000040;">/</span> t1;
+A1 <span style="color: #000080;">=</span> A2 <span style="color: #000080;">=</span> sign <span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">&#40;</span>A1<span style="color: #000000;">&#41;</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span>;</pre>
+<p><b><i>Description</i></b><br />
+Because most of the exponential curves are similar, we can use a simple exponential function to approach complex equations. This EXPDEC2 function can be treated as the combination of two basic exponential function, whose parameters comes from <a class="external text" href="../../OriginC/OriginC/Get_exponent_(global_function).html">get_exponent</a>.
+</p>
+<h3><a name="Peak_function"></a><span class="mw-headline">Peak function</span></h3>
+<p><b><i>Sample Function</i></b>
+</p>
+<dl><dd>LORENTZ</dd></dl>
+<p><b><i>Equation</i></b>
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-d9ff2b308fc198a7dbcfca740e24fe52.png?v=0" title="y = y_0 + \frac{2A}{\pi}\frac{w}{4(x-x_c)^2+w^2}" alt="y = y_0 + \frac{2A}{\pi}\frac{w}{4(x-x_c)^2+w^2}" class="tex"/></dd></dl>
+<p><b><i>Initialization Code</i></b>
+</p>
+<pre class="oc" style="font-family:monospace;">xc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">&#40;</span>x_y_curve, <span style="color: #000040;">&amp;</span>w, <span style="color: #000040;">&amp;</span>y0, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>A<span style="color: #000000;">&#41;</span>;
+A <span style="color: #000040;">*</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1.57</span><span style="color: #000040;">*</span>w;</pre>
+<p><b><i>Description</i></b><br />
+In this initialization code, we firstly evaluate the peak width <img src="../images/Parameter_Initialization/math-f1290186a5d0b1ceab27f4e77c0c5d68.png?v=0" title="w" alt="w" class="tex"/>, baseline value <img src="../images/Parameter_Initialization/math-ffe0f1c55b374ed8643060926316c1e6.png?v=0" title="y_0" alt="y_0" class="tex"/>, peak center <img src="../images/Parameter_Initialization/math-37f14e7725ae8fec0cacf956a69e3f6e.png?v=0" title="x_c" alt="x_c" class="tex"/> and peak height, which is originally assign to the variable <img src="../images/Parameter_Initialization/math-7fc56270e7a70fa81a5935b72eacbe29.png?v=0" title="A" alt="A" class="tex"/>, by the <a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a> function. And then compute the peak area, A, by the following deduction:<br />
+Let <img src="../images/Parameter_Initialization/math-38b5a27db82a0cd8e08cdd5cb2b6d2a3.png?v=0" title="y_{max}" alt="y_{max}" class="tex"/> is the value where <img src="../images/Parameter_Initialization/math-6a2c2acc85c6b35d3f40e515cea7dfaf.png?v=0" title="x = x_c" alt="x = x_c" class="tex"/>, then we have:
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-76ab050a5d144be5d91bc32a6571b70f.png?v=0" title="y_{max} - y_0 = \frac{2A}{w\pi}" alt="y_{max} - y_0 = \frac{2A}{w\pi}" class="tex"/></dd></dl>
+<p>and
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-4cd0a5757796457500b3084424eb7d6b.png?v=0" title="\begin{matrix}A = H w \pi / 2 = 1.57 H w\end{matrix}" alt="\begin{matrix}A = H w \pi / 2 = 1.57 H w\end{matrix}" class="tex"/></dd></dl>
+<p>Where <i>H</i> is the peak height.
+</p>
+<h3><a name="Sigmoidal_Function"></a><span class="mw-headline">Sigmoidal Function</span></h3>
+<p><b><i>Sample Function</i></b>
+</p>
+<dl><dd>DRESP</dd></dl>
+<p><b><i>Equation</i></b>
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-a7a6424c1285db8296113cb98bb816ad.png?v=0" title="A_1 + \frac{A_2 - A_1}{1 + 10^{(LOGx_0 - x)p}}" alt="A_1 + \frac{A_2 - A_1}{1 + 10^{(LOGx_0 - x)p}}" class="tex"/></dd></dl>
+<p><b><i>Initialization Code</i></b>
+</p>
+<pre class="oc" style="font-family:monospace;">sort<span style="color: #000000;">&#40;</span>x_y_curve<span style="color: #000000;">&#41;</span>;
+A1 <span style="color: #000080;">=</span> min<span style="color: #000000;">&#40;</span> y_data <span style="color: #000000;">&#41;</span>;
+A2 <span style="color: #000080;">=</span> max<span style="color: #000000;">&#40;</span> y_data <span style="color: #000000;">&#41;</span>;
+LOGx0 <span style="color: #000080;">=</span> xaty50<span style="color: #000000;">&#40;</span> x_y_curve <span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">double</span> xmin, xmax;
+x_data.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>xmin, xmax<span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">double</span> range <span style="color: #000080;">=</span> xmax <span style="color: #000040;">-</span> xmin;
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> yatxmax<span style="color: #000000;">&#40;</span>x_y_curve<span style="color: #000000;">&#41;</span> <span style="color: #000040;">-</span> yatxmin<span style="color: #000000;">&#40;</span>x_y_curve<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+	p <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.0</span> <span style="color: #000040;">/</span> range;
+<span style="color: #0000ff;">else</span>
+	p <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">5.0</span> <span style="color: #000040;">/</span> range;</pre>
+<p><b><i>Description</i></b><br />
+Knowing the parameter meanings is very helpful and important for parameter initialization. In the does-response reaction, A<sub>1</sub> and A<sub>2</sub> means the bottom and top asymptote respectively, so we can initialize them by the minimum and maximum Y values. The parameter LOGx<sub>0</sub> in the reaction is a typical value that 50% reaction happens, that's why we use the <a class="external text" href="../../OriginC/OriginC/Xaty50_(global_function).html">xaty50</a> function here. Regards to the slope, p, it doesn't matter how you compute this value, however, the sign of the slope is important.
+</p>
+<h3><a name="Surface_Function"></a><span class="mw-headline">Surface Function</span></h3>
+<p><b><i>Sample Function</i></b>
+</p>
+<dl><dd>Gauss2D</dd></dl>
+<p><b><i>Equation</i></b>
+</p>
+<dl><dd><img src="../images/Parameter_Initialization/math-ad966aa8e244d44126663ef35a7745e8.png?v=0" title="z = z_0 + A e^{-\frac{1}{2}(\frac{x-x_c}{w_1})^2-\frac{1}{2}(\frac{y-y_c}{w_2})^2}" alt="z = z_0 + A e^{-\frac{1}{2}(\frac{x-x_c}{w_1})^2-\frac{1}{2}(\frac{y-y_c}{w_2})^2}" class="tex"/></dd></dl>
+<p><b><i>Initialization Code</i></b>
+</p>
+<pre class="oc" style="font-family:monospace;">Curve x_curve, y_curve;
+<span style="color: #0000ff;">bool</span> bRes <span style="color: #000080;">=</span> get_interpolated_xz_yz_curves_from_3D_data<span style="color: #000000;">&#40;</span>x_curve, y_curve, x_data, y_data, z_data, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bRes<span style="color: #000000;">&#41;</span> <span style="color: #0000ff;">return</span>;
+xc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">&#40;</span>x_curve, <span style="color: #000040;">&amp;</span>w1, <span style="color: #000040;">&amp;</span>z0, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>A<span style="color: #000000;">&#41;</span>;
+yc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">&#40;</span>y_curve, <span style="color: #000040;">&amp;</span>w2<span style="color: #000000;">&#41;</span>;</pre>
+<p><b><i>Description</i></b><br />
+One idea for evaluating surface function initial values is solving the problem in a plane. Take this Gauss2D function as example, it's quite obviously that the maximum Z value is on the point (x<sub>c</sub>, y<sub>c</sub>), so we can use the <a class="external text" href="../../OriginC/OriginC/Get_interpolated_xz_yz_curves_from_3D_data_(global_function).html">get_interpolated_xz_yz_curves_from_3D_data</a> function to get the characteristic curve on XZ and YZ plane. And then use the <a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a> function to evaluate the other peak attributes, like peak width, peak height, etc.
+</p>
+<dl><dd><a  class="image"><img alt="Docwiki Parameter Initial 3D Example.png" src="../images/Parameter_Initialization/Docwiki_Parameter_Initial_3D_Example.png?v=15078" width="326"  /></a></dd></dl>
+
+
+
+
+
+

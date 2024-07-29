@@ -1,0 +1,367 @@
+<h1 class="firstHeading">3.5.6.6 TReplace</h1><p class='urlname' style='display: none'>TReplace-func</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-1"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Example"><span class="tocnumber">5</span> <span class="toctext">Example</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_Also"><span class="tocnumber">6</span> <span class="toctext">See Also</span></a></li>
+</ul>
+</div>
+
+<h2 class="ref"><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>The Threshold Replace function is used to compare each value in a dataset  <b>vd</b> with a value <b>val1</b>, with respect to (optional) condition <b>cnd</b>. When the comparison is true, the value in <b>vd</b> is replaced with <b>val2</b> or -<b>val2</b>, depending on the condition <b>cnd</b>. When the comparison is false, the value is retained or replaced with a missing value, depending on the condition <b>cnd</b>.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline"><font color="chocolate">Syntax</font></span></h2>
+<pre class="lt" style="font-family:monospace;">dataset tReplace<span style="color: #000000;">&#40;</span>dataset vd, double val1, double val2<span style="color: #000000;">&#91;</span>, string cnd<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline"><font color="chocolate">Parameters</font></span></h2>
+<p><b>vd</b> 
+</p>
+<dl><dd>is the dataset you want to compare.</dd></dl>
+<p><b>val1</b> 
+</p>
+<dl><dd>is the value you will compare dataset <b>vd</b> values against.</dd></dl>
+<p><b>val2</b> 
+</p>
+<dl><dd>is the value that may replace values in dataset <b>vd</b>.</dd></dl>
+<p><b>cnd</b>
+</p>
+<dl><dd>is the condition that determines how comparisons between <b>vd</b> and <b>val1</b> are made.</dd></dl>
+<p>The condition argument <b>cnd</b> is optional. Calculate the value of condition by adding the <b>Value</b> number for all those conditions which should apply. Note that the first four bits (0, 1, 2, 3) determine how the comparison is made, while the last two bits (4, 5) determine what happens as a result of the comparison. Note that the <b>Action</b> is applied to values in dataset <b>vd</b>, when comparing to <b>val1</b>. For instance, if <b>Value</b> is <i>1</i> ("Use Less Than in the comparison"), the comparison becomes "If the value in dataset <b>vd</b> is less than <b>val1</b>..."
+</p><p><br />
+</p>
+<table class="simple">
+<tr>
+<th><b>Bit</b>
+</th>
+<th><b>Value</b>
+</th>
+<th><b>Action</b>
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td> 1
+</td>
+<td>
+<p>1(on) = Use Less Than in the comparison;
+</p><p>0(off) = Do not consider Less Than.
+</p>
+</td></tr>
+<tr>
+<td> 1
+</td>
+<td> 2
+</td>
+<td>
+<p>2(on) = Use Equal in the comparison;
+</p><p>0(off) = Do not consider Equal.
+</p>
+</td></tr>
+<tr>
+<td> 2
+</td>
+<td> 4
+</td>
+<td>
+<p>4(on) = Use Greater Than in the comparison;
+</p><p>0(off) = Do not consider Greater Than.
+</p>
+</td></tr>
+<tr>
+<td> 3
+</td>
+<td> 8
+</td>
+<td>
+<p>8(on) = Use the absolute value of dataset in the comparison;
+</p><p>0(off) = Use value of dataset.
+</p>
+</td></tr>
+<tr>
+<td> 4
+</td>
+<td> 16
+</td>
+<td>
+<p>16(on) = Keep original sign when replacing;
+</p><p>0(off) = Use <span><i>value2</i></span> regardless of original sign.
+</p>
+</td></tr>
+<tr>
+<td> 5
+</td>
+<td> 32
+</td>
+<td>
+<p>32(on) = When comparison fails, replace dataset with a missing value;
+</p><p>0(off) = Leave dataset alone.
+</p>
+</td></tr></table>
+<h2><a name="Return"></a><span class="mw-headline"><font color="chocolate">Return</font></span></h2>
+<p>If <b>val1</b> is a missing value, then testing will only look at the bit Value = 2 (Use Equal in the comparison) and ignore bit Values 1, 4, and 8. In this case, each value in dataset is tested to see if it is a missing value. When missing values are found in dataset, they are replaced with <b>val2</b>.
+</p><p>If Bit 1 is set to 0 (Do not consider Equal), then each value in dataset is tested to see if it is not a missing value. This time, all non-missing values in dataset are replaced with <b>val2</b>.
+</p><p>When the condition is not specified, the function takes Value to equal 12 -- the sum of 4 and 8: Replace dataset value with <b>val2</b> if the absolute value of dataset value is greater than <b>val1</b>.
+</p><p>When the first three bits (0, 1, 2) are all off (Do not consider Less Than, Do not consider Equal, Do not consider Greater Than), all comparisons between dataset and <b>val1</b> are false. This occurs when Value is one of the following: 0, 8, 16, 24, 32, 40, 48 and 56.
+</p><p>When the first three bits (0, 1, 2) are on (Use Less Than in the comparison, User Equal in the comparison, Use Greater Than in the comparison), the Less Than condition is ignored. This occurs when Value is one of the following 7, 15, 23, 31, 39, 47, 55 and 63.
+</p><p>When Less Than and Greater Than are both on and Equal is off (Use Less Than in the comparison, Use Greater Than in the comparison, Do not consider Equal), the comparison is equivalent to Not Equal. This occurs when Value is one of the following: 5, 13, 21, 29, 37, 45, 53 and 61.
+</p>
+<h2><a name="Example"></a><span class="mw-headline"><font color="chocolate">Example</font></span></h2>
+<pre class="lt" style="font-family:monospace;">Data1_result <span style="color: #000080;">=</span> treplace<span style="color: #000000;">&#40;</span>Data1_A, <span style="color: #0000dd;">1.5</span>, <span style="color: #0000dd;">999</span>, condition<span style="color: #000000;">&#41;</span>;</pre>
+<p>Values of Data1_Result for various conditions:
+</p>
+<table class="simple">
+<tr>
+<th>Data1_A
+</th>
+<th>1
+</th>
+<th>2
+</th>
+<th>3
+</th>
+<th>5
+</th>
+<th>13
+</th>
+<th>14
+</th></tr>
+<tr>
+<td>2
+</td>
+<td>2
+</td>
+<td>2
+</td>
+<td>2
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td></tr>
+<tr>
+<td>1.5
+</td>
+<td>1.5
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>1.5
+</td>
+<td>1.5
+</td>
+<td>999
+</td></tr>
+<tr>
+<td>1
+</td>
+<td>999
+</td>
+<td>1
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>1
+</td></tr>
+<tr>
+<td>0
+</td>
+<td>999
+</td>
+<td>0
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>0
+</td></tr>
+<tr>
+<td>-1
+</td>
+<td>999
+</td>
+<td>-1
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>-1
+</td></tr>
+<tr>
+<td>-1.5
+</td>
+<td>999
+</td>
+<td>-1.5
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>-1.5
+</td>
+<td>999
+</td></tr>
+<tr>
+<td>-2
+</td>
+<td>999
+</td>
+<td>-2
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td>
+<td>999
+</td></tr></table>
+<p><br />
+</p>
+<table class="simple">
+<tr>
+<th>Data1_A
+</th>
+<th>22
+</th>
+<th>25
+</th>
+<th>32
+</th>
+<th>36
+</th>
+<th>49
+</th>
+<th>63
+</th></tr>
+<tr>
+<td> 2
+</td>
+<td> 999
+</td>
+<td> 2
+</td>
+<td> --
+</td>
+<td> 999
+</td>
+<td> --
+</td>
+<td> 999
+</td></tr>
+<tr>
+<td> 1.5
+</td>
+<td> 999
+</td>
+<td> 1.5
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> 999
+</td></tr>
+<tr>
+<td> 1
+</td>
+<td> 1
+</td>
+<td> 999
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> 999
+</td>
+<td> --
+</td></tr>
+<tr>
+<td> 0
+</td>
+<td> 0
+</td>
+<td> 999
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> 999
+</td>
+<td> --
+</td></tr>
+<tr>
+<td> -1
+</td>
+<td> -1
+</td>
+<td> -999
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> -999
+</td>
+<td> --
+</td></tr>
+<tr>
+<td> -1.5
+</td>
+<td> -1.5
+</td>
+<td> -1.5
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> -999
+</td>
+<td> -999
+</td></tr>
+<tr>
+<td> -2
+</td>
+<td> -2
+</td>
+<td> -2
+</td>
+<td> --
+</td>
+<td> --
+</td>
+<td> -999
+</td>
+<td> -999
+</td></tr></table>
+<p>If you assign the results to the same dataset as the first argument, the original data may be changed.
+</p>
+<h2><a name="See_Also"></a><span class="mw-headline"><font color="chocolate">See Also</font></span></h2>
+<p>The <b>treplace()</b> function should be faster than the similar <a href="../../LabTalk/LabTalk/Operators.html#Conditional_Operator_.28.3F:.29" title="LabTalk:Operators"> ternary operator</a>.
+</p>
+
+
+
+
+

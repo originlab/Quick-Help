@@ -1,0 +1,336 @@
+<h1 class="firstHeading">2.2.4.12.24 Datasheet::SetReportTree</h1><p><span class="OIndex" style="display:none">SetReportTree</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Report generation function.
+Automatically generate a results worksheet from an Origin C tree created using report
+generation macros found in the system header file Report.h.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> SetReportTree<span style="color: #000000;">&#40;</span> TreeNode <span style="color: #000040;">&amp;</span> tr, <span style="color: #0000ff;">int</span> nBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, DWORD dwOptions <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> tr</dt>
+<dd>[input] Tree created using report generation macros in Report.h</dd>
+<dt> nBegin</dt>
+<dd>[input] Beginning row number in the table to generate report. default is -1, that means the first row.</dd>
+<dt> dwOptions</dt>
+<dd>[input] additional options from the SETGRTR_* enumeration.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Returns last row number on successful exit and -1 on failure.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This is a simple sample to show how to report only one table.</span>
+<span style="color: #008000;">// Run Datasheet_SetReportTree_Ex1 1, will transpose the rows and columns of table</span>
+<span style="color: #0000ff;">void</span> Datasheet_SetReportTree_Ex1<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">bool</span> bTransposeTable <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique except the case described in [Note1] below</span>
+    <span style="color: #0000ff;">int</span> nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN <span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_HEADINGS<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_HEADINGS <span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+    
+    <span style="color: #008000;">// 1. Create report tree</span>
+    Tree tr;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Sample Report Tree&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table title</span>
+    <span style="color: #008000;">// TREE_Table attribute is critical in getting the report to work so must be present in every table level. </span>
+    <span style="color: #008000;">// Can set this attribute as 0 without any format, but many bits GETNBRANCH_* defined in oc_const.h to set table display format.</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// 2. Create report table</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;This is a simple table&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Table title. If not set this, will show as empty here</span>
+    <span style="color: #0000ff;">int</span> nSubTableFormat <span style="color: #000080;">=</span> nTableFormat;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>bTransposeTable<span style="color: #000000;">&#41;</span>
+        nSubTableFormat <span style="color: #000040;">|</span><span style="color: #000080;">=</span> GETNBRANCH_TRANSPOSE; <span style="color: #008000;">// transpose this table</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nSubTableFormat<span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// 3 ~ 6 is to add rows and columns to this table. But row and column is not real row and column </span>
+    <span style="color: #008000;">// since we can transpose table, introduce row and column here in order to easy to understand </span>
+    
+    <span style="color: #008000;">// 3. Add one row to this table</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Row 1&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Row label</span>
+    
+    <span style="color: #008000;">// 4. Add two columns to this table</span>
+    <span style="color: #0000ff;">int</span> nColIDBase <span style="color: #000080;">=</span> <span style="color: #0000dd;">10000</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nColIDBase <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Column 1&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+    
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nColIDBase <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Column 2&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R1</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;    
+    
+    <span style="color: #008000;">// 5. Add the second row to this table</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Row 2&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Row label</span>
+    
+    <span style="color: #008000;">// 6. Fill in values for the two cells in the second row</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nColIDBase <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// [Note1] For the same column the differnet row, the node ID should keep same. For example, the ID of node tr.Report.Table.R2.C1 is same as the ID of tr.Report.Table.R1.C1.</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">15</span>;
+    
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nColIDBase <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">R2</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+    
+    
+    <span style="color: #008000;">// 7. Prepare worksheet window to report</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+    
+    DWORD     dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE;        
+    string    strSheetName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Report Sheet&quot;</span>;
+    <span style="color: #0000ff;">int</span>        nn <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>strSheetName, dwOptions<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>    
+        <span style="color: #0000ff;">return</span>;    
+    
+    Worksheet wksOut <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000000;">&#41;</span>;
+    wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #0000ff;">Delete</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">//delete the first default layer    </span>
+    
+    <span style="color: #008000;">// 8. Do report</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wksOut.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Report</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Returns last row number on successful exit and -1 on failure.</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>        
+    wksOut.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;        
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// The following example reports two tables. The first table shows result from one struct and the second table shows values got from vector.</span>
+<span style="color: #0000ff;">void</span> Datasheet_SetReportTree_Ex2<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique    </span>
+    <span style="color: #0000ff;">int</span> nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN <span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_HEADINGS<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_HEADINGS <span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+    
+    <span style="color: #008000;">// 1. Create report tree</span>
+    Tree tr;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; 
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Dest Stats Report&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table title</span>
+    <span style="color: #008000;">// TREE_Table attribute is critical in getting the report to work so must be present in every table level. </span>
+    <span style="color: #008000;">// Can set this attribute as 0 without any format, but many bits GETNBRANCH_* defined in oc_const.h to set table display format.</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 
+
+    
+    <span style="color: #008000;">// 2. Prepare the 1st table Descriptive Statistics and show values got from one structure</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Descriptive Statistics&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Table title. If not set this, will show as empty here</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 
+    
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Result&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    tagtTestDescStats stRes; 
+    stRes.<span style="color: #000000;">N</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+    stRes.<span style="color: #000000;">Mean</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">604.72</span>;
+    stRes.<span style="color: #000000;">SD</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">760.19</span>;
+    stRes.<span style="color: #000000;">SEM</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">76.02</span>;    
+    
+    <span style="color: #008000;">// Add nodes with values and IDs from structure to tree</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span> <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRes;
+    
+    <span style="color: #008000;">//&#160;!! Please some details of tagtTestDescStats in stats_types.h, already define ID when declaration this structure</span>
+    <span style="color: #008000;">// If stRes is a user defined structure without ID, here need to assign node ID for each child nodes of trCol, for example:</span>
+    <span style="color: #008000;">//foreach(TreeNode trN in tr.Report.Table1.C1.Children)</span>
+    <span style="color: #008000;">//{</span>
+        <span style="color: #008000;">//trN.ID = nID++;</span>
+    <span style="color: #008000;">//}</span>
+    
+    <span style="color: #008000;">// Set label for each row</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">N</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;N total&quot;</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">Mean</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Mean&quot;</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SD</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Standard Deviation&quot;</span><span style="color: #000000;">&#41;</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SEM</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;SE of Mean&quot;</span><span style="color: #000000;">&#41;</span>;    
+
+    
+    <span style="color: #008000;">// 3. Prepare the 2nd table and show values got from vectors</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Extreme Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table tile</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat <span style="color: #000040;">|</span> GETNBRANCH_TRANSPOSE<span style="color: #000000;">&#41;</span>; 
+    
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Max Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label</span>
+    
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Min Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label        </span>
+    
+    <span style="color: #008000;">// Put data from vector to table columns</span>
+    vector vMaxDatas <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">100</span>, <span style="color: #0000dd;">98</span>, <span style="color: #0000dd;">95</span>, <span style="color: #0000dd;">92</span>, <span style="color: #0000dd;">84</span><span style="color: #000000;">&#125;</span>;
+    vector vMinDatas <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">9</span>, <span style="color: #0000dd;">13</span>, <span style="color: #0000dd;">18</span>, <span style="color: #0000dd;">21</span><span style="color: #000000;">&#125;</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C1</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vMaxDatas; 
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table2</span>.<span style="color: #000000;">C2</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vMinDatas;    
+    
+    
+    <span style="color: #008000;">// 4. Prepare worksheet window to report</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+    
+    DWORD     dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE;        
+    string    strSheetName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Report Sheet&quot;</span>;
+    <span style="color: #0000ff;">int</span>        nn <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>strSheetName, dwOptions<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>    
+        <span style="color: #0000ff;">return</span>;    
+    
+    Worksheet wksOut <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000000;">&#41;</span>;
+    wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #0000ff;">Delete</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">//delete the first default layer    </span>
+    
+    
+    <span style="color: #008000;">// 5. Do report</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wksOut.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Report</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Returns last row number on successful exit and -1 on failure.</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>        
+    wksOut.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX3</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//The following example shows how to embed graphs into a report tables. </span>
+<span style="color: #0000ff;">void</span> Datasheet_SetReportTree_Ex3<span style="color: #000000;">&#40;</span>string strGraphName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Graph1&quot;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphPage gp<span style="color: #000000;">&#40;</span>strGraphName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gp<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No graph named&#160;%s in project<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strGraphName<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique    </span>
+    <span style="color: #0000ff;">int</span> nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN <span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_HEADINGS<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_HEADINGS <span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+    
+    <span style="color: #008000;">// 1. Create report tree</span>
+    Tree tr;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; 
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Report with Embeddem Graph&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table title</span>
+    <span style="color: #008000;">// TREE_Table attribute is critical in getting the report to work so must be present in every table level. </span>
+    <span style="color: #008000;">// Can set this attribute as 0 without any format, but many bits GETNBRANCH_* defined in oc_const.h to set table display format.</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// 2. Prepare table to show report graph</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Example Table&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Table title. If not set this, will show as empty here</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000040;">|</span>GETNBRANCH_HIDE_ROW_LABELS<span style="color: #000000;">&#41;</span>;
+    
+
+    <span style="color: #008000;">// 3. Put graph page inside report table</span>
+    PictureHolder pictHolder;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>page_get_picture<span style="color: #000000;">&#40;</span>gp, pictHolder, <span style="color: #ff00ff;">&quot;EMF&quot;</span>, <span style="color: #0000dd;">72</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;failed to create EMF from graph<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">Graph1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table1</span>.<span style="color: #000000;">Graph1</span>.<span style="color: #000000;">pict</span> <span style="color: #000080;">=</span> pictHolder;    
+
+    <span style="color: #008000;">// 4. Prepare worksheet window to report</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span>, CREATE_EMPTY<span style="color: #000000;">&#41;</span>;    
+    wksPage.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+    
+    DWORD     dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE;        
+    string    strSheetName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Report Sheet&quot;</span>;
+    <span style="color: #0000ff;">int</span>        nn <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>strSheetName, dwOptions<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>    
+        <span style="color: #0000ff;">return</span>;        
+    
+    <span style="color: #008000;">// 5. Do report</span>
+    Worksheet wksOut <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wksOut.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Report</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Returns last row number on successful exit and -1 on failure.</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>        
+    wksPage.<span style="color: #000000;">Rename</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;ReportSample&quot;</span><span style="color: #000000;">&#41;</span>;
+    wksOut.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;        
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX4</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//Reports vector numeric data and text from tree to flat sheet.</span>
+<span style="color: #0000ff;">void</span> Datasheet_SetReportTree_Ex4<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// Each node must have node ID and node ID must be unique    </span>
+    <span style="color: #0000ff;">int</span> nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+
+    <span style="color: #008000;">// 1. Create report tree</span>
+    Tree tr;
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; 
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Dest Stats Report&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table title</span>
+    <span style="color: #008000;">// TREE_Table attribute is critical in getting the report to work so must be present in every table level. </span>
+    <span style="color: #008000;">// Can set this attribute as 0 without any format, but many bits GETNBRANCH_* defined in oc_const.h to set table display format.</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat<span style="color: #000000;">&#41;</span>;
+    
+    
+    <span style="color: #008000;">// 2. Prepare the table and show values got from vectors</span>
+    tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    TreeNode trTable <span style="color: #000080;">=</span> tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">Table</span>;
+    trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Extreme Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Table tile</span>
+    trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>TREE_Table, nTableFormat <span style="color: #000040;">|</span> GETNBRANCH_TRANSPOSE<span style="color: #000000;">&#41;</span>; 
+    
+    <span style="color: #008000;">// setup column 1</span>
+    trTable.<span style="color: #000000;">C1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    trTable.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Description&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label</span>
+    trTable.<span style="color: #000000;">C1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_NONE<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Set column type to None</span>
+    
+    <span style="color: #008000;">// setup column 2</span>
+    trTable.<span style="color: #000000;">C2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    trTable.<span style="color: #000000;">C2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Max Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label</span>
+    trTable.<span style="color: #000000;">C2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Set column type to Y</span>
+    
+    <span style="color: #008000;">// setup column 3</span>
+    trTable.<span style="color: #000000;">C3</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+    trTable.<span style="color: #000000;">C3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Min Values&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Column label    </span>
+    trTable.<span style="color: #000000;">C3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">&#40;</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Set column type to Y</span>
+    
+    
+    <span style="color: #008000;">// Put data from vector to table columns</span>
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsDesc <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #ff00ff;">&quot;Data1&quot;</span>, <span style="color: #ff00ff;">&quot;Data2&quot;</span>, <span style="color: #ff00ff;">&quot;Data3&quot;</span>, <span style="color: #ff00ff;">&quot;Data4&quot;</span>, <span style="color: #ff00ff;">&quot;Data5&quot;</span><span style="color: #000000;">&#125;</span>;
+    vector vMaxDatas <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">100</span>, <span style="color: #0000dd;">98</span>, <span style="color: #0000dd;">95</span>, <span style="color: #0000dd;">92</span>, <span style="color: #0000dd;">84</span><span style="color: #000000;">&#125;</span>;
+    vector vMinDatas <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">9</span>, <span style="color: #0000dd;">13</span>, <span style="color: #0000dd;">18</span>, <span style="color: #0000dd;">21</span><span style="color: #000000;">&#125;</span>;
+    trTable.<span style="color: #000000;">C1</span>.<span style="color: #000000;">strVals</span> <span style="color: #000080;">=</span> vsDesc;    
+    trTable.<span style="color: #000000;">C2</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vMaxDatas; 
+    trTable.<span style="color: #000000;">C3</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vMinDatas;    
+    
+    
+    <span style="color: #008000;">// 4. Prepare worksheet window to report</span>
+    WorksheetPage wksPage;
+    wksPage.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+    
+    
+    string    strSheetName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Report Sheet&quot;</span>;
+    <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>strSheetName<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span>    
+        <span style="color: #0000ff;">return</span>;    
+    
+    Worksheet wksOut <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span>nn<span style="color: #000000;">&#41;</span>;
+    wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #0000ff;">Delete</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    <span style="color: #008000;">//delete the first default layer    </span>
+    
+    
+    <span style="color: #008000;">// 5. Do report</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> wksOut.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Report</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #008000;">// Returns last row number on successful exit and -1 on failure.</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">&#125;</span>        
+    wksOut.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;    
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

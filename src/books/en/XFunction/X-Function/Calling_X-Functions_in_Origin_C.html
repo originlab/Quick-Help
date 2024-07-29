@@ -1,0 +1,54 @@
+<h1 class="firstHeading">1.3.2 Calling X-Functions in Origin C</h1><p><span class="OIndex" style="display:none">X-Function, Execution in Origin C</span>
+<span class="OIndex" style="display:none">X-Function, Set Parameters in Origin C</span>
+Origin comes with many X-Functions for handling a variety of tasks. X-Functions can be called from both LabTalk and Origin C.  This Section will show you how to call X-Functions from Origin C using Origin C's XFBase class<span class="OIndex" style="display:none">XFBase Class</span>. This mechanism also can be used in calling one X-Function in another X-Function. 
+</p><p>The XFBase class is declared in the <b>XFBase.h</b> header file located in the <i>&lt;Origin exe folder&gt;\OriginC\system\</i> folder.  The XFBase.h header file is not included in the Origin.h header file and must be included separately in any Origin C file that uses the XFBase class.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<h2><a name="Calling_the_impFile_X-Function_From_Origin_C"></a><span class="mw-headline">Calling the impFile X-Function From Origin C</span></h2>
+<p>The following Origin C code defines a general function for importing files into Origin.  The function takes two arguments: a data file name and an import filter file name.  The function first creates an instance of the XFBase class, constructed with the name of the X-Function to be called.  In this case, the X-Function name is <a href="../../XFunction/X-Function/ImpFile.html" title="X-Function:ImpFile">impFile</a>.  It then sets the X-Function arguments using the <i>SetArg</i> method, and finally calls the X-Function using the <i>Evaluate</i> method.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">bool</span> call_impFile_XF<span style="color: #000000;">&#40;</span>LPCSTR lpcszDataFile, LPCSTR lpcszFilterFile<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    string strDataFile <span style="color: #000080;">=</span> lpcszDataFile;
+    string strFilterFile <span style="color: #000080;">=</span> lpcszFilterFile;
+
+    <span style="color: #008000;">// Create an instance of XFBase using the X-Function name.</span>
+    XFBase xf<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;impFile&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>xf<span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Set the 'fname' argument.</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fname&quot;</span>, strDataFile<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Set the 'filtername' argument.</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;filtername&quot;</span>, strFilterFile<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Call XFBase's 'Evaluate' method to execute the X-Function</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<p>The following Origin C code shows how to call our call_impFile_XF function defined above.  We will call it to import an image file. 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Lets import the Car bitmap located in Origin's Samples folder.</span>
+string strImageFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span>
+    <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Image Processing and Analysis<span style="color: #666666; font-weight: bold;">\\</span>Car.bmp&quot;</span>;
+
+<span style="color: #008000;">// Lets import the bitmap using the Image import filter.</span>
+string strFilterFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Filters<span style="color: #666666; font-weight: bold;">\\</span>Image.oif&quot;</span>;
+
+<span style="color: #008000;">// Let's call our general function that will call the impFile X-Function.</span>
+call_impFile_XF<span style="color: #000000;">&#40;</span>strImageFile, strFilterFile<span style="color: #000000;">&#41;</span>;</pre>
+<p><br />
+</p>
+<h2><a name="Related_Link"></a><span class="mw-headline">Related Link</span></h2>
+<p><a href="../../XFunction/X-Function/Calling_X-Functions_from_Script.html" title="X-Function:Calling X-Functions from Script">Calling X-Functions from Script</a>
+</p>
+
+
+
+
+

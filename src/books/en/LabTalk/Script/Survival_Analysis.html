@@ -1,0 +1,104 @@
+<h1 class="firstHeading">2.13.2.4 Survival Analysis</h1><p class='urlname' style='display: none'>Survival-Analysis</p>
+<p>Survival Analysis is widely used in the biosciences to quantify survivorship in a population under study. Origin supports three widely used tests, they are available in <b>OriginPro</b>:
+</p>
+<table class="simple" width="80%">
+<tr>
+<th> Name
+</th>
+<th> Brief Description
+</th></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Kaplanmeier.html"><b>kaplanmeier</b></a>
+</td>
+<td>Kaplan-Meier (product-limit) Estimator
+</td></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Phm_Cox.html"><b>phm_cox</b></a>
+</td>
+<td>Cox Proportional Hazards Model
+</td></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Weibullfit.html"><b>weibullfit</b></a>
+</td>
+<td>Weibull Fit
+</td></tr></table>
+<p>For a full description of these X-functions, including input and output arguments, please see the <a class="external text" href="../../XFunction/Category/Survival_Analysis.html">Survival Analysis</a>.
+</p>
+<h2><a name="Kaplan-Meier_EstimatorKaplan-Meier_Estimator"></a><span class="mw-headline">Kaplan-Meier Estimator<span class="OIndex" style="display:none">Kaplan-Meier Estimator</span></span></h2>
+<p>If you want to estimate the survival ratio, create survival plots and compare the quality of survival functions, use the <b><a class="external text" href="../../XFunction/X-Function/Kaplanmeier.html">kaplanmeier</a></b> X-Function. It uses product-limit method to estimate the survival function, and supports three methods for testing the equality of the survival function: Log Rank, Breslow and Tarone-Ware.
+</p><p>As an example, scientists are looking for a better medicine for cancer resistance. After exposing some rats to carcinogen DMBA, they apply different medicine to two different groups of rats and record their survival status for the first 60 hours.  They wish to quantify the difference in survival rates between the two medicines.   
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Import sample data</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\SurvivedRats.dat&quot;</span>;
+impasc;
+
+<span style="color: #008000;">//Perform Kaplan-Meier Analysis</span>
+kaplanmeier irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> logrank<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> 
+            rd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;sf&quot;</span><span style="color: #000080;">&gt;</span> 
+            rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;km&quot;</span><span style="color: #000080;">&gt;</span>;
+
+<span style="color: #008000;">//Get result from survival report tree</span>
+getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mykm iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;km&quot;</span>;
+
+if <span style="color: #000000;">&#40;</span>mykm.<span style="color: #000080;">comp</span>.<span style="color: #000080;">logrank</span>.<span style="color: #000080;">prob</span> <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0.05</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    type <span style="color: #ff00ff;">&quot;The two medicines have significantly different&quot;</span>
+    type <span style="color: #ff00ff;">&quot;effects on survival at the 0.05 level ...&quot;</span>; 
+    type <span style="color: #ff00ff;">&quot;Please see the survival plot.&quot;</span>;
+	
+    <span style="color: #008000;">//Plot survival Function</span>
+    page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;sf&quot;</span>;
+    plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>?, <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#91;</span><span style="color: #000080;">&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>survivalsf<span style="color: #000080;">&gt;</span><span style="color: #000000;">&#93;</span>;
+		
+<span style="color: #000000;">&#125;</span>
+else
+<span style="color: #000000;">&#123;</span>
+    type <span style="color: #ff00ff;">&quot;The two medicines are not significantly different.&quot;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Cox_Proportional_Hazard_Regression"></a><span class="mw-headline">Cox Proportional Hazard Regression</span></h2>
+<p>The <b><a class="external text" href="../../XFunction/X-Function/Phm_Cox.html">phm_cox</a></b> X-Function can be used to obtain the parameter estimates and other statistics associated with the <span class="OIndex">Cox Proportional hazards model</span> for fixed covariates.  It can then forecast the change in the hazard rate along with several fixed covariates. 
+</p><p>For example, we want to study on 66 patients with colorectal carcinoma to determine the effective prognostic parameter and the best prognostic index (a prognostic parameter is a parameter that determines whether a person has a certain illness).  This script implements the <b>phm_cox</b> X-Function to get the relevant statistics.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//import a sample data</span>
+newbook;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\ColorectalCarcinoma.dat&quot;</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impasc option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">LNames</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">units</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">CommsFrom</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">CommsTo</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+
+<span style="color: #008000;">//Perform Cox Regression </span>
+phm_Cox irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>,col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>,col<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span>end<span style="color: #000000;">&#41;</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;cox&quot;</span><span style="color: #000080;">&gt;</span>;
+
+<span style="color: #008000;">//Get result from report tree</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;cox&quot;</span>;
+getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cox;
+
+type <span style="color: #ff00ff;">&quot;Prognostic parameters determining colorectal carcinoma are:&quot;</span>;
+
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;ColorectalCarcinoma&quot;</span>;
+loop<span style="color: #000000;">&#40;</span>ii, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">7</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+  <span style="color: #008000;">// If probability is less than 0.05, </span>
+  <span style="color: #008000;">// we can say it is effective for survival time.</span>
+  if <span style="color: #000000;">&#40;</span>cox.<span style="color: #000080;">paramestim</span>.<span style="color: #000080;">param</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>.<span style="color: #000080;">prob</span><span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">0.05</span><span style="color: #000000;">&#41;</span>
+    type wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>.<span style="color: #000080;">comment</span><span style="color: #000080;">$</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Weibull_FitWeibull_Fit"></a><span class="mw-headline">Weibull Fit<span class="OIndex" style="display:none">Weibull Fit</span></span></h2>
+<p>If it is known <i>apriori</i> that data are Weibull distributed, use the <b><a class="external text" href="../../XFunction/X-Function/Weibullfit.html">weibullfit</a></b> X-Function to estimate the weibull parameters.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//import a sample data</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\Weibull Fit.dat &quot;</span>;
+impasc;
+ 
+<span style="color: #008000;">//Perform Weibull Fit</span>
+weibullfit irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>a<span style="color: #000000;">&#41;</span>, col<span style="color: #000000;">&#40;</span>b<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+
+
+
+
+
+

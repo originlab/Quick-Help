@@ -1,0 +1,112 @@
+<h1 class="firstHeading">3.9.2.2.5 Fit on one data with one implicit function</h1><h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: OriginPro 9.0 SR0</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>The following code shows how to use NLFit to fit with ellipse data.
+</p>
+<ol><li> Create a new worksheet and import the data <i>&lt;Origin Installation Directory&gt;\Samples\Curve Fitting\Ellipse.dat</i>.</li>
+<li> Copy and compile the following codes in Code Builder, and then run "NLFit_Implicit_example1" in Command Window.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// Implicit function fitting, fitting a ellipse f(x,y) = 1 - ((x - xc)/a)^2 - ((y-yc)/b)^2</span>
+<span style="color: #008000;">//////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span>	NLFit_Implicit_example1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string			strFDF <span style="color: #000080;">=</span>  okutil_get_origin_path<span style="color: #000000;">&#40;</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">&quot;FitFunc&quot;</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;ellipse.FDF&quot;</span>; 
+	Tree			trFF;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">&#40;</span> strFDF, <span style="color: #000040;">&amp;</span>trFF <span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to load FDF function file&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 1. Setting the fitting function</span>
+	
+	<span style="color: #008000;">// The fit object</span>
+	NLFit			fit;
+	<span style="color: #0000ff;">int</span>				nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span>trFF<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span>nn <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Failed setting fitting function!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+  
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 2. Setting data for fitting ////////////////////////////////////////////</span>
+	Worksheet 	 wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;No active worksheet to get input data&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	vector vX <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	vector vY <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	vector vWx <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	vector vWy <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	NLSFONEDATA     stIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	stIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX;
+	stIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY;	
+	stIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> stIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	ONEDATAWEIGHT   stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span>;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">stWeightData</span>.<span style="color: #000000;">pdData</span>  <span style="color: #000080;">=</span> vWx;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">stWeightData</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vWx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">method</span> <span style="color: #000080;">=</span> WEIGHT_DIRECT;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">a</span> <span style="color: #000080;">=</span> stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">b</span> <span style="color: #000080;">=</span> stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">c</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">stWeightData</span>.<span style="color: #000000;">pdData</span>  <span style="color: #000080;">=</span> vWy;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">stWeightData</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vWy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">method</span> <span style="color: #000080;">=</span> WEIGHT_DIRECT;
+	stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">a</span> <span style="color: #000080;">=</span> stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">b</span> <span style="color: #000080;">=</span> stWeightIndep<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>.<span style="color: #000000;">c</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+		
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>stIndep, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>stWeightIndep<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nn <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;SetData() failed!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">// 3. Setting paramaters //////////////////////////////////////////////////</span>
+	<span style="color: #0000ff;">int</span>				nNumParams <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;	
+	vector			vParams<span style="color: #000000;">&#40;</span>nNumParams<span style="color: #000000;">&#41;</span>;	<span style="color: #008000;">// this vector should be initialized to the total number of paramaters</span>
+	<span style="color: #008000;">// This vector will be used both to set initial paramater values, and to receive the parameter values after fitting:</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;		<span style="color: #008000;">//xc</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;		<span style="color: #008000;">//yc</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;		<span style="color: #008000;">//a</span>
+	vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;		<span style="color: #008000;">//b</span>
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetParams</span><span style="color: #000000;">&#40;</span>nNumParams, vParams<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nn <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Invalid paramater setting!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+ 
+	<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 4. Fitting /////////////////////////////////////////////////////////////</span>
+	<span style="color: #0000ff;">int</span>				nMaxNumIterations <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+	nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span>nMaxNumIterations, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, FITMETH_ORTHOGONAL_DISTANCE_REGRESSION<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fit(%ld) returned:&#160;%ld<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nMaxNumIterations, nn<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nn <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fit Done!<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">&#41;</span>;	
+ 
+	<span style="color: #008000;">/////////////////////////////////////////////////////////////////////////////</span>
+	<span style="color: #008000;">// 5. Dump all the results and compare with what was expected /////////////</span>
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> iparam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iparam <span style="color: #000080;">&lt;</span> nNumParams; iparam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;param index =&#160;%d   value obtained =&#160;%lf<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iparam <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, vParams<span style="color: #000000;">&#91;</span>iparam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+ 
+	<span style="color: #0000ff;">return</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

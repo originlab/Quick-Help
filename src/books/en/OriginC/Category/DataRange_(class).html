@@ -1,0 +1,424 @@
+<h1 class="firstHeading">2.2.4.9 DataRange</h1><p class='urlname' style='display: none'>DataRange-Class</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Name"><span class="tocnumber">1</span> <span class="toctext">Name</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Remark"><span class="tocnumber">2</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Hierarchy"><span class="tocnumber">3</span> <span class="toctext">Hierarchy</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Header_to_Include"><span class="tocnumber">5</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Reference"><span class="tocnumber">6</span> <span class="toctext">Reference</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Members"><span class="tocnumber">7</span> <span class="toctext">Members</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Name"></a><span class="mw-headline">Name</span></h2>
+<p>DataRange
+</p>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<p>The DataRange class provides methods and properties to construct data ranges for getting and putting data from and to a Worksheet, Matrix and Graph window. This class itself does not contain data; it just keeps the data range with the page name, sheet name (layer index for graph) and row/column indices (data plot index for graph). One DataRange object can contain multiple data ranges. The sub data range can be a whole data sheet, one column or row, or multiple continuous columns or rows.
+</p>
+<h2><a name="Hierarchy"></a><span class="mw-headline">Hierarchy</span></h2>
+<ul><li><a href="../../OriginC/Category/OriginObject_(class).html" title="Category:OriginObject (class)">OriginObject</a>
+<ul><li><strong class="selflink">DataRange</strong>
+<ul><li><a href="../../OriginC/Category/DataRangeEx_(class).html" title="Category:DataRangeEx (class)">DataRangeEx</a></li>
+<li><a href="../../OriginC/Category/XYRange_(class).html" title="Category:XYRange (class)">XYRange</a></li>
+<li><a href="../../OriginC/Category/XYZRange_(class).html" title="Category:XYZRange (class)">XYZRange</a></li></ul></li></ul></li></ul>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// plotting multiple columns in a group plot with X column from the end</span>
+<span style="color: #0000ff;">void</span> DataRange_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+    <span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+    wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">&#40;</span>nRows, nCols<span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// for a demo, lets use the last col as X</span>
+    <span style="color: #0000ff;">int</span> nX <span style="color: #000080;">=</span> nCols<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    Dataset dx<span style="color: #000000;">&#40;</span>wks, nX<span style="color: #000000;">&#41;</span>;
+    dx.<span style="color: #000000;">Data</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>, nRows<span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// fill the Y cols (even though 1st col is really X in the wks, we will plot it as Y anyway)</span>
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nC <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nC <span style="color: #000080;">&lt;</span> nCols<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; nC<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        Dataset dy<span style="color: #000000;">&#40;</span>wks, nC<span style="color: #000000;">&#41;</span>;
+        dy.<span style="color: #000000;">Normal</span><span style="color: #000000;">&#40;</span>nRows<span style="color: #000000;">&#41;</span>;
+        dy <span style="color: #000040;">+</span><span style="color: #000080;">=</span> nC <span style="color: #000040;">*</span> <span style="color: #0000dd;">2</span>;
+    <span style="color: #000000;">&#125;</span>
+    <span style="color: #008000;">//now we will construct our data range with all the Y columns to plot againt the X column at the end of the worksheet</span>
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nX, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> nCols<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, ii, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span>, CREATE_HIDDEN<span style="color: #000000;">&#41;</span>;
+    GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;
+    gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    gp.<span style="color: #000000;">SetShow</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">// you can verify that all the plots are plotting againt the last col as X even though the worksheet is having 1st col as X</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This example prints out the minimum and maximum X and Y values in all existing</span>
+<span style="color: #008000;">// XY selections of the active worksheet or graph</span>
+<span style="color: #008000;">// you can make the plot from example code above, or from any existing plot</span>
+<span style="color: #008000;">// if you do not make a selection, then the whole active plot is considered selected,</span>
+<span style="color: #008000;">// otherwise you can use the Regional Selection tool to select multiple regions</span>
+<span style="color: #0000ff;">void</span> DataRange_ex2<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Tree trXYSelection;
+    DWORD dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+    init_input_data_branch_from_selection<span style="color: #000000;">&#40;</span>trXYSelection, dwRules<span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">//    out_tree(trXYSelection);</span>
+
+    DataRange dr;
+    dr.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>trXYSelection, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;
+
+    DWORD dwPlotID; <span style="color: #008000;">// This is to retrieve DataPlot UID if present</span>
+    vector vX, vY;
+    <span style="color: #0000ff;">double</span> xmin, xmax, ymin, ymax;
+    string strRange;
+    <span style="color: #0000ff;">int</span> nNumRanges <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>dwRules<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nIndex <span style="color: #000080;">&lt;</span> nNumRanges; nIndex<span style="color: #000040;">++</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #008000;">// Copy data associated with nIndex of dr into vectors using DataRange::GetData</span>
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span> dwRules, nIndex, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">&#41;</span>;
+
+        <span style="color: #008000;">// Now we have made a copy of XY data into vectors vX and vY</span>
+        <span style="color: #008000;">// so we can do analysis on the data...for example:</span>
+        vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>xmin, xmax<span style="color: #000000;">&#41;</span>;
+        vY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">&#40;</span>ymin, ymax<span style="color: #000000;">&#41;</span>;
+        DataRange drSub;
+        dr.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">&#40;</span>drSub, dwRules, nIndex<span style="color: #000000;">&#41;</span>;
+        strRange <span style="color: #000080;">=</span> drSub.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>xmin =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>xmax =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>ymin =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>ymax =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strRange, xmin, xmax, ymin, ymax<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX3</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//strX,Y are col names</span>
+<span style="color: #008000;">//call XF to integrate an area using data from active book, given sheet name</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> DataRange_ex3<span style="color: #000000;">&#40;</span>string strX, string strY, string strSheet<span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #008000;">//Create input datarange.</span>
+    DataRange dr1;
+    string strRange;
+    strRange.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s!(%s,%s)&quot;</span>, strSheet, strX, strY<span style="color: #000000;">&#41;</span>;
+    dr1.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span>strRange, XVT_XYDATARANGE<span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">//Created output datarange.</span>
+    DataRange dr2;
+    dr2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    dr2.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    XYRange yi<span style="color: #000000;">&#40;</span>dr1<span style="color: #000000;">&#41;</span>;
+    <span style="color: #008000;">//integ1 -h to see usage of this XF</span>
+    XFBase xf<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;integ1&quot;</span><span style="color: #000000;">&#41;</span>;    
+    XYRange yo<span style="color: #000000;">&#40;</span>dr2<span style="color: #000000;">&#41;</span>;
+    
+    xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;iy&quot;</span>, yi<span style="color: #000000;">&#41;</span>;
+    xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;oy&quot;</span>, yo<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">// to make it &lt;optional&gt;</span>
+    <span style="color: #0000ff;">double</span> dArea;
+    xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;area&quot;</span>, dArea<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+        out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;failed to execute XF&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;for XY Data&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>area =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, yi.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, dArea<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+<h2><a name="Members"></a><span class="mw-headline">Members</span></h2>
+<table class="TableGrid" style="; border-spacing: 0px; border-spacing: 0px;" border="1">
+<tr>
+<th bgcolor="#EFEFEF" width="2%">Name
+</th>
+<th bgcolor="#EFEFEF" width="18%">Brief
+</th>
+<th bgcolor="#EFEFEF" width="2%">Example
+</th></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Add.html" title="OriginC:DataRange-Add">Add</a>
+</td>
+<td> Add a new subrange to the DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Add.html#Examples" title="OriginC:DataRange-Add">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-AddInput.html" title="OriginC:DataRange-AddInput">AddInput</a>
+</td>
+<td> Add data to a DataRange object from named columns in a workbook.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-AddInput.html#Examples" title="OriginC:DataRange-AddInput">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-BreakUp.html" title="OriginC:DataRange-BreakUp">BreakUp</a>
+</td>
+<td> Remove all ranges in the DataRange object.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-BreakUp.html#Examples" title="OriginC:DataRange-BreakUp">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Clone.html" title="OriginC:DataRange-Clone">Clone</a>
+</td>
+<td> Get a copy of the datarange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Clone.html#Examples" title="OriginC:DataRange-Clone">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Create.html" title="OriginC:DataRange-Create">Create</a>
+</td>
+<td> Create a valid DataRange object.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Create.html#Examples" title="OriginC:DataRange-Create">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-DataRange.html" title="OriginC:DataRange-DataRange">DataRange</a>
+</td>
+<td> Default constructor for the DataRange class.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-DataRange.html#Examples" title="OriginC:DataRange-DataRange">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Destroy.html" title="OriginC:DataRange-Destroy">Destroy</a>
+</td>
+<td> Destroy this Origin object.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Destroy.html#Examples" title="OriginC:DataRange-Destroy">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-FindNext.html" title="OriginC:DataRange-FindNext">FindNext</a>
+</td>
+<td> Threshold or matching string replacement for a DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-FindNext.html#Examples" title="OriginC:DataRange-FindNext">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetBookSheet.html" title="OriginC:DataRange-GetBookSheet">GetBookSheet</a>
+</td>
+<td> Get book and sheet name of the index-th x range.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetBookSheet.html#Examples" title="OriginC:DataRange-GetBookSheet">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetData.html" title="OriginC:DataRange-GetData">GetData</a>
+</td>
+<td> Get the data from indexed subrange get data from all subrange if nIndex is negative.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetData.html#Examples" title="OriginC:DataRange-GetData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetDescription.html" title="OriginC:DataRange-GetDescription">GetDescription</a>
+</td>
+<td> Get a text string to describe a data range.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetDescription.html#Examples" title="OriginC:DataRange-GetDescription">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetFactorsValues.html" title="OriginC:DataRange-GetFactorsValues">GetFactorsValues</a>
+</td>
+<td> Get all the factors as a string array.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetFactorsValues.html#Examples" title="OriginC:DataRange-GetFactorsValues">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetIndices.html" title="OriginC:DataRange-GetIndices">GetIndices</a>
+</td>
+<td> Find data points inside polygon enclosed by vX, vY, only supported by single XYRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetIndices.html#Examples" title="OriginC:DataRange-GetIndices">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetMaskedData.html" title="OriginC:DataRange-GetMaskedData">GetMaskedData</a>
+</td>
+<td> Get all masked data into a vector.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetMaskedData.html#Examples" title="OriginC:DataRange-GetMaskedData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetMissingData.html" title="OriginC:DataRange-GetMissingData">GetMissingData</a>
+</td>
+<td> Get all missing data into a vector.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetMissingData.html#Examples" title="OriginC:DataRange-GetMissingData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetName.html" title="OriginC:DataRange-GetName">GetName</a>
+</td>
+<td> Get the name of the datarange as a string.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetName.html#Examples" title="OriginC:DataRange-GetName">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetNamesOfDatasets.html" title="OriginC:DataRange-GetNamesOfDatasets">GetNamesOfDatasets</a>
+</td>
+<td> Gets the names of all the datasets that appear in the DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetNamesOfDatasets.html#Examples" title="OriginC:DataRange-GetNamesOfDatasets">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetNumData.html" title="OriginC:DataRange-GetNumData">GetNumData</a>
+</td>
+<td> Get the number of data ranges according to the rules dwRules.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetNumData.html#Examples" title="OriginC:DataRange-GetNumData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetNumRanges.html" title="OriginC:DataRange-GetNumRanges">GetNumRanges</a>
+</td>
+<td> Get the numer of subranges in this datarange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetNumRanges.html#Examples" title="OriginC:DataRange-GetNumRanges">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetPlots.html" title="OriginC:DataRange-GetPlots">GetPlots</a>
+</td>
+<td> Get dataplot's uids as to access them, dataplots are generated by this datarange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetPlots.html#Examples" title="OriginC:DataRange-GetPlots">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetRange.html" title="OriginC:DataRange-GetRange">GetRange</a>
+</td>
+<td> Get one single range's data.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetRange.html#Examples" title="OriginC:DataRange-GetRange">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetRuntimeDescription.html" title="OriginC:DataRange-GetRuntimeDescription">GetRuntimeDescription</a>
+</td>
+<td> Get the description  string of the datarange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetRuntimeDescription.html#Examples" title="OriginC:DataRange-GetRuntimeDescription">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetSubRange.html" title="OriginC:DataRange-GetSubRange">GetSubRange</a>
+</td>
+<td> Get one subrange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetSubRange.html#Examples" title="OriginC:DataRange-GetSubRange">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-GetTree.html" title="OriginC:DataRange-GetTree">GetTree</a>
+</td>
+<td> Get the datarange as a tree.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-GetTree.html#Examples" title="OriginC:DataRange-GetTree">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-HasNamedRange.html" title="OriginC:DataRange-HasNamedRange">HasNamedRange</a>
+</td>
+<td> Get the datarange's named range if exist.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-HasNamedRange.html#Examples" title="OriginC:DataRange-HasNamedRange">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Intersects.html" title="OriginC:DataRange-Intersects">Intersects</a>
+</td>
+<td> Find if a DataRange intersects another DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Intersects.html#Examples" title="OriginC:DataRange-Intersects">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-IsEmpty.html" title="OriginC:DataRange-IsEmpty">IsEmpty</a>
+</td>
+<td> Check DataRange is valid or whether it includes any empty subrange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-IsEmpty.html#Examples" title="OriginC:DataRange-IsEmpty">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-IsReal.html" title="OriginC:DataRange-IsReal">IsReal</a>
+</td>
+<td> Check DataRange is real or not.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-IsReal.html#Examples" title="OriginC:DataRange-IsReal">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Merge.html" title="OriginC:DataRange-Merge">Merge</a>
+</td>
+<td> Merge another DataRange into this DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Merge.html#Examples" title="OriginC:DataRange-Merge">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Replace.html" title="OriginC:DataRange-Replace">Replace</a>
+</td>
+<td> Threshold or matching string replacement for a DataRange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Replace.html#Examples" title="OriginC:DataRange-Replace">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-Reset.html" title="OriginC:DataRange-Reset">Reset</a>
+</td>
+<td> Clear all the subranges.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-Reset.html#Examples" title="OriginC:DataRange-Reset">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetColumnData.html" title="OriginC:DataRange-SetColumnData">SetColumnData</a>
+</td>
+<td> Set data by column offset index.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetColumnData.html#Examples" title="OriginC:DataRange-SetColumnData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetData.html" title="OriginC:DataRange-SetData">SetData</a>
+</td>
+<td> It sets a matrix data into the data referred to by the DataRange object.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetData.html#Examples" title="OriginC:DataRange-SetData">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetMask.html" title="OriginC:DataRange-SetMask">SetMask</a>
+</td>
+<td> Set data in the range maksed/unmasked.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetMask.html#Examples" title="OriginC:DataRange-SetMask">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetName.html" title="OriginC:DataRange-SetName">SetName</a>
+</td>
+<td> Update the Name property of the datarange.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetName.html#Examples" title="OriginC:DataRange-SetName">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetPlotUID.html" title="OriginC:DataRange-SetPlotUID">SetPlotUID</a>
+</td>
+<td> Set dataplot's uid by index.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetPlotUID.html#Examples" title="OriginC:DataRange-SetPlotUID">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetRange.html" title="OriginC:DataRange-SetRange">SetRange</a>
+</td>
+<td> Set the subrange at the given index.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetRange.html#Examples" title="OriginC:DataRange-SetRange">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetToVirtualDataset.html" title="OriginC:DataRange-SetToVirtualDataset">SetToVirtualDataset</a>
+</td>
+<td> It sets a DataRange object into a virtual dataset.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetToVirtualDataset.html#Examples" title="OriginC:DataRange-SetToVirtualDataset">Examples</a>
+</td></tr>
+<tr>
+<td> <a href="../../OriginC/OriginC/DataRange-SetTree.html" title="OriginC:DataRange-SetTree">SetTree</a>
+</td>
+<td> Specify a datarange from a tree.
+</td>
+<td align="center"> <a href="../../OriginC/OriginC/DataRange-SetTree.html#Examples" title="OriginC:DataRange-SetTree">Examples</a>
+</td></tr></table>
+
+
+
+
+
+

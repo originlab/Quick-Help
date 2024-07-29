@@ -1,0 +1,95 @@
+<h1 class="firstHeading">3.9.2.1.4 Fit User Defined Function</h1><div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Need_to_do_before_Running_Examples"><span class="tocnumber">2</span> <span class="toctext">Need to do before Running Examples</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Examples"><span class="tocnumber">3</span> <span class="toctext">Examples</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8.1 SR0</p>
+<h2><a name="Need_to_do_before_Running_Examples"></a><span class="mw-headline">Need to do before Running Examples</span></h2>
+<p>Prior to running the following example, the <b>nlsf_utils.c</b> file need to be loaded and compiled. This can be done from script with the following command or just add this file to your workspace.
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">&#40;</span>Originlab\nlsf_utils.<span style="color: #000080;">c</span><span style="color: #000000;">&#41;</span>;</pre>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p>The following code shows how to use NLFitSesssion to fit on user define fitting function.
+</p><p><b>If there is a big loop in your fit function body, please close Code Builder to improve fitting speed. </b>
+</p>
+<ol><li> Add a user defined function according to <a class="external text" href="../../Tutorial/Tutorial/Fitting_with_Integral_using_NAG_Library.html">Add User Defined Integral Fitting Function</a></li>
+<li> New a worksheet and import \Samples\Curve Fitting\Replicate Response Data.dat. Set Col(A) = log(Col(A)) in the Set Column Values dialog. </li>
+<li> Copy and compile the following codes. Close Code Builder and then run "NLFitSession_UserDefinedFuncFit" in Command Window.</li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">BOOL</span> NLFitSession_UserDefinedFuncFit<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nMaxIter <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>, string strFunc <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;nag_integration_fitting&quot;</span>, <span style="color: #0000ff;">int</span> nXCol<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nYCol<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    
+    NLFitSession    FitSession;
+    
+    <span style="color: #008000;">// 1. Set fucntion</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">&#40;</span>strFunc, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #008000;">// set function, category name can be ignore</span>
+        <span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;invalid fit function&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>  vsParamNames;
+    <span style="color: #0000ff;">int</span>             nNumParamsInFunction <span style="color: #000080;">=</span> FitSession.<span style="color: #000000;">GetParamNamesInFunction</span><span style="color: #000000;">&#40;</span>vsParamNames<span style="color: #000000;">&#41;</span>;
+    
+    DataRange   	drInputData;
+    drInputData.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nXCol, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+    drInputData.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nYCol, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    DWORD           dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+    <span style="color: #0000ff;">int</span>         	nNumData <span style="color: #000080;">=</span> drInputData.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">&#40;</span>dwRules<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">ASSERT</span><span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">==</span>nNumData <span style="color: #000000;">&#41;</span>;
+        
+    <span style="color: #008000;">// 2. Set the dataset</span>
+	<span style="color: #0000ff;">int</span>             nDataIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// only one set in our case</span>
+    vector  		vX, vY;
+    drInputData.<span style="color: #000000;">GetData</span><span style="color: #000000;">&#40;</span> dwRules, nDataIndex, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX <span style="color: #000000;">&#41;</span>;    
+    
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">&#40;</span> vY, vX, <span style="color: #0000ff;">NULL</span>, nDataIndex, nNumData <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>  
+        <span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;err setting data&quot;</span><span style="color: #000000;">&#41;</span>;  
+        
+    <span style="color: #008000;">// 3. Set parameter init values</span>
+    vector vParams<span style="color: #000000;">&#40;</span>nNumParamsInFunction<span style="color: #000000;">&#41;</span>;
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;	<span style="color: #008000;">// y0</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// A</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// xc</span>
+    vParams<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// w</span>
+    <span style="color: #0000ff;">int</span> nErr <span style="color: #000080;">=</span> FitSession.<span style="color: #000000;">SetParamValues</span><span style="color: #000000;">&#40;</span>vParams<span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>nErr <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+    	<span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Fail to set init parameters: err=&quot;</span> <span style="color: #000040;">+</span> nErr<span style="color: #000000;">&#41;</span>;
+
+    <span style="color: #008000;">// 4. Iterate with default settings</span>
+    FitSession.<span style="color: #000000;">SetMaxNumIter</span><span style="color: #000000;">&#40;</span>nMaxIter<span style="color: #000000;">&#41;</span>;   
+    
+    <span style="color: #0000ff;">int</span>             nFitOutcome;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">Fit</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>nFitOutcome<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        string strOutcome <span style="color: #000080;">=</span> FitSession.<span style="color: #000000;">GetFitOutCome</span><span style="color: #000000;">&#40;</span>nFitOutcome<span style="color: #000000;">&#41;</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;fit failed:%d-&gt;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nFitOutcome, strOutcome<span style="color: #000000;">&#41;</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #008000;">// 5. Success, get results</span>
+    RegStats        fitStats;
+    NLSFFitInfo     fitInfo;
+ 	vector 			vParamValues, vErrors;
+    FitSession.<span style="color: #000000;">GetFitResultsStats</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>fitStats, <span style="color: #000040;">&amp;</span>fitInfo, <span style="color: #0000ff;">false</span>, nDataIndex<span style="color: #000000;">&#41;</span>;
+    FitSession.<span style="color: #000000;">GetFitResultsParams</span><span style="color: #000000;">&#40;</span>vParamValues, vErrors<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;# Iterations=%d, Reduced Chisqr=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fitInfo.<span style="color: #000000;">Iterations</span>, fitStats.<span style="color: #000000;">ReducedChiSq</span><span style="color: #000000;">&#41;</span>;
+    
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vParamValues.<span style="color: #000000;">GetSize</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;%s =&#160;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParamNames<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span>, vParamValues<span style="color: #000000;">&#91;</span>nParam<span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>   
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

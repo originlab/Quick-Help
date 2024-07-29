@@ -1,0 +1,316 @@
+<h1 class="firstHeading">3.5.2 Accessing Graph Format with Theme Tree</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#View_Graph_Format_Tree"><span class="tocnumber">2</span> <span class="toctext">View Graph Format Tree</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Change_Plot_Label_Justify"><span class="tocnumber">3</span> <span class="toctext">Change Plot Label Justify</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Turn_Off_Speed_Mode"><span class="tocnumber">4</span> <span class="toctext">Turn Off Speed Mode</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Turn_Off_Speed_Mode_.28Origin_7.5.29"><span class="tocnumber">5</span> <span class="toctext">Turn Off Speed Mode (Origin 7.5)</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Setup_Data_Plot_Property"><span class="tocnumber">6</span> <span class="toctext">Setup Data Plot Property</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Setup_Property_for_Special_Data_Points"><span class="tocnumber">6.1</span> <span class="toctext">Setup Property for Special Data Points</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Set_Modifier"><span class="tocnumber">6.2</span> <span class="toctext">Set Modifier</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Using_a_Column_to_Control_Plot_Color"><span class="tocnumber">6.3</span> <span class="toctext">Using a Column to Control Plot Color</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<p><br />
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 8 SR0</p>
+<h2><a name="View_Graph_Format_Tree"></a><span class="mw-headline">View Graph Format Tree</span></h2>
+<p>Following code show how to access graph format using Origin C code. 
+</p><p>To customize graph format, you may use <a href="../../OriginC/OriginC/OriginObject-GetFormat.html" title="OriginC:OriginObject-GetFormat">OriginObject::GetFormat</a> to get the format tree of one Origin object(e.x. GraphPage, GraphLayer, DataPlot, Axis), save it to XML file or output it the learn more about it.
+</p><p>To view all graph layer relative format from tree. Compile, and then run this function in Commad window will output format tree.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> ViewGraphFormatTree<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	Tree trFormat;
+	trFormat <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+	out_tree<span style="color: #000000;">&#40;</span>trFormat<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// output format tree</span>
+	
+	string strSaveTo <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;FormatTree.xml&quot;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>trFormat.<span style="color: #000000;">Save</span><span style="color: #000000;">&#40;</span>strSaveTo<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Format Tree xml file saved to &quot;</span><span style="color: #000040;">+</span>strSaveTo<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// This function shows how to get Stack settings from a graph.</span>
+<span style="color: #008000;">// Stack settings in the Theme are only available in Origin version 8.1 and later.</span>
+<span style="color: #0000ff;">void</span> GetGraphFormatStackSetting<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">&#41;</span>
+        <span style="color: #0000ff;">return</span>;
+    
+    Tree trFormat;
+    trFormat <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+
+#if _OC_VER <span style="color: #000080;">&gt;=</span> 0x0810
+    <span style="color: #0000ff;">switch</span><span style="color: #000000;">&#40;</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Offset</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    <span style="color: #0000ff;">case</span> PLOTSTACK_NONE<span style="color: #000000;">:</span>
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> PLOTSTACK_CUMULATIVE<span style="color: #000000;">:</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Cumulative offset setting.&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">bool</span> bCumulative <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> PLOTSTACK_CONST<span style="color: #000000;">:</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Constant offset setting.&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">double</span> dConst <span style="color: #000080;">=</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Constant</span>.<span style="color: #000000;">nVal</span>;
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> PLOTSTACK_AUTO<span style="color: #000000;">:</span>
+		out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Auto offset setting.&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">double</span> dGap <span style="color: #000080;">=</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Gap</span>.<span style="color: #000000;">dVal</span>;
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> PLOTSTACK_INDIVIDUAL<span style="color: #000000;">:</span>
+    	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Individual offset setting.&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">bool</span> bX <span style="color: #000080;">=</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">nVal</span>;
+    	<span style="color: #0000ff;">bool</span> bY <span style="color: #000080;">=</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Y</span>.<span style="color: #000000;">nVal</span>;
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">default</span><span style="color: #000000;">:</span>
+    	out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Unknown offset setting.&quot;</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">break</span>;
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #0000ff;">#else</span> <span style="color: #008000;">//&#160;!_OC_VER &gt;= 0x0810</span>
+    out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Stack settings in Theme only available in Origin 8.1 and later.&quot;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #0000ff;">#endif</span> <span style="color: #008000;">//&#160;!_OC_VER &gt;= 0x0810</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><br />
+</p>
+<h2><a name="Change_Plot_Label_Justify"></a><span class="mw-headline">Change Plot Label Justify</span></h2>
+<p>For now, theme tree not work on change label justify, we will support, can firstly use Labtalk command as below.
+</p><p>Run "change_label_justify 2 1", label display as center.
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// nLabelPlotIndex, label plot index, offset from 1,</span>
+<span style="color: #008000;">// nJustify, 0:Left; 1:Center; 2:Right.</span>
+<span style="color: #0000ff;">void</span> change_label_justify<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> nLabelPlotIndex, <span style="color: #0000ff;">int</span> nJustify <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	string strLT;
+	strLT.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;range aa=%d;&quot;</span>, nLabelPlotIndex<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//this plot is label	</span>
+	
+	string str;
+	str.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;set aa -tj&#160;%d;&quot;</span>, nJustify<span style="color: #000000;">&#41;</span>;
+	strLT <span style="color: #000040;">+</span><span style="color: #000080;">=</span> str;
+	
+	LT_execute<span style="color: #000000;">&#40;</span>strLT<span style="color: #000000;">&#41;</span>;	
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Turn_Off_Speed_Mode"></a><span class="mw-headline">Turn Off Speed Mode</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> TurnOffSpeedMode<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>gl<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Tree trFormat;
+		trFormat <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">&#40;</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span>;
+		
+		TreeNode trSpeed <span style="color: #000080;">=</span> trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">Matrix</span>;
+        <span style="color: #008000;">// if the plot data is from worksheet, </span>
+        <span style="color: #008000;">// use the following line instead of the line above</span>
+        <span style="color: #008000;">// TreeNode trSpeed = trFormat.Root.Speed.Worksheet;</span>
+        
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>trSpeed <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">return</span>;
+		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> trSpeed.<span style="color: #000000;">nVal</span> <span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			trSpeed.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gl.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>trFormat, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+				out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Turn off speed mode!&quot;</span><span style="color: #000000;">&#41;</span>;
+			
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">else</span>
+		<span style="color: #000000;">&#123;</span>
+			out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Speed mode already be turn off!&quot;</span><span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>		
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Turn_Off_Speed_Mode_.28Origin_7.5.29"></a><span class="mw-headline">Turn Off Speed Mode (Origin 7.5)</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> speed_mode_75<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">BOOL</span> bOn <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #0000ff;">BOOL</span> bRes <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span>;
+	GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> gl <span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+		Tree trFormat;
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">Worksheet</span>.<span style="color: #000000;">nVal</span>	<span style="color: #000080;">=</span> bOn;	<span style="color: #008000;">// wks speed mode</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">Matrix</span>.<span style="color: #000000;">nVal</span>		<span style="color: #000080;">=</span> bOn;	<span style="color: #008000;">// matrix speed mode</span>
+		
+		<span style="color: #008000;">// Origin 7.5 does not have easy update ID mechanism, so we must use low level access</span>
+		<span style="color: #008000;">// these IDs could be found comparing &quot;Save Theme As&quot; tree to OTH(xml) file generated by saving</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">ID</span>									<span style="color: #000080;">=</span> 0x00000001;	<span style="color: #008000;">// root ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">ID</span>								<span style="color: #000080;">=</span> 0x00000004;	<span style="color: #008000;">// page ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">ID</span>						<span style="color: #000080;">=</span> 0x40000014;	<span style="color: #008000;">// layer collection ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">ID</span>					<span style="color: #000080;">=</span> 0x10000015;	<span style="color: #008000;">// all layers ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">ID</span>				<span style="color: #000080;">=</span> 0x0000026F;	<span style="color: #008000;">// speed branch ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">Worksheet</span>.<span style="color: #000000;">ID</span>	<span style="color: #000080;">=</span> 0x00000270;	<span style="color: #008000;">// worksheet speed mode ID</span>
+		trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Page</span>.<span style="color: #000000;">Layers</span>.<span style="color: #000000;">All</span>.<span style="color: #000000;">Speed</span>.<span style="color: #000000;">Matrix</span>.<span style="color: #000000;">ID</span>		<span style="color: #000080;">=</span> 0x00000272;	<span style="color: #008000;">// matrix speed mode ID</span>
+		
+		bRes <span style="color: #000080;">=</span> gl.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>trFormat<span style="color: #000000;">&#41;</span>;
+    <span style="color: #000000;">&#125;</span>
+    
+    <span style="color: #0000ff;">return</span> bRes;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Setup_Data_Plot_Property"></a><span class="mw-headline">Setup Data Plot Property</span></h2>
+<h3><a name="Setup_Property_for_Special_Data_Points"></a><span class="mw-headline">Setup Property for Special Data Points</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// set property for the special points on data plot.</span>
+<span style="color: #0000ff;">void</span> set_specialpoints<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+   GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+   DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+   
+   Tree tr;
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Index</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">// the index of the current editing point is 0(offset is 0)</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Size</span>.<span style="color: #000000;">dVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span>;        <span style="color: #008000;">// pts</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Type</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;        <span style="color: #008000;">// geometric</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Shape</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;        <span style="color: #008000;">// square</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Interior</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;    <span style="color: #008000;">// solid</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">EdgeColor</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;   <span style="color: #008000;">// green color</span>
+   
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Index</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; <span style="color: #008000;">// the index of the current editing point is 2(offset is 0)</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Size</span>.<span style="color: #000000;">dVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span>;        <span style="color: #008000;">// pts</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Type</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;        <span style="color: #008000;">// geometric</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Shape</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;        <span style="color: #008000;">// square</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">Interior</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;    <span style="color: #008000;">// solid</span>
+   tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point2</span>.<span style="color: #000000;">Symbol</span>.<span style="color: #000000;">EdgeColor</span>.<span style="color: #000000;">nVal</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;   <span style="color: #008000;">// blue color</span>
+   
+   <span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> dp.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>tr.<span style="color: #000000;">Root</span>, <span style="color: #ff00ff;">&quot;Error&quot;</span>, <span style="color: #ff00ff;">&quot;Unknown tag&quot;</span><span style="color: #000000;">&#41;</span>;
+   <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>tr, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;     
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Set_Modifier"></a><span class="mw-headline">Set Modifier</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//use SetModifier to set plot label</span>
+<span style="color: #0000ff;">void</span> set_label_by_SetModifier<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">//prepare data</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	vector vn <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#125;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">3</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Dataset ds<span style="color: #000000;">&#40;</span>wks, ii<span style="color: #000000;">&#41;</span>;
+		ds <span style="color: #000080;">=</span> vn;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">//plot</span>
+	DataRange dr;	
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span>;
+	gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">//set label</span>
+	Column col<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>;
+	DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>dp<span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	dp.<span style="color: #000000;">SetModifier</span><span style="color: #000000;">&#40;</span>COLDESIG_PLOTLABEL_FORM, col<span style="color: #000000;">&#41;</span>;<span style="color: #008000;">//see PlotDesignationEx for more modifier types.</span>
+	
+	vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnDesigs;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> saNames;
+	dp.<span style="color: #000000;">GetModifiers</span><span style="color: #000000;">&#40;</span>vnDesigs, saNames<span style="color: #000000;">&#41;</span>;
+	
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vecIndex;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>vnDesigs.<span style="color: #000000;">Find</span><span style="color: #000000;">&#40;</span>vecIndex, COLDESIG_PLOTLABEL_FORM<span style="color: #000000;">&#41;</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> 
+	<span style="color: #000000;">&#123;</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;label form =&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, saNames<span style="color: #000000;">&#91;</span> vecIndex<span style="color: #000000;">&#91;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#93;</span> <span style="color: #000000;">&#93;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//use ApplyFormat to set plot label</span>
+<span style="color: #0000ff;">void</span> set_label_by_applyformat<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">//prepare data</span>
+	Worksheet wks;
+	wks.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	vector vn <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">&#125;</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">3</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Dataset ds<span style="color: #000000;">&#40;</span>wks, ii<span style="color: #000000;">&#41;</span>;
+		ds <span style="color: #000080;">=</span> vn;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #008000;">//plot</span>
+	DataRange dr;	
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_SCATTER<span style="color: #000000;">&#41;</span>;
+	gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">//set label</span>
+	DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>dp<span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>		
+		Tree trFmt;
+		TreeNode trEnable <span style="color: #000080;">=</span> trFmt.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Label</span>.<span style="color: #000000;">AddNode</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Enable&quot;</span><span style="color: #000000;">&#41;</span>;
+		trEnable.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		
+		OQCOLOR nLab;
+		<span style="color: #0000ff;">int</span> ycol <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, labelcol <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+		<span style="color: #008000;">//convert the offset(modifier column to y column) to theme internal value</span>
+		okutil_get_ocolor_by_col<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>nLab, labelcol, ycol, SYMB_COLOR_COLTYPE_INDEX<span style="color: #000000;">&#41;</span>;
+		
+		trFmt.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Label</span>.<span style="color: #000000;">Form</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> nLab;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">&#40;</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> dp.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>trFmt.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+			dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>trFmt, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>	
+<span style="color: #000000;">&#125;</span></pre>
+<h3><a name="Using_a_Column_to_Control_Plot_Color"></a><span class="mw-headline">Using a Column to Control Plot Color</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//use a column of values to control data plot colors for plots of data from the same worksheet </span>
+<span style="color: #0000ff;">void</span> DataPlot_SetColorByCol_ex<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	<span style="color: #008000;">//wks with 3 columns</span>
+	<span style="color: #0000ff;">int</span> nXCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nYCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, nCCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	DataRange dr;	
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nXCol, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">&#41;</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>wks, nYCol, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">&#41;</span>;
+	
+	<span style="color: #008000;">//make a line plot</span>
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;
+	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;	
+	gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">&#40;</span>dr, IDM_PLOT_LINE<span style="color: #000000;">&#41;</span>;
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>; 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> <span style="color: #000040;">!</span>dp <span style="color: #000000;">&#41;</span>
+		<span style="color: #0000ff;">return</span>;
+	
+	<span style="color: #008000;">//Get the color value to make plot colors follow a same worksheet column value </span>
+	OQCOLOR oqColor;
+	okutil_get_ocolor_by_col<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>oqColor, nCCol, nYCol, COLTYPE_COLOR_COLORMAP<span style="color: #000000;">&#41;</span>;
+
+	<span style="color: #008000;">//set line color by theme</span>
+	Tree trFormat;
+	trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Line</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> oqColor;
+	<span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> dp.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">&#40;</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">&#40;</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;     
+	
+	gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

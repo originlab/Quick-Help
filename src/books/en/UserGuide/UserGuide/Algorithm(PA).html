@@ -1,0 +1,143 @@
+<h1 class="firstHeading">19.1.9 Algorithms (Peak Analyzer)</h1><p class='urlname' style='display: none'>PA-Algorithm</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Baseline_Detection_Algorithm"><span class="tocnumber">1</span> <span class="toctext">Baseline Detection Algorithm</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#User_Defined"><span class="tocnumber">1.1</span> <span class="toctext">User Defined</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#2nd_Derivative_.28zeroes.29"><span class="tocnumber">1.1.1</span> <span class="toctext">2nd Derivative (zeroes)</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#2nd_Derivative_.28peaks.29"><span class="tocnumber">1.1.2</span> <span class="toctext">2nd Derivative (peaks)</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#1st_Derivative_and_2nd_Derivative"><span class="tocnumber">1.1.3</span> <span class="toctext">1st Derivative and 2nd Derivative</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#XPS"><span class="tocnumber">1.2</span> <span class="toctext">XPS</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Shirley"><span class="tocnumber">1.2.1</span> <span class="toctext">Shirley</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Tougaard"><span class="tocnumber">1.2.2</span> <span class="toctext">Tougaard</span></a>
+<ul>
+<li class="toclevel-4 tocsection-9"><a href="#Reference"><span class="tocnumber">1.2.2.1</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#End_points_weighted"><span class="tocnumber">1.3</span> <span class="toctext">End points weighted</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Asymmetric_least_squares_smoothing.28Pro.29"><span class="tocnumber">1.4</span> <span class="toctext">Asymmetric least squares smoothing(Pro)</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Reference_2"><span class="tocnumber">1.4.1</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Peak_Finding_Algorithm"><span class="tocnumber">2</span> <span class="toctext">Peak Finding Algorithm</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Local_Maximum"><span class="tocnumber">2.1</span> <span class="toctext">Local Maximum</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Window_Search"><span class="tocnumber">2.2</span> <span class="toctext">Window Search</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#First_Derivative"><span class="tocnumber">2.3</span> <span class="toctext">First Derivative</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Second_Derivative"><span class="tocnumber">2.4</span> <span class="toctext">Second Derivative</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Residual_after_First_Derivative"><span class="tocnumber">2.5</span> <span class="toctext">Residual after First Derivative</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Fourier_Self-Deconvolution"><span class="tocnumber">2.6</span> <span class="toctext">Fourier Self-Deconvolution</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Baseline_Detection_Algorithm"></a><span class="mw-headline">Baseline Detection Algorithm</span></h2>
+<p>There are four methods used in Origin to detect the baseline automatically in the data: <b>User Defined</b> for general purpose baseline model, <b>XPS</b> mode for X-Ray photoemission spectrum, <b>End Points Weighted</b> and <b>Straight Line</b> (Not available for <b>Create Baseline</b> Goal). You can also define a constant baseline value or provide existing baseline points through the datasheet.
+</p>
+<h3><a name="User_Defined"></a><span class="mw-headline">User Defined</span></h3>
+<p>Four methods are provided for anchor points detection, but only the following methods are used in "auto baseline detection".
+</p>
+<h4><a name="2nd_Derivative_.28zeroes.29"></a><span class="mw-headline">2nd Derivative (zeroes)</span></h4>
+<p>This method is based on the fact that the baseline area has a smaller curvature than the peak area. The curvature of a curve is defined as
+</p><p><img src="../images/Algorithm(PA)/math-e89cf9fbd875874b8818340c292e1dcf.png?v=0" title="\kappa=\frac{y&#39;&#39;}{(1+y&#39;^2)^{ \frac{3}{2}}}" alt="\kappa=\frac{y&#39;&#39;}{(1+y&#39;^2)^{ \frac{3}{2}}}" class="tex"/>
+</p><p>where <img src="../images/Algorithm(PA)/math-d8ba4afe808679595d07bfca1e43afc6.png?v=0" title="y&#39;" alt="y&#39;" class="tex"/> and <img src="../images/Algorithm(PA)/math-e57fa423968c1523c644fbc29d451dfc.png?v=0" title="y&#39;&#39;" alt="y&#39;&#39;" class="tex"/> are the first and second derivatives of the curve, respectively. After <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_adjacent-averaging_method" title="UserGuide:Algorithm (Smooth)">the <b>Adjecent-Averaging</b> smoothing</a> is computed, the second derivative at each data point is calculated. Next, all data points whose second derivative approaches to 0 (under the tolerance)
+are used to make a second-order polynomial fit. With the fitted baseline in hand, we can adopt the points which lie closest to the fitted line as anchor points.
+</p>
+<h4><a name="2nd_Derivative_.28peaks.29"></a><span class="mw-headline">2nd Derivative (peaks)</span></h4>
+<p>This method is useful when the baseline is constructed from connecting the negative peaks of the pulse.
+</p><p>After <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="UserGuide:Algorithm (Smooth)">the <b>Savitzky-Golay</b> smoothing</a> is computed, the 2nd-order derivative of data point is calculated. Next, all peaks of the 2nd-order derivative curve are found by <a href="#Local_Maximum">the <b>Local Maximum</b> method</a>. With the peaks of 2nd-order derivative in hand, we can adopt the points which lie closest to the peaks as anchor points.
+</p><p><a  class="image"><img alt="2nd derivative peaks.png" src="../images/Algorithm(PA)/2nd_derivative_peaks.png?v=75941" width="342"  /></a>
+</p>
+<h4><a name="1st_Derivative_and_2nd_Derivative"></a><span class="mw-headline">1st Derivative and 2nd Derivative</span></h4>
+<p>In this method, we implement the <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="UserGuide:Algorithm (Smooth)"><b>Savitzky-Golay</b></a> smoothing algorithm. Besides the second derivative threshold, this method also selects the points passing the first-derivative threshold. Since usually a smaller first derivative means a smaller change in the original data set. 
+</p><p>This method is more powerful when the baseline is approximately constant. In this case, both the first and second derivatives of the baseline are approximately zero.
+</p>
+<h3><a name="XPS"></a><span class="mw-headline">XPS</span></h3>
+<p>This mode is designed especially for X-Ray photoemission spectrum analysis. Two options are supported: <b>Shirley</b> and <b>Tougaard</b>.
+</p>
+<h4><a name="Shirley"></a><span class="mw-headline">Shirley</span></h4>
+<p>The <b>Shirley</b> algorithm is an attempt to use information about the spectrum to construct a background sensitive to changes in the data. The essential feature of the <b>Shirley</b> algorithm is the iterative determination of a background using the area of the peak to compute the background intensity <img src="../images/Algorithm(PA)/math-4e84da3481926f7b0ee2e86ea08806fe.png?v=0" title="B(E)" alt="B(E)" class="tex"/> at energy <img src="../images/Algorithm(PA)/math-3a3ea00cfc35332cedf6e5e9a32e94da.png?v=0" title="E" alt="E" class="tex"/>.
+</p><p><img src="../images/Algorithm(PA)/math-c26f125d1710579c37d07ceeaff01589.png?v=0" title="B_n (E)=k_n \int_{E}^{E_{max}}dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)]" alt="B_n (E)=k_n \int_{E}^{E_{max}}dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)]" class="tex"/>,
+</p><p><br />
+where <img src="../images/Algorithm(PA)/math-d97304cbafc40d74d35ee27c96d0c58f.png?v=0" title="I_{max}" alt="I_{max}" class="tex"/> is the end point intensity at the upper bound of the energy bin. In the dialog this parameter is called the <b>Final Height</b>. The iterative value of the scattering factor is given by
+</p><p><img src="../images/Algorithm(PA)/math-728f59a444cfbe06fad8568ccf82064b.png?v=0" title="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)]}" alt="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)]}" class="tex"/>
+</p><p>The <b>Shirley</b> baseline is set to 0 outside the specified range [<img src="../images/Algorithm(PA)/math-5fba6c1b3978b674cd5c9fefa85993e9.png?v=0" title="E_{min}" alt="E_{min}" class="tex"/>, <img src="../images/Algorithm(PA)/math-cdc0075bc9741ac77d7a35a4bac6468a.png?v=0" title="E_{max}" alt="E_{max}" class="tex"/>].
+</p>
+<h4><a name="Tougaard"></a><span class="mw-headline">Tougaard</span></h4>
+<p><img src="../images/Algorithm(PA)/math-abcf3a0db1cb878affe073165665502a.png?v=0" title="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE&#39;[I(E&#39; )-I_{max}-B_{n-1}(E&#39; )](E&#39;-E)}{[1643+(E&#39;-E)^2]^2}" alt="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE&#39;[I(E&#39; )-I_{max}-B_{n-1}(E&#39; )](E&#39;-E)}{[1643+(E&#39;-E)^2]^2}" class="tex"/>,
+</p><p>where <img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png?v=0" title="k" alt="k" class="tex"/> depends on the option set previously,
+</p><p><img src="../images/Algorithm(PA)/math-69d0a27bbe50442b8d1122dfe20ea15e.png?v=0" title="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)](E&#39;-E)}{[1643+(E&#39;-E)^2]^2}}" alt="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE&#39;[I(E&#39;)-I_{max}-B_{n-1}(E&#39;)](E&#39;-E)}{[1643+(E&#39;-E)^2]^2}}" class="tex"/>,
+</p><p>for <b>Final Height</b> option and <img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png?v=0" title="k" alt="k" class="tex"/> equals to <b>Adjustable Parameter</b> when the user selects the <b>Adjustable Parameter</b> option.
+</p>
+<h5><a name="Reference"></a><span class="mw-headline">Reference</span></h5>
+<ul><li>Shirley D.A. High-resolution X-ray photoemission spectrum of valence bands of gold. Phys. Rev. B 1972; 5(12):4709–14.</li>
+<li>Tougaard S. Practical Algorithm for Background Subtraction. Surface Science 1989; 216(3): 343-360.</li>
+<li>Tougaard S., Jansson C. Comparison of validity and consistency of methods for quantitative XPS peak analysis. Surface Interface Anal. 20, 1993; 1013-1046.</li></ul>
+<h3><a name="End_points_weighted"></a><span class="mw-headline">End points weighted</span></h3>
+<p>This method is designed for the special case when you want to create a baseline based on the end points, both start and end. 
+</p><p>You can choose a specific fraction of points as end points to detect the baseline. Then, the adjacent average smoothing method is used to reduce the noise. The default window for smoothing is 6 percent of the total selected points. Since these points are presumed as a baseline, a simple linear interpolation is used to generate the baseline. 
+</p><p><b>Note:</b> This method depends heavily on the selection of end points. You should select the end points fraction very carefully.
+</p>
+<h3><a name="Asymmetric_least_squares_smoothing.28Pro.29"></a><span class="mw-headline">Asymmetric least squares smoothing(Pro)</span></h3>
+<p>Asymmetric least squares smoothing (<b>ALS</b>) method is used to find the baseline so that:
+</p>
+<ol><li> Baseline is smooth.</li>
+<li> Baseline is faithful to the original curve.</li></ol>
+<p>It is implemented by minimizing the sum of two terms: distances between points and baseline, 2nd derivatives of baseline. The sum can be expressed as:
+</p>
+<dl><dd><img src="../images/Algorithm(PA)/math-4ffed4d6b92df8a5bf711cefa2039f56.png?v=0" title="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" alt="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" class="tex"/></dd></dl>
+<p>where y is original data, <img src="../images/Algorithm(PA)/math-7f3121d5be753123b397f22e2a1fb3e3.png?v=0" title="y_b" alt="y_b" class="tex"/> is calculated baseline, <img src="../images/Algorithm(PA)/math-aa38f107289d4d73d516190581397349.png?v=0" title="w_i" alt="w_i" class="tex"/> is weight for each point, <img src="../images/Algorithm(PA)/math-c6a6eb61fd9c6c913da73b3642ca147d.png?v=0" title="\lambda" alt="\lambda" class="tex"/> is a factor to balance the residual and the 2nd derivative, and smoothing factor in X-Function is the log of this value.
+</p><p>Iteration procedures are introduced as below:
+</p>
+<ol><li> In the first iteration, <img src="../images/Algorithm(PA)/math-ddb823a593bbbb3dfaf0d602adc5e422.png?v=0" title="w_i=1" alt="w_i=1" class="tex"/> is used, and once baseline is calculated, asymmetric factor p will be applied on points above baseline (for positive peaks) as the weight, and weight for remaining points is 1-p.</li>
+<li> In the next iteration, use calculated weights in the last iteration to calculate the new baseline and update weight.</li>
+<li> Repeat the above procedure until the specified number of iterations reaches.</li></ol>
+<h5><a name="Reference_2"></a><span class="mw-headline">Reference</span></h5>
+<ul><li> P.H.C. Eilers and H.F.M. Boelens. Baseline correction with asymmetric least squares smoothing, Leiden University Medical Centre Report, 2005.</li></ul>
+<h2><a name="Peak_Finding_Algorithm"></a><span class="mw-headline">Peak Finding Algorithm</span></h2>
+<p>There are five methods used in Origin to automatically detect peaks in the data: <b>Local Maximum</b>, <b>Window Search</b>, <b>First Derivative</b>, <b>Second Derivative</b>, and <b>Residual After First Derivative</b>. The first three methods are designed for normal peak finding in data, while the last two are designed for hidden peak detection.
+</p>
+<h3><a name="Local_Maximum"></a><span class="mw-headline">Local Maximum</span></h3>
+<p>The local maximum method is a brute force searching algorithm which finds the local maximum in a moving window.  The window size is determined by a predefined a number of local points. 
+</p><p>Initially, an n-point window is placed at the start point of data stream. The maximum in this window, as well as its index, is recorded. Then the window is moved one step further. If the new maximun is greater than the saved maximum, update both the maximum value and index value and then move forward. If the maximum moves out of the window, i.e. all points in the window are less than the maximum, a peak is found an the whole window configuration is reconstructed for the next peak.
+</p>
+<h3><a name="Window_Search"></a><span class="mw-headline">Window Search</span></h3>
+<p>The window search method only differs from the local maximum method by the searching criteria used. This method uses a fixed window size, height, and width as its criteria, while the local maximum method searches in a fixed number of points.
+</p>
+<h3><a name="First_Derivative"></a><span class="mw-headline">First Derivative</span></h3>
+<p>First derivative methods make use of the fact that the first derivative of a function at a local extreme point is equal to zero. There are two options in the method used to determine whether to smooth the original data. These methods include: <b>None</b> and <b>Savitzky-Golay</b>.   
+</p><p>The three methods described above are used to find obvious peaks in the data. However, sometimes there may exist hidden peaks in data (See graph below). Origin provides two methods to detect hidden peaks in your data.
+</p>
+<dl><dd><a  class="image"><img alt="First Derivative.png" src="../images/Algorithm(PA)/First_Derivative.png?v=33190" width="250"  /></a></dd></dl>
+<h3><a name="Second_Derivative"></a><span class="mw-headline">Second Derivative</span></h3>
+<p>Since the second derivative can amplify the signal in the original data, we can use the second derivative to detect hidden peaks in data. The second derivative (red solid line) of the data with hidden peaks (black solid line) is sketched in the graph shown below. 
+</p>
+<dl><dd><a  class="image"><img alt="Second Derivative.png" src="../images/Algorithm(PA)/Second_Derivative.png?v=33191" width="250"  /></a></dd></dl>
+<p>From the graph above, we find that the signal of the hidden peak is amplified, which makes it possible to detect the hidden peaks. 
+</p><p>Origin provides four methods to smooth the derivative these include: <b>FFT Filter</b>, <b>Savitzky-Golay</b>, <b>Adjacent Averaging</b>, and <b>Quadratic Savitzky-Golay</b>. Please refer to the <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html" title="UserGuide:Algorithm (Smooth)">smooth algorithm</a> page for a detailed description.
+</p>
+<h3><a name="Residual_after_First_Derivative"></a><span class="mw-headline">Residual after First Derivative</span></h3>
+<p>In the first step, Origin uses the first derivative method to find the visible peaks. Then a series of Gaussian peak functions are used to produce the local maximum in the data stream. A hidden peak is defined as one which fails to produce this local maximum. Origin then uses the first derivative method again to find peaks in the residual data.
+</p>
+<dl><dd><a  class="image"><img alt="Residual after First Derivative.png" src="../images/Algorithm(PA)/Residual_after_First_Derivative.png?v=33185" width="238"  /></a></dd></dl>
+<h3><a name="Fourier_Self-Deconvolution"></a><span class="mw-headline">Fourier Self-Deconvolution</span></h3>
+<p>The Fourier Self-Deconvolution (FSD) method is used to find overlapping peaks in the spectrum.
+</p><p>Firstly FSD is calculated on the spectrum. Then the <b>Local Maximum</b> method is used to find peaks from the FSD result. Origin then uses the found peak centers to calculate peak heights from the original spectrum data, and further check whether the heights meet the constraints specified in the Peak Filter option.
+</p>
+
+
+
+
+

@@ -1,0 +1,51 @@
+<h1 class="firstHeading">1.6.1.2 Workbook Manipulation</h1><p>Origin provides the capabilities for workbook manipulation by using Origin C, such as merging, splitting, etc.
+</p>
+<h2><a name="Merge_Workbooks"></a><span class="mw-headline">Merge Workbooks</span></h2>
+<p>To merge many workbooks into one workbook, actually it is to copy the worksheets from the source workbooks to the target workbook. To add worksheet to a workbook, the <a href="../../OriginC/OriginC/Page-AddLayer.html" title="OriginC:Page-AddLayer">AddLayer</a> method is available.
+</p><p>The following example is to merge all workbooks in current folder to the newly created workbook.
+</p>
+<pre class="oc" style="font-family:monospace;">WorksheetPage wksPgTarget;
+wksPgTarget.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Create the target workbook</span>
+Folder fld <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveFolder</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Get the active/current folder	</span>
+foreach<span style="color: #000000;">&#40;</span>PageBase pb in fld.<span style="color: #000000;">Pages</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>  <span style="color: #008000;">// Loop all Pages in folder</span>
+	WorksheetPage wksPgSource <span style="color: #000080;">=</span> pb;  <span style="color: #008000;">// Convert the Page to WorksheetPage</span>
+	<span style="color: #008000;">// If convert failed, that is to say the Page is not WorksheetPage</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>wksPgSource<span style="color: #000000;">&#41;</span> 
+        <span style="color: #000000;">&#123;</span>  
+		<span style="color: #0000ff;">continue</span>;  <span style="color: #008000;">// Next Page</span>
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// Skip the target workbook</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>wksPgTarget.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">==</span> wksPgSource.<span style="color: #000000;">GetName</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> 
+        <span style="color: #000000;">&#123;</span>
+		<span style="color: #0000ff;">continue</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// Loop all worksheet in workbook for merging</span>
+	foreach<span style="color: #000000;">&#40;</span>Layer lay in wksPgSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span> 
+        <span style="color: #000000;">&#123;</span>
+		Worksheet wks <span style="color: #000080;">=</span> lay;  <span style="color: #008000;">// Get the worksheet</span>
+		<span style="color: #008000;">// Add the worksheet to target workbook</span>
+		wksPgTarget.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">&#41;</span>;  
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #008000;">// If not to keep the source workbook, destroy it</span>
+	wksPgSource.<span style="color: #000000;">Destroy</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Split_Workbook"></a><span class="mw-headline">Split Workbook</span></h2>
+<p>The example above is merging multiple workbooks into one workbook. It is also able to split a workbook into multiple workbooks, which contain single worksheet. 
+</p>
+<pre class="oc" style="font-family:monospace;">WorksheetPage wksPgSource<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Book1&quot;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Workbook with multiple worksheets</span>
+<span style="color: #008000;">// Loop over all worksheets</span>
+foreach<span style="color: #000000;">&#40;</span>Layer lay in wksPgSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#41;</span> 
+<span style="color: #000000;">&#123;</span>
+	Worksheet wks <span style="color: #000080;">=</span> lay;  <span style="color: #008000;">// Get worksheet</span>
+	WorksheetPage wksPgTarget;
+	wksPgTarget.<span style="color: #000000;">Create</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Create new workbook</span>
+	wksPgTarget.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">&#40;</span>wks<span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Add worksheet to the new workbook</span>
+	wksPgTarget.<span style="color: #000000;">Layers</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>.<span style="color: #000000;">Destroy</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;  <span style="color: #008000;">// Delete the first worksheet</span>
+<span style="color: #000000;">&#125;</span></pre>
+
+
+
+
+
+

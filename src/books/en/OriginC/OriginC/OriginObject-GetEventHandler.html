@@ -1,0 +1,128 @@
+<h1 class="firstHeading">2.2.4.32.16 OriginObject::GetEventHandler</h1><p><span class="OIndex" style="display:none">GetEventHandler</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Get the event handler class name if present
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;">string GetEventHandler<span style="color: #000000;">&#40;</span> <span style="color: #0000ff;">BOOL</span> bCheckValid <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">BOOL</span> bDeafult <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> bCheckValid</dt>
+<dd>[input] TRUE will check to see if class name represents a compiled Origin C class that is registered with the OC_REGISTERED keyword</dd>
+<dt> bDeafult</dt>
+<dd>[input] TRUE will return an internal deafult name, of no name has been set using SetEventHandler</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>If bCheckValid = [input] false, simply return the class name or empty string if no event handler was installed.
+</p><p>If bCheckValid = [input] true, then only return the class name if it is valid.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<dl><dt>this example shows how to use SetEventHandler and GetEventHandler to show a menu after right-click on a rectangle in a graph, so please make sure the active graph layer has a rectangle named "Rect"</dt></dl>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>control.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\OriginEvents.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+   
+<span style="color: #008000;">// The following code installs an Event Handler class called MyEvent into a rectangle named &quot;Rect&quot; in active graph layer</span>
+
+<span style="color: #008000;">// MyEvent is a class to trap right-click on GraphObject</span>
+<span style="color: #008000;">// You can create your own class and install it into origin object that require customized event handling.</span>
+<span style="color: #008000;">// Make sure your class is based on OriginEventsBase.</span>
+<span style="color: #0000ff;">class</span> OC_REGISTERED MyEvent <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> OriginEventsBase
+<span style="color: #000000;">&#123;</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	<span style="color: #008000;">//show a test menu</span>
+	<span style="color: #0000ff;">virtual</span> <span style="color: #0000ff;">bool</span> OnContextMenu<span style="color: #000000;">&#40;</span><span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y, DWORD dwControl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		Menu muMenu;
+		muMenu.<span style="color: #000000;">Add</span><span style="color: #000000;">&#40;</span>_L<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;test menu&quot;</span><span style="color: #000000;">&#41;</span>, <span style="color: #0000dd;">1</span>, MF_STRING<span style="color: #000000;">&#41;</span>;	
+		
+		<span style="color: #0000ff;">int</span> 	nSelCmd;
+		muMenu.<span style="color: #000000;">TrackPopupMenu</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, x, y, GetWindow<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>, <span style="color: #000040;">&amp;</span>nSelCmd<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+	<span style="color: #0000ff;">virtual</span>	<span style="color: #0000ff;">bool</span> SetObj<span style="color: #000000;">&#40;</span>OriginObject<span style="color: #000040;">&amp;</span> obj<span style="color: #000000;">&#41;</span> <span style="color: #008000;">//obj with the Event Handler</span>
+	<span style="color: #000000;">&#123;</span>
+		m_Object <span style="color: #000080;">=</span> obj;
+		
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> m_Object <span style="color: #000000;">&#41;</span>
+			<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+		
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	<span style="color: #000000;">&#125;</span>
+	
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>	
+	GraphObject		m_Object; 
+<span style="color: #000000;">&#125;</span>;
+
+<span style="color: #008000;">//set an Event Handler to the Rect object.</span>
+<span style="color: #008000;">//then you can right on the rect to see the test menu</span>
+<span style="color: #0000ff;">void</span> OriginObject_SetEventHandler_Ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphLayer lay <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//get the Rect object on the graph</span>
+    GraphObject goMe;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>lay<span style="color: #000000;">&#41;</span>
+    	goMe <span style="color: #000080;">=</span> lay.<span style="color: #000000;">GraphObjects</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Rect&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>goMe<span style="color: #000000;">&#41;</span>
+        goMe.<span style="color: #000000;">SetEventHandler</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;MyEvent&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//event class name</span>
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Get the event handler class name</span>
+<span style="color: #008000;">//run this function to show the test menu</span>
+<span style="color: #0000ff;">void</span> OriginObject_GetEventHandler_Ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+    GraphLayer lay <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #008000;">//get the Rect object on the graph</span>
+    GraphObject goMe;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>lay<span style="color: #000000;">&#41;</span>
+    	goMe <span style="color: #000080;">=</span> lay.<span style="color: #000000;">GraphObjects</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Rect&quot;</span><span style="color: #000000;">&#41;</span>;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>goMe<span style="color: #000000;">&#41;</span>
+    <span style="color: #000000;">&#123;</span>
+    	<span style="color: #008000;">//use the event handler class name to get the event class to show test menu</span>
+    	string strClassName <span style="color: #000080;">=</span> goMe.<span style="color: #000000;">GetEventHandler</span><span style="color: #000000;">&#40;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">&#41;</span>;
+    	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>strClassName.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>
+		<span style="color: #000000;">&#123;</span>
+			MyEvent<span style="color: #000040;">&amp;</span> event <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span>MyEvent<span style="color: #000040;">&amp;</span><span style="color: #000000;">&#41;</span>Project.<span style="color: #000000;">FindClass</span><span style="color: #000000;">&#40;</span>strClassName<span style="color: #000000;">&#41;</span>;
+			<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>event<span style="color: #000000;">&#41;</span>
+			<span style="color: #000000;">&#123;</span>
+				out_str<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;Found handler, invoking context menu&quot;</span><span style="color: #000000;">&#41;</span>;
+				
+				<span style="color: #0000ff;">int</span> x <span style="color: #000080;">=</span> <span style="color: #0000dd;">500</span>;
+				<span style="color: #0000ff;">int</span> y <span style="color: #000080;">=</span> <span style="color: #0000dd;">500</span>;
+				event.<span style="color: #000000;">OnContextMenu</span><span style="color: #000000;">&#40;</span>x, y<span style="color: #000000;">&#41;</span>; 
+			<span style="color: #000000;">&#125;</span>
+		<span style="color: #000000;">&#125;</span>
+    <span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<p><a href="../../OriginC/OriginC/OriginObject-SetEventHandler.html" title="OriginC:OriginObject-SetEventHandler">OriginObject::SetEventHandler</a>
+</p>
+<pre><a href="../../OriginC/OriginC/Project-FindClass.html" title="OriginC:Project-FindClass">Project::FindClass</a>
+</pre>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+
+
+
+
+

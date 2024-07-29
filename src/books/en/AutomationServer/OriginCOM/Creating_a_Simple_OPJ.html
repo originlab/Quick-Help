@@ -1,0 +1,272 @@
+<h1 class="firstHeading">1.1.1 Creating a Simple OPJ</h1><p>In this example, we will create a simple OPJ that consists of a single workbook with a single sheet. 
+We will add only two columns, X and Y, with default Text &amp; Numeric data type. 
+We will also setup the long name and units for each column. 
+Finally, we will put in some numeric values into these two columns and then save it as an OPJ file. 
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Excel_VBA"><span class="tocnumber">1</span> <span class="toctext">Excel VBA</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#VB6"><span class="tocnumber">2</span> <span class="toctext">VB6</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#VB.NET"><span class="tocnumber">3</span> <span class="toctext">VB.NET</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#C.23"><span class="tocnumber">4</span> <span class="toctext">C#</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Excel_VBA"></a><span class="mw-headline">Excel VBA</span></h2>
+<pre class="vb" style="font-family:monospace;"><span style="color: #E56717; font-weight: bold;">Option</span> <span style="color: #E56717; font-weight: bold;">Explicit</span>
+
+Const NUMPTS = 100
+<span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CreateOPJ()
+    
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> org <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWkBk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> orgColumn <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Column
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Long</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> strPathName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Variant</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s1(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    <span style="color: #151B8D; font-weight: bold;">Dim</span> s2(1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+    
+    <span style="color: #008000;">'------------------------------------------------------------
+</span>  <span style="color: #151B8D; font-weight: bold;">On</span> <span style="color: #151B8D; font-weight: bold;">Error</span> <span style="color: #8D38C9; font-weight: bold;">GoTo</span> <span style="color: #151B8D; font-weight: bold;">error</span>
+
+    <span style="color: #008000;">' Create the Origin COM object:
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> org = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+
+    <span style="color: #008000;">' Initialize new project:
+</span>    org.NewProject
+
+    <span style="color: #008000;">' Add a workbook
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> orgWkBk = org.WorksheetPages.Add
+
+    <span style="color: #008000;">' The sheet
+</span>    <span style="color: #151B8D; font-weight: bold;">Set</span> orgWks = orgWkBk.Layers(0)
+
+   <span style="color: #008000;">' Add two Columns
+</span>    orgWks.Columns.Add
+    orgWks.Columns.Add
+   
+    <span style="color: #008000;">' Set Long Names and Units to the two columns:
+</span>    orgWks.Columns(0).LongName = <span style="color: #800000;">&quot;Temperature&quot;</span>
+    orgWks.Columns(0).Units = <span style="color: #800000;">&quot;(\+(o)C)&quot;</span>
+
+    orgWks.Columns(1).LongName = <span style="color: #800000;">&quot;Presure&quot;</span>
+    orgWks.Columns(1).Units = <span style="color: #800000;">&quot;(lb/in\+(2))&quot;</span>
+
+    <span style="color: #008000;">' Set column types:
+</span>    orgWks.Columns(0).<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_X     <span style="color: #008000;">'Set ColType as X, COLTYPE_X=3
+</span>    orgWks.Columns(1).<span style="color: #151B8D; font-weight: bold;">Type</span> = COLTYPE_Y     <span style="color: #008000;">'Set ColType as Y, COLTYPE_Y=0
+</span>
+    <span style="color: #008000;">' Set LongName and Units as visible
+</span>    orgWks.LabelVisible(LT_LONG_NAME) = <span style="color: #00C2FF; font-weight: bold;">True</span>
+    orgWks.LabelVisible(LT_UNIT) = <span style="color: #00C2FF; font-weight: bold;">True</span>
+
+    <span style="color: #008000;">' Set data array s1 and s2
+</span>    <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 1 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS
+        s1(ii) = ii * 0.1
+        s2(ii) = ii / 13.4
+    <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+    <span style="color: #008000;">' Send data to the Columns
+</span>    orgWks.Columns(0).SetData (s1) <span style="color: #008000;">' col (1)
+</span>    orgWks.Columns(1).SetData (s2) <span style="color: #008000;">' col (2)
+</span>    
+     <span style="color: #008000;">'--------------------Save to an OPJ File------------------------------
+</span>
+    <span style="color: #008000;">' Get the pathname for saving the OPJ:
+</span>    strPathName = Application.GetSaveAsFilename(<span style="color: #800000;">&quot;My Project Name&quot;</span>, <span style="color: #800000;">&quot;Project files (*.OPJ),*.OPJ&quot;</span>, 0)
+    <span style="color: #8D38C9; font-weight: bold;">If</span> strPathName = <span style="color: #800000;">&quot;False&quot;</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+    <span style="color: #008000;">' Save:
+</span>    <span style="color: #8D38C9; font-weight: bold;">If</span> org.Save(strPathName) = <span style="color: #00C2FF; font-weight: bold;">False</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+        MsgBox <span style="color: #800000;">&quot;Failed to save the project into &quot;</span> &amp; strPathName
+    <span style="color: #8D38C9; font-weight: bold;">Else</span>
+        MsgBox <span style="color: #800000;">&quot;Saved into &quot;</span> &amp; strPathName
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+  <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+    
+  <span style="color: #151B8D; font-weight: bold;">error</span>:
+  MsgBox (<span style="color: #800000;">&quot;ERROR&quot;</span>)
+  <span style="color: #151B8D; font-weight: bold;">Resume</span> <span style="color: #8D38C9; font-weight: bold;">Next</span>
+    
+    
+<span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h2><a name="VB6"></a><span class="mw-headline">VB6</span></h2>
+<p>Same as Excel VBA
+</p>
+<h2><a name="VB.NET"></a><span class="mw-headline">VB.NET</span></h2>
+<pre class="vb" style="font-family:monospace;">    <span style="color: #151B8D; font-weight: bold;">Dim</span> NUMPTS = 100
+    <span style="color: #E56717; font-weight: bold;">Public</span> <span style="color: #E56717; font-weight: bold;">Sub</span> CreateOPJ()
+
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> org <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Application
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWkBk <span style="color: #151B8D; font-weight: bold;">As</span> Origin.WorksheetPage
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> orgWks <span style="color: #151B8D; font-weight: bold;">As</span> Origin.Worksheet
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> ii <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Long</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> s1(NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> s2(NUMPTS) <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">Double</span>
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> a
+        <span style="color: #151B8D; font-weight: bold;">Dim</span> strPathName <span style="color: #151B8D; font-weight: bold;">As</span> <span style="color: #F660AB; font-weight: bold;">String</span>
+
+        <span style="color: #008000;">'------------------------------------------------------------
+</span>        Try
+            <span style="color: #008000;">' Create the Origin COM object:
+</span>            org = <span style="color: #E56717; font-weight: bold;">New</span> Origin.Application
+
+            <span style="color: #008000;">' Initialize new project:
+</span>            a = org.NewProject()
+
+            <span style="color: #008000;">' Add a workbook
+</span>            orgWkBk = org.WorksheetPages.Add
+
+            <span style="color: #008000;">' The sheet:
+</span>            orgWks = orgWkBk.Layers(0)
+
+            <span style="color: #008000;">' Set Sheet name:
+</span>            orgWks.Name = <span style="color: #800000;">&quot;RawData&quot;</span>
+
+            <span style="color: #008000;">' Add two Columns
+</span>            orgWks.Columns.Add()
+            orgWks.Columns.Add()
+
+            <span style="color: #008000;">' Set Long Names and Units to the two columns:
+</span>            orgWks.Columns(0).LongName = <span style="color: #800000;">&quot;Temperature&quot;</span>
+            orgWks.Columns(0).Units = <span style="color: #800000;">&quot;(\+(o)C)&quot;</span>
+
+            orgWks.Columns(1).LongName = <span style="color: #800000;">&quot;Presure&quot;</span>
+            orgWks.Columns(1).Units = <span style="color: #800000;">&quot;(lb/in\+(2))&quot;</span>
+
+            <span style="color: #008000;">' Set column types:
+</span>            orgWks.Columns(0).<span style="color: #151B8D; font-weight: bold;">Type</span> = Origin.COLTYPES.COLTYPE_X   <span style="color: #008000;">'Set ColType as X, COLTYPE_X=3
+</span>            orgWks.Columns(1).<span style="color: #151B8D; font-weight: bold;">Type</span> = Origin.COLTYPES.COLTYPE_Y   <span style="color: #008000;">'Set ColType as Y, COLTYPE_Y=0
+</span>
+            <span style="color: #008000;">' Set LongName and Units as visible
+</span>            orgWks.LabelVisible(Origin.LABELTYPEVALS.LT_LONG_NAME) = <span style="color: #00C2FF; font-weight: bold;">True</span>
+            orgWks.LabelVisible(Origin.LABELTYPEVALS.LT_UNIT) = <span style="color: #00C2FF; font-weight: bold;">True</span>
+
+            <span style="color: #008000;">' Set data array s1 and s2
+</span>            <span style="color: #8D38C9; font-weight: bold;">For</span> ii = 0 <span style="color: #8D38C9; font-weight: bold;">To</span> NUMPTS-1
+                s1(ii) = ii * 0.1
+                s2(ii) = ii / 13.4
+            <span style="color: #8D38C9; font-weight: bold;">Next</span>
+
+            <span style="color: #008000;">'Create a single column data range in the workSheet
+</span>            orgWks.Columns(0).SetData (s1)  <span style="color: #008000;">' col (1)
+</span>            orgWks.Columns(1).SetData (s2)  <span style="color: #008000;">' col (2)
+</span>
+            <span style="color: #008000;">'------------------------------------------------------------
+</span>
+            <span style="color: #008000;">' Get the pathname for saving the OPJ:
+</span>
+            strPathName = <span style="color: #00C2FF; font-weight: bold;">Nothing</span>
+            <span style="color: #8D38C9; font-weight: bold;">If</span> (SaveFileDialog.ShowDialog = Windows.Forms.DialogResult.OK) <span style="color: #8D38C9; font-weight: bold;">Then</span>
+                strPathName = SaveFileDialog.FileName
+            <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+            <span style="color: #8D38C9; font-weight: bold;">If</span> strPathName = <span style="color: #00C2FF; font-weight: bold;">Nothing</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+                <span style="color: #E56717; font-weight: bold;">Exit</span> <span style="color: #E56717; font-weight: bold;">Sub</span>
+            <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+            <span style="color: #008000;">' Save:
+</span>            <span style="color: #8D38C9; font-weight: bold;">If</span> org.Save(strPathName) = <span style="color: #00C2FF; font-weight: bold;">False</span> <span style="color: #8D38C9; font-weight: bold;">Then</span>
+                MsgBox(<span style="color: #800000;">&quot;Failed to save the project into &quot;</span> &amp; strPathName)
+            <span style="color: #8D38C9; font-weight: bold;">Else</span>
+                MsgBox(<span style="color: #800000;">&quot;Saved into &quot;</span> &amp; strPathName)
+            <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #8D38C9; font-weight: bold;">If</span>
+
+        Catch exception <span style="color: #151B8D; font-weight: bold;">As</span> Exception
+        <span style="color: #8D38C9; font-weight: bold;">End</span> Try
+
+    <span style="color: #8D38C9; font-weight: bold;">End</span> <span style="color: #E56717; font-weight: bold;">Sub</span></pre>
+<h2><a name="C.23"></a><span class="mw-headline">C#</span></h2>
+<pre class="csharp" style="font-family:monospace;">      <span style="color: #0600FF; font-weight: bold;">public</span> <span style="color: #6666cc; font-weight: bold;">void</span> CreateOPJ<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+      <span style="color: #008000;">&#123;</span>
+        <span style="color: #6666cc; font-weight: bold;">int</span> NUMPTS <span style="color: #008000;">=</span> <span style="color: #FF0000;">100</span><span style="color: #008000;">;</span>
+        Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span> orgWks<span style="color: #008000;">;</span>
+        <span style="color: #6666cc; font-weight: bold;">Double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> s1 <span style="color: #008000;">=</span><a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span> <span style="color: #008000;">&#91;</span>NUMPTS<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+        <span style="color: #6666cc; font-weight: bold;">Double</span><span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> s2 <span style="color: #008000;">=</span><a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> <span style="color: #6666cc; font-weight: bold;">double</span> <span style="color: #008000;">&#91;</span>NUMPTS<span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+
+        <span style="color: #008080; font-style: italic;">//------------------------------------------------------------</span>
+        <span style="color: #0600FF; font-weight: bold;">try</span>
+        <span style="color: #008000;">&#123;</span>
+            <span style="color: #008080; font-style: italic;">//Create the Origin COM object:</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span> org <span style="color: #008000;">=</span> <a href="http://www.google.com/search?q=new+msdn.microsoft.com"><span style="color: #008000;">new</span></a> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Application</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>org <span style="color: #008000;">==</span> <span style="color: #0600FF; font-weight: bold;">null</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Origin could not be started. Check that your installation and project references are correct.&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+                <span style="color: #0600FF; font-weight: bold;">return</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+
+            <span style="color: #008080; font-style: italic;">//Initialize new project:</span>
+            org<span style="color: #008000;">.</span><span style="color: #0000FF;">NewProject</span><span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+             
+            <span style="color: #008080; font-style: italic;">//Add a workbook</span>
+            Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPage</span> orgWkBk <span style="color: #008000;">=</span> org<span style="color: #008000;">.</span><span style="color: #0000FF;">WorksheetPages</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span>, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//The sheet:</span>
+            orgWks <span style="color: #008000;">=</span> <span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">Worksheet</span><span style="color: #008000;">&#41;</span>orgWkBk<span style="color: #008000;">.</span><span style="color: #0000FF;">Layers</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Set Sheet name:</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Name</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;RawData&quot;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Add two Columns</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">.</span><span style="color: #0600FF; font-weight: bold;">Add</span><span style="color: #008000;">&#40;</span><span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Set Long Names, Units, and Comment to the two columns:</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">LongName</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;Temperature&quot;</span><span style="color: #008000;">;</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Units</span> <span style="color: #008000;">=</span> <span style="color: #666666;">@&quot;(\+(o)C)&quot;</span><span style="color: #008000;">;</span>
+
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">LongName</span> <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;Presure&quot;</span><span style="color: #008000;">;</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Units</span> <span style="color: #008000;">=</span> <span style="color: #666666;">@&quot;(lb/in\+(2))&quot;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Set column types:</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">COLTYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">COLTYPE_X</span><span style="color: #008000;">;</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span> <span style="color: #008000;">=</span> Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">COLTYPES</span><span style="color: #008000;">.</span><span style="color: #0000FF;">COLTYPE_Y</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Set LongName and Units as visible</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">set_LabelVisible</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">LABELTYPEVALS</span><span style="color: #008000;">.</span><span style="color: #0000FF;">LT_LONG_NAME</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">set_LabelVisible</span><span style="color: #008000;">&#40;</span>Origin<span style="color: #008000;">.</span><span style="color: #0000FF;">LABELTYPEVALS</span><span style="color: #008000;">.</span><span style="color: #0000FF;">LT_UNIT</span>, <span style="color: #0600FF; font-weight: bold;">true</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">//Set data array s1 and s2</span>
+            <span style="color: #0600FF; font-weight: bold;">for</span> <span style="color: #008000;">&#40;</span><span style="color: #6666cc; font-weight: bold;">int</span> ii <span style="color: #008000;">=</span> <span style="color: #FF0000;">0</span><span style="color: #008000;">;</span> ii <span style="color: #008000;">&lt;=</span> NUMPTS<span style="color: #008000;">-</span><span style="color: #FF0000;">1</span><span style="color: #008000;">;</span> ii<span style="color: #008000;">++</span><span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                s1<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">*</span> <span style="color: #FF0000;">0.1</span><span style="color: #008000;">;</span>
+                s2<span style="color: #008000;">&#91;</span>ii<span style="color: #008000;">&#93;</span> <span style="color: #008000;">=</span> ii <span style="color: #008000;">/</span> <span style="color: #FF0000;">13.4</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+
+            <span style="color: #008080; font-style: italic;">//Create a single column data range in the workSheet</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">0</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s1, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//col (1)</span>
+            orgWks<span style="color: #008000;">.</span><span style="color: #0000FF;">Columns</span><span style="color: #008000;">&#91;</span><span style="color: #FF0000;">1</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">.</span><span style="color: #0000FF;">SetData</span><span style="color: #008000;">&#40;</span>s2, <span style="color: #000000;">System</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Type</span><span style="color: #008000;">.</span><span style="color: #0000FF;">Missing</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span> <span style="color: #008080; font-style: italic;">//col (2)</span>
+
+
+            <span style="color: #008080; font-style: italic;">//------------------------------------------------------------</span>
+
+            <span style="color: #6666cc; font-weight: bold;">String</span> PathName <span style="color: #008000;">=</span> <span style="color: #666666;">&quot;C:<span style="color: #008080; font-weight: bold;">\\</span>ProjectName.opj&quot;</span><span style="color: #008000;">;</span>
+
+            <span style="color: #008080; font-style: italic;">// Save:</span>
+            <span style="color: #0600FF; font-weight: bold;">if</span> <span style="color: #008000;">&#40;</span>org<span style="color: #008000;">.</span><span style="color: #0000FF;">Save</span><span style="color: #008000;">&#40;</span>PathName<span style="color: #008000;">&#41;</span> <span style="color: #008000;">==</span> <span style="color: #0600FF; font-weight: bold;">false</span> <span style="color: #008000;">&#41;</span>
+            <span style="color: #008000;">&#123;</span>
+                Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Failed to save the project into &quot;</span> <span style="color: #008000;">+</span> PathName<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+            <span style="color: #0600FF; font-weight: bold;">else</span>
+            <span style="color: #008000;">&#123;</span>
+                Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;Saved into &quot;</span> <span style="color: #008000;">+</span> PathName<span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+            <span style="color: #008000;">&#125;</span>
+       <span style="color: #008000;">&#125;</span>
+
+       <span style="color: #0600FF; font-weight: bold;">catch</span>
+        <span style="color: #008000;">&#123;</span>
+            Console<span style="color: #008000;">.</span><span style="color: #0000FF;">WriteLine</span><span style="color: #008000;">&#40;</span><span style="color: #666666;">&quot;ERROR&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008000;">;</span>
+        <span style="color: #008000;">&#125;</span> 
+
+      <span style="color: #008000;">&#125;</span></pre>
+
+
+
+
+
+

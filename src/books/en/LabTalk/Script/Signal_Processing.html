@@ -1,0 +1,197 @@
+<h1 class="firstHeading">2.13.4 Signal Processing</h1><p class='urlname' style='display: none'>Signal-Processing</p>
+<p>Origin provides a collection of X-functions and LabTalk functions for signal processing, ranging from smoothing noisy data to Fourier Transform (FFT), Inverse Fourier Transform (IFFT), Short-time FFT, Convolution and Correlation, FFT Filtering, and Wavelet analysis.
+</p><p>The X-Functions are available under the <b><span class="OIndex">Signal Processing</span></b> category and can be listed by typing the following command:
+</p>
+<pre class="lt" style="font-family:monospace;">lx cat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;signal processing*&quot;</span>;</pre>
+<p>Some functionality such as Short-time FFT and Wavelets are only available in OriginPro.
+</p><p>The LabTalk functions for signal processing are available under <a href="../../LabTalk/Category/Signal_Processing_Functions_(Labtalk).html" title="Category:Signal Processing Functions (Labtalk)">Signal Processing Functions</a>, which are used to separately compute FFT results such as amplitude, phase, etc., for multiple datasets and arrange their results in desired columns. Meanwhile, one can utilize these functions to compare DC offset removed magnitudes among different datasets.
+</p><p>The following sections provide some short examples of calling the signal processing X-Functions and LabTalk functions from script.
+</p>
+<h2><a name="Smoothing"></a><span class="mw-headline">Smoothing</span></h2>
+<p><span class="OIndex">Smoothing</span> noisy data can be performed by using the <a class="external text" href="../../XFunction/X-Function/Smooth.html"><b>smooth</b></a> X-Function.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Smooth the XY data in columns 1,2 of the worksheet</span>
+<span style="color: #008000;">// using SavitzkyGolay method with a third order polynomial</span>
+range r<span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// assume worksheet active with XY data</span>
+smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;</pre>
+<p>To smooth all plots in a layer, you can loop over the plots as below:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Count the number of data plots in the layer and save result in </span>
+<span style="color: #008000;">//variable &quot;count&quot;</span>
+layer <span style="color: #000080;">-</span>c;       
+<span style="color: #008000;">// Get the name of this Graph page      </span>
+string gname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;   
+<span style="color: #008000;">// Create a new book named smooth - actual name is stored in bkname$</span>
+newbook na<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Smoothed; 
+<span style="color: #008000;">// Start with no columns</span>
+wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;          
+loop<span style="color: #000000;">&#40;</span>ii,<span style="color: #0000dd;">1</span>,count<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+    <span style="color: #008000;">// Input Range refers to 'ii'th plot</span>
+    range riy <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>gname<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">!$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000000;">&#41;</span>;            
+    <span style="color: #008000;">// Output Range refers to two, new columns</span>
+    range roy <span style="color: #000080;">=</span> <span style="color: #000000;">&#91;</span>bkname<span style="color: #000080;">$</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">!</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; 
+    <span style="color: #008000;">// Savitsky-Golay smoothing using third order polynomial</span>
+    smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>riy meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>roy;   
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="FFT_and_IFFT"></a><span class="mw-headline">FFT and IFFT</span></h2>
+<p>The following example shows how to individually obtain the FFT results by LabTalk functions listed under <a href="../../LabTalk/Category/Signal_Processing_Functions_(Labtalk).html" title="Category:Signal Processing Functions (Labtalk)">Signal Processing Functions</a>.
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+<span style="color: #008000;">// Import the signal data</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\fftfilter1.DAT&quot;</span>;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// Add 5 columns to store different quantities</span>
+worksheet <span style="color: #000080;">-</span>a <span style="color: #0000dd;">5</span>;
+<span style="color: #008000;">// Set column label to distinguish</span>
+col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Raw Signal&quot;</span>;
+
+<span style="color: #008000;">// Set data type to complex prior to store complex results from FFT analysis</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;FFT Complex&quot;</span>;
+
+<span style="color: #008000;">// Calculate FFT complex results</span>
+col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftc<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//with no shift</span>
+
+col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Frequency&quot;</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//Set X column type</span>
+
+<span style="color: #008000;">// Compute the frequencies based on time data in column A</span>
+col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftfreq<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>, wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span><span style="color: #000000;">&#41;</span>;
+
+col<span style="color: #000000;">&#40;</span>E<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Magnitude&quot;</span>;
+
+<span style="color: #008000;">// Get FFT magnitude results</span>
+col<span style="color: #000000;">&#40;</span>E<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftmag<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Use fftmag(col(C), 2) to obtain Two-Sided and Shifted magnitude</span>
+
+col<span style="color: #000000;">&#40;</span>F<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Phase&quot;</span>;
+col<span style="color: #000000;">&#40;</span>F<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftphase<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Use fftphase(col(C), 2, 1, 0) to obtain Two-sided, unwrapped phase with radian unit</span>
+
+wks.<span style="color: #000080;">col7</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+col<span style="color: #000000;">&#40;</span>G<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Shifted FFT Complex&quot;</span>;
+col<span style="color: #000000;">&#40;</span>G<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftshift<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">// Update sparklines for calculated results</span>
+sparklines sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> c1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> c2<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+<span style="color: #008000;">// Auto adjust column width to fit content</span>
+wautosize;</pre>
+<p>The following example shows how to obtain the IFFT result from shifted FFT complex result.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Continue from the example above, suppose we have shifted FFT results in column G</span>
+<span style="color: #008000;">// Add 2 more columns to store different quantities</span>
+worksheet <span style="color: #000080;">-</span>a <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// Label columns to distinguish</span>
+col<span style="color: #000000;">&#40;</span>H<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Unshifted FFT Complex&quot;</span>;
+<span style="color: #008000;">// Set the data type to be complex</span>
+wks.<span style="color: #000080;">col8</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+<span style="color: #008000;">// Unshift the shifted FFT results before doing IFFT</span>
+col<span style="color: #000000;">&#40;</span>H<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> ifftshift<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>G<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span>;
+
+col<span style="color: #000000;">&#40;</span>I<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;IFFT result&quot;</span>;
+wks.<span style="color: #000080;">col9</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+<span style="color: #008000;">// Compute inverse FFT from unshifted FFT results</span>
+col<span style="color: #000000;">&#40;</span>I<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> invfft<span style="color: #000000;">&#40;</span> col<span style="color: #000000;">&#40;</span>H<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;</pre>
+<p>The following example shows how to specify a window in FFT analysis.
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+<span style="color: #008000;">// Import the signal data</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\Chirp Signal.dat.&quot;</span>;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// Define a range variable for input signal</span>
+range rSignal <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span>;
+int wSize <span style="color: #000080;">=</span> rSignal.<span style="color: #000080;">nrows</span>;
+
+col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Apply Blackman window&quot;</span>;
+col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">&#40;</span>B<span style="color: #000000;">&#41;</span> <span style="color: #000080;">*</span> windata<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">6</span>, wSize<span style="color: #000000;">&#41;</span>; <span style="color: #008000;">// Apply Blackman window</span>
+
+col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Amplitude&quot;</span>;
+col<span style="color: #000000;">&#40;</span>D<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftamp<span style="color: #000000;">&#40;</span> fftc<span style="color: #000000;">&#40;</span>col<span style="color: #000000;">&#40;</span>C<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//Without Origin window correction</span></pre>
+<p>The following example shows how to perform fft analysis on multiple columns using loop and arrange obtained amplitude and phase columns side by side. You can also calculate FFT results for multiple columns directly on worksheet by selecting multiple columns on the worksheet, and right click to select <b>Set Multiple Columns Values...</b>.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//Prepare multiple column data for FFT analysis</span>
+newbook;
+int nc <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>, ii;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">//Fill x column with time data</span>
+col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> data<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000080;">-</span>1e<span style="color: #000080;">-</span>3, 1e<span style="color: #000080;">-</span>3<span style="color: #000000;">&#41;</span>;
+<span style="color: #008000;">//Fill five columns with sum of an f1 Hz sinusoid and an f2 Hz sinusoid</span>
+for<span style="color: #000000;">&#40;</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+double f1, f2;
+f1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">20</span><span style="color: #000080;">*</span>ii;
+f2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">20</span><span style="color: #000080;">*</span>ii;
+wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> <span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">+</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>pi<span style="color: #000080;">*</span>f1<span style="color: #000080;">*</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">+</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">8</span><span style="color: #000080;">-</span>ii<span style="color: #000000;">&#41;</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>pi<span style="color: #000080;">*</span>f2<span style="color: #000080;">*</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">+</span>rnd<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Subtract mean before FFT to remove DC offset</span>
+for<span style="color: #000000;">&#40;</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+wcol<span style="color: #000000;">&#40;</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Subtract mean of Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span><span style="color: #000080;">-</span>mean<span style="color: #000000;">&#40;</span> wcol<span style="color: #000000;">&#40;</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Calculate frequency for FFT results</span>
+wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//Set X column type</span>
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Frequency&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftfreq<span style="color: #000000;">&#40;</span> col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#93;</span><span style="color: #000080;">-</span>col<span style="color: #000000;">&#40;</span>A<span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#93;</span>, wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span> <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//Calculate FFT amplitude and phase for five columns</span>
+for<span style="color: #000000;">&#40;</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+<span style="color: #008000;">//FFT amplitude result</span>
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Amplitude&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftamp<span style="color: #000000;">&#40;</span> fftc<span style="color: #000000;">&#40;</span> wcol<span style="color: #000000;">&#40;</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+
+<span style="color: #008000;">//FFT phase result</span>
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>L<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Phase&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#91;</span>C<span style="color: #000000;">&#93;</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">&#40;</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> <span style="color: #000080;">=</span> fftphase<span style="color: #000000;">&#40;</span> fftc<span style="color: #000000;">&#40;</span> wcol<span style="color: #000000;">&#40;</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span>
+
+<span style="color: #008000;">//Plot FFT amplitude and phase results for five columns in two layers</span>
+plotstack iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span>,<span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span><span style="color: #000000;">&#41;</span> portrait<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> order<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> layer<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> number<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;5 5&quot;</span>;</pre>
+<p><br />
+</p><p><br />
+</p>
+<h2><a name="FFT_and_Filtering"></a><span class="mw-headline">FFT and Filtering</span></h2>
+<p>The following example shows how to perform 1D <span class="OIndex">FFT</span><span class="OIndex" style="display:none">Fast Fourier Transform</span> of data using the <b><a class="external text" href="../../XFunction/X-Function/Fft1.html">fft1</a></b> X-Function.
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Import a sample file</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\fftfilter1.dat&quot;</span>;
+impasc;
+<span style="color: #008000;">// Perform FFT and get output into a named tree</span>
+Tree myfft;
+fft1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfft rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>; 
+<span style="color: #008000;">// You can list all trees using the command: list vt</span></pre>
+<p>Once you have results in a tree, you can do further analysis on the output such as:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Copy desired tree vector nodes to datasets</span>
+<span style="color: #008000;">// Locate the peak and mean frequency components</span>
+dataset tmp_x<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">freq</span>;
+dataset tmp_y<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">amp</span>;
+<span style="color: #008000;">// Perform stats and output results</span>
+percentile <span style="color: #000080;">=</span> <span style="color: #000000;">&#123;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">:</span><span style="color: #0000dd;">10</span><span style="color: #000000;">:</span><span style="color: #0000dd;">100</span><span style="color: #000000;">&#125;</span>;
+diststats iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span>tmp_x, tmp_y<span style="color: #000000;">&#41;</span> percent<span style="color: #000000;">:</span><span style="color: #000080;">=</span>percentile;
+type <span style="color: #ff00ff;">&quot;The mean frequency is $(diststats.mean)&quot;</span>;</pre>
+<p>The following example shows how to perform signal <span class="OIndex">filtering</span> using the <b><a class="external text" href="../../XFunction/X-Function/Fft_filters.html">fft_filters</a></b> X-Function:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Import some data with noise and create graph</span>
+newbook;
+string filepath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\&quot;</span>;
+string filename<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal with High Frequency Noise.dat&quot;</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filepath<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filename<span style="color: #000080;">$</span>;
+impasc;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">&#40;</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">&#41;</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span>line;
+ 
+<span style="color: #008000;">// Perform low pass filtering</span>
+fft_filters filter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lowpass cutoff<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1.5</span>;</pre>
+
+
+
+
+
+

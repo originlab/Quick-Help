@@ -1,0 +1,64 @@
+<h1 class="firstHeading">2.1.25.53 okutil_find_path_from_origin_registry_key</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Header_to_Include"><span class="tocnumber">8</span> <span class="toctext">Header to Include</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Checks registry key for stored origin user path or executible path, for any version of Origin.
+These paths may not be associated with the currently running origin.
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">BOOL</span> okutil_find_path_from_origin_registry_key<span style="color: #000000;">&#40;</span> string <span style="color: #000040;">*</span> pstrPath, LPCTSTR lpszPathKey, LPCSTR lpszAppTitle, LPCSTR lpcszSubVersionName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, LPCSTR lpcszSpecialChar <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, LPCSTR lpcszLanguage <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> pstrPath</dt>
+<dd>[output] path found</dd>
+<dt> lpszPathKey</dt>
+<dd>[input] either "Path" for User Folder, or "Executable Path" for system folder.</dd>
+<dt> lpszAppTitle</dt>
+<dd>[input] title used in registry ex "Origin 7.5", "Origin 8"</dd>
+<dt> lpcszSubVersionName</dt>
+<dd>[input] Default NULL. Example: "Beta 4" "Academic"</dd>
+<dt> lpcszSpecialChar</dt>
+<dd>[input] Default NULL. Special Character. For Origin 8, only D allowed. Examples for 7.5: "S" for Server, "C" for Client, "A" for Student (Academic). Example for 8.0 or 7.5 "D" for Debug. Can combine "SD"</dd>
+<dt> lpcszLanguage</dt>
+<dd>[input] Default NULL. Language string: "English", Japanese", "German" required for &lt; Origin 8. For Origin 8+ use NULL.</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>Return TRUE if the path string can be found in registry and path exists on disk.
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>oUtils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> okutil_find_path_from_origin_registry_key_ex1<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>    
+    string strPath;
+    <span style="color: #0000ff;">BOOL</span> bExists <span style="color: #000080;">=</span> okutil_find_path_from_origin_registry_key<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>strPath, <span style="color: #ff00ff;">&quot;Path&quot;</span>, <span style="color: #ff00ff;">&quot;Origin 7.5&quot;</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">&quot;English&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bExists<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// try Server</span>
+        bExists <span style="color: #000080;">=</span> okutil_find_path_from_origin_registry_key<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>strPath, <span style="color: #ff00ff;">&quot;Path&quot;</span>, <span style="color: #ff00ff;">&quot;Origin 7.5&quot;</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">&quot;S&quot;</span>, <span style="color: #ff00ff;">&quot;English&quot;</span><span style="color: #000000;">&#41;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span><span style="color: #000040;">!</span>bExists<span style="color: #000000;">&#41;</span> <span style="color: #008000;">// try Client</span>
+        bExists <span style="color: #000080;">=</span> okutil_find_path_from_origin_registry_key<span style="color: #000000;">&#40;</span><span style="color: #000040;">&amp;</span>strPath, <span style="color: #ff00ff;">&quot;Path&quot;</span>, <span style="color: #ff00ff;">&quot;Origin 7.5&quot;</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">&quot;C&quot;</span>, <span style="color: #ff00ff;">&quot;English&quot;</span><span style="color: #000000;">&#41;</span>;
+
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="Header_to_Include"></a><span class="mw-headline">Header to Include</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+
