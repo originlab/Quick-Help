@@ -6,5 +6,5 @@ public class WebPageModel
 {
     public required string Language { get; set; }
 
-    public required HtmlString Contents { get; set; }
+    public required IHtmlContent Contents { get; set; }
 }
