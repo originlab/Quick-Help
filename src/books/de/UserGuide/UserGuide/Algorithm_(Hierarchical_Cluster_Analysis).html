@@ -1,0 +1,140 @@
+﻿<h1 class="firstHeading">Algorithmus (Hierarchische Clusteranalyse)</h1>
+
+  <table id="toc" class="toc" summary="Contents">
+    <tr>
+      <td>
+        <div id="toctitle">
+          <h2>Inhalt</h2>
+        </div>
+
+        <ul>
+          <li class="toclevel-1">
+            <a href="#Distance_Matrix"><span class="tocnumber">1</span> <span class="toctext">Distanzmatrix</span></a>
+
+            <ul>
+              <li class="toclevel-2"><a href="#Cluster_Observations"><span class="tocnumber">1.1</span> <span class="toctext">Beobachtungen clustern</span></a></li>
+
+              <li class="toclevel-2"><a href="#Cluster_Variables"><span class="tocnumber">1.2</span> <span class="toctext">Variablen clustern</span></a></li>
+            </ul>
+          </li>
+
+          <li class="toclevel-1"><a href="#Linkage_Method"><span class="tocnumber">2</span> <span class="toctext">Verknüpfungsmethode</span></a></li>
+
+          <li class="toclevel-1"><a href="#Dendrogram"><span class="tocnumber">3</span> <span class="toctext">Dendrogramm</span></a></li>
+
+          <li class="toclevel-1"><a href="#Group_Objects"><span class="tocnumber">4</span> <span class="toctext">Objekte gruppieren</span></a></li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <p><br>
+  Die <b>hierarchische Clusteranalyse</b> wird verwendet, um einen hierarchischen Baum zu erstellen. Zu Beginn gibt es n Cluster, jeder mit einem einzelnen Objekt und dann auf jeder n ? 1 Stufen werden zwei Cluster zusammengefügt und bilden einen größeren Cluster, bis sich alle Objekte in einem einzigen Cluster befinden. Der Vorgang kann in einem <b>Dendrogramm</b> gezeigt werden.</p>
+
+  <p>Die zu clusternden Objekte in der <b>hierarchischen Clusteranalyse</b> können Beobachtungen oder Variablen sein.</p><a name="Distance_Matrix"></a>
+
+  <h2><span class="mw-headline">Distanzmatrix</span></h2>
+
+  <p>Eine Distanz- oder Unähnlichkeitsmatrix ist eine symmetrische Matrix mit null diagonalen Elementen. Das <i>ij</i>-te Element stellt dar, wie unähnlich sich das <i>i</i>-te und <i>j</i>-te Objekt sind. Die Methoden zum Berechnen der Distanz zwischen zwei Objekten unterscheiden sich je nach dem, ob Beobachtungen oder Variablen geclustert werden.</p><a name="Cluster_Observations"></a>
+
+  <h3><span class="mw-headline">Beobachtungen clustern</span></h3>
+
+  <p>Origin unterstützt die Standardisierung von Daten vor der Distanzberechnung zum Clustern von Beobachtungen. Beobachtungen, die einen oder mehrere fehlende Werte enthält, werden aus der Analyse ausgeschlossen.</p>
+
+  <ul>
+    <li>Variablen standardisieren
+
+      <ol>
+        <li>Normieren auf N(0,1)<br>
+        Eine Variable <img class="tex" alt="x_j\ " src="../images/math/2/1/3/213f6a55ac26cd3e835cd5e1e5653d67.png"> wird normiert zu: <img class="tex" alt="(x_j-\bar{x}_j)/\sigma_j" src="../images/math/6/3/4/6347bd2c4977b0f3d85c68e3c3ed1475.png">, wobei <img class="tex" alt="\bar{x}_j\ " src="../images/math/f/8/6/f8656a6bb3651370fb49feeec0450ee3.png"> und <img class="tex" alt="\sigma_j\ " src="../images/math/d/6/0/d6019b8f4a0f330ba59766c475ed6a57.png"> der Mittelwert und die Standardabweichung der Variable sind. Die standardisierte Variable hat einen Mittelwert bei Null und eine einheitliche Standardabweichung.</li>
+
+        <li>Normieren auf (0,1)<br>
+        Eine Variable <img class="tex" alt="x_j\ " src="../images/math/2/1/3/213f6a55ac26cd3e835cd5e1e5653d67.png"> wird normiert zu: <img class="tex" alt="(x_j-\mathrm{min}(x_j))/(\mathrm{max}(x_j)-\mathrm{min}(x_j))\ " src="../images/math/a/b/6/ab6614b4b1778b30b74fe79b07ec7f25.png">. Die Variable wird im Bereich 0 bis 1 standardisiert.</li>
+      </ol>
+    </li>
+  </ul>
+
+  <p>Origin unterstützt drei Distanztypen.</p>
+
+  <ul>
+    <li>Distanztyp<br>
+      Für eine standardisierte Matrix <img class="tex" alt="x_{ij}\ " src="../images/math/c/1/5/c15665b7d8c207bb7934e364aa962639.png"> mit <i>n</i> Beobachtungen und <i>p</i> Variablen kann die Distanz zwischen der <i>i-</i>ten Beobachtung und der <i>k-</i>ten Beobachtung folgendermaßen ausgedrückt werden:
+
+      <ol>
+        <li>Euklidische Distanz<br>
+        <img class="tex" alt="d_{ik}=\Big\{\sum_{j=1}^p (x_{ij}-x_{kj})^2 \Big\}^{\frac{1}{2}}" src="../images/math/e/b/6/eb6480236d091104cc09b503504c21d7.png"></li>
+
+        <li>Quadrierte euklidische Distanz<br>
+        <img class="tex" alt="d_{ik}=\sum_{j=1}^p (x_{ij}-x_{kj})^2" src="../images/math/1/c/a/1cac337262a06064dce82da1fc26ff1c.png"></li>
+
+        <li>Absolute Distanz (City-Block-Metrik)<br>
+        <img class="tex" alt="d_{ik}=\sum_{j=1}^p |x_{ij}-x_{kj}|" src="../images/math/3/2/f/32fcda29e1cda5e6543b5fe7d22138d8.png"></li>
+
+        <li>Kosinus-Distanz<br>
+        <img class="tex" alt="d_{ik}=1-\frac{\sum_{j=1}^p x_{ij}x_{kj}}{\sqrt{\sum_{j=1}^p x_{ij}^2}\sqrt{\sum_{j=1}^p x_{kj}^2}}" src="../images/math/d/2/c/d2c23ee0214d4eaf515c173f12d37a06.png"></li>
+
+        <li>Pearson-Korrelationsdistanz<br>
+        <img class="tex" alt="d_{ik}=1-\frac{\sum_{j=1}^p (x_{ij}- \bar x_i)(x_{kj}- \bar x_k)}{\sqrt{\sum_{j=1}^p (x_{ij}- \bar x_i)^2}\sqrt{\sum_{j=1}^p (x_{kj}- \bar x_k)^2}}" src="../images/math/e/5/4/e54691582ae840dc459d8eb758b7fcd2.png"><br>
+        , wobei <img class="tex" alt="\bar x_i=\sum_{j=1}^p x_{ij}" src="../images/math/4/8/d/48d7c83e94a3b7364d484b78d4be3ace.png"> und <img class="tex" alt="\bar x_k=\sum_{j=1}^p x_{kj}" src="../images/math/1/a/c/1ac9fbf6a68bde93f882f2b6b8e2033d.png"></li>
+
+        <li>Jaccard-Distanz<br>
+        <img class="tex" alt="d_{ik}=\frac{\sum_{j=1}^p ( (x_{ij} \ne x_{kj}) \and (x_{ij} \ne 0 \or x_{kj} \ne 0) )&#160;? 1:0 } {\sum_{j=1}^p (x_{ij} \ne 0 \or x_{kj} \ne 0) )&#160;? 1:0}" src="../images/math/e/b/0/eb011e836eb304483b25de4ab75bbd35.png"></li>
+      </ol>
+    </li>
+  </ul><a name="Cluster_Variables"></a>
+
+  <h3><span class="mw-headline">Variablen clustern</span></h3>
+
+  <p>Origin unterstützt zwei Distanztypen zum Clustern von Variablen. Beobachtungen werden aus der Berechnung der Korrelation zwischen zwei Variablen ausgeschlossen, wenn fehlende Werte in einer der beiden Variablen existieren.</p>
+
+  <ul>
+    <li>Distanztyp<br>
+      Für eine Matrix <img class="tex" alt="x_{ij}\ " src="../images/math/c/1/5/c15665b7d8c207bb7934e364aa962639.png"> mit <i>n</i> Beobachtungen und <i>p</i> Variablen kann die Distanz zwischen der <i>j</i>-ten Variablen und der <i>k-</i>ten Variablen folgendermaßen ausgedrückt werden.
+
+      <ol>
+        <li>Korrelation<br>
+        <img class="tex" alt="d_{jk}=1-\mathrm{corr}(x_j, x_k)\ " src="../images/math/2/e/c/2ec3cd510d37082353a0740a4e19eced.png"> wobei <img class="tex" alt="\mathrm{corr}(x_j, x_k)\ " src="../images/math/b/1/f/b1f1d3d80280fb42c5703bedb1beb2fe.png"> die Korrelation zwischen der <i>j</i>-ten Variablen und der <i>k-</i>ten Variable ist.</li>
+
+        <li>Absolute Korrelation<br>
+        <img class="tex" alt="d_{jk}=1-|\mathrm{corr}(x_j, x_k)|\ " src="../images/math/0/4/d/04d41a10848ff2f14b7c5af76c0b29c3.png"></li>
+      </ol>
+    </li>
+  </ul><a name="Linkage_Method"></a>
+
+  <h2><span class="mw-headline">Verknüpfungsmethode</span></h2>
+
+  <p>Auf jeder Stufe werden die beiden Cluster, die sich am nahesten sind, zusammengefügt. Origin bietet mehrere Methoden, um die Distanz zwischen dem neuen und den anderen Clustern zu berechnen. Die zwei Cluster <i>j</i> und <i>k</i> werden zu dem Cluster <i>jk</i> zusammengefügt. <img class="tex" alt="n_i\ " src="../images/math/1/7/1/171f2b37141209823bc2277e6c37eea6.png">, <img class="tex" alt="n_j\ " src="../images/math/9/6/7/9673ac3e05e910a01a1a8fad3f3d9416.png"> und <img class="tex" alt="n_k\ " src="../images/math/d/d/0/dd0e3c44ed3720cd2a34b428579f7c67.png"> seien die Anzahl der Objekte von Cluster <i>i</i>, Cluster <i>j</i> und Cluster <i>k</i> und <img class="tex" alt="d_{ij}\ " src="../images/math/0/2/0/0207d4a8a2ccc1b52bb077d844ad1af7.png">, <img class="tex" alt="d_{ik}\ " src="../images/math/9/0/7/907d8701c5d140d5c22216bd232afaf2.png"> und <img class="tex" alt="d_{jk}\ " src="../images/math/2/0/1/201842d50274711e9203f4d73c42bdee.png"> seien die Distanzen zwischen zwei Clustern. Die Distanz zwischen Cluster <i>jk</i> und Cluster <i>i</i> <img class="tex" alt="d_{i,jk}\ " src="../images/math/b/b/6/bb6d10847d3d5aa436ef46e5a61f4dd3.png"> kann dann folgendermaßen berechnet werden:</p>
+
+  <ol>
+    <li>Einzelne Verknüpfung oder Nächster Nachbar<br>
+    <img class="tex" alt="d_{i,jk}=\mathrm{min}(d_{ij},d_{ik})\ " src="../images/math/d/d/9/dd9ccfba8c37966ae6ea09b79ec8e715.png"></li>
+
+    <li>Vollständige Verknüpfung oder Weitesten entfernter Nachbar<br>
+    <img class="tex" alt="d_{i,jk}=\mathrm{max}(d_{ij},d_{ik})\ " src="../images/math/1/8/a/18aed5301fdd958259b8a602c7b0835d.png"></li>
+
+    <li>Gruppendurchschnitt<br>
+    <img class="tex" alt="d_{i,jk}=\frac{n_j}{n_j+n_k}d_{ij}+\frac{n_k}{n_j+n_k}d_{ik}\ " src="../images/math/5/3/0/5305965e863f63765ef34be710eeac78.png"></li>
+
+    <li>Zentroid<br>
+    <img class="tex" alt="d_{i,jk}=\frac{n_j}{n_j+n_k}d_{ij}+\frac{n_k}{n_j+n_k}d_{ik}-\frac{n_jn_k}{(n_j+n_k)^2}d_{jk}\ " src="../images/math/f/5/3/f53a77a871121a5002320a33e70bd7aa.png"></li>
+
+    <li>Median<br>
+    <img class="tex" alt="d_{i,jk}=\frac{1}{2}d_{ij}+\frac{1}{2}d_{ik}-\frac{1}{4}d_{jk}\ " src="../images/math/2/a/6/2a66040b9e565a062409f9023b8b0292.png"></li>
+
+    <li>Minimale Varianz oder Ward<br>
+    <img class="tex" alt="d_{i,jk}=\frac{(n_i+n_j)d_{ij}+(n_i+n_k)d_{ik}-n_id_{jk}}{n_i+n_j+n_k}\ " src="../images/math/1/c/8/1c870b124b602482a99548a4030e38f5.png"></li>
+  </ol>
+
+  <p>Wenn Cluster <i>j</i> und <i>k</i>, <i>j</i>&lt;<i>k</i>, zusammengefügt werden, wird der neue Cluster in der Tabelle der <b>Clusterstufen</b> als Cluster <i>j</i> bezeichnet.</p><a name="Dendrogram"></a>
+
+  <h2><span class="mw-headline">Dendrogramm</span></h2>
+
+  <p>Das <b>Dendrogramm</b> ist ein hierarchischer Baum, der zeigt, bei welcher Distanz zwei Cluster zusammengefügt werden. Jede Stufe wird durch eine Einheit in dem <b>Dendrogramm</b> dargestellt. Der obere Teil der Einheit für jede Stufe stellt den neuen Cluster dar, indem zwei Cluster zusammengefügt wurden. Die Höhe entspricht der Distanz zwischen den zwei zusammengefügten Clustern.</p>
+
+  <p>Die Endpunkte des <b>Dendrogramms</b> stellen <i>n</i> Objekte dar. Die <i>n</i> Objekte in dem <b>Dendrogramm</b> werden sortiert, so dass die Cluster, die zusammengefügt wurden, nebeneinander liegen. Der erste Endpunkt im <b>Dendrogramm</b> entspricht immer dem ersten Objekt.</p><a name="Group_Objects"></a>
+
+  <h2><span class="mw-headline">Objekte gruppieren</span></h2>
+
+  <p>Die Zugehörigkeit von <i>n</i> Objekten für festgelegte <i>k</i> Cluster kann mit den Informationen aus dem <b>Dendrogramm</b> oder der Tabelle der <b>Clusterstufen</b> bestimmt werden. <i>k</i> Cluster befinden sich auf der <i>n-k-</i>ten Stufe, das heißt, die Zugehörigkeit von jedem Objekt ist durch die ersten <i>n-k-</i>ten Stufen bekannt. Objekt 1 gehört immer zu Cluster 1.</p>
+
+  <p>Clusterzentren, die Distanz zwischen Clusterzentren und die Distanz zwischen Beobachtungen und Clustern werden zum Clustern von Beobachtungen berechnet. Beachten Sie, dass Beobachtungen in der Berechnung standardisiert sind, wenn die Standardisierung in der Analyse gewählt wird.</p>

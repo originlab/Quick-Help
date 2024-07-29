@@ -1,0 +1,95 @@
+﻿<h1 class="firstHeading">Benutzerdefinierte Datendateien importieren</h1>
+
+  <p class='urlname' style='display: none'>ImpWiz-UserDefined-File</p>
+
+  <p>Wenn die Datendateien, die Sie importieren möchten, nicht über die Optionen der Importfilter von ASCII- oder Binärdateien importiert werden können, können Sie Ihre eigene <b>Python</b>- oder <b>Origin-C</b>-Funktion zum Importieren der Dateien schreiben.</p>
+
+  <h2><a name="Python_Code_for_Data_Import"></a><span class="mw-headline">Python-Code für den Datenimport</span></h2>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Importing_User_Defined_Data_Files/Tutorial_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>Erfahren Sie, wie ein <a class="external text" href="http://blog.originlab.com/creating-a-python-based-import-filter-with-origin-2021" target="_blank">Python-basierter Importfilter</a> erstellt wird.</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Python-Code kann verwendet werden, um eine benutzerdefinierte Datendatei zu importieren. Ein grobes Beispiel eines solchen Codes wird unten dargestellt. Der wichtigste zu beachtende Punkt zu diesem Code ist, dass das Zielarbeitsblatt aktiviert sein muss, bevor der Code von Origin aufgerufen wird. Zudem erhält die LabTalk-Variable <b>fname$</b> mit dem vollen Pfad und Dateinamen der aktuell zu importierenden Datei. Bitte lesen Sie die Codekommentare, um besser zu verstehen, was im Python-Code zu tun ist.</p>
+  <pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op <span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd <span style="color: #d00; font-style: italic;"># Function reads file into a pandas DataFrame.</span> <span style="color: #ff7700;font-weight:bold;">def</span> read_file<span style="color: #000;">(</span><span style="color: #900090;">file</span><span style="color: #000;">)</span>: df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">(</span><span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">with</span> <span style="color: #900090;">open</span><span style="color: #000;">(</span><span style="color: #900090;">file</span><span style="color: #000;">,</span> <span style="color: #0a0;">'r'</span><span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">as</span> f: line <span style="color: #000;">=</span> f.<span style="color: #000;">readline</span><span style="color: #000;">(</span><span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">while</span> line: <span style="color: #d00; font-style: italic;"># Put your code here to parse the line in the file</span> <span style="color: #d00; font-style: italic;"># and then append it to the DataFrame.</span> <span style="color: #ff7700;font-weight:bold;">return</span> df <span style="color: #d00; font-style: italic;"># The file chosen by Origin import filter is placed into the fname$</span> <span style="color: #d00; font-style: italic;"># LabTalk variable. Must bring it into Python. Don't specify $ in name!</span> fname <span style="color: #000;">=</span> op.<span style="color: #000;">get_lt_str</span><span style="color: #000;">(</span><span style="color: #0a0;">'fname'</span><span style="color: #000;">)</span> <span style="color: #d00; font-style: italic;"># Read the file into a pandas DataFrame.</span> data <span style="color: #000;">=</span> read_file<span style="color: #000;">(</span>fname<span style="color: #000;">)</span> <span style="color: #d00; font-style: italic;"># Returns the active sheet.</span> wks <span style="color: #000;">=</span> op.<span style="color: #000;">find_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span> <span style="color: #d00; font-style: italic;"># Add DataFrame to sheet starting at first column.</span> <span style="color: #d00; font-style: italic;"># DataFrame column labels will become worksheet column long names.</span> <span style="color: #d00; font-style: italic;"># Origin automagically sets column format based on DataFrame data types.</span> wks.<span style="color: #000;">from_df</span><span style="color: #000;">(</span>data<span style="color: #000;">)</span>
+</pre>
+
+  <p>Nach Erstellen des Codes, der den Import handhabt, können Sie ihn folgendermaßen verwenden:</p>
+
+  <ol>
+    <li>Öffnen Sie den Importassistenten mit der Schaltfläche <b>Importassistent</b> <a class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png" width="23"></a> oder wählen Sie <b>Daten: Aus Datei importieren: Importassistent</b> im Origin-Menü.</li>
+
+    <li>Wählen Sie auf der ersten Seite (der <b>Quell</b>seite) des Assistenten die Option <b>Benutzerdefiniert</b> in der Gruppe <b>Datentyp</b>.</li>
+
+    <li>Legen Sie den Pfad für die importierten Dateien fest, wenn Sie eine oder mehrere Dateien importieren möchten, oder wählen Sie die Option <b>Zwischenablage</b>, wenn Sie aus der Zwischenablage importieren möchten.</li>
+
+    <li>Wählen Sie ein Zielfenster aus, indem Sie eine der Optionen in der Gruppe <b>Zielfenster</b> auswählen. Wählen Sie ggf. eine Vorlage <span style="color:red">*</span> und einen Importmodus. Klicken Sie auf <b>Weiter</b>, um zur Seite <b>Anwenderdefinierte Filter</b> zu gelangen.</li>
+
+    <li>Fügen Sie auf der Seite <b>Benutzerdefinierte Filter</b> Ihren Code in den Textbereich <b>Python-Code</b> ein. Alternativ können Sie Ihren Python-Code in einer Datei speichern und das Bedienelement <b>Python-Datei</b> verwenden, um einen Pfad zu einer Python-Datei festzulegen. Der Pfad kann sein:
+
+      <ul>
+        <li>ein absoluter Dateipfad,</li>
+
+        <li>ein Dateipfad relativ zu Ihrem Anwenderordner,</li>
+
+        <li>nur ein Dateiname, wenn sich die Datei in Ihrem Anwenderdateiordner befindet.</li>
+      </ul>
+    </li>
+
+    <li>Wenn Sie alle Einstellungen vorgenommen haben, klicken Sie auf <b>Fertigstellen</b>. Ihr Python-Code wird verwendet, um die Dateien zu importieren.</li>
+  </ol>
+
+  <table class="note">
+    <tr>
+      <td><span style="color:red">*:</span> Die Vorlage des Zielfensters, die auf der ersten Seite <b>Quelle</b> des Importassistenten genannt wird, wird nur beim Erstellen neuer Fenster verwendet (wie es unter bestimmten Bedingungen während des Importierens mit Drag&amp;Drop der Fall sein würde). Wenn Sie <b>Daten: Aus Datei importieren</b> wählen und Ihr aktives Fenster den Zielfensterspezifikationen Ihres Importfilters entspricht, dann wird kein neues Fenster erzeugt, sondern nur ein Verweis auf das Seitenobjekt für das aktive Fenster an Ihre Funktion übermittelt. Wenn das aktive Fenster ein anderer Fenstertyp ist, dann wird ein neues Fenster auf der Grundlage der angegebenen Vorlage erzeugt und der Seitenverweis zu diesem neuen Fenster weitergegeben.</td>
+    </tr>
+  </table>
+
+  <p> </p>
+
+  <h2><a name="Origin_C_Functions_for_Data_Import"></a><span class="mw-headline">Origin-C-Funktionen für den Datenimport</span></h2>
+
+  <p>Sie können Ihre eigene Origin-C-Funktion entwickeln, um mit dem Import benutzerdefinierter Datendateien umzugehen, indem Sie eine Origin-C-Funktion in einer Origin-C-Datei erstellen.</p>
+
+  <p>Der Prototyp der Origin-C-Funktion muss einer der folgenden sein:</p>
+
+  <ul>
+    <li>int YourFunctionName(Page&amp; pgTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)</li>
+
+    <li>int YourFunctionName(Layer&amp; lyTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)</li>
+  </ul>
+
+  <table class="note">
+    <tr>
+      <td><b>Hinweis:</b> Weitere Einzelheiten zum Schreiben dieser Origin C-Funktionen können im Kapitel <a class="external text" href="../../OriginC/OCGuide/Importing_Data.html">Daten importieren</a> im Origin C Guide nachgelesen werden.</td>
+    </tr>
+  </table>
+
+  <p>Nach Schreiben einer Funktion zum Durchführen des Imports und ihrer Speicherung in eine Origin C-Datei, können Sie sie folgendermaßen verwenden:</p>
+
+  <ol>
+    <li>Öffnen Sie den Importassistenten mit der Schaltfläche <b>Importassistent</b> <a class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png" width="23"></a> oder wählen Sie <b>Daten: Aus Datei importieren: Importassistent</b> im Origin-Menü.</li>
+
+    <li>Wählen Sie auf der ersten Seite (der <b>Quell</b>seite) des Assistenten die Option <b>Benutzerdefiniert</b> in der Gruppe <b>Datentyp</b>.</li>
+
+    <li>Legen Sie den Pfad für die importierten Dateien fest, wenn Sie eine oder mehrere Dateien importieren möchten, oder wählen Sie die Option <b>Zwischenablage</b>, wenn Sie aus der Zwischenablage importieren möchten.</li>
+
+    <li>Wählen Sie ein Zielfenster aus, indem Sie eine der Optionen in der Gruppe <b>Zielfenster</b> auswählen. Wählen Sie ggf. eine Vorlage <span style="color:red">*</span> und einen Importmodus. Klicken Sie auf <b>Weiter</b>, um zur Seite <b>Anwenderdefinierte Filter</b> zu gelangen.</li>
+
+    <li>Klicken Sie auf dieser Seite auf die Schaltfläche <b>Durchsuchen</b> <a class="image"><img alt="Importing Simple Binary Files with the Import Wizard-1.png" src="../images/Importing_User_Defined_Data_Files/Importing_Simple_Binary_Files_with_the_Import_Wizard-1.png" width="17"></a> auf der rechten Seite der <b>Origin C-Quelldatei</b>. Navigieren Sie zu dem Ordner, in dem sich die Origin C-Datei befindet. Wählen Sie die Datei aus und klicken Sie auf <b>Öffnen</b>, um zum Importassistenten zurückzukehren. Geben Sie den Namen der Funktion im Bearbeitungsfeld <b>Origin C-Funktion</b> ein. Klicken Sie dann auf <b>Weiter</b>, um die Einstellungen auf anderen Seiten benutzerdefiniert anzupassen.</li>
+
+    <li>Wenn Sie alle Einstellungen vorgenommen haben, klicken Sie auf <b>Fertigstellen</b>. Ihre Origin C-Funktion wird verwendet, um die Dateien zu importieren.</li>
+  </ol>
+
+  <table class="note">
+    <tr>
+      <td><span style="color:red">*:</span> Die Vorlage des Zielfensters, die auf der ersten Seite <b>Quelle</b> des Importassistenten genannt wird, wird nur beim Erstellen neuer Fenster verwendet (wie es unter bestimmten Bedingungen während des Importierens mit Drag&amp;Drop der Fall sein würde). Wenn Sie <b>Daten: Aus Datei importieren</b> wählen und Ihr aktives Fenster den Zielfensterspezifikationen Ihres Importfilters entspricht, dann wird kein neues Fenster erzeugt, sondern nur ein Verweis auf das Seitenobjekt für das aktive Fenster an Ihre Funktion übermittelt. Wenn das aktive Fenster ein anderer Fenstertyp ist, dann wird ein neues Fenster auf der Grundlage der angegebenen Vorlage erzeugt und der Seitenverweis zu diesem neuen Fenster weitergegeben.</td>
+    </tr>
+  </table>

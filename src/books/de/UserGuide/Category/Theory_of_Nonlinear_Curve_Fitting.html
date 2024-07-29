@@ -1,0 +1,966 @@
+﻿<h1 class="firstHeading">Theorie der nichtlinearen Kurvenanpassung</h1>
+
+  <p class='urlname' style='display: none'>NLFit-Theory</p>
+
+  <div class="toclimit-4">
+    <div id="toc" class="toc">
+      <div id="toctitle">
+        <h2>Inhalt</h2>
+      </div>
+
+      <ul>
+        <li class="toclevel-1 tocsection-1">
+          <a href="#How_Origin_Fits_the_Curve"><span class="tocnumber">1</span> <span class="toctext">Eine Kurve mit Origin anpassen</span></a>
+
+          <ul>
+            <li class="toclevel-2 tocsection-2">
+              <a href="#Explicit_Functions"><span class="tocnumber">1.1</span> <span class="toctext">Explizite Funktionen</span></a>
+
+              <ul>
+                <li class="toclevel-3 tocsection-3"><a href="#Fitting_Model"><span class="tocnumber">1.1.1</span> <span class="toctext">Anpassungsmodell</span></a></li>
+
+                <li class="toclevel-3 tocsection-4">
+                  <a href="#Least-Squares_Algorithms"><span class="tocnumber">1.1.2</span> <span class="toctext">Algorithmen der kleinsten Quadrate</span></a>
+
+                  <ul>
+                    <li class="toclevel-4 tocsection-5"><a href="#Levenberg-Marquardt_.28L-M.29_Algorithm"><span class="tocnumber">1.1.2.1</span> <span class="toctext">Levenberg-Marquardt-Algorithmus (L-M)</span></a></li>
+
+                    <li class="toclevel-4 tocsection-6"><a href="#Downhil_Simplex_Algorithm"><span class="tocnumber">1.1.2.2</span> <span class="toctext">Downhill-Simplex-Algorithmus</span></a></li>
+                  </ul>
+                </li>
+
+                <li class="toclevel-3 tocsection-7"><a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm"><span class="tocnumber">1.1.3</span> <span class="toctext">Algorithmus der orthogonalen Distanzregression (ODR)</span></a></li>
+              </ul>
+            </li>
+
+            <li class="toclevel-2 tocsection-8"><a href="#Comparison_between_ODR_and_L-M"><span class="tocnumber">1.2</span> <span class="toctext">Vergleich von ODR und L-M</span></a></li>
+
+            <li class="toclevel-2 tocsection-9">
+              <a href="#Implicit_Functions"><span class="tocnumber">1.3</span> <span class="toctext">Implizite Funktionen</span></a>
+
+              <ul>
+                <li class="toclevel-3 tocsection-10"><a href="#Fitting_Model_2"><span class="tocnumber">1.3.1</span> <span class="toctext">Anpassungsmodell</span></a></li>
+
+                <li class="toclevel-3 tocsection-11"><a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm_2"><span class="tocnumber">1.3.2</span> <span class="toctext">Algorithmus der orthogonalen Distanzregression (ODR)</span></a></li>
+              </ul>
+            </li>
+
+            <li class="toclevel-2 tocsection-12"><a href="#Weighted_Fitting"><span class="tocnumber">1.4</span> <span class="toctext">Gewichtete Anpassung</span></a></li>
+          </ul>
+        </li>
+
+        <li class="toclevel-1 tocsection-13">
+          <a href="#Parameters"><span class="tocnumber">2</span> <span class="toctext">Parameters</span></a>
+
+          <ul>
+            <li class="toclevel-2 tocsection-14"><a href="#The_Fitted_Value"><span class="tocnumber">2.1</span> <span class="toctext">Der angepasste Wert</span></a></li>
+
+            <li class="toclevel-2 tocsection-15"><a href="#Parameter_Standard_Errors"><span class="tocnumber">2.2</span> <span class="toctext">Die Parameterstandardfehler</span></a></li>
+
+            <li class="toclevel-2 tocsection-16"><a href="#The_Standard_Error_for_Derived_Parameter"><span class="tocnumber">2.3</span> <span class="toctext">Der Standardfehler für abgeleitete Parameter</span></a></li>
+
+            <li class="toclevel-2 tocsection-17">
+              <a href="#Confidence_Intervals"><span class="tocnumber">2.4</span> <span class="toctext">Konfidenzintervalle</span></a>
+
+              <ul>
+                <li class="toclevel-3 tocsection-18"><a href="#Asymptotic-Symmetry_Method"><span class="tocnumber">2.4.1</span> <span class="toctext">Asymptotisch-symmetrische Methode</span></a></li>
+
+                <li class="toclevel-3 tocsection-19"><a href="#Model-Comparison_Method"><span class="tocnumber">2.4.2</span> <span class="toctext">Methode des Modellvergleichs</span></a></li>
+              </ul>
+            </li>
+
+            <li class="toclevel-2 tocsection-20"><a href="#t_Value"><span class="tocnumber">2.5</span> <span class="toctext">t-Wert</span></a></li>
+
+            <li class="toclevel-2 tocsection-21"><a href="#Prob.3E.7Ct.7C"><span class="tocnumber">2.6</span> <span class="toctext">Wahrsch.&gt;|t|</span></a></li>
+
+            <li class="toclevel-2 tocsection-22"><a href="#Dependency"><span class="tocnumber">2.7</span> <span class="toctext">Abhängigkeit</span></a></li>
+
+            <li class="toclevel-2 tocsection-23"><a href="#CI_Half_Width"><span class="tocnumber">2.8</span> <span class="toctext">KI Halbe Breite</span></a></li>
+          </ul>
+        </li>
+
+        <li class="toclevel-1 tocsection-24">
+          <a href="#Statistics"><span class="tocnumber">3</span> <span class="toctext">Statistik</span></a>
+
+          <ul>
+            <li class="toclevel-2 tocsection-25"><a href="#Degree_of_Freedom"><span class="tocnumber">3.1</span> <span class="toctext">Freiheitsgrad</span></a></li>
+
+            <li class="toclevel-2 tocsection-26"><a href="#Residual_Sum_of_Squares"><span class="tocnumber">3.2</span> <span class="toctext">Residuensumme der Quadrate</span></a></li>
+
+            <li class="toclevel-2 tocsection-27"><a href="#Reduced_Chi-Sqr"><span class="tocnumber">3.3</span> <span class="toctext">Reduziertes Chi-Quadrat</span></a></li>
+
+            <li class="toclevel-2 tocsection-28"><a href="#R-Square_.28COD.29"><span class="tocnumber">3.4</span> <span class="toctext">R-Quadrat (COD)</span></a></li>
+
+            <li class="toclevel-2 tocsection-29"><a href="#Adj._R-Square"><span class="tocnumber">3.5</span> <span class="toctext">Korr. R-Quadrat</span></a></li>
+
+            <li class="toclevel-2 tocsection-30"><a href="#R_Value"><span class="tocnumber">3.6</span> <span class="toctext">R-Wert</span></a></li>
+
+            <li class="toclevel-2 tocsection-31"><a href="#Root-MSE_.28SD.29"><span class="tocnumber">3.7</span> <span class="toctext">Wurzel-MSE (StAbw)</span></a></li>
+          </ul>
+        </li>
+
+        <li class="toclevel-1 tocsection-32"><a href="#ANOVA_Table"><span class="tocnumber">4</span> <span class="toctext">ANOVA-Tabelle</span></a></li>
+
+        <li class="toclevel-1 tocsection-33">
+          <a href="#Confidence_and_Prediction_Bands"><span class="tocnumber">5</span> <span class="toctext">Konfidenz- und Prognosebänder</span></a>
+
+          <ul>
+            <li class="toclevel-2 tocsection-34"><a href="#Confidence_Band"><span class="tocnumber">5.1</span> <span class="toctext">Konfidenzband</span></a></li>
+
+            <li class="toclevel-2 tocsection-35"><a href="#Prediction_Band"><span class="tocnumber">5.2</span> <span class="toctext">Prognoseband</span></a></li>
+          </ul>
+        </li>
+
+        <li class="toclevel-1 tocsection-36"><a href="#Topics_for_Further_Reading"><span class="tocnumber">6</span> <span class="toctext">Weiterführende Themen</span></a></li>
+
+        <li class="toclevel-1 tocsection-37"><a href="#Reference"><span class="tocnumber">7</span> <span class="toctext">Referenz</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><a name="How_Origin_Fits_the_Curve"></a><span class="mw-headline">So passt Origin eine Linie an</span></h2>
+
+  <p>Das Ziel der nichtlinearen Anpassung ist es, die Parameterwerte abzuschätzen, die die Daten am besten beschreiben. Allgemein können wir den Prozess der nichtlinearen Kurvenanpassung wie unten beschreiben.</p>
+
+  <ol>
+    <li>Erzeugen Sie eine Anfangsfunktionskurve aus den <a href="../../UserGuide/UserGuide/Parameter_Initialization.html" title="UserGuide:Parameter Initialization">Initialisierungswerten</a>.</li>
+
+    <li>Führen Sie eine Iteration durch, um die Parameterwerte anzupassen, so dass die Datenpunkte näher an der Kurve liegen.</li>
+
+    <li>Hören Sie auf, wenn die minimale Distanz das Stopp-Kriterium erreicht, um die beste Anpassung zu erhalten.</li>
+  </ol>
+
+  <p>Origin enthält Optionen für verschiedene Algorithmen, die unterschiedliche iterative Prozeduren und Statistiken haben, um die minimale Distanz zu definieren.</p>
+
+  <h3><a name="Explicit_Functions"></a><span class="mw-headline">Explizite Funktionen</span></h3>
+
+  <h4><a name="Fitting_Model"></a><span class="mw-headline">Anpassungsmodell</span></h4>
+
+  <p>Ein allgemeines nichtlineares Modell kann wie folgt ausgedrückt werden:</p>
+
+  <table class="formula">
+    <tr>
+      <td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bcabf9847b705f433568f8c400c6e79c.png" title="Y=f(X, \boldsymbol{\beta})+\varepsilon " alt="Y=f(X, \boldsymbol{\beta})+\varepsilon " class="tex"></td>
+
+      <td>(1)</td>
+    </tr>
+  </table>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-35f21cd4e2e75c09315e49b2b031710b.png" title="X = (x_1, x_2, \cdots , x_k)'" alt="X = (x_1, x_2, \cdots , x_k)'" class="tex"> die unabhängige Variable und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ca56912a8efd3e2d420b7ceeaf293903.png" title="\boldsymbol{\beta} = (\beta_1, \beta_2, \cdots , \beta_k)'" alt="\boldsymbol{\beta} = (\beta_1, \beta_2, \cdots , \beta_k)'" class="tex"> der Parameter ist.</p>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p><b>Beispiele für die explizite Funktion</b></p>
+
+        <ul>
+          <li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-974247a2296cfc3a2c93ad0e93168732.png" title="y=y_0+Ae^{-x/t}" alt="y=y_0+Ae^{-x/t}" class="tex"></li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h4><a name="Least-Squares_Algorithms"></a><span class="mw-headline">Algorithmen der kleinsten Quadrate</span></h4>
+
+  <p>Der Algorithmus der kleinsten Quadrate besteht darin, die Parameter zu wählen, die die Abweichungen der theoretischen Kurve(n) von den experimentellen Punkten minimieren. Diese Methode wird auch Chi-Quadrat-Minimierung genannt und wird wie folgt definiert:</p>
+
+  <table class="formula">
+    <tr>
+      <td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-06e0bc4dd4c9e79eae6f116e751e9eb5.png" title="\chi ^2=\sum_{i=1}^n \left [ \frac{Y_i-f(x_i^{\prime },\hat{\beta }) } {\sigma _i} \right ]^2" alt="\chi ^2=\sum_{i=1}^n \left [ \frac{Y_i-f(x_i^{\prime },\hat{\beta }) } {\sigma _i} \right ]^2" class="tex"></td>
+
+      <td>(2)</td>
+    </tr>
+  </table>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a347f189f4162c04370051b770afbfa1.png" title="x_i^{\prime }" alt="x_i^{\prime }" class="tex"> der Zeilenvektor für die <i>i</i>-te (<i>i</i> = 1, 2, …, n) Beobachtung ist.</p>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>Diese Abbildung stellt das Konzept in einem einfachen linearen Modell dar (Beachten Sie, dass die mehrfache Regression und der nichtlineare Fit sich ähneln).</p>
+
+        <dl>
+          <dd><a class="image"><img alt="Illustration of the Least Squares Method.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/350px-Illustration_of_the_Least_Squares_Method.png" width="350"></a></dd>
+        </dl>
+
+        <p>Die <b>am besten angepasste Kurve</b> stellt das angenommene theoretische Modell dar. Für einen bestimmten Punkt <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2d2896b8e02816556a3f43ee67a81ed4.png" title="(x_i,y_i)\,\!" alt="(x_i,y_i)\,\!" class="tex"> im ursprünglichen Datensatz wird der entsprechende theoretische Wert bei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d2583020b138319a535bc3c88278ab33.png" title="x_i\,\!" alt="x_i\,\!" class="tex"> mit bezeichnet <small><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bc2145775fa07d048a39d1846a4f4148.png" title="\widehat{y_i}" alt="\widehat{y_i}" class="tex"></small>.</p>
+
+        <p>Gibt es zwei unabhängige Variable im Regressionsmodell, minimiert das Schätzen der kleinsten Quadrate die Abweichung der experimentellen Datenpunkte zur am besten angepassten Oberfläche. Gibt es mehr als 3 unabhängige Variablen, ist das angepasste Modell eine Hyperfläche. In diesem Fall wird die angepasste Oberfläche (oder Kurve) nach der Regression nicht gezeichnet.</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Origin bietet zwei Optionen, um die Parameterwerte in der iterativen Prozedur anzupassen.</p>
+
+  <dl>
+    <dd>
+      <ul>
+        <li><a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Function_Selection" title="UserGuide:Settings Tab Upper Panel">Algorithmus Levenberg-Marquardt (L-M)</a></li>
+
+        <li><a href="../../UserGuide/UserGuide/NLFit_Dialog_Buttons.html" title="UserGuide:NLFit Dialog Buttons">Downhill-Simplex-Approximation</a></li>
+      </ul>
+    </dd>
+  </dl>
+
+  <h5><a name="Levenberg-Marquardt_.28L-M.29_Algorithm"></a><span class="mw-headline">Algorithmus Levenberg-Marquardt (L-M)</span></h5>
+
+  <p>Der <a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Function_Selection" title="UserGuide:Settings Tab Upper Panel">Algorithmus Levenberg-Marquardt (L-M)</a><sup><a href="#Reference">11</a></sup> ist eine iterative Prozedur, die die Gauss-Newton-Methode und die Methode des steilsten Abstiegs kombiniert. Der Algorithmus funktioniert gut für die meisten Fälle und ist Standard für nichtlineare Routinen der kleinste Quadrate.</p>
+
+  <ol>
+    <li>Berechnen Sie den <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-204b209474ca9158d3be8bf938264518.png" title="\chi ^2(b)" alt="\chi ^2(b)" class="tex">-Wert aus den gegebenen <a href="../../UserGuide/UserGuide/Parameter_Initialization.html" title="UserGuide:Parameter Initialization">Initialisierungswerten</a>: <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-92eb5ffee6ae2fec3ad71c777531578f.png" title="b" alt="b" class="tex"> .</li>
+
+    <li>Wählen Sie einen moderaten Wert für <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex">, sagen wir <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex"> = 0,001.</li>
+
+    <li>Löschen Sie die Levenberg-Marquardt-Funktion<sup><a href="#Reference">11</a></sup> für <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-02df0bfa3fa822a063d48e627b7ad7fc.png" title="\delta b" alt="\delta b" class="tex"> und werten Sie <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2c4f070d67741634bb7dcb3815ba11db.png" title="\chi ^2(\beta + \delta b)" alt="\chi ^2(\beta + \delta b)" class="tex"> aus.</li>
+
+    <li>Wenn <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f81fcda6393e0a6fbdb5bfc2c572c20c.png" title="\chi ^2(\beta + \delta b) \geq \chi ^2(b)" alt="\chi ^2(\beta + \delta b) \geq \chi ^2(b)" class="tex">, erhöhen Sie <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex"> um einen Faktor von 10 und kehren Sie zurück zu Schritt 3.</li>
+
+    <li>Wenn <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-96084296a143c0c942baae5959dc08ac.png" title="\chi ^2(\beta + \delta b) \leq \chi ^2(b)" alt="\chi ^2(\beta + \delta b) \leq \chi ^2(b)" class="tex">, verringern Sie <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex"> um einen Faktor von 10, aktualisieren Sie die Parameterwerte auf <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-02df0bfa3fa822a063d48e627b7ad7fc.png" title="\delta b" alt="\delta b" class="tex"> und kehren Sie zurück zu Schritt 3.</li>
+
+    <li>Stoppen Sie, bis die <a class="image"><img alt="Temp-Regression and Curve Fitting-image125.gif" src="../images/Theory_of_Nonlinear_Curve_Fitting/Temp-Regression_and_Curve_Fitting-image125.gif" width="21"></a>-Werte, die in zwei aufeinanderfolgenden Iterationen berechnet werden, klein genug sind (verglichen mit der <a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Advanced" title="UserGuide:Settings Tab Upper Panel">Toleranz</a>).</li>
+  </ol>
+
+  <h5><a name="Downhil_Simplex_Algorithm"></a><span class="mw-headline">Downhill-Simplex-Algorithmus</span></h5>
+
+  <p>Neben der L-M-Methode bietet Origin auch eine <a href="../../UserGuide/UserGuide/NLFit_Dialog_Buttons.html" title="UserGuide:NLFit Dialog Buttons">Downhill-Simplex-Approximation</a><sup><a href="#Reference">9,10</a></sup>. In der Geometrie ist ein Simplex ein Polytop von N + 1 Sattelpunkten in N Dimensionen. Bei einer nichtlinearen Optimierung existiert ein Analogon für eine Zielfunktion von N Variablen. Während der Iterationen passt der Simplex-Algorithmus (auch bekannt als Nelder-Mead) den Parameter "Simplex" an, bis er bis zu einem lokalen Minimum konvergiert.</p>
+
+  <p>Anders als die L-M-Methode benötigt die Simplex-Methode keine Ableitungen und bleibt effektiv, auch wenn die Rechenbelastung gering ist. Normalerweise, wenn Sie keinen guten Wert für die Parameterinitialisierung erhalten haben, können Sie diese Methode ausprobieren, um den ungefähren Parameterwert zur weiteren Anpassungsberechnung mit L-M zu erhalten. Die Simplex-Methode ist insofern stabiler, als dass sie weniger in unbedeutendere Bereiche des Parameterraums wandert; allerdings ist sie im Allgemeinen langsamer als L-M, besonders in der Nähe eines lokalen Minimums. Tatsächlich gibt es keinen "perfekten" Algorithmus für eine nichtlineare Anpassung, und vieles kann das Ergebnis beeinflussen (z.b. Initialisierungswerte). Bei komplizierten Modellen ist eine Methode vielleicht besser geeignet als eine andere. Außerdem möchten Sie vielleicht beide Methoden testen, um die Anpassungsoperation durchzuführen.</p>
+
+  <h4><a name="Orthogonal_Distance_Regression_.28ODR.29_Algorithm"></a><span class="mw-headline">Algorithmus der orthogonalen Distanzregression (ODR)</span></h4>
+
+  <p>Der <a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Function_Selection" title="UserGuide:Settings Tab Upper Panel">Algorithmus der ODR (Orthogonale Distanzregression)</a> minimiert die Summe der Fehlerquadrate, indem sowohl Anpassungsparameter und Werte der unabhängigen Variable in dem iterativen Prozess angepasst werden. Das Residuum in der ODR ist nicht die Differenz zwischen dem beobachteten Wert und dem vorhergesagten Wert für die abhängige Variable, sondern die orthogonale Distanz zwischen den Daten zu der angepassten Kurve.</p>
+
+  <p>Origin verwendet den ODR-Algorithmus in ODRPACK95<sup><a href="#Reference">8</a></sup>.</p>
+
+  <p>Für eine explizite Funktion könnte der ODR-Algorithmus folgendermaßen ausgedrückt werden:</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-63152dbc3e42c69b87cc39bdb5bf39f2.png" title="\min\left (\sum_{i=1}^{n}\left (w_{yi}\cdot \epsilon_{i} ^{2}+w_{xi}\cdot \delta_{i}^{2} \right ) \right )" alt="\min\left (\sum_{i=1}^{n}\left (w_{yi}\cdot \epsilon_{i} ^{2}+w_{xi}\cdot \delta_{i}^{2} \right ) \right )" class="tex"></p>
+
+  <p>unterliegt den Nebenbedingungen:</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bd52ec18c34bbb8cc60c2c5170b022c0.png" title="y_{i}=f\left ( x_{i} +\delta_{i}; \beta \right )-\epsilon _{i}\ \ \ \ \ \ i=1,...,n" alt="y_{i}=f\left ( x_{i} +\delta_{i}; \beta \right )-\epsilon _{i}\ \ \ \ \ \ i=1,...,n" class="tex"></p>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f0ed6a7e9e5079b9b9f2bcd01768ddcc.png" title="w_{xi}" alt="w_{xi}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6f64afa2febc1a132beeeba5e4bd81ef.png" title="w_{yi}" alt="w_{yi}" class="tex"> die Gewichtungen der Anwendereingabe von <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex"> sind sowie <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f046a1b3002c9fd615276bb4e1a3a761.png" title="\delta_{i}" alt="\delta_{i}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-67b31d49c0358463d6dbefd1c0c6c18c.png" title="\epsilon_{i}" alt="\epsilon_{i}" class="tex"> das Residuum der entsprechenden <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex">. <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex"> ist der Anpassungsparameter.</p>
+
+  <p>Weitere Einzelheiten zum ODR-Algorithmus finden Sie unter ODRPACK95<sup><a href="#Reference">8</a></sup>.</p>
+
+  <h3><a name="Comparison_between_ODR_and_L-M"></a><span class="mw-headline">Vergleich zwischen ODR und L-M</span></h3>
+
+  <p>Um zwischen ODR- und L-M-Algorithmus für Ihre Anpassung zu wählen, können Sie in der folgenden Informationstabelle nachlesen:</p>
+
+  <table class="simple">
+    <tr>
+      <th></th>
+
+      <th>Orthogonale Distanzregression</th>
+
+      <th>Levenberg-Marquardt</th>
+    </tr>
+
+    <tr>
+      <td style="background:#C9C9C9"><b>Anwendung</b></td>
+
+      <td>Implizite und explicit Funktionen</td>
+
+      <td>Nur explizite Funktionen</td>
+    </tr>
+
+    <tr>
+      <td style="background:#C9C9C9"><b>Gewichtung</b></td>
+
+      <td>Unterstützt sowohl X- als auch Y-Gewichtung</td>
+
+      <td>Unterstützt nur Y-Gewichtung</td>
+    </tr>
+
+    <tr>
+      <td style="background:#C9C9C9"><b>Residuumsquelle</b></td>
+
+      <td>Die orthogonale Distanz von den Daten zu der angepassten Kurve</td>
+
+      <td>Die Differenz zwischen dem beobachteten Wert und dem vorhergesagten Wert</td>
+    </tr>
+
+    <tr>
+      <td style="background:#C9C9C9"><b>Iterationsprozess</b></td>
+
+      <td>Anpassen der Werte der Anpassungsparameter und der unabhängigen Variablen</td>
+
+      <td>Anpassen der Werte der Anpassungsparameter</td>
+    </tr>
+  </table>
+
+  <h3><a name="Implicit_Functions"></a><span class="mw-headline">Implizite Funktionen</span></h3>
+
+  <h4><a name="Fitting_Model_2"></a><span class="mw-headline">Anpassungsmodell</span></h4>
+
+  <p>Eine allgemeine implizite Funktion könnte ausgedrückt werden mit:</p>
+
+  <table class="formula">
+    <tr>
+      <td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2c70edb6aaa03e8925fa8e82fb079995.png" title="f\left ( X, Y, \beta \right )-const=0 " alt="f\left ( X, Y, \beta \right )-const=0 " class="tex"></td>
+
+      <td>(5)</td>
+    </tr>
+  </table>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-35f21cd4e2e75c09315e49b2b031710b.png" title="X = (x_1, x_2, \cdots , x_k)'" alt="X = (x_1, x_2, \cdots , x_k)'" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-efc29c0295bfc803602e300317eb1204.png" title="Y = (y_1, y_2, \cdots , y_k)'" alt="Y = (y_1, y_2, \cdots , y_k)'" class="tex"> Variablen sind, <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex"> die Anpassungsparameter sind und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6680dba00f3a88f66f8029a93d71d93c.png" title="const" alt="const" class="tex"> eine Konstante ist.</p>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p><b>Beispiele für die implizite Funktion:</b></p>
+
+        <ul>
+          <li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d45d2cae23282528539e4f2dccaa0047.png" title="f = \left(\frac{x-x_c}{a}\right)^2 + \left(\frac{y-y_c}{b}\right)^2 - 1" alt="f = \left(\frac{x-x_c}{a}\right)^2 + \left(\frac{y-y_c}{b}\right)^2 - 1" class="tex"></li>
+        </ul>
+
+        <p>&#160;</p>
+      </td>
+    </tr>
+  </table>
+
+  <h4><a name="Orthogonal_Distance_Regression_.28ODR.29_Algorithm_2"></a><span class="mw-headline">Algorithmus der orthogonalen Distanzregression (ODR)</span></h4>
+
+  <p>Die ODR-Methode kann für sowohl implizite als auch explizite Funktionen verwendet werden. Um weitere Einzelheiten der ODR-Methode zu erfahren, lesen Sie bitte die Beschreibung der ODR-Methode im <a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm">obigen Abschnitt</a>.</p>
+
+  <p>Für implizite Funktionen könnte der ODR-Algorithmus folgendermaßen ausgedrückt werden:</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a4443476c7d74800f2fd5e4c90a79988.png" title="\min\left (\sum_{i=1}^{n}\left ( w_{xi}\cdot \delta_{xi}^{2}+w_{yi}\cdot \delta_{yi}^{2} \right ) \right )" alt="\min\left (\sum_{i=1}^{n}\left ( w_{xi}\cdot \delta_{xi}^{2}+w_{yi}\cdot \delta_{yi}^{2} \right ) \right )" class="tex"></p>
+
+  <p>unter der Bedingung:</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-75d51c5f694e13f570e6ee14eab0fcf7.png" title="f\left ( x_{i}+\delta_{xi},y_{i}+\delta_{yi},\beta \right )= 0\ \ \ \ \ \ i=1,...,n" alt="f\left ( x_{i}+\delta_{xi},y_{i}+\delta_{yi},\beta \right )= 0\ \ \ \ \ \ i=1,...,n" class="tex"></p>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f0ed6a7e9e5079b9b9f2bcd01768ddcc.png" title="w_{xi}" alt="w_{xi}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6f64afa2febc1a132beeeba5e4bd81ef.png" title="w_{yi}" alt="w_{yi}" class="tex"> die Gewichtungen der Anwendereingabe von <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex"> sind sowie <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2543a24cee2f57e100a071caebc57326.png" title="\delta_{xi}" alt="\delta_{xi}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-37644270c5e8eefafd1d93fd743e6bbc.png" title="\delta_{yi}" alt="\delta_{yi}" class="tex"> das Residuum der entsprechenden <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex">. <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex"> ist der Anpassungsparameter.</p>
+
+  <h3><a name="Weighted_Fitting"></a><span class="mw-headline">Gewichtete Anpassung</span></h3>
+
+  <p>Sind die Messfehler unbekannt, wird <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-86d759d3081512d7183f5d7b87a1e825.png" title="\sigma _i\,\!" alt="\sigma _i\,\!" class="tex"> für alle <i>i</i> auf 1 gesetzt und die Anpassung ohne Gewichtung ausgeführt. Sind die Fehler aber bekannt, können wir diese Fehler als Gewichtungen betrachten und gewichtete Anpassung verwenden. In diesem Fall kann Chi^2 wie folgt dargestellt werden:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d8212e6e4627f94f8d8ca2a1ede630e2.png" title="\chi ^2=\sum_{i=1}^nw_i[Y_i-f(x_i^{\prime },\hat \beta )]^2" alt="\chi ^2=\sum_{i=1}^nw_i[Y_i-f(x_i^{\prime },\hat \beta )]^2" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(6)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Es sind eine Reihe von gewichteten Methoden in Origin verfügbar. Bitte entnehmen Sie weitere Informationen dem Abschnitt <a href="../../UserGuide/UserGuide/Fitting_with_Errors_and_Weighting.html" title="UserGuide:Fitting with Errors and Weighting">Anpassen mit Fehlern und Gewichtung</a> in der Origin-Hilfe.</p>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameter</span></h2>
+
+  <p>Die mit der Anpassung verbundenen Formeln werden hier zusammengefasst:</p>
+
+  <dl>
+    <dd><a class="image"><img alt="The Fit Results.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/The_Fit_Results.png" width="654"></a></dd>
+  </dl>
+
+  <h3><a name="The_Fitted_Value"></a><span class="mw-headline">Der angepasste Wert</span></h3>
+
+  <p>Das Berechnen der angepassten Werte in nichtlinearer Regression ist eine iterative Vorgehensweise. Sie können eine kurze Einführung in dem oben stehenden Abschnitt lesen (<a href="#How_Origin_Fits_the_Curve">So passt Origin die Kurve an</a>) oder sich mit Hilfe des unten erwähnten Materials weiterführend informieren.</p>
+
+  <h3><a name="Parameter_Standard_Errors"></a><span class="mw-headline">Die Parameterstandardfehler</span></h3>
+
+  <p>Während der L-M-Iteration müssen wir die partielle Ableitungsmatrix <b><i>F</i></b> berechnen, deren Element in der <i>i</i>-ten Zeile und der <i>j</i>-ten Spalte folgendermaßen lautet:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7df4a0ef76e047f4b002d1b4628f7a6d.png" title="F_{ij}=\frac{\partial f(x,\theta )}{\sigma _i\partial \theta _j}" alt="F_{ij}=\frac{\partial f(x,\theta )}{\sigma _i\partial \theta _j}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(7)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-571f263e771aca60a4a284b14251565c.png" title="\sigma _i" alt="\sigma _i" class="tex"> der Fehler von Y für die <i>i</i>-te Beobachtung ist, falls das <b>instrumentelle</b> Gewicht verwendet wird. Falls es kein Gewicht gibt, <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ece93aac8aa97d60ece2b228ea95b246.png" title="\sigma _i = 1" alt="\sigma _i = 1" class="tex">. Und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ba404f144da76afb0ad9ee47351ed6bf.png" title="F_{ij}" alt="F_{ij}" class="tex"> wird für jede Beobachtung <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"> in jeder Iteration ausgewertet.</p>
+
+  <p>Anschließend können wir die <b>Varianz-Kovarianz</b>-Matrix für die Parameter <a class="image"><img alt="Temp-Regression and Curve Fitting-image124.gif" src="../images/Theory_of_Nonlinear_Curve_Fitting/Temp-Regression_and_Curve_Fitting-image124.gif" width="15"></a> wie folgt ermitteln:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b468175c71479a7b2b5bc140c0d13325.png" title="C=(F'F)^{-1}s^2\,\!" alt="C=(F'F)^{-1}s^2\,\!" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(8)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5df7e7b0f9a17b149f36fec7c1142e01.png" title="F'" alt="F'" class="tex"> die Transponierte der <i>F</i>-Matrix ist. s<sup>2</sup> ist die mittlere Residuenvarianz, auch als <b>Reduziertes Chi-Quadrat</b> bezeichnet oder die <b>Abweichung</b> des Modells, und kann folgendermaßen berechnet werden:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-135afe5aa195767729555499d3c7aff8.png" title="s^2=\frac{RSS}{n-p}" alt="s^2=\frac{RSS}{n-p}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(9)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <i>n</i> die Anzahl der Punkte ist und <i>p</i> die Anzahl der Parameter.</p>
+
+  <p>Die Quadratwurzel des diagonalen Hauptwerts dieser Matrix <i>C</i> ist der <b>Standardfehler</b> des entsprechenden Parameters.</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-1bd9c4721fff6c989d8b8284ea46193c.png" title="s_{\theta _i}=\sqrt{c_{ii}}\,\!" alt="s_{\theta _i}=\sqrt{c_{ii}}\,\!" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(10)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <b><i>C</i></b><sub>ii</sub> das Element in der <i>i</i>-ten Zeile und <i>i</i>-ten Spalte der Matrix <b><i>C</i></b> ist. <b><i>C</i></b><sub>ij</sub> ist die Kovarianz zwischen <i>θ</i><sub>i</sub> und <i>θ</i><sub>j</sub>.</p>
+
+  <p>Sie können wählen, ob s<sup>2</sup> ausgeschlossen wird, wenn die Kovarianzmatrix berechnet wird. Die hat Einfluss auf die Standardfehlerwerte. Beim Ausschließen von s<sup>2</sup> deaktivieren Sie das Kontrollkästchen <b>Reduziertes Chi^2 verwenden</b> auf der Seite <b>Erweitert</b> im Bedienfeld <b>Fit-Steuerung</b>. Die Kovarianz wird dann berechnet durch:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7ba5bc942d74535e881bac8fffef8e0d.png" title="c=(F'F)^{-1}\,\!" alt="c=(F'F)^{-1}\,\!" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(11)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Die Standardfehler sind dann:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-45acf7fd19d29633c1814cab358125b4.png" title="s_{\theta _i}^{\prime }=\frac{s_{\theta _i}}s\,\!" alt="s_{\theta _i}^{\prime }=\frac{s_{\theta _i}}s\,\!" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(12)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Die Parameterstandardfehler kann uns einen Eindruck von der Genauigkeit der angepassten Werte geben. Normalerweise sollte der Betrag der Standardfehlerwerte niedriger sein als die angepassten Werte. Wenn die Standardfehlerwerte größer sind als die angepassten Werte kann das Anpassungsmodell überparameterisiert sein.</p>
+
+  <h3><a name="The_Standard_Error_for_Derived_Parameter"></a><span class="mw-headline">Der Standardfehler für abgeleitete Parameter</span></h3>
+
+  <p>Origin schätzt die Standardfehler für die abgeleiteten Parameter gemäß der Fehlerverbreitungsformel, eine approximative Formel.</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-9886143d781b18fae944d111614266b3.png" title="z = f\left (\theta _1, \theta _2, ..., \theta _p \right )" alt="z = f\left (\theta _1, \theta _2, ..., \theta _p \right )" class="tex"> sei die Funktion mit einer Kombination von (linearen oder nichtlinearen) <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5a34bb082daf037b3c4b14c13af6855b.png" title="p\," alt="p\," class="tex"> Variablen <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-4a096a413b1ea45201f320996396be49.png" title="\theta _1, \theta _2, ..., \theta _p \," alt="\theta _1, \theta _2, ..., \theta _p \," class="tex">.</p>
+
+  <p>Die allgemeine Regel der Fehlerverbreitung ist:</p>
+
+  <dl>
+    <dd><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a1a4895080bf724c87cfcd4c7b64292f.png" title="\sigma_z^2 = \sum_i^p \sum_j^p \frac {\partial z}{\partial \theta_i} COV_{\theta_i \theta_j} \frac {\partial z}{\partial \theta_j}" alt="\sigma_z^2 = \sum_i^p \sum_j^p \frac {\partial z}{\partial \theta_i} COV_{\theta_i \theta_j} \frac {\partial z}{\partial \theta_j}" class="tex"></dd>
+  </dl>
+
+  <p>wobei <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f3bfa311268b39ae3ce3ae42e47f6937.png" title="COV_{\theta_i \theta_j}\," alt="COV_{\theta_i \theta_j}\," class="tex"> der Kovarianzwert für <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f633d81011ebbdb486d3bfee35e4789e.png" title="\left (\theta_i, \theta_j \right )" alt="\left (\theta_i, \theta_j \right )" class="tex"> und <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-edb838306186ccc2230aa890ba0bad64.png" title="\left (i = 1, 2, ..., p \right ), \left (j = 1, 2, ..., p \right )" alt="\left (i = 1, 2, ..., p \right ), \left (j = 1, 2, ..., p \right )" class="tex"> ist.</p>
+
+  <p>Sie können wählen, ob die mittlere Residuenvarianz <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e25a9ed7a5b522d46c98a8813634ab5d.png" title="s^2" alt="s^2" class="tex"> ausgeschlossen werden soll, wenn die Kovarianzmatrix <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-94e8fbdc16330d396a135eb8ff7c399e.png" title="COV_{\theta_i \theta_j}" alt="COV_{\theta_i \theta_j}" class="tex"> berechnet wird. Dies beeinflusst die Werte des Standardfehlers für abgeleitete Parameter. Beim Ausschließen von <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e25a9ed7a5b522d46c98a8813634ab5d.png" title="s^2" alt="s^2" class="tex"> deaktivieren Sie das Kontrollkästchen <b>Reduziertes Chi^2 verwenden</b> auf der Seite <b>Erweitert</b> im Bedienfeld <b>Fit-Steuerung</b>.</p>
+
+  <p>Verwenden wir zum Beispiel drei Variablen:</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5a9033d9c4d88c1ee1a786cbfbbf1d27.png" title="z = f\left (\theta_1, \theta_2, \theta_3 \right )" alt="z = f\left (\theta_1, \theta_2, \theta_3 \right )" class="tex"></p>
+
+  <p>Dann haben wir:</p>
+
+  <dl>
+    <dd><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-37a2eeec5b384e170c8c1a0ddda74e60.png" title="\sigma_z^2 = \left (\frac {\partial z}{\partial \theta_1} \right )^2 \sigma_{\theta_1}^2 + \left (\frac {\partial z}{\partial \theta_2} \right )^2 \sigma_{\theta_2}^2 + \left (\frac {\partial z}{\partial \theta_3} \right )^2 \sigma_{\theta_3}^2 + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_2} \right ) COV_{\theta_1 \theta_2} + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_1 \theta_3} + 2 \left (\frac {\partial z}{\partial \theta_2} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_2 \theta_3}" alt="\sigma_z^2 = \left (\frac {\partial z}{\partial \theta_1} \right )^2 \sigma_{\theta_1}^2 + \left (\frac {\partial z}{\partial \theta_2} \right )^2 \sigma_{\theta_2}^2 + \left (\frac {\partial z}{\partial \theta_3} \right )^2 \sigma_{\theta_3}^2 + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_2} \right ) COV_{\theta_1 \theta_2} + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_1 \theta_3} + 2 \left (\frac {\partial z}{\partial \theta_2} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_2 \theta_3}" class="tex"></dd>
+  </dl>
+
+  <p><br>
+  Jetzt sei der abgeleitete Parameter <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77698ae92ac0435f8da1e266eeb528e3.png" title="z\," alt="z\," class="tex"> und die Anpassungsparameter seien <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2170397abaa4c195e1337c282185dacb.png" title="\theta_1, \theta_2, ..., \theta_p\," alt="\theta_1, \theta_2, ..., \theta_p\," class="tex">. Der Standardfehler für den abgeleiteten Parameter <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77698ae92ac0435f8da1e266eeb528e3.png" title="z\," alt="z\," class="tex"> ist <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-62f8edd0067312992b259e2cea2f98fa.png" title="\sigma_z\," alt="\sigma_z\," class="tex">.</p>
+
+  <h3><a name="Confidence_Intervals"></a><span class="mw-headline">Konfidenzintervalle</span></h3>
+
+  <p>Origin bietet zwei Methoden zum Berechnen der Konfidenzintervalle für Parameter: <a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Advanced" title="UserGuide:Settings Tab Upper Panel">Asymptotisch-Symmetrisch und Modellvergleich</a>.</p>
+
+  <h5><a name="Asymptotic-Symmetry_Method"></a><span class="mw-headline">Asymptotisch-symmetrische Methode</span></h5>
+
+  <p>Eine Annahme in der Regressionsanalyse ist, dass die Daten normalverteilt sind, so dass wir die Standardfehlerwerte verwenden können, um die <b>Parameterkonfidenzintervalle</b> zu erzeugen. Bei einem gegebenen Signifikanzniveau α ist das (1-α)x100%-Konfidenzintervall für den Parameter:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f9deaed4f0f2b676163099e46b6375b1.png" title="\hat \theta _j-t_{(\frac \alpha 2,n-p)}s_{\theta _j}\leq \hat \theta _j\leq \hat \theta _j+t_{(\frac \alpha 2,n-p)}s_{\theta _j}" alt="\hat \theta _j-t_{(\frac \alpha 2,n-p)}s_{\theta _j}\leq \hat \theta _j\leq \hat \theta _j+t_{(\frac \alpha 2,n-p)}s_{\theta _j}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(13)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Das Parameterkonfidenzintervall gibt an, wie wahrscheinlich das Intervall den wahren Wert enthält.</p>
+
+  <p>Das oben dargestellte Konfidenzintervall ist <b>Asymptotisch</b>, die am häufigsten verwendete Methode zum Berechnen von Konfidenzintervallen. Das "Asymptotisch" meint hier, dass es sich um einen approximativen Wert handelt.</p>
+
+  <h5><a name="Model-Comparison_Method"></a><span class="mw-headline">Methode des Modellvergleichs</span></h5>
+
+  <p>Wenn Sie genauere Werte brauchen, können Sie die Methode des <b>Modellvergleichs</b> verwenden, um das Konfidenzintervall zu schätzen.</p>
+
+  <p>Wird die Methode Modellvergleich verwendet, werden die oberen und unteren Konfidenzgrenzen berechnet, indem die Werte für jeden Parameter <i>p</i> gesucht werden, bei dem <i>RSS(<sub>j</sub>)</i> (das über die verbleibenden Parameter minimiert wird) größer ist als <i>RSS</i> mit einem Faktor von (<i>1+F</i>/(<i>n-p</i>)).</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e4335f63c75b0341e9888b260ef77e7f.png" title="RSS(\theta _j)=RSS(1+F\frac 1{n-p})" alt="RSS(\theta _j)=RSS(1+F\frac 1{n-p})" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(14)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <i>F = Ftable</i>(<i>α, 1, n-p</i>) und <i>RSS</i> die minimale Fehlersumme der Quadrate ist, die während der Anpassungssitzung gefunden wurde.</p>
+
+  <h3><a name="t_Value"></a><span class="mw-headline">t-Wert</span></h3>
+
+  <p>Sie können entscheiden, einen <i>t</i>-Test für jeden Parameter auszuführen, um zu testen, ob sein Wert gleich Null ist. Die Nullhypothese des t-Tests für den <i>j</i>-ten Parameter ist:</p>
+
+  <table class="formula">
+    <tr>
+      <td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e1506f5dbd3c5df22513df890dba20fb.png" title="H_0: \theta_j = 0 \," alt="H_0: \theta_j = 0 \," class="tex"></td>
+
+      <td></td>
+    </tr>
+  </table>
+
+  <p>Die Alternativhypothese ist:</p>
+
+  <table class="formula">
+    <tr>
+      <td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-11a56a7d0ca6131863575566cc7117c9.png" title="H_\alpha: \theta_j \ne 0" alt="H_\alpha: \theta_j \ne 0" class="tex"></td>
+
+      <td></td>
+    </tr>
+  </table>
+
+  <p>Der <i>t</i>-Wert kann wie folgt berechnet werden:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7ddf34c66dcaeadff80cfc8fe6a519b4.png" title="t=\frac{\hat \beta _j-0}{s_{\hat \beta _j}}" alt="t=\frac{\hat \beta _j-0}{s_{\hat \beta _j}}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(15)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="Prob.3E.7Ct.7C"></a><span class="mw-headline">Wahrsch.&gt;|t|</span></h3>
+
+  <p>Die Wahrscheinlichkeit, dass <i>H</i><sub>0</sub> in dem <i>t-</i>Test oben wahr ist.</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-3e5335a131705b3ef0bb8b250033167d.png" title="prob=2(1-tcdf(|t|,df_{Error}))\,\!" alt="prob=2(1-tcdf(|t|,df_{Error}))\,\!" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(16)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <i>tcdf(t, df)</i> die untere Wahrscheinlichkeit für die studentisierte <i>t-</i>Verteilung mit dem <i>df</i>-Freiheitsgrad berechnet.</p>
+
+  <h3><a name="Dependency"></a><span class="mw-headline">Abhängigkeit</span></h3>
+
+  <p>Ist eine Gleichung überparametrisiert, bestehen zwischen den Parametern wechselseitige Abhängigkeiten. Die Abhängigkeit des <i>i</i>-ten Parameters wird definiert als:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-20b1f9a2fd5f5c4f53e55b4d9e537e8d.png" title="1-\frac 1{c_{ii}(c^{-1})_{ii}}" alt="1-\frac 1{c_{ii}(c^{-1})_{ii}}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(17)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>und (<b><i>C</i></b><sup>-1</sup>)<sub>ii</sub> ist das (<i>i</i>, <i>i</i>)-te diagonale Element der Inversen der Matrix <b><i>C</i></b>. Liegt dieser Wert nahe bei 1, besteht eine starke Abhängigkeit.</p>
+
+  <p>Um weitere Informationen zu erhalten, wie die Werte die Qualität eines Anpassungsmodells bewerten, siehe die Seite <a href="../../UserGuide/UserGuide/Model_Diagnosis_Using_Dependency_Values.html" title="UserGuide:Model Diagnosis Using Dependency Values">Modelldiagnose mit Abhängigkeitswerten</a>.</p>
+
+  <h3><a name="CI_Half_Width"></a><span class="mw-headline">KI halbe Breite</span></h3>
+
+  <p>Das Konfidenzintervall halbe Breite ist:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77ec7c61ac9d06bfc9ad4c0ae47b85ce.png" title="CI=\frac{UCL-LCL}2" alt="CI=\frac{UCL-LCL}2" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(18)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei OEG und UEG das obere Konfidenzintervall bzw. untere Konfidenzintervall ist.</p>
+
+  <h2><a name="Statistics"></a><span class="mw-headline">Statistiken</span></h2>
+
+  <p>Mehrere Statistikformeln für Anpassungen werden unten zusammengefasst:</p>
+
+  <p><a class="image"><img alt="The Fit Results 02.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/The_Fit_Results_02.png" width="252"></a></p>
+
+  <h3><a name="Degree_of_Freedom"></a><span class="mw-headline">Freiheitsgrade</span></h3>
+
+  <p>Der Freiheitsgrad <i>Fehler</i> Weitere Einzelheiten finden Sie in der <a href="#ANOVA_Table">ANOVA-Tabelle</a>.</p>
+
+  <h3><a name="Residual_Sum_of_Squares"></a><span class="mw-headline">Summe der Fehlerquadrate</span></h3>
+
+  <p>Residuensumme der Quadrate</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-098376be8e9d0c82d36905f8384a9f90.png" title="RSS(X,\hat \theta )=\sum_{i=1}^n w_i[Y_i-f(x_i^{\prime },\hat \theta )]^2" alt="RSS(X,\hat \theta )=\sum_{i=1}^n w_i[Y_i-f(x_i^{\prime },\hat \theta )]^2" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(19)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="Reduced_Chi-Sqr"></a><span class="mw-headline">Reduziertes Chi-Quadrat</span></h3>
+
+  <p>Der Wert des reduzierten Chi-Quadrats, der gleich der Residuensumme des Quadrats geteilt durch den Freiheitsgrad ist</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b8e3b965a160ce8b28ff9f67113f6a4a.png" title="Reduced\chi ^2=\frac{\chi ^2}{df_{Error}}=\frac{RSS}{df_{Error}}" alt="Reduced\chi ^2=\frac{\chi ^2}{df_{Error}}=\frac{RSS}{df_{Error}}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(20)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="R-Square_.28COD.29"></a><span class="mw-headline">R-Quadrat (COD)</span></h3>
+
+  <p>Der <i>R</i><sup>2</sup>-Wert zeigt die Güte eines Fits und kann berechnet werden durch:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-85527db992f009b94c01e40bd6650d3d.png" title="R^2=\frac{Explained\,variation}{Total\,variation}=\frac{TSS-RSS}{TSS}=1-\frac{RSS}{TSS}" alt="R^2=\frac{Explained\,variation}{Total\,variation}=\frac{TSS-RSS}{TSS}=1-\frac{RSS}{TSS}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(21)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei <i>TSS</i> die Gesamtsumme der Quadrate und <i>RSS</i> die Residuensumme des Quadrats ist.</p>
+
+  <h3><a name="Adj._R-Square"></a><span class="mw-headline">Kor. R-Quadrat</span></h3>
+
+  <p>Der korrigierte <i>R</i><sup>2</sup>-Wert:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-3dce278823ecfde5fe7c017ab3681a62.png" title="\bar R^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" alt="\bar R^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(22)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="R_Value"></a><span class="mw-headline">R-Wert</span></h3>
+
+  <p>Der <i>R</i>-Wert ist die Quadratwurzel von <i>R</i><sup>2</sup>:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-8dea6550a6f24458c884bb59c192c935.png" title="R=\sqrt{R^2}" alt="R=\sqrt{R^2}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(23)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Weitere Informationen zu <i>R</i><sup>2</sup>, korrigiertem <i>R</i><sup>2</sup> und <i>R</i> finden Sie im Abschnitt <a href="../../UserGuide/Category/Interpreting_Regression_Results.html#Goodness_of_Fit" title="Category:Interpreting Regression Results">Güte des Fits</a>.</p>
+
+  <h3><a name="Root-MSE_.28SD.29"></a><span class="mw-headline">Wurzel-MSE (StAbw)</span></h3>
+
+  <p>Die Quadratwurzel des Mittelwerts des Fehlers oder die <b>Standardabweichung</b> der Residuen ist gleich der Quadratwurzel des reduzierten χ<sup>2</sup>:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-54a849a10ec028930b7e06f130fd19fe.png" title="Root\,MSE=\sqrt{Reduced \,\chi ^2}" alt="Root\,MSE=\sqrt{Reduced \,\chi ^2}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(24)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="ANOVA_Table"></a><span class="mw-headline">ANOVA-Tabelle</span></h2>
+
+  <p>Die ANOVA-Tabelle:</p>
+
+  <p><b>Hinweise:</b> Die <b>ANOVA-Tabelle</b> ist für die Anpassung von impliziten Funktionen nicht verfügbar.</p>
+
+  <table class="simple">
+    <tr>
+      <th></th>
+
+      <th>Freiheitsgrade</th>
+
+      <th>Summe der Quadrate</th>
+
+      <th>Mittelwert der Quadrate</th>
+
+      <th>F -Wert</th>
+
+      <th>Wahrsch. &gt; F</th>
+    </tr>
+
+    <tr>
+      <th>Modell</th>
+
+      <td>
+        <p><i>p</i></p>
+      </td>
+
+      <td>
+        <p><i>SS</i><sub>reg</sub> = <i>TSS</i> - <i>RSS</i></p>
+      </td>
+
+      <td>
+        <p><i>MS</i><sub>reg</sub> = <i>SS</i><sub>reg</sub> / <i>p</i></p>
+      </td>
+
+      <td>
+        <p><i>MS</i><sub>reg</sub> / <i>MSE</i></p>
+      </td>
+
+      <td>
+        <p><i>p</i>-<i>Wert</i></p>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Fehler</th>
+
+      <td>
+        <p><i>n</i> - <i>p</i></p>
+      </td>
+
+      <td>
+        <p><i>RSS</i></p>
+      </td>
+
+      <td>
+        <p><i>MSE</i> = <i>RSS</i> / (<i>n</i>-<i>p</i>)</p>
+      </td>
+
+      <td></td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <th>Unkorrigierte Gesamtsumme</th>
+
+      <td>
+        <p><i>n</i></p>
+      </td>
+
+      <td>
+        <p><i>TSS</i></p>
+      </td>
+
+      <td></td>
+
+      <td></td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <th>Korrigierte Gesamtsumme</th>
+
+      <td>
+        <p><i>n-1</i></p>
+      </td>
+
+      <td>
+        <p><i>TSS</i> <sub>korrigiert</sub></p>
+      </td>
+
+      <td></td>
+
+      <td></td>
+
+      <td></td>
+    </tr>
+  </table>
+
+  <p><b>Hinweis:</b> Bei der nichtlinearen Anpassung gibt Origin korrigierte und unkorrigierte Summen der Quadrate aus: Korrigiertes Modell:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-88dbe70110d96ad89fd62c2370948912.png" title="TSS_{corrected}=\sum_{i=1}w_{i}y_{i}^2-\left(\sum_{i=1}\left(y_{i}w_{i} \right )/\sum_{i=1}w_{i} \right )^2\sum_{i=1}w_{i}" alt="TSS_{corrected}=\sum_{i=1}w_{i}y_{i}^2-\left(\sum_{i=1}\left(y_{i}w_{i} \right )/\sum_{i=1}w_{i} \right )^2\sum_{i=1}w_{i}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(25)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Unkorrigiertes Modell:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5fccc733e8b665c322ce58f630c39be1.png" title="TSS=\sum_{i=1}^nw_iy_i^2" alt="TSS=\sum_{i=1}^nw_iy_i^2" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(26)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Der F-Wert ist ein Test, ob das Anpassungsmodell sich signifikant von dem Modell Y = konstant unterscheidet. Zusätzlich werden der <i>p</i>-Wert bzw. die Signifikanzebene mit einem <i>F</i>-Test ermittelt. Wir können die Nullhypothese verwerfen, wenn der <i>p</i>-Wert kleiner als <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"> ist, das heißt, das Anpassungsmodell unterscheidet sich signifikant von dem Modell Y = konstant.</p>
+
+  <h2><a name="Confidence_and_Prediction_Bands"></a><span class="mw-headline">Konfidenz- und Prognosebänder</span></h2>
+
+  <h3><a name="Confidence_Band"></a><span class="mw-headline">Konfidenzband</span></h3>
+
+  <p>Das Konfidenzintervall für die Anpassungsfunktion besagt, wie gut Ihre Schätzung des Werts der Anpassungsfunktion bei bestimmten Werten der unabhängigen Variablen ist. Sie können mit einer Konfidenz von 100α% behaupten, dass der korrekte Wert für die Anpassungsfunktion sich innerhalb des Konfidenzintervalls befindet, in dem α das gewünschte Konfidenzniveau liegt. Dieses definierte Konfidenzintervall für die Anpassungsfunktion wird berechnet mit:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-82c86845ee3d0efa23d2a1ce2450a05f.png" title="f(x_{1i},x_{2i},\ldots;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2fcf^{\prime }]^{\frac 12}" alt="f(x_{1i},x_{2i},\ldots;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2fcf^{\prime }]^{\frac 12}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(27)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f04def5c58d56a887955d9132f42b968.png" title="f=[\frac{\partial f}{\partial \theta _1},\frac{\partial f}{\partial \theta _2},\cdots ,\frac{\partial f}{\partial \theta _p}]" alt="f=[\frac{\partial f}{\partial \theta _1},\frac{\partial f}{\partial \theta _2},\cdots ,\frac{\partial f}{\partial \theta _p}]" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(28)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="Prediction_Band"></a><span class="mw-headline">Prognoseband</span></h3>
+
+  <p>Das Prognoseband für das gewünschte Konfidenzniveau α ist das Intervall, in das erwartungsgemäß 100α% aller Versuchspunkte in einer Reihe wiederholter Messungen bei bestimmten Werten unabhängiger Variablen fallen. Dieses definierte Prognoseintervall für die Anpassungsfunktion wird berechnet als:</p>
+
+  <table class="formula">
+    <tr>
+      <td>
+        <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-29ebc8680acd0d1962dee476a98e9926.png" title="f(x_{1i},x_{2i},\ldots;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2(1+fcf^{\prime })]^{\frac 12}" alt="f(x_{1i},x_{2i},\ldots;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2(1+fcf^{\prime })]^{\frac 12}" class="tex"></p>
+      </td>
+
+      <td>
+        <p>(29)</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>wobei</p>
+
+  <p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-4f08a0e1ff8ccb6f9fa6b1bf64d3f75f.png" title="\chi _*^2" alt="\chi _*^2" class="tex"> ist das reduzierte <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ea14eb92a09af346481a999c310094f2.png" title="\chi ^2" alt="\chi ^2" class="tex"></p>
+
+  <table class="note">
+    <tr>
+      <td><b>Hinweise:</b> Das <b>Konfidenzband</b> und das <b>Prognoseband</b> in dem angepassten Kurvendiagramm sind nicht für die Anpassung von impliziten Funktionen verfügbar.</td>
+    </tr>
+  </table>
+
+  <h2><a name="Topics_for_Further_Reading"></a><span class="mw-headline">Weiterführende Themen</span></h2>
+
+  <ul>
+    <li><a href="../../UserGuide/UserGuide/Quick_Start.html" title="UserGuide:Quick Start">Nichtlineare Kurvenanpassung: Schnellstart</a></li>
+
+    <li><a href="../../UserGuide/Category/The_NLFit_Dialog_Box.html" title="Category:The NLFit Dialog Box">Dialog NLFit (nichtlinearer Kurvenfit)</a></li>
+
+    <li><a href="../../UserGuide/Category/Interpreting_Regression_Results.html" title="Category:Interpreting Regression Results">Interpretieren von Regressionsergebnissen</a></li>
+  </ul>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Referenz</span></h2>
+
+  <ol>
+    <li>William. H. Press, etc. <i>Numerical Recipes in C++.</i> Cambridge University Press, 2002.</li>
+
+    <li>Norman R. Draper, Harry Smith. <i>Applied Regression Analysis</i>, Third Edition. John Wiley &amp; Sons, Inc. 1998.</li>
+
+    <li>George Casella, et al. <i>Applied Regression Analysis: A Research Tool</i>, Second Edition. Springer-Verlag New York, Inc. 1998.</li>
+
+    <li>G. A. F. Seber, C. J. Wild. <i>Nonlinear Regression</i>. John Wiley &amp; Sons, Inc. 2003.</li>
+
+    <li>David A. Ratkowsky. <i>Handbook of Nonlinear Regression Models.</i> Marcel Dekker, Inc. 1990.</li>
+
+    <li>Douglas M. Bates, Donald G. Watts. <i>Nonlinear Regression Analysis &amp; Its Applications.</i> John Wiley &amp; Sons, Inc. 1988.</li>
+
+    <li>Marko Ledvij. <i>Curve Fitting Made Easy.</i> The Industrial Physicist. Apr./May 2003. 9:24-27.</li>
+
+    <li>"J. W. Zwolak, P.T. Boggs, and L.T. Watson, ``Algorithm 869: ODRPACK95: A weighted orthogonal distance regression code with bound constraints<i>, ACM Transactions on Mathematical Software Vol. 33, Issue 4, August 2007."</i></li>
+
+    <li>Nelder, J.A., and R. Mead. 1965. <i>Computer Journal</i>, vol. 7, S. 308 -313</li>
+
+    <li><i>Numerical Recipes in C</i>, Ch. 10.4, Downhill Simplex Method in Multidimensions.</li>
+
+    <li><i>Numerical Recipes in C</i>, Ch. 15.5, Nonlinear Models.</li>
+  </ol>

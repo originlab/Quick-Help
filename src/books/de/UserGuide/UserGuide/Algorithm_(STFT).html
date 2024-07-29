@@ -1,0 +1,166 @@
+﻿<h1 class="firstHeading">Algorithmen (STFT)</h1>
+
+  <p class='urlname' style='display: none'>STFT-Algorithm</p>
+
+  <p>Eine STFT teilt ein Eingabesignal, {<i>ix(n)</i>}, in N Abschnitte gemäß dem Schiebefenster und führt eine FFT für jeden der Abschnitte durch. Es kann wie folgt berechnet werden:</p>
+
+  <p><img src="../images/Algorithm_(STFT)/math-b7782b6d6de5c1237e94d47beca08bcb.png" title="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" alt="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" class="tex"></p>
+
+  <p>wobei <img src="../images/Algorithm_(STFT)/math-b5e496a80c0259060dad76468e217c13.png" title="\omega (n)" alt="\omega (n)" class="tex">&#160;das Schiebefenster repräsentiert, das die lokalen Frequenzkomponenten in ihm hervorhebt.</p>
+
+  <p><br>
+  <b>STFT wird mit dem folgendem Verfahren berechnet:</b></p>
+
+  <ol>
+    <li>Das Eingabesignal wird in <i>N</i> Abschnitte unterteilt. Jedes Mal werden <i>n</i> Punkte genommen, wobei <i>n</i> gleich der festgelegten <b>Fensterlänge</b> ist.</li>
+
+    <li>Der gewählte <b>Fenstertyp</b> wird zum Multiplizieren der extrahierten Daten verwendet, Punkt für Punkt.</li>
+
+    <li>An beiden Seiten des Fenster werden Nullen aufgefüllt, wenn die <b>Fensterlänge</b> kleiner ist als die <b>Länge der FFT</b>.</li>
+
+    <li>FFT wird im FFT-Abschnitt berechnet.</li>
+
+    <li>Verschieben Sie das Fenster entsprechend der benutzerdefinierten <b>Überlappung</b>sgröße und wiederholen Sie die Schritte 1 bis 4, bis das Ende des Eingabesignals erreicht ist.</li>
+  </ol>
+
+  <dl>
+    <dd><a class="image"><img alt="STFT algorithms overlap.png" src="../images/Algorithm_(STFT)/STFT_algorithms_overlap.png" width="352"></a></dd>
+  </dl>
+
+  <p>Das Ergebnis der STFT ist eine Matrix, die N Zeilen und M Spalten hat, wobei</p>
+
+  <p><img src="../images/Algorithm_(STFT)/math-9e348c3fe7f09aadbbd7d72a053ac985.png" title="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" alt="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" class="tex"></p>
+
+  <p>und</p>
+
+  <p><img src="../images/Algorithm_(STFT)/math-59e9a587d2252885aae75c225885eb51.png" title="M= \begin{cases} FFTLength/2+1, &amp; \mbox{if input signal is real} \\ FFTLength, &amp; \mbox{if input signal is not real} \end{cases}" alt="M= \begin{cases} FFTLength/2+1, &amp; \mbox{if input signal is real} \\ FFTLength, &amp; \mbox{if input signal is not real} \end{cases}" class="tex"></p>
+
+  <p>Die <i>j</i>-te Spalte in der Matrix stellt das FFT-Ergebnis des <i>j</i>-ten Abschnitts des Eingabesignals dar und der X-Wert dieser Spalte ist die Zentrumszeit des <i>j</i>-ten Abschnitts. Die Y-Werte der Frequenz wird durch das Abtastintervall <img src="../images/Algorithm_(STFT)/math-5a72f1304af0783657605aed0e38201a.png" title="\Delta t" alt="\Delta t" class="tex"> und die Anzahl der Eingabedatenpunkte <i>N</i> erstellt. Die <i>i</i>-te Frequenz ist gegeben durch:</p>
+
+  <p><img src="../images/Algorithm_(STFT)/math-50aa7a12fb8c13db0f687048c53d8b89.png" title="f_i=\frac i{N\Delta t}" alt="f_i=\frac i{N\Delta t}" class="tex"></p>
+
+  <p>&#160;</p>
+
+  <p><b>Über die automatische Berechnung des Abtastintervalls:</b></p>
+
+  <p>Wenn <b>&lt;Auto&gt;</b> für das <b>Abtastintervall</b> ausgewählt wird, wird das in der Berechnung erforderliche Abtastintervall automatisch von Origin berechnet.</p>
+
+  <p>Das automatisch berechnete Abtastintervall ist das durchschnittliche Inkrement der Zeitsequenz, die normalerweise aus der X-Spalte kommt, die mit dem Eingabesignal verbunden ist. Gibt es keine verbundene X-Spalte, werden die Zeilennummern verwendet. Beachten Sie, dass das Abtastintervall auf 1 gesetzt wird, wenn Origin das durchschnittliche Inkrement nicht erhält.</p>
+
+  <p><b>Fenster</b></p>
+
+  <p>Legt den von der FFT verwendeten Fenstertyp fest. Die Standardoption ist <b>Hanning</b>.</p>
+
+  <ul>
+    <li>
+      <b>Rechteck</b>
+
+      <dl>
+        <dd>Rechteckiges Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-1dff02816a08f5abee4db570718fae2e.png" title="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \\ 0, &amp; \mbox{otherwise } \end{cases}" alt="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \\ 0, &amp; \mbox{otherwise } \end{cases}" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Welch</b>
+
+      <dl>
+        <dd>Welch-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-6e73eab9df4bcc92805e0be4ccc831c1.png" title="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" alt="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Dreieckig</b>
+
+      <dl>
+        <dd><b>Dreieckiges Fenster</b>:</dd>
+
+        <dd>Ungerade: <img src="../images/Algorithm_(STFT)/math-0301923ac9ba030df614e6d597b61aca.png" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex"><br></dd>
+
+        <dd>Gerade: <img src="../images/Algorithm_(STFT)/math-8e83f30fc0b782e1d8b13c070ff8819d.png" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Bartlett</b>
+
+      <dl>
+        <dd>Bartlett-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-e66a9f4dcc74b3ab6be533c1c74db331.png" title="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" alt="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Hanning</b>
+
+      <dl>
+        <dd>Hann-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-f625e1fbe6f2ba1e906c542714a5a198.png" title="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" alt="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Hamming</b>
+
+      <dl>
+        <dd>Hamming-Fenster:</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-b6803ad49e62341c7d027fda8b337cb8.png" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Blackman</b>
+
+      <dl>
+        <dd>Blackman-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-53be39cb73653898ae42aa3e07614275.png" title="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" alt="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" class="tex"></dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Gaussian</b>
+
+      <dl>
+        <dd>Gaussian-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-fab7a042f67f1dfb6dc5556e228508ec.png" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex"></dd>
+
+        <dd>wobei <i>Alpha</i> von dem Parameter <b>Alpha</b> festgelegt wird.</dd>
+      </dl>
+    </li>
+
+    <li>
+      <b>Kaiser</b>
+
+      <dl>
+        <dd>Kaiser-Fenster</dd>
+
+        <dd><img src="../images/Algorithm_(STFT)/math-04b7bbeb549a0b1d5ee22e3d50305676.png" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex"></dd>
+
+        <dd>wobei I(ix) die Bessel-Funktion bezeichnet und <i>beta</i> von dem Parameter <b>Beta</b> festgelegt wird.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <p><b>Ergebnisse</b></p>
+
+  <ol>
+    <li>Komplexes Ergebnis<br>
+    Komplexes FFT-Ergebnis für jeden FFT-Abschnitt Es ist verschoben, so dass der Anfangsteil das Ergebnis der negativen Frequenzen ist.</li>
+
+    <li>Amplitudenergebnis<br>
+    Einseitig für reales Eingabesignal und zweiseitig für komplexes Eingabesignal Die Definition ist ähnlich der <a href="../../UserGuide/UserGuide/Algorithm_(FFT1).html" title="UserGuide:Algorithm (FFT1)">Amplitude des Hilfsmittels FFT</a>. Für das zweiseitige Ergebnis wird eine Verschiebung verwendet, so dass der Anfangsteil das Ergebnis der negativen Frequenzen ist.</li>
+
+    <li>Amplitude in dB<br>
+    <img src="../images/Algorithm_(STFT)/math-12ec70533ced68ec298d82a8c5ab34e7.png" title="20\text{log}(\text{Amplitude})" alt="20\text{log}(\text{Amplitude})" class="tex"></li>
+  </ol>
+
+  <p><b>Zeit</b><br>
+  Die Zeit von jedem FFT-Abschnitt im STFT-Ergebnis entspricht der Mitte des Zeitintervalls für das Signal jedes Abschnitts. z.B. für ein Abschnittsintervall (ti, ti+(N-1)*dt) ist die Zeit seines FFT-Abschnitts im STFT-Ergebnis: ti+(N-1)*dt/2.</p>

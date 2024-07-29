@@ -1,0 +1,221 @@
+﻿<h1 class="firstHeading">Algorithmen (FFT)</h1>
+
+  <p class='urlname' style='display: none'>FFT1-Algorithm</p>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Inhalt</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#FFTW"><span class="tocnumber">1</span> <span class="toctext">FFTW</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Power_density"><span class="tocnumber">2</span> <span class="toctext">Leistungsdichte</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#More_results"><span class="tocnumber">3</span> <span class="toctext">Weitere Ergebnisse</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Normalization"><span class="tocnumber">4</span> <span class="toctext">Normalisierung</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Automatic_Computation_of_Sampling_Interval"><span class="tocnumber">5</span> <span class="toctext">Automatische Berechnung des Abtastintervalls</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Windows"><span class="tocnumber">6</span> <span class="toctext">Fenster</span></a></li>
+    </ul>
+  </div>
+
+  <p>Eine diskrete Fourier-Transformation (DFT) konvertiert ein Signal im Zeitbereich in seine Gegenstücke im Frequenzbereich. Angenommen, (<i><img src="../images/Algorithm_(FFT1)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"></i>) ist eine Sequenz der Länge N, dann ist die DFT die Sequenz (<i><img src="../images/Algorithm_(FFT1)/math-f67871cd00ac973d0e2b80db93f3bcd3.png" title="F_n" alt="F_n" class="tex"></i>) gegeben von</p>
+
+  <dl>
+    <dd><img src="../images/Algorithm_(FFT1)/math-44b84261a0760528e61954194fb105bb.png" title="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" alt="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" class="tex"></dd>
+  </dl>
+
+  <p>Origin verwendet eine FFTW-Bibliothek, um die Fourier-Transformation durchzuführen. Mit den transformierten Daten kann Origin die Amplitude, den Betrag und die Leistungsdichte berechnen.</p>
+
+  <h4><a name="FFTW"></a><span class="mw-headline">FFTW</span></h4>
+
+  <p>In FFTW wird die Berechnung der FFT von einem ausführenden Element durchgeführt, das aus C-Code-Blöcken besteht, den so genannten "Codelets". Jedes Codelet ist für einen Teil der Transformation spezialisiert. Mit diesen Codelets implementiert das ausführende Element den FFT-Algorithmus nach Cooley-Turkey, der die Größe des Eingabesignals faktoriert. Durch rekursive Faktorzerlegung wird das Signal in kürzere Teile gebrochen. Die Ergebnisse der Transformationen der kurzen Teile werden multipliziert; schließlich wird die Transformation des ursprünglichen Signals berechnet. Weitere Informationen zu FFTW finden Sie unter <a class="external free" href="http://fftw.org/" target="_blank">http://fftw.org/</a>.</p>
+
+  <h4><a name="Power_density"></a><span class="mw-headline">Leistungsdichte</span></h4>
+
+  <p>Definitionsgemäß kann die Leistungsdichte oder das Spektrum mit der folgenden Gleichung berechnet werden:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-01ea72bb6484d55067efaf077c138a95.png" title="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" alt="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" class="tex"></p>
+
+  <p>wobei <img src="../images/Algorithm_(FFT1)/math-da6b0fd4971690d9cd42cf8f66d491ea.png" title="r_{xx}(m)\,\!" alt="r_{xx}(m)\,\!" class="tex"> die Autokorrelationsfunktion des Eingabesignals ist.</p>
+
+  <p>Wir haben jedoch eine endliche Anzahl von Stichproben für das Eingabesignal. Daher ist das Berechnen des Leistungsspektrums mit der Definition nicht möglich, da nur bestimmte Methoden verwendet werden können, um das Leistungsspektrum zu schätzen. Die in Origin verwendete Methode ist das <i>Periodogramm</i>, das die Leistung aus der Amplitude der transformierten Fourier-Daten schätzt. Während allgemein anerkannt wird, dass die quadratische Amplitude proportional zur Amplitude des Leistungsspektrum ist, existieren zahlreiche Konventionen zum Beschreiben der Normierung des Leistungsspektrums in jeder Domäne. Die drei Beschreibungen, die Origin verwendet, sind die "mittlere quadratische Amplitude" (MSA), die "Summe der quadratischen Amplitude" (SSA) und das "Zeitintegral der quadratischen Amplitude" (TISA). Sie können wie folgt ausgedrückt werden:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-f78ce05254203460fee0e30a9b4cff70.png" title="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" alt="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" class="tex"></p>
+
+  <p>wobei <img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png" title="Re\,\!" alt="Re\,\!" class="tex"> und <img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png" title="Im\,\!" alt="Im\,\!" class="tex"> die realen und imaginären Teile der transformierten Daten darstellen; <img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png" title="n\,\!" alt="n\,\!" class="tex"> ist die Länge der Eingabesequenz; <img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex"> ist das Abtastintervall.</p>
+
+  <p>Das Leistungsspektrum kann entweder einseitig (einzelseitig) oder zweiseitig (doppelseitig) sein, abhängig davon, ob <b>Zweiseitig</b> (2) oder <b>Einseitig</b> (1) für <b>Spektrumstyp</b> (st) ausgewählt ist. Zum Berechnen einer einseitigen Leistungsdichte ist es erforderlich, zuerst die zweiseitige Leistungsdichte zu berechnen. Das Ergebnis wird dann mit Hilfe der folgenden Gleichungen in das einseitige Leistungsspektrum konvertiert:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-7bce1e1b9a6be59860ec46e258c91cd1.png" title="P_s(i)=P_d(i),i=0\,\!" alt="P_s(i)=P_d(i),i=0\,\!" class="tex"></p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-baeb6ffeed47a699cc1b677554430b8c.png" title="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" alt="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" class="tex"></p>
+
+  <p>wobei <img src="../images/Algorithm_(FFT1)/math-31778efa2cc67bd5c807be00488cba96.png" title="P_s(i)\,\!" alt="P_s(i)\,\!" class="tex"> das einseitige Leistungsspektrum und <img src="../images/Algorithm_(FFT1)/math-e075b2b8adb8eba728d28cab34392d45.png" title="P_d(i)\,\!" alt="P_d(i)\,\!" class="tex"> das zweiseitige Leistungsspekrum ist.</p>
+
+  <p>Wenn eine Fensterfunktion angewendet wird, wird das Leistungsergebnis zum Ausgleich mit einem Faktor multipliziert, der definiert ist mit&#160;:</p>
+
+  <dl>
+    <dd><img src="../images/Algorithm_(FFT1)/math-363eaa9c63ea87cd48ba42fdf880175e.png" title="N/{\sum_{n=0}^{N-1}w(n)^2}" alt="N/{\sum_{n=0}^{N-1}w(n)^2}" class="tex">, wobei <img src="../images/Algorithm_(FFT1)/math-4f1e95fe0a7a8e27f3b50dd3fc160462.png" title="w(n)" alt="w(n)" class="tex"> die unten definierte Fensterfunktion ist.</dd>
+  </dl>
+
+  <h4><a name="More_results"></a><span class="mw-headline">Weitere Ergebnisse</span></h4>
+
+  <p>Origin kann den Betrag, die Phase, die Amplitude und weitere Eigenschaften der transformierten Daten berechnen. Es wird angenommen, dass <img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png" title="Re\,\!" alt="Re\,\!" class="tex"> und <img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png" title="Im\,\!" alt="Im\,\!" class="tex"> die realen und imaginären Teile der transformierten Daten sind und <img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png" title="n\,\!" alt="n\,\!" class="tex"> die Größe des Eingabesignals ist. Verwenden Sie <img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex">, um das Abtastintervall darzustellen. Angenommen, die Variable <b>norma</b> ist auf 0 gesetzt (Normierung wird nicht verwendet). Weitere Ausgaben werden mit den folgenden Formeln berechnet:</p>
+
+  <table class="simple">
+    <tr>
+      <th></th>
+
+      <th>Spektrumstyp<br>
+      ist zweiseitig<br>
+      (i=1-n/2 ~ n/2)</th>
+
+      <th>Spektrumstyp<br>
+      ist einseitig<br>
+      (i=0 ~ n)</th>
+    </tr>
+
+    <tr>
+      <td>
+        <p>Phase</p>
+      </td>
+
+      <td colspan="2">
+        <p><img src="../images/Algorithm_(FFT1)/math-ad64609096818ed7ccb8b3d4ba0f7ab6.png" title="\arctan (\frac{Im}{Re})\," alt="\arctan (\frac{Im}{Re})\," class="tex"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <p>Betrag</p>
+      </td>
+
+      <td colspan="2">
+        <p><img src="../images/Algorithm_(FFT1)/math-c1ece0acf285e8b40cf88b80e8282cfa.png" title="\sqrt{Re^2+Im^2}\," alt="\sqrt{Re^2+Im^2}\," class="tex"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Amplitude</td>
+
+      <td>
+        <p><img src="../images/Algorithm_(FFT1)/math-492e800da9c3c4b1292f0a0bea063f0d.png" title="\sqrt{Re^2+Im^2}/n\," alt="\sqrt{Re^2+Im^2}/n\," class="tex"></p>
+      </td>
+
+      <td>
+        <p><img src="../images/Algorithm_(FFT1)/math-13a921e0253cc1827e37d9ff186d9278.png" title="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," alt="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," class="tex"><br>
+        <img src="../images/Algorithm_(FFT1)/math-59b53c2648a667df20f43a3773b28534.png" title="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," alt="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," class="tex"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <p>dB</p>
+      </td>
+
+      <td colspan="2">
+        <p><img src="../images/Algorithm_(FFT1)/math-ea3686f5a52c473b0e14137f2542b7aa.png" title="20log(Amplitude)\," alt="20log(Amplitude)\," class="tex"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <p>Normierte Amplitude in dB</p>
+      </td>
+
+      <td colspan="2">
+        <p><img src="../images/Algorithm_(FFT1)/math-0496b25eab060be3595e4ca0bca32c71.png" title="dB-max(dB)\," alt="dB-max(dB)\," class="tex"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <p>RMS-Amplitude</p>
+      </td>
+
+      <td colspan="2">
+        <p><img src="../images/Algorithm_(FFT1)/math-01979a16e7b68ffff4f1b0b1456829ea.png" title="\frac{\sqrt{2}}2Amplitude\," alt="\frac{\sqrt{2}}2Amplitude\," class="tex"></p>
+      </td>
+    </tr>
+  </table>
+
+  <h4><a name="Normalization"></a><span class="mw-headline">Normierung</span></h4>
+
+  <p>Die oben stehenden Berechnungen basieren tatsächlich auf der Annahme, dass die Variable <b>norma</b> auf falsch gesetzt ist. Wenn diese Variable auf wahr gesetzt ist, werden die komplexen, realen und imaginären Ergebnisse sowie die Ergebnisse von Betrag und quadratischem Betrag normiert. Beachten Sie, dass Phase, Leistung, Amplitude, normierte Amplitude, db und quadratischer Amplitude nicht von der Variable <b>norma</b> beeinflusst werden.</p>
+
+  <p>Wenn <b>Zweiseitig</b> (2) für <b>Spektrumstyp</b> (st) ausgewählt und <b>Normieren</b> (norma) auf wahr gesetzt ist, werden die komplexen, realen und imaginären Ergebnisse sowie die Ergebnisse für Betrag und quadratischem Betrag durch <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png" title="n\," alt="n\," class="tex"> geteilt, wobei <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png" title="n\," alt="n\," class="tex"> die Größe des Eingabesignals ist.</p>
+
+  <p>Wenn <b>Einseitig</b> (1) für <b>Spektrumstyp</b> (st) ausgewählt und <b>Normieren</b> (norma) auf wahr gesetzt ist, werden die komplexen, realen und imaginären Ergebnisse folgendermaßen normiert. Angenommen, <img src="../images/Algorithm_(FFT1)/math-4d30e4daa217409c00a4232ebdb923a1.png" title="res_s'\," alt="res_s'\," class="tex"> ist das normierte Ergebnis:</p>
+
+  <dl>
+    <dd><img src="../images/Algorithm_(FFT1)/math-a5652bda282e618ec59b68074eb5790f.png" title="res_s'(i) = \begin{cases} res_s(i)/n, &amp; \mbox{if } i=0 \\ 2*res_s(i)/n, &amp; \mbox{otherwise} \end{cases}" alt="res_s'(i) = \begin{cases} res_s(i)/n, &amp; \mbox{if } i=0 \\ 2*res_s(i)/n, &amp; \mbox{otherwise} \end{cases}" class="tex"></dd>
+  </dl>
+
+  <h4><a name="Automatic_Computation_of_Sampling_Interval"></a><span class="mw-headline">Automatische Berechnung des Abtastintervalls</span></h4>
+
+  <p>Das automatisch berechnete Abtastintervall ist das durchschnittliche Inkrement der Zeitsequenz, die normalerweise aus der X-Spalte kommt, die mit dem Eingabesignal verbunden ist. Gibt es keine verbundene X-Spalte, werden die Zeilennummern verwendet. Beachten Sie, dass das Abtastintervall auf 1 gesetzt wird, wenn Origin das durchschnittliche Inkrement nicht erhält.</p>
+
+  <p><b>Frequenz</b></p>
+
+  <p>Die Frequenzspalte wird durch das Abtastintervall <a class="image"><img alt="Fft1 help English files image014.gif" src="../images/Algorithm_(FFT1)/Fft1_help_English_files_image014.gif" width="20"></a> und die Anzahl der Eingabedatenpunkte <i>N</i> erstellt. Das <i>n-</i>te Frequenzdatum ist gegeben durch:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-8763f1f56d63a872fd52fda663147678.png" title="f_n=\frac n{N\Delta t}" alt="f_n=\frac n{N\Delta t}" class="tex"></p>
+
+  <p>Wenn es N Eingabedatenpunkte gibt, hat der Frequenzbereich ebenfalls N Punkte mit der maximalen Frequenz, <img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"> gleich<img src="../images/Algorithm_(FFT1)/math-f10972036c4bdf0172f82cbdec5fdf32.png" title="\frac 1{\Delta t}(1-\frac 1N)" alt="\frac 1{\Delta t}(1-\frac 1N)" class="tex">. Ist die Option <i>Ergebnis verschieben</i> nicht aktiviert, wird die Transformation von 0 bis <img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"> angezeigt. Ansonsten wird die verschobene Transformation von <img src="../images/Algorithm_(FFT1)/math-da28b5b651977378ea2afdc6646eabbc.png" title="-\frac{f_{\max }}2" alt="-\frac{f_{\max }}2" class="tex"> bis <img src="../images/Algorithm_(FFT1)/math-e8556cbd67b2e41e95b7cbc74d5fdd96.png" title="\frac{f_{\max }}2" alt="\frac{f_{\max }}2" class="tex"> angezeigt.</p>
+
+  <h4><a name="Windows"></a><span class="mw-headline">Fenster</span></h4>
+
+  <p>Fenster werden zum Unterdrücken von Verlusten verwendet. Verschiedene Fenstertypen werden in Origin wie folgt definiert.</p>
+
+  <table class="mtip">
+    <tr>
+      <td style="vertical-align:top"><img src="../images/Algorithm_(FFT1)/Mini_bulb.png" alt=""></td>
+
+      <td>
+        <p>In den untenstehenden Gleichungen ist <img src="../images/Algorithm_(FFT1)/math-7b8b965ad4bca0e41ab51de7b31363a1.png" title="n" alt="n" class="tex"> der Datenindex und <img src="../images/Algorithm_(FFT1)/math-8d9c307cb7f3c4a32822a51922d1ceaa.png" title="N" alt="N" class="tex"> die Gesamtanzahl des Datensatzes.</p>
+      </td>
+    </tr>
+  </table>
+
+  <p><b>Rechteckiges Fenster</b>:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-0ea6c517a0282283a8ebbdd2525f1713.png" title="w[n]=1\,\!" alt="w[n]=1\,\!" class="tex"></p>
+
+  <p><b>Welch-Fenster</b>:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-36c370ad4c40cff081352cd6c147f4bf.png" title="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" alt="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" class="tex"></p>
+
+  <p><b>Dreieckiges Fenster</b>:</p>
+
+  <p>Ungerade: <img src="../images/Algorithm_(FFT1)/math-0301923ac9ba030df614e6d597b61aca.png" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex"><br>
+  Gerade: <img src="../images/Algorithm_(FFT1)/math-8e83f30fc0b782e1d8b13c070ff8819d.png" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex"></p>
+
+  <p><b>Bartlett-Fenster:</b></p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-825eb9c392e4c816f626392c7bd01c1b.png" title="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" alt="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" class="tex"></p>
+
+  <p><b>Hanning-Fenster:</b></p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-8f823e6c7622542b06faa1579d56e96a.png" title="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" alt="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" class="tex"></p>
+
+  <p><b>Hamming-Fenster:</b></p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-a6fd9500215ae9924cd381d672708a6d.png" title="w[n]=0,54-0,46\cos (\frac{2\pi n}{N-1})" alt="w[n]=0,54-0,46\cos (\frac{2\pi n}{N-1})" class="tex"></p>
+
+  <p><b>Blackman-Fenster:</b></p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-d1c1de031af458564cd1fdf389d5fa25.png" title="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" alt="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" class="tex"></p>
+
+  <p><b>Gaussian-Fenster</b>:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-fab7a042f67f1dfb6dc5556e228508ec.png" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex"></p>
+
+  <p><b>Kaiser-Fenster</b>:</p>
+
+  <p><img src="../images/Algorithm_(FFT1)/math-04b7bbeb549a0b1d5ee22e3d50305676.png" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex"></p>

@@ -1,0 +1,508 @@
+﻿<h1 class="firstHeading">Algorithmus (Diskriminanzanalyse)</h1>
+
+  <table id="toc" class="toc" summary="Contents">
+    <tr>
+      <td>
+        <div id="toctitle">
+          <h2>Inhalt</h2>
+        </div>
+
+        <ul>
+          <li class="toclevel-1"><a href="#Test_for_Equality_of_Within-group_Covariance_Matrices"><span class="tocnumber">1</span> <span class="toctext">Gleichheitstest von Kovarianzmatrizen innerhalb von Gruppen</span></a></li>
+
+          <li class="toclevel-1"><a href="#Canonical_Discriminant_Analysis"><span class="tocnumber">2</span> <span class="toctext">Kanonische Diskriminanzanalyse</span></a></li>
+
+          <li class="toclevel-1"><a href="#Mahalanobis_Distance"><span class="tocnumber">3</span> <span class="toctext">Quadratische Mahalanobis-Distanz</span></a></li>
+
+          <li class="toclevel-1">
+            <a href="#Classify"><span class="tocnumber">4</span> <span class="toctext">Klassifizieren</span></a>
+
+            <ul>
+              <li class="toclevel-2"><a href="#Prior_Probabilities"><span class="tocnumber">4.1</span> <span class="toctext">A-priori-Zugehörigkeitswahrscheinlichkeit</span></a></li>
+
+              <li class="toclevel-2"><a href="#Posterior_Probability"><span class="tocnumber">4.2</span> <span class="toctext">A-posteriori-Zugehörigkeitswahrscheinlichkeit</span></a></li>
+
+              <li class="toclevel-2"><a href="#Atypicality_Index"><span class="tocnumber">4.3</span> <span class="toctext">Typikalitätsindex</span></a></li>
+
+              <li class="toclevel-2"><a href="#Linear_Discriminant_Function_Coefficients"><span class="tocnumber">4.4</span> <span class="toctext">Lineare Diskriminanzfunktionskoeffizienten</span></a></li>
+
+              <li class="toclevel-2"><a href="#Classify_Training_Data"><span class="tocnumber">4.5</span> <span class="toctext">Schulungsdaten klassifizieren</span></a></li>
+
+              <li class="toclevel-2"><a href="#Cross_Validation_for_Training_Data"><span class="tocnumber">4.6</span> <span class="toctext">Kreuzvalidierung für Schulungsdaten</span></a></li>
+
+              <li class="toclevel-2"><a href="#Classify_Test_Data"><span class="tocnumber">4.7</span> <span class="toctext">Testdaten klassifizieren</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <p><br>
+  Die <b>Diskriminanzanalyse</b> wird verwendet, um Beobachtungen Gruppen zuzuweisen. Hierfür werden Informationen über Beobachtungen, deren Gruppenzugehörigkeit bekannt ist, verwendet, d.h. Schulungsdaten.</p>
+
+  <p><img class="tex" alt="X_t\ " src="../images/math/8/0/6/806a6784f090250a8613f986b22eaad7.png"> seien die Schulungsdaten mit n Beobachtungen und p Variablen bei <span class="texhtml"><i>n</i><sub><i>g</i></sub></span> Gruppen. <img class="tex" alt="\bar{x}_j" src="../images/math/5/e/7/5e72f5938f508c4176cb9ec44dfccd2e.png"> ist ein Zeilenvektor des Stichprobenmittelwerts für die <i>j</i>-te Gruppe, <img class="tex" alt="n_j\ " src="../images/math/9/6/7/9673ac3e05e910a01a1a8fad3f3d9416.png"> ist die Anzahl der Beobachtungen für die <i>j</i>-te Gruppe. Die Kovarianzmatrix innerhalb der Gruppe für Gruppe j kann ausgedrückt werden durch:</p>
+
+  <p><img class="tex" alt="S_j=\frac{1}{n_j-1}\cdot (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" src="../images/math/4/9/8/498023ab71c21c6957ff783cb0d00ef4.png"></p>
+
+  <p>Die gepoolte Kovarianzmatrix innerhalb der Gruppe ist:</p>
+
+  <p><img class="tex" alt="S=\frac{1}{n-n_g}\cdot\sum_{j=1}^{n_g} (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" src="../images/math/4/f/5/4f57b574da2bf0c980080c681369b968.png"></p>
+
+  <p><b>Beachten Sie,</b> dass fehlende Werte listenweise aus der Analyse ausgeschlossen werden, d.h., eine Beobachtung, die einen oder mehrere fehlende Werte enthält, wird aus der Analyse ausgeschlossen.</p><a name="Test_for_Equality_of_Within-group_Covariance_Matrices"></a>
+
+  <h2><span class="mw-headline">Gleichheitstest von Kovarianzmatrizen innerhalb von Gruppen</span></h2>
+
+  <p>Wenn angenommen wird, dass die Schulungsdaten einer multivariaten Normalverteilung folgen, kann die folgende Statistik des Likelihood-Verhältnis-Tests <i>G</i> verwendet werden, um auf Gleichheit der Kovarianzmatrizen innerhalb der Gruppe zu testen.</p>
+
+  <p><img class="tex" alt="G=C{(n-n_g) \mathrm{log} |S|-\sum_{j=1}^{n_g} (n_j-1) \mathrm{log} |S_j|}" src="../images/math/f/c/9/fc91905a90814a5da4b5881a6da5de7a.png"></p>
+
+  <p>wobei</p>
+
+  <p><img class="tex" alt="C=1-\frac{2p^2+3p-1}{6(p+1)(n_g-1)}\cdot(\sum_{j=1}^{n_g} \frac{1}{n_j-1} -\frac{1}{n-n_g})" src="../images/math/e/2/7/e27b64054260df28a6b4448be268577a.png"></p>
+
+  <p>Für große <i>n</i> ist <i>G</i> ungefähr als eine <img class="tex" alt="\chi^2\ " src="../images/math/3/7/e/37e77ef6fb4bb1c3cc3c5df5f51d5206.png"> Variable mit <img class="tex" alt="\frac{1}{2}\cdot p(p+1)(n_g-1)" src="../images/math/5/b/1/5b154416953ceb8c1045ce27cc18428f.png"> Freiheitsgeraden verteilt.</p><a name="Canonical_Discriminant_Analysis"></a>
+
+  <h2><span class="mw-headline">Kanonische Diskriminanzanalyse</span></h2>
+
+  <p>Die kanonische Diskriminanzanalyse wird verwendet, um die lineare Kombination der <i>p</i> Variablen zu suchen, die das Verhältnis der Streuung von "zwischen Gruppen" und "innerhalb der Gruppe" maximiert. Die gebildeten kanonischen Variate können dann verwendet werden, um zwischen Gruppen zu unterscheiden.</p>
+
+  <p>Die Schulungsdaten mit subtrahierten Gesamtmittelwerten sei <i>X</i> und der Rang sei <i>k</i>, dann kann die orthogonale Matrix <i>Q</i> aus der <b>QR</b> Zerlegung (voller Spaltenrang) oder <b>SVD</b> aus <i>X</i> berechnet werden. <img class="tex" alt="Q_X\ " src="../images/math/1/8/3/183b9e34bba8093b1b06d6eb4ed75d64.png"> ist die erste <i>k</i> Spalte von <i>Q</i>. <img class="tex" alt="Q_g\ " src="../images/math/b/7/9/b79693df3c686b62a73655219701cd15.png"> sei eine orthogonale <i>n</i> x <span class="texhtml"><i>n</i><sub><i>g</i></sub> - 1</span>-Matrix zum Definieren von Gruppen. Dann sei <i>k</i> mal <img class="tex" alt="n_g-1\ " src="../images/math/a/d/d/add0445fad55acf9ed116fb3f5245f91.png"> Matrix <i>V</i></p>
+
+  <p><img class="tex" alt="V=Q_X^TQ_g" src="../images/math/4/4/8/4486b6a8f28817754dec4e3f4d251345.png"></p>
+
+  <p>Die <b>SVD</b> von <i>V</i> ist:</p>
+
+  <p><img class="tex" alt="V=U_X \triangle U_g^T" src="../images/math/3/0/4/3042e5abf1f88ce56b29be1559b4bc45.png"></p>
+
+  <p>Diagonale Elemente (nicht Null) der Matrix <img class="tex" alt="\triangle" src="../images/math/f/5/d/f5d889f32d6794e1bc2ed394e9688c76.png"> sind die <i>l</i> kanonischen Korrelationen verbunden mit den <i>l</i> kanonischen Variaten <img class="tex" alt="\delta_i\ " src="../images/math/8/0/c/80c472be58a884b25503f5c52a7f8092.png"> i=1,2,...,<i>l</i> und <img class="tex" alt="l=\mathrm{min}(k, n_g)\ " src="../images/math/c/e/5/ce5dc5ff5448a3d7a89ec2de580c7d9c.png">.</p>
+
+  <p>Eigenwerte der Matrix zu den Summen der Quadrate innerhalb der Gruppen sind:</p>
+
+  <p><img class="tex" alt="\lambda_i=\frac{\delta_i^2}{1-\delta_i^2}" src="../images/math/8/5/f/85fea859f86b82cc4634ebaa2c1659be.png"></p>
+
+  <p>&#160;</p>
+
+  <ul>
+    <li>Wilks' Lambda</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>Testen auf eine signifikante Dimensionalität größer als <i>i</i>:</dd>
+
+        <dd><img class="tex" alt="\Lambda_i=\prod_{j=i+1}^{l} 1/(1+\lambda_j)" src="../images/math/0/6/1/061f4cc68901096c3146c42781921c4c.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>Eine <img class="tex" alt="\chi^2\ " src="../images/math/3/7/e/37e77ef6fb4bb1c3cc3c5df5f51d5206.png"> Statistik mit <img class="tex" alt="(k-i)(n_g-1-i)\ " src="../images/math/f/6/0/f604cc77cf8aa8f12b69ca764bae570b.png"> Freiheitsgraden wird verwendet:</dd>
+
+        <dd><img class="tex" alt="(n-1-n_g-\frac{1}{2}(k-n_g))\sum_{j=i+1}^{l} \mathrm{log}(1+\lambda_j)\ i=0,1,...,l-1" src="../images/math/5/f/b/5fb611edb8f47f26c4c9d114f3d1c740.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Nicht standardisierte kanonische Koeffizienten</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          Das Laden von Matrix <i>B</i> für kanonische Variate kann berechnet werden aus <img class="tex" alt="U_X\ " src="../images/math/7/1/7/717463ecb6ea19959c2a43174c1fc293.png">. Dies ist skaliert, so dass die kanonischen Variate eine einheitliche gepoolte Varianz innerhalb der Gruppen haben, d.h.
+
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="B^TSB=I\ " src="../images/math/9/2/1/9214dc2a07824fa1e6e9f2c84e511804.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd><b>Beachten Sie,</b> dass das Vorzeichen des Eigenwerts in dem Ergebnis der <b>SVD</b> nicht einzigartig ist, das heißt, jede Spalte <i>B</i> kann mit -1 multipliziert werden. Origin normiert seine Vorzeichen, indem die Summe jeder Spalte in <img class="tex" alt="RB\ " src="../images/math/d/d/2/dd2ed2b7aef1cc29f38fcf893e186990.png"> positiv gemacht wird, wobei <i>R</i> die <b>Cholesky-</b>Faktorisierung von <i>S</i> ist.</dd>
+
+        <dd>
+          Konstante Elemente können wie folgt berechnet werden:
+
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="C_0=-X_mB\ " src="../images/math/6/2/f/62f41ec2fa46aaf53833f7de36f14f62.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="X_m\ " src="../images/math/a/3/2/a32036999d3cf1bb10313f35f15e9515.png"> ein Zeilenvektor der Mittelwerte für Variablen ist.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Standardisierte kanonische Koeffizienten</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="D=S_aB\ " src="../images/math/9/3/6/936a0dc07855ba51c20d93a3c4a17ba8.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="S_a\ " src="../images/math/d/8/1/d819f129b9d8924f969ab6939fff1e13.png"> eine diagonale Matrix ist, deren diagonale Elemente die Quadratwurzeln der diagonalen Elemente der gepoolten Gruppenvarianzmatrix <i>S</i> innerhalb der Gruppen sind</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Kanonische Strukturmatrix</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="C=S_a^{-1}SB\ " src="../images/math/0/b/2/0b2d1cdbed622d4fff103a6eff34a6e6.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Kanonische Gruppenmittelwerte</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="M_j=C_0+\bar{x}_jB\ " src="../images/math/6/3/e/63e2250f05a8d021a1c36f26cde3d89a.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="M_j\ " src="../images/math/8/4/f/84f7b1f2c10b8d87128031259036ff16.png"> und <img class="tex" alt="\bar{x}_j\ " src="../images/math/f/8/6/f8656a6bb3651370fb49feeec0450ee3.png"> Zeilenvektoren des kanonischen Gruppenmittelwerts bzw. des Gruppenmittelwerts für die <i>j-</i>te Gruppe sind.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Kanonische Scores</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="A_i=C_0+X_iB\ " src="../images/math/e/e/6/ee6d1036b8a58fc0798c252a0b056c90.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="A_i\ " src="../images/math/b/a/d/bad6086b4cd371c171d1fdaa132aad36.png"> der kanonische Score für die <i>i-</i>te Beobachtung <img class="tex" alt="X_i\ " src="../images/math/8/c/a/8ca1d624ee0fbe3e36b06288e1965cfa.png"> sind.</dd>
+
+        <dd><b>Beachten Sie</b>, dass hier die <i>i-</i>te Beobachtung Schulungsdaten oder Testdaten sein können.</dd>
+      </dl>
+    </dd>
+  </dl><a name="Mahalanobis_Distance"></a>
+
+  <h2><span class="mw-headline">Mahalanobis-Distanz</span></h2>
+
+  <p>Die <b>Mahalanobis</b>-Distanz ist ein Maß der Distanz einer Beobachtung von einer Gruppe. Sie hat zwei Formen. Für eine Beobachtung <img class="tex" alt="x_i\ " src="../images/math/0/4/2/0424ddf948e53cc231b908a0c1031a04.png"> aus der <i>j</i>-ten Gruppe ist die Distanz:</p>
+
+  <ul>
+    <li>Mit Hilfe der Kovarianzmatrix innerhalb der Gruppe</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="D_{ij}^2=(x_i-\bar{x}_j)S_j^{-1}(x_i-\bar{x}_j)^T" src="../images/math/2/b/e/2be54f7707efd51f30c7a0f51a683a90.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Mit Hilfe der gepoolten Kovarianzmatrix innerhalb der Gruppen</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="D_{ij}^2=(x_i-\bar{x}_j)S^{-1}(x_i-\bar{x}_j)^T" src="../images/math/0/6/d/06df4b7b8e20a506aeaa34f3d138c07f.png"></dd>
+      </dl>
+    </dd>
+  </dl><a name="Classify"></a>
+
+  <h2><span class="mw-headline">Klassifizieren</span></h2><a name="Prior_Probabilities"></a>
+
+  <h3><span class="mw-headline">A-priori-Zugehörigkeitswahrscheinlichkeit</span></h3>
+
+  <p>Die A-priori-Zugehörigkeitswahrscheinlichkeit gibt die Ansicht des Anwenders wieder hinsichtlich der Wahrscheinlichkeit, dass die Beobachtungen aus unterschiedlichen Gruppen stammen. Origin unterstützt zwei Arten von A-priori-Zugehörigkeitswahrscheinlichkeiten:</p>
+
+  <ul>
+    <li>Gleich</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="\pi_j=1/n_g\ " src="../images/math/9/f/6/9f65c3eeb15a360e218ce7d10bad9334.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Proportional zur Gruppengröße</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="\pi_j=n_j/n\ " src="../images/math/0/f/f/0ff3baf0592e79a9421797f0a04ca674.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="n_j\ " src="../images/math/9/6/7/9673ac3e05e910a01a1a8fad3f3d9416.png"> die Anzahl der Beobachtungen in der <i>j</i>-ten Gruppe der Schulungsdaten darstellt.</dd>
+      </dl>
+    </dd>
+  </dl><a name="Posterior_Probability"></a>
+
+  <h3><span class="mw-headline">A-posteriori-Zugehörigkeitswahrscheinlichkeit</span></h3>
+
+  <p>Von den <i>p</i> Variablen der Beobachtungen wird angenommen, dass sie einer multivariaten Normalverteilung mit Mittelwert <img class="tex" alt="\mu_j\ " src="../images/math/e/c/3/ec30e14d875f66377caef86940c14347.png"> und Kovarianzmatrix <img class="tex" alt="\Sigma_j\ " src="../images/math/f/e/e/fee46d841f43f3c3a27a2030ef62a344.png"> folgen, wenn die Beobachtung aus der <i>j</i>-ten Gruppe stammt. Wenn <img class="tex" alt="p(x_i|\mu_j,\Sigma_j)\ " src="../images/math/9/5/f/95fbd5bf3ec81cebe9d314de1485b949.png"> die Wahrscheinlichkeit ist, die Beobachtung <img class="tex" alt="x_i\ " src="../images/math/0/4/2/0424ddf948e53cc231b908a0c1031a04.png"> in Gruppe <i>j</i> zu beobachten, dann ist die A-posteriori-Zugehörigkeitswahrscheinlichkeit zur Gruppe <i>j</i>:</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="q_j=p(j|x_i,\mu_j,\Sigma_j)\propto p(x_i|\mu_j,\Sigma_j)\pi_j" src="../images/math/b/6/4/b640229e8f221456ae3bd190dd214fa2.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <p>Die Parameter <img class="tex" alt="\mu_j\ " src="../images/math/e/c/3/ec30e14d875f66377caef86940c14347.png"> und <img class="tex" alt="\Sigma_j\ " src="../images/math/f/e/e/fee46d841f43f3c3a27a2030ef62a344.png"> werden in den Schulungsdaten <img class="tex" alt="X_t\ " src="../images/math/8/0/6/806a6784f090250a8613f986b22eaad7.png"> geschätzt. Die Beobachtung wird der Gruppe mit der höhsten A-posteriori-Zugehörigkeitswahrscheinlichkeit zugewiesen. Origin bietet zwei Methoden zum Berechnen der A-posteriori-Zugehörigkeitswahrscheinlichkeit.</p>
+
+  <ul>
+    <li>Lineare Diskriminanzfunktion</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>Kovarianzmatrizen innerhalb der Gruppe werden als gleich angenommen.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)+c_0" src="../images/math/9/9/9/99980b44832a316f0556865c0df66d85.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>wobei <img class="tex" alt="D_{ij}^2" src="../images/math/a/8/a/a8aabe9d61b3268b4c814fd2ab6cd440.png"> die <b>Mahalanobis</b>-Distanz der <i>i-</i>ten Beobachtung aus der <i>j-</i>ten Gruppe unter Verwendung der gepoolten Kovarianzmatrix innerhalb der Gruppe und <img class="tex" alt="c_0\ " src="../images/math/f/9/4/f94fd23f085550aeb888e32138b1fe14.png"> eine Konstante ist.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Quadratische Diskriminanzfunktion</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>Kovarianzmatrizen innerhalb der Gruppe werden nicht als gleich angenommen.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)-\frac{1}{2}\mathrm{log}|S_j|+c_0" src="../images/math/f/9/a/f9a89a5e7e93e7e798b4b051b884f618.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>wobei <img class="tex" alt="D_{ij}^2" src="../images/math/a/8/a/a8aabe9d61b3268b4c814fd2ab6cd440.png"> die <b>Mahalanobis</b>-Distanz der <i>i-</i>ten Beobachtung aus der <i>j-</i>ten Gruppe unter Verwendung der Kovarianzmatrizen innerhalb der Gruppe und <img class="tex" alt="c_0\ " src="../images/math/f/9/4/f94fd23f085550aeb888e32138b1fe14.png"> eine Konstante ist.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <p><img class="tex" alt="q_j\ " src="../images/math/f/4/d/f4d095aee788424488306aa42f5bd753.png"> sind folgendermaßen standardisiert und <img class="tex" alt="c_0\ " src="../images/math/f/9/4/f94fd23f085550aeb888e32138b1fe14.png"> wird durch die Standardisierung bestimmt.</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="\sum_{j=1}^{n_g} q_j=1" src="../images/math/b/2/6/b261b1249eb739a4bfb462f653457f13.png"></dd>
+      </dl>
+    </dd>
+  </dl><a name="Atypicality_Index"></a>
+
+  <h3><span class="mw-headline">Typikalitätsindex</span></h3>
+
+  <p>Der <b>Typikalitätsindex</b> <img class="tex" alt="I_j(x_i)\ " src="../images/math/3/a/e/3ae5728f51bae22d009e5c6a6c457d4b.png"> gibt die Wahrscheinlichkeit an, mit der Sie eine Beobachtung erhalten, die typischer für Gruppe <i>j</i> ist als die <i>i-</i>te Beobachtung. Wenn sie für alle Gruppen nah bei 1 liegen, ist das ein Hinweis darauf, dass die Beobachtung von einer Gruppierung stammen könnte, die nicht in den Schulungsdaten dargestellt ist. Der <b>Typikalitätsindex</b> wird berechnet mit:</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="I_j(x_i)=P(B\le z:\frac{1}{2}p,\frac{1}{2}(n_j-d)) " src="../images/math/d/9/b/d9bc84aee5b8638ddede4a4e1b14fafb.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <p>wobei <img class="tex" alt="P(B\le \beta:\ a, b)" src="../images/math/2/0/9/2094a56685f9a0f50deab179d98e62d4.png"> die untere Wahrscheinlichkeit aus einer Beta-Verteilung für gleiche Kovarianzmatrizen innerhalb von Gruppen is,</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="z=D_{ij}^2/(D_{ij}^2+(n-n_g)(n_j-1)/n_j)" src="../images/math/c/0/a/c0a077155d834185491bd09b481041cd.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <p>für nicht gleiche Kovarianzmatrizen innerhalb der Gruppe,</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="z=D_{ij}^2/(D_{ij}^2+(n_j^2-1)/n_j)" src="../images/math/7/c/0/7c0c49583c2184a739b2c29f71e67312.png"></dd>
+      </dl>
+    </dd>
+  </dl><a name="Linear_Discriminant_Function_Coefficients"></a>
+
+  <h3><span class="mw-headline">Lineare Koeffizienten der Diskriminanzfunktion</span></h3>
+
+  <p>Die lineare Diskriminanzfunktion (auch bekannt als Fishers lineare Diskriminanzfunktionen) kann berechnet werden mit:</p>
+
+  <ul>
+    <li>Linearer Koeffizient für die <i>j-</i>te Gruppe:</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="b_j=S^{-1}\bar{x}_j^T" src="../images/math/5/9/2/59292e73279ea0b37c2f966ac4e1adf7.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+
+        <dd>wobei <img class="tex" alt="b_j\ " src="../images/math/0/5/6/056bd52f60ece9ad08857671729b0873.png"> ein Spaltenvektor mit der Größe von <i>p</i> ist.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Konstanter Koeffizient für die <i>j-</i>te Gruppe:</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <dl>
+            <dd>
+              <dl>
+                <dd><img class="tex" alt="a_j=\bar{x}_jb_j" src="../images/math/5/7/a/57a9a8e23e89e5c1d4a3588c4467f209.png"></dd>
+              </dl>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </dd>
+  </dl><a name="Classify_Training_Data"></a>
+
+  <h3><span class="mw-headline">Schulungsdaten klassifizieren</span></h3>
+
+  <p>Jede Beobachtung in den Schulungsdaten kann durch A-posteriori-Zugehörigkeitswahrscheinlichkeiten klassifiziert werden, d.h., sie wird der Gruppe mit der höchsten A-posteriori-Zugehörigkeitswahrscheinlichkeit zugeordnet. Die quadrierte <b>Mahalanobis</b>-Distanz von jeder Gruppe und der <b>Typikalitätsindex</b> von jeder Gruppe können ebenfalls berechnet werden.</p>
+
+  <p>Das Klassifizierungsergebnis für Schulungsdaten wird zusammengefasst, indem gegebene Gruppenzugehörigkeit und vorhergesagte Gruppenzugehörigkeit verglichen werden. Eine fehlklassifizierte Fehlerrate wird durch den Prozentsatz der fehlklassifizierten Beobachtungen berechnet, gewichtet durch die A-priori-Zugehörigkeitswahrscheinlichkeiten der Gruppen. d.h.</p>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><img class="tex" alt="E=\sum_{j=1}^{n_g} e_j\pi_j" src="../images/math/1/0/9/1095a4a74fd8e0263bb6b48a614f5465.png"></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <p>wobei <img class="tex" alt="e_j\ " src="../images/math/3/a/3/3a3a35612ca6381a5232dfe94f5eb7f8.png"> der Prozentsatz der fehlklassifizierten Beobachtungen für die <i>j-</i>te Gruppe ist.</p><a name="Cross_Validation_for_Training_Data"></a>
+
+  <h3><span class="mw-headline">Kreuzvalidierung für Schulungsdaten</span></h3>
+
+  <p>Es erfolgt der gleiche Vorgang wie beim <a href="#Classify_Training_Data" title="">Klassifizieren der Schulungsdaten</a>, nur dass, um eine Beobachtungszugehörigkeit in den Schulungsdaten vorhersagen zu können, die Beobachtung während der Berechnung der Kovarianzmatrizen innerhalb der Gruppe oder der gepoolten Kovarianzmatrix innerhalb der Gruppe ausgeschlossen ist.</p><a name="Classify_Test_Data"></a>
+
+  <h3><span class="mw-headline">Testdaten klassifizieren</span></h3>
+
+  <p>Kovarianzmatrizen innerhalb der Gruppe und die gepoolte Kovarianzmatrix innerhalb der Gruppe werden aus den Schulungsdaten berechnet. Jede Beobachtung in den Testdaten kann durch A-posteriori-Zugehörigkeitswahrscheinlichkeiten klassifiziert werden, d.h., sie wird der Gruppe mit der höchsten A-posteriori-Zugehörigkeitswahrscheinlichkeit zugeordnet.</p>

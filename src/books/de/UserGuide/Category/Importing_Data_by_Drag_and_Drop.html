@@ -1,0 +1,163 @@
+﻿<h1 class="firstHeading">Daten per Drag&amp;Drop importieren</h1>
+
+  <p class='urlname' style='display: none'>Imp-DragDrop</p>
+
+  <p>Origin unterstützt den Drag&amp;Drop-Import für viele gängige Dateitypen. Aus historischen Gründen werden mehrere Technologien verwendet. Wenn Sie eine Datei in ein Origin-Arbeitsblatt oder -Matrixblatt ziehen, wird eine Sequenz ausgeführt, die den Code überprüft und bestimmt, welche Methode verwendet wird. Siehe unten <b>Leseabfolge des Importcodes</b>.</p>
+
+  <table class="note">
+    <tr>
+      <td><b>Hinweis:</b> Sie werden Dateien nicht per Drag&amp;Drop verschieben können, wenn Sie <a class="external text" href="../../QuickHelp/QuickHelp/Why_does_not_drag_and_drop_work.html">Origin als Administrator</a> ausführen.</td>
+    </tr>
+  </table>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Inhalt</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Import_Code_Reading_Sequence"><span class="tocnumber">1</span> <span class="toctext">Leseabfolge des Importcodes</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Data_Connectors_and_Drag-and-Drop"><span class="tocnumber">2</span> <span class="toctext">Datenkonnektoren und Drag&amp;Drop</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Save_Drag-and-Drop_Settings_into_the_Sheet"><span class="tocnumber">3</span> <span class="toctext">Einstellungen für Drag&amp;Drop im Blatt speichern</span></a></li>
+
+      <li class="toclevel-1 tocsection-4">
+        <a href="#Using_the_Import_Wizard_to_Set_Up_D.26D_Import"><span class="tocnumber">4</span> <span class="toctext">Mit dem Importassistenten Drag&amp;Drop-Import einrichten</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-5"><a href="#Origin_Import_Filters"><span class="tocnumber">4.1</span> <span class="toctext">Origin-Importfilter</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Target_Windows_and_Target_Window_Templates"><span class="tocnumber">4.2</span> <span class="toctext">Zielfenster und Zielfenstervorlagen</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Import_Code_Reading_Sequence"></a><span class="mw-headline">Leseabfolge des Importcodes</span></h2>
+
+  <p>Wenn Dateien in Origin gezogen werden, wird diese Sequenz angewendet:</p>
+
+  <ol>
+    <li>Die älteste Methode -- auf die als erste geprüft wird -- ruft einen LabTalk-Abschnitt in einer Datei auf, der als <b>DOFILE.OGS</b> bezeichnet wird. Sollte er gefunden werden, wird die Importroutine ausgeführt. Während der Legacy Code in DOFILE noch zufriedenstellend läuft, sollten Anwender nicht versuchen, neue Importroutinen mit Hilfe dieser Methode zu schreiben.</li>
+
+    <li>Als Nächstes wird das aktive Arbeitsblatt oder Matrixblatt nach Importfilterinformationen gescannt, die im Blatt gespeichert sind (siehe unten <a href="#Save_Drag-and-Drop_Settings_into_the_Sheet">Einstellungen für Drag&amp;Drop im Blatt speichern</a>).</li>
+
+    <li>Falls keine Filterinformationen im Blatt gespeichert wurden, wird im Datenordner nach einem passenden <a href="#Origin_Import_Filters">Origin-Importfilter (*.oif)</a> gesucht.</li>
+
+    <li>Falls es keinen Filter im Datenordner gibt, wird der Ordner <a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">Anwenderdateien\Filters</a> auf einen geeigneten Importfilter geprüft. Falls ein USER-Filter existiert und das entsprechende Kontrollkästchen <b>Drag&amp;Drop unterstützen</b> im Dialog <a class="external text" href="../../UserGuide/UserGuide/Introduction_to_Import_Filters_Manager.html">Importfilter verwalten</a> aktiviert ist, regelt dieser Filter den Import.</li>
+
+    <li>Wenn kein passender Filter im Ordner Anwenderdateien\Filters gefunden wurde, prüft der Code, ob es einen installierten <a class="external text" href="../../UserGuide/Category/Data_Connector.html">Datenkonnektor</a> gibt, der dem Dateityp entspricht. Wenn ein passender Datenkonnektor gefunden wird, regelt der Datenkonnektor den Import.</li>
+
+    <li>Wenn kein Datenkonnektor gefunden wird und das Kontrollkästchen <b>Drag&amp;Drop unterstützen</b> im Dialog Importfilter verwalten deaktiviert ist oder nicht angezeigt wird, öffnet Origin ein Warnfeld, das Sie fragt, ob der <a class="external text" href="../../UserGuide/Category/The_Import_Wizard.html">Importassistent</a> zum Importieren der Datei geöffnet werden soll.</li>
+  </ol>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Importing_Data_by_Drag_and_Drop/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>Das Drag&amp;Drop-Verhalten für .dat, .xls/xlsx, .txt und .csv kann mit der Systemvariable <b>@IFS</b> modifiziert werden. Siehe <b>Hinweise</b> im nächsten Abschnitt.</p>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="Data_Connectors_and_Drag-and-Drop"></a><span class="mw-headline">Datenkonnektoren und Drag&amp;Drop</span></h2>
+
+  <p><a href="../../UserGuide/Category/Data_Connector.html#Adding_a_Connector_to_the_Sheet" title="Category:Data Connector"><b>Datenkonnektoren</b></a> stellen Origins neueste Methode des Datenimports dar. Datenkonnektoren bieten einen einfachen Import für gängige Datendateien wie <b>Text/CSV</b> und <b>Excel</b>. Dateien werden oft automatisch verarbeitet, ohne dass Dialoge konfiguriert oder Einstellungen im Blatt oder einer externen Filterdatei gespeichert werden müssen. Beide, <b>Text/CSV</b>- und <b>Excel</b>-Konnektoren, können gut mit Datums-/Zeitdaten umgehen: Daten sollten beim Import automatisch erkannt und im Blatt formatiert werden.</p>
+
+  <p>Wenn Sie eine Routine verwendet haben, die auf einem Origin-Importfilter (*.oif) basiert, sollte sie trotzdem voll unterstützt werden (siehe <b>Hinweis</b> unten). Wir bestärken Sie jedoch, Ihre Daten mit einem der verfügbaren Konnektoren zu importieren (<b>Daten: Verbinden mit</b> ...). Beachten Sie auch, das Sie Ihren Importfilter mit einem Datenkonnektor verwenden <i>können</i> (<b>Daten: Verbinden mit Datei: Importfilter</b>).</p>
+
+  <ul>
+    <li>Importfilter, die im <i>Blatt</i> oder im <i>Datenordner</i> als eine Origin-Importfilterdatei (*.oif) gespeichert werden, haben Priorität vor der Verwendung eines Datenkonnektors.</li>
+
+    <li>Filter, die im Verzeichnis Anwenderdateien\Filters gespeichert sind, haben Vorrang vor Datenkonnektoren, <i>falls</i> das Kontrollkästchen <b>Drag&amp;Drop unterstützen</b> des Anwenderdateifilters im Dialog Importfilter verwalten (<b>Einstellungen: Importfilter verwalten</b>) aktiviert ist.</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><a class="image"><img alt="OH filter manager supportDandD.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_filter_manager_supportDandD.png" width="588"></a></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Falls -- wenn Sie Ihre Datei(en) fallen lassen -- mehrere anwendbare Filter gefunden werden, wird der Dialog <b>Filter auswählen</b> geöffnet. Verwenden Sie den Dialog, um den Filter, den Sie verwenden möchten, zu wählen. Oder wählen Sie <b>Konnektor verwenden</b>.</li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd><a class="image"><img alt="OH select filter dialog.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_select_filter_dialog.png" width="271"></a></dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Das Drag&amp;Drop-Verhalten für .dat, .xls/xlsx, .txt und .csv kann mit der Systemvariablen <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#H.2CI.2CJ.2CK"><b>@IFS</b></a> (Standard = 0) modifiziert werden. Wenn Sie zum Beispiel (a) <b>@IFS</b> = <i>1</i> setzen, (b) mindestens eine anwendbare .dat-Filterdatei unter Anwenderdateien\Filters haben und (c) <b>Drag&amp;Drop unterstützen</b> für diesen Filter aktiviert ist, dann öffnet das Fallenlassen einer .dat-Datei in Origin den Dialog <b>Filter auswählen</b>. Hier können Sie einen Filter wählen, einschließlich einen Systemfilter (diese sind im Allgemeinen nicht hilfreich), oder Sie können wählen, einen <b>Konnektor (zu) verwenden</b>.</li>
+
+    <li>Auch beachtenswert: Wenn Sie eine Datei, die über einen passenden Filter im <i>Datenordner</i> verfügt, per Drag&amp;Drop importieren, ist das Ergebnis im Grunde das gleiche wie bei der Wahl von <b>Daten: Mit Datei verbinden: Importfilter</b>. Der Vorteil ist hier, dass Sie Ihren Importfilter verwenden können, um die Datei zu analysieren <i>und außerdem</i> einen <a href="../../UserGuide/Category/Data_Connector.html#Adding_a_Connector_to_the_Sheet" title="Category:Data Connector"><b>Datenkonnektor</b></a> zum Blatt hinzuzufügen.</li>
+  </ul>
+
+  <h2><a name="Save_Drag-and-Drop_Settings_into_the_Sheet"></a><span class="mw-headline">Einstellungen für Drag&amp;Drop im Blatt speichern</span></h2>
+
+  <p>Beim Verwenden eines der auf X-Funktionen basierenden Dialoge für den Dateiimport -- die Dialoge, die man unter <b>Daten: Aus Datei importieren</b> -- haben Sie die Option, die aktuelle Konfiguration des Dialogs in einem <a href="../../UserGuide/UserGuide/Dialog_Themes.html" title="UserGuide:Dialog Themes"><b>Dialogdesign</b></a> zu speichern oder <b>Einstellungen für Drag&amp;Drop speichern</b> zu verwenden.</p>
+
+  <p>Wenn Sie <b>Einstellungen für Drag&amp;Drop speichern</b> wählen, speichern Sie einen Importfilter im Blatt selbst. Solange das Blatt -- oder ein dupliziertes Blatt aktiv ist -- können Sie neue Dateien des gleichen Dateityps und der gleichen Struktur hineinziehen, und sie werden sauber in das Blatt importiert.</p>
+
+  <ol>
+    <li>Erstellen Sie eine neue Arbeitsmappe und wählen Sie ein Dateiformat unter <b>Daten: Aus Datei importieren</b> (z. B. <b>Einzelnes ASCII</b>).</li>
+
+    <li>Wählen Sie einen passenden Filter, stellen Sie sicher, dass das Kontrollkästchen <b>Optionendialog zeigen</b> aktiviert ist und klicken Sie dann auf <b>Öffnen</b>.</li>
+
+    <li>Wählen Sie im Dialog Optionen aus, so dass die Dateidaten richtig analysiert werden. Klicken Sie dann auf <a class="image"><img alt="Dialog Theme Button.png" src="../images/Importing_Data_by_Drag_and_Drop/Dialog_Theme_Button.png" width="21"></a> rechts vom <b>Dialogdesign</b> (oben im Dialog) und wählen Sie <b>Einstellungen für Drag&amp;Drop</b> speichern.</li>
+  </ol>
+
+  <ul>
+    <li>Zu diesem Zeitpunkt können Sie eine weitere Datei von entsprechendem Typ und Struktur auf das aktive Blatt ziehen (beachten Sie, dass Sie in Abhängigkeit von den Einstellungen Ihres Dialogs <b>Importmodus</b> die existierenden Daten überschreiben oder ein neues Blatt bzw. eine neue Mappe öffnen können). Sie wird entsprechend der im Blatt gespeicherten Einstellungen behandelt.</li>
+
+    <li>Sie können das Fenster als eine Vorlage speichern (<b>Datei: Template speichern unter</b>) und die Fensterkonfiguration -- einschließlich Drag&amp;Drop der Datei -- zur späteren Vrewendung aufrufen.</li>
+  </ul>
+
+  <h2><a name="Using_the_Import_Wizard_to_Set_Up_D.26D_Import"></a><span class="mw-headline">Mit dem Importassistenten Drag&amp;Drop-Import einrichten</span></h2>
+
+  <p>Der <a href="../../UserGuide/Category/The_Import_Wizard.html" title="Category:The Import Wizard">Importassistent</a> unterstützt den Import von <b>ASCII</b>- und einfachen <b>Binärdateien</b> ("einfach" bedeutet ein optionaler Headerabschnitt gefolgt von einer sequenziellen binären Struktur). Wenn Ihre Daten nicht so einfach in eine dieser beiden Kategorien einzuordnen sind, können Sie Ihren eigenen Origin C-Code (<b>Benutzerdefiniert</b>) schreiben, um den Datenimport durchzuführen.</p>
+
+  <p>Unabhängig vom <b>Datentyp</b> ist einer der Hauptvorteile bei der Verwendung des Assistenten zum Importieren Ihrer Dateien, dass Sie Ihre benutzerdefinierten Einstellungen als Origin-Importfilter (*.oif) speichern können, der zum Importieren von identisch strukturierten Dateien wieder verwendet werden kann. Sobald Sie Ihren Filter erstellt haben, können nachfolgende Dateien einfach per Drag&amp;Drop importiert werden.</p>
+
+  <h3><a name="Origin_Import_Filters"></a><span class="mw-headline">Origin-Importfilter</span></h3>
+
+  <p>Beim <a href="../../UserGuide/UserGuide/Import_Wizard_Basics.html" title="UserGuide:Import Wizard Basics">Erstellen eines Importfilters</a> ist der normale Ablauf wie folgt: den <a href="../../UserGuide/UserGuide/Import_Wizard_Basics.html" title="UserGuide:Import Wizard Basics"><b>Importassistenten</b></a> öffnen, eine Datendatei auswählen, dann eine Reihe von Assistentenseiten durchgehen, auf denen die Datei interaktiv analysiert wird, eine Datei und Optionen für die Fensterbenennung sowie Headerinformationen auswählen, die gespeichert und wiederverwendet werden etc. Wenn Sie Ihre Importeinstellungen beendet haben, können Sie sie als Importfilter speichern (es wird ausdrücklich empfohlen, den Filter zu speichern, wenn Sie beabsichtigen, die gleiche oder ähnliche Dateien zukünftig zu importieren).</p>
+
+  <p>Beim Erstellen eines Importfilters haben Sie die Option, den Filter (a) <b>im Ordner der Datendatei</b>, (b) <b>im Anwenderdateiordner</b> oder (c) <b>im Fenster</b> zu speichern. Alle Optionen unterstützen den Dateiimport per Drag&amp;Drop.</p>
+
+  <dl>
+    <dd><a class="image"><img alt="OH save filters page storage options.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_save_filters_page_storage_options.png" width="727"></a></dd>
+  </dl>
+
+  <p>Ein Vorteil beim Abspeichern des Filters <b>im Fenster</b> ist, dass der Filter im Fenster selbst gespeichert wird und somit ein Teil der Origin-Projektdatei (<b>*.opju</b>) oder des <a class="external text" href="../../GettingStarted/OriginLab/The_Origin_Interface.html#Origin_Child_Windows">Unterfensters (<b>*.ogwu</b>)</a> wird.</p>
+
+  <p>Die zwei anderen Optionen (<b>Datendateiordner</b> oder <b>Anwenderdateiordner</b>) erfordern das Speichern des Filters als eine separate *.oif-Datei. Der primäre Vorteil hier wäre ein größerer Grad an Flexibilität beim Importieren. Sie können wählen, den Filter (Datenordner) <i>immer</i> zu verwenden, oder sich entscheiden, den Filter <i>nicht</i> und dafür stattdessen einen Datenkonnektor zu verwenden, indem Sie das Kontrollkästchen <b>Drag&amp;Drop unterstützen</b> im Dialog Importfilter verwalten deaktivieren (<b>Einstellungen: Importfilter verwalten</b>), oder -- eine weitere Option -- einen Datenkonnektor <b>mit</b> Ihren Einstellungen zur Importfilterdatei verwenden (<b>Daten: Mit Datei verbinden: Importfilter</b>).</p>
+
+  <p>Ist der Importfilter einmal erstellt, kann er für Importdateien verwendet werden, die etwas in ihrer Struktur variieren, ohne jede Importspezifikation vollständig erneut festlegen zu müssen. Das Vorgehen hier wäre: Assistent öffnen, (1) die Datei, für die Sie Ihren Importfilter modifizieren möchten, auswählen, (2) den Importfilter laden (eventuell müssen Sie das Kontrollkästchen <b>Passende Filter für Datentyp und Dateinamen anzeigen</b> deaktivieren, um die Anwenderfilter aufzulisten), (3) den Assistenten durchgehen, wobei Sie die Einstellungen nach Bedarf ändern, und (4) auf der Seite Filter speichern des Assistenten Ihre Filtereinstellungen unter einem neuen Namen speichern.</p>
+
+  <p>Ihr Importfilter kann eng definiert werden, um mit einem bestimmten Dateinamen (oder Variationen dieses Dateinamens) zu arbeiten, oder er kann breit definiert werden, so dass man ihn auf alle Dateien mit einer gegebenen Dateierweiterung anwenden kann. Wenn Sie beispielsweise mit einem Instrument arbeiten, das Datendateien automatisch nacheinander nach einem Schema benennt wie etwa XYZ_001.CSV, XYZ_002.CSV, XYZ_003.CSV. Durch die Verwendung des Platzhalters "*" können Sie den Filter auf alle CSV-Dateien in Ihrem Datendateiordner ausrichten, indem Sie festlegen, dass der Filter auf jede Datei, die "*.CSV." beinhaltet, angewendet wird. Umgekehrt könnten Sie den Filter noch mehr eingrenzen, indem Sie den Filter nur auf CSV-Dateien ausrichten, die "XYZ*.CSV." beinhalten.</p>
+
+  <h3><a name="Target_Windows_and_Target_Window_Templates"></a><span class="mw-headline">Zielfenster und Zielfenstervorlagen</span></h3>
+
+  <p>Definieren Sie einen Importfilter für ASCII, binäre oder benutzerdefinierte Dateitypen, müssen Sie ein <b>Zielfenster</b> und eine <b>Zielfenstervorlage</b> bestimmen. Beachten Sie, dass nur die Einstellung <b>Datentyp</b> = <b>Benutzerdefiniert</b> etwas anderes als <b>Zielfenster = Arbeitsmappe</b> zulässt. Beachten Sie auch, dass <b>Benutzerdefiniert</b> es Ihnen ermöglicht, eine Bestimmung des <b>Zielfensters</b> und der <b>Zielfenstervorlage</b> zu umgehen (<b>Zielfenster</b> = <b>Kein</b>) , wenn das Erstellen des Fensters mit Ihrem <b>Origin C</b>-Code gemacht werden muss (in diesem Fall würde der Code das Erstellen des Fensters vornehmen).</p>
+
+  <ul>
+    <li>Das <b>Zielfenster</b> legt lediglich den Typ des Unterfensters fest, das die importierten Daten empfängt.</li>
+
+    <li>Die <b>Zielfenstervorlage</b> ist eine spezifische Fenstervorlage (kann einfach &lt;Standard&gt; sein, könnte aber auch eine benutzerdefinierte Vorlage mit Ihren eigenen Konfigurations- und Formateinstellungen sein). Die <b>Zielfenstervorlage</b> wird aufgerufen, wenn durch Drag&amp;Drop-Importoperationen ein Erstellen neuer Fenster nötig wird.</li>
+  </ul>
+
+  <p>Angenommen, Sie haben einen Importfilter definiert, als Sie eine oder mehrere Datendateien mit Drag&amp;Drop in ein aktives Fenster eingefügt haben, und dieses Fenster gehört zum <b>Zielfenster</b>typ, dann wird Origin die Datei(en) mit Hilfe der Einstellungen des/der neuen Fensters / Arbeitsblätter / Spalten importieren, das/die im Filter festgelegt wurde(n). Wenn z. B. (1) der Filter<b>importmodus</b> auf <b>Neue Spalten öffnen</b> eingestellt wurde und (2) die Datei(en) in ein Arbeitsmappenfenster eingefügt wurde(n) (mit dem im Filter bestimmten Zielfenstertyp), dann werden die Datei(en) als Spalten in das aktive Worksheet in der aktiven Arbeitsmappe importiert und hinzugefügt. Befinden sich im aktiven Blatt leere Spalten, werden diese zuerst aufgefüllt. In diesem Fall war die aktive Arbeitsmappe vom richtigen <b>Zielfenster</b>typ, und für jede Datei mussten nur neue Spalten erzeugt werden. Es mussten keine neuen Fenster erstellt werden, also wurde die <b>Zielfenstervorlage</b> nicht verwendet.</p>
+
+  <p>Ist der Filter<b>importmodus</b> auf <b>Neue Arbeitsmappe öffnen</b> gesetzt, dann wird die erste Datei in die aktive Arbeitsmappe importiert, wenn die Spalten im aktiven Blatt leer sind (vorausgesetzt das <b>Zielfenster</b> wäre vom richtigen Typ), und jede nachträgliche Datei würde in ein neu erstelltes Arbeitsmappenfenster mit Hilfe der Zielfenstervorlage importiert. Beachten Sie, dass die <b>Zielfenstervorlage</b> evtl. die gleiche Vorlage sein kann, auf der die aktive Arbeitsmappenfenster basiert. Jedoch ist die Standard-<b>Zielfenster</b><b>vorlage</b> (<b>&lt;Standard&gt;</b> aus der Auswahlliste der Quellseite des Importassistenten) das Origin-Standardarbeitsblatt oder die Matrixvorlage. Solange Sie keine andere Standardvorlage gewählt haben, wäre diese entweder ORIGIN.OTW (Worksheet) oder ORIGIN.OTM (Matrix).</p>
+
+  <p>&#160;</p>

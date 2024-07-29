@@ -1,0 +1,220 @@
+﻿<h1 class="firstHeading">Algorithmus (2D-FFT-Filter)</h1>
+
+  <p>2D-FFT-Filter werden verwendet, um 2D-Signale zu verarbeiten, einschließlich Matrix und Bild. Zuerst wird eine zweidimensionale schnelle Fourier-Transformation (2D-FFT) durchgeführt, dann wird ein Frequenzdomainfilter angewendet und schließlich wird eine 2D-IFFT durchgeführt, um das gefilterte Ergebnis zurück in die räumliche Domain zu konvertieren.</p>
+
+  <p>Fünf Filtertypen und vier Fensterarten sind für die <b>2D-FFT-Filter</b> verfügbar.</p>
+
+  <table id="toc" class="toc" summary="Contents">
+    <tr>
+      <td>
+        <div id="toctitle">
+          <h2>Inhalt</h2>
+        </div>
+
+        <ul>
+          <li class="toclevel-1"><a href="#Filter_Types"><span class="tocnumber">1</span> <span class="toctext">Filtertypen</span></a></li>
+
+          <li class="toclevel-1">
+            <a href="#Window_Types"><span class="tocnumber">2</span> <span class="toctext">Fenstertypen</span></a>
+
+            <ul>
+              <li class="toclevel-2"><a href="#Butterworth"><span class="tocnumber">2.1</span> <span class="toctext">Butterworth</span></a></li>
+
+              <li class="toclevel-2"><a href="#Ideal"><span class="tocnumber">2.2</span> <span class="toctext">Ideal</span></a></li>
+
+              <li class="toclevel-2"><a href="#Gaussian"><span class="tocnumber">2.3</span> <span class="toctext">Gaussian</span></a></li>
+
+              <li class="toclevel-2"><a href="#Blackman"><span class="tocnumber">2.4</span> <span class="toctext">Blackman</span></a></li>
+            </ul>
+          </li>
+
+          <li class="toclevel-1"><a href="#Cutoff_Value"><span class="tocnumber">3</span> <span class="toctext">Oberer Grenzwert</span></a></li>
+        </ul>
+      </td>
+    </tr>
+  </table><a name="Filter_Types"></a>
+
+  <h2><span class="mw-headline">Filtertypen</span></h2>
+
+  <p>Die Filtertypen schließen <b>Tiefpass</b>, <b>Hochpass</b>, <b>Bandpass</b>, <b>Bandblock</b> und <b>Schwellenwert</b> mit ein.</p>
+
+  <p>Beachten Sie, dass <b>Hochpass</b>, <b>Bandpass</b> und <b>Bandblock</b> alle mit Hilfe des <b>Tiefpass'</b> erstellt werden können.</p>
+
+  <p>Die Filtertypen der <b>2D FFT-Filter</b> werden in der folgenden Tabelle aufgeführt. Um die 2D-Filtertypen von <b>Tiefpass</b>, <b>Hochpass</b>, <b>Bandpass</b> und <b>Bandblock</b> einfacher zu verstehen, wird für jeden Filtertyp das <b>ideale Fenster</b> in der Tabelle verwendet.</p>
+
+  <p>Für einen 2D-Filter H(u,v), u=0, 1,.., M-1, v=0, 1,..., N-1. Normieren Sie die Frequenzkoordinaten: m=(u-M/2)/M, n=(v-N/2)/N, where -0,5&lt;m&lt;0,5 -0,5&lt;n&lt;0,5 . r ist definiert als:<br>
+  <img class="tex" alt="r(u,v)=\sqrt{m^2+n^2}" src="../images/math/e/4/c/e4cdcc0df2aceb099aa29f89d8496890.png"> und <img class="tex" alt="\ F_c" src="../images/math/6/1/7/6178f0820b778a36d32dba4ff7b64dcf.png"> sind die Grenzfrequenz.</p>
+
+  <table class="dialogcontroltable">
+    <tr>
+      <th>Tiefpass</th>
+
+      <td>
+        Blockiert die Frequenzkomponenten über der Grenzfrequenz und lässt nur die niedrigen Frequenzkomponenten durch.
+
+        <p><img class="tex" alt="H_{LP}(u,v) = \begin{cases}1, \ r(u,v)&lt; F_{c} \\0, \ otherwise \end{cases}" src="../images/math/a/9/3/a93fcef5a39a5224daea065178a48c22.png"></p>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Hochpass</th>
+
+      <td>
+        Blockt die Frequenzkomponenten, die unter der Grenzfrequenz liegen.
+
+        <p><img class="tex" alt="H_{HP}(u,v) = \begin{cases}1, \ r(u,v)&gt; F_{c} \\0, \ otherwise \end{cases}" src="../images/math/2/6/d/26d1c0f1b59719e6221b7a7cf49362dc.png"></p>
+
+        <p>Beachten Sie, dass <img class="tex" alt="H_{HP}(u,v)=1\ -H_{LP}(u,v)" src="../images/math/1/4/8/14874cc0f5e7d83a4f5e8428c63e7cd7.png">.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Bandpass</th>
+
+      <td>
+        Lässt die Frequenzen innerhalb eines bestimmten Bereichs, der durch die untere und obere Grenzfreqzenz definiert wird, durch.
+
+        <p><img class="tex" alt="H_{BP}(u,v) = \begin{cases}1,\ F_{c1}\le r(u,v)\le F_{c2} \\0, \ otherwise \end{cases}" src="../images/math/d/c/8/dc8ab5522c2c456bbdb020c9c26bd81b.png"></p>
+
+        <p>Beachten Sie, dass <img class="tex" alt="H_{BP}(u,v)=\ H_{LP2}(u,v) -H_{LP1}(u,v)" src="../images/math/b/8/7/b8738cf747f7f4dcf793d8adab2ff854.png">.</p>
+
+        <p>wobei <img class="tex" alt="\ H_{LP1}(u,v)" src="../images/math/e/2/5/e25850272df1a214c6249a5640704f44.png"> und <img class="tex" alt="\ H_{LP2}(u,v)" src="../images/math/3/a/0/3a0dbcbd9dd08e7cea8bddb05673128c.png"> Tiefpassfilter sind mit der jeweils unteren und oberen Frequenz Fc1 und Fc2.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Bandblock</th>
+
+      <td>
+        Entfernt die Frequenzen innerhalb des gewählten Bereichs.
+
+        <p><img class="tex" alt="H_{BB}(u,v) = \begin{cases}0,\ F_{c1}\le r(u,v)\le F_{c2} \\1, \ otherwise \end{cases}" src="../images/math/d/9/c/d9ca5edd8e35a2ad4f171197566dc96c.png"></p>
+
+        <p>Beachten Sie, dass <img class="tex" alt="H_{BB}(u,v)=\ 1-H_{BP}(u,v)" src="../images/math/8/0/0/800e14490e388fa34a07117376d7cd63.png">.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Schwellenwert</th>
+
+      <td>
+        Lässt nur Frequenzkomponenten durch, deren Amplituden zwischen dem unteren Schwellenwert und dem oberen Schwellenwert liegen.
+
+        <p><img class="tex" alt="H_{AT}(u,v) = \begin{cases}1,\ TH_1 \cdot max(A(u,v))\le A(u,v)\le TH_2 \cdot max(A(u,v)) \\0, \ otherwise \end{cases}" src="../images/math/4/a/6/4a67401a06981827df5e933373eeade2.png"></p>
+
+        <p>Wobei <img class="tex" alt="A(u,v)=\ abs(H(u,v)) " src="../images/math/b/7/0/b704799751bd1ea8f6d452deb2adeca6.png">, <img class="tex" alt="\ TH_1" src="../images/math/d/e/8/de8bb5f54a7dfc9585c86bdbfcb8ed20.png"> und <img class="tex" alt="\ TH_2" src="../images/math/6/9/4/69425002f3e81a6e5924968f80e02baa.png"> die unteren und oberen Schwellenwerte sind.</p>
+
+        <p>Beachten Sie, dass das Fenster nicht für den Filtertyp <b>Schwellenwert</b> verwendet wird.</p>
+      </td>
+    </tr>
+  </table><a name="Window_Types"></a>
+
+  <h2><span class="mw-headline">Fenstertypen</span></h2>
+
+  <p>Fenstertypen der <b>2D FFT-Filter</b> schließen <b>Butterworth</b>, <b>Ideal</b>, <b>Gaussian</b> und <b>Blackman</b> ein.</p>
+
+  <p><b>Hochpass-</b>, <b>Bandpass-</b> und <b>Bandblock</b>filter können alle aus dem <b>Tiefpassfilter</b> für andere Fenstertypen auf die gleiche Weise erstellt werden wie das <b>Ideal</b>fenster, das in <a href="#Filter_Types" title="">der Tabelle der Filtertypen</a> aufgelistet wird. Daher werden nur <b>Tiefpass</b>filter für jeden Fenstertyp folgendermaßen eingeführt.</p>
+
+  <p>Eine gängige Möglichkeit, einen 2D-Filter zu erzeugen, besteht darin, das entsprechende 1D-Filterfenster im m - n normierten Frequenzbereich zu drehen, d.h., verwenden Sie <img class="tex" alt="r=\sqrt{m^2 + n^2}" src="../images/math/1/e/3/1e36081b69dacbbdcc6d35b712c786b1.png">, um die Variable im Fenster der 1D-Butterworth-Funktion zu ersetzen. Die Erzeugung des 2D-Butterworth-Tiefpassfilters dient als Beispiel, um die Vorgehensweise zu beschreiben.</p><a name="Butterworth"></a>
+
+  <h3><span class="mw-headline">Butterworth</span></h3>
+
+  <p>Die Fensterfunktion 1D Butterworth wird ausgedrückt mit:</p>
+
+  <p><img class="tex" alt="H(u)=\frac{1}{1 + \left (\frac{m}{F_c} \right )^ {2p} }, u = 0, 1, ..., M-1" src="../images/math/9/a/e/9aed7235982df1f91ec783989fd5c38f.png"></p>
+
+  <p>Parameter werden folgendermaßen beschrieben:</p>
+
+  <ul>
+    <li>m = (u - M/2) / M&#160;: die normierte Frequenz im Bereich [-0,5, 0,5], +/- 0,5 entspricht der halben Nyquist-Frequenz Beachten Sie, dass die anderen Normierungsmethoden auch gefunden werden können. Diese wird in diesem Fall ausgewählt, weil der Peak des Filters an der DC-Komponente des FFT-Ergebnisses ausgerichtet sein muss.</li>
+
+    <li>Fc: die Grenzfrequenz, die sich im Bereich (0, 0,5] befindet. Die Grenzfrequenz ist ein Schlüsselparameter für einen Filter. Für Butterworth ist die Grenzfrequenz die Frequenz, bei der sich H(u) auf das 0,5-fache seines maximalen Werts verringert. Je größer Fc ist, desto glatter ist der Filter. Im Allgemeinen eignet sich ein glatterer Filter besser zum Reduzieren des negativen Ringeffekts, der von der FFT-Filterung verursacht wird.</li>
+
+    <li>p: die Filterordnung, eine ganze Zahl Je kleiner p ist, desto glatter ist der Filter.</li>
+  </ul>
+
+  <p>Für eine 2D-FFT-Filter sei m = ( u - M/2 ) / M, n = (v - N/2 ) / N. Beides, m und n, liegen im Bereich [-0,5, 0,5]. Drehen Sie das 1D-Butterworth-Fenster in dem m - n normierten Frequenzbereich und lassen Sie <img class="tex" alt="r=\sqrt{m^2+n^2}" src="../images/math/1/e/3/1e36081b69dacbbdcc6d35b712c786b1.png">. Der 2D-Butterworth-Tiefpassfilter kann ausgedrückt werden als:</p>
+
+  <p><img class="tex" alt="H(u,v)=\frac{1}{1 + \left (\frac{r}{F_c} \right )^ {2p} }, \ u = 0, 1, ..., M-1, \ v = 0, 1, ..., N-1" src="../images/math/5/2/e/52e3368ff5381e280907f1f0255ab1c5.png"></p>
+
+  <p>H(u,v) sollte nur Werte in einem kreisförmigen Bereich nehmen, dessen Radius bestimmt wird durch R = max(-m[0], m[M-1], -n[0], n[N-1] ). Wenn r &gt; R ist, sollte der Wert von H(u,v) auf Null gesetzt werden. Die Grenzfrequenz Fc liegt in dem Bereich (0, R].</p>
+
+  <p>Die Grenzfrequenz wird normiert durch 2R, so dass der Wertebereich von Fc immer (0, 0,5] ist.</p>
+
+  <p>Die Vorgehensweise zum Erstellen eines 2D-FFT-Filters wird im Folgenden gezeigt.</p>
+
+  <dl>
+    <dd><img alt="Image:Algorithm_bw_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_make_2d_filter.png" width="569" height="364" border="0"></dd>
+  </dl>
+
+  <p>Ein 2D-Butterworth-Tiefpassfilter für Fc=0,3, p=1 sieht folgendermaßen aus.</p>
+
+  <dl>
+    <dd><img alt="Image:Algorithm_bw_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bw_filter.png" width="643" height="492" border="0"></dd>
+  </dl><a name="Ideal"></a>
+
+  <h3><span class="mw-headline">Ideal</span></h3>
+
+  <p>Der Ideal-Filter wird in <a href="#Filter_Types" title="">der Tabelle der Filtertypen</a> eingeführt.</p><a name="Gaussian"></a>
+
+  <h3><span class="mw-headline">Gaussian</span></h3>
+
+  <p>Der Tiefpassfilter 2D-Gaussian kann ausgedrückt werden als:</p>
+
+  <p><img class="tex" alt="H(u,v)=exp(-\frac{r^2}{2 \cdot F_c ^ 2} )" src="../images/math/d/8/6/d862c9b15341f99d805313b0a9bea7db.png"></p>
+
+  <p>Die Grenzfrequenz für einen 2D-Gaussian-Filter ist diejenige, bei der H(u,v) sich auf das 0,607-fache seines maximalen Werts verringert. Größere Werte von Fc entsprechen einem glatteren Filter.</p>
+
+  <p>Ein 2D-Gaussian-Tiefpassfilter für Fc=0,2 sieht folgendermaßen aus.</p>
+
+  <dl>
+    <dd><img alt="Image:Algorithm_gau_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_gau_filter.png" width="643" height="492" border="0"></dd>
+  </dl><a name="Blackman"></a>
+
+  <h3><span class="mw-headline">Blackman</span></h3>
+
+  <p>Der Tiefpassfilter 2D-Blackman kann ausgedrückt werden als: <img class="tex" alt="H(u,v)=\begin{cases}0.42 - 0.5 \cdot cos(2 \pi (r + 0.5) ) + 0.08 \cdot cos(4 \pi (r + 0.5) ),\ r(u,v) \le R\\0, \ r(u,v) &gt; R \end{cases}" src="../images/math/f/c/c/fcc61e9d3600644d1b5a703465b65f8e.png"></p>
+
+  <p>Beachten Sie, dass diese Fensterfunktion sich geringfügig von der bekannten Standardform unterscheidet, die Hochpass entspricht. Hier soll ein Tiefpassfilter verwendet werden, daher wird 0,5 zu r hinzugefügt, um den Filter in einen Tiefpass umzuwandeln.</p>
+
+  <p><b>2D-FFT-Filter</b> in OriginPro bieten eine Option zum <b>Fenster abschneiden</b>, um zu entscheiden, ob das Blackman-Fenster abgeschnitten wird.</p>
+
+  <p>2D-Blackman-Tiefpassfilter ohne (erster Graph) und mit (zweiter Graph) Abschneiden werden jeweils im Folgenden gezeigt.</p>
+
+  <dl>
+    <dd><img alt="Image:Algorithm_bmn_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmn_filter.png" width="643" height="492" border="0"></dd>
+
+    <dd><img alt="Image:Algorithm_bmw_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmw_filter.png" width="643" height="492" border="0"></dd>
+  </dl><a name="Cutoff_Value"></a>
+
+  <h2><span class="mw-headline">Grenzwert</span></h2>
+
+  <p><b>2D-FFT-Filter</b> in OriginPro unterstützen vier Methode zum Festlegen des <b>Grenzwerts</b>. Dabei handelt es sich um <b>Bruch</b>, <b>Fourier Pixel</b>, <b>Wellenlänge</b> und <b>Hertz</b>. Die Verhältnisse dieser vier Methoden werden im Folgenden aufgelistet.</p>
+
+  <table class="dialogcontroltable">
+    <tr>
+      <th>Fourier Pixel</th>
+
+      <td>Pixel in der Matrix, die die Daten speichert. Der Wert kann jede positive Zahl des Typs double sein.</td>
+    </tr>
+
+    <tr>
+      <th>Bruch</th>
+
+      <td>Bruch = Fourier Pixel / sqrt( (cols/2)^2+(rows/2)^2 ), wobei cols und rows jeweils die Anzahl der Spalten und Zeilen darstellen.</td>
+    </tr>
+
+    <tr>
+      <th>Wellenlänge</th>
+
+      <td>Wellenlänge = (cols-1) / Fourier Pixel</td>
+    </tr>
+
+    <tr>
+      <th>Hertz</th>
+
+      <td>Hertz = Fourier Pixel / cols</td>
+    </tr>
+  </table>
+
+  <p>&#160;</p>

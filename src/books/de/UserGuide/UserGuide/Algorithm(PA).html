@@ -1,0 +1,234 @@
+﻿<h1 class="firstHeading">Algorithmen (Peaks analysieren)</h1>
+
+  <p class='urlname' style='display: none'>PA-Algorithm</p>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Inhalt</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1">
+        <a href="#Baseline_Detection_Algorithm"><span class="tocnumber">1</span> <span class="toctext">Algorithmus der Basislinienerkennung</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-2">
+            <a href="#User_Defined"><span class="tocnumber">1.1</span> <span class="toctext">Benutzerdefiniert</span></a>
+
+            <ul>
+              <li class="toclevel-3 tocsection-3"><a href="#2nd_Derivative_.28zeroes.29"><span class="tocnumber">1.1.1</span> <span class="toctext">2. Ableitung (Nullen)</span></a></li>
+
+              <li class="toclevel-3 tocsection-4"><a href="#2nd_Derivative_.28peaks.29"><span class="tocnumber">1.1.2</span> <span class="toctext">2. Ableitung (Peaks)</span></a></li>
+
+              <li class="toclevel-3 tocsection-5"><a href="#1st_Derivative_and_2nd_Derivative"><span class="tocnumber">1.1.3</span> <span class="toctext">1. Ableitung und 2. Ableitung</span></a></li>
+            </ul>
+          </li>
+
+          <li class="toclevel-2 tocsection-6">
+            <a href="#XPS"><span class="tocnumber">1.2</span> <span class="toctext">XPS</span></a>
+
+            <ul>
+              <li class="toclevel-3 tocsection-7"><a href="#Shirley"><span class="tocnumber">1.2.1</span> <span class="toctext">Shirley</span></a></li>
+
+              <li class="toclevel-3 tocsection-8">
+                <a href="#Tougaard"><span class="tocnumber">1.2.2</span> <span class="toctext">Tougaard</span></a>
+
+                <ul>
+                  <li class="toclevel-4 tocsection-9"><a href="#Reference"><span class="tocnumber">1.2.2.1</span> <span class="toctext">Referenz</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li class="toclevel-2 tocsection-10"><a href="#End_points_weighted"><span class="tocnumber">1.3</span> <span class="toctext">Endpunkte gewichtet</span></a></li>
+
+          <li class="toclevel-2 tocsection-11">
+            <a href="#Asymmetric_least_squares_smoothing.28Pro.29"><span class="tocnumber">1.4</span> <span class="toctext">Asymmetrische Glättung der kleinsten Quadrate, AsLS (Pro)</span></a>
+
+            <ul>
+              <li class="toclevel-3 tocsection-12"><a href="#Reference_2"><span class="tocnumber">1.4.1</span> <span class="toctext">Referenz</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toclevel-1 tocsection-13">
+        <a href="#Peak_Finding_Algorithm"><span class="tocnumber">2</span> <span class="toctext">Algorithmus zum Suchen von Peaks</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-14"><a href="#Local_Maximum"><span class="tocnumber">2.1</span> <span class="toctext">Lokales Maximum</span></a></li>
+
+          <li class="toclevel-2 tocsection-15"><a href="#Window_Search"><span class="tocnumber">2.2</span> <span class="toctext">Fenstersuche</span></a></li>
+
+          <li class="toclevel-2 tocsection-16"><a href="#First_Derivative"><span class="tocnumber">2.3</span> <span class="toctext">1. Ableitung</span></a></li>
+
+          <li class="toclevel-2 tocsection-17"><a href="#Second_Derivative"><span class="tocnumber">2.4</span> <span class="toctext">2. Ableitung</span></a></li>
+
+          <li class="toclevel-2 tocsection-18"><a href="#Residual_after_First_Derivative"><span class="tocnumber">2.5</span> <span class="toctext">Residuen nach 1. Ableitung</span></a></li>
+
+          <li class="toclevel-2 tocsection-19"><a href="#Fourier_Self-Deconvolution"><span class="tocnumber">2.6</span> <span class="toctext">Fourier-Selbstentfaltung</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Baseline_Detection_Algorithm"></a><span class="mw-headline">Algorithmus der Basislinienerkennung</span></h2>
+
+  <p>Es gibt vier Methoden, die in Origin verwendet werden, um die Basislinie automatisch in den Daten zu erkennen: <b>Benutzerdefiniert</b> für allgemeingültige Basislinienmodelle, ein spezifischer <b>XPS</b>-Modus für die spezielle Basislinie des Röntgen-Fotoemissionsspektrums, <b>Gewichtete Endpunkte</b> und <b>Gerade Linie</b> (nicht verfügbar für das Ziel <b>Basislinie erstellen</b>). Sie können auch einen konstanten Basislinienwert definieren oder über das Datenblatt bereits bestehende Basislinienpunkte bereitstellen.</p>
+
+  <h3><a name="User_Defined"></a><span class="mw-headline">Benutzerdefiniert</span></h3>
+
+  <p>Es werden vier Methoden für die Erkennung von Ankerpunkten verwendet, aber es werden nur die folgenden Methoden als "automatische Basislinienerkennung" verwendet.</p>
+
+  <h4><a name="2nd_Derivative_.28zeroes.29"></a><span class="mw-headline">2. Ableitung (Nullen)</span></h4>
+
+  <p>Diese Methode basiert auf der Tatsache, dass die Basislinienfläche eine kleinere Krümmung hat als die Peakfläche. Die Krümmung einer Kurve wird definiert als:</p>
+
+  <p><img src="../images/Algorithm(PA)/math-e89cf9fbd875874b8818340c292e1dcf.png" title="\kappa=\frac{y''}{(1+y'^2)^{ \frac{3}{2}}}" alt="\kappa=\frac{y''}{(1+y'^2)^{ \frac{3}{2}}}" class="tex"></p>
+
+  <p>wobei <img src="../images/Algorithm(PA)/math-d8ba4afe808679595d07bfca1e43afc6.png" title="y'" alt="y'" class="tex"> und <img src="../images/Algorithm(PA)/math-e57fa423968c1523c644fbc29d451dfc.png" title="y''" alt="y''" class="tex"> die erste bzw. zwei Ableitung der Kurve sind. Nachdem die <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_adjacent-averaging_method" title="UserGuide:Algorithm (Smooth)">Glättung des <b>gleitenden Durchschnitts</b></a> berechnet wurde, wird die zweite Ableitung bei jedem Datenpunkt berechnet. Als Nächstes werden alle Datenpunkte, deren zweite Ableitung sich 0 annähert (unter der Toleranz), dazu verwendet, eine polynomiale Anpassung zweiter Ordnung durchzuführen. Mit der angepassten Basislinie können wir dann die Punkte, die am nächsten an der angepassten Linie liegen, als Ankerpunkte übernehmen.</p>
+
+  <h4><a name="2nd_Derivative_.28peaks.29"></a><span class="mw-headline">2. Ableitung (Peaks)</span></h4>
+
+  <p>Diese Methode ist nützlich, wenn die Basislinie durch das Verbinden der negativen Peaks des Impulses erzeugt wurde.</p>
+
+  <p>Nachdem die <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="UserGuide:Algorithm (Smooth)"><b>Savitzky-Golay-Glättung</b></a> berechnet wurde, wird die zweite Ableitung bei jedem Datenpunkt berechnet. Als Nächstes werden alle Peaks der Ableitung 2. Ordnung durch mit Hilfe der <a href="#Local_Maximum"><b>Lokales Maximum</b></a> gesucht. Mit den Peaks der Ableitung 2. Ordnung können wir die Punkte, die am nächsten an den Peaks liegen, als Ankerpunkte übernehmen.</p>
+
+  <p><a class="image"><img alt="2nd derivative peaks.png" src="../images/Algorithm(PA)/2nd_derivative_peaks.png" width="342"></a></p>
+
+  <h4><a name="1st_Derivative_and_2nd_Derivative"></a><span class="mw-headline">1. Ableitung und 2. Ableitung</span></h4>
+
+  <p>Bei dieser Methode wird der Glättungsalgorithmus <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="UserGuide:Algorithm (Smooth)"><b>Savitzky-Golay</b></a> implementiert. Neben dem Schwellenwert der zweiten Ableitung wählt diese Methode auch die Punkte aus, die den Schwellenwert der 1. Ableitung überschreiten. Normalerweise bedeutet eine kleinere Ableitung eine kleinere Änderung im Originaldatensatz.</p>
+
+  <p>Diese Methode ist leistungsstärker, wenn die Basislinie annähernd konstant ist. In diesem Fall sind die erste und zweite Ableitung der Basislinie annähernd null.</p>
+
+  <h3><a name="XPS"></a><span class="mw-headline">XPS</span></h3>
+
+  <p>Dieser Modus wurde insbesondere für die Analyse des Spektrums der Röntgenfotoemission entwickelt. Es werden zwei Optionen unterstützt: <b>Shirley</b> und <b>Tougaard</b>.</p>
+
+  <h4><a name="Shirley"></a><span class="mw-headline">Shirley</span></h4>
+
+  <p>Der Algorithmus <b>Shirley</b> ist ein Versuch, Informationen über das Spektrum zu verwenden, um einen Hintergrund zu konstruieren, der sensibel auf Änderungen in den Daten reagiert. Die grundlegende Funktion des Algorithmus <b>Shirley</b> ist die iterative Determination eines Hintergrunds, wobei die Peakfläche verwendet wird, um die Hintergrundintensität <img src="../images/Algorithm(PA)/math-4e84da3481926f7b0ee2e86ea08806fe.png" title="B(E)" alt="B(E)" class="tex"> bei einer Energie <img src="../images/Algorithm(PA)/math-3a3ea00cfc35332cedf6e5e9a32e94da.png" title="E" alt="E" class="tex"> zu berechnen.</p>
+
+  <p><img src="../images/Algorithm(PA)/math-c26f125d1710579c37d07ceeaff01589.png" title="B_n (E)=k_n \int_{E}^{E_{max}}dE'[I(E')-I_{max}-B_{n-1}(E')]" alt="B_n (E)=k_n \int_{E}^{E_{max}}dE'[I(E')-I_{max}-B_{n-1}(E')]" class="tex">,</p>
+
+  <p><br>
+  wobei <img src="../images/Algorithm(PA)/math-d97304cbafc40d74d35ee27c96d0c58f.png" title="I_{max}" alt="I_{max}" class="tex"> die Endpunktintensität bei der oberen Grenze der Energieeinteilung ist. In dem Dialog wird dieser Parameter als <b>Endgültige Höhe</b> bezeichnet. Der iterative Wert des Streufaktors wird gegeben mit</p>
+
+  <p><img src="../images/Algorithm(PA)/math-728f59a444cfbe06fad8568ccf82064b.png" title="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE'[I(E')-I_{max}-B_{n-1}(E')]}" alt="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE'[I(E')-I_{max}-B_{n-1}(E')]}" class="tex"></p>
+
+  <p>Die Basislinie <b>Shirley</b> ist auf 0 außerhalb des festgelegten Bereichs [<img src="../images/Algorithm(PA)/math-5fba6c1b3978b674cd5c9fefa85993e9.png" title="E_{min}" alt="E_{min}" class="tex">, <img src="../images/Algorithm(PA)/math-cdc0075bc9741ac77d7a35a4bac6468a.png" title="E_{max}" alt="E_{max}" class="tex">] gesetzt.</p>
+
+  <h4><a name="Tougaard"></a><span class="mw-headline">Tougaard</span></h4>
+
+  <p><img src="../images/Algorithm(PA)/math-abcf3a0db1cb878affe073165665502a.png" title="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE'[I(E' )-I_{max}-B_{n-1}(E' )](E'-E)}{[1643+(E'-E)^2]^2}" alt="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE'[I(E' )-I_{max}-B_{n-1}(E' )](E'-E)}{[1643+(E'-E)^2]^2}" class="tex">,</p>
+
+  <p>wobei <img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png" title="k" alt="k" class="tex"> von der zuvor festgelegten Option abhängt,</p>
+
+  <p><img src="../images/Algorithm(PA)/math-69d0a27bbe50442b8d1122dfe20ea15e.png" title="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE'[I(E')-I_{max}-B_{n-1}(E')](E'-E)}{[1643+(E'-E)^2]^2}}" alt="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE'[I(E')-I_{max}-B_{n-1}(E')](E'-E)}{[1643+(E'-E)^2]^2}}" class="tex">,</p>
+
+  <p>für die Option <b>Endgültige Höhe</b> und <img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png" title="k" alt="k" class="tex"> gleich dem <b>Veränderlichen Parameter</b> ist, wenn der Anwender die Option <b>Veränderlicher Parameter</b> ausgewählt hat.</p>
+
+  <h5><a name="Reference"></a><span class="mw-headline">Referenz</span></h5>
+
+  <ul>
+    <li>Shirley D.A. High-resolution X-ray photoemission spectrum of valence bands of gold. Phys. Rev B 1972; 5(12):4709–14.</li>
+
+    <li>Tougaard S. Practical Algorithm for Background Subtraction. Surface Science 1989; 216(3): 343-360.</li>
+
+    <li>Tougaard S., Jansson C. Comparison of validity and consistency of methods for quantitative XPS peak analysis. Surface Interface Anal. 20, 1993; 1013-1046.</li>
+  </ul>
+
+  <h3><a name="End_points_weighted"></a><span class="mw-headline">Endpunkte gewichtet</span></h3>
+
+  <p>Diese Methode wurde für den speziellen Fall entwickelt, in dem Sie eine Basislinie basierend auf den Endpunkten erstellen, sowohl Anfang als auch Ende.</p>
+
+  <p>Sie können einen bestimmten Bruchteil der Punkte als Endpunkte wählen, um die Basislinie zu entdecken. Die Glättungsmethode des gleitenden Durchschnitts wird dann verwendet, um das Rauschen zu reduzieren. Das Standardfenster zum Glätten beträgt 6 Prozent der insgesamt ausgewählten Punkte. Da diese Punkte als Basislinie angenommen werden, wird eine einfache lineare Interpolation verwendet, um die Basislinie zu erzeugen.</p>
+
+  <p><b>Hinweis:</b> Diese Methode hängt stark von der Auswahl der Endpunkte ab. Sie sollten den Anteil der Endpunkte sorgfältig auswählen.</p>
+
+  <h3><a name="Asymmetric_least_squares_smoothing.28Pro.29"></a><span class="mw-headline">Asymmetrische Glättung der kleinsten Quadrate, AsLS (Pro)</span></h3>
+
+  <p>Die asymmetrische Glättung der kleinsten Quadrate (<b>AsLS</b>-Methode) wird zum Suchen der der Basislinie verwendet, so dass:</p>
+
+  <ol>
+    <li>die Basislinie geglättet ist.</li>
+
+    <li>die Basislinie der ursprünglichen Kurve gegenüber treu ist.</li>
+  </ol>
+
+  <p>sie durch Minimieren der von zwei Termen implementiert wird: Distanzen zwischen Punkten und Basislinie, 2. Ableitungen der Basislinie. Die Summe kann folgendermaßen ausgedrückt werden:</p>
+
+  <dl>
+    <dd><img src="../images/Algorithm(PA)/math-4ffed4d6b92df8a5bf711cefa2039f56.png" title="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" alt="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" class="tex"></dd>
+  </dl>
+
+  <p>wobei Y die ursprünglichen Daten, <img src="../images/Algorithm(PA)/math-7f3121d5be753123b397f22e2a1fb3e3.png" title="y_b" alt="y_b" class="tex"> die berechnete Basislinie, <img src="../images/Algorithm(PA)/math-aa38f107289d4d73d516190581397349.png" title="w_i" alt="w_i" class="tex"> die Gewichtung für jeden Punkt, <img src="../images/Algorithm(PA)/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex"> ein Faktor zum Ausgleichen von Residuum und der 2. Ableitung sowie der Glättungsfaktor in der X-Funktion das Protokoll dieses Werts ist.</p>
+
+  <p>Die Iterationsprozeduren werden, wie unten zu sehen, eingeführt:</p>
+
+  <ol>
+    <li>In der ersten Iteration wird <img src="../images/Algorithm(PA)/math-ddb823a593bbbb3dfaf0d602adc5e422.png" title="w_i=1" alt="w_i=1" class="tex"> verwendet und, sobald die Basislinie berechnet wird, wird der asymmetrische Faktor p auf Punkte oberhalb der Basislinie (für positive Peaks) als Gewichtung angewendet. Die Gewichtung für die restlichen Punkte ist 1-p.</li>
+
+    <li>In der nächsten Iteration verwenden Sie die berechneten Gewichtungen aus der letzten Iteration, um die neue Basislinie zu berechnen und die Gewichtung zu aktualisieren.</li>
+
+    <li>Wiederholen Sie die obenstehende Prozedur, bis die festgelegte Anzahl der Iterationen erreicht ist.</li>
+  </ol>
+
+  <h5><a name="Reference_2"></a><span class="mw-headline">Referenz</span></h5>
+
+  <ul>
+    <li>P.H.C. Eilers and H.F.M. Boelens. Baseline correction with asymmetric least squares smoothing, Leiden University Medical Centre Report, 2005.</li>
+  </ul>
+
+  <h2><a name="Peak_Finding_Algorithm"></a><span class="mw-headline">Algorithmus der Peaksuche</span></h2>
+
+  <p>Es gibt fünf Methoden, die in Origin verwendet werden, um Peaks automatisch in den Daten zu entdecken: <b>Lokales Maximum</b>, <b>Fenstersuche</b>, <b>1. Ableitung</b>, <b>2. Ableitung</b> und <b>Residuum nach 1. Ableitung</b>. Die ersten drei Methoden sind für die normale Peaksuche in Daten entwickelt worden, während die letzten beiden für das Entdecken von verborgenen Peaks verwendet werden.</p>
+
+  <h3><a name="Local_Maximum"></a><span class="mw-headline">Lokales Maximum</span></h3>
+
+  <p>Das lokale Maximum stellt eine Brute-Force-Methode dar, bei der ein Suchalgorithmus das lokale Maximum in einem beweglichen Fenster sucht. Die Fenstergröße wird von der vordefinierten Anzahl der lokalen Punkte bestimmt.</p>
+
+  <p>Anfangs wird ein Fenster mit n Punkten an dem Anfangspunkt des Datenstroms positioniert. Das Maximum in diesem Fenster sowie in sein Index wird aufgezeichnet. Danach wird das Fenster eine Stufe weiter geschoben. Wenn das Maximum größer ist als das gespeicherte Maximum, aktualisieren Sie sowohl den Wert des Maximums als auch den Indexwert und verschieben dann vorwärts. Wenn das Maximum dabei aus dem Fenster bewegt wird, d.h., alle Punkte sind kleiner als das Maximum, dann wurde ein Peak gefunden und die gesamte Fensterkonfiguration wird für den nächsten Peak neu erstellt.</p>
+
+  <h3><a name="Window_Search"></a><span class="mw-headline">Suchen im Fenster</span></h3>
+
+  <p>Die Methode der Fenstersuche unterscheidet sich von der Methode des lokalen Maximums durch die verwendeten Suchkriterien. Diese Methode verwendet eine festgelegte Fenstergröße, -höhe und -breite als Kriterium, während die Methode des lokalen Maximums in einem Fenster mit einer festen Anzahl von Punkten sucht.</p>
+
+  <h3><a name="First_Derivative"></a><span class="mw-headline">1. Ableitung</span></h3>
+
+  <p>Die Methoden der 1. Ableitung nutzen die Tatsache, dass die erste Ableitung einer Funktion bei einem lokalen Endpunkt gleich null ist. Es gibt zwei Optionen, mit denen bestimmt werden kann, ob die Originaldaten geglättet werden sollen. Diese Methoden sind: <b>Kein</b> und <b>Savitzky-Golay</b>.</p>
+
+  <p>Die drei oben beschriebenen Methoden werden verwendet, um die offensichtlichen Peaks in den Daten zu finden. Manchmal existieren jedoch verborgene Peaks in den Daten (siehe Abbildung unten). Origin bietet zwei Methoden, um verborgene Peaks in Ihren Daten zu entdecken.</p>
+
+  <dl>
+    <dd><a class="image"><img alt="First Derivative.png" src="../images/Algorithm(PA)/First_Derivative.png" width="250"></a></dd>
+  </dl>
+
+  <h3><a name="Second_Derivative"></a><span class="mw-headline">Zweite Ableitung (suche verborgene Peaks)</span></h3>
+
+  <p>Da die zweite Ableitung das Signal in den ursprünglichen Daten verstärken kann, können Sie die zweite Ableitung verwenden, um die verborgenen Peaks in den Daten zu entdecken. Die zweite Ableitung (rote durchgezogene Linie) der Daten mit verborgenen Peaks (schwarze durchgezogene Linie) wird in dem unten gezeigten Diagramm skizziert.</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Second Derivative.png" src="../images/Algorithm(PA)/Second_Derivative.png" width="250"></a></dd>
+  </dl>
+
+  <p>Im oben stehenden Diagramm können wir erkennen, dass das Signal des verborgenen Peaks verstärkt ist, wodurch es möglich wird, die verborgenen Peaks zu entdecken.</p>
+
+  <p>Origin bietet vier Methoden, um die Ableitung zu glätten: <b>FFT-Filter</b>, <b>Savitzky-Golay</b>, <b>Gleitender Durchschnitt</b> und <b>Quadratische Savitzky-Golay</b>. Bitte lesen Sie auf der Seite <a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html" title="UserGuide:Algorithm (Smooth)">Algorithmus Smooth</a> eine detaillierte Beschreibung.</p>
+
+  <h3><a name="Residual_after_First_Derivative"></a><span class="mw-headline">Residuum nach erster Ableitung</span></h3>
+
+  <p>Im ersten Schritt verwendet Origin die Methode der 1. Ableitung, um sichtbare Peaks zu suchen. Dann wird eine Reihe von Gaussian-Peakfunktionen verwendet, um das lokale Maximum in dem Datenstrom zu erzeugen. Ein verborgener Peak wird als Peak definiert, der diese lokale Maximum nicht erzeugen kann. Origin verwendet wieder die Methode der 1. Ableitung, um Peaks in den Residuendaten zu suchen.</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Residual after First Derivative.png" src="../images/Algorithm(PA)/Residual_after_First_Derivative.png" width="238"></a></dd>
+  </dl>
+
+  <h3><a name="Fourier_Self-Deconvolution"></a><span class="mw-headline">Fourier Self-Deconvolution</span></h3>
+
+  <p>Die Methode der Fourier-Selbstentfaltung (FSD) wird verwendet, um sich überschneidende Peaks im Spektrum zu suchen.</p>
+
+  <p>Zuerst wird die FSD auf dem Spektrum berechnet. Dann werden mit der Methode des <b>Lokalen Maximums</b> die Peaks im FSD-Ergebnis gesucht. Origin verwendet dann die gefundenen Peakzentren, um die Peakhöhen aus den ursprünglichen Spektrumsdaten zu berechnen, und weiter zu prüfen, ob die Höhen die in den Peakfilteroptionen festgelegten Nebenbedingungen erfüllen.</p>

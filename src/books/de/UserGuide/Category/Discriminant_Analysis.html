@@ -1,0 +1,228 @@
+﻿<h1 class="firstHeading">Diskriminanzanalyse</h1>
+
+  <p class='urlname' style='display: none'>Discriminant-Analysis</p>
+
+  <table id="toc" class="toc">
+    <tr>
+      <td>
+        <div id="toctitle">
+          <h2>Inhalt</h2>
+        </div>
+
+        <ul>
+          <li class="toclevel-1 tocsection-1"><a href="#Goals"><span class="tocnumber">1</span> <span class="toctext">Ziele</span></a></li>
+
+          <li class="toclevel-1 tocsection-2"><a href="#Assumptions"><span class="tocnumber">2</span> <span class="toctext">Annahmen</span></a></li>
+
+          <li class="toclevel-1 tocsection-3">
+            <a href="#Processing_Procedure"><span class="tocnumber">3</span> <span class="toctext">Verarbeitungsvorgänge</span></a>
+
+            <ul>
+              <li class="toclevel-2 tocsection-4"><a href="#Preparing_Analysis_Data"><span class="tocnumber">3.1</span> <span class="toctext">Analysedaten vorbereiten</span></a></li>
+
+              <li class="toclevel-2 tocsection-5"><a href="#Verifying_Assumptions"><span class="tocnumber">3.2</span> <span class="toctext">Annahmen überprüfen</span></a></li>
+
+              <li class="toclevel-2 tocsection-6"><a href="#Selecting_Discriminant_Methods"><span class="tocnumber">3.3</span> <span class="toctext">Diskriminanzmethoden auswählen</span></a></li>
+
+              <li class="toclevel-2 tocsection-7"><a href="#Interpreting_and_Verifying_the_Results"><span class="tocnumber">3.4</span> <span class="toctext">Ergebnisse interpretieren und verifizieren</span></a></li>
+            </ul>
+          </li>
+
+          <li class="toclevel-1 tocsection-8"><a href="#Performing_Discriminant_Analysis"><span class="tocnumber">4</span> <span class="toctext">Diskriminanzanalyse durchführen</span></a></li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <p><br>
+  Die Diskriminanzanalyse wird verwendet, um eindeutige Beobachtungen zu unterscheiden und neue Beobachtungen in zuvor definierte Gruppen zuzuordnen. Diese Methode wird gemeinhin in biologischen Klassifizierungen von Spezien verwendet, in medizinischen Klassifizierungen von Tumoren, in Gesichtserkennungstechnologien und im Bereich von Kreditkarten und Versicherungen zur Bestimmung von Risiken verwendet.</p>
+
+  <h2><a name="Goals"></a><span class="mw-headline">Ziele</span></h2>
+
+  <p>Es gibt zwei Hauptziele für die Diskriminanzanalyse:</p>
+
+  <ul>
+    <li>
+      <b>Diskrimination</b>
+
+      <dl>
+        <dd>Ein Klassifizierer wird erzeugt, der einen Satz von Beobachtungen in einer bekannten Grundgesamtheit unterscheidet.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <ul>
+    <li>
+      <b>Klassifizierung</b>
+
+      <dl>
+        <dd>Unbeschriftete Beobachtungen werden mit Hilfe eines Klassifizierers in beschriftete Gruppen verteilt. Hauptsächlich soll hier ein Klassifizierer abgeleitet werden, der verwendet werden kann, um neue Beobachtungen in beschriftete Klassen zu sortieren.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <h2><a name="Assumptions"></a><span class="mw-headline">Annahmen</span></h2>
+
+  <p>Das Diskriminanzmodell hat folgende Annahmen:</p>
+
+  <ul>
+    <li>Multivariate Normalverteilung
+
+      <dl>
+        <dd>Datenwerte stammen aus einer Normalverteilung. Wir können einen <a href="../../UserGuide/Category/Normality_Test.html" title="Category:Normality Test">Test auf Normalverteilung</a> verwenden, um dies zu verifizieren. Bitte beachten Sie jedoch, dass die Annahme von Normalverteilung normalerweise nicht alles entscheidend ist. Die sich ergebenden Signifikanztests können trotzdem zuverlässig sein<sup>[2]</sup></dd>
+      </dl>
+    </li>
+  </ul>
+
+  <ul>
+    <li>Gleichheit der Varianz-Kovarianz innerhalb der Gruppe
+
+      <dl>
+        <dd>Die Kovarianzmatrix innerhalb jeder Gruppe sollte gleich sein. <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="UserGuide:Interpreting Results of Discriminant Analysis">Der Gleichheitstest der Kovarianzmatrizen</a> kann verwendet werden, um dies zu verifizieren. Sollten Zweifel bestehen, führen Sie die Analysen erneut aus, indem Sie die quadratische Methode verwenden oder mehr Beobachtungen hinzufügen oder eine oder zwei Gruppen ausschließen.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <ul>
+    <li>Geringe Multikollinearität der Variablen
+
+      <dl>
+        <dd>Wenn eine hohe Multikollinearität unter zwei oder mehr Variablen besteht, sind die Diskriminanzfunktionskoeffizienten nicht zuverlässig hinsichtlich ihrer Vorhersage der Gruppenzugehörigkeit. Wir können eine <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Pooled_Within-group_Covariance.2FCorrelation_Matrix" title="UserGuide:Interpreting Results of Discriminant Analysis">gepoolte Korrelationsmatrix innerhalb der Gruppen</a> verwenden, um Multikollinearität zu entdecken. Wenn es Korrelationskoeffizienten gibt, die größer als 0,8 sind, schließen Sie bitte einige Variablen aus oder führen Sie zuerst die Hauptkomponentenanalyse durch.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <h2><a name="Processing_Procedure"></a><span class="mw-headline">Verarbeitungsvorgang</span></h2>
+
+  <h3><a name="Preparing_Analysis_Data"></a> <span class="mw-headline">Analysedaten vorbereiten</span></h3>
+
+  <ul>
+    <li>Ausreichend großer Stichprobenumfang
+
+      <dl>
+        <dd>In der Regel sollte der Stichprobenumfang der kleinsten Gruppe die Anzahl von Variablen überschreiten. Normalerweise ist es am besten, wenn es für jede Variable mindestens 20 gibt. Auch wenn ein kleinerer Stichprobenumfang funktionieren kann, wird er nicht empfohlen. Es sollte mindestens 5 Beobachtungen für jede Variable geben.</dd>
+      </dl>
+    </li>
+
+    <li>Unabhängige Zufallsstichproben (keine Ausreißer)
+
+      <dl>
+        <dd>Die Diskriminanzanalyse macht es erforderlich, dass die Beobachtungen unabhängig voneinander sind, d.h. keine wiederholten Messungen oder verbundenen Datenpaare. Außerdem ist die Diskriminanzanalyse sehr empfindlich gegenüber dem Einschließen von Ausreißern. Um Ausreißer zu beobachten, können wir <a href="../../UserGuide/UserGuide/Creating_Box_Charts.html" title="UserGuide:Creating Box Charts">Boxdiagramme</a> verwenden oder verdächtige Punkte in einem <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Canonical_Score_Plot" title="UserGuide:Interpreting Results of Discriminant Analysis">Kanonischen Score-Diagramm</a> für jedes Paar kanonischer Funktionen prüfen.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <ul>
+    <li>Geeignete Variablen auswählen
+
+      <dl>
+        <dd>Unterdrückende Variablen sollten ausgeschlossen werden. Wir können dies bewerten, indem wir uns die Tabelle der <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Univariate_ANOVA" title="UserGuide:Interpreting Results of Discriminant Analysis">Univariaten ANOVA</a> ansehen.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <ul>
+    <li>Stichprobe teilen
+
+      <dl>
+        <dd>Die <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Classification_Summary_for_Training_Data" title="UserGuide:Interpreting Results of Discriminant Analysis">Klassifizierungszusammenfassung der Schulungsdaten</a> wertet die Beobachtung mit Hilfe der Diskriminanzfunktionen aus, die aus den gleichen Daten abgeleitet werden. Die "Fehlerrate" ist normalerweise größer, wenn der Anwender die Testdaten auswertet, die nicht für die Schätzung der Diskriminanzfunktion verwendet werden. Im Normalfall teilen wir die Beobachtungen zufällig in Teildatensätze. Der erste Teildatensatz wird für die Schätzung des Diskriminanzmodells (Schulungsdatensatz) verwendet und der zweite für das Testen der Zuverlässigkeit der Ergebnisse (Testdatensatz). Wenn der Anwender jedoch die Stichprobe teilen will, sollte sie groß genug sein. Gewöhnlich ist der Stichprobenumfang größer als 100<sup>[3],[4]</sup>.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <h3><a name="Verifying_Assumptions"></a> <span class="mw-headline">Annahmen überprüfen</span></h3>
+
+  <p>Der <a href="../../UserGuide/Category/Normality_Test.html" title="Category:Normality Test">Test auf Normalverteilung</a>, der <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="UserGuide:Interpreting Results of Discriminant Analysis">Gleichheitstest der Kovarianzmatrizen</a> und die <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Pooled_Within-group_Covariance.2FCorrelation_Matrix" title="UserGuide:Interpreting Results of Discriminant Analysis">gepoolte Korrelationsmatrix innerhalb von Gruppen</a> können verwendet werden, um die Annahmen zu verifizieren. Bitte lesen Sie weitere Informationen unter <a href="#Assumptions">Annahmen</a>.</p>
+
+  <h3><a name="Selecting_Discriminant_Methods"></a><span class="mw-headline">Diskriminanzmethode auswählen</span></h3>
+
+  <ul>
+    <li>Linear oder quadratisch
+
+      <dl>
+        <dd>Die quadratische Diskriminanzanalyse (QDA) entspricht der linearen Diskriminanzanalyse (LDA), nur dass die Kovarianzmatrix in der LDA identisch ist. Wenn der <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="UserGuide:Interpreting Results of Discriminant Analysis">Gleichheitstest der Kovarianzmatrizen</a> fehlschlägt, sollten Sie die QDA verwenden.</dd>
+
+        <dd>Obwohl die QDA hinsichtlich der Kovarianzmatrix flexibler ist als die LDA, muss sie mehr Parameter schätzen. Bei der QDA haben Sie eine separate Kovarianzmatrix für jede Gruppe. Das heißt, wenn Sie viele Gruppen haben, aber nicht so viele Beobachtungen, empfiehlt sich die QDA nicht.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <dl>
+    <dd>
+      <dl>
+        <dd>
+          <table class="note">
+            <tr>
+              <td><b>Hinweis:</b> Die LDA ist die <b>lineare</b> Variante der <b>Diskriminanzfunktion</b> und die <b>QDA</b> ist die <b>quadratische</b> <b>Variante</b>.</td>
+            </tr>
+          </table>
+        </dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li>Identifizierbare A-priori-Zugehörigkeitswahrscheinlichkeiten
+
+      <dl>
+        <dd>Die Diskriminanzanalyse nimmt an, dass die A-priori-Zugehörigkeitswahrscheinlichkeiten der Gruppen identifizierbar sind. Wenn die Größen der Grundgesamtheit der Gruppe nicht gleich sind, unterscheiden sich die A-priori-Zugehörigkeitswahrscheinlichkeiten möglicherweise. Wenn Sie herausfinden, dass N für jede Gruppe in der Tabelle der deskriptiven Statistik unterschiedlich ist, verwenden Sie bitte die Option <b>Proportional zur Gruppengröße</b> für <b>A-priori-Zugehörigkeitswahrscheinlichkeiten</b>.</dd>
+      </dl>
+    </li>
+  </ul>
+
+  <h3><a name="Interpreting_and_Verifying_the_Results"></a><span class="mw-headline">Ergebnisse interpretieren und verifizieren</span></h3>
+
+  <p>Lesen Sie auf der Seite <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html" title="UserGuide:Interpreting Results of Discriminant Analysis">Ergebnisse interpretieren</a> Informationen zum Bearbeiten der Diskriminanzfunktionen, um beurteilen zu können, ob die Diskriminanzfunktionen gut sind oder nicht, und die Beobachtungen zu klassifizieren.</p>
+
+  <p>Um die Ergebnisse zu verifizieren, können wir das Ergebnis der <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Classification_Summary_for_Test_Data" title="UserGuide:Interpreting Results of Discriminant Analysis">Testdaten</a> und der <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Cross-validation_Summary_for_Training_Data" title="UserGuide:Interpreting Results of Discriminant Analysis">Kreuzvalidierung der Schulungsdaten</a> auswerten. Bitte beachten Sie jedoch, dass beide Methoden von der Größe des Stichprobenumfangs beeinflusst werden. Wenn der Stichprobenumfang klein ist, ist das Ergebnis womöglich nicht zuverlässig.</p>
+
+  <table class="note">
+    <tr>
+      <td><b>Hinweis:</b> Die Kreuzvalidierung wird auch als <i>Leave-one-out-Kreuzvalidierung</i> bezeichnet. Wenn Sie N Beobachtungen haben, wird die Diskriminanzanalyse N-mal ausgeführt. Jedes Mal wird die Analyse für alle Daten außer einem Punkt durchgeführt. Für diesen Punkt wird eine Prognose durchgeführt.</td>
+    </tr>
+  </table>
+
+  <h2><a name="Performing_Discriminant_Analysis"></a><span class="mw-headline">Diskriminanzanalyse durchführen</span></h2>
+
+  <ul>
+    <li>Wählen Sie <b>Statistik: Multivariate Analyse: Diskriminanzanalyse</b>.
+
+      <dl>
+        <dd>Oder</dd>
+      </dl>
+    </li>
+
+    <li>Geben Sie <b>discrim -d</b> im Skriptfenster ein.</li>
+  </ul>
+
+  <p>&#160;</p>
+
+  <p>&#160;</p>
+
+  <table class="topiclist">
+    <tr>
+      <td>
+        <p><i><b>Themen, die in diesem Abschnitt behandelt werden:</b></i></p>
+
+        <ul>
+          <li><a href="../../UserGuide/UserGuide/The_Discriminant_Analysis_Dialog_Box.html" title="UserGuide:The Discriminant Analysis Dialog Box">Dialog der Diskriminanzanalyse</a></li>
+        </ul>
+
+        <ul>
+          <li><a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html" title="UserGuide:Interpreting Results of Discriminant Analysis">Ergebnisse interpretieren</a></li>
+        </ul>
+
+        <ul>
+          <li><a href="../../UserGuide/UserGuide/Algorithm_(Discriminant_Analysis).html" title="UserGuide:Algorithm (Discriminant Analysis)">Algorithmen</a></li>
+        </ul>
+
+        <ul>
+          <li><a class="external text" href="../../Tutorial/Tutorial/Discriminant_Analysis.html">Tutorial</a></li>
+        </ul>
+
+        <ul>
+          <li><a href="../../UserGuide/UserGuide/Reference(Discriminant_Analysis).html" title="UserGuide:Reference(Discriminant Analysis)">Referenzen</a></li>
+        </ul>
+      </td>
+    </tr>
+  </table>

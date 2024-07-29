@@ -1,0 +1,344 @@
+﻿<h1 class=firstHeading>Customizing Origin Startup Behavior with the Command 
+ Line</h1>
+<p class=urlname style="display: none;">Startup-AdjustByComLine</p>
+<p>When Origin is started, it reads the Command Line or Target text box 
+ (depending on your version of Windows) in the Origin program icon's <b>Properties</b> 
+ dialog box. </p>
+<p>By default, these text boxes start Origin by executing the Origin .EXE 
+ file - without any switches. Switches can be added to modify Origin's 
+ startup sequence. </p>
+<div id=toc class=toc>
+<div id=toctitle>
+<h2>Contents</h2>
+</div>
+<ul><li class="toclevel-1 tocsection-1"><a href="#Syntax_of_Command_Line_ArgumentsCommand_Line_ArgumentArgument.2C_Command_Line"><span 
+ class=tocnumber>1</span> <span class=toctext>Syntax of Command Line Arguments<span 
+ class=OIndex style="display: none;">Command Line Argument</span><span 
+ class=OIndex style="display: none;">Argument, Command Line</span></span></a></li>
+	<li class="toclevel-1 tocsection-2"><a href="#Switchesswitch"><span 
+ class=tocnumber>2</span> <span class=toctext>Switches<span class=OIndex 
+ style="display: none;">switch</span></span></a></li>
+	<li class="toclevel-1 tocsection-3">
+	<a href="#Examples"><span class=tocnumber>3</span> <span class=toctext>Examples</span></a> 
+ 
+	<ul><li class="toclevel-2 tocsection-4">
+		<a href="#Loading_an_Origin_Project_FileLoad_Origin_Project"><span 
+ class=tocnumber>3.1</span> <span class=toctext>Loading an Origin Project 
+ File<span class=OIndex style="display: none;">Load Origin Project</span></span></a> 
+ 
+		<ul><li class="toclevel-3 tocsection-5"><a href="#Example_1"><span 
+ class=tocnumber>3.1.1</span> <span class=toctext>Example 1</span></a></li>
+			<li class="toclevel-3 tocsection-6"><a href="#Example_2"><span 
+ class=tocnumber>3.1.2</span> <span class=toctext>Example 2</span></a></li>
+		</ul>
+		</li>
+		<li class="toclevel-2 tocsection-7"><a href="#Run_OPJ-Based_Custom_Program_with_Command-Line_Control"><span 
+ class=tocnumber>3.2</span> <span class=toctext>Run OPJ-Based Custom Program 
+ with Command-Line Control</span></a></li>
+		<li class="toclevel-2 tocsection-8"><a href="#Batch_Processing_with_Summary_Report_in_OriginBatch_Processing"><span 
+ class=tocnumber>3.3</span> <span class=toctext>Batch Processing with Summary 
+ Report in Origin<span class=OIndex style="display: none;">Batch Processing</span></span></a></li>
+		<li class="toclevel-2 tocsection-9"><a href="#Batch_Processing_with_Summary_Report_in_External_Excel_File"><span 
+ class=tocnumber>3.4</span> <span class=toctext>Batch Processing with Summary 
+ Report in External Excel File</span></a></li>
+	</ul>
+	</li>
+</ul>
+</div>
+<h2><a name=Syntax_of_Command_Line_ArgumentsCommand_Line_ArgumentArgument.2C_Command_Line></a><span 
+ class=mw-headline>Syntax of Command Line Arguments<span class=OIndex style="display: none;">Command 
+ Line Argument</span><span class=OIndex style="display: none;">Argument, 
+ Command Line</span></span></h2>
+<p>All command line arguments are optional. The syntax for passing arguments 
+ to Origin is: </p>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">&lt;Origin.EXE 
+ path and name&gt;[-switch <i>arg</i>] [<i>origin_file_name</i>] [<i>labtalk_scripts</i>]</i></b> 
+ </p>
+<ul><li><i style="font-style: italic;">-switch arg</i><br />
+	Multiple switches can be passed. Most switches follow the above notation 
+ except -r, -r0 and -rs, which use LabTalk scripts as arguments and execute 
+ the scripts after Origin C startup compile. See the Switches table and 
+ examples below for available switches and their function.</li>
+	<li><i style="font-style: italic;">origin_file_name</i><br />
+	This file name must refer to an Origin project file or an Origin window 
+ file. A path may be included and the file extension must be specified.</li>
+	<li><i style="font-style: italic;">labtalk_scripts</i><br />
+	Optional <span class=OIndex>script</span> to run after the OPJ is open. 
+ This is useful when the script is very long.</li>
+</ul>
+<p>&nbsp;</p>
+<table class=note x-use-null-cells>
+
+<tr><td>
+<p><b style="font-weight: bold;">Note:</b> In general, the initialization 
+ switch (<b>-i</b>) should precede other switches if more than one switch 
+ is used. </td></tr>
+</table>
+<h2><a name=Switchesswitch></a><span class=mw-headline>Switches<span class=OIndex 
+ style="display: none;">switch</span></span></h2>
+<table class=simple x-use-null-cells>
+
+<tr><th>Switch </th>
+<th>Argument </th>
+<th>Function </th></tr>
+<tr><td>-A </td>
+<td><i style="font-style: italic;">cnf file</i> </td>
+<td>Specifies a configuration file to add to the list specified in the 
+ INI file.<br />
+
+<p>Configuration files can include any LabTalk command, but typically contain 
+ menu commands and macro definitions. The file (a) should be placed at 
+ the root level in your User Files Folder, (b) must have a CNF extension 
+ (omit at the command line), and (c) cannot contain spaces in the file 
+ name. For example:<br />
+</p>
+<dl><dd><i style="font-style: italic;">&lt;Origin.EXE path and name&gt;</i> 
+ -a MyConfig<br />
+	</dd>
+</dl>
+<p><b style="font-weight: bold;">Note:</b> When passing the .cnf file on 
+ the command line using -a switch, Origin C may not finish startup compiling, 
+ and the licensing has probably not been processed by the time the .cnf 
+ file is processed. So, when you want to include X-Functions in your .cnf 
+ file, it's better to use -r or -rs switch instead of -a. </td></tr>
+<tr><td>-B </td>
+<td>&lt;none&gt; </td>
+<td>Run script following OPJ path-name after the OPJ is open similar to 
+ -R but before the OPJ's attached ProjectEvents.ogs, such that you can 
+ use this option to pass in variables to ProjectEvents.ogs. This option 
+ also have the advantage of using all the command line string at the end 
+ so it does not need to be put into parenthesis as is needed by -R. </td></tr>
+<tr><td>-C </td>
+<td><i style="font-style: italic;">cnf file</i> </td>
+<td>Specifies a new configuration file to override the specification in 
+ the INI file.<br />
+Configuration files can include any LabTalk command, but typically contain 
+ menu commands and macro definitions. </td></tr>
+<tr><td>-H </td>
+<td>&lt;none&gt; </td>
+<td>Hide the Origin application. Script Window will still show if it is 
+ open by internal control. </td></tr>
+<tr><td>-HS </td>
+<td>&lt;none&gt; </td>
+<td>Same as -h, but in addition, it prevents the <b>Script Window</b> from 
+ opening. This helps scheduled tasks to run reliably. </td></tr>
+<tr><td>-I </td>
+<td><i style="font-style: italic;">ini file</i> </td>
+<td>Specifies an initialization file to use in place of ORIGIN.INI. In 
+ general this switch should precede other switches if more than one switch 
+ is used. </td></tr>
+<tr><td>-L </td>
+<td><i style="font-style: italic;">level</i> </td>
+<td>Specifies at which menu level to start Origin at. </td></tr>
+<tr><td>-M </td>
+<td>&lt;none&gt; </td>
+<td>Run the Origin application as minimized. </td></tr>
+<tr><td>-OCW </td>
+<td><i style="font-style: italic;">ocw file</i> </td>
+<td>Load the Origin C workspace file. </td></tr>
+<tr><td>-P </td>
+<td><i style="font-style: italic;">full path</i> </td>
+<td>Directs the network version of Origin to look for client-specific files 
+ in the specified path. </td></tr>
+<tr><td>-R </td>
+<td>(<i>script</i>) </td>
+<td>Run the LabTalk <i>script</i> after any specified OPJ has been loaded. 
+ 
+<p><b style="font-weight: bold;">Note:</b> This script will execute after 
+ Origin C startup compile. </td></tr>
+<tr><td>-R0 </td>
+<td>(<i>script</i>) </td>
+<td>Run the LabTalk <i>script</i> before any specified OPJ has been loaded. 
+ 
+<p><b style="font-weight: bold;">Note:</b> This script will execute after 
+ Origin C startup compile. </td></tr>
+<tr><td>-RS </td>
+<td><i style="font-style: italic;">scripts</i> </td>
+<td>Similar to -R but without having OPJ specified. All the remaining string 
+ from the command line will be used as LabTalk script and run after Origin 
+ C startup compile has finished. </td></tr>
+<tr><td>-SLOG </td>
+<td><i style="font-style: italic;">file name</i> </td>
+<td>Send script window output to file. If no path is provided, then the 
+ file is written to the user files folder. If no <i>file name</i> is specified 
+ and another switch follows, like <b>-slog -hs</b>, then <b>Script_Log.txt</b> 
+ will be created in the user files folder. </td></tr>
+<tr><td>-TL </td>
+<td><i style="font-style: italic;">file name</i> </td>
+<td>Specifies the default page template. </td></tr>
+<tr><td>-TM </td>
+<td><i style="font-style: italic;">otm file</i> </td>
+<td>Specifies the default matrix template. </td></tr>
+<tr><td>-TG </td>
+<td><i style="font-style: italic;">otp file</i> </td>
+<td>Specifies the default graph template. Same as -TP. </td></tr>
+<tr><td>-TP </td>
+<td><i style="font-style: italic;">otp file</i> </td>
+<td>Specifies the default graph template. Same as -TG. </td></tr>
+<tr><td>-TW </td>
+<td><i style="font-style: italic;">otw file</i> </td>
+<td>Specifies the template used to create the first window in the project/session. 
+ File name cannot exceed 8 characters, excluding the otw extension. </td></tr>
+<tr><td>-W </td>
+<td>&lt;none&gt; </td>
+<td>Directs the network version of Origin to look for client-specific files 
+ in the Start In folder or Working directory. </td></tr>
+</table>
+<h2><a name=Examples></a><span class=mw-headline>Examples</span></h2>
+<h3><a name=Loading_an_Origin_Project_FileLoad_Origin_Project></a><span 
+ class=mw-headline>Loading an Origin Project File<span class=OIndex style="display: none;">Load 
+ Origin Project</span></span></h3>
+<h5><a name=Example_1></a><span class=mw-headline>Example 1</span></h5>
+<p>The following is an example of a DOS <i>*.bat</i> file. First it changes 
+ the current directory to the Origin exe directory. It then calls Origin 
+ and passes the following command line arguments: </p>
+<ul><li><i style="font-style: italic;">-r0 (type -b &quot;opj will open 
+ next&quot;)</i><br />
+	Uses -r0 to run script before the Origin project is loaded.</li>
+	<li><i style="font-style: italic;">-r (type -b &quot;OPJ is now loaded&quot;)</i><br 
+ />
+	Uses -r to run script after the Origin project is loaded.</li>
+	<li><i style="font-style: italic;">c:\mypath\test.opj</i><br />
+	Gives the name of the Origin project to open.</li>
+</ul>
+<p>Please note that these -r, -r0, -rs, -b switches will wait for Origin 
+ C startup compiling to finish and thus you can use X-Functions in such 
+ script, as in: </p>
+<dl><dd><i style="font-style: italic;">cd &quot;&lt;Origin.EXE path&gt;&quot; 
+ &lt;Origin.EXE name&gt; -r0 (type -b &quot;opj will open next&quot;) -r 
+ (type -b &quot;OPJ is now loaded&quot;) c:\mypath\test.opj</i></dd>
+</dl>
+<p>For more complicated scripts, you will be better off putting them into 
+ an OGS file, and then running that OGS file from the command line. </p>
+<h5><a name=Example_2></a><span class=mw-headline>Example 2</span></h5>
+<p>The following example will run the script code in the main section of 
+ the <b>startup.ogs</b> file located in the User Files Folder. When the 
+ file name given to the <b><a class="external text" href="../../LabTalk/LabTalk/Run_(object).html">run.section</a></b> 
+ method does not contain a path, LabTalk assumes the file is in the <span 
+ class=OIndex>User Files Folder</span>. The following command line argument 
+ illustrates use of the <b>run.section</b> object method: </p>
+<dl><dd><i style="font-style: italic;">&quot;&lt;Origin.EXE path and name&gt;&quot; 
+ -rs &quot;run.section(startup.ogs, main)&quot;</i></dd>
+</dl>
+<p>A simple <b>startup.ogs</b> file to demonstrate the above example can 
+ be: </p>
+<pre class=lt style="font-family: monospace;">
+<span style="color: #000000;">[</span>main<span style="color: #000000;">]</span>
+ <spaces>&nbsp;&nbsp;&nbsp;</spaces>type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;hello, from startup.ogs&quot;</span>;
+</pre>
+<h3><a name=Run_OPJ-Based_Custom_Program_with_Command-Line_Control></a><span 
+ class=mw-headline>Run OPJ-Based Custom Program with Command-Line Control</span></h3>
+<p>The <a class="external text" href="../../LabTalk/Script/ProjectEvents_Script.html"><b>ProjectEvents.ogs</b></a> 
+ script attached to an OPJ file can be used to create an OPJ-centered task-processing 
+ tool. In the following example, an OPJ can be used to run a program either 
+ by opening the OPJ directly, or by calling it from a command line console 
+ external to Origin. In addition, we can set a project variable in the 
+ command line to indicate whether the OPJ was opened by a user from the 
+ Origin GUI or as part of a command-line argument. </p>
+<p>We will create an OPJ with the following ProjectEvents.ogs code: </p>
+<pre class=lt style="font-family: monospace;">
+<span style="color: #000000;">[</span>AfterOpenDoc<span style="color: #000000;">]</span>
+Function doTask<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+	type <span style="color: #000080;">-</span>a <span style="color: #ff00ff;">&quot;Doing some task...&quot;</span>;
+	<span style="color: #008000;">// code to do things</span>
+	type <span style="color: #ff00ff;">&quot;Done!&quot;</span>;<span style="color: #000000;">
+}</span><span style="color: #008000;">
+//%2 = 2 for command line, but also for dble-click OPJ</span><span style="color: #008000;">
+// so we better control it exactly with this variable</span>
+CheckVar FromCmdLine <span style="color: #0000dd;">0</span>;
+if<span style="color: #000000;">(</span>FromCmdLine<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Coming from command line&quot;</span>;
+	doTask<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	sec <span style="color: #000080;">-</span>p <span style="color: #0000dd;">2</span>;<span style="color: #008000;">//wait a little before closing</span>
+	exit;<span style="color: #000000;">
+}</span>
+else<span style="color: #000000;">
+{</span>
+	type <span style="color: #000080;">-</span>N <span style="color: #ff00ff;">&quot;Do you want to do the task now?&quot;</span>;
+	doTask<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+</pre>
+<p>To run this OPJ (call it <i>test</i>) from a command line, use the -B 
+ switch to ensure the <b>FromCmdLine</b> variable is defined before <b>[AfterOpenDoc]</b> 
+ is executed: </p>
+<dl><dd><i style="font-style: italic;">&quot;&lt;Origin.EXE path&gt;&quot; 
+ &lt;Origin.EXE name&gt; -b &lt;opjpath&gt;test.opj FromCmdLine=1</i></dd>
+</dl>
+<h3><a name=Batch_Processing_with_Summary_Report_in_OriginBatch_Processing></a><span 
+ class=mw-headline>Batch Processing with Summary Report in Origin<span 
+ class=OIndex style="display: none;">Batch Processing</span></span></h3>
+<p>The following example demonstrates starting Origin from a command line 
+ shell (i.e., Windows <b>cmd</b>) by entering a long script string containing 
+ the <b>-rs</b> switch. </p>
+<p>The script performs several actions: </p>
+<ol><li>Sets up a string variable (<i>fname$</i>) with multiple file names, 
+ </li>
+	<li>Calls an X-Function (<a class="external text" href="../../XFunction/X-Function/BatchProcess.html">batchprocess</a>) 
+ to perform <span class=OIndex>batch processing</span> using an existing 
+ <span class=OIndex>analysis template</span>, </li>
+	<li>Calls an X-Function (<i>expasc</i>) to Export the result to a CSV 
+ file (<i>c:\test\my batch\output.csv</i>),</li>
+	<li>Suppresses a prompt to save the Origin Project (OPJ) file (<i>doc 
+ -s</i>), and </li>
+	<li>Exits the Origin application.</li>
+</ol>
+<p>To begin, issue this command at an external, system-level command prompt 
+ (such as Windows <b>cmd</b>), replacing the Origin installation path given 
+ with the one on your computer or network: </p>
+<dl><dd><i style="font-style: italic;">&quot;&lt;Origin.EXE path and name&gt;&quot; 
+ -m -rs template$=&quot;&lt;Origin.EXE path&gt;\Samples\Curve Fitting\autofit.ogw&quot;; 
+ fname$=&quot;&lt;Origin.EXE path&gt;\Samples\Curve Fitting\step01.dat%(CRLF)&lt;Origin.EXE 
+ path&gt;\Samples\Curve Fitting\step02.dat%(CRLF)&lt;Origin.EXE path&gt;\Samples\Curve 
+ Fitting\step03.dat%(CRLF)&lt;Origin.EXE path&gt;\Samples\Curve Fitting\step04.dat%(CRLF)&lt;Origin.EXE 
+ path&gt;\Samples\Curve Fitting\step05.dat%(CRLF)&lt;Origin.EXE path&gt;\Samples\Curve 
+ Fitting\step06.dat&quot;; batchprocess batch:=template name:=template$ 
+ fill:=&quot;Data&quot; append:=&quot;Summary&quot; ow:=[Summary Book]&quot;Summary 
+ Sheet&quot;!; expasc iw:=[Summary Book]&quot;Summary Sheet&quot;! type:=csv 
+ path:=&quot;c:\test\my batch output.csv&quot;; doc -s; exit;</i></dd>
+</dl>
+<h3><a name=Batch_Processing_with_Summary_Report_in_External_Excel_File></a><span 
+ class=mw-headline>Batch Processing with Summary Report in External Excel 
+ File</span></h3>
+<p>This example demonstrates using an external Excel file to generate a 
+ Summary Report using Batch Processing. </p>
+<p>In one single continuous command line, the following is performed: </p>
+<ol><li>
+	Origin is launched and an existing Origin Project file (OPJ) is loaded 
+ which contains 
+	<ul><li>an Origin workbook to be used as Analysis Template, and </li>
+		<li>an externally linked Excel file to be used as the report book. 
+ </li>
+	</ul>
+	</li>
+	<li>All files matching a particular wild card specification (in this 
+ case, file names beginning with <i>T</i> having the <i>*.csv</i> extension) 
+ are found.</li>
+	<li>The batchProcess X-Function is called to perform batch processing 
+ of the files. </li>
+	<li>The Excel window will contain the summary report at the end of 
+ the batch processing operation. This window, linked to the external Excel 
+ file, is saved and the Origin project is closed without saving. </li>
+	<li>You can directly open the Excel file from the <b>\Samples\Batch 
+ Processing</b> subfolder to view the results.</li>
+</ol>
+<p>To begin, issue this command at an external, system-level command prompt 
+ (such as Windows <b>cmd</b>), replacing the Origin installation path given 
+ with the one on your computer or network: </p>
+<dl><dd><i style="font-style: italic;">&quot;&lt;Origin.EXE path and name&gt;&quot; 
+ -rs string path$=system.path.program$+&quot;Samples\Batch Processing\&quot;;string 
+ opj$=path$+&quot;Batch Processing with Summary Report in External Excel 
+ File.opj&quot;;doc -o&nbsp;%(opj$);findfiles ext:=&quot;T*.csv&quot;;win 
+ -a Book1;batchProcess batch:=0 fill:=&quot;Raw Data&quot; append:=&quot;My 
+ Results&quot; ow:=[Book2]Sheet1! number:=7 label:=1;win -o Book2 {save 
+ -i&nbsp;%YReport.xls}; doc -s; exit;</i></dd>
+</dl>
+<table class=note x-use-null-cells>
+
+<tr><td>
+<p><b style="font-weight: bold;">Note:</b> Additional information on batch 
+ processing from script (using both <a class="external text" href="../../LabTalk/LabTalk/Flow_of_Control.html">Loops</a> 
+ and X-Functions) is available in a separate <a class="external text" href="../../LabTalk/Script/Batch_Processing.html">Batch 
+ Processing</a> chapter. </td></tr>
+</table>
