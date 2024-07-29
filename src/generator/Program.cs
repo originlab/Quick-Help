@@ -13,6 +13,7 @@ namespace OriginLab.DocumentGeneration;
 
 internal class Program
 {
+    private const string RootUrlPrefix = "/static";
     private readonly Options Options;
     private readonly ImmutableArray<string> Languages;
     private readonly FrozenDictionary<string, (string url, string title)> PageInfo;
@@ -145,6 +146,7 @@ internal class Program
 
         var html = await RazorTemplateEngine.RenderAsync("/DocumentPage.cshtml", new DocumentPageModel
         {
+            RootUrlPrefix = RootUrlPrefix,
             BookUrlName = bookUrlName,
             BookFolderName = bookFolderName,
             Page = page,
@@ -200,18 +202,18 @@ internal class Program
 
                         if (fullPath.StartsWith(dummyRoot) && PageInfo.TryGetValue(fullPath[dummyRoot.Length..], out var link))
                         {
-                            a.SetAttribute("href", $"/static/{language}/{link.url}{hash}");
+                            a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
 
                             if (String.IsNullOrWhiteSpace(a.Title) || a.Title.Contains(':'))
                             {
                                 a.Title = link.title;
                             }
                         }
-                        else if (fullPath.StartsWith(OperatingSystem.IsWindows() ? "C:/static/" : "/static/"))
+                        else if (fullPath.StartsWith(OperatingSystem.IsWindows() ? $"C:{RootUrlPrefix}/" : $"{RootUrlPrefix}/"))
                         {
                             var secondSlash = fullPath.IndexOf('/', 3);
 
-                            a.SetAttribute("href", $"/static{fullPath[secondSlash..]}{hash}");
+                            a.SetAttribute("href", $"{RootUrlPrefix}{fullPath[secondSlash..]}{hash}");
                         }
                         else
                         {
@@ -235,7 +237,7 @@ internal class Program
             {
                 if (src.StartsWith("../images/"))
                 {
-                    img.SetAttribute("src", $"/static/{language}/{bookUrlName}/{src["../".Length..]}");
+                    img.SetAttribute("src", $"{RootUrlPrefix}/{language}/{bookUrlName}/{src["../".Length..]}");
                 }
                 else if (!Uri.IsWellFormedUriString(src, UriKind.Absolute))
                 {
