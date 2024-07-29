@@ -280,7 +280,8 @@ internal class Program
 
         if (!src.Exists)
         {
-            throw new DirectoryNotFoundException($"Source directory not found: {src.FullName}");
+            Console.Error.WriteLine($"CopyDirectory: Source directory ({source}) not exists.");
+            return;
         }
 
         Directory.CreateDirectory(destination);
