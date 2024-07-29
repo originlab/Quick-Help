@@ -73,7 +73,7 @@ internal class Program
         }
 
         Options = options;
-        PageInfo = GetPageInfo();
+        PageInfo = GetPagesInfo();
     }
 
     private async Task BuildOutput(CancellationToken cancellation)
@@ -93,8 +93,8 @@ internal class Program
             {
                 foreach (var bookFolder in Directory.EnumerateDirectories(Path.Combine(Options.SourcePath, "en")))
                 {
-                    var pages = GetPagesInfo(GetPagesXml(Path.Combine(bookFolder, "book.xml"))).ToList();
-                    var bookUrlName = pages[0].url;
+                    var pages = GetPagesXml(Path.Combine(bookFolder, "book.xml")).Select(e => (self: GetPageInfo(e), parent: GetPageInfo(e.Parent))).ToList();
+                    var bookUrlName = pages[0].self.url;
                     var bookFolderName = Path.GetFileName(bookFolder);
 
                     CopyImages(Options.OutputPath, language, bookFolderName, bookUrlName);
@@ -109,22 +109,22 @@ internal class Program
                     },
                     async (page, cancellation) =>
                     {
-                        var pageFolder = Path.Combine(Options.OutputPath, language, page.url);
+                        var pageFolder = Path.Combine(Options.OutputPath, language, page.self.url);
 
                         Directory.CreateDirectory(pageFolder);
 
-                        await ProcessPage(bookUrlName, bookFolderName, page, language, Path.Combine(pageFolder, "index.html"));
+                        await ProcessPage(bookUrlName, bookFolderName, page.self, page.parent, language, Path.Combine(pageFolder, "index.html"));
                     });
                 }
             }
 
-            await ProcessPage("", "", ("Index", "index.html", ""), language, Path.Combine(Options.OutputPath, language, "index.html"));
+            await ProcessPage("", "", ("Index", "index.html", ""), null, language, Path.Combine(Options.OutputPath, language, "index.html"));
         }
 
         File.Copy(Path.Combine(Options.OutputPath, "en", "index.html"), Path.Combine(Options.OutputPath, "index.html"));
     }
 
-    private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, string language, string destinationPath)
+    private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, (string title, string file, string url)? parent, string language, string destinationPath)
     {
         var sourcePath = Path.Combine(Options.SourcePath, language, bookFolderName, page.file);
 
@@ -150,6 +150,7 @@ internal class Program
             BookUrlName = bookUrlName,
             BookFolderName = bookFolderName,
             Page = page,
+            Parent = parent,
             Language = language,
             Contents = new HtmlString(File.ReadAllText(sourcePath)),
         });
@@ -185,17 +186,6 @@ internal class Program
 
                 if (!String.IsNullOrWhiteSpace(href))
                 {
-                    href = href.Replace("{pageUrl}", page.url);
-
-                    if (page.url.LastIndexOf('/') is int lastSlash and > -1)
-                    {
-                        href = href.Replace("{parentUrl}", page.url[..lastSlash]);
-                    }
-                    else
-                    {
-                        href = href.Replace("{parentUrl}", "");
-                    }
-
                     if (Uri.IsWellFormedUriString(href, UriKind.Relative))
                     {
                         var fullPath = Path.GetFullPath(href, dummyFolder).Replace('\\', '/');
@@ -259,7 +249,7 @@ internal class Program
         }
     }
 
-    private FrozenDictionary<string, (string url, string title)> GetPageInfo()
+    private FrozenDictionary<string, (string url, string title)> GetPagesInfo()
     {
         var mappings = new List<(string file, string url, string title)>();
 
@@ -267,7 +257,7 @@ internal class Program
         {
             var bookFolderName = Path.GetFileName(bookFolder);
 
-            foreach (var (title, file, url) in GetPagesInfo(GetPagesXml(Path.Combine(bookFolder, "book.xml"))))
+            foreach (var (title, file, url) in GetPagesXml(Path.Combine(bookFolder, "book.xml")).Select(GetPageInfo))
             {
                 mappings.Add(($"{bookFolderName}/{file}", url, title));
             }
@@ -279,8 +269,8 @@ internal class Program
     private static IEnumerable<XElement> GetPagesXml(string file)
         => XElement.Load(file).Descendants("page");
 
-    private static IEnumerable<(string title, string file, string url)> GetPagesInfo(IEnumerable<XElement> pages)
-        => from page in pages select (title: page.Attribute("title")!.Value, file: page.Attribute("file")!.Value, url: page.Attribute("url")!.Value);
+    private static (string title, string file, string url) GetPageInfo(XElement? page)
+        => page is null ? ("Index", "index.html", "") : (page.Attribute("title")!.Value, page.Attribute("file")!.Value, page.Attribute("url")!.Value);
 
     private static void CopyDirectory(string source, string destination, bool recursive = true, bool overwrite = true)
     {

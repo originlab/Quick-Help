@@ -9,4 +9,6 @@ public class DocumentPageModel : WebPageModel
     public required string BookFolderName { get; set; }
 
     public (string title, string file, string url) Page { get; set; }
+
+    public (string title, string file, string url)? Parent { get; set; }
 }
