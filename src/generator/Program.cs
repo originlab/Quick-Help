@@ -93,7 +93,7 @@ internal class Program
             {
                 foreach (var bookFolder in Directory.EnumerateDirectories(Path.Combine(Options.SourcePath, "en")))
                 {
-                    var pages = GetPagesXml(Path.Combine(bookFolder, "book.xml")).ToList();
+                    var pages = GetPagesInfo(GetPagesXml(Path.Combine(bookFolder, "book.xml"))).ToList();
                     var bookUrlName = pages[0].url;
                     var bookFolderName = Path.GetFileName(bookFolder);
 
@@ -267,7 +267,7 @@ internal class Program
         {
             var bookFolderName = Path.GetFileName(bookFolder);
 
-            foreach (var (title, file, url) in GetPagesXml(Path.Combine(bookFolder, "book.xml")))
+            foreach (var (title, file, url) in GetPagesInfo(GetPagesXml(Path.Combine(bookFolder, "book.xml"))))
             {
                 mappings.Add(($"{bookFolderName}/{file}", url, title));
             }
@@ -276,11 +276,11 @@ internal class Program
         return mappings.ToFrozenDictionary(m => m.file, m => (m.url, m.title), StringComparer.OrdinalIgnoreCase);
     }
 
-    private static IEnumerable<(string title, string file, string url)> GetPagesXml(string xmlFileName)
-        => from page in XElement.Load(xmlFileName).Descendants("page")
-           select (title: page.Attribute("title")!.Value,
-                   file: page.Attribute("file")!.Value,
-                   url: page.Attribute("url")!.Value);
+    private static IEnumerable<XElement> GetPagesXml(string file)
+        => XElement.Load(file).Descendants("page");
+
+    private static IEnumerable<(string title, string file, string url)> GetPagesInfo(IEnumerable<XElement> pages)
+        => from page in pages select (title: page.Attribute("title")!.Value, file: page.Attribute("file")!.Value, url: page.Attribute("url")!.Value);
 
     private static void CopyDirectory(string source, string destination, bool recursive = true, bool overwrite = true)
     {
