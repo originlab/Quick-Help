@@ -1,0 +1,111 @@
+<html>
+    <head>
+ <meta http-equiv="X-UA-Compatible" content="IE=Edge" >
+<script type="text/javascript" src="C:\Program Files\Adobe\Adobe RoboHelp 2019\RoboHTML\ehlpdhtm.js"></script>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>共有データフィルタオブジェクトを使用したプロット</title>
+        <LINK href="../OriginHTML.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+</script>
+
+        <a href="http://www.originlab.com" title="www.originlab.com" target="_blank">
+            <img src="..\header_logo.png" width="224" height="62" border="0"
+                 alt="OriginLab Corporation - 科学技術系グラフデータ分析ソフトウェア - 2Dグラフ、3Dグラフ、等高線図、統計グラフ、データ探索、統計、曲線フィット、信号処理、ピーク分析" />
+        </a>
+        <h1 class="firstHeading">共有データフィルタオブジェクトを使用したプロット</h1><div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Plot_with_Shared_Data_Filter_Object"><span class="tocnumber">1</span> <span class="toctext">共有データフィルタオブジェクトを使用したプロット</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Plot_with_Shared_Data_Filter_Object"></a><span class="mw-headline">共有データフィルタオブジェクトを使用したプロット</span></h2>
+<p>このサンプルでは、共有データフィルタオブジェクトを使って新しいプロットを作成する方法を示します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//pp_flt(2, 5, 3, &quot;3:&quot;between(11,15)&quot;&quot;, 4, &quot;3:&quot;between(1700,2200)&quot;&quot;)</span>
+<span style="color: #0000ff;">void</span> pp_flt<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nx<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> ny<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nShDF1 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, string strShDF1 <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>, <span style="color: #0000ff;">int</span> nShDF2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, string strShDF2 <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>, <span style="color: #0000ff;">int</span> nPlotType <span style="color: #000080;">=</span> <span style="color: #0000dd;">201</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	Worksheet		wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+		<span style="color: #0000ff;">return</span>;
+	string strBook, strSheet;
+	wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strBook<span style="color: #000000;">)</span>;
+	wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strSheet<span style="color: #000000;">)</span>;
+
+	DWORD			dwAuxTypeInfo, dwLTPlotInfo;
+	string			strColPattern;
+	uint			nExVal <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+	Tree			tr;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>	vsWksPages;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>	vsLayers;
+	vsWksPages.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strBook<span style="color: #000000;">)</span>;
+	vsLayers.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strSheet<span style="color: #000000;">)</span>;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsCols;
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vpdesig;
+	Column cx <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>nx<span style="color: #000000;">)</span>;
+	Column cy <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>ny<span style="color: #000000;">)</span>;
+	string strName;
+	
+	cx.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+	vsCols.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+	vpdesig.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>COLDESIG_X<span style="color: #000000;">)</span>;
+	
+	cy.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+	vsCols.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+	vpdesig.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>COLDESIG_Y<span style="color: #000000;">)</span>;
+	
+	IntArray		arrFilterCols;
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>	vsShDFs;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">&lt;=</span> nShDF1<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		arrFilterCols.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>nShDF1<span style="color: #000000;">)</span>;
+		vsShDFs.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strShDF1<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">&lt;=</span> nShDF2<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		arrFilterCols.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>nShDF2<span style="color: #000000;">)</span>;
+		vsShDFs.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strShDF2<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> iShDF <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iShDF <span style="color: #000080;">&lt;</span> arrFilterCols.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; iShDF<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">&lt;=</span> arrFilterCols<span style="color: #000000;">[</span>iShDF<span style="color: #000000;">]</span> <span style="color: #000040;">&amp;&amp;</span> <span style="color: #000040;">!</span>vsShDFs<span style="color: #000000;">[</span>iShDF<span style="color: #000000;">]</span>.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+		<span style="color: #000000;">{</span>
+			Column cFilter <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>arrFilterCols<span style="color: #000000;">[</span>iShDF<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>cFilter.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+			<span style="color: #000000;">{</span>
+				cFilter.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+				vsCols.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+				vpdesig.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>COLDESIG_FILTER<span style="color: #000000;">)</span>;
+			<span style="color: #000000;">}</span>
+			<span style="color: #0000ff;">else</span>
+				<span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span><span style="color: #0000ff;">FALSE</span><span style="color: #000000;">)</span>;
+		<span style="color: #000000;">}</span>
+		<span style="color: #0000ff;">else</span>
+			<span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span><span style="color: #0000ff;">FALSE</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	
+	DWORD dwCntrl <span style="color: #000080;">=</span> DPEDTVIEW_HIDE_LIMITS;
+	<span style="color: #0000ff;">int</span>				nn <span style="color: #000080;">=</span> get_plot_type_info<span style="color: #000000;">(</span>nPlotType, EXIST_WKS, <span style="color: #0000dd;">0</span>, dwAuxTypeInfo, dwLTPlotInfo, strColPattern<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">int</span>	nRet <span style="color: #000080;">=</span>  <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> Project.<span style="color: #000000;">MakeDataplotsTree</span><span style="color: #000000;">(</span>tr, nn, dwAuxTypeInfo, dwLTPlotInfo, strColPattern, nExVal, vpdesig, vsWksPages, vsLayers, vsCols, dwCntrl
+				, <span style="color: #0000ff;">NULL</span>
+				, <span style="color: #000040;">&amp;</span>vsShDFs	
+				<span style="color: #000000;">)</span>;
+	
+	GraphPage gp;
+	gp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;scatter&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 散布図作成	</span>
+	GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+	TreeNode		trLayer <span style="color: #000080;">=</span> tr.<span style="color: #000000;">FirstNode</span>;
+	<span style="color: #0000ff;">int</span>				nNumPlotsAdded <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlots</span><span style="color: #000000;">(</span>trLayer, ADDPLOTSFROMTREE_NEW<span style="color: #000000;">)</span>;
+	gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    </body>
+</html>

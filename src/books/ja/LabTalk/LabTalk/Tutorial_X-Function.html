@@ -1,0 +1,251 @@
+﻿<h1 class="firstheading">LabTalkでXファンクションを使う</h1>
+
+  <p class='urlname' style='display: none'>Tutorial-XF</p>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_You_Will_Learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Call_X-Function"><span class="tocnumber">3.1</span> <span class="toctext">Xファンクションの呼び出し</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Recalculate_of_X-Function"><span class="tocnumber">3.2</span> <span class="toctext">Xファンクションの再計算</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Get_Results_from_X-Functions"><span class="tocnumber">3.3</span> <span class="toctext">Xファンクションから結果を取得</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <p>Xファンクションは、LabTalkスクリプトからOriginの機能のほとんどを一律に利用できます。</p>
+
+  <p>Xファンクションを呼び出す構文は以下の通りです。</p>
+
+  <p><b>xFunctionName [argument1:=&lt;<i>range</i>,<i>name</i> or <i>value</i>&gt; argument2:=&lt;<i>range</i>,<i>name</i> or <i>value</i>&gt; ...][ -switch];</b></p>
+
+  <p>オプションスイッチは、スクリプトからXファンクションを実行する代替のモードにアクセスします。各Xファンクションで、<b>-h</b>スイッチを使ってヘルプファイルにアクセスして引数および定義を出力できます。</p>
+
+  <p><b>xFunctionName -h;</b></p>
+
+  <p>Xファンクションの操作は、多くの場合Xファンクション<b>op_change</b>でアクセス可能なオプションツリーに関連付けられています。Xファンクション<b>op_change</b>を使って、引数の変更やXファンクション操作の再実行が可能です。</p>
+
+  <p>Xファンクションがレポートデータを生成する場合、データを取得して指定したワークシート/列またはツリー変数に配置できます。</p>
+
+  <h2><a name="What_You_Will_Learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ul>
+    <li>LabTalkスクリプトでXファンクションを呼び出す</li>
+
+    <li>Xファンクションのツリーノードオプションを操作</li>
+
+    <li>ダイアログ設定からスクリプトを生成</li>
+
+    <li>操作ツリーを取得、設定を変更、新しい設定でXファンクションを実行</li>
+
+    <li>結果データをツリー変数またはワークシート/列に送る</li>
+
+    <li>Xファンクションにアクセスする際にスイッチオプションを使用</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <h3><a name="Call_X-Function"></a><span class="mw-headline">Xファンクションの呼び出し</span></h3>
+
+  <ol>
+    <li>Originを起動して新しい空のOPJUファイルを開始します。Xファンクション<a class="external text" href="../../XFunction/X-Function/Newbook.html">newbook</a>を呼び出して新しいワークブックをします。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//ワークブックのロングネームを&quot;Curves&quot;に設定</span>
+<span style="color: #008000;">//ワークブックのショートネーム文字列変数bkn$に保存</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Curves&quot;</span> result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bkn<span style="color: #000080;">$</span>;
+</pre>
+    </li>
+
+    <li>以下のスクリプトを実行してXファンクション<b>impASC</b>のグラフィカルインターフェースである ASCII のインポートダイアログを開きます。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+impASC <span style="color: #000080;">-</span>d;
+<span style="color: #008000;">//&quot;-d&quot; はXファンクションの実行オプションでグラフィカルインターフェースを開くときに使用</span>
+</pre>
+    </li>
+
+    <li><i>&lt;Origin Exe Folder&gt;\Samples\Curve Fitting\</i>にある<b>Polynomial Fit.dat</b>ファイルを参照して選択します。</li>
+
+    <li><b>インポートオプション</b>ツリーノードで、<b>スパークラインの追加</b>を<b>しない</b>にし、<b>シート名を（部分）ファイル名に変更する</b>、<b>ブック名を（部分）ファイル名に変更する</b>、<b>ファイル名をワークブックコメントに含める</b>のチェックを外します。</li>
+
+    <li>ダイアログ上<b>のダイアログテーマ</b>の右側にある矢印ボタンをクリックして開くメニューで<b>スクリプトの生成</b>を選択すると、この操作に対するLabTalkスクリプトがスクリプトウィンドウに表示されます。</li>
+
+    <li><b>キャンセル</b>をクリックして<b>ImpASC</b>を終了します。改行して見やすくすると以下のようになります。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//Note: ファイルパスはOrigin EXEパスにより異なります</span>
+
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;C:\Program Files\OriginLab\Origin2016\Samples\Curve Fitting\Polynomial Fit.dat&quot;</span> 
+options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+options.<span style="color: #000080;">Cols</span>.<span style="color: #000080;">ColDesign</span><span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>Unchanged<span style="color: #000080;">&gt;</span> 
+options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToSht</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBk</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBkComm</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+</pre>
+    </li>
+
+    <li>1行のスクリプトの場合カーソルをスクリプト行に置き、<b>Enter</b>キーを押すと実行できます。複数行のスクリプトの場合、選択状態にしてから<b>Enter</b>を押すと実行できます。上のスクリプトの&quot;options&quot;はツリー変数で、このXファンクションのパラメータを設定および保存するために使用されます。</li>
+
+    <li>Xファンクション<a class="external text" href="../../XFunction/X-Function/Fitpoly.html">fitpoly</a>を使って、最初の2列のXYデータセットで多項式フィットを実行します。&quot;-r&quot;スイッチで再計算モードを自動に設定します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+fitpoly iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> polyorder<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> 
+        coef<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new<span style="color: #000080;">&gt;</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>Input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span> 
+        AdjRSq<span style="color: #000000;">:</span><span style="color: #000080;">=</span>arsq RSqCOD<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rsq <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span>;
+</pre>
+    </li>
+  </ol>
+
+  <h3><a name="Recalculate_of_X-Function"></a><span class="mw-headline">Xファンクションの再計算</span></h3>
+
+  <ol>
+    <li>この操作を含む範囲変数を取得します。これは後に使用します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+range r1 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+</pre>
+    </li>
+
+    <li>操作の設定をツリー変数mytreeとして取得します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+op_change ir<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r1 tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mytree;
+</pre>
+    </li>
+
+    <li>スクリプトウィンドウで、以下のスクリプトを実行してツリー構造および値を取得します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+mytree.<span style="color: #000080;">=</span>;
+</pre>
+    </li>
+
+    <li><b>Mytree</b> 変数を使って操作の設定を変更します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//入力データを変更</span>
+mytree.<span style="color: #000080;">xfGetN</span>.<span style="color: #000080;">iy</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">Y</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;[%(bkn$)]1!C&quot;</span>;
+<span style="color: #008000;">//多項式次数を変更</span>
+mytree.<span style="color: #000080;">xfGetN</span>.<span style="color: #000080;">polyorder</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+</pre>
+    </li>
+
+    <li>スクリプト&quot;mytree.=;&quot;を再度実行して変更した設定を確認します。</li>
+
+    <li>変更した設定で操作を再実行します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+op_change ir<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r1 tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mytree op<span style="color: #000000;">:</span><span style="color: #000080;">=</span>run;
+</pre>
+    </li>
+  </ol>
+
+  <h3><a name="Get_Results_from_X-Functions"></a><span class="mw-headline">Xファンクションから結果を取得</span></h3>
+
+  <p>Xファンクション操作からレポートデータを取得し、指定したブック/シート/列やツリー変数に送信できます。</p>
+
+  <ol>
+    <li>Xファンクション<a class="external text" href="../../XFunction/X-Function/Newsheet.html">newsheet</a>で新しいワークシートを作成します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+newsheet;
+<span style="color: #008000;">//文字列レジスタ%Bのシート名を取得</span>
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span>;
+</pre>
+    </li>
+
+    <li>列Aにデータを入力します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">13.2</span>, <span style="color: #0000dd;">14.1</span>, <span style="color: #0000dd;">11.7</span>, <span style="color: #0000dd;">23.9</span>, <span style="color: #0000dd;">10.3</span><span style="color: #000000;">}</span>;
+</pre>
+    </li>
+
+    <li>Xファンクション<a class="external text" href="../../XFunction/X-Function/Grubbs.html">grubbs</a>を使って列Aに外れ値があるか検出します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//ツリー変数trにレポートデータを出力</span>
+<span style="color: #008000;">//trがない場合、作成</span>
+grubbs ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> rt<span style="color: #000000;">:</span><span style="color: #000080;">=</span>tr;
+</pre>
+    </li>
+
+    <li>以下のスクリプトを使って、ツリー構造及び値を取得します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+tr.<span style="color: #000080;">=</span>;
+</pre>
+    </li>
+
+    <li>ツリー変数から結果の値を取得してdouble型変数または文字列変数に渡します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//外れ値と疑われる行番号を取得</span>
+double rindex <span style="color: #000080;">=</span> tr.<span style="color: #000080;">Stats</span>.<span style="color: #000080;">Stats</span>.<span style="color: #000080;">C2</span>;
+<span style="color: #008000;">//conclusion文字列を取得</span>
+string conclusion<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> tr.<span style="color: #000080;">Stats</span>.<span style="color: #000080;">Footer</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">//外れ値と疑われるデータセルの右に結論文を表示</span>
+col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>rindex<span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> conclusion<span style="color: #000080;">$</span>;
+<span style="color: #008000;">//列幅を調整してテキストを表示</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">width</span><span style="color: #000080;">=</span><span style="color: #0000dd;">40</span>;
+</pre>
+    </li>
+
+    <li>Xファンクションgrubbsを再実行しますが、指定したワークシート<b>Result</b>にレポートデータを送信します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//新しいワークシート&quot;Result&quot;を作成</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Result;
+<span style="color: #008000;">//Resultワークシートにレポートデータを送信</span>
+grubbs ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>H<span style="color: #000000;">]</span><span style="color: #000080;">%</span>B<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> rt<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>Input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>Result<span style="color: #000080;">!</span>; 
+<span style="color: #008000;">//Note: Resultという名前のシートがない場合、上述のnewsheetスクリプトはなくても構いません</span>
+<span style="color: #008000;">//自動的に作成されます</span>
+</pre>
+
+      <table class="noborder">
+        <tr>
+          <td style="vertical-align:top" width="60"><img src="../images/Tutorial_X-Function/Tip_icon.png" width="57" border="0" alt=""></td>
+
+          <td>
+            <p>非線形のカーブフィット（Xファンクション<a class="external text" href="../../XFunction/X-Function/Nlbegin.html">nlbegin</a>/<a class="external text" href="../../XFunction/X-Function/Nlfit.html">nlfit</a>/<a class="external text" href="../../XFunction/X-Function/Nlend.html">nlend</a>）のレポートツリーを取得する場合、Xファンクション<a class="external text" href="../../XFunction/X-Function/Getnlr.html">getnlr</a>も使用できます。</p>
+          </td>
+        </tr>
+      </table>
+    </li>
+  </ol>

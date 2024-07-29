@@ -1,0 +1,144 @@
+﻿<h1 class="firstheading">サンプル: LabTalkを使用したRでのロジスティック回帰の実行</h1><p class='urlname' style='display: none'>R-Console-Example</p>
+<p>ロジスティック回帰モデルは、説明変数とカテゴリ応答変数間の関連です。以下のサンプルでは、スクリプトウィンドウで<a class="external text" href="../../LabTalk/LabTalk/R_(object).html"><b>R オブジェクト</b></a> および <a class="external text" href="../../LabTalk/LabTalk/Rserve_(object).html"><b>RSオブジェクト</b></a>を使用して、<i>Origin2016\Samples\Statistics\LogRegData.dat </i>のデータにロジスティック回帰を実行します。 
+</p><p>最初にOriginのワークシートにデータを読み込み、Rデータフレームとしてデータを送ります。Rコマンド<a class="external text" href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html" target="_blank"><b>glm</b></a>を使用してインポートされたデータにロジスティック回帰を実行し、最終的には、結果のために新しいOriginのワークシートを作成して、パラメータ、残差、aic、分散等を含む結果を和マリーシートに送ります。
+</p>
+<h3><a name="R_Object"></a><span class="mw-headline">R オブジェクト</span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// LabTalkでRオブジェクトを呼び出すサンプル</span>
+<span style="color: #008000;">//run.section(testRex,LogisticRoex)</span>
+&nbsp;
+<span style="color: #008000;">//サンプルデータをインポート</span>
+newbook;
+string fn <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\LogRegData.dat&quot;</span>; 
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span> options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+&nbsp;
+<span style="color: #008000;">//Rがインストールされているかチェック</span>
+if<span style="color: #000000;">(</span> R.<span style="color: #000080;">Init</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Please install R software first.&quot;</span>;
+	return;
+<span style="color: #000000;">}</span>
+&nbsp;
+<span style="color: #008000;">//OriginにインポートしたデータをRデータフレーム変数 dfy として送る</span>
+<span style="color: #008000;">//データフレーム dfy は次の4列を含む：Age, Salary, Gender and Career_Change</span>
+<span style="color: #008000;">//Gender と Career_Change 列はカテゴリデータ</span>
+R.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;!&quot;</span>, dfy, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//インポートしたデータにロジスティック回帰を実行</span>
+<span style="color: #008000;">//結果はRのリスト変数 yr に格納</span>
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span> <span style="color: #ff00ff;">&quot;yf&lt;-glm( Career_Change ~ Age + Salary + Gender, family=binomial(logit), data=dfy)&quot;</span> <span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;yr&lt;-summary(yf)&quot;</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//Rno結果を出力するために新しいワークブックを作成</span>
+newbook;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Logistic Regression Result&quot;</span>;
+&nbsp;
+<span style="color: #008000;">//リストオブジェクトのRの係数行列をOriginのワークシートに送る</span>
+<span style="color: #008000;">//ワークシートの1列目から開始</span>
+R.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1&quot;</span>, yr<span style="color: #000080;">$</span>coefficients<span style="color: #000000;">)</span>;
+&nbsp;
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc <span style="color: #000080;">+</span> <span style="color: #0000dd;">6</span>;
+&nbsp;
+<span style="color: #008000;">//パラメータの指数値を計算</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Exp of Parameter&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> <span style="color: #000080;">=</span> exp<span style="color: #000000;">(</span> wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//計算された結果のラベルと列のロングネームをセット</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Residual&quot;</span>;
+&nbsp;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;DF&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Deviance&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;AIC&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Dispersion Parameter for Binomial Family&quot;</span>;
+&nbsp;
+<span style="color: #008000;">//Rno残差情報をOriginのワークシートに送る</span>
+double dfr, devr, aic, rlev;
+<span style="color: #008000;">//LabTalkのdouble型変数をRのリストオブジェクトの要素から取得</span>
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> dfr, yr<span style="color: #000080;">$</span>df.<span style="color: #000080;">residual</span> <span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> devr, yr<span style="color: #000080;">$</span>deviance <span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> aic, yr<span style="color: #000080;">$</span>aic <span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> rlev, yr<span style="color: #000080;">$</span>dispersion <span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//ワークシートセルをLabTalkのdouble 型変数でセット</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dfr;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> devr;
+&nbsp;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> aic;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> rlev;
+&nbsp;
+<span style="color: #008000;">//全てのR変数をクリア</span>
+R.<span style="color: #000080;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;</pre>
+<h3><a name="RS_Object"></a><span class="mw-headline">RS オブジェクト</span></h3>
+<p>このサンプルを実行する前に、<a class="external text" href="../../UserGuide/UserGuide/Setup_R_Server.html">R Serveの設定</a>が必要です。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//LabTalkでRserveを呼び出すためのRSサンプル</span>
+<span style="color: #008000;">//サンプルデータのインポート</span>
+newbook;
+string fn <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\LogRegData.dat&quot;</span>; 
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span> options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+&nbsp;
+<span style="color: #008000;">//Rserveに接続An Rserve should be set up first.</span>
+if<span style="color: #000000;">(</span> RS.<span style="color: #000080;">Init</span><span style="color: #000000;">(</span> <span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>, <span style="color: #0000dd;">12306</span> <span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span> <span style="color: #008000;">//サーバ側のIPアドレスを入力</span>
+<span style="color: #000000;">{</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Fail to connect R server.&quot;</span>;
+	return;
+<span style="color: #000000;">}</span>
+&nbsp;
+<span style="color: #008000;">//OriginにインポートしたデータをRのデータフレーム変数 dfy に送る</span>
+<span style="color: #008000;">//データフレーム dfy には次の列があります: Age, Salary, Gender and Career_Change</span>
+<span style="color: #008000;">//Gender と Career_Change 列はカテゴリデータ</span>
+RS.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;!&quot;</span>, dfy, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//インポートしたデータにロジスティック回帰を実行</span>
+<span style="color: #008000;">//結果はRのリスト変数 yr に格納</span>
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span> <span style="color: #ff00ff;">&quot;yf&lt;-glm( Career_Change ~ Age + Salary + Gender, family=binomial(logit), data=dfy)&quot;</span> <span style="color: #000000;">)</span>;
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;yr&lt;-summary(yf)&quot;</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//Rno結果を出力するために新しいワークブックを作成</span>
+newbook;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Logistic Regression Result&quot;</span>;
+&nbsp;
+<span style="color: #008000;">//リストオブジェクトのRの係数行列をOriginのワークシートに送る</span>
+<span style="color: #008000;">//ワークシートの1列目から開始</span>
+RS.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1&quot;</span>, yr<span style="color: #000080;">$</span>coefficients<span style="color: #000000;">)</span>;
+&nbsp;
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc <span style="color: #000080;">+</span> <span style="color: #0000dd;">6</span>;
+&nbsp;
+<span style="color: #008000;">//パラメータの指数値を計算</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Exp of Parameter&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> <span style="color: #000080;">=</span> exp<span style="color: #000000;">(</span> wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//計算された結果のラベルと列のロングネームをセット</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Residual&quot;</span>;
+&nbsp;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;DF&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Deviance&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;AIC&quot;</span>;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Dispersion Parameter for Binomial Family&quot;</span>;
+&nbsp;
+<span style="color: #008000;">//Rno残差情報をOriginのワークシートに送る</span>
+double dfr, devr, aic, rlev;
+<span style="color: #008000;">//LabTalkのdouble型変数をRのリストオブジェクトの要素から取得</span>
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> dfr, yr<span style="color: #000080;">$</span>df.<span style="color: #000080;">residual</span> <span style="color: #000000;">)</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> devr, yr<span style="color: #000080;">$</span>deviance <span style="color: #000000;">)</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> aic, yr<span style="color: #000080;">$</span>aic <span style="color: #000000;">)</span>;
+RS.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span> rlev, yr<span style="color: #000080;">$</span>dispersion <span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//ワークシートセルをLabTalkのdouble 型変数でセット</span>
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dfr;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> devr;
+&nbsp;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> aic;
+wcol<span style="color: #000000;">(</span> nc<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span> <span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> rlev;
+&nbsp;
+<span style="color: #008000;">//全てのR変数をクリア</span>
+RS.<span style="color: #000080;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

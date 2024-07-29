@@ -1,0 +1,76 @@
+﻿<h1 class="firstheading">Pythonオブジェクトのサンプル</h1><p class='urlname' style='display: none'>Python-Object-Example</p>
+<p class="version" >必要なOriginのバージョン：Origin 2017 SR1以降</p>
+<p>LabTalkの<a href="../../LabTalk/LabTalk/Python_(object).html" title="LabTalk:Python (オブジェクト)">Python</a>オブジェクトを使用してロジスティック回帰を行う方法を以下の例で示します。
+</p>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> このサンプルではPython拡張を使用します。この例を理解しやすくするために、最初にPython拡張を使用する方法に関する<a href="../../LabTalk/Category/LT_Working_with_Python.html#A_Note_to_Use_Python_Extensions" title="カテゴリー:LT Pythonを使って操作する">注意</a>を読むことを強くお勧めします。
+</td></tr></table>
+<h3><a name="Python_Object"></a><span class="mw-headline">Pythonオブジェクト</span></h3>
+<p>最初にOriginのワークシートにデータを読み込み、Pythonリストオブジェクトとしてデータを送ります。それからPythonでロジスティック回帰を実行し、最後にリストオブジェクトにあるPythonのフィッティングされた係数をOriginのワークシートに送ります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//LabTalkでPythonを呼び出すPythonオブジェクト</span>
+
+<span style="color: #008000;">//Pythonがインストールされているか確認</span>
+if<span style="color: #000000;">(</span> Python.<span style="color: #000080;">Init</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Initialize failed.&quot;</span>;
+	return;
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">//Python拡張機能のインストールフォルダをシステムパスリストに追加</span>
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;import sys&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//必要に応じて、インストールフォルダのパスを変更</span>
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;PkPath = &quot;</span>C<span style="color: #000000;">:</span>\Python33\Lib\site<span style="color: #000080;">-</span>packages<span style="color: #ff00ff;">&quot;&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;sys.path.append(PkPath)&quot;</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//サンプルデータのインポート</span>
+newbook;
+string fn <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\LogRegData.dat&quot;</span>; 
+impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span> options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">//ワークシート内データをPythonに送る</span>
+for <span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii <span style="color: #000080;">&lt;=</span> wks.<span style="color: #000080;">ncols</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	range rr <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+	Python.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span>rr, var<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//Pythonでロジスティック回帰を実行</span>
+<span style="color: #008000;">//結果はPythonのリストオブジェクトに保存</span>
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;import pandas as pd&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;import numpy as np&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;import statsmodels.api as sm&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;df = pd.DataFrame.from_items([(&apos;Age&apos;, var1), (&apos;Salary&apos;, var2),(&apos;Gender&apos;,var3),(&apos;Career_Change&apos;,var4)])&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;df[&apos;Gender&apos;] = df[&apos;Gender&apos;].astype(&apos;category&apos;)&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;df[&apos;Career_Change&apos;] = df[&apos;Career_Change&apos;].astype(&apos;category&apos;)&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;cat_columns = df.select_dtypes([&apos;category&apos;]).columns&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;df[cat_columns] = df[cat_columns].apply(lambda x: x.cat.codes)&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;df[&apos;intercept&apos;] = 1.0&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;logit = sm.Logit(df[&apos;Career_Change&apos;], df[[&apos;Age&apos;,&apos;Salary&apos;,&apos;Gender&apos;,&apos;intercept&apos;]])&quot;</span><span style="color: #000000;">)</span>;
+Python.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;result = logit.fit()&quot;</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//Pythonの結果を出力する新しい</span>
+newbook;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Logistic Regression Result&quot;</span>;
+
+<span style="color: #008000;">//リストオブジェクトのPythonのフィット係数をOriginのワークシートに送信</span>
+wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">//リストオブジェクトのPythonのフィット係数をOriginのワークシートに送信</span>
+Python.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1&quot;</span>, list<span style="color: #000000;">(</span>result.<span style="color: #000080;">params</span>.<span style="color: #000080;">index</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">SetFormat</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Fitted parameter;
+Python.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;2&quot;</span>, list<span style="color: #000000;">(</span>result.<span style="color: #000080;">params</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">SetFormat</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">95</span><span style="color: #000080;">%</span> CI lower;
+Python.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;3&quot;</span>, list<span style="color: #000000;">(</span>result.<span style="color: #000080;">conf_int</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">SetFormat</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">95</span><span style="color: #000080;">%</span> CI upper;
+Python.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;4&quot;</span>, list<span style="color: #000000;">(</span>result.<span style="color: #000080;">conf_int</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Example_of_Python_Object/Tip_icon.png" width="57"  border="0" /></td><td><p>LabTalkを使用したRによるロジスティック回帰を実行する方法を<a href="../../LabTalk/LabTalk/Perform_Logistic_regression_in_R_by_using_LabTalk.html" title="LabTalk: LabTalkを使用したRでのロジスティック回帰の実行">こちらのページ</a>で学ぶことができます。
+</p></td></tr></table>
+
+
+
+    

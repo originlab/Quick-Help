@@ -1,0 +1,135 @@
+﻿<h1 class="firstheading">OriginでRを使う</h1><p class='urlname' style='display: none'>LT-Running-R</p>
+<p>OriginとRを一緒に利用するいくつかの方法があります。 
+</p>
+<ul>
+<li> <b>R コンソール</b>ツール、または<b>Rserve コンソール</b>ツールを使用します。これらのツールは、ダイアログインターフェースまたはコマンドを使用してOrigin環境内でRコマンドを投入でき、2つのアプリケーション間でデータを移せます。例は <a class="external text" href="../../UserGuide/UserGuide/Data_Analysis_in_Origin_with_R_Console.html"><b>Rコンソールを使ったOriginでのデータ分析</b></a>.</li>
+<li>LabTalk オブジェクト <a href="../../LabTalk/LabTalk/R_(object).html" title="LabTalk:R（オブジェクト）"><b>R</b></a> および <a href="../../LabTalk/LabTalk/Rserve_(object).html" title="LabTalk:Rserve （オブジェクト）"><b>RS (RServe)</b></a>R および RS は、Rコマンドを実行できるLabTalkオブジェクトで、変数とデータセットをLabTalkとOrigin間で受け渡します。
+</ul></ul>
+<p><br />
+<b>R</b> オブジェクトと<b>R コンソール</b>を使用するには、Rがローカルのパソコンにインストールされている必要があります。<b>RS</b> オブジェクトと<b>Rserve コンソール</b>を利用するには、サーバ側にRパッケージがインストールされているかつ、クライアント側にあるOriginと通信が出来ることが条件となります。 
+</p>
+<ul><li> ローカルにRを取得してインストールすることについては、<a class="external text" href="../../UserGuide/Category/R_Console_and_Rserve_Console.html">こちらのトピック</a>をご覧ください。</li>
+<li> R serverの設定については、<a class="external text" href="../../UserGuide/UserGuide/Setup_R_Server.html">こちらのトピック</a>をご覧ください。</li></ul>
+<p><br />
+</p>
+<p class="version" >必要なOriginバージョン：2016SR0</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Execute_R_Command_in_Script_Window"><span class="tocnumber">1</span> <span class="toctext">スクリプトウィンドウでRコマンドを実行</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Initialize_R_or_RS"><span class="tocnumber">1.1</span> <span class="toctext">R または RSの初期化</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Execute_R_and_RS_command"><span class="tocnumber">1.2</span> <span class="toctext">R および RS コマンドを実行</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Execute_R.2FRS_command_example"><span class="tocnumber">1.2.1</span> <span class="toctext">R/RS コマンドのサンプルを実行</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#Execute_.R_file"><span class="tocnumber">1.3</span> <span class="toctext">.R ファイルを実行</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Send_Origin_Dataset_to_R_Console"><span class="tocnumber">1.4</span> <span class="toctext">OriginのデータセットをRコンソールに送る</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Receive_R_Variable_as_Origin_Dataset"><span class="tocnumber">1.5</span> <span class="toctext">OriginのデータセットとしてR変数を受け取る</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Pass_Variables_between_Labtalk_and_R"><span class="tocnumber">1.6</span> <span class="toctext">Labtalk と R 間の変数の受け渡し</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Utilizing_R_Console_or_Rserve_Console"><span class="tocnumber">2</span> <span class="toctext">R コンソールまたはRserve コンソールの利用</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Execute_R_Command_in_Script_Window"></a><span class="mw-headline">スクリプトウィンドウでRコマンドを実行</span></h2>
+<p>LabTalkオブジェクト<b>R</b> および <b>RS</b> を使用してRコマンドを実行し、LabTalkとR間で変数の受け渡しが可能です。以下のサンプルは、R 及び RServe（Rの代わりにRSを使用）の両方で有効です。 
+</p>
+<h3><a name="Initialize_R_or_RS"></a><span class="mw-headline">R または RSの初期化</span></h3>
+<p>LabTalkでRコマンドを実行する前に、以下を実行してRアプリケーションを初期化します。
+</p>
+<pre class="lt" style="font-family:monospace;">if<span style="color: #000000;">(</span> R.<span style="color: #000080;">Init</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Please install R software first.&quot;</span>;
+		return;
+	<span style="color: #000000;">}</span></pre>
+<p>スクリプトウィンドウで実行します。
+</p><p>RSオブジェクトを初期化するには、以下のスクリプトを参考にしてください。パラメータ設定については<a class="external text" href="../../UserGuide/UserGuide/Setup_R_Server.html">このページ</a>を確認してください。
+</p>
+<pre class="lt" style="font-family:monospace;">if<span style="color: #000000;">(</span>RS.<span style="color: #000080;">Init</span><span style="color: #000000;">(</span><span style="color: #000080;">***</span>.<span style="color: #000080;">***</span>.<span style="color: #000080;">**</span>.<span style="color: #000080;">**</span>, <span style="color: #0000dd;">12306</span>, user, password<span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// アドレスはRservePC IP（例：192.168.18.75）</span>
+	<span style="color: #000000;">{</span>
+		type <span style="color: #000080;">-</span>b <span style="color: #ff00ff;">&quot;Initialize failed.&quot;</span>;
+		return;
+	<span style="color: #000000;">}</span></pre>
+<h3><a name="Execute_R_and_RS_command"></a><span class="mw-headline">R および RS コマンドを実行</span></h3>
+<p><b>Rコマンドを実行</b>
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>rand<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>sample<span style="color: #000000;">(</span>x <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">6</span>, size <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span>, replace <span style="color: #000080;">=</span> TRUE<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>rand<span style="color: #000000;">)</span>;</pre>
+<p>分析を実行します。
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>sum<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>summary<span style="color: #000000;">(</span>rand<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>sum<span style="color: #000000;">)</span>;</pre>
+<p>サマリーを表示します。
+</p>
+<pre class="lt" style="font-family:monospace;">Min. 1st Qu.  <span style="color: #000080;">Median</span>    Mean 3rd Qu.    <span style="color: #000080;">Max</span>. 
+<span style="color: #0000dd;">1.00</span>    <span style="color: #0000dd;">2.00</span>    <span style="color: #0000dd;">3.50</span>    <span style="color: #0000dd;">3.56</span>    <span style="color: #0000dd;">5.00</span>    <span style="color: #0000dd;">6.00</span></pre>
+<p><b>複数のRコマンド行を実行</b>
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;array&lt;-1:25;dim(array)&lt;-c(5,5);array&quot;</span><span style="color: #000000;">)</span> <span style="color: #008000;">// セミコロンで区切った複数行のRコマンドを実行</span></pre>
+<p><b>RSコマンドを実行</b>
+</p>
+<pre class="lt" style="font-family:monospace;">string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Sensor01.dat&quot;</span>;
+impasc;
+range r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">2</span>;
+&nbsp;
+<span style="color: #008000;">//ワークシートからR ベクターにデータを送る</span>
+RS.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>r1<span style="color: #000000;">)</span>, RR, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">//範囲をR data.frame に送る</span>
+&nbsp;
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>fit<span style="color: #000080;">&lt;</span><span style="color: #000080;">-</span>lm<span style="color: #000000;">(</span>RR<span style="color: #000080;">$</span>Sensor.<span style="color: #000080;">Output</span>~RR<span style="color: #000080;">$</span>Displacement<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">//線形フィットを実行</span>
+RS.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>fit<span style="color: #000000;">)</span>;</pre>
+<h4><a name="Execute_R.2FRS_command_example"></a><span class="mw-headline">R/RS コマンドのサンプルを実行</span></h4>
+<p>これらに加えて、<a href="../../LabTalk/LabTalk/Perform_Logistic_regression_in_R_by_using_LabTalk.html" title="LabTalk: LabTalkを使用したRでのロジスティック回帰の実行"><b>Perform Logistic regression in R by using LabTalk</b></a>のページに練習用サンプルがあります。
+</p>
+<h3><a name="Execute_.R_file"></a><span class="mw-headline">.R ファイルを実行</span></h3>
+<p>コンピュータ内の*.R ファイルを実行したい場合、スクリプトウィンドウで以下のシンタックスを使用します。
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>source<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;.R file path&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;</pre>
+<p>例えば、
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Exec</span><span style="color: #000000;">(</span>source<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;D:\\RData\\test.R&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;</pre>
+<h3><a name="Send_Origin_Dataset_to_R_Console"></a><span class="mw-headline">OriginのデータセットをRコンソールに送る</span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//ワークブックをアクティブにする</span>
+R.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1!1&quot;</span>, arr1, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 現在のワークブックのSheet 1、列1を変数 &apos;&apos;array&apos;&apos; (データ型 vector)としてRに送る</span></pre>
+<pre class="lt" style="font-family:monospace;">range rx<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 範囲表記 rx を使用してアクティブワークシートの列1を参照</span>
+R.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rx<span style="color: #000000;">)</span>, rlabel, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// R変数 rlabel (type vector)に列1を送る</span></pre>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 最初の列の値が1, 2, 3, -- のようになっているとする</span>
+range rr <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// アクティブなワークシートの最初の列を参照</span>
+R.<span style="color: #000080;">Send</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rr<span style="color: #000000;">)</span>, temp, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 最初の列をR変数tempとして送信</span></pre>
+<h3><a name="Receive_R_Variable_as_Origin_Dataset"></a><span class="mw-headline">OriginのデータセットとしてR変数を受け取る</span></h3>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1!1&quot;</span>,RMat,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #008000;">// R 行列変数 RMat を現在の行列ブックの最初の行列オブジェクトに受け取る</span>
+R.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;1!1&quot;</span>,df<span style="color: #000080;">$</span>vec1,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Rデータフレーム &apos;df&apos; 内のデータメンバー &apos;vec1&apos; をベクトルとして列に受け取る</span></pre>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 値 [1] FALSE FALSE TRUEの論理的なベクトルがあると仮定</span>
+range rl<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+R.<span style="color: #000080;">Receive</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rl<span style="color: #000000;">)</span>,temp,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 代わりにアクティブシートの列1を 0,0,1 に</span></pre>
+<h3><a name="Pass_Variables_between_Labtalk_and_R"></a><span class="mw-headline">Labtalk と R 間の変数の受け渡し</span></h3>
+<p><a href="../../LabTalk/LabTalk/R_(object).html" title="LabTalk:R（オブジェクト）"><b>R</b></a>オブジェクトと<a href="../../LabTalk/LabTalk/Rserve_(object).html" title="LabTalk:Rserve （オブジェクト）"><b>RS</b></a>オブジェクトには、<b>GetReal</b>、<b>SetReal</b>、<b>GetStr</b>、<b>SetStr</b>の4つのメンバー関数があり、LabtalkとRの間で数値変数と文字列変数を渡すために使用されます。次に例を示します。
+</p><p>数値または文字列の変数をR Serveコンソールで定義します。
+</p>
+<pre class="lt" style="font-family:monospace;">Rvar<span style="color: #000080;">=</span><span style="color: #0000dd;">16</span>
+Rstr<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;height&quot;</span>
+e1<span style="color: #000080;">=</span>list<span style="color: #000000;">(</span>name<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Apple&quot;</span>, a<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span></pre>
+<p>LabTalk変数に値を渡します。
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span>LTVar, Rvar<span style="color: #000000;">)</span>
+R.<span style="color: #000080;">GetStr</span><span style="color: #000000;">(</span>LTStr<span style="color: #000080;">$</span>, Rstr<span style="color: #000000;">)</span>
+<span style="color: #008000;">//pass a real number in a R list &apos;e1&apos; to a Labtalk variable</span>
+R.<span style="color: #000080;">GetReal</span><span style="color: #000000;">(</span>LTVar,e1<span style="color: #000080;">$</span>a<span style="color: #000000;">)</span>;</pre>
+<p>または、LabTalk で数値または文字列変数を定義し、R変数に渡すこともできます。
+</p>
+<pre class="lt" style="font-family:monospace;">R.<span style="color: #000080;">SetReal</span><span style="color: #000000;">(</span>LTVar2, Rvar<span style="color: #000000;">)</span>
+R.<span style="color: #000080;">SetStr</span><span style="color: #000000;">(</span>LTStr2<span style="color: #000080;">$</span>, Rstr<span style="color: #000000;">)</span></pre>
+<h2><a name="Utilizing_R_Console_or_Rserve_Console"></a><span class="mw-headline">R コンソールまたはRserve コンソールの利用</span></h2>
+<p>Rコンソール（またはRserve コンソール）を使用してダイアログ入力ボックスで直接コマンドを実行し、<b>&lt;&lt;</b> および <b>&gt;&gt;</b>のボタンを使用してOriginのワークシートに結果の値を受け渡すことができます。Rコンソール（Rserveコンソール）を使用して、RとOriginワークシート（行列シート）間でデータを複数のフォーマット (vector, matrix, data.frame) に変換できます。<br />
+以下のグラフは、二項分布のランダムデータを生成し、Originのワークシートに送る方法を説明しています。 
+</p>
+<dl><dd><a  class="image"><img alt="R Send Data.png" src="../images/LT_Running_R_in_Origin/R_Send_Data.png" width="743"  /></a></dd></dl>
+
+
+
+
+
+
+
+    

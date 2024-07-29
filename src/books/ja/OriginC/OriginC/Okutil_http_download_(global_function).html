@@ -1,0 +1,122 @@
+﻿<h1 class="firstheading">okutil_http_download</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#header_to_Included"><span class="tocnumber">8</span> <span class="toctext">header to Included</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+<p>Download from given URL to a file, with https(SSL) support
+</p>
+<h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> okutil_http_download<span style="color: #000000;">&#40;</span> LPCSTR lpcszURL, LPCSTR lpcszFileName, <span style="color: #0000ff;">int</span> nConnectTimeout <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nResponseTimeout <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">BOOL</span> bIgnoreCertError <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span>, <span style="color: #0000ff;">BOOL</span> bWait <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">BOOL</span> bShowMsg <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000000;">&#41;</span></pre>
+<h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+<dl><dt> lpcszURL</dt>
+<dd>[input]The URL specify the target file to download</dd>
+<dt> lpcszFileName</dt>
+<dd>[input]The local file to receive data downloaded from lpcszURL</dd>
+<dt> nConnectionTimeout</dt>
+<dd>[input]The number of seconds to specify timeout limit when connect to server</dd>
+<dt> nResponseTimeout</dt>
+<dd>[input]The number of seconds to specify timeout limit waiting for response of a request</dd>
+<dt> bIgnoreCertError</dt>
+<dd>[input]Ignore Error</dd>
+<dt> bWait</dt>
+<dd>[input]Set as FALSE to download in a separate thread.</dd>
+<dt> bShowMsg </dt>
+<dd>[input]True to dump message to Messages Log after download</dd></dl>
+<h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+<p>If bWait = true, return OHTTP_E_OK for success, other negative values are error code. If bWait = false, return 0 for download starts，other value for previous download not completed. System variable @OCDL can check the download status, see <a href="../../OriginC/OriginC/Okutil_http_download_(global_function).html#Examples" title="OriginC:Okutil http download (global function)"><b>EX2</b></a>.
+</p><p><br />
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+<p><b>EX1</b>
+</p>
+<dl><dt>this example will download a CSV file and import to worksheet</dt></dl>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//assume active book empty</span>
+<span style="color: #0000ff;">void</span> stock<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string strSymbol <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;MSFT&quot;</span>;<span style="color: #008000;">//you need apikey if searching any other stock</span>
+	string strFile <span style="color: #000080;">=</span> GetOriginPath<span style="color: #000000;">&#40;</span>ORIGIN_PATH_USER<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strSymbol <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;_stock.csv&quot;</span>;
+	string strURL <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&amp;symbol=&quot;</span>;
+	strURL <span style="color: #000040;">+</span><span style="color: #000080;">=</span> strSymbol;
+	strURL <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&amp;apikey=demo&amp;datatype=csv&quot;</span>;
+	string result;
+	<span style="color: #0000ff;">int</span> err <span style="color: #000080;">=</span> okutil_http_download<span style="color: #000000;">&#40;</span>strURL, strFile<span style="color: #000000;">&#41;</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> err <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+		out_int<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;err = &quot;</span>, err<span style="color: #000000;">&#41;</span>;
+		<span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">&#125;</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>;
+	ASCIMP  ai;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span>AscImpReadFileStruct<span style="color: #000000;">&#40;</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">&#41;</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#123;</span>
+		ai.<span style="color: #000000;">iSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		ai.<span style="color: #000000;">nLongNames</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">&#40;</span>strFile, ai<span style="color: #000000;">&#41;</span>;
+		Column col<span style="color: #000000;">&#40;</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">&#41;</span>;
+		col.<span style="color: #000000;">SetFormat</span><span style="color: #000000;">&#40;</span>OKCOLTYPE_DATE, <span style="color: #ff00ff;">&quot;yyyy'-'MM'-'dd&quot;</span><span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+<span style="color: #000000;">&#125;</span></pre>
+<p><b>EX2</b>
+</p>
+<dl><dt>this example shows Origin downloads file in another thread, meanwhile you can use Origin to do other things.</dt></dl>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//open Messages Log to see the download begin/end message</span>
+<span style="color: #0000ff;">void</span> okutil_http_download_ex2<span style="color: #000000;">&#40;</span><span style="color: #000000;">&#41;</span>
+<span style="color: #000000;">&#123;</span>
+	string strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;ECMWF_ERA-40_subset.nc&quot;</span>;
+	string strFile <span style="color: #000080;">=</span> GetOriginPath<span style="color: #000000;">&#40;</span>ORIGIN_PATH_USER<span style="color: #000000;">&#41;</span> <span style="color: #000040;">+</span> strName;
+	string strURL <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;https://www.unidata.ucar.edu/software/netcdf/examples/&quot;</span> <span style="color: #000040;">+</span> strName;
+	
+	string strMsg;
+	<span style="color: #0000ff;">double</span> err;
+	<span style="color: #0000ff;">BOOL</span> bWait <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span>;	<span style="color: #008000;">// download file in a separate thread</span>
+	<span style="color: #0000ff;">BOOL</span> bShowMsg <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span>; <span style="color: #008000;">// message log will show message after download complete</span>
+	
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> okutil_http_download<span style="color: #000000;">&#40;</span>strURL, strFile, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">FALSE</span>, bWait, bShowMsg<span style="color: #000000;">&#41;</span> <span style="color: #000000;">&#41;</span>
+	<span style="color: #000000;">&#123;</span>
+		LT_get_var<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@OCDL&quot;</span>, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>; 
+		strMsg.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;previous download not completed&#160;%.2f%%<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">&#41;</span>;
+	<span style="color: #000000;">&#125;</span>
+	<span style="color: #0000ff;">else</span>
+	<span style="color: #000000;">&#123;</span>
+		LT_execute<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;sec -p 1&quot;</span><span style="color: #000000;">&#41;</span>; <span style="color: #008000;">//wait @OCDL update</span>
+		
+		LT_get_var<span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;@OCDL&quot;</span>, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">&#41;</span>; 
+		<span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> err <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> 
+		<span style="color: #000000;">&#123;</span>
+			strMsg.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;err =&#160;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span><span style="color: #000000;">&#40;</span> err <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">&#41;</span> 
+		<span style="color: #000000;">&#123;</span>
+			strMsg.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;download complete:&#160;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, strName<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+		<span style="color: #0000ff;">else</span>
+		<span style="color: #000000;">&#123;</span>
+			strMsg.<span style="color: #000000;">Format</span><span style="color: #000000;">&#40;</span><span style="color: #ff00ff;">&quot;downloading&#160;%.2f%%<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">&#41;</span>;
+		<span style="color: #000000;">&#125;</span>
+	<span style="color: #000000;">&#125;</span>
+	strMsg.<span style="color: #000000;">Write</span><span style="color: #000000;">&#40;</span>WRITE_MESSAGE_LOG<span style="color: #000000;">&#41;</span>;
+<span style="color: #000000;">&#125;</span></pre>
+<h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+<h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+<h2><a name="header_to_Included"></a><span class="mw-headline">header to Included</span></h2>
+<p>origin.h
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+
+
+
+
+
+
+    

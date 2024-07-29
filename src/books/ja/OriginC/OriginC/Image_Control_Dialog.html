@@ -1,0 +1,136 @@
+﻿<h1 class="firstheading">Image Control Dialog</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Need_to_do_before_Running_Examples"><span class="tocnumber">2</span> <span class="toctext">Need to do before Running Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Example"><span class="tocnumber">3</span> <span class="toctext">Example</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Need_to_do_before_Running_Examples"></a><span class="mw-headline">Need to do before Running Examples</span></h2>
+
+  <ol>
+    <li>New a matrix window and import \Samples\Image Processing and Analysis\Flower.jpg.</li>
+
+    <li>New a c file named ImageControlExample.c in Code Builder and save to \OriginC\Originlab folder.</li>
+
+    <li>Run<br>
+    run.LoadOC(Originlab\ImageControlExample.c, 16);<br>
+    OpenImagePreviewDlg;<br>
+    in Command window. Click UP button to adjust brightness.</li>
+  </ol>
+
+  <h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\DialogEx.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>image_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\ImageControl.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\matdata_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> OpenImagePreviewDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> ml <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                
+                ImagePreviewDlg dlgEx<span style="color: #000000;">(</span>mo<span style="color: #000000;">)</span>;
+                dlgEx.<span style="color: #000000;">DoModalEx</span><span style="color: #000000;">(</span> GetWindow<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">class</span> ImagePreviewDlg <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> ResizeDialog
+<span style="color: #000000;">{</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+        ImagePreviewDlg<span style="color: #000000;">(</span>MatrixObject<span style="color: #000040;">&amp;</span> mo, <span style="color: #0000ff;">int</span> ID <span style="color: #000080;">=</span> IDD_GETNBOX_PREVIEW<span style="color: #000000;">)</span>;
+        ~ImagePreviewDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">int</span> DoModalEx<span style="color: #000000;">(</span>HWND hWndParent<span style="color: #000000;">)</span>;
+        
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+EVENTS_BEGIN
+        ON_INIT<span style="color: #000000;">(</span>OnInitDialog<span style="color: #000000;">)</span>
+        ON_BN_CLICKED<span style="color: #000000;">(</span>IDC_PARAMS_MORE, OnBtnClick<span style="color: #000000;">)</span>
+EVENTS_END      
+
+        <span style="color: #0000ff;">BOOL</span> OnInitDialog<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">BOOL</span> OnBtnClick<span style="color: #000000;">(</span>Control ctrl<span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+        MatrixObject            m_moSource;
+        PictureControl          m_pictControl;
+        MOImageControl<span style="color: #000040;">*</span>            m_pimgView;
+<span style="color: #000000;">}</span>;
+
+ImagePreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">ImagePreviewDlg</span><span style="color: #000000;">(</span>MatrixObject<span style="color: #000040;">&amp;</span> mo, <span style="color: #0000ff;">int</span> ID<span style="color: #000000;">)</span>
+<span style="color: #000000;">:</span>ResizeDialog<span style="color: #000000;">(</span>ID, <span style="color: #ff00ff;">"ODlg"</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        m_moSource <span style="color: #000080;">=</span> mo;
+<span style="color: #000000;">}</span>
+
+ImagePreviewDlg<span style="color: #000000;">::</span>~ImagePreviewDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">delete</span> m_pimgView;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">BOOL</span> ImagePreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// to hidden ususeful controls</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnHiddenIDs <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>IDC_ERR_MESSAGE_BOX, IDC_PARAMS_DESCRIPTION, IDC_GETN_RESULT_PREVIEW<span style="color: #000000;">}</span>;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nn <span style="color: #000080;">&lt;</span> vnHiddenIDs.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; nn<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Control ctrl <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>vnHiddenIDs<span style="color: #000000;">[</span>nn<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>ctrl<span style="color: #000000;">)</span>
+                        ctrl.<span style="color: #000000;">Visible</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;    
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// click to update brightness</span>
+        Control btn <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>IDC_PARAMS_MORE<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> btn <span style="color: #000000;">)</span>
+                btn.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"UP"</span>;
+        
+        Control cntrl <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>IDC_PARAMS_PREVIEW<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>cntrl<span style="color: #000000;">)</span>
+                m_pictControl.<span style="color: #000000;">CreateControl</span><span style="color: #000000;">(</span>cntrl.<span style="color: #000000;">GetSafeHwnd</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #008000;">//m_pictControl.DrawMode = PCDM_NO_STRETCH;       </span>
+        
+        m_pimgView <span style="color: #000080;">=</span> <span style="color: #0000ff;">new</span> MOImageControl<span style="color: #000000;">(</span>m_pictControl<span style="color: #000000;">)</span>;     
+        Image imgi<span style="color: #000000;">(</span>m_moSource<span style="color: #000000;">)</span>;
+        m_pimgView<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetImage<span style="color: #000000;">(</span>imgi<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">BOOL</span> ImagePreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBtnClick</span><span style="color: #000000;">(</span>Control ctrl<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        pBITMAPHANDLE pLBmp <span style="color: #000080;">=</span> m_pimgView<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetBitmapHandlePtr<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;     <span style="color: #008000;">// get bitmap handle from matrix</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> SUCCESS <span style="color: #000080;">==</span> adjust_image_brightness<span style="color: #000000;">(</span>pLBmp, <span style="color: #0000dd;">20</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                m_pimgView<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Update<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">int</span> ImagePreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">DoModalEx</span><span style="color: #000000;">(</span>HWND hWndParent<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        InitMsgMap<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        DWORD dwDlgOptions <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> DoModal<span style="color: #000000;">(</span>hWndParent, dwDlgOptions<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> nRet;
+<span style="color: #000000;">}</span>
+</pre>

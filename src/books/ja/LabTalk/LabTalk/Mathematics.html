@@ -1,0 +1,138 @@
+﻿<h1 class="firstheading">数学</h1>
+
+  <p class='urlname' style='display: none'>数学</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Interpolate_Data_on_given_X_Vector"><span class="tocnumber">1</span> <span class="toctext">与えられたXについてデータを補間</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Average_Curves"><span class="tocnumber">2</span> <span class="toctext">曲線を平均</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#2D_Interpolate"><span class="tocnumber">3</span> <span class="toctext">2D補間</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Polygon_Area"><span class="tocnumber">4</span> <span class="toctext">ポリゴンの面積</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Interpolate_Data_on_given_X_Vector"></a><span class="mw-headline">与えられたXについてデータを補間</span></h2>
+  <pre class="lt" style="font-family:monospace;">
+pe_mkdir Interp1 path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span>;  <span style="color: #008000;">//プロジェクト内にInterp1というフォルダを作成</span>
+pe_cd aa<span style="color: #000080;">$</span>; <span style="color: #008000;">//フォルダInterp1を開く</span>
+        
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Mathematics\Interpolation.dat&quot;</span>;
+newbook;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYXY&quot;</span>; 
+impasc;
+
+Range rTime1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// アクティブシートのcol(1)</span>
+Range rData1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// アクティブシートのcol(2)</span>
+Range rTime2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// col(3) </span>
+Range rData2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// col(4) </span>
+
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rTime2 iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span> rData1 method<span style="color: #000000;">:</span><span style="color: #000080;">=</span> spline ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rData2 ;
+
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rData1 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rData2 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+</pre>
+
+  <p>以下のサンプルでは、ファイルからインポートされたデータをスプラインで補間し、折れ線グラフを作成します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//サンプルフォルダからデータをインポート</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting\Exponential Decay.dat&quot;</span>;
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYYY&quot;</span>; 
+impasc;
+
+<span style="color: #008000;">//指定された列を補間</span>
+for<span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;i<span style="color: #000080;">&lt;</span><span style="color: #0000dd;">5</span>;i<span style="color: #000080;">++</span><span style="color: #000000;">)</span><span style="color: #000000;">{</span>
+interp1xy <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>ExponentialDe<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline npts<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+<span style="color: #000000;">}</span>
+
+plotxy <span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">7</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>; <span style="color: #008000;">//グラフを作成</span>
+</pre>
+
+  <h2><a name="Average_Curves"></a><span class="mw-headline">曲線を平均</span></h2>
+
+  <p>次のサンプルでは、Xが単調に増加する複数のXYデータを平均します。Xは必ずしも共有X値である必要はありません。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000; font-style: regular;">/*
+サンプルデータのパス：Originインストールフォルダ\Samples\Spectroscopy\DSC\Data folder
+
+1.同じブックの異なるワークシートにデータを読み込む
+2. avecurves XFを使用して、すべてのシートのA（X）B（Y）を平均
+3. 結果を新しいシートに出力
+4.元データと平均のデータを別々のグラフとして作図
+*/</span>
+
+<span style="color: #008000;">// サンプルファイルloadDSC.ogsを使ってサンプルデータを</span>
+<span style="color: #008000;">// 異なるシートにロード</span>
+string LoadDSCogsPath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\LoadDSC.ogs&quot;</span>;
+<span style="color: #000080;">%</span>A<span style="color: #000080;">=</span>LoadDSCogsPath<span style="color: #000080;">$</span>;
+if<span style="color: #000000;">(</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>A, Main, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        break <span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// アクティブシートにデータがロードされる</span>
+string dscBook<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+<span style="color: #008000;">// データA(X), B(Y)でグラフを作成</span>
+plotxy <span style="color: #000000;">[</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+<span style="color: #008000;">// 線形補間平均の手法を使って全シートのデータを平均</span>
+avecurves iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #000080;">&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Averaged Data&quot;</span><span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ave interp<span style="color: #000000;">:</span><span style="color: #000080;">=</span>linear;
+<span style="color: #008000;">// 平均データも作図</span>
+plotxy <span style="color: #000000;">[</span>dscBook<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #ff00ff;">&quot;Averaged Data&quot;</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span>;
+</pre>
+
+  <h2><a name="2D_Interpolate"></a><span class="mw-headline">2D補間</span></h2>
+
+  <p>Xファンクション<a class="external text" href="../../XFunction/X-Function/Minterp2.html">minterp2</a>を使って、行列に2D補間/補外を実行できます。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Interpolate.png" src="../images/Mathematics/Interpolate.png" width="600"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>MyMatrix1 mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+ 
+<span style="color: #008000;">//行列次数と値をセット</span>
+matrix <span style="color: #000080;">-</span>ps DIM <span style="color: #0000dd;">20</span> <span style="color: #0000dd;">20</span>;
+matrix <span style="color: #000080;">-</span>ps X <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">1</span>;
+matrix <span style="color: #000080;">-</span>ps Y <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">1</span>;
+matrix <span style="color: #000080;">-</span>v x<span style="color: #000080;">*</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000080;">-</span>x<span style="color: #000000;">)</span><span style="color: #000080;">*</span>cos<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>PI<span style="color: #000080;">*</span>x<span style="color: #000000;">)</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>PI<span style="color: #000080;">*</span>y<span style="color: #000080;">^</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">^</span><span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">//スプラインで補間</span>
+minterp2 <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> im<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span> cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">50</span> rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">50</span> xmin<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> xmax<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> ymin<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> ymax<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> om<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Interp;
+ 
+<span style="color: #008000;">//元の行列データを等高線図として作図</span>
+plotm im<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>MyMatrix1<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">226</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>Contour<span style="color: #000080;">&gt;</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">load</span><span style="color: #000000;">(</span>Fire.<span style="color: #000080;">pal</span>,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//結果行列を等高線図にプロット</span>
+plotm im<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Interp<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">226</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>;
+layer.<span style="color: #000080;">cmap</span>.<span style="color: #000080;">load</span><span style="color: #000000;">(</span>Fire.<span style="color: #000080;">pal</span>,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+sec <span style="color: #000080;">-</span>p <span style="color: #0000dd;">0.1</span>;
+layer.<span style="color: #000080;">matmaxptsenabled</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">// スピードモードオフ</span>
+</pre>
+
+  <h2><a name="Polygon_Area"></a><span class="mw-headline">ポリゴンの面積</span></h2>
+
+  <p>このグラフのようなヒステリシス・ループの場合、以下のスクリプトを使ってポリゴンの面積を計算できます。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Loop.png" src="../images/Mathematics/Loop.png" width="332"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//グラフをアクティブにする</span>
+type Dataset     Loop Area;
+doc <span style="color: #000080;">-</span>e d <span style="color: #008000;">// アクティブグラフウィンドウの全プロットでループ</span>
+<span style="color: #000000;">{</span>
+polyarea iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>C type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+type <span style="color: #000080;">%</span>C       <span style="color: #000080;">$</span><span style="color: #000000;">(</span>polyarea.<span style="color: #000080;">Area</span>,<span style="color: #000080;">%</span>2.2f<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000; font-style: regular;">/*結果表
+Index     Loop Area
+Book1_B      0.23
+Book1_C      0.16
+Book1_D      0.11
+*/</span>
+</pre>

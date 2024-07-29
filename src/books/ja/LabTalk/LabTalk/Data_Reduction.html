@@ -1,0 +1,147 @@
+﻿<h1 class="firstheading">データ削減</h1>
+
+  <p class='urlname' style='display: none'>Data-Reduction</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1">
+        <a href="#Deleting"><span class="tocnumber">1</span> <span class="toctext">削除</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-2"><a href="#Delete_Columns"><span class="tocnumber">1.1</span> <span class="toctext">列の削除</span></a></li>
+        </ul>
+      </li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Averaging"><span class="tocnumber">2</span> <span class="toctext">平均</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Average_Data_from_All_Sheets_with_Row_Statistics"><span class="tocnumber">2.1</span> <span class="toctext">行の統計ですべてのシートのデータを平均</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Data_Average_over_Selected_Sheets"><span class="tocnumber">2.2</span> <span class="toctext">選択したシートのデータを平均</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Average_XYY_Data_from_All_Sheets_with_Interpolation_of_X"><span class="tocnumber">2.3</span> <span class="toctext">Xを補間してすべてのシートのXYYデータを平均</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Deleting"></a><span class="mw-headline">削除</span></h2>
+
+  <h3><a name="Delete_Columns"></a><span class="mw-headline">列の削除</span></h3>
+
+  <p>名前またはインデックスで列を削除できます。</p>
+  <pre class="lt" style="font-family:monospace;">
+del col<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Sample 6&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// ロングネームを使う</span>
+del col<span style="color: #000000;">(</span>G<span style="color: #000000;">)</span>;          <span style="color: #008000;">// ショートネームを使う</span>
+del col<span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;          <span style="color: #008000;">// 列インデックス（最初の列は1）を使う</span>
+
+NextCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;         <span style="color: #008000;">// 変数を使う</span>
+del wcol<span style="color: #000000;">(</span>NextCol<span style="color: #000000;">)</span>;
+</pre>
+
+  <h2><a name="Averaging"></a><span class="mw-headline">平均</span></h2>
+
+  <h3><a name="Average_Data_from_All_Sheets_with_Row_Statistics"></a><span class="mw-headline">行の統計ですべてのシートのデータを平均</span></h3>
+
+  <p>以下のコードはXファンクション<b>rowStats</b>を使用してワークブック内の全てのシートにある列を平均し、新しいブックに結果を出力します。2列以上持つワークシートを2つ以上用意したワークブックから開始します（それぞれで同じ列数）。</p>
+  <pre class="lt" style="font-family:monospace;">
+string ss<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;        <span style="color: #008000;">// アクティブブック名を保存</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;  <span style="color: #008000;">// アクティブシートの列の数を保存</span>
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;         <span style="color: #008000;">// 結果用のブック（シート数3）</span>
+
+<span style="color: #008000;">// 各シートの名前付け:</span>
+range s1<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;s1.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Mean;
+range s2<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>;s2.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> N;
+range s3<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span><span style="color: #000080;">!</span>;s3.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SD;
+
+loop<span style="color: #000000;">(</span>i,<span style="color: #0000dd;">1</span>,ncols<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   rowstats <span style="color: #000000;">[</span>ss<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> 
+   mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> 
+   n<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> 
+   sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Data_Average_over_Selected_Sheets"></a><span class="mw-headline">選択したシートのデータを平均</span></h3>
+
+  <p>以下のコードは、XファンクションrowStatsを使って、<b>選択された</b>すべてのシートの各列を平均し、結果を同じブックの<i>Mean, N, SD</i>という3つのシートに出力します。2列以上持つ3つ以上のワークシート（列の数は同じ）があるワークブックを用意してコードを実行します。Ctrlキーを押しながらシート名をクリックして2つ以上のシートを選択します。</p>
+  <pre class="lt" style="font-family:monospace;">
+int ncols<span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span>;<span style="color: #008000;">//アクティブシートの列数を保存</span>
+<span style="color: #008000;">// 3,4,6のように選択されたシートを取得</span>
+string sel<span style="color: #000080;">$</span><span style="color: #000080;">=</span>SelLayers<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+
+if<span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>H<span style="color: #000000;">]</span>Mean<span style="color: #000080;">!</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Mean&quot;</span>;
+        newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;N&quot;</span>;
+        newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;SD&quot;</span>;
+<span style="color: #000000;">}</span>
+
+type <span style="color: #ff00ff;">&quot;selected sheets %(sel$)&quot;</span>;
+loop<span style="color: #000000;">(</span>i,<span style="color: #0000dd;">1</span>,ncols<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+   rowstats <span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>sel<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Mean<span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> n<span style="color: #000000;">:</span><span style="color: #000080;">=</span>N<span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SD<span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Mean;
+</pre>
+
+  <h3><a name="Average_XYY_Data_from_All_Sheets_with_Interpolation_of_X"></a><span class="mw-headline">Xを補間してすべてのシートのXYYデータを平均</span></h3>
+
+  <p>以下のコードでは、Xファンクションaverageを使用してすべてのシートのXYYデータの平均を計算して</p>
+
+  <p>結果を新しいシートに出力します。ブック内のすべてのシートは、最初の列がXで、</p>
+
+  <p>全シートの列数と列名が共通であるなど、同じ形式のデータである必要があります。各シートは</p>
+
+  <p>X値の数は同じである必要はありません。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// データファイルの場所を指定</span>
+string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Import and Export\&quot;</span>; 
+<span style="color: #008000;">// ワイルドカードを使用してすべてのファイルを探す</span>
+findfiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;S*-*-*.dat&quot;</span>; 
+int numFiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">(</span>CRLF<span style="color: #000000;">)</span>; 
+<span style="color: #008000;">// 新しいブックを開始</span>
+newbook; 
+<span style="color: #008000;">// 全てのファイルでループしてブック内の新しいシートにインポート</span>
+for<span style="color: #000000;">(</span>int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ifile <span style="color: #000080;">&lt;=</span> numFiles; ifile<span style="color: #000080;">++</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span> 
+   string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>; 
+   <span style="color: #008000;">// 次のファイル名を取得</span>
+   filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span>ifile,CRLF<span style="color: #000000;">)</span><span style="color: #000080;">$</span>; 
+   <span style="color: #008000;">// I新しいシートを追加してインポート </span>
+   impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #000000;">}</span> 
+
+<span style="color: #008000;">// すべてのシートで平均する  </span>
+
+<span style="color: #008000;">// シートの数を取得</span>
+int nlayers <span style="color: #000080;">=</span> page.<span style="color: #000080;">nlayers</span>;
+
+<span style="color: #008000;">// X取得 </span>
+range rXIn <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// Y列の数を取得 - 全てのシートで共通</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">-</span> <span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">// 新しい出力シートを追加 </span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Average&quot;</span>;
+
+<span style="color: #008000;">// 全てのデータ列でループして平均を計算</span>
+for<span style="color: #000000;">(</span>int icol <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; icol<span style="color: #000080;">&lt;=</span>ncols; icol<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  averagexy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>nlayers<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>icol <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> interp<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> x<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> y<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wcol<span style="color: #000000;">(</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+  <span style="color: #008000;">// 最初のシートのY列のロングネームと単位を取得して出力Y列に割り当て</span>
+  range rYIn <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+  col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rYIn<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>; 
+  col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>icol<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rYIn<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span>; 
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// X列のロングネームと単位を取得して出力X列に割り当て</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rXIn<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>; 
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rXIn<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+</pre>

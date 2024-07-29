@@ -1,0 +1,204 @@
+﻿<h1 class="firstheading">データのインポート</h1><p><br />
+WorksheetおよびMatrixLayerクラスはDatasheetクラスから派生されます。  DatasheetクラスにはImportASCIIというメソッドがあります。  importASCIIメソッドは、ASCIIデータファイルをインポートするのに使われます。  Microsoft Excel および SPCデータファイルをそれぞれインポートするには、ImportExcel および ImportSPCというメソッドがあります。
+</p><p><span class="OIndex" style="display:none">ASCIIデータファイルをワークシートにインポート</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Import_ASCII_Data_File_into_Worksheet"><span class="tocnumber">1</span> <span class="toctext">ASCIIデータファイルをワークシートにインポート</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Import_ASCII_Data_File_into_Matrixsheet"><span class="tocnumber">2</span> <span class="toctext">ASCIIデータファイルを行列シートにインポート</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Import_Data_Using_an_Import_FilterImport_Data_with_Filter"><span class="tocnumber">3</span> <span class="toctext">インポートフィルタを使ってデータをインポート<span class="OIndex" style="display:none">Import Data with Filter</span></span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Import_Files_with_Import_Wizard"><span class="tocnumber">4</span> <span class="toctext">インポートウィザードでファイルをインポート</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Variable_Extraction_in_Import_Wizard"><span class="tocnumber">4.1</span> <span class="toctext">インポートウィザードで変数を拡張</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Import_ASCII_Data_File_into_Worksheet"></a><span class="mw-headline">ASCIIデータファイルをワークシートにインポート</span></h2>
+<p>最初のサンプルは、ASCIIデータファイルをアクティブワークブックのアクティブワークシートにインポートします。  最初にファイルフォーマットを検出するために、AscImpReadFileStructグローバル関数を呼び出します。  フォーマット情報は、ASCIMP構造に保存されています。  そして構造は、実際にインポートを行うImportASCII メソッドに渡されます。
+<span class="OIndex" style="display:none">ASCIIデータファイルをワークシートにインポート</span>
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>data.dat&quot;</span>; <span style="color: #008000;">// いくつかのデータファイル名</span>
+ASCIMP	ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// このサンプルでは、LabTalkのシステム変数@NPOを0にして</span>
+    <span style="color: #008000;">//ASCIIインポートのプログレスバーを無効</span>
+    <span style="color: #008000;">// これは任意で、ここで可能であることを表示</span>
+    <span style="color: #008000;">// LTVarTempChangeクラスは</span>
+    <span style="color: #008000;">// LabTalk変数を簡単に設定および  元に戻すLTVarTempChangeについての詳細は</span>
+    <span style="color: #008000;">// LabTalkにアクセスするセクションをご覧ください</span>
+    LTVarTempChange progressBar<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 0 = プログレスバーを無効化</span>
+
+    <span style="color: #008000;">// アクティブワークブックからアクティブワークシートを取得</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Import data successful.&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>次のサンプルは、ASCIIデータファイルをワークシートにインポートしますが、ファイルから各列の情報も取得し、ワークシート列をセットアップします。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// ファイルを開くダイアログでユーザにインポートするファイルの選択を促す</span>
+string 	strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;*.dat&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #0000ff;">return</span>; <span style="color: #008000;">// ユーザがキャンセルあるいはエラー</span>
+
+ASCIMP	ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    ai.<span style="color: #000000;">iAutoSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 自動検出サブヘッダを無効化 </span>
+
+    <span style="color: #008000;">// 1, ロングネーム</span>
+    <span style="color: #008000;">// 2.単位	</span>
+    <span style="color: #008000;">// 3.拡張された説明（ユーザ定義）</span>
+    <span style="color: #008000;">// 4.データ型の指示（ユーザ定義）</span>
+    ai.<span style="color: #000000;">iSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+
+    <span style="color: #008000;">// iAutoSubheaderLinesがfalse(0)のとき、ai.nLongName, ai.nUnits, ai.nFirstUserParamsの </span>
+    <span style="color: #008000;">// 開始インデックスがメインヘッダから取得</span>
+    ai.<span style="color: #000000;">nLongNames</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span>; 
+    ai.<span style="color: #000000;">nUnits</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;  
+
+    <span style="color: #008000;">// 最初のユーザパラメータのインデックスをセット</span>
+    ai.<span style="color: #000000;">nFirstUserParams</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>; 
+    ai.<span style="color: #000000;">nNumUserParams</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// ユーザパラメータの数をセット</span>
+
+    <span style="color: #008000;">// コメントラベルにヘッダをセットしない</span>
+    ai.<span style="color: #000000;">iMaxLabels</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; 
+
+    <span style="color: #008000;">// アクティブワークブックからアクティブワークシートを取得</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #008000;">// エラーなしは0を返す</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #008000;">// ユーザパラメータラベルの名前</span>
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsUserLabels <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">&quot;Expanded Description&quot;</span>, <span style="color: #ff00ff;">&quot;Type Indication&quot;</span><span style="color: #000000;">}</span>;
+
+        <span style="color: #008000;">// ユーザパラメータラベルを指定した名前にセット</span>
+        Grid grid;
+        grid.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;
+        grid.<span style="color: #000000;">SetUserDefinedLabelNames</span><span style="color: #000000;">(</span>vsUserLabels<span style="color: #000000;">)</span>;
+
+        wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 内容に合うように列幅を調整</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Import_ASCII_Data_File_into_Matrixsheet"></a><span class="mw-headline">ASCIIデータファイルを行列シートにインポート</span></h2>
+<p>データを行列シートにインポートすることは、ワークシートへのインポートに似ています。  この例は、最初のワークシート例に似ています。  違いは、Worksheet クラスではなく、 MatrixLayerクラスを使って、アクティブな行列ブックからアクティブな行列シートを取得するという点です。
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>someData.dat&quot;</span>;
+ASCIMP ai;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;	
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> ml.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Data imported successfully.&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Import_Data_Using_an_Import_FilterImport_Data_with_Filter"></a><span class="mw-headline">インポートフィルタを使ってデータをインポート<span class="OIndex" style="display:none">Import Data with Filter</span></span></h2>
+<p>ファイルインポートのための関数は、<b>OriginC\Originlab\FileImport.h</b> ファイル内で宣言されます。これらの関数は、Origin Cの言語リファレンスヘルプに説明があります。
+</p><p>ファイルインポート関数を呼ぶ前に、最初にプログラムで<b>FileImport.c</b>をロードし、コンパイルする必要があります。これは、コマンドを使ってスクリプトから行うことができます。
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\FileImport.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 16というオプションは、FileImport.cファイルのcorresponding .hで</span>
+<span style="color: #008000;">// スキャンすることで、すべてのOrigin C依存ファイルがロードされるようにする</span></pre>
+<p>次のサンプルは、フィルタファイルでデータをインポートすることを示しています。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> import_with_filter_file<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// アクティブページ</span>
+ 
+    <span style="color: #008000;">// ページブック名を取得</span>
+    string strPageName <span style="color: #000080;">=</span> pg.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">// ページのアクティブインデックスを取得</span>
+    <span style="color: #0000ff;">int</span> nIndexLayer <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">// Originのサンプルフォルダを取得</span>
+    string strPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Signal Processing<span style="color: #666666; font-weight: bold;">\\</span>&quot;</span>;
+ 
+    <span style="color: #008000;">// .oif フィルタ名を指定</span>
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;TR Data Files&quot;</span>;
+ 
+    import_file<span style="color: #000000;">(</span>strPageName, nIndexLayer, strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;TR2MM.dat&quot;</span>, strFilterName<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>データフォーマットに合わせるために、既存のフィルタを修正し、ファイルからフィルタをロードし、設定する必要があるかもしれません。次のケースを確認してください。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span>    config_filter_tree<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Step01.dat&quot;</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;  
+ 
+    <span style="color: #008000;">// ツリーにフィルタをロード</span>
+    Tree trFilter;    
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;ASCII&quot;</span>;
+    <span style="color: #0000ff;">int</span> nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 組み込みのフィルタフォルダ</span>
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">)</span>;
+    WorksheetPage wp <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    string strPageName <span style="color: #000080;">=</span> wp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">(</span>strFilterName, strFile,
+                                strPageName, nLocation, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to load import filter&quot;</span><span style="color: #000000;">)</span>; 
+    
+    <span style="color: #008000;">// フィルタツリー更新</span>
+    trFilter.<span style="color: #000000;">iRenameCols</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0はデフォルトの列名を保持、1は列の名前を変更</span>
+    
+    <span style="color: #008000;">// フィルタツリーでデータファイルをインポート</span>
+    <span style="color: #008000;">// import_files 関数は、一度に複数ファイルのインポートをサポート</span>
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsDataFileName;
+    vsDataFileName.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strFile<span style="color: #000000;">)</span>;    
+    nRet <span style="color: #000080;">=</span> import_files<span style="color: #000000;">(</span>vsDataFileName, strPageName, wks.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, trFilter<span style="color: #000000;">)</span>;	
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to import file&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Import_Files_with_Import_Wizard"></a><span class="mw-headline">インポートウィザードでファイルをインポート</span></h2>
+<p>インポートするファイルが、ASCIIファイルでも単純なバイナリファイルでもない場合、あるいは、データファイルのインポートフィルタがない場合は、Origin Cの impFile Xファンクションを使用し、インポートウィザードウィザードでファイルをインポートできます。
+</p><p><b>Origin C</b> 関数は、次のプロトタイプのどちらかを使います。
+</p><p>int YourFunctionName(Page&amp; pgTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)
+</p><p>ここで、
+</p>
+<ul><li><b>pgTarget:</b> worksheet型またはMatrix型のPageオブジェクトへの参照。  これは、自分のフィルタ内またはインポートウィザードの「データソース」ページでターゲットウィンドウとして定義するものです。 </li></ul>
+<ul><li><b>trFilter:</b> フィルタファイルまたはウィザードの指定からのすべてのフィルタ設定を持つツリー構造でのTreeNodeオブジェクトへの参照。 </li></ul>
+<ul><li><b>lpcszFile:</b> インポートするファイルのフルパスと名前 </li></ul>
+<ul><li><b>nFile:</b> インポートするファイルの順序を示すファイルインデックス番号 (例えば、n 個のファイルをインポートする場合、関数はn回呼び出され、nFile は処理されるファイルの数となります。 </li></ul>
+<p>または、
+</p><p>int YourFunctionName(Layer&amp; lyTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)
+</p><p>ここで、
+</p>
+<ul><li><b>lyTarget:</b>orksheet型またはMatrix型のLayerオブジェクトへの参照。  これは、自分のフィルタ内またはインポートウィザードの「データソース」ページでターゲットウィンドウとして定義するものです。</li></ul>
+<ul><li><b>trFilter:</b> フィルタファイルまたはウィザードの指定からのすべてのフィルタ設定を持つツリー構造でのTreeNodeオブジェクトへの参照。</li></ul>
+<ul><li><b>lpcszFile:</b> インポートするファイルのフルパスと名前</li></ul>
+<ul><li><b>nFile:</b> インポートするファイルの順序を示すファイルインデックス番号 (例えば、n 個のファイルをインポートする場合、関数はn回呼び出され、nFile は処理されるファイルの数となります。</li></ul>
+<p>Originのインストールフォルダの、\Samples\Import と Export\User Defined フォルダにサンプルがあります。 
+</p>
+<table class="note">
+
+<tr>
+<td>
+<p><b>Note:</b> インポートウィザードの最初のページ(<b>データソース</b>ページ)にあるターゲットウィンドウテンプレートの名前は、新しいウィンドウを作成するときだけ使われます(ドラッグ&amp;ドロップインポート時にはいくつか条件があります)。  <b>ファイル：インポート</b>を選択するとき、アクティブウィンドウがインポートフィルタの<b>ターゲットウィンドウ</b>として設定されていると、新しいウィンドウは作成されず、アクティブウィンドウへのpageオブジェクトの参照が関数に渡されます。  アクティブウィンドウが異なるタイプの場合、指定したテンプレートで新しいウィンドウが作成され、この新しいウィンドウへのpage参照が渡されます。
+</p>
+</td></tr></table>
+<p><br />
+</p>
+<h3><a name="Variable_Extraction_in_Import_Wizard"></a><span class="mw-headline">インポートウィザードで変数を拡張</span></h3>
+<p>インポートウィザードでASCIIファイルをインポートするとき、ユーザ定義のOrigin C関数を使ってファイルヘッダから変数を抽出することができます。
+</p><p>Origin C 関数は、次のようなプロトタイプになっている必要があります。
+</p><p>int FuncName(StringArray&amp; saVarNames, StringArray&amp; saVarValues, const StringArray&amp; saHdrLines, const TreeNode &amp;trFilter);
+</p><p>ここで、 
+</p>
+<ul><li><b>saVarNames</b>: 変数名を配置する文字列配列</li>
+<li><b>saVarValues</b>: 変数値を配置する文字列配列 </li>
+<li><b>saHdrLines</b>: ヘッダ行を含む文字列配列への参照。  ヘッダ行が自動的に関数に渡されるので、Origin C関数はデータファイルを読み込む必要はありません。 </li>
+<li><b>trFilter</b>: フィルタファイルまたはウィザードの指定からのすべてのフィルタ設定を持つツリー構造でのTreeNodeオブジェクトへの参照。 </li></ul>
+
+
+
+
+
+
+
+    

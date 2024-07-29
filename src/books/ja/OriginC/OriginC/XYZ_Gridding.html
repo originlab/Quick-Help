@@ -1,0 +1,135 @@
+﻿<h1 class="firstheading">XYZ Gridding</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Need_to_do_before_Running_Examples"><span class="tocnumber">2</span> <span class="toctext">Need to do before Running Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Examples"><span class="tocnumber">3</span> <span class="toctext">Examples</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Need_to_do_before_Running_Examples"></a><span class="mw-headline">Need to do before Running Examples</span></h2>
+
+  <p>Prior to running the following example, the <b>gridding_utils.c</b> file need to be loaded and compiled. This can be done from script with the following command:</p>
+  <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\gridding_utils.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span>;
+</pre>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #008000;">// File Name:  XYZ Gridding.c</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Description:</span>
+<span style="color: #008000;">// This example demonstrates how to convert different type XYZ data to matrix. </span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// Instructions:</span>
+<span style="color: #008000;">// 1. Add Nag_utils.c to Code Builder Workspace and compile with this file.</span>
+<span style="color: #008000;">// 2. New a worksheet and import \\Matrix Conversion and Gridding\XYZ Random Gaussian.dat,</span>
+<span style="color: #008000;">// then run xyz_gridding in command window, will convert random xyz data to matrix.</span>
+<span style="color: #008000;">// 3. New a worksheet and import  \\Matrix Conversion and Gridding\XYZ Regular.dat,</span>
+<span style="color: #008000;">// then run xyz_gridding in command window, will convert regular xyz data to matrix.</span>
+<span style="color: #008000;">// 4. New a worksheet and import  \\Matrix Conversion and Gridding\Sparse.dat,</span>
+<span style="color: #008000;">// then run xyz_gridding in command window, will convert sparse xyz data to matrix.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+<span style="color: #008000;">// For more Origin C examples visit the Origin C Wiki online at:</span>
+<span style="color: #008000;">// http://wikis/ocwiki/index.php?title=Category:Examples</span>
+<span style="color: #008000;">//--------------------------------------------------------------------------</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Nag_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+
+<span style="color: #0000ff;">void</span> xyz_gridding<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>, <span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"No active worksheet"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        Column colX<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        Column colY<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        Column colZ<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>colX <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>colY <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>colZ <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"No XYZ column"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        XYZRange rng;
+        rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Z"</span><span style="color: #000000;">)</span>;
+        
+        vector vX, vY, vZ;
+        rng.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vZ, vY, vX<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// examine data type</span>
+        UINT nVar;
+        <span style="color: #0000ff;">double</span> xmin, xstep, xmax, ymin, ystep, ymax;
+        <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nMethod <span style="color: #000080;">=</span> ocmath_xyz_examine_data<span style="color: #000000;">(</span>nSize, vX, vY, vZ, 1.0e<span style="color: #000040;">-</span>8, 1.0e<span style="color: #000040;">-</span>8, <span style="color: #000040;">&amp;</span>nVar, <span style="color: #000040;">&amp;</span>xmin, <span style="color: #000040;">&amp;</span>xstep, <span style="color: #000040;">&amp;</span>xmax, <span style="color: #000040;">&amp;</span>ymin, <span style="color: #000040;">&amp;</span>ystep, <span style="color: #000040;">&amp;</span>ymax<span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000040;">||</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000000;">)</span> <span style="color: #008000;">//regular or Sparse</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">(</span>ystep, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        nRows <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">(</span>ymax <span style="color: #000040;">-</span> ymin<span style="color: #000000;">)</span><span style="color: #000040;">/</span>ystep <span style="color: #000040;">+</span> <span style="color: #0000dd;">1.5</span>;
+                
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">(</span>xstep, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        nCols <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">(</span>xmax <span style="color: #000040;">-</span> xmin<span style="color: #000000;">)</span><span style="color: #000040;">/</span>xstep <span style="color: #000040;">+</span> <span style="color: #0000dd;">1.5</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// prepare matrix window</span>
+        MatrixPage mp;
+        mp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+        MatrixLayer ml <span style="color: #000080;">=</span> mp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        MatrixObject mo<span style="color: #000000;">(</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">(</span>xmin, ymin, xmax, ymax<span style="color: #000000;">)</span>;
+        Matrix mat<span style="color: #000000;">(</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        mat.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nRows, nCols<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// do xyz gridding</span>
+        <span style="color: #0000ff;">int</span> iRet;
+        <span style="color: #0000ff;">switch</span><span style="color: #000000;">(</span>nMethod<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Regular.</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"--- %d: regular conversion ---<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iRet<span style="color: #000000;">)</span>;    
+                iRet <span style="color: #000080;">=</span> ocmath_convert_regular_xyz_to_matrix<span style="color: #000000;">(</span>nSize, vX, vY, vZ, mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">break</span>;
+                
+        <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Sparse.</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"--- %d: sparse conversion ---<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iRet<span style="color: #000000;">)</span>;             
+                iRet <span style="color: #000080;">=</span> ocmath_convert_sparse_xyz_to_matrix<span style="color: #000000;">(</span>nSize, vX, vY, vZ, mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">break</span>;
+                
+        <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Random(Renka Cline).</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"--- %d: random conversion ---<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iRet<span style="color: #000000;">)</span>;
+                
+                vector vxGrid<span style="color: #000000;">(</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">)</span>, vyGrid<span style="color: #000000;">(</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">)</span>;
+                iRet <span style="color: #000080;">=</span> ocmath_mat_to_regular_xyz<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, xmin, xmax, ymin, ymax, vxGrid, vyGrid<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> iRet <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                iRet <span style="color: #000080;">=</span> xyz_gridding_nag<span style="color: #000000;">(</span>vX, vY, vZ, vxGrid, vyGrid, mat<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>
+                <span style="color: #0000ff;">break</span>;
+                
+        <span style="color: #0000ff;">default</span><span style="color: #000000;">:</span> <span style="color: #008000;">// Error.</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"--- Error: %d returned ---<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iRet<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>             
+<span style="color: #000000;">}</span>
+</pre>

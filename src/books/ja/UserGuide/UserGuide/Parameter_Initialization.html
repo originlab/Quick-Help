@@ -1,0 +1,342 @@
+﻿<h1 class="firstheading">パラメータ初期化</h1>
+<p class="urlname" style="display: none;">FitPara-INI</p>
+<p>Levenberg-Marquardt反復アルゴリズムは、フィット処理を開始するのに、初期値を必要とします。適切な初期値を与えると、素早く、信頼できる収束結果を得ることができます。関数オーガナイザでフィット関数を定義するとき、『パラメータ設定』ボックスで初期値を割り当てることができ、『パラメータ初期化』ボックスに初期値を計算するのに使用するOrigin Cコードを入力します。</p>
+<p>OriginのNLFitは、すべての組み込み関数に対して、自動初期値計算ルーチンを提供しています。ユーザ定義関数では、パラメータ初期化コードを自分で追加する必要があります。パラメータ初期化コードが無い場合、NLFitが開始するとき、すべてのパラメータ値が欠損値になります。この場合、フィット処理を開始するときに、推定される初期値を入力する必要があります。</p>
+<p>仮に「パラメータ設定」で異なる初期値が設定されていたとしても、パラメータ初期化ルーチンにより推定されるパラメータの初期値が使われます。</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>目次</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Set_initial_values_in_Parameter_Settings_dialog"><span class="tocnumber">1</span> <span class="toctext">「パラメータ設定」ダイアログで初期値を設定する</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Estimate_parameter_initial_values_by_Origin_C_code"><span class="tocnumber">2</span> <span class="toctext">Origin Cコードでパラメータの初期値を推定する</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Frequently_Used_Origin_C_Function_for_Parameter_Initialization"><span class="tocnumber">3</span> <span class="toctext">パラメータ初期化によく使われるOrigin Cファンクション</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#More_Parameter_Initialization_Examples"><span class="tocnumber">4</span> <span class="toctext">パラメータ初期化の例</span></a>
+<ol>
+<li class="toclevel-2 tocsection-5"><a href="#Exponent_function"><span class="tocnumber">4.1</span> <span class="toctext">指数関数</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Peak_function"><span class="tocnumber">4.2</span> <span class="toctext">ピーク関数</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Sigmoidal_Function"><span class="tocnumber">4.3</span> <span class="toctext">シグモイド関数</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Surface_Function"><span class="tocnumber">4.4</span> <span class="toctext">曲面関数</span></a></li>
+</ol>
+</li>
+</ol>
+</div>
+<h2><a name="Set_initial_values_in_Parameter_Settings_dialog" id="Set_initial_values_in_Parameter_Settings_dialog"></a><span class="mw-headline">「パラメータ設定」ダイアログで初期値を設定する</span></h2>
+<p><b style="font-weight: bold;">パラメータ設定</b>ボックスの近くにある<a class="image"><img alt="Parameter Initialization button.png" src="../images/Parameter_Initialization/Parameter_Initialization_button.png" width="18" border="0" /></a> ボタンをクリックし、<b>パラメータ設定</b>ダイアログを開きます。そして、<b>パラメータ</b>タブの「値」列にパラメータの適切な初期値を入力できます。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="Parameter Initialization 01.png" src="../images/Parameter_Initialization/Parameter_Initialization_01.png" width="1091" height="313" border="0" /></a></dd>
+</dl>
+<p>初期式（列統計値、ラベル行など）でパラメータを初期化するには、<b>初期式</b>のチェックボックスのチェックを入れて、初期式やメタデータをフライアウトメニューから選択します。</p>
+<h2><a name="Estimate_parameter_initial_values_by_Origin_C_code" id="Estimate_parameter_initial_values_by_Origin_C_code"></a><span class="mw-headline">Origin Cコードでパラメータの初期値を推定する</span></h2>
+<p>『パラメータ初期化』のテキストボックスには、パラメータの初期化コードが含まれます。組込み関数に対して、これらのルーチンは&#160;データセット特有のパラメータを推定することでフィット前にパラメータ値を効果的に推定することができます。新しいOrigin Cフィット関数を定義するとき、<a class="image"><img alt="Parameter Initialization button.png" src="../images/Parameter_Initialization/Parameter_Initialization_button.png" width="18" border="0" /></a>ボタンをクリックして、コードビルダで初期化コードを編集することができます。</p>
+<p>パラメータの初期値を推定する方法は、多くありますが、一般に関数を変換して、元データに基づく値を推定します。例えば、MyFuncという名前のフィットモデルを次のように定義できます。</p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-94dcae711817b2f2065c011e106c9b86.png" title="y=ax^b\,\!" alt="y=ax^b\,\!" class="tex" border="0" /></dd>
+</dl>
+<p>(これは、Originの組込のAllometric1関数と同じ関数です。)</p>
+<p>そして、数式は次のような式で変換されます。</p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-49d5d1f50379e7b6263ece1f1f70c0fe.png" title="\ln (y)=\ln (ax^b)\,\!" alt="\ln (y)=\ln (ax^b)\,\!" class="tex" border="0" /></dd>
+<dd><img src="../images/Parameter_Initialization/math-84d594c8d89dc8cbfef59cdd4c6d0c16.png" title="\ln (y)=\ln (a)+b\ln (x)\,\!" alt="\ln (y)=\ln (a)+b\ln (x)\,\!" class="tex" border="0" /></dd>
+</dl>
+<p>変換すると、ln(y) と ln(x)の間に線形の関係を持ち、切片と勾配がそれぞれ、ln(a)とb になります。推定パラメータ値を取得するには、単純な線形フィットを行う必要があります。初期化コードは次のようになります。</p>
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>   <span style="color: #0000ff;">void</span> _nlsfParamMyFunc<span style="color: #000000;">(</span> <span style="color: #008000;">// フィットパラメータ:</span> <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> a, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> b, <span style="color: #008000;">// 独立データセット:</span> vector<span style="color: #000040;">&amp;</span> x_data, <span style="color: #008000;">// 独立データセット:</span> vector<span style="color: #000040;">&amp;</span> y_data, <span style="color: #008000;">// 曲線:</span> Curve x_y_curve, <span style="color: #008000;">// 補助的なエラーコード:</span> <span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> nErr<span style="color: #000000;">)</span>   <span style="color: #000000;">{</span>                                                  <span style="color: #008000;">// 編集可能部分の開始</span> sort<span style="color: #000000;">(</span> x_y_curve <span style="color: #000000;">)</span>;                         <span style="color: #008000;">// 曲線のソート</span> Dataset dx; x_y_curve.<span style="color: #000000;">AttachX</span><span style="color: #000000;">(</span>dx<span style="color: #000000;">)</span>;                     <span style="color: #008000;">// Xデータにデータセットオブジェクトを付加</span> dx <span style="color: #000080;">=</span> ln<span style="color: #000000;">(</span>dx<span style="color: #000000;">)</span>;                               <span style="color: #008000;">// x = ln(x)を設定</span> x_y_curve <span style="color: #000080;">=</span> ln<span style="color: #000000;">(</span> x_y_curve <span style="color: #000000;">)</span>;               <span style="color: #008000;">//y = ln(y)を設定</span> vector coeff<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>; fitpoly<span style="color: #000000;">(</span>x_data, y_data, <span style="color: #0000dd;">1</span>, coeff<span style="color: #000000;">)</span>;         <span style="color: #008000;">// 一次 (単一線形)多項式フィット</span> a <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span> coeff<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000000;">)</span>;                       <span style="color: #008000;">// パラメータaの推定</span> b <span style="color: #000080;">=</span> coeff<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;                              <span style="color: #008000;">// パラメータbの推定</span> <span style="color: #008000;">// 編集可能部分の終了</span> <span style="color: #000000;">}</span>
+</pre>
+<p>コードビルダで、関数本体を編集する必要があります。パラメータ、独立変数、従属変数が関数定義で宣言されます。さらに、Originのオブジェクトのいくつかは宣言されています。各独立変数と従属変数のDatasetオブジェクトおよび各xyデータのCurveオブジェクトが宣言されています。</p>
+<pre class="oc" style="font-family: monospace;">
+vector<span style="color: #000040;">&amp;</span> x_data; vector<span style="color: #000040;">&amp;</span> y_data; Curve x_y_curve;
+</pre>
+<p>Vectorはxとyのキャッシュ入力値を表し、これらは変更されません。curveオブジェクトは、xデータセットとyデータセットで構成されるデータセットの曲線の複製で、一番いいフィットを探しているデータです。</p>
+<p>これらの宣言の下に、編集可能なセクション(白い領域)があり、初期化コードを入力することができます。関数の定義はC言語のシンタックスに従う必要があります。</p>
+<table class="note">
+<tr>
+<td>Note:void型の関数は、関数が値を戻さないということです。パラメータの変数は、関数コードに保存されます。</td>
+</tr>
+</table>
+<p>初期化は、vectorまたはcurveオブジェクトを引数として、組込み関数を呼び出すことで行われます。初期化関数を定義したら、シンタックスが正しいかどうかを確認します。これを行うには、コードビルダの上の方にある「コンパイル」ボタンをクリックします。これは、Origin Cコンパイラを使って、関数コードをコンパイルします。コンパイル中に発生したエラーは、ワークスペースの下にあるコードビルダの出力ウィンドウに出力されます。</p>
+<p>初期化コードを定義して、コンパイルしたら、ウィンドウの上部にある<b>NLSFに戻る</b>ボタンをクリックし、関数オーガナイザに戻ることができます。</p>
+<table class="note">
+<tr>
+<td>コードをデバッグしたい場合、<a class="external text" href="../../UserGuide/UserGuide/Code_Tab_Upper_Panel.html">NLFitダイアログのコードタブ</a>から<b>コードビルダ</b>の初期化コードを開き、切断点を設定します。そして、<b>パラメータ初期化</b>ボタン<a class="image"><img alt="Button Initialize Parameters.png" src="../images/Parameter_Initialization/Button_Initialize_Parameters.png" width="26" border="0" /></a> をクリックして初期化コードを呼び出し、デバッグします。デバッグに関する詳細は、Originメニューから<b>ヘ</b>ルプ：プログラミング：コードビルダを選択し、デバッグを検索して下さい。</td>
+</tr>
+</table>
+<h2><a name="Frequently_Used_Origin_C_Function_for_Parameter_Initialization" id="Frequently_Used_Origin_C_Function_for_Parameter_Initialization"></a><span class="mw-headline">パラメータ初期化によく使われるOrigin Cファンクション</span></h2>
+<table class="simple">
+<tr>
+<th>関数</th>
+<th>説明</th>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Area_(global_function).html">area</a></b></p>
+</td>
+<td>
+<p>曲線下の面積を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Curve_MinMax_(global_function).html">Curve_MinMax</a></b></p>
+</td>
+<td>
+<p>曲線のXとYの範囲を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Curve_x_(global_function).html">Curve_x</a></b></p>
+</td>
+<td>
+<p>指定したインデックスにおける曲線のX値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Curve_xfromY_(global_function).html">Curve_xfromY</a></b></p>
+</td>
+<td>
+<p>指定したY値における、曲線のXの補間/補外値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Curve_y_(global_function).html">Curve_y</a></b></p>
+</td>
+<td>
+<p>指定したインデックスにおける曲線のY値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Curve_xfromY_(global_function).html">Curve_yfromX</a></b></p>
+</td>
+<td>
+<p>与えられた曲線に対して、指定したX値におけるYの補間/補外値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Fitpoly_(global_function).html">fitpoly</a></b></p>
+</td>
+<td>
+<p>曲線（またはXYベクトル）に多項式をフィットし、係数と統計結果を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Fit_polyline_(global_function).html">fit_polyline</a></b></p>
+</td>
+<td>
+<p>nがセクションの数である時に曲線をポリラインにフィットし、各セクションのX座標の平均値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Fitpoly_range_(global_function).html">fitpoly_range</a></b></p>
+</td>
+<td>
+<p>多項式を曲線領域にフィットします。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Find_roots_(global_function).html">find_roots</a></b></p>
+</td>
+<td>
+<p>指定した高さのポイントを見つけます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Fwhm_(global_function).html">fwhm</a></b></p>
+</td>
+<td>
+<p>Yの最大値の半値における曲線のピーク幅を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Get_exponent_(global_function).html">get_exponent</a></b></p>
+</td>
+<td>
+<p>この関数は、y = y0 + A*exp(R0*x)におけるy0、R0 、Aの測定に使われます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Get_interpolated_xz_yz_curves_from_3D_data_(global_function).html">get_interpolated_xz_yz_curves_from_3D_data</a></b></p>
+</td>
+<td>
+<p>3Dデータを補間し、xz, yz 曲線を戻します。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Ocmath_xatasymt_(global_function).html">ocmath_xatasymt</a></b></p>
+</td>
+<td>
+<p>垂直な漸近線におけるXの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Ocmath_yatasymt_(global_function).html">ocmath_yatasymt</a></b></p>
+</td>
+<td>
+<p>水平な漸近線におけるYの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a></b></p>
+</td>
+<td>
+<p>この関数は、XY座標、ピーク幅、面積などの測定に使われます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Sort_(global_function).html">sort</a></b></p>
+</td>
+<td>
+<p>曲線オブジェクトを使って、Xデータセットに準じてYデータセットを抽出します。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Vectorbase-GetMinMax.html">Vectorbase::GetMinMax</a></b></p>
+</td>
+<td>
+<p>最小値と最大値、そしてインデックスからベクトルを求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Xatasymt_(global_function).html">xatasymt</a></b></p>
+</td>
+<td>
+<p>垂直な漸近線におけるXの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Xaty50_(global_function).html">xaty50</a></b></p>
+</td>
+<td>
+<p>曲線のY値の最小値と最大値の平均におけるXの補間値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Xatymax_(global_function).html">xatymax</a></b></p>
+</td>
+<td>
+<p>曲線のYの最大値におけるXの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Xatymin_(global_function).html">xatymin</a></b></p>
+</td>
+<td>
+<p>曲線のYの最小値におけるXの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Yatasymt_(global_function).html">yatasymt</a></b></p>
+</td>
+<td>
+<p>水平な漸近線におけるYの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Yatxmax_(global_function).html">yatxmax</a></b></p>
+</td>
+<td>
+<p>曲線のXの最大値におけるYの値を求めます。</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><b style="font-weight: bold;"><a class="external text" href="../../OriginC/OriginC/Yatxmin_(global_function).html">yatxmin</a></b></p>
+</td>
+<td>
+<p>曲線のXの最小値におけるYの値を求めます。</p>
+</td>
+</tr>
+</table>
+<h2><a name="More_Parameter_Initialization_Examples" id="More_Parameter_Initialization_Examples"></a><span class="mw-headline">パラメータ初期化の例</span></h2>
+<h3><a name="Exponent_function" id="Exponent_function"></a><span class="mw-headline">指数関数</span></h3>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">サンプル関数</i></b></p>
+<dl>
+<dd>EXPDEC2</dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">方程式</i></b></p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-6970073dbaf58ac427944e7a57e39314.png" title="y = y_0 + A_1e^{-x/t_1} + A_2e^{-x/t_2}" alt="y = y_0 + A_1e^{-x/t_1} + A_2e^{-x/t_2}" class="tex" border="0" /></dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">初期化コード</i></b></p>
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #0000ff;">int</span> sign; t1 <span style="color: #000080;">=</span> get_exponent<span style="color: #000000;">(</span>x_data, y_data, <span style="color: #000040;">&amp;</span>y0, <span style="color: #000040;">&amp;</span>A1, <span style="color: #000040;">&amp;</span>sign<span style="color: #000000;">)</span>; t1 <span style="color: #000080;">=</span> t2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000040;">/</span> t1; A1 <span style="color: #000080;">=</span> A2 <span style="color: #000080;">=</span> sign <span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span>A1<span style="color: #000000;">)</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span>;
+</pre>
+<p><b><i style="font-style: italic;"><b style="font-weight: bold;">説明</b></i></b><br />
+ほとんどの指数曲線が類似しているため、複雑な方程式へのアプローチには単純な指数関数を使うことができます。このEXPDEC2関数は、パラメータが<a class="external text" href="../../OriginC/OriginC/Get_exponent_(global_function).html">get_exponent</a>からくる2つの基本的な指数関数の組み合わせとして扱うことができます。</p>
+<h3><a name="Peak_function" id="Peak_function"></a><span class="mw-headline">ピーク関数</span></h3>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">サンプル関数</i></b></p>
+<dl>
+<dd>LORENTZ</dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">方程式</i></b></p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-d9ff2b308fc198a7dbcfca740e24fe52.png" title="y = y_0 + \frac{2A}{\pi}\frac{w}{4(x-x_c)^2+w^2}" alt="y = y_0 + \frac{2A}{\pi}\frac{w}{4(x-x_c)^2+w^2}" class="tex" border="0" /></dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">初期化コード</i></b></p>
+<pre class="oc" style="font-family: monospace;">
+xc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">(</span>x_y_curve, <span style="color: #000040;">&amp;</span>w, <span style="color: #000040;">&amp;</span>y0, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>A<span style="color: #000000;">)</span>; A <span style="color: #000040;">*</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1.57</span><span style="color: #000040;">*</span>w;
+</pre>
+<p><b><i style="font-style: italic;"><b style="font-weight: bold;">説明</b></i></b><br />
+この初期化コードでは、まず初めにピーク幅<img src="../images/Parameter_Initialization/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />、基線<img src="../images/Parameter_Initialization/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />、ピークの中心<img src="../images/Parameter_Initialization/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />、元は<a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a>関数によって変数<img src="../images/Parameter_Initialization/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />とされていたピークの高さを測定します。以下の演算でピーク面積Aを求めます。<br />
+<img src="../images/Parameter_Initialization/math-38b5a27db82a0cd8e08cdd5cb2b6d2a3.png" title="y_{max}" alt="y_{max}" class="tex" border="0" />は<img src="../images/Parameter_Initialization/math-6a2c2acc85c6b35d3f40e515cea7dfaf.png" title="x = x_c" alt="x = x_c" class="tex" border="0" />の値とします。</p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-76ab050a5d144be5d91bc32a6571b70f.png" title="y_{max} - y_0 = \frac{2A}{w\pi}" alt="y_{max} - y_0 = \frac{2A}{w\pi}" class="tex" border="0" /></dd>
+</dl>
+<p>and</p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-4cd0a5757796457500b3084424eb7d6b.png" title="\begin{matrix}A = H w \pi / 2 = 1.57 H w\end{matrix}" alt="\begin{matrix}A = H w \pi / 2 = 1.57 H w\end{matrix}" class="tex" border="0" /></dd>
+</dl>
+<p>ここで、<i>H</i> はピークの高さです。</p>
+<h3><a name="Sigmoidal_Function" id="Sigmoidal_Function"></a><span class="mw-headline">シグモイド関数</span></h3>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">サンプル関数</i></b></p>
+<dl>
+<dd>DRESP</dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">方程式</i></b></p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-a7a6424c1285db8296113cb98bb816ad.png" title="A_1 + \frac{A_2 - A_1}{1 + 10^{(LOGx_0 - x)p}}" alt="A_1 + \frac{A_2 - A_1}{1 + 10^{(LOGx_0 - x)p}}" class="tex" border="0" /></dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">初期化コード</i></b></p>
+<pre class="oc" style="font-family: monospace;">
+sort<span style="color: #000000;">(</span>x_y_curve<span style="color: #000000;">)</span>; A1 <span style="color: #000080;">=</span> min<span style="color: #000000;">(</span> y_data <span style="color: #000000;">)</span>; A2 <span style="color: #000080;">=</span> max<span style="color: #000000;">(</span> y_data <span style="color: #000000;">)</span>; LOGx0 <span style="color: #000080;">=</span> xaty50<span style="color: #000000;">(</span> x_y_curve <span style="color: #000000;">)</span>; <span style="color: #0000ff;">double</span> xmin, xmax; x_data.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>xmin, xmax<span style="color: #000000;">)</span>; <span style="color: #0000ff;">double</span> range <span style="color: #000080;">=</span> xmax <span style="color: #000040;">-</span> xmin; <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> yatxmax<span style="color: #000000;">(</span>x_y_curve<span style="color: #000000;">)</span> <span style="color: #000040;">-</span> yatxmin<span style="color: #000000;">(</span>x_y_curve<span style="color: #000000;">)</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> p <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.0</span> <span style="color: #000040;">/</span> range; <span style="color: #0000ff;">else</span> p <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">5.0</span> <span style="color: #000040;">/</span> range;
+</pre>
+<p><b><i style="font-style: italic;"><b style="font-weight: bold;">説明</b></i></b>パラメータの意味を知ることは、パラメータの初期化に非常に役立つ重要なことです。用量反応において、A<sub>1</sub>は下の漸近線 、A<sub>2</sub>は上の漸近線を意味するので、Yの最小値と最大値で初期化を行うことができます。反応におけるパラメータLOGx<sub>0</sub> は、50%の反応がおこる典型的な値なので、ここでは<a class="external text" href="../../OriginC/OriginC/Xaty50_(global_function).html">xaty50</a>関数を使います。傾きpに関しては、この値をどのように計算しても問題ありませんが、傾きの符号は重要です。</p>
+<h3><a name="Surface_Function" id="Surface_Function"></a><span class="mw-headline">曲面関数</span></h3>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">サンプル関数</i></b></p>
+<dl>
+<dd>Gauss2D</dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">方程式</i></b></p>
+<dl>
+<dd><img src="../images/Parameter_Initialization/math-ad966aa8e244d44126663ef35a7745e8.png" title="z = z_0 + A e^{-\frac{1}{2}(\frac{x-x_c}{w_1})^2-\frac{1}{2}(\frac{y-y_c}{w_2})^2}" alt="z = z_0 + A e^{-\frac{1}{2}(\frac{x-x_c}{w_1})^2-\frac{1}{2}(\frac{y-y_c}{w_2})^2}" class="tex" border="0" /></dd>
+</dl>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">初期化コード</i></b></p>
+<pre class="oc" style="font-family: monospace;">
+Curve x_curve, y_curve; <span style="color: #0000ff;">bool</span> bRes <span style="color: #000080;">=</span> get_interpolated_xz_yz_curves_from_3D_data<span style="color: #000000;">(</span>x_curve, y_curve, x_data, y_data, z_data, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>; <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>bRes<span style="color: #000000;">)</span> <span style="color: #0000ff;">return</span>; xc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">(</span>x_curve, <span style="color: #000040;">&amp;</span>w1, <span style="color: #000040;">&amp;</span>z0, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>A<span style="color: #000000;">)</span>; yc <span style="color: #000080;">=</span> peak_pos<span style="color: #000000;">(</span>y_curve, <span style="color: #000040;">&amp;</span>w2<span style="color: #000000;">)</span>;
+</pre>
+<p><b style="font-weight: bold;"><i style="font-style: italic;">説明</i></b><br />
+曲線関数の初期値を測定する一つの方法は、平面で問題を解くことです。このGauss2D関数を例にとると、Zの最大値は点(x<sub>c</sub>, y<sub>c</sub>)上にあるのが明らかなので、 <a class="external text" href="../../OriginC/OriginC/Get_interpolated_xz_yz_curves_from_3D_data_(global_function).html">get_interpolated_xz_yz_curves_from_3D_data</a> 関数を使ってXZとYZ平面での特徴的な曲線を求めることができます。そして、<a class="external text" href="../../OriginC/OriginC/Peak_pos_(global_function).html">peak_pos</a> 関数を使ってピーク幅、高さなどの他のピークの属性を測定します。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="Docwiki Parameter Initial 3D Example.png" src="../images/Parameter_Initialization/Docwiki_Parameter_Initial_3D_Example.png" width="326" border="0" /></a></dd>
+</dl>

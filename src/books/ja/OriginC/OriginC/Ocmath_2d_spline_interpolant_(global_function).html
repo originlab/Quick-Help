@@ -1,0 +1,202 @@
+﻿<h1 class="firstheading">ocmath_2d_spline_interpolant</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Computes a bicubic spline interpolating surface through a set of data values, given on a rectangular grid in the x-y plane.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_2d_spline_interpolant<span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nX, <span style="color: #0000ff;">int</span> nY, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pZ, ocmath_2dSpline <span style="color: #000040;">*</span> spline <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>nX</dt>
+
+    <dd>[input] Number of x abcissae ( nX &gt; 4 )</dd>
+
+    <dt>nY</dt>
+
+    <dd>[input] Number of y abcissae ( nY &gt; 4 )</dd>
+
+    <dt>pX</dt>
+
+    <dd>[input] pointer to x abcissae values (size nX), Must be strictly increasing.</dd>
+
+    <dt>pY</dt>
+
+    <dd>[input] pointer to y abcissae values (size nY), Must be strictly increasing.</dd>
+
+    <dt>pZ</dt>
+
+    <dd>[input] pointer to function values to interpolate. (size nX by nY)</dd>
+
+    <dt>spline</dt>
+
+    <dd>[output]</dd>
+
+    <dd>spline-&gt;nx = nX + 4</dd>
+
+    <dd>spline-&gt;ny = nY + 4</dd>
+
+    <dd>spline-&gt;lamda = pointer to the knots in the x direction. (size nX + 4)</dd>
+
+    <dd>spline-&gt;mu = pointer to the knots in the y direction. (size nY + 4)</dd>
+
+    <dd>spline-&gt;c = pointer to coefficients of the B-spline interpolant.(size nX by nY)</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>NE_NOERROR (code 0) --- success</p>
+
+  <p>NE_INT_ARG_LT (error code 11) --- nX &lt; 4 or nY &lt; 4</p>
+
+  <p>NE_NOT_STRICTLY_INCREASING (error code 63) --- pX[i] or pY[i] is not strictly increasing</p>
+
+  <p>NE_ALLOC_FAIL (error code 73) --- memory allocation failed</p>
+
+  <p>NE_DATA_ILL_CONDITIONED (error code 252) --- An intermediate set of linear equations is singular, the data is too ill-conditioned to compute B-spline coefficients</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//This program reads in values of mx, xq for q = 1, 2, . . .,mx, my</span>
+<span style="color: #008000;">//and yr for r = 1, 2, . . .,my, followed by values of the</span>
+<span style="color: #008000;">//ordinates fq,r defined at the grid points (xq, yr). It then calls</span>
+<span style="color: #008000;">//ocmath_2d_spline_interpolant to compute a bicubic spline interpolant</span>
+<span style="color: #008000;">//of the data values, and prints the values of the knots and</span>
+<span style="color: #008000;">//B-spline coefficients. Finally it evaluates the spline at a</span>
+<span style="color: #008000;">//small sample of points on a rectangular grid.</span>
+<span style="color: #0000ff;">void</span> ocmath_2d_spline_interpolant_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">int</span> i, j, mx, my, npx, npy;
+    <span style="color: #0000ff;">double</span> fg<span style="color: #000000;">[</span><span style="color: #0000dd;">400</span><span style="color: #000000;">]</span>, tx<span style="color: #000000;">[</span><span style="color: #0000dd;">20</span><span style="color: #000000;">]</span>, ty<span style="color: #000000;">[</span><span style="color: #0000dd;">20</span><span style="color: #000000;">]</span>;
+    <span style="color: #0000ff;">double</span> xhi, yhi, xlo, ylo, step;
+    ocmath_2dSpline spline;
+
+    mx <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;
+    my <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+    <span style="color: #0000ff;">double</span> x<span style="color: #000000;">[</span><span style="color: #0000dd;">20</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1.0</span>, <span style="color: #0000dd;">1.10</span>, <span style="color: #0000dd;">1.30</span>, <span style="color: #0000dd;">1.50</span>, <span style="color: #0000dd;">1.60</span>, <span style="color: #0000dd;">1.80</span>, <span style="color: #0000dd;">2.00</span><span style="color: #000000;">}</span>;
+
+    <span style="color: #0000ff;">double</span> y<span style="color: #000000;">[</span><span style="color: #0000dd;">20</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">0.00</span>, <span style="color: #0000dd;">0.10</span>, <span style="color: #0000dd;">0.40</span>, <span style="color: #0000dd;">0.70</span>, <span style="color: #0000dd;">0.90</span>, <span style="color: #0000dd;">1.00</span><span style="color: #000000;">}</span>;
+
+    <span style="color: #0000ff;">double</span> f<span style="color: #000000;">[</span><span style="color: #0000dd;">400</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1.00</span>, <span style="color: #0000dd;">1.10</span>, <span style="color: #0000dd;">1.40</span>, <span style="color: #0000dd;">1.70</span>, <span style="color: #0000dd;">1.90</span>, <span style="color: #0000dd;">2.00</span>, <span style="color: #0000dd;">1.21</span>, <span style="color: #0000dd;">1.31</span>, <span style="color: #0000dd;">1.61</span>, <span style="color: #0000dd;">1.91</span>,
+                     <span style="color: #0000dd;">2.11</span>, <span style="color: #0000dd;">2.21</span>, <span style="color: #0000dd;">1.69</span>, <span style="color: #0000dd;">1.79</span>, <span style="color: #0000dd;">2.09</span>, <span style="color: #0000dd;">2.39</span>, <span style="color: #0000dd;">2.59</span>, <span style="color: #0000dd;">2.69</span>, <span style="color: #0000dd;">2.25</span>, <span style="color: #0000dd;">2.35</span>,
+                     <span style="color: #0000dd;">2.65</span>, <span style="color: #0000dd;">2.95</span>, <span style="color: #0000dd;">3.15</span>, <span style="color: #0000dd;">3.25</span>, <span style="color: #0000dd;">2.56</span>, <span style="color: #0000dd;">2.66</span>, <span style="color: #0000dd;">2.96</span>, <span style="color: #0000dd;">3.26</span>, <span style="color: #0000dd;">3.46</span>, <span style="color: #0000dd;">3.56</span>,
+                     <span style="color: #0000dd;">3.24</span>, <span style="color: #0000dd;">3.34</span>, <span style="color: #0000dd;">3.64</span>, <span style="color: #0000dd;">3.94</span>, <span style="color: #0000dd;">4.14</span>, <span style="color: #0000dd;">4.24</span>, <span style="color: #0000dd;">4.00</span>, <span style="color: #0000dd;">4.10</span>, <span style="color: #0000dd;">4.40</span>, <span style="color: #0000dd;">4.70</span>,
+                     <span style="color: #0000dd;">4.90</span>, <span style="color: #0000dd;">5.00</span><span style="color: #000000;">}</span>;
+
+
+    ocmath_2d_spline_interpolant<span style="color: #000000;">(</span>mx, my, x, y, f, <span style="color: #000040;">&amp;</span>spline<span style="color: #000000;">)</span>;
+
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Distinct knots in x direction located at<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>; j<span style="color: #000080;">&lt;</span>spline.<span style="color: #000000;">nx</span><span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>; j<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%12.4f"</span>,spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">[</span>j<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>j<span style="color: #000040;">-</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000040;">%</span>5<span style="color: #000080;">==</span><span style="color: #0000dd;">4</span> <span style="color: #000040;">||</span> j<span style="color: #000080;">==</span>spline.<span style="color: #000000;">nx</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Distinct knots in y direction located at<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>; j<span style="color: #000080;">&lt;</span>spline.<span style="color: #000000;">ny</span><span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>; j<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%12.4f"</span>,spline.<span style="color: #000000;">mu</span><span style="color: #000000;">[</span>j<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>j<span style="color: #000040;">-</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000040;">%</span>5<span style="color: #000080;">==</span><span style="color: #0000dd;">4</span> <span style="color: #000040;">||</span> j<span style="color: #000080;">==</span>spline.<span style="color: #000000;">ny</span><span style="color: #000040;">-</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>The B-Spline coefficients:<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>mx; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000080;">&lt;</span>my; j<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%9.4f"</span>,spline.<span style="color: #000000;">c</span><span style="color: #000000;">[</span>my<span style="color: #000040;">*</span>i<span style="color: #000040;">+</span>j<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+
+    npx <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+    npy <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+    xlo <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+    ylo <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    xhi <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.0</span>;
+    yhi <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+
+    step <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>xhi<span style="color: #000040;">-</span>xlo<span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>npx<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Spline evaluated on a regular mesh (x across, y down): <span style="color: #666666; font-weight: bold;">\n</span> "</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>npx; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>xlo <span style="color: #000040;">+</span> i <span style="color: #000040;">*</span> step <span style="color: #000080;">&gt;</span> xhi<span style="color: #000000;">)</span>
+            tx<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> xhi;
+        <span style="color: #0000ff;">else</span>
+            tx<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> xlo <span style="color: #000040;">+</span> i <span style="color: #000040;">*</span> step;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">" %5.2f "</span>,tx<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+
+    step <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>yhi<span style="color: #000040;">-</span>ylo<span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>npy<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>npy; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>ylo <span style="color: #000040;">+</span> i <span style="color: #000040;">*</span> step <span style="color: #000080;">&gt;</span> yhi<span style="color: #000000;">)</span>
+            ty<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> yhi;
+        <span style="color: #0000ff;">else</span>
+            ty<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ylo <span style="color: #000040;">+</span> i <span style="color: #000040;">*</span> step;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>npx; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000080;">&lt;</span>npy; j<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            ocmath_2d_spline_eval<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">&amp;</span>tx<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span>, <span style="color: #000040;">&amp;</span>ty<span style="color: #000000;">[</span>j<span style="color: #000000;">]</span>, <span style="color: #000040;">&amp;</span>fg<span style="color: #000000;">[</span>i<span style="color: #000040;">*</span>npx <span style="color: #000040;">+</span> j<span style="color: #000000;">]</span>, <span style="color: #000040;">&amp;</span>spline<span style="color: #000000;">)</span>;
+
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000080;">&lt;</span>npy; j<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%5.2f"</span>,ty<span style="color: #000000;">[</span>j<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>npx; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%8.3f "</span>,fg<span style="color: #000000;">[</span>npy<span style="color: #000040;">*</span>i<span style="color: #000040;">+</span>j<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    ocmath_free<span style="color: #000000;">(</span>spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">)</span>;
+    ocmath_free<span style="color: #000000;">(</span>spline.<span style="color: #000000;">mu</span><span style="color: #000000;">)</span>;
+    ocmath_free<span style="color: #000000;">(</span>spline.<span style="color: #000000;">c</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+  <p>nag_2d_spline_interpolant(e01dac)nag_2d_spline_interpolant(e01dac), NAG Manual</p>

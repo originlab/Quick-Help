@@ -1,0 +1,179 @@
+﻿<h1 class="firstheading">Xファンクションのレポートツリーサンプル</h1>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">サマリー</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#You_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Run_the_X-Function"><span class="tocnumber">4</span> <span class="toctext">Xファンクションを実行する</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<a name="Summary" id="Summary"></a>
+<h2><span class="mw-headline">サマリー</span></h2>
+<p>このサンプルでは、ワークシート内の選択されたデータの統計を実行し、新しい階層シートにレポートを生成する方法を紹介しています。選択データは1列、複数列はもちろん、ワークシート内のサブレンジを選択することもできます。</p>
+<p>出力データ型はReportTreeのとき、ダイアログには、再計算コンボボックスが表示され、レポートシートの再計算モードを「手動」、「自動」、「なし」にセットできます。</p>
+<a name="You_will_learn" id="You_will_learn"></a>
+<h2><span class="mw-headline">学習する項目</span></h2>
+<ol>
+<li>選択されたデータ範囲からデータを取得</li>
+<li>event1のエラーの取り扱い、before_executeとメイン関数</li>
+<li>再計算の鍵付きの新しい階層シートにレポート表を生成</li>
+</ol>
+<a name="Steps" id="Steps"></a>
+<h2><span class="mw-headline">ステップ</span></h2>
+<ol>
+<li>F10キーを押して、Xファンクションビルダを開き、Xファンクションの名前と変数を下図のように入力して、保存<a class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_savebutton.png" width="23" height="23" border="0" /></a>をクリックします。<br />
+<a class="image"><img alt="OCguide xf example StatsReport.png" src="../images/X-Function_ReportTree_Example/OCguide_xf_example_StatsReport.png" width="529" height="240" border="0" /></a></li>
+<li>このXファンクションをコードビルダで開き、ソースコードを編集します。まず、以下のように必要なヘッダファイルを含めます。
+<pre class="oc" style="font-family: monospace;">
+#include <span style="color: #000080;">&lt;</span>ReportTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// ReportTableクラスに必要</span>
+        
+</pre></li>
+<li>入力データ範囲をチェックするために、<i>StatsReport_event1</i>にエラーチェックコードを下図のように追加します。
+<pre class="oc" style="font-family: monospace;">
+DataRange drInput;
+drInput.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span>trGetN.<span style="color: #000000;">iy</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 入力が無効な場合、エラーメッセージを表示する</span><span style="color: #008000;">
+// 場所はダイアログの下部</span><span style="color: #008000;">
+// OKボタンは無効</span>
+if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>drInput.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> drInput.<span style="color: #000000;">GetNumRanges</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> <span style="color: #000000;">
+{</span>
+        strErrMsg <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Please select valid data for input"</span>;
+        bOKEnable <span style="color: #000080;">=</span> false;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li><i style="font-style: italic;">report_stats_before_execute</i> にエラーチェックコードを追加します。
+<pre class="oc" style="font-family: monospace;">
+DataRange drInput;
+drInput.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span>trGetN.<span style="color: #000000;">iy</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 入力が無効な場合、エラーメッセージを印字</span><span style="color: #008000;">
+// Xファンクションの実行をとめる</span>
+if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>drInput.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> drInput.<span style="color: #000000;">GetNumRanges</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> <span style="color: #000000;">
+{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid Input Data"</span><span style="color: #000000;">)</span>;
+        nRet <span style="color: #000080;">=</span> XFEVT_ABORT;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li><i style="font-style: italic;">//put your own support static functions here</i> と入力された行の下に、入力範囲をチェックするstatic関数を追加します。
+<pre class="oc" style="font-family: monospace;">
+static  bool    _check_input<span style="color: #000000;">(</span>const Range<span style="color: #000040;">&amp;</span> iy<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        int nRanges;
+ 
+        if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>iy.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                return false;
+ 
+        nRanges <span style="color: #000080;">=</span> iy.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+                           DRR_NO_FACTORS<span style="color: #000000;">)</span>;
+ 
+        if <span style="color: #000000;">(</span> nRanges <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                return false;
+        return true;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li>static関数の下に、必要なマクロを追加します。このマクロは、Xファンクションのメイン関数で使用されます。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">// ID はどの値でも良いが、固有である必要がある</span>
+#define TABLE_ID_BEGIN          0x1000
+#define ROW_ID_BEGIN            0x0001
+</pre></li>
+<li>Xファンクションのメイン関数<i>StatsReport</i> に以下のコードを追加し、指定したデータ範囲からデータを取得し、統計を実行してレポートシートを作成します。<span class="OIndex" style="display: none;">&#160;</span>
+<pre class="oc" style="font-family: monospace;">
+if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>_check_input<span style="color: #000000;">(</span>iy<span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        <span style="color: #008000;">// 入力が無効な場合、</span>
+        <span style="color: #008000;">// エラーメッセージが表示され</span>
+        <span style="color: #008000;">// Xファンクションの実行は中止される</span>
+        XF_THROW<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid input data"</span><span style="color: #000000;">)</span>;
+        return;<span style="color: #000000;">
+}</span>        
+ <span style="color: #008000;">
+// 統計サマリーを表示する表を作成する</span>
+ReportTable rt <span style="color: #000080;">=</span> report.<span style="color: #000000;">CreateTable</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Summary"</span>,_L<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Summary"</span><span style="color: #000000;">)</span>, 
+                                    TABLE_ID_BEGIN<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// レポート表の列ヘッダ</span>
+const vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsColLabels <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>
+        <span style="color: #ff00ff;">"N"</span>,
+        <span style="color: #ff00ff;">"Number of Missing"</span>,
+        <span style="color: #ff00ff;">"Mean"</span>,
+        <span style="color: #ff00ff;">"SD"</span>,
+        <span style="color: #ff00ff;">"SEM"</span>,
+        <span style="color: #ff00ff;">"Sum"</span>,
+        <span style="color: #ff00ff;">"Variance"</span><span style="color: #000000;">
+}</span>;       
+int nRowID <span style="color: #000080;">=</span> ROW_ID_BEGIN;
+int nRanges <span style="color: #000080;">=</span> iy.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+                            DRR_NO_FACTORS<span style="color: #000000;">)</span>;
+ 
+for <span style="color: #000000;">(</span> int nRange <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nRange <span style="color: #000080;">&lt;</span> nRanges; nRange<span style="color: #000040;">++</span> <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        <span style="color: #008000;">// サブレンジを取得 - 1列</span>
+        DataRange drOne;
+        iy.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">(</span>drOne, DRR_COLUMN_INDEX <span style="color: #000040;">|</span>
+                       DRR_NO_FACTORS, nRange<span style="color: #000000;">)</span>;         
+ 
+        <span style="color: #008000;">// [Book1]Sheet1!Aのような範囲文字列を取得 </span>
+        string strDataLabel;
+        drOne.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">(</span>strDataLabel<span style="color: #000000;">)</span>;
+ 
+        vector vInput;
+        drOne.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vInput, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;         
+        if <span style="color: #000000;">(</span> vInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// 列が空の場合警告メッセージを印字し、</span>
+                <span style="color: #008000;">// 次の列に行く</span>
+                warning_msg_box<span style="color: #000000;">(</span>
+                   strDataLabel <span style="color: #000040;">+</span> <span style="color: #ff00ff;">", empty column found."</span>, 
+                   false, <span style="color: #ff00ff;">'W'</span><span style="color: #000000;">)</span>;
+                continue;
+        <span style="color: #000000;">}</span>
+ 
+        int N, Missing;
+        double dMean, dSum, dVariance, dSD, dSE;
+        int nRet <span style="color: #000080;">=</span> ocmath_basic_summary_stats<span style="color: #000000;">(</span>vInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, 
+                        vInput,
+                        <span style="color: #000040;">&amp;</span>N, <span style="color: #000040;">&amp;</span>dMean, <span style="color: #000040;">&amp;</span>dSD, <span style="color: #000040;">&amp;</span>dSE, <span style="color: #000040;">&amp;</span>dVariance, <span style="color: #000040;">&amp;</span>dSum,
+                        NULL, NULL, NULL, NULL, NULL, NULL, <span style="color: #000040;">&amp;</span>Missing<span style="color: #000000;">)</span>;
+        if <span style="color: #000000;">(</span> STATS_NO_ERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// statistics関数が失敗したら</span>
+                <span style="color: #008000;">// 警告メッセージを表示</span>
+                warning_msg_box<span style="color: #000000;">(</span>
+                   strDataLabel <span style="color: #000040;">+</span> <span style="color: #ff00ff;">", statistics fails."</span>, 
+                   false, <span style="color: #ff00ff;">'W'</span><span style="color: #000000;">)</span>;
+                continue;
+        <span style="color: #000000;">}</span>
+ 
+        vector vResults<span style="color: #000000;">(</span>vsColLabels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> N;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> Missing;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dMean;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dSD;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dSE;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dSum;
+        vResults<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dVariance;
+ 
+        <span style="color: #008000;">//レポート表に新しい行を追加</span>
+        string strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Data"</span> <span style="color: #000040;">+</span> nRange;
+        rt.<span style="color: #000000;">AddRow</span><span style="color: #000000;">(</span>strName, vResults, strDataLabel, 
+                  vsColLabels, NULL, nRowID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>;  <span style="color: #000000;">
+}</span>
+</pre></li>
+</ol>
+<a name="Run_the_X-Function" id="Run_the_X-Function"></a>
+<h2><span class="mw-headline">Xファンクションを実行する</span></h2>
+<p>いくつかのデータが入力されたワークシートをアクティブにして、スクリプトウィンドウで<i>StatsReport -d</i> を実行し、Xファンクションダイアログを開きます。</p>
+<p><a class="image"><img alt="Ocguide xfdialog StatsReport display.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_StatsReport_display.png" width="410" height="258" border="0" /></a></p>
+<p>OKをクリックすると、新しいレポートシートが生成されます。</p>
+<p><a class="image"><img alt="Ocguide xfdialog StatsReport result.png" src="../images/X-Function_ReportTree_Example/Ocguide_xfdialog_StatsReport_result.png" width="467" height="170" border="0" /></a></p>
+
+

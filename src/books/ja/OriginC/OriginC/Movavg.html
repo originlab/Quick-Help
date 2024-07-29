@@ -1,0 +1,125 @@
+﻿<h1 class="firstheading">Movavg</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 9.0</p>
+
+  <h2><a name="Moving_Average"></a><span class="mw-headline">Moving Average</span></h2>
+
+  <p>This example shows for a specific cell, how to compute average in a specific range. Then, with transversing along the whole column, each cell is set to the mean of the same of adjacent range.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> GetAdjAvg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wkstmp <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Column colA, colB;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>wkstmp<span style="color: #000000;">)</span><span style="color: #000000;">{</span>
+        colA <span style="color: #000080;">=</span> wkstmp.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                colB <span style="color: #000080;">=</span> wkstmp.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    
+    vector vcInput <span style="color: #000080;">=</span> colA.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    Dataset dsOutput;
+    dsOutput.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>colB<span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dsOutput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">!</span><span style="color: #000080;">=</span>vcInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        dsOutput.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>vcInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//iBack: the backward offset respect to current position</span>
+<span style="color: #008000;">//iForw: the forward offset respect to current position        </span>
+    <span style="color: #0000ff;">int</span> iBack <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+    <span style="color: #0000ff;">int</span> iForw <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    
+    dsOutput <span style="color: #000080;">=</span> movavg1<span style="color: #000000;">(</span>vcInput, iBack, iForw<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+vector  movavg1<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vdInput,  <span style="color: #0000ff;">int</span> iBack, <span style="color: #0000ff;">int</span> iForw<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+    vector vdOutput<span style="color: #000000;">(</span>vdInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>vdOutput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #000040;">++</span>ii<span style="color: #000000;">)</span>
+<span style="color: #008000;">//The row index passed from SetColumnValues is 1 offset.</span>
+        vdOutput<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> movavg1<span style="color: #000000;">(</span>vdInput, iBack, iForw, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;    
+   
+    <span style="color: #0000ff;">return</span> vdOutput;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//This overloaded function is designed to get adjacent average through </span>
+<span style="color: #008000;">//SetColumnValues menu. </span>
+ 
+<span style="color: #0000ff;">double</span> movavg1<span style="color: #000000;">(</span>vector<span style="color: #000040;">&amp;</span> vdInput, <span style="color: #0000ff;">int</span> iBack, <span style="color: #0000ff;">int</span> iForw, 
+              <span style="color: #0000ff;">int</span> nInd, <span style="color: #0000ff;">int</span> bPerio<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+<span style="color: #008000;">//iBack: the backward offset respect to current position</span>
+<span style="color: #008000;">//iForw: the forward offset respect to current position</span>
+<span style="color: #008000;">//bPero: Specifiy the periodicity of the vector. </span>
+<span style="color: #008000;">// 0: non-periodic: cells beyond the vector range are ignored.</span>
+<span style="color: #008000;">// 1: periodic:v[i] = v[(i+n*K)%n] where n is the length of the vector</span>
+
+<span style="color: #000000;">{</span>
+<span style="color: #008000;">//The row index is 1 offset respect to the vector.        </span>
+
+        <span style="color: #000040;">--</span>nInd;
+        <span style="color: #0000ff;">int</span> lower <span style="color: #000080;">=</span> nInd<span style="color: #000040;">+</span>iBack;
+        <span style="color: #0000ff;">int</span> upper <span style="color: #000080;">=</span> nInd<span style="color: #000040;">+</span>iForw;
+        <span style="color: #0000ff;">int</span> nStart <span style="color: #000080;">=</span> min<span style="color: #000000;">(</span>lower, upper<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nEnd   <span style="color: #000080;">=</span> max<span style="color: #000000;">(</span>lower, upper<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// Periodic Vector.  vec[-1]=vec[n-1] vec[-2] = vec[n-2]</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> bPerio <span style="color: #000000;">)</span><span style="color: #000000;">{</span>
+                
+                <span style="color: #0000ff;">double</span> sum <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+                <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span>nStart; ii<span style="color: #000080;">&lt;=</span>nEnd; <span style="color: #000040;">++</span>ii <span style="color: #000000;">)</span>
+                        sum <span style="color: #000040;">+</span><span style="color: #000080;">=</span> vdInput<span style="color: #000000;">[</span>indPerio1<span style="color: #000000;">(</span>ii, vdInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>;
+                                        
+                <span style="color: #0000ff;">double</span> avg <span style="color: #000080;">=</span> sum<span style="color: #000040;">/</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>iBack<span style="color: #000040;">+</span>iForw<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> avg;
+        <span style="color: #000000;">}</span>
+<span style="color: #008000;">// Nonperiodic Vector. To be comptable with Excel, exceeded cells are truncatated. </span>
+        <span style="color: #0000ff;">else</span><span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nStart <span style="color: #000080;">&gt;</span> vdInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000040;">||</span> nEnd <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+                        <span style="color: #0000ff;">return</span> NANUM;
+
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nStart <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span> 
+                        nStart <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nEnd <span style="color: #000080;">&gt;</span> vdInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> 
+                        nEnd <span style="color: #000080;">=</span> vdInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+                <span style="color: #0000ff;">int</span> nLen <span style="color: #000080;">=</span> nEnd <span style="color: #000040;">-</span> nStart<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;
+                <span style="color: #0000ff;">double</span> sum <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+                <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span>nStart; ii<span style="color: #000080;">&lt;=</span>nEnd; <span style="color: #000040;">++</span>ii <span style="color: #000000;">)</span>
+                        sum <span style="color: #000040;">+</span><span style="color: #000080;">=</span> vdInput<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>;
+                <span style="color: #0000ff;">double</span> avg <span style="color: #000080;">=</span> sum<span style="color: #000040;">/</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span>nLen;
+                <span style="color: #0000ff;">return</span> avg;        
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">int</span> indPerio1<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ind, <span style="color: #0000ff;">int</span> nSize<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #000000;">(</span>ind<span style="color: #000040;">%</span>nSize<span style="color: #000040;">+</span>nSize<span style="color: #000000;">)</span><span style="color: #000040;">%</span>nSize;
+
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// This function allows passing column number (labtalk 1-based counting)</span>
+<span style="color: #008000;">// and the backward and forward points</span>
+<span style="color: #0000ff;">void</span> getadjavg<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> iColIn, <span style="color: #0000ff;">int</span> iColOut, <span style="color: #0000ff;">int</span> iBack, <span style="color: #0000ff;">int</span> iForw<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span> <span style="color: #0000ff;">return</span>;
+        Column colIn, colOut;
+        colIn <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>iColIn<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        colOut <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>iColOut<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>colIn <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>colOut<span style="color: #000000;">)</span> <span style="color: #0000ff;">return</span>;
+        
+        vector vcInput <span style="color: #000080;">=</span> colIn.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        Dataset dsOutput;
+        dsOutput.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>colOut<span style="color: #000000;">)</span>;
+        
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dsOutput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">!</span><span style="color: #000080;">=</span>vcInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        dsOutput.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>vcInput.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//iBack: the backward offset respect to current position</span>
+<span style="color: #008000;">//iForw: the forward offset respect to current position        </span>
+ 
+    dsOutput <span style="color: #000080;">=</span> movavg1<span style="color: #000000;">(</span>vcInput, iBack, iForw<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>

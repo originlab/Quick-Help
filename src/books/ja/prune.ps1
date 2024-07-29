@@ -1,0 +1,1 @@
+dir -Recurse | ? { $_.Name -match '[^a-zA-Z0-9,&%~_@$#+!\(\)\{\}\[\]\-\s\.]' } | del

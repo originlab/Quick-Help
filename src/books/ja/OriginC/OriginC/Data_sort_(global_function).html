@@ -1,0 +1,175 @@
+﻿<h1 class="firstheading">Data_sort</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Function to sort a data set inplace.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> Data_sort<span style="color: #000000;">(</span> Dataset <span style="color: #000040;">*</span> pdsData, <span style="color: #0000ff;">BOOL</span> bDescending <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span>, <span style="color: #0000ff;">BOOL</span> bMissingAsMin <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>pdsData</dt>
+
+    <dd>[modify] Pointer to dataset</dd>
+
+    <dt>bDescending</dt>
+
+    <dd>[input] If TRUE sort in descending order otherwise sort in ascending order (default)</dd>
+
+    <dt>bMissingAsMin</dt>
+
+    <dd>[input] If TRUE evaluate Origin missing values as smallest value otherwise as largest value (default)</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>If successful returns TRUE and a sorted dataset otherwise returns FALSE.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This is a self contained sample program for the function Data_sort. </span>
+<span style="color: #008000;">// It demonstrates a simple call of the function, and shows how to </span>
+<span style="color: #008000;">// sort a dataset by replacing the input dataset with the sorted one. </span>
+<span style="color: #008000;">// The sample data is created at the beginning of the program. </span>
+<span style="color: #008000;">// To run the program, enter the following command in the Script window:</span>
+<span style="color: #008000;">//   Data_sort_ex1</span>
+<span style="color: #008000;">// This will print a message like following:</span>
+<span style="color: #008000;">//   Applying Data_sort on Data2_A succedded. (updated the dataset directly)</span>
+<span style="color: #008000;">//     Simple call with defaults: Ascending &amp; Missing as Largest</span>
+<span style="color: #008000;">//    </span>
+<span style="color: #0000ff;">void</span> Data_sort_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">BOOL</span> success;
+
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    String wksName<span style="color: #000080;">=</span>wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Dataset myInDs<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    String strInDsName <span style="color: #000080;">=</span> myInDs.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Dataset myOrg<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;    <span style="color: #008000;">// Back up dataset of original</span>
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>.<span style="color: #000000;">SetName</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Original"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">//******* Create sample data *****************</span>
+    myInDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    myOrg.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.097</span>;     myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.41256</span>;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>NANUM;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.47304</span>;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>NANUM;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.64529</span>;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.44514</span>;    myOrg<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span>;
+    <span style="color: #008000;">//******** End of Sample Data Creation *******</span>
+    
+    success <span style="color: #000080;">=</span> Data_sort<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>myInDs<span style="color: #000000;">)</span>; <span style="color: #008000;">// Demonstration of Data_sort</span>
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>success<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Applying Data_sort on %s succedded. (updated the dataset directly)<span style="color: #666666; font-weight: bold;">\n</span>"</span>               <span style="color: #ff00ff;">"  Simple call with defaults: Ascending &amp; Missing as Largest<span style="color: #666666; font-weight: bold;">\n</span>"</span>,strInDsName<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span> 
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error: Data_sort failed.<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX2</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This is a self contained sample program for the function Data_sort. </span>
+<span style="color: #008000;">// It demonstrates the function call with its parameters, and shows how </span>
+<span style="color: #008000;">// to sort a dataset without modifying itself by sorting a copied </span>
+<span style="color: #008000;">// temporary dataset. </span>
+<span style="color: #008000;">// The sample data is created at the beginning of the program. </span>
+<span style="color: #008000;">// To run the program, enter the following command in the Script window:</span>
+<span style="color: #008000;">//   Data_sort_ex2</span>
+<span style="color: #008000;">// This will print a message like following:</span>
+<span style="color: #008000;">//   Applying Data_sort on Data4_A succedded. (result in the temporary dataset)</span>
+<span style="color: #008000;">//     Function call with specifications: Ascending Flag=0 &amp; Missing_as_Largest Flag=1</span>
+<span style="color: #008000;">//     Number of Missing Values = 2</span>
+<span style="color: #008000;">//</span>
+<span style="color: #0000ff;">void</span> Data_sort_ex2<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">int</span> i,iMissing;
+    <span style="color: #0000ff;">BOOL</span> success;
+
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Dataset myInDs<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    String strInDsName <span style="color: #000080;">=</span> myInDs.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">//******* Create sample data *****************</span>
+    myInDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.097</span>; 
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.41256</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>NANUM;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.47304</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span>NANUM;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.64529</span>;
+    myInDs<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.44514</span>;
+    <span style="color: #0000ff;">BOOL</span> ASCENDING_FLAG <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span>;
+    <span style="color: #0000ff;">BOOL</span> NANUM_AS_LARGEST_FLAG <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span>;
+    <span style="color: #008000;">//******** End of Sample Data Creation *******</span>
+    
+    Dataset mySortDs<span style="color: #000000;">(</span>myInDs<span style="color: #000000;">)</span>; <span style="color: #008000;">// Create a temporary copy of original data</span>
+    mySortDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>myInDs.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        
+    success <span style="color: #000080;">=</span> Data_sort<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>mySortDs,ASCENDING_FLAG,NANUM_AS_LARGEST_FLAG<span style="color: #000000;">)</span>; <span style="color: #008000;">// Demonstration of Data_sort</span>
+
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>success<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Applying Data_sort on %s succedded. (result in the temporary dataset)<span style="color: #666666; font-weight: bold;">\n</span>"</span>               <span style="color: #ff00ff;">"  Function call with specifications: Ascending Flag=%d &amp; Missing_as_Largest Flag=%d<span style="color: #666666; font-weight: bold;">\n</span>"</span>,
+          strInDsName,ASCENDING_FLAG,NANUM_AS_LARGEST_FLAG<span style="color: #000000;">)</span>;
+        iMissing<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span><span style="color: #0000dd;">7</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>mySortDs<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span><span style="color: #000080;">==</span>NANUM<span style="color: #000000;">)</span> iMissing<span style="color: #000040;">++</span>;
+            <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">break</span>; <span style="color: #008000;">// NANUMs grouped at top, and break immediately when found not NANUM.</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"  Number of Missing Values = %d<span style="color: #666666; font-weight: bold;">\n</span>"</span>,iMissing<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span> 
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error: Data_sort failed.<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>Function to sort a data set inplace.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

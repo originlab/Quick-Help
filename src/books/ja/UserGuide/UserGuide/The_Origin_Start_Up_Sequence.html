@@ -1,0 +1,101 @@
+﻿<h1 class="firstheading">Originの起動時の動作の編集</h1>
+<p class="urlname" style="display: none;">Startup-Sequence</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>目次</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#The_Origin_Startup_Sequence_When_Started_from_Command-line"><span class="tocnumber">1</span> <span class="toctext">コマンドラインから起動するときのOriginの起動シーケンス</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Directing_Origin_to_Start_by_Opening_a_Specific_File"><span class="tocnumber">2</span> <span class="toctext">起動時に指定のプロジェクトやウィンドウを開く</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Directing_Origin_to_Start_by_Opening_a_Worksheet_Based_on_a_Specific_Template"><span class="tocnumber">3</span> <span class="toctext">指定のテンプレートのワークシートをOrigin起動時に開く</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Using_a_Different_Initialization_File_When_Starting_Origin"><span class="tocnumber">4</span> <span class="toctext">起動時に異なる初期化ファイルを使用する</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Specifying_a_Menu_Level_When_Starting_Origin"><span class="tocnumber">5</span> <span class="toctext">Origin開始時のメニューレベルを指定する</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Adding_a_New_or_Additional_Configuration_File"><span class="tocnumber">6</span> <span class="toctext">新規又は補助のコンフィギュレーションファイルの追加</span></a></li>
+</ol>
+</div>
+<table class="note">
+<tr>
+<td><b style="font-weight: bold;">Note:</b>
+<ol>
+<li>このページで引用しているファイル名は、バージョンによって異なることがあります。例えば、Origin 8.6を使用している場合、ORIGIN9.INIではなく、ORIGIN86.INIファイルがフォルダにあります。</li>
+<li>このページにあるファイルパスを含むコマンド行を試すとき、使用しているバージョンをもとに内容を更新してください。パスとファイル名は、バージョンごとに異なります。</li>
+<li><b style="font-weight: bold;">ユーザファイルフォルダ</b>ダイアログのスクリーンショットは、バージョンによって見た目が異なります。</li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="The_Origin_Startup_Sequence_When_Started_from_Command-line" id="The_Origin_Startup_Sequence_When_Started_from_Command-line"></a><span class="mw-headline">コマンドラインから起動するときのOriginの起動シーケンス</span></h2>
+<p>外部コンソール(Windowsの<b>cmd</b>ウィンドウなど)の<b>コマンドライン</b>や、Originのプログラムアイコンの<b>プロパティ</b>ダイアログボックスの<b>ターゲット</b>テキストボックスでOriginを起動する場合、起動時イベントのシーケンスが思い通りになるように設定することができます。これらのイベントの順序は、コマンドのオプションスイッチの指定や、 ORIGIN.INI ファイルでの内容を変えることで、変更が可能ですが、Origin内で複雑な相互干渉を引き起こすことも考えられ、経験あるユーザの方にのみ、お勧めします。以下は、デフォルトで行なわれるOriginの起動シーケンスです。</p>
+<ol>
+<li>最初にコマンドラインが読み取られます。</li>
+<li>ORIGIN.INI (あるいはその代替INIファイル)およびORIGIN9.INI が、読み取られます。Origin.iniの <b>[Startup]</b> セクションにリストアップされた .ogsに <a class="external text" href="../../QuickHelp/QuickHelp/How_do_I_define_global_constants.html">定義されたグローバルな定数と変数</a> がある場合、それらはメモリに読み込まれています。</li>
+<li>SYSTEM.CNF、OPTION.CNF、ORGSYS.CNFの各コンフィギュレーションファイルが実行されます。コンフィギュレーションファイルは、LabTalkスクリプトコマンドを含むテキストファイルです。コンフィギュレーションファイル、 SYSTEM.CNFとOPTION.CNF には、LabTalkの <b>system</b> オブジェクトのプロパティが設定されています。また、ORGSYS.CNFファイルには、オブジェクトプロパティ、システム変数、マクロなどが定義されています。</li>
+<li>MACROS.CNFとメニューレベルCNFファイル(群) (あるいはその代替ファイル)の内容が実行されます。MACROS.CNF には、幾つかのシステムマクロが定義されており、一般に、メニューレベルのCNFと共に読み込まれます。これを取り込まない場合には注意が必要です。<br />
+メニューレベルは、コマンドラインの｢<b>-l <i>number</i></b>｣オプションスイッチ、あるいは ORIGIN.INI ファイルの｢LEVEL=<i>number</i>｣行にて指定することができます。(指定されなかった場合は、デフォルトの1が使われます。)メニューレベルCNFファイル群は、 ORIGIN.INI ファイルで次の行のように指定します。
+<pre class="lt" style="font-family: monospace;">
+File#<span style="color: #000080;">=</span>Macros filename1 filename2 filename3 etc...
+        
+</pre>
+<p>ここで、｢File｣はリテラル、｢#｣はメニューレベルを示す<i>番号</i>、｢Macro｣はリテラルで、｢<i>f</i>filename1, filename2, filename3, etc...｣は、OriginプログラムフォルダにあるメニューレベルCNFファイル群を示しています。メニューレベルCNFファイルは、メニューレベルの設定に応じて、異なるOriginメニューの配列を生成します。次は ORIGIN.INI にある例です。</p>
+<pre class="lt" style="font-family: monospace;">
+File1<span style="color: #000080;">=</span>Macros FullMenu
+        
+</pre></li>
+<li>指定された追加のCNFファイルが、実行されます。追加のCNFファイルは、 <b>-a</b> オプションスイッチで指定されます。</li>
+<li>もし、起動時に開けられるファイルがコマンドラインの最後に置かれておらず、AutoExec マクロが定義されているならば、そのAutoExec マクロが実行されます。もしその両方が指定されているならば、Originは空のワークシートを開け、AutoExecマクロが実行されます。AutoExecマクロは、内部的な各種デフォルト設定を書き換えるのに、よく使われます。コメント化したAutoExecマクロの小さな例が、MACROS.CNFに入っています。AutoExecマクロを定義する必要は一般に無く、スタートアップ時にこの定義をすることは推奨できません。もし、AutoExecマクロが実行されないと、内部的なデフォルト値が設定され、デフォルトのワークシートテンプレートが、Originによって開かれます。</li>
+<li>もし、グラフテンプレート(*.OTP)、グラフ/ワークシート/行列のウィンドウ(*.OGG, *.OGW, *.OGM)、Excelファイル(*.XLS)など、起動時に開けられるファイルがコマンドラインの最後に置かれていると、新たなプロジェクトが作られた時、そのファイルがOriginによって開けられます。また、DocEndマクロが定義されていると、新たに作られたプロジェクトが閉じられる時に、それが実行されます。Originは、新しいプロジェクトを作成して、指定したテンプレート、ウィンドウ、ワークブックを開きます。DocEndマクロが定義されていると、新しいプロジェクトが閉じられるときに、Originは、DocEndマクロを実行します。DocEndマクロの定義は、MACROS.CNFに入っています。</li>
+<li>もし、プロジェクトファイル(*.OPJ または*.ORG) がコマンドラインの最後に置かれていると、 ORGSYS.CNFが再度実行され、指定されたプロジェクトが開かれます。また、DocBegin、EndOpen、および DocEndマクロが定義されていれば、それぞれ必要な時点で実行されます。Originは、ORGSYS.CNFファイルを2度実行して、指定したプロジェクトファイルを開きます。DocBeginマクロは、プロジェクトファイルが開かれる直前、EndOpenマクロは、プロジェクトファイルが開かれた直後、DocEndマクロは、プロジェクトが閉じられる時に、実行されます。DocBeginマクロの定義は、ORGSYS.CNFに入っています。EndOpenと DocEndマクロの定義は、MACROS.CNFに入っています。</li>
+</ol>
+<h2><a name="Directing_Origin_to_Start_by_Opening_a_Specific_File" id="Directing_Origin_to_Start_by_Opening_a_Specific_File"></a><span class="mw-headline">起動時に指定のプロジェクトやウィンドウを開く</span></h2>
+<p>Originを、指定したプロジェクト、グラフウィンドウテンプレート、特定ウィンドウなどで起動させるには、Originショートカットの「プロパティ」ダイアログボックスにある『リンク先』テキストボックスまたは『コマンドライン』テキストボックスに、これらのファイルのパスと名前を指定します。サポートしているファイルは、グラフテンプレート (*.OTP)、グラフ(*.OGG)、ワークシート (*.OGW)、行列(*.OGM)、プロジェクト(*.OPJ および *.ORG)、Excelファイル(*.XLS)です。プロジェクトファイル(*.OPJファイル)の場合には、拡張子を指定する必要は必要ありません。</p>
+<p>例えば、Originのプログラムフォルダ (ドライブ名やパスはインストールの指定によります) にある、MYPROJECTFILE.OPJという名前のプロジェクトを開くには、以下のコマンドをコマンドラインまたはOriginショートカットの『リンク先』テキストボックスに書き込みます。</p>
+<pre class="lt" style="font-family: monospace;">
+DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> MYPROJECTFILE
+</pre>
+<p>また、フォルダ D:\MY OGGs にある、MYGRAPH.OGGという名前のグラフを開くには、以下のコマンドをコマンドラインまたはOriginショートカットの『リンク先』テキストボックスに書き込みます。</p>
+<pre class="lt" style="font-family: monospace;">
+ 
+</pre>
+<p>他のコマンドスイッチの指定とは異なり、指定したファイルは、OriginプログラムのEXEファイルと同じディレクトリにある必要はありません。しかし、そのファイルがOriginプログラムのEXEファイルと同じディレクトリに無い場合は、完全パス名の指定が必要なことに注意してください。また、空白を中に持つ｢長形式｣のパス名とファイル名の場合、それを (上の例のように) ダブルクォート(")で囲む必要があります。なお、複数のオプションスイッチを使用する場合、一般的に、ファイル名は列挙されたコマンドオプション群の最後なるような順序で書くようにします。</p>
+<p><br /></p>
+<h2><a name="Directing_Origin_to_Start_by_Opening_a_Worksheet_Based_on_a_Specific_Template" id="Directing_Origin_to_Start_by_Opening_a_Worksheet_Based_on_a_Specific_Template"></a><span class="mw-headline">Origin 起動時指定のテンプレートでワークシートを開くよう設定する</span></h2>
+<p>Originを起動すると、デフォルトではワークシートテンプレートORIGIN.OTWのワークシートを持つ新しいプロジェクトが開かれます。Originの起動時に、別のテンプレートで作成されるワークシートを表示することも可能で、それには、スイッチ <b>-tw</b> <i>templateName</i> を使用します。その場合、この templateName は、さらに、Originの<b>新ワークシート</b>ボタンを押すことによって作られるデフォルトワークシートのテンプレートとしても使われます。</p>
+<p>例えば、Originを起動させワークシートテンプレートCONVANALYSIS.OTWによるワークシートを作成するには、コマンドライン、又は『リンク先』のテキストボックスに下記のコマンドを書き込みます。</p>
+<pre class="lt" style="font-family: monospace;">
+DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>tw CONVANALYSIS.<span style="color: #000080;">OTW</span>
+</pre>
+<p>指定するテンプレートファイルはOriginのEXEファイルと同じフォルダまたはOriginを最初に実行する際に指定するユーザフォルダになければなりません。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="User Files Folder dialog box.png" src="../images/The_Origin_Start_Up_Sequence/User_Files_Folder_dialog_box.png" width="648" height="257" border="0" /></a></dd>
+</dl>
+<p><br /></p>
+<h2><a name="Using_a_Different_Initialization_File_When_Starting_Origin" id="Using_a_Different_Initialization_File_When_Starting_Origin"></a><span class="mw-headline">起動時に異なった初期化ファイルを使用する方法</span></h2>
+<p>Originのデフォルト初期化ファイルORIGIN.INIは、Originのセッションを終了させるまで実行される数多くのOriginオプションを設定します。これらのオプションには、メニューの設定や表示上の設定が含まれます。Originは自動的にORIGIN.INIをデフォルト初期化ファイルとして使用するので、ショートカットの『リンク先』テキストボックスによる指定は必要ありません。</p>
+<p>ORIGIN.INI以外の初期化ファイルを使用するためには、 <b>-i <i>filename</i></b> スイッチを使用して、初期化ファイルを指定します。ORIGIN.INIが見つからず、他の初期化ファイルも指定されていない場合、デフォルト値が初期化に使用されます。</p>
+<p>下記のスイッチ <b>-i</b> のコマンドラインは、Originオプションの設定の際にMYINIT.INIファイルを使用するように指定します。</p>
+<pre class="lt" style="font-family: monospace;">
+DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>i MYINIT
+</pre>
+<p>INIファイルはOriginのEXEファイルと同じフォルダまたはOriginを最初に実行する際に指定するユーザフォルダ(下図)になければなりません。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="Using a Different Initialization File When Starting Origin.png" src="../images/The_Origin_Start_Up_Sequence/Using_a_Different_Initialization_File_When_Starting_Origin.png" width="648" height="257" border="0" /></a></dd>
+</dl>
+<p><br /></p>
+<h2><a name="Specifying_a_Menu_Level_When_Starting_Origin" id="Specifying_a_Menu_Level_When_Starting_Origin"></a><span class="mw-headline">Origin開始時のメニューレベル指定</span></h2>
+<p>Originコマンドのオプションスイッチを使って、その開始時に、どのメニューが利用可能になるかのメニューレベルを設定することができます。それには、 <b>-l <i>number</i></b> というオプションスイッチを使います。ここのnumber は、 ORIGIN.INI ファイルに含まれるメニューのリストと矛盾しないように指定しなければなりません。もし <b>-l</b> オプションスイッチが、Originショートカットの『リンク先』テキストボックスのコマンドに含まれていなければ、ORIGIN.INI ファイルの指定で強制的されない限り、Originは、メニューレベル 1 をデフォルトとします。</p>
+<p>次の <b>-l</b> オプションスイッチを含むOriginの実行コマンドの例では、Originは、メニューレベル 2 で開始されます。</p>
+<pre class="lt" style="font-family: monospace;">
+DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>l <span style="color: #0000dd;">2</span>
+</pre>
+<h2><a name="Adding_a_New_or_Additional_Configuration_File" id="Adding_a_New_or_Additional_Configuration_File"></a><span class="mw-headline">新規又は補助のコンフィギュレーションファイルの追加</span></h2>
+<p>コンフィギュレーションファイルは、LabTalkスクリプトコマンドを含むテキストファイルです。コンフィギュレーションファイルは、変数、メニュー、マクロ及びOriginのセッション中で実行される関数を定義付けます。このファイルは、ORIGIN.INIファイル中のメニューレベルでの指定に従って起動する時に実行されます。</p>
+<p><b style="font-weight: bold;">-c <i>filename</i></b>スイッチは、INIファイル中でメニューレベルによって指定されたコンフィギュレーションファイルを無効にし、新しいコンフィギュレーションファイルを指定するために使用します。</p>
+<p><b style="font-weight: bold;">-a <i>filename</i></b>スイッチは、INIファイル中でメニューレベルによって指定されたコンフィギュレーションファイルのリストに追加する新しいコンフィギュレーションファイルを指定するために使用します。</p>
+<p>次のコマンドラインのスイッチ -cは、Originが、新しいファイルMYCONFIG.CNFを、ORIGIN.INIファイル中に指定されている現行のファイルと置き換えて使用するよう指定しています。</p>
+<pre class="lt" style="font-family: monospace;">
+DriveLetter<span style="color: #000000;">:</span>\Origin9InstallationPath\ORIGIN9.<span style="color: #000080;">EXE</span> <span style="color: #000080;">-</span>c MYCONFIG
+</pre>
+<p>コンフィギュレーションファイルはOriginのEXEファイルと同じフォルダまたはOriginを最初に実行する際に指定するユーザフォルダになければなりません。</p>
+<dl>
+<dd><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="Adding a New or Additional Configuration File.png" src="../images/The_Origin_Start_Up_Sequence/Adding_a_New_or_Additional_Configuration_File.png" width="648" height="257" border="0" /></a></dd>
+</dl>

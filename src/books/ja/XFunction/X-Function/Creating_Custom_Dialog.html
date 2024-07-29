@@ -1,0 +1,159 @@
+﻿<h1 class="firstheading">カスタムダイアログを作成する</h1>
+<p><span class="OIndex" style="display: none;">Xファンクションカスタムダイアログ</span> Xファンクションはインターフェイスとしてダイアログビルダを元にカスタムダイアログを作成できます。ユーザがカスタムダイアログを使用してダイアログ内での自動更新もサポートさせる場合、あるいはOriginのメニューからダイアログを開く場合はカスタム化したダイアログと共にXファンクションを作成できます。そのご、OPXファイルを作成すると、他のユーザとも共有できます。</p>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_a_Dailog_Resource_DLL"><span class="tocnumber">1</span> <span class="toctext">ダイアログリソース DLLを作成する</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_X-Function"><span class="tocnumber">2</span> <span class="toctext">Xファンクションを作成する</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Using_X-Function"><span class="tocnumber">3</span> <span class="toctext">Xファンクションを使用する</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#How_to_share_your_custom_dialog_with_others"><span class="tocnumber">4</span> <span class="toctext">他のユーザと作成したカスタムダイアログを共有するには</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="Creating_a_Dailog_Resource_DLL" id="Creating_a_Dailog_Resource_DLL"></a><span class="mw-headline">ダイアログリソース DLLを作成する</span></h2>
+<p>リソースのみのDLLをOrigin Cからアクセス可能なVisual Studio 2008 または 2010で構築するには、この<a class="external text" href="../../OriginC/OriginC/Open_Customize_Dialog_in_Origin_C.html#Creating_a_Resource-Only_DLL">サンプル</a>を確認してください。<b>リソースのみのDLLを作成する</b>セクションを実行すると2つのファイル、<b>Welcome.dll</b> と <b>resource.h</b>を作成できます。</p>
+<h2><a name="Creating_X-Function" id="Creating_X-Function"></a><span class="mw-headline">Xファンクションを作成する</span></h2>
+<ol>
+<li>上記の2つのファイル、Welcome.dll と resource.h をOriginの&lt;ユーザファイルフォルダ\OriginC\&gt;にコピーします。Note: resource DLL ファイルと resource.h ファイルは同じフォルダ内に保存します。</li>
+<li>F10を押してXファンクションビルダを開きます。</li>
+<li>Xファンクション名として「CustomDlg」を入力し、以下のようにXファンクションの変数を設定します。
+<div><a class="image" style="color: #0000ff; text-decoration: underline;"><img alt="CustomDlg.png" src="../images/Creating_Custom_Dialog/CustomDlg.png" width="520" height="322" border="0" /></a></div>
+</li>
+<li>ツリービューボタン<a class="image"><img alt="Ocguide xf treeview button.png" src="../images/Creating_Custom_Dialog/Ocguide_xf_treeview_button.png" width="23" height="23" border="0" /></a>をクリックしてツリービューを開きます。そして「使用のコンテクスト→メニュー→自動GetNダイアログ」をカスタムに設定します。カスタムダイアログ関数編集ボックスにカスタムダイアログ関数名、例えば「OpenCustomDlg」を入力します。保存ボタンをクリックしてこのXファンクションをユーザファイルフォルダ内の<b>デフォルト</b>フォルダに保存し、Xファンクションビルダを閉じます。<b>Note:</b> XファンクションはOriginの実行フォルダまたはユーザファイルフォルダ内のXファンクションフォルダに保存される必要があります。</li>
+<li>新しいヘッダファイル、CustomDlg.hを作成し、Origin Cフォルダの中に保存します。このファイルに以下のコードを入力します。カスタムダイアログを構築するコードは、Xファンクション設定をXファンクションから入手してダイアログに表示する方法と、ダイアログで設定した内容をOrigin CのTreeNode変数を通じてXファンクションにフィードバック方法を示しています。
+<pre class="oc" style="font-family: monospace;">
+#include <span style="color: #000080;">&lt;</span>..\Originlab\DialogEx.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #ff00ff;">"resource.h"</span><span style="color: #008000;">
+// リソースのファイル名を拡張子なしで表示、ここはWelcome.dllを記入 </span><span style="color: #008000;">
+// DLL ファイルが .h ファイルと同じフォルダ内にある事を前提としている </span>
+#define STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">"Welcome"</span>
+ <span style="color: #008000;">
+// リソース DLLのファイル名</span>
+#ifdef _OWIN64
+#define STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">"Welcome_64"</span> <span style="color: #008000;">// 64 bit DLL</span>
+#else <span style="color: #008000;">//!_OWIN64</span>
+#define STR_DLG_RESOURCE_DLL  <span style="color: #ff00ff;">"Welcome"</span> <span style="color: #008000;">// 32 bit DLL</span>
+#endif<span style="color: #008000;">// _OWIN64</span>
+ 
+ 
+class CustomDialog <span style="color: #000000;">:</span> public ResizeDialog<span style="color: #000000;">
+{</span>
+public<span style="color: #000000;">:</span>
+    <span style="color: #008000;">// 重要: IDD_MY_DIALOG はダイアログのリソースIDを示す</span>
+    <span style="color: #008000;">// STR_DLG_RESOURCE_DLL はダイアログのリソースDLL ファイルを示す</span>
+    CustomDialog<span style="color: #000000;">(</span>TreeNode<span style="color: #000040;">&amp;</span> trXFSettings<span style="color: #000000;">)</span> <span style="color: #000000;">:</span> ResizeDialog<span style="color: #000000;">(</span> IDD_MY_DIALOG, STR_DLG_RESOURCE_DLL <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+            m_trXFSettings <span style="color: #000080;">=</span> trXFSettings;
+ 
+    <span style="color: #000000;">}</span>
+ 
+    int DoModalEx<span style="color: #000000;">(</span>HWND hParent <span style="color: #000080;">=</span> NULL<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+            InitMsgMap<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+            return ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">DoModal</span><span style="color: #000000;">(</span>hParent<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>  
+ 
+protected<span style="color: #000000;">:</span>
+EVENTS_BEGIN
+        ON_INIT<span style="color: #000000;">(</span>OnInitDialog<span style="color: #000000;">)</span>
+        ON_OK<span style="color: #000000;">(</span>OnOK<span style="color: #000000;">)</span>
+EVENTS_END
+ 
+        BOOL OnInitDialog<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>          
+                ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;       
+                Edit    ed;
+                ed <span style="color: #000080;">=</span> GetDlgItem<span style="color: #000000;">(</span>IDC_EDIT1<span style="color: #000000;">)</span>;
+                <span style="color: #008000;">// 初期ダイアログのコントロールをXファンクションで実行     </span>
+                ed.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> ftoa<span style="color: #000000;">(</span>m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span><span style="color: #000000;">)</span>; 
+              return TRUE;
+        <span style="color: #000000;">}</span> 
+ 
+        BOOL OnOK<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Edit    ed;
+                ed <span style="color: #000080;">=</span> GetDlgItem<span style="color: #000000;">(</span>IDC_EDIT1<span style="color: #000000;">)</span>;
+                m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> atof<span style="color: #000000;">(</span>ed.<span style="color: #000000;">Text</span><span style="color: #000000;">)</span>;
+ 
+                <span style="color: #008000;">// 入力値が0の場合、自動的に1に変更される</span>
+                if <span style="color: #000000;">(</span> m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                        m_trXFSettings.<span style="color: #000000;">factor</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+ 
+                return TRUE;
+        <span style="color: #000000;">}</span>
+ 
+private<span style="color: #000000;">:</span>
+        TreeNode        m_trXFSettings;<span style="color: #000000;">
+}</span>;
+</pre></li>
+<li>Originのコードビルダを開き、メニューからファイル→開く、と選択してXファンクションを選びます。開くダイアログで「ワークスペースに追加」にチェックがついている事を確認してからOKをクリックします。CustomDlg.XFCがOriginCワークスペースビューのユーザフォルダに追加され、編集ビューに関数のボディを表示します。</li>
+<li><b style="font-weight: bold;">//put additional include files here</b>行の後に、次のような行を追加します。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put additional include files here</span>
+#include <span style="color: #ff00ff;">"CustomDlg.h"</span>
+        
+</pre></li>
+<li><b style="font-weight: bold;">//put your own support static functions here</b> と入力された行の下に、カスタムダイアログを開く関数を次のように入力します。関数名はツリービューカスタムダイアログ関数編集ボックスに入力されます。関数のインターフェイス、返してくる形式、引数リストは変更せずに以下のようにそのまま利用してください。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put your own support static functions here</span>
+bool OpenCustomDlg<span style="color: #000000;">(</span>TreeNode<span style="color: #000040;">&amp;</span> tr, PEVENT_FUNC pfn, LPCSTR lpcszTitle, LPCSTR 
+lpcszDescription, HWND hWndParent<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        CustomDialog dlg<span style="color: #000000;">(</span>tr<span style="color: #000000;">)</span>;
+        if<span style="color: #000000;">(</span> dlg.<span style="color: #000000;">DoModal</span><span style="color: #000000;">(</span>GetWindow<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                tr.<span style="color: #000000;">AutoUpdate</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> AU_AUTO; <span style="color: #008000;">// デフォルトは2(手動)</span>
+                return true;    
+        <span style="color: #000000;">}</span>
+        else <span style="color: #008000;">// ダイアログでキャンセルをクリック</span>
+        <span style="color: #000000;">{</span>
+                return false; <span style="color: #008000;">// メイン関数を呼び出さない</span>
+        <span style="color: #000000;">}</span><span style="color: #000000;">
+}</span>
+</pre></li>
+<li>Xファンクションのメイン関数( CustomDlg 関数)に次のコードを入力します。
+<pre class="oc" style="font-family: monospace;">
+out <span style="color: #000080;">=</span> in <span style="color: #000040;">*</span> factor;
+ <span style="color: #008000;">
+// "Col(A)*8" のようなコメントを出力列のコメントラベルに表示</span>
+DataRange drIn;
+drIn <span style="color: #000080;">=</span> in.<span style="color: #000000;">GetSourceDataRange</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+Worksheet wks;
+int c1, c2;
+drIn.<span style="color: #000000;">GetRange</span><span style="color: #000000;">(</span>wks, c1, c2<span style="color: #000000;">)</span>;
+Column col<span style="color: #000000;">(</span>wks, c1<span style="color: #000000;">)</span>;
+ 
+if<span style="color: #000000;">(</span> wks <span style="color: #000040;">&amp;&amp;</span> col <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>        
+        string strOutputComment;
+        strOutputComment.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Col(%s)*%g"</span>, col.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, factor<span style="color: #000000;">)</span>;
+        out.<span style="color: #000000;">SetOutputComment</span><span style="color: #000000;">(</span>strOutputComment<span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li><a class="image"><img alt="Ocguide XF Compile Button.PNG" src="../images/Creating_Custom_Dialog/Ocguide_XF_Compile_Button.PNG" width="107" height="24" border="0" /></a>ボタンをクリックします。</li>
+</ol>
+<h2><a name="Using_X-Function" id="Using_X-Function"></a><span class="mw-headline">Xファンクションを使用する</span></h2>
+<ol>
+<li>2列を有するワークシートを作成して、それぞれの列に異なるデータを入力します。</li>
+<li>列を選択してからコマンドウィンドウで「CustomDlg -d」を実行します。</li>
+<li>Factorに「8」を入力します。</li>
+<li>OK ボタンをクリックして、ダイアログを閉じます。</li>
+<li>新しい列が作成され、自動更新を示す錠前(列(A)＊factor)が表示されます。</li>
+<li>入力が0の場合、結果は自動的に1に変換されます。</li>
+<li>列Aにあるデータを変更すると出力値を入力した列の自動更新が起動し、数値を更新します。</li>
+</ol>
+<h2><a name="How_to_share_your_custom_dialog_with_others" id="How_to_share_your_custom_dialog_with_others"></a><span class="mw-headline">他のユーザと作成したカスタムダイアログを共有するには</span></h2>
+<p><b style="font-weight: bold;">パッケージマネージャ</b>を使用すると、1つのパッケージファイルとして他のOriginユーザに渡すことができます。このパッケージをインストールするには、Originに直接パッケージファイルをドロップすれば行えます。</p>
+<ol>
+<li>「ツール：パッケージマネージャ」を選択します。「ファイルの追加」ボタンをクリックして4つのファイル、CustomDlg.XFC, CustomDlg.h, resource.h, Welcome.dll を追加します。</li>
+<li>ファイル→保存、と操作して「CustomDlg.opx」として保存し、他のユーザと共有します。</li>
+</ol>
+
+

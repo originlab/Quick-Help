@@ -1,0 +1,566 @@
+﻿<h1 class="firstheading">データのインポート</h1><p class='urlname' style='display: none'>Import-Data</p>
+<dl><dd><a  class="image"><img alt="Import grand image4 650px.png" src="../images/Import_Data/Import_grand_image4_650px.png" width="799"  /></a></dd></dl>
+<p>Origin 2019bで<b>データコネクタ</b>と呼ばれる新しいデータインポートの仕組みが追加されました。名前の通り、データコネクタはプロジェクトと外部のソースファイルの間にリンクを作成します。ソースファイルはローカルにあっても、会社のネットワーク上にあってもかまいません。Webサーバ上に置くこともできます。データコネクタは、プロジェクトを保存時にインポートデータを含まずに保存するオプション（ファイルサイズを軽くし、ソースデータへのリンクを維持）と、偶発的な変更または削除操作からデータを保護するオプションをサポートします。データコネクタは、<b>HTMLテーブル</b>や<b>JavaScript Object Notation (JSON)</b>データなど、これまで利用できなかったデータソースのインポートをサポートします。  データコネクタは、<b>ドラッグアンドドロップ</b>と<b>プロジェクトオープン時の自動インポート</b>をサポートします。さらに、OriginLabでは新しいデータ形式への対応を進めています。たとえば、<b>Origin 2021b</b>では、<b>National Instruments TDMS</b>および<b>NetCDF</b>ファイル用のコネクタが改善されました。 さらに、新しい<b>Thermo Fisher Scientific MSRawFile</b>コネクタを追加しました。
+</p><p><br />
+<i><b>その他のサポートされているインポート方法：</b></i>
+</p>
+<ul><li> OriginLabは、ASCII、CSV、Excel、バイナリファイル、およびMATLAB、pClamp、NI TDM、NetCDFを含む多くのサードパーティ形式向けの、Originの<b>Xファンクション+フィルターベース ルーチン</b>を引き続きサポートしています。これまで使用してきたインポートフィルタやテーマがある場合は、問題なく機能します。</li>
+<li> <b>コピー＆ペースト</b>で、単純に構造化されたデータをすばやくインポートできます（主にワークシートにデータを素早く追加するのに役立ちます）。 </li>
+<li> 複雑なASCII、バイナリ、またはユーザ定義のファイルタイプの場合、<b>インポートウィザード</b>のわかりやすいインターフェイスを使用してファイル内容を確認しながらインポートできます。インポート設定はフィルタファイルとして保存できます。インポートウィザードは、ファイルメタデータを変数に保存したり、データ処理やインポートのためにカスタムOrigin C関数を使用したりするなどの強力な機能をサポートしています。</li>
+<li> <b>SQL</b>データベースで作業したい場合、Originの<b>データベースコネクタ</b>および<b>SQLエディタ</b>を使って接続文字列やSQLクエリを作成できます。</li></ul>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#A_Note_to_Upgrade_Users"><span class="tocnumber">1</span> <span class="toctext">アップグレードユーザ向け情報</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Data_Connectors"><span class="tocnumber">2</span> <span class="toctext">データコネクタ</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Things_to_Know_about_Data_Connectors"><span class="tocnumber">2.1</span> <span class="toctext">データコネクタについて知っておくべきこと</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Data_Source_File_Path"><span class="tocnumber">2.2</span> <span class="toctext">データソースファイルパス</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Data_Navigator"><span class="tocnumber">2.3</span> <span class="toctext">データナビゲータ</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Data_Connectors_and_Drag-and-Drop"><span class="tocnumber">2.4</span> <span class="toctext">データコネクタとドラッグアンドドロップ</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Connecting_to_Text.2FCSV"><span class="tocnumber">3</span> <span class="toctext">Text/CSVに接続</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Connecting_to_MATLAB_Files"><span class="tocnumber">4</span> <span class="toctext">MATLABファイルに接続する</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Connecting_to_NetCDF_and_Shapefiles"><span class="tocnumber">5</span> <span class="toctext">NetCDFファイルとシェープファイルに接続する</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Connecting_to_a_Cloud_Drive"><span class="tocnumber">6</span> <span class="toctext">クラウドドライブに接続</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Working_with_Excel_Data"><span class="tocnumber">7</span> <span class="toctext">Excelデータを操作する</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Connecting_to_Excel_Files"><span class="tocnumber">7.1</span> <span class="toctext">Excelファイルに接続する </span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Import_from_File"><span class="tocnumber">8</span> <span class="toctext">ファイルからインポート</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Importing_ASCII_Files_with_impASC"><span class="tocnumber">8.1</span> <span class="toctext">impASCでASCIIファイルをインポート</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Saving_Import_Settings"><span class="tocnumber">8.2</span> <span class="toctext">インポート設定を保存</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Third_Party_Formats"><span class="tocnumber">8.3</span> <span class="toctext">サードパーティ製データ</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17"><a href="#The_Import_Wizard"><span class="tocnumber">9</span> <span class="toctext">インポートウィザード</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#Copy.2FPaste_the_Clipboard_Data"><span class="tocnumber">10</span><span class="toctext">クリップボードのデータをコピー/貼り付け</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Selectively_Import_Data_by_Querying_an_Origin_File"><span class="tocnumber">11</span> <span class="toctext">Originファイルをクエリして選択的にデータをインポート</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#Database"><span class="tocnumber">12</span> <span class="toctext">データベース</span></a></li>
+<li class="toclevel-1 tocsection-21"><a href="#Digitizer"><span class="tocnumber">13</span> <span class="toctext">デジタイザ</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#Saving_Origin_Files_without_Imported_Data"><span class="tocnumber">14</span> <span class="toctext">インポートデータを除外してOriginファイルを保存する</span></a></li>
+<li class="toclevel-1 tocsection-23"><a href="#Re-Importing_Data_Files"><span class="tocnumber">15</span> <span class="toctext">データファイルの再インポート</span></a></li>
+<li class="toclevel-1 tocsection-24"><a href="#Clone_Import"><span class="tocnumber">16</span> <span class="toctext">クローンインポート</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#Topics_for_Further_Reading"><span class="tocnumber">17</span> <span class="toctext">詳細情報</span></a></li>
+</ul>
+</div>
+<h2><a name="A_Note_to_Upgrade_Users"></a><span class="mw-headline">アップグレードユーザ向け情報</span></h2>
+<p>以前のバージョンでは、<b>ファイル</b>メニューにあったインポートルーチンが、最近のバージョンでは<b>データ</b>メニューに移動していることに注意してください。Originの最新のデータインポートツールである<b>データコネクタ</b>があります。
+</p>
+<dl><dd><dl><dd><a  class="image"><img alt="Import fF Moved.png" src="../images/Import_Data/Import_fF_Moved.png" width="700"  /></a></dd></dl></dd></dl>
+<h2><a name="Data_Connectors"></a><span class="mw-headline">データコネクタ</span></h2>
+<dl><dd><dl><dd><a  class="image"><img alt="Data Connector General Concept.png" src="../images/Import_Data/Data_Connector_General_Concept.png" width="687"  /></a></dd></dl></dd></dl>
+<p><b>データコネクタ</b>は、<i>ローカル</i>または<i>webベース</i>のファイルやページからOriginプロジェクトにデータをインポートするための一般的なメカニズムです。データコネクタは、主に2つのデフォルト（変更可能な）の古いOriginのインポート方法とは異なります。
+</p>
+<ul><li> コネクタを介してインポートされたデータは編集が<a class="external text" href="../../UserGuide/Category/Data_Connector.html#Data_Integrity"><i>ロック</i></a>されています。これにより、データの整合性が確保されます。</li>
+<li> コネクタを介してインポートされたデータは、プロジェクトとともに<a class="external text" href="../../UserGuide/Category/Data_Connector.html#Excluding_or_Saving_Imported_Data"><i>保存されません</i></a>。これにより、プロジェクトファイルを小さくすることが可能です。</li></ul>
+<p><br />
+データコネクタは多数の一般的なデータフォーマットをサポートしています。
+</p>
+<ul><li> <b>Text/CSV</b></li>
+<li> <b>Excel</b></li>
+<li> <b>Originファイル</b>（プロジェクト、ワークブック、行列）</li>
+<li> <b>MATLAB</b></li>
+<li> <b>JavaScript Object Notation (JSON)</b></li>
+<li> <b>HDFファイル</b></li>
+<li> <b>TDMSファイル</b></li>
+<li> <b>HTML表</b></li>
+<li> <b>インポートフィルタ</b>（データコネクタの仕組みで<a class="external text" href="../../UserGuide/Category/Importing_Data_by_Drag_and_Drop.html#Origin_Import_Filters">カスタムインポートフィルタ</a>を使用） </li>
+<li> <b>シェープファイル（Shapefile）</b></li>
+<li> <b>NetCDF</b></li>
+<li> <b>XML</b></li></ul>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tip_icon.png" width="57"  border="0" /></td><td><p><b>SQL</b>データベースに接続するには、<a href="#Database"><b>データベース</b></a>を参照してください。 
+</p></td></tr></table>
+<p><br />
+<i><b>データコネクタでデータをインポートする方法</b></i>
+</p>
+<ol><li> ワークブックをアクティブにして、<b>データ</b>メニューをクリックします。 </li></ol>
+<dl><dd><ul><li> ローカルまたはネットワークファイルに接続する場合、<b>ファイルに接続</b>をクリックしてファイルタイプを選択します。 </li>
+<li> 複数ファイルに接続するには、<b>複数ファイルに接続</b>を選択します。 </li>
+<li> Webデータに接続する場合、<b>Webに接続</b>を選択してURLを入力します。</li></ul></dd></dl>
+<h3><a name="Things_to_Know_about_Data_Connectors"></a><span class="mw-headline">データコネクタについて知っておくべきこと</span></h3>
+<ul><li> インポートデータのファイルサイズが500kBを超える場合、インポートされたデータとそのデータから作成されたグラフは、デフォルトでOriginファイルとともに保存されません（LabTalkシステム変数<a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#F.2CG"><b>@FSE</b></a>を参照）。インポートされたデータに起因するすべての分析出力はOriginファイルと一緒に保存されます。プロジェクトファイルと一緒に生データを保存しないと、ファイルサイズが大幅に削減され、サイズの大きいプロジェクトを操作するときのパフォーマンスが向上します。</li>
+<li> <b>重要</b>：デフォルトでは、コネクタでインポートされたデータ(&gt;500kB)はプロジェクトファイルと一緒に保存されないため、ユーザーはインポートされたデータを保存する必要があるかどうかを常に確認する必要があります。これは、データソースがWebベースであり、制御できない場所に保存されている場合に問題になることがあります。データコネクタ経由でインポートした全データをOriginファイルと一緒に保存したい場合は、データコネクタアイコンをクリックし、<b>保存時にインポートデータを除外</b><strong><sup>&dagger;</sup></strong>の横のチェックマークを外します。各データコネクタを含むブックには、それぞれ独自の<b>除外...</b>チェックマークが付きます。あるいは、データコネクタが必要でないと判断した場合、データコネクタアイコンをクリックして<b>データコネクタを削除</b>（このブックから）または、<b>全てのブックからコネクタを削除</b>（プロジェクト内）を選択します。</li>
+<li> ワークシートの左上隅にあるデータコネクタアイコン（<a  class="image"><img alt="DC Icon DataMod.png" src="../images/Import_Data/DC_Icon_DataMod.png" width="18"  /></a>または<a  class="image"><img alt="DC Icon Live.png" src="../images/Import_Data/DC_Icon_Live.png" width="18"  /></a>)をクリックして<b>インポート</b> (<b>Ctrl+4</b>) または<b>すべてインポート</b>を選択すると、いつでもデータを再インポートできます。 </li>
+<li> デフォルトでは、データコネクタ経由でインポートされたデータは編集できません。グラフ作成や分析をすることはできますが、変更することはできません。これにより、誤って変更することを防ぐことができますが、制限が厳しすぎると感じる場合もあります。コネクタアイコンをクリックし、<b>インポートされたデータを解除</b>を選択することにより、接続されたデータのロック解除できます。コネクタインポートデータから編集制限を削除する方法については、<a class="external text" href="../../QuickHelp/QuickHelp/How_to_allow_changing_data_when_data_connector_is_used.html">このFAQ</a>を参照してください。</li>
+<li> ワークブックに接続できるコネクタのタイプは<i>1つのみ</i>です（例：Text/CSV）。Text / CSVなどの単純な構造のファイルの場合、同じコネクタを共有している限り、それぞれが別々のファイルに接続する複数のシートを持つことができます。ExcelやMATALABなどのより複雑な構造のファイルの場合、最初に1つのシート/変数に接続し、次に<a href="../../GettingStarted/OriginLab/Import_Data.html#Data_Navigator" title="OriginLab:データのインポート">データナビゲータ</a>の<b>シートの追加と接続</b>ショートカットメニューコマンドを使用して、必要に応じてブックに他のシート/変数を追加します。1つのExcelまたはMATLABファイルは、1つのOriginワークブックまたは行列ブックにのみ接続できます。</li>
+<li> 単純な構造のファイル（CSVなど）を含むブックでは、シートタブを右クリックして新しいシートを追加すると、シートは空のコネクタで追加されます。未接続状態は、淡黄色のコネクタアイコン<a  class="image"><img alt="DC Icon Empty.png" src="../images/Import_Data/DC_Icon_Empty.png" width="18"  /></a>で示されます(<a href="#Data_Source_File_Path">下記のコネクタの状態を参照ください</a>)。コネクタアイコンをクリックしてショートカットメニューを開き、シートをデータソースに接続できます。</li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="Data Connector Shortcut Menu.png" src="../images/Import_Data/Data_Connector_Shortcut_Menu.png" width="396"  /></a></dd></dl></dd></dl>
+<ul><li> 使用しないデータコネクタを非表示にするには、<b>データ：ファイルに接続：カスタマイズ...</b>を選択し、未使用のコネクタのチェックを外します。</li>
+<li> Originにインストールされていないファイル形式のデータコネクタは、<b>データ: ファイルに接続: 新規追加...</b>をクリックして利用できます。新しいデータコネクタが <b>データ</b> メニューに追加されます。</li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="UG data connector add new.png" src="../images/Import_Data/UG_data_connector_add_new.png" width="412"  /></a></dd></dl></dd></dl>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Alert_icon.png" width="57"  border="0" /></td><td><p><strong><sup>&dagger;</sup></strong>Originは、 <b>データ：Webに接続</b>によってインポートされたデータを、LabTalkのシステム変数 <b>@CFDT</b>とファイルサイズで決定された期間キャッシュします。デフォルトでは、10MBのファイルの場合キャッシュされたデータを24時間保存します。つまり、24時間以内に再インポート（つまり、Webファイルに再接続）した場合、最初のインポートでキャッシュされたデータが使用されます。24時間経過後、この10MBのファイルに再インポートすると、キャッシュがクリアされ、データが新たにインポートされます。このキャッシュに関する動作を制御する方法については、以下のトピックを参照してください。
+</p>
+<ul><li> <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#C">LabTalk システム変数 <b>@CFDT</b></a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/Delete_(command).html">LabTalk <b>delete -web</b> コマンド</a> </li></ul>
+	</td>
+	</tr>
+	</table>
+<h3><a name="Data_Source_File_Path"></a><span class="mw-headline">データソースファイルパス</span></h3>
+<p>データコネクタアイコンは、次の5つの状態のいずれかで表示されます。
+</p>
+<ul><li> データソースが接続されると、アイコンは次のようになります。 <a  class="image"><img alt="DC Icon Live.png" src="../images/Import_Data/DC_Icon_Live.png" width="18"  /></a></li>
+<li> シート内のデータのロックが解除されて編集できるようになると（<a href="#Data_Connectors">コネクタメニュー</a>またはLabTalkシステム変数<a class="external text" href="../../QuickHelp/QuickHelp/How_to_allow_changing_data_when_data_connector_is_used.html"><b>@IPDC=0</b></a>)のいずれかで）、アイコンは次のようになります。 <a  class="image"><img alt="DC Icon Unlocked.png" src="../images/Import_Data/DC_Icon_Unlocked.png" width="18"  /></a></li>
+<li> データソースのインポートが保留中の場合、アイコンは次のようになります。 <a  class="image"><img alt="DC Icon DataMod.png" src="../images/Import_Data/DC_Icon_DataMod.png" width="18"  /></a></li>
+<li> 接続されたブックに新しいシートが追加されると、空のコネクタがシートに追加され、アイコンは次のようになります <a  class="image"><img alt="DC Icon Empty.png" src="../images/Import_Data/DC_Icon_Empty.png" width="18"  /></a></li>
+<li> データソースが実行可能でなくなった場合（データソースが移動された場合など）、アイコンは次のようになります。 <a  class="image"><img alt="DC Icon Broken.png" src="../images/Import_Data/DC_Icon_Broken.png" width="18"  /></a></li>
+<li> シートがすべての編集に対して保護されている場合 (<a href="../../GettingStarted/OriginLab/Workbooks_Worksheets_Columns.html#Protecting_Worksheet_Data" title="OriginLab:ワークブック、ワークシート、列">ワークシート保護</a>)、コネクタメニューは無効になり、アイコンは次のようになります。<a  class="image"><img alt="DC icon disabled.png" src="../images/Import_Data/DC_icon_disabled.png" width="18"  /></a></li></ul>
+<p><br />
+接続の状態に関係なく、コネクタアイコンをクリックし、<b>データソースファイルパス</b>と<b>共通データパス</b>を使用して、Originファイルとソースデータ間の接続を維持できます。
+</p>
+<dl><dd><dl><dd><a  class="image"><img alt="UG Common Data Path Dialogs.png" src="../images/Import_Data/UG_Common_Data_Path_Dialogs.png" width="934"  /></a></dd></dl></dd></dl>
+<ul><li> <b>プロジェクトパスからの相対パス</b>: ：データがプロジェクトファイルの下のフォルダに保存されている場合は、データソースファイルへのパスを<b>プロジェクトパスからの相対パス</b>に設定できます。その後、プロジェクトとデータソースを一緒に移動しても、それらの相対パスは維持されます。ネットワーク上の別の場所からプロジェクトファイルを再度開くときに、パスの修正は必要ありません。 </li>
+<li> <b>共通データパスからの相対パス</b>：データソースが何らかの共通パスの下にある場合は、データソースファイルパスを<b>共通データパスからの相対パス</b>に設定できます。その後ファイルを移動した場合は、<b>共通データパス</b>を再確立してから<b>すべてのブックをインポート</b>を選択します。</li></ul>
+<h3><a name="Data_Navigator"></a><span class="mw-headline">データナビゲータ</span></h3>
+<p><b>データナビゲータ</b>は、Excel、MATLAB、Originプロジェクトなどの複数ページ/複数変数のファイルに接続したときに、ブックに自動的に追加される折りたたみ可能なパネルです。
+</p>
+<dl><dd><a  class="image"><img alt="UG data navigator overview.png" src="../images/Import_Data/UG_data_navigator_overview.png" width="816"  /></a></dd></dl>
+<ul><li> Originは最初のシートからデータをインポートし、他のシートを淡色表示にします。</li>
+<li> 淡色表示されたシートを右クリックするか、CtrlキーまたはShiftキーを押しながら複数のシートを選択してから、<b>シート追加および接続</b>を選択します。</li>
+<li> ファイル名はブックの<b>ロングネーム</b>に割り当てられ、シートは元のシート名がシートの<b>名前</b>に割り当てられます。</li>
+<li> 接続されたシートは、現在のOriginワークブックから削除できます。</li></ul>
+<h3><a name="Data_Connectors_and_Drag-and-Drop"></a><span class="mw-headline">データコネクタとドラッグアンドドロップ</span></h3>
+<p><b>データ: ファイルに接続</b>にあるファイルタイプでドラッグアンドドロップがサポートされています。
+</p>
+<ul><li> 単純なヘッダ情報（列名と単位のみなど）を持つファイルの場合、データコネクタが追加され、インポートフィルタなしでファイルが適切に解析されます。</li>
+<li> ヘッダ情報がワークシートのデータ部分に含まれる場合など、適切に解析されないファイルの場合は、<a href="#The_Import_Wizard">インポートウィザード</a>を使用して<a class="external text" href="../../UserGuide/UserGuide/Import_Wizard_Save_Filters_Page_(All_Data_Types).html">Originのインポートフィルタファイル(*.oif)</a>を作成することを検討してください。</li>
+<li> インポートフィルタは、データファイルフォルダ、User Files\Filtersフォルダ、現在のウィンドウのいずれかに保存できます。データのインポートに<a class="external text" href="../../UserGuide/UserGuide/Basic_Child_Window_Operations.html#Saving_a_window_to_a_file">テンプレート</a>を使用する場合は、ウィンドウにフィルタを保存できます。それ以外の場合、フィルタファイル（* .oif）はデータファイルフォルダまたは\User Files\Filtersに保存することで使用可能です。</li></ul>
+<h2><a name="Connecting_to_Text.2FCSV"></a><span class="mw-headline">Text/CSVに接続</span></h2>
+<p><span class="OIndex" style="display:none">CSVファイル</span>
+</p><p>データコネクタを使用して、ローカルまたはWebに保存されたテキストファイル（TXT、DAT、CSV）をインポートできます。データコネクタ機能は、これらのファイルタイプで適切に機能し、Originの古いX-Functionベースのインポートルーチンに関連する問題の一部を簡素化し、場合によっては排除します。たとえば、日時データのインポートでは、常に<a class="external text" href="../../UserGuide/UserGuide/Dates_and_Times_in_the_Worksheet.html">日時列は手動で構成する</a>必要がありました。コネクタを使用すると、日時データが標準の簡単に認識できる形式である場合、その構成は自動的に行われます。
+</p><p><br />
+<i><b>ローカルドライブまたはLANドライブ上のファイルに接続するには：</b></i>
+</p>
+<ol><li> ワークブックをアクティブな状態で、メニューから<b>データ：ファイルに接続： Text/CSV</b>を選択します。 </li>
+<li> ファイルを参照して選択します。</li>
+<li> <b>CSVインポートオプション</b>を設定します。多くの場合、デフォルトを受け入れるだけでファイルがきれいにインポートされるため、テストとして、デフォルトを変更せずにデータをインポートしてみてください。結果が良くない場合は、インポートを再実行してデフォルト設定を変更します。<b>他のオプション</b>ボタン（<b>OK</b>の左）をクリックするとオプションを利用できます。</li></ol>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tutorial_icon.png" width="57"  border="0" />
+	</td>
+	<td><p>このミニチュートリアルでは、<b>Text/CSVコネクタ</b>を使用して、日時コンポーネントを含むテキストファイルをインポートします。古いOriginのインポート方法では日時データがテキストとして扱われ、ユーザーは手動で日時列をインポート後の日付に設定する必要がありましたが、Text / CSVコネクタはインポート時にワークシート列を自動的に構成できます。
+</p>
+<ol><li> <b>新規ワークブック</b>ボタン<a  class="image"><img alt="Button New Workbook.png" src="../images/Import_Data/Button_New_Workbook.png" width="23"  /></a>をクリックし、<b>データ:ファイルに接続:Text/CSV</b>を選択します。</li>
+<li> &lt;<i>Origin Program</i>&gt;\Samples\Import and Export\フォルダを参照し、Date with higher precision.dat.を開きます。</li>
+<li> <b>CSVインポートオプション</b>ダイアログの設定はデフォルトのままにして、 <b>OK</b>をクリックします。データがワークブックにインポートされます。</li>
+<li> 列<i>A</i>ヘッダをクリックして列を選択し、右クリックして<b>列プロパティ</b>を選択します。<b>フォーマット</b>は自動的に<i>日付</i>に設定され、<b>表示</b>は<i>カスタム</i>に設定され、カスタムフォーマットは<b>カスタム表示</b>に表示されることに注意してください。</li></ol>
+<dl><dd><a  class="image"><img alt="Import custom date time.png" src="../images/Import_Data/Import_custom_date_time.png" width="684"  /></a></dd></dl>
+</td></tr></table>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tutorial_icon.png" width="57"  border="0" />
+	</td>
+	<td><p>このミニチュートリアルでは、データコネクタを使用して複数のファイルをインポートします。これらの同じ構造のファイルには、保持したいメタデータの複数の行があります。したがって、<a class="external text" href="../../Tutorial/Tutorial/Import_Wizard.html">インポートフィルタを使用して作られた</a>インポートフィルタファイルを使用して、ファイルをインポートし、ファイルメタデータを各ワークシートの複数の<a class="external text" href="../../UserGuide/UserGuide/Displaying_Supporting_Data_in_Worksheet_header_Rows.html">列ラベル行</a>に書き込みます。そうすることで、（a）データコネクタを使用して複数のファイルをインポートする方法、および（b）以前のバージョンのOriginで開発された<a class="external text" href="../../UserGuide/Category/Importing_Data_by_Drag_and_Drop.html#Origin_Import_Filters">インポートフィルタファイル (*.oif)</a>を使用して、Originの新しいデータコネクタテクノロジーを使用してファイルをインポートする方法を確認できます。
+</p>
+<ol><li> 新しいプロジェクトを開始し、ワークブックをアクティブにして、<b>データ：複数ファイルに接続</b>を選択します。</li>
+<li> <b>files2dc</b>ダイアログボックスで、以下のように設定します。
+<ul><li> <b>データコネクタ</b> = <i>インポートフィルタ</i></li>
+<li> <b>ソース</b> = <i>指定したファイル</i></li>
+<li> <b>ファイル名</b> = <i>&lt;Origin Program&gt;</i>\Samples\Import and Export\S15-125-03.dat, S21-235-07.dat and S32-014-04.dat</li>
+<li> <b>同一ブック</b> = 有効（チェックボックスをオンにすると、すべてのファイルが1つのブックになります）</li></ul></li>
+<li> <b>OK</b>をクリックし、開かれたダイアログで、<b>インポートフィルタ</b> = データフォルダー：VarsFromFileNameAndheader.oif]を設定します。</li>
+<li> <b>OK</b>をクリックすると、3つのファイルがワークブックに別々のシートとしてインポートされます。</li></ol>
+</td></tr></table>
+<p><br />
+<i><b>Web上のファイルに接続するには：</b></i>
+</p>
+<ol><li> <b>データ：Webに接続</b></li>
+<li> ファイルのURLがある場合は、<b>URL</b>ボックスに入力します。それ以外の場合は、<b>ファイルタイプ</b>を<i>Text/CSV</i>に設定し（オプションですが、<b>最近使ったURL</b>をフィルタリングするのに役立ちます）、<b>最近使ったURL</b>を直接クリックして、リストから選択します。</li></ol>
+<dl><dd><a  class="image"><img alt="Connect to web dialog URL.png" src="../images/Import_Data/Connect_to_web_dialog_URL.png" width="786"  /></a></dd></dl>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tip_icon.png" width="57"  border="0" /></td><td><p><b>CSVインポートオプション</b> ダイアログを使用して、ローカルに保存されたファイルと同様、Webに保存されたファイルの部分インポートを指定できます。<b>部分インポート</b>ボックスをチェックして、<b>列</b>および<b>行</b>インポートを定義するために使用しるシンタックスのガイドを開きます。
+</p></td></tr></table>
+<table class="note">
+<tr>
+<td> <b>Note：</b>Text/CSVコネクタと一緒に操作する方法についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ: Origin: Originヘルプ &gt; <a class="external text" href="../../UserGuide/UserGuide/Connecting_to_File.html#Text.2FCSV_Connector">Text/CSVコネクタ</a></b>
+</p>
+</td></tr></table>
+<h2><a name="Connecting_to_MATLAB_Files"></a><span class="mw-headline">MATLABファイルに接続する</span></h2>
+<p>Originは、これまでの<a href="../../GettingStarted/OriginLab/Import_Data.html#Third_Party_Formats" title="OriginLab:データのインポート">XファンクションベースのMATファイルインポート</a>を引き続きサポートしていますが、データコネクタにはローカルに保存されたMATLABファイルとWebに保存されたMATLABファイルの両方のインポートにいくつかの利点があります。
+</p>
+<ul><li> ルートレベルでMATLABファイルに接続すると、すべての変数がOriginの行列オブジェクトとして行列シートに追加されます。</li>
+<li> スライダーが追加され、シート内のOrigin行列オブジェクトをめくることができます。ミニツールバーのボタン<b>スライダーまたはサムネイル</b>を使用して、スライダーとサムネイルを切り替えることができます。</li>
+<li> また、コネクタは、折りたたみ可能な<a href="../../GettingStarted/OriginLab/Import_Data.html#Data_Navigator" title="OriginLab:データのインポート"><b>データナビゲータ</b></a>パネルをウィンドウに追加します。変数を個別のシートとして追加する場合は、データナビゲータリストを右クリックして追加できます。</li></ul>
+<dl><dd><a  class="image"><img alt="UG slider or thumb MAT.png" src="../images/Import_Data/UG_slider_or_thumb_MAT.png" width="773"  /></a></dd></dl>
+<p><br />
+<i><b>MATLABファイルに接続するには：</b></i>
+</p>
+<ol><li> ワークブックまたは行列ブックをアクティブにして、<b>データ: ファイルに接続: MATLAB</b>または<b>データ: フWebに接続</b>をクリックして、.matファイルへのURLを入力します。</li>
+<li> インポートする変数を選択し（ブラウザの下部パネルに追加します）、<b>OK</b>をクリックします。</li></ol>
+<p><br />
+</p>
+<table class="note">
+<tr>
+<td> <b>Note：</b>JSON/MATLABコネクタと一緒に操作する方法についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ: Origin: Originヘルプ &gt; <a class="external text" href="../../UserGuide/UserGuide/Connecting_to_File.html#JSON.2FMATLAB">JSON/MATLAB</a></b>
+</p>
+</td></tr></table>
+<h2><a name="Connecting_to_NetCDF_and_Shapefiles"></a><span class="mw-headline">NetCDFファイルとシェープファイルに接続する</span></h2>
+<p>NetCDFファイル形式は、多次元の科学データを共有するために使用されます。主に気候科学で広く使用されています。シェープファイルは通常、地理的境界やその他の地理空間データを格納するために使用されます
+</p>
+<dl><dd><a  class="image"><img alt="Import NetCDF Image Map.png" src="../images/Import_Data/Import_NetCDF_Image_Map.png" width="799"  /></a></dd></dl>
+<p><br />
+<i><b>NetCDFファイルに接続するには：</b></i>
+</p>
+<ol><li> ワークブックまたは行列ブックをアクティブにして、<b>データ: ファイルに接続: NetCDF</b>または<b>データ: Webに接続</b>をクリックして、.ncファイルへのURLを入力します。</li>
+<li> インポートする変数を選択しブラウザの下部パネルに追加します。</li>
+<li> 必要に応じて<b>インポートオプション</b>（鉛筆ボタン）を調整して<b>OK</b>ボタンを2回クリックします。</li>
+<li> ワークブックがアクティブであるが、変数に行列ブックが必要な場合は、アクティブなワークックに新しい行列ブックまたは埋め込み行列ブックを追加するように求められます。</li></ol>
+<p><br />
+<i><b>シェープファイルに接続するには：</b></i>
+</p>
+<ol><li> ワークブックまたは行列ブックをアクティブにして、<b>データ: ファイルに接続: Shapefile</b>をクリックして.shpファイルを選択します。</li>
+<li> （オプションで）エンコーディングと<b>属性をロード</b>や<b>WGS84に変換</b>を指定し、<b>OK</b>をクリックします。</li></ol>
+<table class="note">
+<tr>
+<td> <b>Note：</b>NetCDFコネクタと一緒に操作する方法についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ: Origin: Originヘルプ &gt; <a class="external text" href="../../UserGuide/UserGuide/Connecting_to_File.html#NetCDF">NetCDFコネクタ</a></b>
+</p>
+</td></tr></table>
+<h2><a name="Connecting_to_a_Cloud_Drive"></a><span class="mw-headline">クラウドドライブに接続</span></h2>
+<p>MS OneDrive または Googleドライブに保存されている<b>Origin</b>、<b>MS Excel</b>、<b>ASCII</b>ファイルに接続可能です。アカウント認証後、ローカルファイルへの接続と同じようにクラウドファイルへの接続が可能です。
+</p>
+<ol><li> ワークブックをアクティブにして、<b>データ：クラウドに接続</b>をクリックします。ブラウザが開いたらファイルを選択します。 </li>
+<li> 必要に応じてブラウザのドロップダウンでクラウドサービスやアカウントの選択を行います。
+<dl><dd> <a  class="image"><img alt="Data Connect to Cloud Browser.png" src="../images/Import_Data/Data_Connect_to_Cloud_Browser.png" width="538"  /></a></dd></dl></li>
+<li> ファイルを選択して、<b>開く</b>をクリックします。</li></ol>
+<p>初めてクラウドアカウントに接続するときは、アカウントの確認が必要です。Originは一時ファイルを使用して、クラウドアカウントとローカルコンピュータ間でデータにアクセスして転送します。それ以外の情報の通信は実行されません。
+</p>
+<h2><a name="Working_with_Excel_Data"></a><span class="mw-headline">Excelデータを操作する</span></h2>
+<p><span class="OIndex" style="display:none">Excel</span>OriginでExcelデータを扱う場合、複数の方法があります。
+</p>
+<ul><li> Excelのデータをクリップボードにコピーして、そのデータをOriginに貼り付けるまたはリンク貼り付けできます。</li>
+<li> <b>データコネクタ</b>を使用して、（1）<b>データ：ファイルに接続：Excel</b>をクリックするか、（2）<b>標準</b>ツールバーのボタン<a  class="image"><img alt="Button Import Excel.png" src="../images/Import_Data/Button_Import_Excel.png" width="25"  /></a>をクリックするか、（3）ExcelファイルをOriginワークスペースにドロップすることでローカルExcelファイルをインポートできます。 </li>
+<li> <b>データ：Webに接続：Excel</b>をクリックすると、<b>データコネクタ</b>を使用してWebからExcelデータをインポートできます（以下、参照）。</li>
+<li> Originの古いX-Functionベースのルーチンを使用して、<b>データ：ファイルからインポート</b>をクリックすると、ローカルのExcelファイルをインポートできます。Excelコネクタ対応のため、最近このオプションは非表示になりましたが、使用したい場合は、<a class="external text" href="../../UserGuide/UserGuide/Working_with_Microsoft_Excel.html#Importing_Excel_Data_using_the_impMSExcel_X-Function_Dialog"><b>Originヘルプ</b>ファイルのこのセクション</a>を参照してください。</li></ul>
+<p><br />
+<i><b>OriginでExcelを操作する際の注意事項</b></i>
+</p>
+<ul><li> Originは.xls, .xlsx または .xlsmをインポート可能です。 </li>
+<li> Excelコネクタを使ってデータをインポートする場合、コネクタアイコン<a  class="image"><img alt="Dadta connector icon connect.png" src="../images/Import_Data/Dadta_connector_icon_connect.png" width="16"  /></a>をクリックして<b>インポート</b>を選択することで、いつでもOrigin上のデータを更新できます。また、Excelに接続したOriginプロジェクトを開いたときもExcelデータを再インポートします。</li>
+<li> 以前のXファンクションimpMSExceベースの機能を使用してインポートする場合、特定のファイルインポート情報がワークブックに保存されます。ExcelファイルをOriginのワークブックにインポートした後は、標準ツールバーの<b>再インポート</b> ボタンを使用して、更新されたExcelファイル（複数のシートを含むものも含む）をOriginのワークブックに再インポートできます。</li>
+<li> Originは、あるExcelブックを別のExcelブックに動的にリンクすることや、Excelの数式を認識、変換などはサポートしていません。</li></ul>
+<p><br />
+</p>
+<table class="note">
+<tr>
+<td> <b>Note：</b>Excelデータの操作についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ: Origin: Originヘルプ  &gt; <a class="external text" href="../../UserGuide/Category/Working_with_Microsoft_Excel.html">Microsoft Excelの操作</a></b>および<a class="external text" href="../../UserGuide/UserGuide/Connecting_to_File.html#Excel"><b>ファイルに接続 &gt; Excel</b></a>
+</p>
+</td></tr></table>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tip_icon.png" width="57"  border="0" /></td><td><p><b>Excelコネクタ</b>と<b>impMSExcel</b> ルーチンは、Excelファイルの部分インポートをサポートしています。詳細は、Originヘルプの<a class="external text" href="../../UserGuide/Category/Partial_Importing_and_Re_Importing.html"><b>部分インポートと再インポート</b></a>を参照してください。
+</p></td></tr></table>
+<h3><a name="Connecting_to_Excel_Files"></a><span class="mw-headline">Excelファイルに接続する</span></h3>
+<p><b>Originのデータコネクタ</b>は、Originプロジェクトの外部データファイルとのライブリンクを作成します。
+</p>
+<ul><li> ローカルのファイルに接続するには、<b>データ：ファイルに接続</b>をクリックします（または<b>標準</b>ツールバーの<a  class="image"><img alt="Button Import Excel.png" src="../images/Import_Data/Button_Import_Excel.png" width="25"  /></a> ボタンをクリックします）。</li>
+<li> Webに保存されたファイルに接続するには、<b>データ：Webに接続</b>をクリックします。</li>
+<li> Originのワークブック1つにつき、Excelファイル1つを接続できます。</li>
+<li> ファイルが複数シートファイルの場合、最初に1つのシートに接続する必要があります。これにより、<b>データナビゲータ</b>パネルが開き、必要に応じて追加のページに接続できます。</li>
+<li> すべてのシートが同じ構造になっている場合、最初のシートが適切に解析されれば（たとえば、ヘッダ情報が正しく処理される）、特に調整せずに追加のシートを接続できます。 </li></ul>
+<dl><dd><a  class="image"><img alt="Excel connect import options structure.png" src="../images/Import_Data/Excel_connect_import_options_structure.png" width="620"  /></a></dd></dl>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tutorial_icon.png" width="57"  border="0" />
+	</td>
+	<td><ol><li> <b>新規ワークブック</b><a  class="image"><img alt="Button New Workbook.png" src="../images/Import_Data/Button_New_Workbook.png" width="23"  /></a>ボタンをクリックして新しいワークブックを作成し、<b>データ：ファイルに接続：Excel</b>を選択します。</li>
+<li> &lt;<i>Origin Program</i>&gt;/Samples/Import and Export/United States Energy (1980-2013).xlsを検索し、開くをクリックします。</li>
+<li> <b>Exceｌインポートオプション</b>ダイアログの設定はデフォルトのままにして、 <b>OK</b>をクリックします。</li>
+<li> ブックの左側に表示される<b>データナビゲータ</b>パネルで、Ctrlキーを押しながら他の3つのシートを選択し、右クリックして<b>シートの追加と接続</b>を選択します。残りのシート（<i>Natural Gas</i>、<i>Coal</i>、および<i>Total Primary Energy</i>）はワークブックにインポートされます。接続されていないシートのサイズが大きい場合は、必要に応じて、一度に1枚ずつ接続することを選択できます。</li></ol>
+</td></tr></table>
+<h2><a name="Import_from_File"></a><span class="mw-headline">ファイルからインポート</span></h2>
+<p><span class="OIndex" style="display:none">ASCIIデータ</span>
+<b>データ: ファイルからインポート</b>の下にリストされているインポートルーチンは、データコネクタより前のものです。<b>ファイルからインポート</b>機能は今後開発されることはありませんが、利用<i>できます</i>。
+</p><p>また、<a href="../../GettingStarted/OriginLab/Import_Data.html#Third_Party_Formats" title="OriginLab:データのインポート">この表</a>にあるファイルの種類によっては、コネクタが存在しない場合があります。データコネクタがない場合は、<b>データ：ファイルからインポート</b>機能を使用する必要があります。
+</p>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Alert_icon.png" width="57"  border="0" /></td><td><p>標準ツールバーの<b>単一ASCIIのインポート</b>ボタン<a  class="image"><img alt="Button Import ASCII.png" src="../images/Import_Data/Button_Import_ASCII.png" width="20"  /></a>で、<b>データ:ファイルに接続: Text/CSV</b>ルーチンが呼び出されるようになりました。<b>impASC</b>ルーチンについては、次のセクションを参照してください。
+</p>
+	</td>
+	</tr>
+	</table>
+<h3><a name="Importing_ASCII_Files_with_impASC"></a><span class="mw-headline">impASCでASCIIファイルをインポート</span></h3>
+<ul><li> <b>データ：ファイルからインポート：複数ASCII...</b>（<a  class="image"><img alt="Button Import Multiple ASCII.png" src="../images/Import_Data/Button_Import_Multiple_ASCII.png" width="23"  /></a>）この方法は、一般に、単純な構造のテキストファイルをインポートするのに十分です（単一ファイルまたは複数ファイルのインポートで機能します）。この2つのメソッドは、通常、一般的に使用される区切り文字とシンプルなヘッダ構造を持つファイルを調整なしで処理可能です。 </li>
+<li> ファイルのインポートを調整する必要がある場合は、<b>ASCII</b>ダイアログでファイルを選択するときに<b>オプションダイアログの表示</b>チェックボックスを選択します。これにより、<b>impASC</b>ダイアログボックスが開き、ファイルインポート時の処理方法を調節可能です。 </li></ul>
+<dl><dd> <a  class="image"><img alt="Import data 1.png" src="../images/Import_Data/Import_data_1.png" width="648"  /></a></dd></dl>
+<table class="note">
+<tr>
+<td> <b>Note：</b><b>impASCダイアログを使用したASCIIインポート</b>についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ: Origin: Originヘルプ &gt;<a class="external text" href="../../UserGuide/UserGuide/Customizing_the_ASCII_Import_Options.html">ASCIIインポートオプションのカスタマイズ</a></b>
+</p>
+</td></tr></table>
+<h3><a name="Saving_Import_Settings"></a><span class="mw-headline">インポート設定を保存</span></h3>
+<p><b>impASC</b>ダイアログでインポート設定を調整した場合、次の2通りの方法でこれを保存できます。 
+</p>
+<ul><li> ワークシート<a class="external text" href="../../UserGuide/UserGuide/Basic_Child_Window_Operations.html#Saving_a_window_to_a_file">テンプレート</a>に保存。</li>
+<li> impASCダイアログボックス内からの<a class="external text" href="../../UserGuide/UserGuide/Dialog_Themes.html#Saving_Dialog_Themes"><b>テーマ</b></a>ファイルとして保存（<a class="external text" href="../../UserGuide/Category/Importing_Data_by_Drag_and_Drop.html#Save_Settings_for_Drag-and-Drop">ドラッグアンドドロップ設定の保存</a>を含む）。 </li></ul>
+<p>ワークシートテンプレートを使用してインポート設定を保存すると、移植性が向上します（テンプレートは同僚と簡単に共有できます）。テーマとしてインポート設定を保存すると、impASCダイアログボックスでインポートするときにインポートオプションの組み合わせをいくつでも呼び出せるという利点があります。 
+</p><p>テーマとテンプレートの詳細については、このユーザーガイドの後の章にある<a href="../../GettingStarted/OriginLab/Customizing_Origin.html#Templates_and_Themes" title="OriginLab:Originのカスタマイズ"><i>Originのカスタマイズ</i></a>をご覧ください。またに、下の「詳細情報」にある、トピックスもご覧ください。
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tip_icon.png" width="57"  border="0" /></td><td><p><b>データ</b>メニューの下部にあるリストからカスタムインポートテーマをすばやく読み込むことができます。また、<b>データ：ファイルからインポート：ファイルの種類の追加／削除</b>と選択して開く、<b>インポートメニューのカスタマイズ</b>ダイアログを使用して、保存した<b>ユーザテーマ</b>を<b>データ：ファイルからインポート</b>で表示されるサブメニュー内に表示させることができます。  
+</p></td></tr></table>
+<h3><a name="Third_Party_Formats"></a><span class="mw-headline">サードパーティ製データ</span></h3>
+<p>特定のサードパーティ製の<a href="#Data_Connectors"><b>データコネクタ</b></a>が存在しない場合でも、Originの古いX-Functionベースのインポートルーチンを使用できます。これらには、pClamp、NI TDM、NetCDFなど、広く使用されている含む幅広いサードパーティ製データが含まれます。すべてのX-Functionベースのルーチンと同様に、サードパーティのファイルインポートオプションをカスタマイズし、<a class="external text" href="../../UserGuide/Category/Importing_Data_by_Drag_and_Drop.html#Save_Settings_for_Drag-and-Drop">ワークシートテンプレートを使用して</a>、または後で使用するための<a class="external text" href="../../UserGuide/UserGuide/Dialog_Themes.html#Saving_Dialog_Themes">ダイアログテーマ</a>として設定を保存できます。サポートされている他のファイルタイプと同様に、<a class="external text" href="../../UserGuide/UserGuide/Introduction_to_Import_Filters_Manager.html">ドラッグアンドドロップ</a>でサードパーティのファイルをインポートできます。 
+<span class="OIndex" style="display:none">pClamp</span>
+<span class="OIndex" style="display:none">HDF5</span>
+<span class="OIndex" style="display:none">SPC</span>
+<span class="OIndex" style="display:none">MATLAB</span>
+<span class="OIndex" style="display:none">JCAMP</span>
+</p>
+<table class="simple">
+<tr>
+<th> ファイルの種類
+</th>
+<th> 方法
+</th>
+<th> より詳細をご覧いただくには次を参照してください：
+<p><b>ヘルプ：Origin：Originヘルプ ＞ データのインポートとエクスポート</b> 
+</p>
+</th></tr>
+<tr>
+<td>
+<p><br /><span class="OIndex">Thermo</span> (<span class="OIndex">SPC</span>, <span class="OIndex">CGM</span>) <br /><span class="OIndex">pCLAMP</span> (<span class="OIndex">ABF</span>, <span class="OIndex">DAT</span>, <span class="OIndex">AB?</span>)
+<br /><span class="OIndex">Princeton Instruments</span> (<span class="OIndex">SPE</span>)
+<br />音声(<span class="OIndex">WAV</span>)
+<br /><span class="OIndex">NetCDF</span> (<span class="OIndex">NC</span>)
+<br />CDF (<span class="OIndex">CDF</span>)
+<br />HDF5 (<span class="OIndex">H5</span>, <span class="OIndex">HE</span>, <span class="OIndex">HDF5</span>)
+<br /><span class="OIndex">NI DIAdem</span> (DAT) <span class="OIndex" style="display:none">National Instruments</span>
+<br /><span class="OIndex">Famos</span> (<span class="OIndex">DAT</span>, <span class="OIndex">RAW</span>)
+<br /><span class="OIndex">ETAS INCA</span> MDF (DAT, <span class="OIndex">MDF</span>)
+<br /><span class="OIndex">IgorPro</span> (<span class="OIndex">PXP</span>, <span class="OIndex">IBW</span>)
+<br /><span class="OIndex">Prism</span> (<span class="OIndex">PZFX</span>, <span class="OIndex">XML</span>)
+<br />MATLAB (<span class="OIndex">Mat</span>)
+<br /><span class="OIndex">Minitab</span> (<span class="OIndex">MTW</span>, <span class="OIndex">MPJ</span>)
+<br /><span class="OIndex">KaleidaGraph</span> (<span class="OIndex">QDA</span>)
+<br /><span class="OIndex">SigmaPlot</span> (<span class="OIndex">JNB</span>)
+<br />MZXML(<span class="OIndex">mzData</span>, <span class="OIndex">mzXML</span>, <span class="OIndex">mzML</span>, <span class="OIndex">imzML</span>)
+<br /><span class="OIndex">EarthProbe</span> (<span class="OIndex">EPA</span>)
+<br />EDF (<span class="OIndex">EDF</span>, <span class="OIndex">BDF</span>, <span class="OIndex">REC</span>, <span class="OIndex">HYP</span>)
+<br /><span class="OIndex">Somat</span> SIE (<span class="OIndex">SIE</span>)
+<br /><span class="OIndex">JCAMP-DX</span> (<span class="OIndex">DX</span>, <span class="OIndex">DX1</span>, <span class="OIndex">JDX</span>, <span class="OIndex">JCM</span>)
+<br /><span class="OIndex">HEKA</span> (DAT)
+<br /><span class="OIndex">SPSS</span> (<span class="OIndex">SAV</span>)
+<br /><span class="OIndex">BRUKER OPUS</span>
+<br /><span class="OIndex">SAS</span> (<span class="OIndex">sas7bdat</span>)
+<br /><span class="OIndex">Tektronix</span> (<span class="OIndex">ISF</span>)
+<br />Data Translation (<span class="OIndex">DCF</span>, <span class="OIndex">HPF</span>) 
+<br />バイナリ２D配列 (<span class="OIndex">IMG</span>, <span class="OIndex">B2D</span>)<span class="OIndex" style="display:none">バイナリ２D配列、インポート</span>
+<br />画像<span class="OIndex" style="display:none">画像、インポート</span>
+</p>
+</td>
+<td> <b>データ：ファイルからインポート</b>
+</td>
+<td> <b>＞ サードパーティ製ファイルのインポート</b>
+</td></tr>
+</table>
+<table class="note">
+<tr>
+<td><b><b>Note:</b></b>デフォルトでは非表示になっているサードパーティ製ファイルフォーマットもあります。追加するには、<b>データ：ファイルからインポート：ファイルの種類の追加/削除...</b>を選択します。これにより、<b>インポートメニューのカスタマイズ</b>ダイアログボックスが開き、<b>ファイルからインポート</b>メニューに表示するファイルの種類を選択できます。もし、メニューコマンドの間に区切りが必要な場合、このダイアログの右側のパネルで右クリックし、<b><b>区切りの追加</b></b>を選択します。<b>区切り</b>を削除するには、右側のパネルで<b>区切り</b>をダブルクリックします。
+</td></tr></table>
+<p><span class="OIndex" style="display:none">ドラッグ&amp;ドロップ、インポート</span>
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tip_icon.png" width="57"  border="0" /></td><td><p>特定のファイルタイプ（つまり、上記の表にリストされているもの）にデータコネクタが存在しない場合、ドラッグアンドドロップのサポートは、<b>フィルタマネージャー</b>ダイアログを使用してファイル拡張子によって管理されます。メインメニューから、<b>環境設定：基本設定：インポートフィルタマネージャ...</b>をクリックします。
+</p></td></tr></table>
+<table class="note">
+<tr>
+<td> <b>Note：</b><b>サードパーティー製ファイル</b>と一緒に操作する方法についての詳細は、次のOriginヘルプを確認してください。
+<p><b>ヘルプ：Origin：Originヘルプ ＞<a class="external text" href="../../UserGuide/UserGuide/Importing_Third_Party_Files.html"> サードパーティ製ファイルのインポート</a></b>
+</p>
+</td></tr></table>
+<h2><a name="The_Import_Wizard"></a><span class="mw-headline">インポートウィザード</span></h2>
+<p>上記2つの方法では十分に扱えない、複雑な構造のASCIIファイルをインポートする場合、インタラクティブな<b>インポートウィザード</b> を使用します。任意のヘッダ部とその後にバイナリデータが続くような構造を持つバイナリファイルはOriginのインポートウィザードでインポートします。<span class="OIndex" style="display:none">バイナリデータ</span><span class="OIndex" style="display:none">インポートウィザード</span>
+</p><p>ASCIIデータでインポートウィザードを使用するもう1つの利点は、同じ名前のデータファイルのグループを対象とするインポートフィルタを作成できることです。これは、ファイルに特定の方法で処理する必要のあるメタデータが含まれている場合に役立ちます。作成したフィルタは、ドラッグアンドドロップによるインポート操作で使用でき、<b>データ：ファイルからインポート</b>メニューに追加できます。<b>環境設定：インポートフィルタ・マネージャ</b>メニューでインポートフィルタの閲覧や編集が可能です。
+</p><p><br />
+<i><b>インポートウィザードを開くには：</b></i>
+</p>
+<ol><li> <b>データ：ファイルからインポート：インポートウィザード</b>を選択するか、<b>標準</b>ツールバーにある<a  class="image"><img alt="Button Import Wizard.png" src="../images/Import_Data/Button_Import_Wizard.png" width="25"  /></a>ボタンをクリックします。 </li></ol>
+<ul><li> Text/CSVコネクタでうまく処理されないASCIIファイルをインポートするためにOriginインポートフィルタファイル(*.oif)を作成します。</li>
+<li> Webページなどにあるデータをクリップボードにコピーしてインポートします（下記を参照ください。）</li>
+<li> インポートファイル名やヘッダから変数を抽出します。</li>
+<li> データを解析するためのカスタム区切り記号と日付形式を指定します。</li>
+<li> インポートデータに対して実行するLabTalkスクリプトを含めます。 </li></ul>
+<p><br />
+</p>
+<table class="note">
+<tr>
+<td><b>Note</b>: 詳細は、次のヘルプファイルをご覧ください。
+<p><b>ヘルプ：Origin ヘルプ &gt; データのインポートとエクスポート &gt; <a class="external text" href="../../UserGuide/Category/The_Import_Wizard.html"><u>インポートウィザード</u></a> </b>
+</p>
+</td></tr></table>
+<h2><a name="Copy.2FPaste_the_Clipboard_Data"></a><span class="mw-headline">クリップボードのデータをコピー/貼り付け</span></h2>
+<p><span class="OIndex" style="display:none">Clipboard Data, Importing</span>Originでデータを取得するひとつの方法として、クリップボードにコピーしたデータをOriginに貼り付ける、という方法があります。  これで、Excelワークブックの一部分を選択し、Originのワークブックに貼り付けるという簡単が可能です。しかし、クリップボードのデータは、Originへ正しくデータを貼り付けることができるように、フォーマットされた配列、または区切りではありません。ここではいくつかの注意点があります。
+</p>
+<ul><li> ExcelからコピーしてOriginに貼り付けたデータは、Excelで表示されている小数点桁数にかかわらず、完全精度で貼り付けられます。</li>
+<li> ヘッダ行のあるExcelファイルの場合、クリップボードのデータをOriginの1行目（ラベル行でない）に貼り付けた後、行を選択して右クリックし、開くショートカットメニューから、<b><b>ロングネームに設定</b></b>、<b><b>単位として設定</b></b>、<b><b>コメントとして設定</b></b>を使用して、ヘッダ情報をタグ付けすることができます。</li>
+<li> また、Webからコピーされたデータは様々な方法でフォーマットされていることがあります。きれいにデータを貼り付けるためには、いくつかの操作を試す必要があります。もし、単にコピーアンドペーストするだけではうまくデータを取得できない場合、<b><b>インポートウィザード</b></b>を使用して試すことができます。インポートウィザードでは、クリップボードのデータをインポート処理するためのインタラクティブなインターフェースと、同じ形式のデータに対して適用できるインポートフィルタ（.oif）の保存機能を提供します。詳しい情報は、チュートリアルの<a class="external text" href="../../UserGuide/UserGuide/Using_the_Import_Wizard_to_Import_Clipboard_Data.html">インポートウィザードを使ってクリップボードデータをインポートする</a>をご覧ください。</li></ul>
+<dl><dd><dl><dd> <a  class="image"><img alt="Import data wizard composite resample office 600px.png" src="../images/Import_Data/Import_data_wizard_composite_resample_office_600px.png" width="600"  /></a></dd></dl></dd></dl>
+<h2><a name="Selectively_Import_Data_by_Querying_an_Origin_File"></a><span class="mw-headline">Originファイルをクエリして選択的にデータをインポート</span></h2>
+<p>インポートに先立って<b>データコネクタブラウザ</b>でSQL同様のクエリの指定により、外部Originファイルからデータ列を選択的にインポートできるようになりました。
+</p>
+<dl><dd><a  class="image"><img alt="UG Import Origin SQL.png" src="../images/Import_Data/UG_Import_Origin_SQL.png" width="713"  /></a></dd></dl>
+<p><i><b>Originコネクタを使ってOriginファイルを選択的にクエリ</b></i>
+</p>
+<ol><li> ワークシートをアクティブにして、<b>データ：ファイルに接続</b>または、<b>Webに接続</b>を選択します。</li>
+<li> Originファイルを参照して、<b>開く</b>をクリックします。データコネクタブラウザが開きます。</li>
+<li> <b><b>クエリを選択</b></b>ボタン<a  class="image"><img alt="UG Select Query Button.png" src="../images/Import_Data/UG_Select_Query_Button.png" width="42"  /></a>をクリックします。</li>
+<li> クエリを選択ダイアログでクエリを入力し、<b>OK</b>ボタンをクリックします。</li></ol>
+<p>クエリで指定した通りに、アクティブワークブックに選択的にデータがインポートされます。
+</p><p><br />
+<i><b>一般的なキーワード</b></i>
+</p>
+<table class="simple" style="width: 80%">
+<tr>
+<th style="width: 40%">キーワード
+</th>
+<th style="width: 40%">説明
+</th></tr>
+<tr>
+<td>_SName
+</td>
+<td>ショートネーム。例：_SName, Sheet_SName
+</td></tr>
+<tr>
+<td>_LName
+</td>
+<td>ロングネーム。例：_LName, Book_LName
+</td></tr>
+<tr>
+<td>_Comments
+</td>
+<td>コメント。例：_Comments, Sheet_Comments
+</td></tr>
+<tr>
+<td>Column_D1
+</td>
+<td>列ユーザ定義パラメータで、<i>1</i> はパラメータ番号
+</td></tr>
+<tr>
+<td>Column_[Name]
+</td>
+<td>列ユーザ定義パラメータで、[Name] はスペースを含めたパラメータ名
+</td></tr></table>
+<p><br />
+<i><b>サンプル:</b></i>
+</p>
+<pre class="lt" style="font-family:monospace;">Select Column from Project where _SName <span style="color: #000080;">==</span> <span style="color: #ff00ff;">&quot;A&quot;</span>;
+Select Column from Project where _Comments like <span style="color: #ff00ff;">&quot;S*3&quot;</span>;
+Select Column from Project where <span style="color: #000000;">(</span>Column_P1 like <span style="color: #ff00ff;">&quot;*y*&quot;</span> and Column_D1 <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+Select Column from Project where Sheet_SName like <span style="color: #ff00ff;">&quot;Trial*&quot;</span>;
+Select Column from Project where <span style="color: #000000;">(</span>Book_SName like <span style="color: #ff00ff;">&quot;Book*&quot;</span> or Book_LName like <span style="color: #ff00ff;">&quot;*fit*&quot;</span><span style="color: #000000;">)</span></pre>
+<p><br />
+<i><b>詳細情報</b></i>は、<a class="external text" href="../../UserGuide/UserGuide/Examples_of_using_SQL_query_condition_in_Origin_Connector.html">ユーザガイド: OriginコネクタでSQLクエリを使用するサンプル</a>を参照してください。
+</p>
+<h2><a name="Database"></a><span class="mw-headline">データベース</span></h2>
+<p><span class="OIndex" style="display:none">SQLデータ</span>
+</p><p>Originは、ODBCとOLE DBによるデータベースへの接続をサポートしています。さらに、Originには、接続文字列を追加し、Origin内でSQLクエリを生成するためのシンプルなSQLエディタが含まれています。
+</p><p><br />
+SQLデータをインポートするには、<b>データ：データベースに接続</b>メニューコマンドから開始します。
+</p>
+<ul><li> <b>開く</b>は、保存された接続（ODS）またはクエリ（ODQ）ファイルを参照して開くことができます。</li>
+<li> <b>新規作成</b>は、<b>データベースコネクタ</b>ダイアログを開きます。 </li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="UG database connector dialog.png" src="../images/Import_Data/UG_database_connector_dialog.png" width="321"  /></a></dd></dl>
+<ul><li> <b>接続文字列</b>: 指定されたデータソース（ODBCまたはOLE DB）のテキストベースの接続文字列がすでにある場合は、これを選択します。</li>
+<li> <b>ODBCデータソース</b>:&nbsp;<b>ODBC データ ソース アドミニストレーター</b>アプレットを使用してODBCデータソースを定義している場合は、これを選択します。</li>
+<li> <b>ODBCドライバ</b>:&nbsp;ODBCドライバを使用していて、このデータコネクタインスタンスに適用可能なデータソースを作成したい場合は、これを選択します。</li>
+<li> <b>Windows&quot;データリンクプロパティ&quot;ダイアログ</b>: OLE DBベースのデータソースなどをSQLサーバーまたはアクセスクライアントライブラリとして使用している場合は、これを選択します。</li></ul></dd></dl>
+<p><br />
+<i><b>他の事項：</b></i>
+</p>
+<ul><li> LabTalkシステム変数<a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#H.2CI.2CJ.2CK"><b>@IPDB</b></a>を使ってインポートされる範囲を制御できます（0 = 保護なし、1 = 保護するが再配置許可、2 = 保護）。</li>
+<li> 他のコネクタと同様に、OPJU/OGWUとして<b>保存時にインポート</b>（データ）<b>を除外</b>するオプションがあります。</li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="DB Save wo data.png" src="../images/Import_Data/DB_Save_wo_data.png" width="383"  /></a></dd></dl></dd></dl>
+<table class="note">
+<tr>
+<td><b>Note</b>: 詳細は、次のOriginヘルプを参照してください。
+<p><b>ヘルプ：Origin：Origin ヘルプ &gt; データのインポートとエクスポート &gt; <a class="external text" href="../../UserGuide/Category/Importing_Data_from_a_Database.html">データベースからデータをインポートする</a></b>
+</p>
+</td></tr></table>
+<h2><a name="Digitizer"></a><span class="mw-headline">デジタイザ</span></h2>
+<p>詳細に探求したい、いくつかのデータのグラフ画像のみある場合、デジタイザを使って、イメージファイルをインポートします。そして、Originの分析およびグラフ作成ツールを使って、イメージを検定や再プロット可能な数値データに変換して、プロットをデジタイズします。 
+</p>
+<dl><dd><a  class="image"><img alt="Digitizer data import chapter 2.png" src="../images/Import_Data/Digitizer_data_import_chapter_2.png" width="603"  /></a></dd></dl>
+<ul><li> 汎用的な画像形式をインポートします。</li>
+<li> 開始と終了の値を指定して、インポートしたイメージの回転、ノイズの除去、スケール測定を行います。</li>
+<li> 手動または自動で曲線上のポイントを指定します。</li>
+<li> 必要に応じて、手動で曲線の編曲点を追加します。</li>
+<li> デジタイズしたくない点は、インタラクティブに削除します。</li>
+<li> 直交、極座標、三角座標をサポートしています。</li></ul>
+<p><br />
+デジタイザを開くには
+</p>
+<ol><li> <b>標準</b>ツールバーの<b><b>イメージのデジタイズ</b></b>ボタン<a  class="image"><img alt="Button Digitize Image.png" src="../images/Import_Data/Button_Digitize_Image.png" width="23"  /></a>をクリックするか、メインメニューの<b> ツール：デジタイザ...</b>を選択します。</li></ol>
+<h2><a name="Saving_Origin_Files_without_Imported_Data"></a><span class="mw-headline">インポートデータを除外してOriginファイルを保存する</span></h2>
+<p>今までの方法でも、Originデータをデータなしで保存することはできました。<b>テンプレートとして保存...</b>、<b>ワークブックを分析テンプレートとして保存</b>、<b>プロジェクトをデータなしで保存</b>は、ファイルと設定や操作を維持しながら、データのない起源ファイルを保存するための3つのオプションでした。
+</p><p>また、<i>インポートされた</i>データなしでOriginファイルを保存することができるようになりました。これは、大きなデータファイルを扱うユーザにとっては特に便利なオプションです。ファイルを使ってそのデータを保存すると、パフォーマンスが低下したり、ディスク容量が無駄になったりする可能性があります。
+</p>
+<ul><li>  デフォルトでは、インポートファイルサイズが500kBを超える場合、<b>データコネクタ</b>を使用してインポートされたデータはブックと一緒に保存されません。各ブックには<b>保存時にインポートデータを除外</b>チェックマークがあり、ブック内の任意のページのチェックマークを外すと、インポートされたすべてのデータがブックと共に保存されます。</li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="Exclude imported when saving.png" src="../images/Import_Data/Exclude_imported_when_saving.png" width="334"  /></a></dd></dl></dd></dl>
+<ul><li> プロジェクト内のどのブック（<b>データコネクタ</b>がないものも含む）でも、インポートデータを除外するオプションを選択できます。ウィンドウのタイトルバー上で右クリックして<b>プロパティ</b>を開き、ダイアログ下部の<b>プロジェクト保存時にインポートデータを除外</b>ボックスにチェックします。</li></ul>
+<dl><dd><dl><dd><a  class="image"><img alt="Exclude imported when saving Properties dialog.png" src="../images/Import_Data/Exclude_imported_when_saving_Properties_dialog.png" width="555"  /></a></dd></dl></dd></dl>
+<p><br />
+<i><b>保存時にデータを除外するという動作は、いくつかの重要な点でテンプレートファイルの保存とは異なります。</b></i>
+</p>
+<ul><li> インポートされたデータを除外しても、インポートされたデータに対する分析操作の結果（フィット結果、統計分析、設定値の計算など）の結果はすべて保存されます。インポートされたデータやインポートされたデータのグラフは保存されません。</li>
+<li> データをインポートせずに保存したブックは、元のデータソースへの「ライブ」リンクを保持します。データコネクタを含むブックの場合は、<b>データコネクタ</b>アイコンをクリックし、<b>インポート</b>（アクティブシート）または<b>すべてインポート</b>（ブック内の全てのシート）をクリックします。標準のファイルインポートに使用されるブックの場合は、空のブックをアクティブにして、<b>データ：直接再インポート</b>をクリックします。または<b>インポート</b>ツールバーの<b>再インポート（ダイアログなし）</b>ボタンをクリックします（次を参照）。</li></ul>
+<h2><a name="Re-Importing_Data_Files"></a><span class="mw-headline">データファイルの再インポート</span></h2>
+<p><span class="OIndex" style="display:none">再インポート</span>
+<b>データ</b>メニューには、同じファイルを繰り返しインポートするための2つのインポートコマンドがあります（ファイルパスと名前は同じである必要があります）。
+</p>
+<ul><li><b>直接再インポート</b>:  デフォルトでOriginのワークシートや行列シートにファイルをインポートする場合、ファイルパスと名前を含むパラメータは、シートに保存されています。定期的に更新される外部データファイルがある場合、または標準ファイルをワークシートに再ロードする場合は、インポートダイアログを開かずに直接再インポートできます。</li></ul>
+<ul><li><b>再インポート...</b>:  このメニューコマンドで、ファイルタイプに必要なXファンクションのダイアログボックスを開き、再インポート前にインポートオプションを設定することができます。</li></ul>
+<table class="note">
+<tr>
+<td>
+<p><b>Note:</b>
+</p>
+<ul><li>一度に再インポートできるのは1つのファイルだけです。  これら2つのメニューコマンドのいずれか1つを使うと、アクティブワークシートあるいは行列シートと結びついたファイルのみがインポートされます。  選択したデータを複数のファイルからインポートすると、再インポートは失敗します。   </li>
+<li><i>ASCII</i>ファイルを<b>インポートウィザード</b>を使ってインポートして<b>データ: 再インポート...</b>を選択する場合、<b>インポートウィザード</b>の代わりに<b>impASC</b>ダイアログが開きます。 </li>
+<li> 再インポートは、インポートウィザードを使った<i>バイナリ</i>または<i>ユーザ定義</i>データタイプでは操作できません。</li></ul>
+</td></tr></table>
+<h2><a name="Clone_Import"></a><span class="mw-headline">クローンインポート</span></h2>
+<p>クローンインポートは、インポート（および、オプションで関連する分析操作）を「モデリング」し、最初のファイルに対して行われた内容を一連の類似ファイルに適用する機能です。アクティブなブックにインポートされたデータと関連する操作が含まれている限り、クローンを作成できます。この意味で、クローン作成は<a href="../../GettingStarted/OriginLab/How_to_Handle_Repetitive_Tasks.html#Batch_Analysis_Using_an_Analysis_Template" title="OriginLab:繰り返し処理の方法"><b>分析テンプレート</b></a>の作成に似ていますが、いくつか制限があります（たとえば、<a href="../../GettingStarted/OriginLab/How_to_Handle_Repetitive_Tasks.html#Batch_Analysis_Using_an_Analysis_Template" title="OriginLab:繰り返し処理の方法"><b>バッチ処理</b></a>ツールでは使用できません）。
+</p><p>クローンインポートは、<b>データコネクタ</b>と<b>Xファンクション</b>ベースのインポート方法の両方でサポートされています。簡単なチュートリアルで、クローンインポートと分析操作の基本について説明します。
+</p>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Import_Data/Tutorial_icon.png" width="57"  border="0" />
+	</td>
+	<td><ol><li> <b>新規ワークブック</b>ボタン<a  class="image"><img alt="Button New Workbook.png" src="../images/Import_Data/Button_New_Workbook.png" width="23"  /></a>をクリックし、新しいワークブックを作成します。</li>
+<li> ファイルエクスプローラーを使用して、&lt;Origin Program&gt;\Samples\Curve Fitting フォルダーを参照し、<i>Sensor01.dat</i>というファイルを見つけます。このファイルを新しいワークブック内にドラッグアンドドロップします。<b>Text/CSV コネクタ</b>を使用して.datファイルをインポートします。</li>
+<li> 列Bのヘッダをクリックして列を選択し、<b>散布図</b>ボタン<a  class="image"><img alt="Button Scatter.png" src="../images/Import_Data/Button_Scatter.png" width="22"  /></a>をクリックして散布図を作成します。</li>
+<li> XまたはYグラフの軸スケールをクリックし、表示される <b>軸</b> ダイアログボックスで <b>スケール</b> タブをクリックし、Ctrlを押して、左側のパネルで<b>水平軸</b>アイコンと<b>垂直軸</b>アイコンの両方を選択します。<b>再スケール</b> を <b>自動</b> に設定して、<b>OK</b>をクリックします。</li>
+<li> グラフがアクティブな状態で、 <b>解析 ： フィット ： 線形フィット</b> をクリックして、ダイアログボックスを開きます。<b><b>再計算</b></b>を<b><b>自動</b></b>に変更し、他の設定はデフォルトのまま<b><b>OK</b></b>ボタンをクリックしてフィットを実行します。<b>確認メッセージ</b>に「<i>いいえ</i>」と答え、<b>OK</b>をクリックします。</li>
+<li> ワークブックのタブを1つ右クリックし、<b>グラフをシートとして追加</b>をクリックします。これにより、線形フィットの結果を含む散布図がワークブックのページとして追加されます。
+<dl><dd> <a  class="image"><img alt="UG clone import add graph.png" src="../images/Import_Data/UG_clone_import_add_graph.png" width="360"  /></a></dd></dl></li>
+<li> <i>Sensor01.dat</i>のデータがアクティブな状態で、<b>インポート</b>ツールバー上の<b>クローンインポート</b>ボタン<a  class="image"><img alt="Button Clone Import.png" src="../images/Import_Data/Button_Clone_Import.png" width="25"  /></a>をクリックします。 </li>
+<li> もう一度、&lt;Origin Program&gt;\Samples\Curve Fitting フォルダを参照し、CtrlキーまたはShiftキーを押して、Sensor02.datからSensor07.datファイルを選択します。<b>ファイルの追加</b>をクリックし、<b>OK</b>をクリックします。元のブックをインポートおよび分析操作のモデルとして使用すると、SensorファイルはText / CSV コネクタを使用してインポートされ、1つずつ処理されます（すべて完了するまでに数秒かかる場合があります）。
+<dl><dd> <a  class="image"><img alt="UG clone import results.png" src="../images/Import_Data/UG_clone_import_results.png" width="678"  /></a></dd></dl></li></ol>
+</td></tr></table>
+<h2><a name="Topics_for_Further_Reading"></a><span class="mw-headline">参考</span></h2>
+<ul><li> <a class="external text" href="../../UserGuide/Category/Data_Connector.html">データコネクタ</a></li>
+<li> <a class="external text" href="../../UserGuide/Category/Importing_Simple_ASCII_Data_Files.html">単一ASCIIデータファイルをインポート</a></li>
+<li> <a class="external text" href="../../UserGuide/UserGuide/Customizing_the_ASCII_Import_Options.html">ASCIIインポートオプションをカスタマイズする</a></li>
+<li> <a class="external text" href="../../UserGuide/Category/Working_with_Microsoft_Excel.html#Updating_Excel_Data_in_Origin">OriginでExcelデータを更新する</a></li>
+<li> <a class="external text" href="https://www.originlab.com/videos/details.aspx?id=269" target="_blank">Video: Use Clone Import to Batch Process More Data Files</a></li>
+<li> <a class="external text" href="../../Tutorial/Tutorial/Importing_Multiple_Files_into_Workbooks_Cloned_from_Active_Workbook.html">チュートリアル：アクティブなワークブックからクローン複製されたワークブックに複数のファイルをインポート</a></li>
+<li> <a class="external text" href="../../UserGuide/UserGuide/Importing_Third_Party_Files.html">サードパーティ製のファイルをインポートする</a></li>
+<li> <a class="external text" href="../../UserGuide/Category/Importing_Data_by_Drag_and_Drop.html">ドラッグ&amp;ドロップによるデータのインポート</a></li>
+<li> <a class="external text" href="../../Tutorial/Tutorial/Update_Graph_By_Reimport_Data_From_Database.html">チュートリアル: データベースからデータを再インポートしてグラフを更新する</a></li>
+<li> <a class="external text" href="../../Tutorial/Tutorial/Web_Connect_by_Copy_Link_Address.html">チュートリアル: リンクアドレスのコピーによりWebデータに接続</a></li>
+<li> <a class="external text" href="../../UserGuide/Category/Importing_Data_from_a_Database.html">データベースからデータをインポートする</a></li>
+<li> <a class="external text" href="../../UserGuide/Category/Drawing_or_Deleting_Data_Points.html">作図、データポイントの削除</a></li>
+<li> <a class="external text" href="../../Tutorial/Tutorial/Enhanced_Digitizer.html">チュートリアル: デジタイザ</a></li></ul>
+
+
+    

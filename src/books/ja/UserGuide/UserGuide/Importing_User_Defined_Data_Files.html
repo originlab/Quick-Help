@@ -1,0 +1,122 @@
+﻿<h1 class="firstheading">ユーザ定義データファイルのインポート</h1>
+
+  <p class='urlname' style='display: none'>ImpWiz-UserDefined-File</p>
+
+  <p>インポートしたいデータファイルがインポートフィルタのASCIIまたはバイナリファイルのオプションを使用してインポートできない場合、独自の<b>Python</b>または<b>OriginC</b>関数を作成してファイルをインポートできます。</p>
+
+  <h2><a name="Python_Code_for_Data_Import"></a><span class="mw-headline">データインポートのためのPythonコード</span></h2>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Importing_User_Defined_Data_Files/Tutorial_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p><a class="external text" href="http://blog.originlab.com/creating-a-python-based-import-filter-with-origin-2021" target="_blank">Pythonベースのインポートフィルタ</a>を作成する方法について説明します。</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Pythonコードを使用して、ユーザ定義のデータファイルをインポートできます。このようなコードの簡単な例を以下に示します。このコードに関する最も重要な点は、Originによってコードが呼び出される前に、目的のワークシートがアクティブ化されることです。さらに、LabTalk変数 <b>fname$</b> には、インポートする現在のファイルのフルパスとファイル名が入力されます。Pythonコードで何をする必要があるかをよりよく理解するには、コードコメントをご覧ください。</p>
+  <pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #d00; font-style: italic;"># 関数はファイルをpandas DataFrameに読み込みます。</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> read_file<span style="color: #000;">(</span><span style="color: #900090;">file</span><span style="color: #000;">)</span>:
+    df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">with</span> <span style="color: #900090;">open</span><span style="color: #000;">(</span><span style="color: #900090;">file</span><span style="color: #000;">,</span> <span style="color: #0a0;">&apos;r&apos;</span><span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">as</span> f:
+        line <span style="color: #000;">=</span> f.<span style="color: #000;">readline</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+        <span style="color: #ff7700;font-weight:bold;">while</span> line:
+            <span style="color: #d00; font-style: italic;"># ここにコードを入力して、ファイルの行を解析します</span>
+            <span style="color: #d00; font-style: italic;"># 次に、それをDataFrameに追加します</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> df
+
+
+<span style="color: #d00; font-style: italic;"># Originのインポートフィルタによって選択されたファイルはfname$に配置されます</span>
+<span style="color: #d00; font-style: italic;"># LabTalk変数。Pythonに取り込む必要があります。名前に$を指定しないでください！</span>
+fname <span style="color: #000;">=</span> op.<span style="color: #000;">get_lt_str</span><span style="color: #000;">(</span><span style="color: #0a0;">&apos;fname&apos;</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># ファイルをpandas DataFrameに読み込みます</span>
+data <span style="color: #000;">=</span> read_file<span style="color: #000;">(</span>fname<span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># アクティブなシートを返します。</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">find_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># 最初の列から始まるシートにDataFrameを追加します。</span>
+<span style="color: #d00; font-style: italic;"># DataFrame列ラベルは、ワークシート列のロングネームになります。</span>
+<span style="color: #d00; font-style: italic;">#  Originは、DataFrameデータ型に基づいて列形式を自動的に設定します。</span>
+wks.<span style="color: #000;">from_df</span><span style="color: #000;">(</span>data<span style="color: #000;">)</span>
+</pre>
+
+  <p>インポートを処理するコードを作成すると、次のように使用できます。</p>
+
+  <ol>
+    <li><b>インポートウィザード</b>ボタン<a class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png" width="23"></a>か、メインメニューから<b>データ：ファイルからインポート</b>を選択します。</li>
+
+    <li>ウィザードの最初のページ(「<b>データソース</b>ページ)で、<b>データタイプ</b>グループの<b>ユーザ定義</b>ラジオボタンを選択します。</li>
+
+    <li>1つまたは複数ファイルをインポートする場合、インポートするファイルのパスを指定します。また、クリップボードからインポートする場合、<b>クリップボード</b>ラジオボタンを選択します。</li>
+
+    <li><b>ターゲットウィンドウ</b>グループのラジオボタンから1つを選択して、目的のウィンドウを選択します。必要に応じて、テンプレート<span style="color:red">*</span>とインポートモードを選択します。<b>進む</b>をクリックして<b>ユーザ定義フィルタ</b>ページに移動します。</li>
+
+    <li><b>ユーザ定義フィルタ</b>ページでは、コードを<b>Pythonコード</b>テキスト領域に貼り付けます。または、Pythonコードをファイルに保存し、<b>Pythonファイル</b>の制御を使用してPythonファイルへのパスを指定することもできます。パスは次のいずれかになります。
+
+      <ul>
+        <li>絶対ファイルパス</li>
+
+        <li>ユーザーファイルフォルダの相対ファイルパス</li>
+
+        <li>ファイルがユーザーファイルフォルダにある場合は、ファイル名だけです。</li>
+      </ul>
+    </li>
+
+    <li>すべての設定が完了したら、<b>完了</b>ボタンをクリックします。ファイルをインポートするのにPythonコードが使われます。</li>
+  </ol>
+
+  <table class="note">
+    <tr>
+      <td><span style="color:red">*</span> : インポートウィザードの「<b>データソース</b>」ページにあるターゲットウィンドウテンプレートの名前は、新しいウィンドウを作成するときだけ使われます(ドラッグ&amp;ドロップインポート時にはいくつか条件があります。)。メニューから、「<b>データ：ファイルからインポート</b>」を選択するとき、アクティブウィンドウがインポートフィルタのターゲットウィンドウとして設定されていると、新しいウィンドウは作成されず、アクティブウィンドウへのpageオブジェクトの参照が関数に渡されます。アクティブウィンドウが異なるタイプの場合、指定したテンプレートで新しいウィンドウが作成され、この新しいウィンドウへのpage参照が渡されます。</td>
+    </tr>
+  </table>
+
+  <p> </p>
+
+  <h2><a name="Origin_C_Functions_for_Data_Import"></a><span class="mw-headline">データインポートのためのOrigin C関数</span></h2>
+
+  <p>OriginCファイルにOriginC関数を作成することにより、ユーザ定義データファイルのインポートを処理する独自のOriginC関数を開発できます。</p>
+
+  <p>Origin C関数のプロトタイプは、下記のいずれかでなければなりません。</p>
+
+  <ul>
+    <li>int YourFunctionName(Page&amp; pgTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)</li>
+
+    <li>int YourFunctionName(Layer&amp; lyTarget, TreeNode&amp; trFilter, LPCSTR lpcszFile, int nFile)</li>
+  </ul>
+
+  <table class="note">
+    <tr>
+      <td><b>Note:</b>このようなOrigin C関数を記述する方法についての詳細は、Origin Cガイドの<a class="external text" href="../../OriginC/OCGuide/Importing_Data.html">データのインポート</a>にあります。</td>
+    </tr>
+  </table>
+
+  <p>インポートを行う関数を記述して、それをOrigin Cファイルに保存したら、次のようにしてそれを使用することができます。</p>
+
+  <ol>
+    <li><b>インポートウィザード</b>ボタン<a class="image"><img alt="Button Import Wizard.png" src="../images/Importing_User_Defined_Data_Files/Button_Import_Wizard.png" width="23"></a>か、メインメニューから<b>データ：ファイルからインポート</b>を選択します。</li>
+
+    <li>ウィザードの最初のページ(「<b>データソース</b>ページ)で、<b>データタイプ</b>グループの<b>ユーザ定義</b>ラジオボタンを選択します。</li>
+
+    <li>1つまたは複数ファイルをインポートする場合、インポートするファイルのパスを指定します。また、クリップボードからインポートする場合、<b>クリップボード</b>ラジオボタンを選択します。</li>
+
+    <li><b>ターゲットウィンドウ</b>グループのラジオボタンから1つを選択して、目的のウィンドウを選択します。必要に応じて、テンプレート<span style="color:red">*</span>とインポートモードを選択します。<b>進む</b>をクリックして<b>ユーザ定義フィルタ</b>ページに移動します。</li>
+
+    <li><b><b>ユーザ定義フィルタ</b></b>ページでは、<b><b>Origin Cソースファイル</b></b>の右にある、<b><b>参照</b></b>ボタン<a class="image"><img alt="Importing Simple Binary Files with the Import Wizard-1.png" src="../images/Importing_User_Defined_Data_Files/Importing_Simple_Binary_Files_with_the_Import_Wizard-1.png" width="17"></a>をクリックします。自分で作成したOrigin Cファイルのあるフォルダに移動します。ファイルを選択し、<b>開く</b>をクリックして、インポートウィザードに戻ります。<b>Origin C関数名</b>フィールドに関数の名前を入力します。そして<b>進む</b>ボタンをクリックして、他のページの設定をカスタマイズします。</li>
+
+    <li>すべての設定が完了したら、<b>完了</b>ボタンをクリックします。ファイルをインポートするのにOrigin C関数が使われます。</li>
+  </ol>
+
+  <table class="note">
+    <tr>
+      <td><span style="color:red">*</span> : インポートウィザードの「<b>データソース</b>」ページにあるターゲットウィンドウテンプレートの名前は、新しいウィンドウを作成するときだけ使われます(ドラッグ&amp;ドロップインポート時にはいくつか条件があります。)。メニューから、「<b>データ：ファイルからインポート</b>」を選択するとき、アクティブウィンドウがインポートフィルタのターゲットウィンドウとして設定されていると、新しいウィンドウは作成されず、アクティブウィンドウへのpageオブジェクトの参照が関数に渡されます。アクティブウィンドウが異なるタイプの場合、指定したテンプレートで新しいウィンドウが作成され、この新しいウィンドウへのpage参照が渡されます。</td>
+    </tr>
+  </table>

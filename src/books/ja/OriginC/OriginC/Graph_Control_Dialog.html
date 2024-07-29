@@ -1,0 +1,143 @@
+﻿<h1 class="firstheading">Graph Control Dialog</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Need_to_do_before_Running_Examples"><span class="tocnumber">2</span> <span class="toctext">Need to do before Running Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Example"><span class="tocnumber">3</span> <span class="toctext">Example</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Need_to_do_before_Running_Examples"></a><span class="mw-headline">Need to do before Running Examples</span></h2>
+
+  <ol>
+    <li>New a c file named "GraphControl Example.c" and save to \OriginC\Originlab folder.</li>
+
+    <li>Open Origin, open 2D Gaussian.ogm from \Samples\Matrix Conversion and Gridding folder. Choose menu Plot -&gt; 3D Surface -&gt; Color Map Surface to plot a 3D graph.</li>
+
+    <li>Add the above c file to current workspace and compile.</li>
+
+    <li>Run "OpenGraphPreviewDlg 0" to open dialog, click "UP" button, source graph changed, but preview on dialog not update. If run "OpenGraphPreviewDlg 1" to open dialog, click "UP" button, source graph and preview both changed.</li>
+  </ol>
+
+  <h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\DialogEx.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> OpenGraphPreviewDlg<span style="color: #000000;">(</span><span style="color: #0000ff;">bool</span> bRealTimeUpdate <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> gl <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// open preview dialog</span>
+                GraphPage gp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;                
+                GraphPreviewDlg dlgEx<span style="color: #000000;">(</span>gp, bRealTimeUpdate<span style="color: #000000;">)</span>;
+                dlgEx.<span style="color: #000000;">DoModalEx</span><span style="color: #000000;">(</span> GetWindow<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">class</span> GraphPreviewDlg <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> ResizeDialog
+<span style="color: #000000;">{</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+        GraphPreviewDlg<span style="color: #000000;">(</span>GraphPage<span style="color: #000040;">&amp;</span> gp, <span style="color: #0000ff;">bool</span> bRealTimeUpdate, <span style="color: #0000ff;">int</span> ID <span style="color: #000080;">=</span> IDD_GETNBOX_PREVIEW<span style="color: #000000;">)</span>;
+        ~GraphPreviewDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">int</span> DoModalEx<span style="color: #000000;">(</span>HWND hWndParent<span style="color: #000000;">)</span>;
+        
+<span style="color: #0000ff;">protected</span><span style="color: #000000;">:</span>
+EVENTS_BEGIN
+        ON_INIT<span style="color: #000000;">(</span>OnInitDialog<span style="color: #000000;">)</span>
+        ON_BN_CLICKED<span style="color: #000000;">(</span>IDC_PARAMS_MORE, OnBtnClick<span style="color: #000000;">)</span>
+EVENTS_END      
+        <span style="color: #0000ff;">BOOL</span> OnInitDialog<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">BOOL</span> OnBtnClick<span style="color: #000000;">(</span>Control ctrl<span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+        <span style="color: #0000ff;">void</span> updatePreview<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+<span style="color: #0000ff;">private</span><span style="color: #000000;">:</span>
+        GraphPage                       m_gpSource;
+        PictureControl          m_pictControl;
+        
+        <span style="color: #0000ff;">bool</span>                               m_bRealTimeUpdate;
+<span style="color: #000000;">}</span>;
+
+GraphPreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">GraphPreviewDlg</span><span style="color: #000000;">(</span>GraphPage<span style="color: #000040;">&amp;</span> gp, <span style="color: #0000ff;">bool</span> bRealTimeUpdate, <span style="color: #0000ff;">int</span> ID<span style="color: #000000;">)</span>
+<span style="color: #000000;">:</span>ResizeDialog<span style="color: #000000;">(</span>ID, <span style="color: #ff00ff;">"ODlg"</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        m_gpSource <span style="color: #000080;">=</span> gp;
+        m_bRealTimeUpdate <span style="color: #000080;">=</span> bRealTimeUpdate;
+<span style="color: #000000;">}</span>
+
+GraphPreviewDlg<span style="color: #000000;">::</span>~GraphPreviewDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">BOOL</span> GraphPreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        ResizeDialog<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// to hidden ususeful controls</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnHiddenIDs <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>IDC_ERR_MESSAGE_BOX, IDC_PARAMS_DESCRIPTION, IDC_GETN_RESULT_PREVIEW<span style="color: #000000;">}</span>;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nn <span style="color: #000080;">&lt;</span> vnHiddenIDs.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; nn<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Control ctrl <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>vnHiddenIDs<span style="color: #000000;">[</span>nn<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>ctrl<span style="color: #000000;">)</span>
+                        ctrl.<span style="color: #000000;">Visible</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;    
+        <span style="color: #000000;">}</span>     
+        
+        Control btn <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>IDC_PARAMS_MORE<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> btn <span style="color: #000000;">)</span>
+                btn.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"UP"</span>;
+        
+        Control cntrl <span style="color: #000080;">=</span> GetItem<span style="color: #000000;">(</span>IDC_PARAMS_PREVIEW<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>cntrl<span style="color: #000000;">)</span>
+                m_pictControl.<span style="color: #000000;">CreateControl</span><span style="color: #000000;">(</span>cntrl.<span style="color: #000000;">GetSafeHwnd</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// this property to no stretch to enable scroll bar</span>
+        <span style="color: #008000;">//m_pictControl.DrawMode = PCDM_NO_STRETCH;</span>
+        
+    updatePreview<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">void</span> GraphPreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">updatePreview</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        PictureHolder phDst;
+    m_gpSource.<span style="color: #000000;">GetPicture</span><span style="color: #000000;">(</span>phDst, <span style="color: #ff00ff;">"EMF"</span>, <span style="color: #0000dd;">72</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, EMBEDGRAPH_HIDE_LEGENDS<span style="color: #000000;">)</span>; 
+    m_pictControl.<span style="color: #000000;">SetPicture</span><span style="color: #000000;">(</span>phDst<span style="color: #000000;">)</span>;     
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">BOOL</span> GraphPreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnBtnClick</span><span style="color: #000000;">(</span>Control ctrl<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        GraphLayer gl <span style="color: #000080;">=</span> m_gpSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// active layer</span>
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// active data plot</span>
+        Curve crv<span style="color: #000000;">(</span>dp<span style="color: #000000;">)</span>;
+        crv <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// add 1 to each y data point, data plotting line will be moved up</span>
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> m_bRealTimeUpdate <span style="color: #000000;">)</span>
+                updatePreview<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">int</span> GraphPreviewDlg<span style="color: #000000;">::</span><span style="color: #000000;">DoModalEx</span><span style="color: #000000;">(</span>HWND hWndParent<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        InitMsgMap<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        DWORD dwDlgOptions <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> DoModal<span style="color: #000000;">(</span>hWndParent, dwDlgOptions<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> nRet;
+<span style="color: #000000;">}</span>
+</pre>

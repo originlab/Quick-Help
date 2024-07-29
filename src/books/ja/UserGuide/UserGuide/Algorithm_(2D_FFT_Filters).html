@@ -1,0 +1,140 @@
+﻿<h1 class="firstheading">アルゴリズム (2D FFTフィルタ)</h1>
+<p>2D FFTフィルタは行列や画像などの2D信号を処理する方法を提供します。最初に2次元の高速フーリエ変換(2D FFT)を実行し、そして、それらに周波数領域フィルタを適用し、最終的に2D IFFTを実行して、空間領域に変換して戻します。</p>
+<p><b style="font-weight: bold;">2D FFTフィルタ</b>では、5つのフィルタと4種類のウィンドウ法が利用できます。</p>
+<table id="toc" class="toc" summary="Contents">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1"><a href="#Filter_Types"><span class="tocnumber">1</span> <span class="toctext">フィルタの種類</span></a></li>
+<li class="toclevel-1"><a href="#Window_Types"><span class="tocnumber">2</span> <span class="toctext">ウィンドウ法</span></a>
+<ol>
+<li class="toclevel-2"><a href="#Butterworth"><span class="tocnumber">2.1</span> <span class="toctext">Butterworth</span></a></li>
+<li class="toclevel-2"><a href="#Ideal"><span class="tocnumber">2.2</span> <span class="toctext">Ideal</span></a></li>
+<li class="toclevel-2"><a href="#Gaussian"><span class="tocnumber">2.3</span> <span class="toctext">Gaussian</span></a></li>
+<li class="toclevel-2"><a href="#Blackman"><span class="tocnumber">2.4</span> <span class="toctext">Blackman</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1"><a href="#Cutoff_Value"><span class="tocnumber">3</span> <span class="toctext">カットオフ値</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<a name="Filter_Types" id="Filter_Types"></a>
+<h2><span class="mw-headline">フィルタの種類</span></h2>
+<p>フィルタの種類には、<b>ローパス</b>, <b>ハイパス</b>, <b>バンドパス</b>, <b>バンドブロック</b>, <b>しきい値</b>があります。</p>
+<p><b style="font-weight: bold;">ハイパス</b>, <b>バンドパス</b>, <b>バンドブロック</b>は<b>ローパス</b>を使って作成することができます。</p>
+<p><b style="font-weight: bold;">2D FFTフィルタ</b>のフィルタの種類は、次の表に表示しています。<b>ローパス</b>, <b>ハイパス</b>, <b>バンドパス</b>, <b>バンドブロック</b>の2Dフィルタをより簡単に理解するため、表にある各フィルタタイプに対して、<b>Idealウィンドウ</b>が使用されています。</p>
+<p>2Dフィルタ H(u,v)に対して、u=0, 1,.., M-1, v=0, 1,..., N-1となっている時、周波数成分を正規化します。その時、m=(u-M/2)/M, n=(v-N/2)/N となり、ここで -0.5&lt;m&lt;0.5 -0.5&lt;n&lt;0.5 .rは<br />
+<img class="tex" alt="r(u,v)=\sqrt{m^2+n^2}" src="../images/Algorithm_(2D_FFT_Filters)/math-e4ddef8a9ba1e75b5e0eb1125a164426.png" width="145" height="21" border="0" /> 定義され、<img class="tex" alt="\ F_c" src="../images/Algorithm_(2D_FFT_Filters)/math-7519ce67b604a24947bd69649a8f4608.png" width="17" height="14" border="0" />はカットオフ周波数です。</p>
+<table class="dialogcontroltable">
+<tr>
+<th>ローパス</th>
+<td>カットオフ周波数より大きいすべての周波数成分をブロックし、小さい周波数のみを通します。
+<p><img class="tex" alt="H_{LP}(u,v) = \begin{cases}1, \ r(u,v)&lt; F_{c} \\0, \ otherwise \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-4dc2a9e3317e483036241d5aad569bfa.png" width="215" height="51" border="0" /></p>
+</td>
+</tr>
+<tr>
+<th>ハイパス</th>
+<td>カットオフ周波数以下の周波数成分をブロックします。
+<p><img class="tex" alt="H_{HP}(u,v) = \begin{cases}1, \ r(u,v)&gt; F_{c} \\0, \ otherwise \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-22300f12140ce300177c7252d9fc7a7a.png" width="217" height="51" border="0" /></p>
+<p><img class="tex" alt="H_{HP}(u,v)=1\ -H_{LP}(u,v)" src="../images/Algorithm_(2D_FFT_Filters)/math-c356fc37a2c882cd2354cfebe7513624.png" width="202" height="18" border="0" />である事に注意しましょう。</p>
+</td>
+</tr>
+<tr>
+<th>バンドパス</th>
+<td>低域および高域カットオフ周波数で指定した範囲の周波数を通します。
+<p><img class="tex" alt="H_{BP}(u,v) = \begin{cases}1,\ F_{c1}\le r(u,v)\le F_{c2} \\0, \ otherwise \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-894b3aae8f24e9e58329f2077718911b.png" width="268" height="51" border="0" /></p>
+<p><img class="tex" alt="H_{BP}(u,v)=\ H_{LP2}(u,v) -H_{LP1}(u,v)" src="../images/Algorithm_(2D_FFT_Filters)/math-a859b14ffce3b7a14f8ffae4801cfa8e.png" width="278" height="18" border="0" />である事に注意しましょう。</p>
+<p>ここで<img class="tex" alt="\ H_{LP1}(u,v)" src="../images/Algorithm_(2D_FFT_Filters)/math-b959ba913c69ccd750c9af3f46eaf37f.png" width="78" height="18" border="0" />と<img class="tex" alt="\ H_{LP2}(u,v)" src="../images/Algorithm_(2D_FFT_Filters)/math-10e987dc6c477c6d07eabaf82f40a3ff.png" width="78" height="18" border="0" />は、それぞれ低域カットオフ周波数Fc1 と高域カットオフ周波数Fc2を持つローパスフィルタです。</p>
+</td>
+</tr>
+<tr>
+<th>バンドブロック</th>
+<td>選択した範囲内の周波数を除去します。
+<p><img class="tex" alt="H_{BB}(u,v) = \begin{cases}0,\ F_{c1}\le r(u,v)\le F_{c2} \\1, \ otherwise \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-ee3fe8cc5c649dd46ba13113a133ac6a.png" width="269" height="51" border="0" /></p>
+<p><img class="tex" alt="H_{BB}(u,v)=\ 1-H_{BP}(u,v)" src="../images/Algorithm_(2D_FFT_Filters)/math-261886c7d5496c59ffd981f98387ea10.png" width="203" height="18" border="0" />である事に注意しましょう。</p>
+</td>
+</tr>
+<tr>
+<th>しきい値</th>
+<td>振幅が下側しきい値と上側しきい値の間にあるような周波数成分のみを通します。
+<p><img class="tex" alt="H_{AT}(u,v) = \begin{cases}1,\ TH_1 \cdot max(A(u,v))\le A(u,v)\le TH_2 \cdot max(A(u,v)) \\0, \ otherwise \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-1a952e410fe1ee45d9db272a5ea0f3d1.png" width="506" height="51" border="0" /></p>
+<p>ここで、<img class="tex" alt="A(u,v)=\ abs(H(u,v)) " src="../images/Algorithm_(2D_FFT_Filters)/math-f3a8b92b0b31597aec06de1f1a9a9d69.png" width="167" height="18" border="0" />、 <img class="tex" alt="\ TH_1" src="../images/Algorithm_(2D_FFT_Filters)/math-d4f94e40b7e91f2a3eff442ad6d3c60d.png" width="32" height="14" border="0" /> 、<img class="tex" alt="\ TH_2" src="../images/Algorithm_(2D_FFT_Filters)/math-dbe93f00eccfb7ae98aa98f14ce04172.png" width="32" height="14" border="0" />は下側および上側しきい値です。</p>
+<p>しきい値フィルタに対して、ウィンドウ法は使用されません。</p>
+</td>
+</tr>
+</table>
+<a name="Window_Types" id="Window_Types"></a>
+<h2><span class="mw-headline">ウィンドウタイプ</span></h2>
+<p><b style="font-weight: bold;">2D FFTフィルタ</b>のウィンドウ法には、<b>Butterworth</b>, <b>Ideal</b>, <b>Gaussian</b>, <b>Blackman</b>が含まれます。</p>
+<p><b style="font-weight: bold;">ハイパス</b>, <b>バンドパス</b>, <b>バンドブロック</b>フィルタは、<b>Ideal</b> ウィンドウと同じ方法で他のウィンドウ法に対しても、<b>ローパス</b>フィルタから作成することができ、これは<a href="#Filter_Types" title="">フィルタの種類の表</a>にリストされています。そのため、各ウィンドウ法の<b>ローパス</b>フィルタのみが以下に説明されています。</p>
+<p>2Dフィルタを生成する一般的な方法は、対応する1Dフィルタウィンドウをm-nの正規化した領域で回転することです。例えば、 <img class="tex" alt="r=\sqrt{m^2 + n^2}" src="../images/Algorithm_(2D_FFT_Filters)/math-cfede040a7a090c243ebfb3f684821f8.png" width="107" height="21" border="0" /> を使って、1D　Butterworthウィンドウ関数の変数を置き換えることができます。手順の例として2DローパスButteworthフィルタを生成します。</p>
+<a name="Butterworth" id="Butterworth"></a>
+<h3><span class="mw-headline">Butterworth</span></h3>
+<p>1D Butterworthウィンドウ関数は、次のように表されます。</p>
+<p><img class="tex" alt="H(u)=\frac{1}{1 + \left (\frac{m}{F_c} \right )^ {2p} }, u = 0, 1, ..., M-1" src="../images/Algorithm_(2D_FFT_Filters)/math-a7d49e67deecbd8600c92a55c1e8e499.png" width="282" height="56" border="0" /></p>
+<p>パラメータは以下に説明されています。</p>
+<ul>
+<li>m = (u - M/2) / M : 範囲 [-0.5, 0.5]での正規化した周波数成分, +/- 0.5はナイキストの周波数の半分です。他の正規法も見つける事もできます。この場合、フィルタのピークがFFTのDC成分で整列されなければならないので、これを選択します。</li>
+<li>Fc: カットオフ周波数、(0, 0.5]の範囲です。カットオフ周波数はフィルタのキーパラメータです。Butterworthでは、カットオフ周波数はH(u)が最大値の0.5倍まで減少する位置の周波数です。Fcが大きければ大きいほど、フィルタは滑らかになります。一般に、スムーザフィルタは、FFTフィルタによって負のリンギング効果を減少します。</li>
+<li>p: フィルタの順序で、これは正の整数です。pが小さければ小さいほど、フィルタは滑らかになります。</li>
+</ul>
+<p>2D FFTフィルタに対して、m = ( u - M/2 ) / M, n = (v - N/2 ) / Nとなります。mとnは、範囲[-0.5, 0.5]にあります。m-n周波数領域で1D Butterworthウィンドウを回転し、<img class="tex" alt="r=\sqrt{m^2+n^2}" src="../images/Algorithm_(2D_FFT_Filters)/math-91c7eb231be7ddce8f93697c09e53e1e.png" width="107" height="21" border="0" />とします。2D Butterworthローパスは次式で表されます。</p>
+<p><img class="tex" alt="H(u,v)=\frac{1}{1 + \left (\frac{r}{F_c} \right )^ {2p} }, \ u = 0, 1, ..., M-1, \ v = 0, 1, ..., N-1" src="../images/Algorithm_(2D_FFT_Filters)/math-63baadf6fc31ae558f99f0d515999d19.png" width="443" height="56" border="0" /></p>
+<p>H(u,v)は、循環領域内の値のみを取ります。。この半径はR = max(-m[0], m[M-1], -n[0], n[N-1] )で決まります。r &gt; Rのとき、H(u,v)の値はゼロにセットされます。カットオフ周波数Fcは、範囲(0, R]内にあります。</p>
+<p>カットオフ周波数は、2Rで正規化され、Fcの値は常に (0, 0.5]です。</p>
+<p>2D FFTフィルタを作成する手順は以下の通りです。</p>
+<dl>
+<dd><img alt="Image:Algorithm_make_2d_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_make_2d_filter.png" width="569" height="364" border="0" /></dd>
+</dl>
+<p>Fc=0.3, p=1の2D Butterworthローパスフィルタは、以下の通りです。</p>
+<dl>
+<dd><img alt="Image:Algorithm_bw_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bw_filter.png" width="643" height="492" border="0" /></dd>
+</dl>
+<a name="Ideal" id="Ideal"></a>
+<h3><span class="mw-headline">Ideal</span></h3>
+<p>Idealフィルタは、<a href="#Filter_Types" title="">フィルタの種類のテーブル</a>にあります。</p>
+<a name="Gaussian" id="Gaussian"></a>
+<h3><span class="mw-headline">Gaussian</span></h3>
+<p>2D Gaussianローパスフィルタは次式で表されます。</p>
+<p><img class="tex" alt="H(u,v)=exp(-\frac{r^2}{2 \cdot F_c ^ 2} )" src="../images/Algorithm_(2D_FFT_Filters)/math-5eb02e03fa73259bbff99c38852eaacc.png" width="170" height="41" border="0" /></p>
+<p>2DGaussianフィルタに対して、カットオフ値は、H(u,v)が最大値の0.607倍まで減少する場所です。Fcが大きければ大きいほど、フィルタは滑らかになります。</p>
+<p>Fc=0.2, p=1の2D Gaussianローパスフィルタは、以下の通りです。</p>
+<dl>
+<dd><img alt="Image:Algorithm_gau_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_gau_filter.png" width="643" height="492" border="0" /></dd>
+</dl>
+<a name="Blackman" id="Blackman"></a>
+<h3><span class="mw-headline">Blackman</span></h3>
+<p>2D Blackmanローパスフィルタは次式で表されます。 <img class="tex" alt="H(u,v)=\begin{cases}0.42 - 0.5 \cdot cos(2 \pi (r + 0.5) ) + 0.08 \cdot cos(4 \pi (r + 0.5) ),\ r(u,v) \le R\\0, \ r(u,v) &gt; R \end{cases}" src="../images/Algorithm_(2D_FFT_Filters)/math-87dc751766a3732ec3de4955b7307b27.png" width="562" height="51" border="0" /></p>
+<p>このウィンドウ関数は、一般に見られる標準の形式とは少し異なり、これはハイパスです。ここでローパスフィルタが欲しいので、rに0.5を足して、フィルタをローパスに変えます。</p>
+<p>OriginProの<b>2DFFTフィルタ</b>は、Blackmanウィンドウをカットオフするかどうかを決める<b>Truncateウィンドウ</b>オプションを提供します。</p>
+<p>最初のグラフで切詰めなし、2番目のグラフで切詰めありの2DBlackmanローパスフィルタは、それぞれ次のように表示されます。</p>
+<dl>
+<dd><img alt="Image:Algorithm_bmn_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmn_filter.png" width="643" height="492" border="0" /></dd>
+<dd><img alt="Image:Algorithm_bmw_filter.png" src="../images/Algorithm_(2D_FFT_Filters)/Algorithm_bmw_filter.png" width="643" height="492" border="0" /></dd>
+</dl>
+<a name="Cutoff_Value" id="Cutoff_Value"></a>
+<h2><span class="mw-headline">カットオフ値</span></h2>
+<p>Origin Proの<b>2D FFT Filters</b>は<b>カットオフ値</b>を指定する4つの方法をサポートしています。これらは<b>Fraction</b>、<b>Fourier Pixel</b>、 <b>Wavelength</b>、<b>Hertz</b>です。これら4つの関係は、以下のようになっています。</p>
+<table class="dialogcontroltable">
+<tr>
+<th>Fourier Pixel</th>
+<td>データを保存している行列のピクセルです。値はdouble型の正数にすることができます。</td>
+</tr>
+<tr>
+<th>Fraction</th>
+<td>Fraction(小数部) = Fourier Pixel / sqrt( (cols/2)^2+(rows/2)^2 ), ここで、colsとrowsは、それぞれフィルタの行と列の数です。</td>
+</tr>
+<tr>
+<th>Wavelength</th>
+<td>Wavelength = (cols-1) / Fourier Pixel</td>
+</tr>
+<tr>
+<th>Hertz</th>
+<td>Hertz = Fourier Pixel / cols</td>
+</tr>
+</table>
+<p><br /></p>

@@ -1,0 +1,157 @@
+﻿<h1 class="firstheading">LabTalkによる統計</h1><p class='urlname' style='display: none'>Tutorial-Statistics</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#What_Will_You_Learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Calculate_the_means_on_the_rows"><span class="tocnumber">3.1</span> <span class="toctext">行の平均を計算</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Create_box_graphs_with_template"><span class="tocnumber">3.2</span> <span class="toctext">テンプレートでボックスチャートを作成</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Statistics_on_columns_with_grouping"><span class="tocnumber">3.3</span> <span class="toctext">グループ化した列の統計</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Unstack_columns"><span class="tocnumber">3.4</span> <span class="toctext">列のアンスタック</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Create_Line.2BSymbol_graph"><span class="tocnumber">3.5</span> <span class="toctext">線+シンボルグラフの作成</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Perform_Descriptive_Stats_on_matrix_object_with_theme"><span class="tocnumber">3.6</span> <span class="toctext">テーマで行列オブジェクトの記述統計を実行</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+<p>このチュートリアルでは、統計分析でLabTalkを使用する方法を示します。2012年の3つのセクターにおける9つの銘柄の毎日の変化率からなるデータセットを使用します。  1年間の3つの株式セクターのパフォーマンスを比較します。
+</p>
+<h2><a name="What_Will_You_Learn"></a><span class="mw-headline">学習する項目</span></h2>
+<p>このチュートリアルでは、LabTalk スクリプトを使用して次のことを行う方法を説明します。
+</p>
+<ul><li> 行の統計を実行するために、 <i>rowstats</i>を使用して各セクターの平均日次データを計算</li>
+<li> グループ化された列に対して統計を実行して、月次データを計算</li>
+<li> 計算されたデータを使用して線+シンボルプロットおよびボックスチャートを作図</li>
+<li> テーマで行列オブジェクトの記述統計を実行 </li></ul>
+<h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+<h3><a name="Calculate_the_means_on_the_rows"></a><span class="mw-headline">行の平均を計算</span></h3>
+<p>Xファンクション<a class="external text" href="../../XFunction/X-Function/Rowstats.html">rowstats</a>を使用して特定の範囲のデータの各行に対して記述統計を実行できます。ここでは、3つのセクターについて、それぞれ同じ日の株価変動率の<b>平均</b>値を計算し、その結果を指定した列に入れます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// ファイル名を定義 </span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\Stocks.dat&quot;</span>;
+<span style="color: #008000;">//Xファンクションimpfileを使って指定したファイルをインポート</span>
+newbook;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">//アクティブなワークブックのショートネームを保存</span>
+string bk<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+
+<span style="color: #008000;">// スプレッドシートセル表記をオフ</span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// ショートネームを指定して4つの新しい列を追加;</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>M<span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>M1<span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>M2<span style="color: #000000;">)</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>M3<span style="color: #000000;">)</span>;
+ 
+<span style="color: #008000;">// 4つの列のロングネームを設定;</span>
+col<span style="color: #000000;">(</span>M<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Month;
+col<span style="color: #000000;">(</span>M1<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Technology;
+col<span style="color: #000000;">(</span>M2<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Electronics Manufacturer;
+col<span style="color: #000000;">(</span>M3<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Consumer Products;
+
+<span style="color: #008000;">// Month列にDate列をコピー</span>
+col<span style="color: #000000;">(</span>M<span style="color: #000000;">)</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Date<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 列11 (Month) を日付フォーマットに設定</span>
+wks.<span style="color: #000080;">col11</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #008000;">// 列11 (Month) の表示を &quot;May&quot;に設定</span>
+wks.<span style="color: #000080;">col11</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">17</span>; 
+ 
+<span style="color: #008000;">//  3つのセクターの行の平均を計算</span>
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>M1<span style="color: #000000;">)</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>M2<span style="color: #000000;">)</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">8</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">10</span><span style="color: #000000;">)</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>M3<span style="color: #000000;">)</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Statistics/Tip_icon.png" width="57"  border="0" /></td><td><p>ワークブックの<a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">スプレッドシートセル表記</a>については、<a class="external text" href="../../QuickHelp/QuickHelp/Turn_off_spreadsheet_cell_notation.html"><b>FAQ-849</b></a> を参照してください。
+</p></td></tr></table>
+<h3><a name="Create_box_graphs_with_template"></a><span class="mw-headline">テンプレートでボックスチャートを作成</span></h3>
+<p>Xファンクション<a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a>でボックスチャートを作成できます。plot オプションで利用可能なすべての値は、<a href="../../LabTalk/LabTalk/Plot_Type_IDs.html" title="LabTalk:Plot Type IDs">プロットタイプID</a>にあります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// &quot;box&quot; テンプレートでボックスチャートを作成</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">12</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">13</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">14</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">206</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>box<span style="color: #000080;">&gt;</span>;
+ 
+<span style="color: #008000;">// アクティブレイヤのXラベルを30度回転</span>
+range ll <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+ll.<span style="color: #000080;">x</span>.<span style="color: #000080;">label</span>.<span style="color: #000080;">rotate</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;</pre>
+<h3><a name="Statistics_on_columns_with_grouping"></a><span class="mw-headline">グループ化した列の統計</span></h3>
+<p>3つのセクターの株価変動率の月<b>平均</b>値を取得するには、アクティブシートでグループ化された列に対して記述統計を実行し、レポート シートを生成します。 
+<br /><br />
+<b>列の統計</b>は非常に複雑で、操作フレームワークと呼ばれるOrigin Cのフレームワークを通じて実装されています。操作フレームワークにより、これらの操作ベースのクラスをOrigin Cから呼び出すことができるため、操作クラスを実行するためにXファンクション<a class="external text" href="../../XFunction/X-Function/Xop.html">xop</a>が作成されています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 新しく作成されたグラフがアクティブウィンドウ</span>
+<span style="color: #008000;">// しかし元のワークブックをアクティブにする必要がある</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">(</span>bk<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// DescStatsクラスを使用して、GUI ツリー&quot;statGUI&quot;を作成</span>
+tree statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;
+
+<span style="color: #008000;">// GUIツリーの入力データを指定</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">X</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span>M1<span style="color: #000000;">:</span>M3<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// グループ化データを指定</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">F</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span>Month<span style="color: #000000;">)</span>;
+ 
+<span style="color: #008000;">// 説の統計の設定</span>
+<span style="color: #008000;">// N合計、標準偏差、合計、最大、最小、中央値を結果で表示しない</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">N</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">SD</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">moments</span>.<span style="color: #000080;">Sum</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Min</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Median</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Quantities</span>.<span style="color: #000080;">quantiles</span>.<span style="color: #000080;">Max</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+
+<span style="color: #008000;">// 準備したGUIツリーでレポートツリーを生成</span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>report iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI otrresult<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statOut;
+
+<span style="color: #008000;">// 統計の後に操作オブジェクトをクリーンアップ</span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cleanup;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Tutorial_Statistics/Tip_icon.png" width="57"  border="0" /></td><td><p>スクリプトでGUIツリー「statGUI」を作成した後 
+</p>
+<pre class="lt" style="font-family:monospace;">xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;</pre>
+<p>以下のスクリプトを実行して、「statGUI」ツリーの詳細設定を行えます。
+</p>
+<pre class="lt" style="font-family:monospace;">statGUI.<span style="color: #000080;">=</span></pre>
+<p><br />
+</p></td></tr></table>
+<h3><a name="Unstack_columns"></a><span class="mw-headline">列のアンスタック</span></h3>
+<p>グラフをプロットするには、列を3つのセクター( <b>DescStatsQuantities1</b>シートの<b>Data</b>列)でアンスタックします 。  スクリプトからこれを実行するには、 <a class="external text" href="../../XFunction/X-Function/Wunstackcol.html">wunstackcol</a> Xファンクションが最も便利な方法です。列は、入力範囲<b>irng2</b>で指定した特定のカテゴリによってアンスタックされます。(カテゴリーで)表示されるデータは、入力範囲 <b>irng1</b>で参照されます。 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// Data列を使用して他のすべての列をアンスタック</span>
+<span style="color: #008000;">// 出力シートのロングネーム行に&quot;Data&quot;を配置</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;DescStatsQuantities1&quot;</span>;
+wunstackcol <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> irng1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Mean<span style="color: #000000;">)</span> irng2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Data<span style="color: #000000;">)</span> nonstack<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> other<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Month<span style="color: #000000;">)</span> pos<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lname ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;UnstackCols1&quot;</span>;</pre>
+<h3><a name="Create_Line.2BSymbol_graph"></a><span class="mw-headline">線+シンボルグラフの作成</span></h3>
+<p>Xファンクション<a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a>で線+シンボルグラフを作成できます。plot オプションで利用可能なすべての値は、<a href="../../LabTalk/LabTalk/Plot_Type_IDs.html" title="LabTalk:Plot Type IDs">プロットタイプID</a>にあります。
+</p>
+<pre class="lt" style="font-family:monospace;">page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;UnstackCols1&quot;</span>;
+<span style="color: #008000;">// アクティブなワークシートの列 2、3、4 で折れ線グラフを作成</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;
+<span style="color: #008000;">//凡例をソース データのロングネームで更新</span>
+legendupdate mode<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lname;</pre>
+<h3><a name="Perform_Descriptive_Stats_on_matrix_object_with_theme"></a><span class="mw-headline">テーマで行列オブジェクトの記述統計を実行</span></h3>
+<p>テーマを準備します。列の統計ダイアログを開き、出力タブを開きます。
+</p>
+<ul><li> レポート表の設定にあるブックを&lt;新規&gt;に設定します。これでレポート表のために新しいワークブックがされます。</li>
+<li> 値ブランチを開き、ブックを&lt;レポート&gt;に設定します。これで値がレポート表と同じブックに出力されます。</li>
+<li> ダイアログ右上の矢印のボタンをクリックして、名前を付けて保存を選択し、reportnewbookという名前で保存します。</li></ul>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// DescStatsクラスを使ってテーマ&quot;reportnewbook&quot;でGUIツリー&quot;statGUI&quot;を作成</span>
+tree statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>init classname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>DescStats iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span>reportnewbook;
+
+<span style="color: #008000;">// 入力データを設定</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">InputData</span>.<span style="color: #000080;">Range1</span>.<span style="color: #000080;">X</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>MBook1<span style="color: #000000;">]</span>MSheet1<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">0</span>; <span style="color: #008000;">//1:0 は全行列オブジェクト</span>
+
+<span style="color: #008000;">// レポート出力をBook1に変更。これはテーマ&quot;reportnewbook&quot;で&lt;new&gt;に設定されている</span>
+statGUI.<span style="color: #000080;">GUI</span>.<span style="color: #000080;">Output</span>.<span style="color: #000080;">Report</span>.<span style="color: #000080;">Book</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Book1&quot;</span>;
+
+<span style="color: #008000;">// 準備されたGUI ツリーでレポートを生成し、操作オブジェクトをクリーンアップ</span>
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>report iotrgui<span style="color: #000000;">:</span><span style="color: #000080;">=</span>statGUI;
+xop execute<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cleanup;</pre>
+
+
+
+    

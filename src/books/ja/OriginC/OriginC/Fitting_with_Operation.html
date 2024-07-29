@@ -1,0 +1,307 @@
+﻿<h1 class="firstheading">Fitting with Operation</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Simplest_Case_of_Fitting_with_Operation"><span class="tocnumber">1</span> <span class="toctext">Simplest Case of Fitting with Operation</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Fit_on_Multipe_Dataset_with_Parameter_Shared"><span class="tocnumber">2</span> <span class="toctext">Fit on Multipe Dataset with Parameter Shared</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Fit_Multiple_Peaks_Data"><span class="tocnumber">3</span> <span class="toctext">Fit Multiple Peaks Data</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Fit_and_Output_Find_Y_from_X_table"><span class="tocnumber">4</span> <span class="toctext">Fit and Output Find Y from X table</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Simplest_Case_of_Fitting_with_Operation"></a><span class="mw-headline">Simplest Case of Fitting with Operation</span></h2>
+
+  <p>This example shows how to do nonlinear curve fit on one XY data with Gauss function. Without dialog open and with default settings to do fit and genereate worksheet report including parameter, statistics report tables and fitted curves report graphs.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>operation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> NLFit_op_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">bool</span> bInit;
+    Operation<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Operation<span style="color: #000040;">&amp;</span><span style="color: #000000;">)</span>op_create<span style="color: #000000;">(</span><span style="color: #ff00ff;">"FitNL"</span>, bInit<span style="color: #000000;">)</span>;  <span style="color: #008000;">// the operation name of NLFit is FitNL</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>bInit <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error in op create"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    Tree trOp;
+    op.<span style="color: #000000;">GetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;   
+ 
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>; 
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// init trOp.GUI.InputData treenodes from dr and do SetData, SetFunction actions</span>
+    string      strFunction <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Gauss"</span>;
+    string      strCategory <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Peak Functions"</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OP_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> op.<span style="color: #000000;">OnInitDataFromOCLT</span><span style="color: #000000;">(</span>trOp, trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">InputData</span>, dr, strFunction, strCategory<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to init data from data range"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    op.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;<span style="color: #008000;">// set the changes of trOp back to op object</span>
+    
+    <span style="color: #0000ff;">int</span> nAutoUpdate <span style="color: #000080;">=</span> AU_AUTO;
+    op.<span style="color: #000000;">OnNoEdit</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, nAutoUpdate<span style="color: #000000;">)</span>;
+    
+    op.<span style="color: #000000;">Execute</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// do fit and genereate report</span>
+    
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>Copy the following commands in Command window and press Enter to run:</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;
+string ascfile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"samples\Curve Fitting\Gaussian.dat"</span>;
+ImpASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ascfile<span style="color: #000080;">$</span>;
+NLFit_op_ex;
+</pre>
+
+  <h2><a name="Fit_on_Multipe_Dataset_with_Parameter_Shared"></a><span class="mw-headline">Fit on Multipe Dataset with Parameter Shared</span></h2>
+
+  <p>The following example shows how to fit on two XY datasets with Gauss function, parameter xc is shared and Y0 of the first dataset is fixed as 5.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>operation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> NLFit_op_with_Multi_Datasets<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please activate a worksheet with Gaussian.dat data"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>; 
+    <span style="color: #000000;">}</span>
+ 
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #0000ff;">bool</span> bInit;
+    Operation<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Operation<span style="color: #000040;">&amp;</span><span style="color: #000000;">)</span>op_create<span style="color: #000000;">(</span><span style="color: #ff00ff;">"FitNL"</span>, bInit<span style="color: #000000;">)</span>;  <span style="color: #008000;">// the operation name of NLFit is FitNL</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>bInit <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error in op create"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    Tree trOp;
+    op.<span style="color: #000000;">GetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>; 
+ 
+    <span style="color: #008000;">// init trOp.GUI.InputData treenodes from dr and do SetData, SetFunction actions</span>
+    string  strFunction <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Gauss"</span>;
+    string  strCategory <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Peak Functions"</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OP_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> op.<span style="color: #000000;">OnInitDataFromOCLT</span><span style="color: #000000;">(</span>trOp, trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">InputData</span>, dr, strFunction, strCategory<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to init data from data range"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>    
+ 
+    <span style="color: #008000;">// set share</span>
+    trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">InputData</span>.<span style="color: #000000;">Use</span> <span style="color: #000080;">=</span> DATA_MODE_GLOBAL; <span style="color: #008000;">// if want to share parameters, data mode should be Global Fit</span>
+    trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Parameters</span>.<span style="color: #000000;">Share</span>.<span style="color: #000000;">Value1</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// not share y0</span>
+    trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Parameters</span>.<span style="color: #000000;">Share</span>.<span style="color: #000000;">Value2</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// share xc</span>
+ 
+    <span style="color: #008000;">// set fix</span>
+    trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Parameters</span>.<span style="color: #000000;">Fixed</span>.<span style="color: #000000;">Value1</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// fix y0</span>
+    trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Parameters</span>.<span style="color: #000000;">FixedValues</span>.<span style="color: #000000;">Value1</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>; <span style="color: #008000;">// fixed value</span>
+ 
+    <span style="color: #008000;">// set the changes of trOp back to op object</span>
+    op.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;    
+ 
+    <span style="color: #0000ff;">int</span> nAutoUpdate <span style="color: #000080;">=</span> AU_AUTO;
+    op.<span style="color: #000000;">OnNoEdit</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, nAutoUpdate<span style="color: #000000;">)</span>;  
+ 
+    <span style="color: #008000;">// do fit and genereate report</span>
+    op.<span style="color: #000000;">Execute</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+    
+    <span style="color: #008000;">// to get the newest operation tree including fit result.</span>
+    op.<span style="color: #000000;">GetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">// output parameter values</span>
+    <span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+    vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParamNames <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">"y0"</span>, <span style="color: #ff00ff;">"xc"</span>, <span style="color: #ff00ff;">"w"</span>, <span style="color: #ff00ff;">"A"</span><span style="color: #000000;">}</span>;    
+    TreeNode trParams <span style="color: #000080;">=</span> trOp.<span style="color: #000000;">Calculation</span>.<span style="color: #000000;">Parameters</span>;
+    
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nData <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nData <span style="color: #000080;">&lt;</span> nNumData; nData<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%d:<span style="color: #666666; font-weight: bold;">\t</span>"</span>, nData<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        
+            <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nn <span style="color: #000080;">&lt;</span> vsParamNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; nn<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                string strParamName <span style="color: #000080;">=</span> vsParamNames<span style="color: #000000;">[</span>nn<span style="color: #000000;">]</span>;
+                TreeNodeCollection trNs<span style="color: #000000;">(</span>trParams, strParamName<span style="color: #000040;">+</span><span style="color: #ff00ff;">"_"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> trNs.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&gt;</span> nData <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        TreeNode trParam;
+                        trParam <span style="color: #000080;">=</span> trNs.<span style="color: #000000;">Item</span><span style="color: #000000;">(</span>nData<span style="color: #000000;">)</span>;
+                        
+                        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> trParam <span style="color: #000040;">&amp;&amp;</span> trParam.<span style="color: #000000;">Value</span> <span style="color: #000000;">)</span>
+                                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s=%g, "</span>, strParamName, trParam.<span style="color: #000000;">Value</span>.<span style="color: #000000;">dVal</span> <span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>
+                
+            <span style="color: #000000;">}</span>
+            
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>Copy the following commands in Command window and press Enter to run:</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;
+string ascfile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"samples\Curve Fitting\Gaussian.dat"</span>;
+ImpASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ascfile<span style="color: #000080;">$</span>;
+NLFit_op_with_Multi_Datasets;
+</pre>
+
+  <h2><a name="Fit_Multiple_Peaks_Data"></a><span class="mw-headline">Fit Multiple Peaks Data</span></h2>
+
+  <p>The following example shows how to fit on the multiple peaks data.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>operation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> NLFit_op_with_Multi_Peaks<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please activate a worksheet with Multiple Peaks.dat data"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>; 
+    <span style="color: #000000;">}</span>
+        
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">bool</span> bInit;
+    Operation<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Operation<span style="color: #000040;">&amp;</span><span style="color: #000000;">)</span>op_create<span style="color: #000000;">(</span><span style="color: #ff00ff;">"FitNL"</span>, bInit<span style="color: #000000;">)</span>;  <span style="color: #008000;">// the operation name of NLFit is FitNL</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>bInit <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error in op create"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    Tree trOp;
+    op.<span style="color: #000000;">GetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>; 
+    
+    <span style="color: #008000;">// set replica number to 2. Default is 0. </span>
+        trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Replica</span>.<span style="color: #000000;">Number</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  
+
+    <span style="color: #008000;">// init trOp.GUI.InputData treenodes from dr and do SetData, SetFunction actions</span>
+    string      strFunction <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Gauss"</span>;
+    string      strCategory <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Peak Functions"</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OP_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> op.<span style="color: #000000;">OnInitDataFromOCLT</span><span style="color: #000000;">(</span>trOp, trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">InputData</span>, dr, strFunction, strCategory<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to init data from data range"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>        
+
+    <span style="color: #008000;">// set the changes of trOp back to op object</span>
+    op.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;    
+    
+    <span style="color: #0000ff;">int</span> nAutoUpdate <span style="color: #000080;">=</span> AU_AUTO;
+    op.<span style="color: #000000;">OnNoEdit</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, nAutoUpdate<span style="color: #000000;">)</span>;  
+    
+    <span style="color: #008000;">// do fit and genereate report</span>
+        op.<span style="color: #000000;">Execute</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+  
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>Copy the following commands in Command window and press Enter to run:</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;
+string ascfile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"samples\Curve Fitting\Multiple Peaks.dat"</span>;
+ImpASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ascfile<span style="color: #000080;">$</span>;
+NLFit_op_with_Multi_Peaks;
+</pre>
+
+  <h2><a name="Fit_and_Output_Find_Y_from_X_table"></a><span class="mw-headline">Fit and Output Find Y from X table</span></h2>
+
+  <p>The following example shows how to output Find Y from X table.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>operation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> NLFit_op_with_YfromX<span style="color: #000000;">(</span><span style="color: #0000ff;">bool</span> bYfromX <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please activate a worksheet with Gaussian.dat data"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>; 
+    <span style="color: #000000;">}</span>
+
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">bool</span> bInit;
+    Operation<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Operation<span style="color: #000040;">&amp;</span><span style="color: #000000;">)</span>op_create<span style="color: #000000;">(</span><span style="color: #ff00ff;">"FitNL"</span>, bInit<span style="color: #000000;">)</span>;  <span style="color: #008000;">// the operation name of NLFit is FitNL</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>bInit <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error in op create"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    Tree trOp;
+    op.<span style="color: #000000;">GetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>; 
+ 
+    <span style="color: #008000;">// init trOp.GUI.InputData treenodes from dr and do SetData, SetFunction actions</span>
+    string  strFunction <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Gauss"</span>;
+    string  strCategory <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Peak Functions"</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OP_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> op.<span style="color: #000000;">OnInitDataFromOCLT</span><span style="color: #000000;">(</span>trOp, trOp.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">InputData</span>, dr, strFunction, strCategory<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to init data from data range"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span> 
+    
+    <span style="color: #008000;">//enable Find Y from X and Calculate Confidence</span>
+    TreeNode trCalibration, trCustomSettings;
+        trCalibration <span style="color: #000080;">=</span> op_get_calibration_table<span style="color: #000000;">(</span>trOp.<span style="color: #000000;">GUI</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> trCalibration <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">int</span> nIndexTbl <span style="color: #000080;">=</span> bYfromX ? <span style="color: #0000dd;">2</span> <span style="color: #000000;">:</span> <span style="color: #0000dd;">1</span>;
+                string strCustomNode <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Custom"</span> <span style="color: #000040;">+</span> <span style="color: #000000;">(</span>nIndexTbl <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                trCustomSettings <span style="color: #000080;">=</span> trCalibration.<span style="color: #000000;">GetNode</span><span style="color: #000000;">(</span>strCustomNode<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> trCustomSettings <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                trCustomSettings.<span style="color: #000000;">Conf</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+                trCustomSettings.<span style="color: #000000;">Conf</span>.<span style="color: #000000;">Enable</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+                trCustomSettings.<span style="color: #000000;">Use</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to enable Find Y from X"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// set the changes of trOp back to op object</span>
+    op.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trOp<span style="color: #000000;">)</span>;    
+
+    <span style="color: #0000ff;">int</span> nAutoUpdate <span style="color: #000080;">=</span> AU_AUTO;
+    op.<span style="color: #000000;">OnNoEdit</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, nAutoUpdate<span style="color: #000000;">)</span>;  
+    
+    <span style="color: #008000;">// do fit and genereate report</span>
+    op.<span style="color: #000000;">Execute</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>Copy the following commands in Command window and press Enter to run:</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;
+string ascfile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> System.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"samples\Curve Fitting\Gaussian.dat"</span>;
+ImpASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ascfile<span style="color: #000080;">$</span>;
+NLFit_op_with_YfromX;
+</pre>

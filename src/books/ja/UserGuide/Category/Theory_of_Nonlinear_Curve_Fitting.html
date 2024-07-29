@@ -1,0 +1,653 @@
+﻿<h1 class="firstheading">非線形曲線フィットの理論</h1>
+<p class="urlname" style="display: none;">NLFit-Theory</p>
+<div class="toclimit-4">
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>目次</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#How_Origin_Fits_the_Curve"><span class="tocnumber">1</span> <span class="toctext">Originの曲線フィットの方法</span></a>
+<ol>
+<li class="toclevel-2 tocsection-2"><a href="#Explicit_Functions"><span class="tocnumber">1.1</span> <span class="toctext">陽関数</span></a>
+<ol>
+<li class="toclevel-3 tocsection-3"><a href="#Fitting_Model"><span class="tocnumber">1.1.1</span> <span class="toctext">フィットモデル</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Least-Squares_Algorithms"><span class="tocnumber">1.1.2</span> <span class="toctext">最小二乗法アルゴリズム</span></a>
+<ol>
+<li class="toclevel-4 tocsection-5"><a href="#Levenberg-Marquardt_.28L-M.29_Algorithm"><span class="tocnumber">1.1.2.1</span> <span class="toctext">Levenberg-Marquardt (LM法)アルゴリズム</span></a></li>
+<li class="toclevel-4 tocsection-6"><a href="#Downhil_Simplex_Algorithm"><span class="tocnumber">1.1.2.2</span> <span class="toctext">滑降シンプレックス法アルゴリズム</span></a></li>
+</ol>
+</li>
+<li class="toclevel-3 tocsection-7"><a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm"><span class="tocnumber">1.1.3</span> <span class="toctext">直交距離回帰(ODR )アルゴリズム</span></a></li>
+</ol>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Comparison_between_ODR_and_L-M"><span class="tocnumber">1.2</span> <span class="toctext">ODRアルゴリズムとL-Mアルゴリズムの比較</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Implicit_Functions"><span class="tocnumber">1.3</span> <span class="toctext">陰関数</span></a>
+<ol>
+<li class="toclevel-3 tocsection-10"><a href="#Fitting_Model_2"><span class="tocnumber">1.3.1</span> <span class="toctext">フィットモデル</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm_2"><span class="tocnumber">1.3.2</span> <span class="toctext">直交距離回帰(ODR )アルゴリズム</span></a></li>
+</ol>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Weighted_Fitting"><span class="tocnumber">1.4</span> <span class="toctext">重み付けフィット</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Parameters"><span class="tocnumber">2</span> <span class="toctext">パラメータ</span></a>
+<ol>
+<li class="toclevel-2 tocsection-14"><a href="#The_Fitted_Value"><span class="tocnumber">2.1</span> <span class="toctext">フィットパラ値</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Parameter_Standard_Errors"><span class="tocnumber">2.2</span> <span class="toctext">パラメータの標準誤差</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#The_Standard_Error_for_Derived_Parameter"><span class="tocnumber">2.3</span> <span class="toctext">派生パラメータの標準誤差</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Confidence_Intervals"><span class="tocnumber">2.4</span> <span class="toctext">信頼区間</span></a>
+<ol>
+<li class="toclevel-3 tocsection-18"><a href="#Asymptotic-Symmetry_Method"><span class="tocnumber">2.4.1</span> <span class="toctext">Asymptotic-Symmetry法</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Model-Comparison_Method"><span class="tocnumber">2.4.2</span> <span class="toctext">モデル比較法</span></a></li>
+</ol>
+</li>
+<li class="toclevel-2 tocsection-20"><a href="#t_Value"><span class="tocnumber">2.5</span> <span class="toctext">t値</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#Prob.3E.7Ct.7C"><span class="tocnumber">2.6</span> <span class="toctext">Prob&gt;|t|</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Dependency"><span class="tocnumber">2.7</span> <span class="toctext">依存度</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#CI_Half_Width"><span class="tocnumber">2.8</span> <span class="toctext">CI半幅</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1 tocsection-24"><a href="#Statistics"><span class="tocnumber">3</span> <span class="toctext">統計</span></a>
+<ol>
+<li class="toclevel-2 tocsection-25"><a href="#Degree_of_Freedom"><span class="tocnumber">3.1</span> <span class="toctext">自由度</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Residual_Sum_of_Squares"><span class="tocnumber">3.2</span> <span class="toctext">残差平方和</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Reduced_Chi-Sqr"><span class="tocnumber">3.3</span> <span class="toctext">既約カイ二乗</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#R-Square_.28COD.29"><span class="tocnumber">3.4</span> <span class="toctext">R二乗 (COD)</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Adj._R-Square"><span class="tocnumber">3.5</span> <span class="toctext">補正R二乗</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#R_Value"><span class="tocnumber">3.6</span> <span class="toctext">R値</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Root-MSE_.28SD.29"><span class="tocnumber">3.7</span> <span class="toctext">Root-MSE (SD)</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1 tocsection-32"><a href="#ANOVA_Table"><span class="tocnumber">4</span> <span class="toctext">ANOVA表</span></a></li>
+<li class="toclevel-1 tocsection-33"><a href="#Confidence_and_Prediction_Bands"><span class="tocnumber">5</span><span class="toctext">信頼帯と推定帯</span></a>
+<ol>
+<li class="toclevel-2 tocsection-34"><a href="#Confidence_Band"><span class="tocnumber">5.1</span> <span class="toctext">信頼帯</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#Prediction_Band"><span class="tocnumber">5.2</span> <span class="toctext">推定帯</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1 tocsection-36"><a href="#Topics_for_Further_Reading"><span class="tocnumber">6</span><span class="toctext">詳細情報</span></a></li>
+<li class="toclevel-1 tocsection-37"><a href="#Reference"><span class="tocnumber">7</span> <span class="toctext">参考文献</span></a></li>
+</ol>
+</div>
+</div>
+<h2><a name="How_Origin_Fits_the_Curve" id="How_Origin_Fits_the_Curve"></a>Originの曲線フィットの方法</h2>
+<p>非線形曲線フィットの目的はデータを最もよく説明するパラメータ値を推定することです。通常、次のように非線形曲線フィットのプロセスを記述することが出来ます。</p>
+<ol>
+<li><a href="../../UserGuide/UserGuide/Parameter_Initialization.html" title="ユーザガイド:パラメータ初期化">初期値</a> から最初の関数曲線を作成します。</li>
+<li>パラメータ値の調整を繰り返して、曲線にデータポイントを近づけていきます。</li>
+<li>最短の距離が停止基準に達すると計算を停止し、最適なフィット曲線を得ます。</li>
+</ol>
+<p>最小距離を定義するための異なる反復手順および、統計を有するアルゴリズムを選択肢として用意しています。</p>
+<h3><a name="Explicit_Functions" id="Explicit_Functions"></a>陽関数</h3>
+<h4><a name="Fitting_Model" id="Fitting_Model"></a>フィットモデル</h4>
+<p>一般的な非線形モデルは次のように説明されます。</p>
+<table class="formula">
+<tr>
+<td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bcabf9847b705f433568f8c400c6e79c.png" title="Y=f(X, \boldsymbol{\beta})+\varepsilon " alt="Y=f(X, \boldsymbol{\beta})+\varepsilon " class="tex" border="0" /></td>
+<td>(1)</td>
+</tr>
+</table>
+<p>ここで <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-35f21cd4e2e75c09315e49b2b031710b.png" title="X = (x_1, x_2, \cdots , x_k)&amp;apos;" alt="X = (x_1, x_2, \cdots , x_k)&amp;apos;" class="tex" border="0" /> は、独立変数で、 <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ca56912a8efd3e2d420b7ceeaf293903.png" title="\boldsymbol{\beta} = (\beta_1, \beta_2, \cdots , \beta_k)&amp;apos;" alt="\boldsymbol{\beta} = (\beta_1, \beta_2, \cdots , \beta_k)&amp;apos;" class="tex" border="0" /> は、パラメータです。</p>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<p><b>陽関数の例</b></p>
+<ul>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-974247a2296cfc3a2c93ad0e93168732.png" title="y=y_0+Ae^{-x/t}" alt="y=y_0+Ae^{-x/t}" class="tex" border="0" /></li>
+</ul>
+</td>
+</tr>
+</table>
+<h4><a name="Least-Squares_Algorithms" id="Least-Squares_Algorithms"></a>最小二乗法アルゴリズム</h4>
+<p>最小二乗法は、測定データから理論曲線の偏差を最小にするパラメータを選択することです。この方法はカイ二乗最小化とも呼ばれ、次のように定義されます。</p>
+<table class="formula">
+<tr>
+<td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-06e0bc4dd4c9e79eae6f116e751e9eb5.png" title="\chi ^2=\sum_{i=1}^n \left [ \frac{Y_i-f(x_i^{\prime },\hat{\beta }) } {\sigma _i} \right ]^2" alt="\chi ^2=\sum_{i=1}^n \left [ \frac{Y_i-f(x_i^{\prime },\hat{\beta }) } {\sigma _i} \right ]^2" class="tex" border="0" /></td>
+<td>(2)</td>
+</tr>
+</table>
+<p>ここで <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a347f189f4162c04370051b770afbfa1.png" title="x_i^{\prime }" alt="x_i^{\prime }" class="tex" border="0" />&#160;は、<i>i</i> 番目 (<i>i</i> = 1, 2, …, n) の測定データの行のベクトルデータです。</p>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<p>下図は、単純な線形モデルでの最小二乗フィッティングの考え方を示しています。(多重回帰と非線形回帰も同様です。)</p>
+<dl>
+<dd><a class="image"><img alt="最小二乗法の説明" src="../images/Theory_of_Nonlinear_Curve_Fitting/350px-Illustration_of_the_Least_Squares_Method.png" width="350" height="234" border="0" /></a></dd>
+</dl>
+<p><b>最適なフィット曲線</b>は、仮定の理論モデルを表しています。元のデータセットの特定のポイント <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2d2896b8e02816556a3f43ee67a81ed4.png" title="(x_i,y_i)\,\!" alt="(x_i,y_i)\,\!" class="tex" border="0" /> に対して <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d2583020b138319a535bc3c88278ab33.png" title="x_i\,\!" alt="x_i\,\!" class="tex" border="0" /> における理論値は、<small><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bc2145775fa07d048a39d1846a4f4148.png" title="\widehat{y_i}" alt="\widehat{y_i}" class="tex" border="0" /></small> で表されます。</p>
+<p>回帰モデルに2つの独立変数がある場合、最小二乗推定法は、最適なフィット曲面への測定データのずれを最小化します。3つより多い独立変数を持つ場合、フィットモデルは超曲面になります。この場合、回帰が実行されたときにフィット曲面（または曲線）が作図されません。</p>
+</td>
+</tr>
+</table>
+<p>反復計算の中でパラメータを調整するためのオプションは２つあります。</p>
+<dl>
+<dd>
+<ul>
+<li><a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Function_Selection" title="ユーザガイド:『設定』タブ (上側パネル)">Levenberg-Marquardt (LM法)アルゴリズム</a></li>
+<li><a href="../../UserGuide/UserGuide/NLFit_Dialog_Buttons.html" title="ユーザガイド:NLFitダイアログボタン">滑降シンプレックス近似値</a></li>
+</ul>
+</dd>
+</dl>
+<h5><a name="Levenberg-Marquardt_.28L-M.29_Algorithm" id="Levenberg-Marquardt_.28L-M.29_Algorithm"></a>Levenberg-Marquardt (LM法)アルゴリズム</h5>
+<p>「<a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Function_Selection" title="ユーザガイド:『設定』タブ (上側パネル)" style="text-decoration: none;">Levenberg-Marquardt(L-M)アルゴリズム</a>」<sup><a href="#Reference">11</a></sup> は、Gauss-Newton法と最急降下法を組み合わせた反復方法です。このアルゴリズムは、ほとんどの場合よく機能し、非線形最小二乗ルーチンの標準になります。</p>
+<ol>
+<li>与えられた<a href="../../UserGuide/UserGuide/Parameter_Initialization.html" title="ユーザガイド:パラメータ初期化">初期値</a>: <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-92eb5ffee6ae2fec3ad71c777531578f.png" title="b" alt="b" class="tex" border="0" /> から<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-204b209474ca9158d3be8bf938264518.png" title="\chi ^2(b)" alt="\chi ^2(b)" class="tex" border="0" />を計算</li>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex" border="0" /> = 0.001などの<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex" border="0" />の適度な値を選択</li>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-02df0bfa3fa822a063d48e627b7ad7fc.png" title="\delta b" alt="\delta b" class="tex" border="0" /> のLevenberg-Marquardt 関数 <sup><a href="#Reference">11</a></sup>を解き、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2c4f070d67741634bb7dcb3815ba11db.png" title="\chi ^2(\beta + \delta b)" alt="\chi ^2(\beta + \delta b)" class="tex" border="0" />を評価</li>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f81fcda6393e0a6fbdb5bfc2c572c20c.png" title="\chi ^2(\beta + \delta b) \geq \chi ^2(b)" alt="\chi ^2(\beta + \delta b) \geq \chi ^2(b)" class="tex" border="0" /> の場合、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex" border="0" />を10倍に増やし、手順3に戻る</li>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-96084296a143c0c942baae5959dc08ac.png" title="\chi ^2(\beta + \delta b) \leq \chi ^2(b)" alt="\chi ^2(\beta + \delta b) \leq \chi ^2(b)" class="tex" border="0" /> の場合、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex" border="0" />を10倍に増やし、パラメーター値を<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-02df0bfa3fa822a063d48e627b7ad7fc.png" title="\delta b" alt="\delta b" class="tex" border="0" />に更新して、手順3に戻る</li>
+<li>連続する2回の反復で計算された<a class="image"><img alt="Temp-Regression and Curve Fitting-image125.gif" src="../images/Theory_of_Nonlinear_Curve_Fitting/Temp-Regression_and_Curve_Fitting-image125.gif" width="21" border="0" /></a>値が（<a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Advanced" title="ユーザガイド:『設定』タブ (上側パネル)">許容値</a>と比較して）十分に小さくなったら停止</li>
+</ol>
+<h5><a name="Downhil_Simplex_Algorithm" id="Downhil_Simplex_Algorithm"></a>滑降シンプレックスアルゴリズム</h5>
+<p>L-M法に加えて、Originは「<a href="../../UserGuide/UserGuide/NLFit_Dialog_Buttons.html" title="ユーザガイド:NLFitダイアログボタン" style="text-decoration: none;">滑降シンプレックス法による近似</a>」<sup><a href="#Reference">9,10</a></sup>も提供しています。ジオメトリでは、シンプレックスはN次元のN + 1頂点の多面体です。非線形最適化では、N変数の目的関数のアナログが存在します。反復の間、シンプレックスアルゴリズム（Nelder-Meadとしても知られる）は、局所最小値に収束するまで、パラメータ「シンプレックス」を調整します。</p>
+<p>シンプレックス法は、L-M法と異なり、微分を必要とせず、計算負荷が小さい場合に有効です。通常、パラメータの初期化に適切な値が得られなかった場合は、この方法を試し、L-Mを使用したフィット計算のための近似パラメータ値を取得できます。 シンプレックス法は、パラメータ空間の無意味な部分に入りこむ可能性が低いので、より安定している傾向があります。 他方では、一般にL-Mよりもはるかに遅く、特に極小に非常に近いです。現実として、非線形近似のための「完全な」アルゴリズムはなく、多くのことが結果（例えば、初期値）に影響を及ぼす可能性があります。複雑なモデルでは、ある方法が他の方法よりも優れているかもしれません。さらに、フィッティング操作を実行するために両方の方法を試してみるとよいでしょう。</p>
+<h4><a name="Orthogonal_Distance_Regression_.28ODR.29_Algorithm" id="Orthogonal_Distance_Regression_.28ODR.29_Algorithm"></a><span class="mw-headline">直交距離回帰(ODR )アルゴリズム</span></h4>
+<p><span class="mw-headline">直交距離回帰（ODR、Orthogonal Distance Regression）アルゴリズムは反復プロセス内で残差平方和をフィットパラメータと独立変数を調整することで最小にします。ODRの残差は、従属変数の観測値と予測値の差ではなく、データから近似曲線までの直交距離です。</span></p>
+<p><span class="mw-headline">Originでは、ODRPACK95<sup><a href="#Reference">8</a></sup>でODRアルゴリズムを使用します。</span></p>
+<p><span class="mw-headline">陽関数では、ODRアルゴリズムは次のように表現されます。</span></p>
+<p><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-63152dbc3e42c69b87cc39bdb5bf39f2.png" title="\min\left (\sum_{i=1}^{n}\left (w_{yi}\cdot \epsilon_{i} ^{2}+w_{xi}\cdot \delta_{i}^{2} \right ) \right )" alt="\min\left (\sum_{i=1}^{n}\left (w_{yi}\cdot \epsilon_{i} ^{2}+w_{xi}\cdot \delta_{i}^{2} \right ) \right )" class="tex" border="0" /></span></p>
+<p><span class="mw-headline">制約の主要因は次のとおりです。</span></p>
+<p><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-bd52ec18c34bbb8cc60c2c5170b022c0.png" title="y_{i}=f\left ( x_{i} +\delta_{i}; \beta \right )-\epsilon _{i}\ \ \ \ \ \ i=1,...,n" alt="y_{i}=f\left ( x_{i} +\delta_{i}; \beta \right )-\epsilon _{i}\ \ \ \ \ \ i=1,...,n" class="tex" border="0" /></span></p>
+<p><span class="mw-headline">ここで、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f0ed6a7e9e5079b9b9f2bcd01768ddcc.png" title="w_{xi}" alt="w_{xi}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6f64afa2febc1a132beeeba5e4bd81ef.png" title="w_{yi}" alt="w_{yi}" class="tex" border="0" /> はユーザが入力した<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex" border="0" /> と <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex" border="0" />の重み付け、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f046a1b3002c9fd615276bb4e1a3a761.png" title="\delta_{i}" alt="\delta_{i}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-67b31d49c0358463d6dbefd1c0c6c18c.png" title="\epsilon_{i}" alt="\epsilon_{i}" class="tex" border="0" /> は対応する<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex" border="0" /> の残差、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex" border="0" /> はフィットパラメータを示します。</span></p>
+<p><span class="mw-headline">ODRアルゴリズムについての詳細は、 ODRPACK95<sup><a href="#Reference">8</a></sup>を参照してください。</span></p>
+<h3><span class="mw-headline"><a name="Comparison_between_ODR_and_L-M" id="Comparison_between_ODR_and_L-M"></a>ODRアルゴリズムとL-Mアルゴリズムの比較</span></h3>
+<p><span class="mw-headline">ODRアルゴリズムとL-Mアルゴリズムのどちらをフィットで使用するか選択する際には、次の表の情報を参考にしてください。</span></p>
+<table class="simple">
+<tr>
+<th>&#160;</th>
+<th>直交距離回帰</th>
+<th>Levenberg Marquardt法</th>
+</tr>
+<tr>
+<td bgcolor="#C9C9C9"><b>適用先</b></td>
+<td>陰関数、陽関数の両方</td>
+<td>陽関数のみ</td>
+</tr>
+<tr>
+<td bgcolor="#C9C9C9"><b>重み付け</b></td>
+<td>xとyの重み付け、両方に対応</td>
+<td>yの重み付けのみ</td>
+</tr>
+<tr>
+<td bgcolor="#C9C9C9"><b>残差のソース</b></td>
+<td>データから曲線距離までの直交距離</td>
+<td>観測値と予測値の差</td>
+</tr>
+<tr>
+<td bgcolor="#C9C9C9"><b>反復プロセス</b></td>
+<td>フィットパラメータと独立変数の値を修正</td>
+<td>フィットパラメータの値を修正</td>
+</tr>
+</table>
+<dl>
+<dd><span class="mw-headline"><a class="image"><img alt="LM vs ODR 85pc.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/LM_vs_ODR_85pc.png" width="799" height="326" border="0" /></a></span></dd>
+</dl>
+<h3><span class="mw-headline"><a name="Implicit_Functions" id="Implicit_Functions"></a>陰関数</span></h3>
+<h4><span class="mw-headline"><a name="Fitting_Model_2" id="Fitting_Model_2"></a>フィットモデル</span></h4>
+<p><span class="mw-headline">一般的な陰関数は、以下のように説明されます。</span></p>
+<table class="formula">
+<tr>
+<td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2c70edb6aaa03e8925fa8e82fb079995.png" title="f\left ( X, Y, \beta \right )-const=0 " alt="f\left ( X, Y, \beta \right )-const=0 " class="tex" border="0" /></td>
+<td>(5)</td>
+</tr>
+</table>
+<p><span class="mw-headline">ここで、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-35f21cd4e2e75c09315e49b2b031710b.png" title="X = (x_1, x_2, \cdots , x_k)&amp;apos;" alt="X = (x_1, x_2, \cdots , x_k)&amp;apos;" class="tex" border="0" /> と <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-efc29c0295bfc803602e300317eb1204.png" title="Y = (y_1, y_2, \cdots , y_k)&amp;apos;" alt="Y = (y_1, y_2, \cdots , y_k)&amp;apos;" class="tex" border="0" /> は変数、 <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex" border="0" /> はフィットパラメータ、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6680dba00f3a88f66f8029a93d71d93c.png" title="const" alt="const" class="tex" border="0" /> は定数を示します。</span></p>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/Tip_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<p><b>陰関数の例：</b></p>
+<ul>
+<li><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d45d2cae23282528539e4f2dccaa0047.png" title="f = \left(\frac{x-x_c}{a}\right)^2 + \left(\frac{y-y_c}{b}\right)^2 - 1" alt="f = \left(\frac{x-x_c}{a}\right)^2 + \left(\frac{y-y_c}{b}\right)^2 - 1" class="tex" border="0" /></li>
+</ul>
+<p>&#160;</p>
+</td>
+</tr>
+</table>
+<h4><span class="mw-headline"><a name="Orthogonal_Distance_Regression_.28ODR.29_Algorithm_2" id="Orthogonal_Distance_Regression_.28ODR.29_Algorithm_2"></a><span class="mw-headline">直交距離回帰(ODR )アルゴリズム</span></span></h4>
+<p><span class="mw-headline"><span class="mw-headline">ODR法は陰関数と陽関数、どちらでも使用できます。ODR法の詳細については、<a href="#Orthogonal_Distance_Regression_.28ODR.29_Algorithm">上のセクション</a>の説明を参照してください。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">陰関数では、ODRアルゴリズムは次のように表現されます。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a4443476c7d74800f2fd5e4c90a79988.png" title="\min\left (\sum_{i=1}^{n}\left ( w_{xi}\cdot \delta_{xi}^{2}+w_{yi}\cdot \delta_{yi}^{2} \right ) \right )" alt="\min\left (\sum_{i=1}^{n}\left ( w_{xi}\cdot \delta_{xi}^{2}+w_{yi}\cdot \delta_{yi}^{2} \right ) \right )" class="tex" border="0" /></span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">次に従います。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-75d51c5f694e13f570e6ee14eab0fcf7.png" title="f\left ( x_{i}+\delta_{xi},y_{i}+\delta_{yi},\beta \right )= 0\ \ \ \ \ \ i=1,...,n" alt="f\left ( x_{i}+\delta_{xi},y_{i}+\delta_{yi},\beta \right )= 0\ \ \ \ \ \ i=1,...,n" class="tex" border="0" /></span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f0ed6a7e9e5079b9b9f2bcd01768ddcc.png" title="w_{xi}" alt="w_{xi}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-6f64afa2febc1a132beeeba5e4bd81ef.png" title="w_{yi}" alt="w_{yi}" class="tex" border="0" /> はユーザが入力した<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex" border="0" /> と <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex" border="0" />の重み付け、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2543a24cee2f57e100a071caebc57326.png" title="\delta_{xi}" alt="\delta_{xi}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-37644270c5e8eefafd1d93fd743e6bbc.png" title="\delta_{yi}" alt="\delta_{yi}" class="tex" border="0" /> は対応する<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-05e42209d67fe1eb15a055e9d3b3770e.png" title="x_{i}" alt="x_{i}" class="tex" border="0" /> と<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-18daef71b5d25ce76b8628a81e4fc76b.png" title="y_{i}" alt="y_{i}" class="tex" border="0" /> の残差、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b0603860fcffe94e5b8eec59ed813421.png" title="\beta" alt="\beta" class="tex" border="0" /> はフィットパラメータを示します。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Weighted_Fitting" id="Weighted_Fitting"></a>重み付けフィット.</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">測定誤差が未知な場合、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-86d759d3081512d7183f5d7b87a1e825.png" title="\sigma _i\,\!" alt="\sigma _i\,\!" class="tex" border="0" />は、全<i>i</i> で1に設定され、曲線フィットは、重みなしで実行されます。しかし、測定誤差は既知の場合、これを重みとして扱い、重み付きフィットを実行できます。この場合、カイ二乗は以下のように記述できます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-d8212e6e4627f94f8d8ca2a1ede630e2.png" title="\chi ^2=\sum_{i=1}^nw_i[Y_i-f(x_i^{\prime },\hat \beta )]^2" alt="\chi ^2=\sum_{i=1}^nw_i[Y_i-f(x_i^{\prime },\hat \beta )]^2" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(6)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">Originでは、数種類の重み付け方法を利用できます。詳細は、Originヘルプの<a href="../../UserGuide/UserGuide/Fitting_with_Errors_and_Weighting.html" title="ユーザガイド:誤差と重み付けを使ってフィットする">誤差と重み付けを使ってフィットする</a>を参照してください。</span></span></p>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="Parameters" id="Parameters"></a>パラメータ</span></span></h2>
+<p><span class="mw-headline"><span class="mw-headline">フィットに関連する式をここに要約します。</span></span></p>
+<dl>
+<dd><span class="mw-headline"><span class="mw-headline"><a class="image"><img alt="The Fit Results.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/The_Fit_Results.png" width="595" height="32" border="0" /></a></span></span></dd>
+</dl>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="The_Fitted_Value" id="The_Fitted_Value"></a>フィット値</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">非線形回帰のフィット値の計算は反復法によるものです。上のセクションのイントロダクション（<a href="#How_Origin_Fits_the_Curve">Originの曲線フィットの方法</a>）を読むか、以下の参考文献で詳細を確認してください。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Parameter_Standard_Errors" id="Parameter_Standard_Errors"></a>パラメータの標準誤差</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">L-Mによる反復計算で、行列<i><b>F</b></i>の偏微分を計算する必要があり、行列の <i>i</i> 番目の行と<i>j</i> 番目の列の要素は次のように表されます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7df4a0ef76e047f4b002d1b4628f7a6d.png" title="F_{ij}=\frac{\partial f(x,\theta )}{\sigma _i\partial \theta _j}" alt="F_{ij}=\frac{\partial f(x,\theta )}{\sigma _i\partial \theta _j}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(7)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<b>機械的</b>重みを使用している場合、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-571f263e771aca60a4a284b14251565c.png" title="\sigma _i" alt="\sigma _i" class="tex" border="0" />は<i>i</i> 番目のyの誤差です。重みなしの場合、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ece93aac8aa97d60ece2b228ea95b246.png" title="\sigma _i = 1" alt="\sigma _i = 1" class="tex" border="0" />です。そして、各反復計算で、各観測値<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex" border="0" />について <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ba404f144da76afb0ad9ee47351ed6bf.png" title="F_{ij}" alt="F_{ij}" class="tex" border="0" />が評価されます。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">パラメータ<a class="image"><img alt="Temp-Regression and Curve Fitting-image124.gif" src="../images/Theory_of_Nonlinear_Curve_Fitting/Temp-Regression_and_Curve_Fitting-image124.gif" width="15" border="0" /></a>の<b>分散共分散</b>行列を以下のようにして取得します。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b468175c71479a7b2b5bc140c0d13325.png" title="C=(F&amp;apos;F)^{-1}s^2\,\!" alt="C=(F&amp;apos;F)^{-1}s^2\,\!" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(8)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5df7e7b0f9a17b149f36fec7c1142e01.png" title="F&amp;apos;" alt="F&amp;apos;" class="tex" border="0" /> は、<i>F</i> 行列の転置で、s<sup>2</sup> は平均残差分散（<b>自由度当たりのカイ二乗</b>とも呼ばれる）で、モデルの<b>偏差</b>は以下のように計算されます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-135afe5aa195767729555499d3c7aff8.png" title="s^2=\frac{RSS}{n-p}" alt="s^2=\frac{RSS}{n-p}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(9)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<i>n</i> はポイント数で、<i>p</i> はパラメータの数です。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">この行列<i>C</i> の主要な対角値の平方根は、対応するパラメータの<b>標準誤差</b>で、次のようになります。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-1bd9c4721fff6c989d8b8284ea46193c.png" title="s_{\theta _i}=\sqrt{c_{ii}}\,\!" alt="s_{\theta _i}=\sqrt{c_{ii}}\,\!" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(10)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで <b><i>C</i></b><sub>ii</sub>は、行列<i><b>C</b></i> の <i>i</i> 番目の行と <i>i</i> 番目の列の要素です。<b><i>C</i></b><sub>ij</sub> は、<i>θ</i><sub>i</sub> と <i>θ</i><sub>j</sub>の間の共分散です。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">共分散行列の計算の際に、s<sup>2</sup>を除外するか選択できます。これは、標準誤差の値に影響します。s<sup>2</sup>を除外する場合、<b>フィット制御</b>の<b>詳細</b>ページにある<b>縮小したカイ二乗値を使う</b>のチェックを外します。共分散は次式で計算されます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7ba5bc942d74535e881bac8fffef8e0d.png" title="c=(F&amp;apos;F)^{-1}\,\!" alt="c=(F&amp;apos;F)^{-1}\,\!" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(11)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">標準誤差は、</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-45acf7fd19d29633c1814cab358125b4.png" title="s_{\theta _i}^{\prime }=\frac{s_{\theta _i}}s\,\!" alt="s_{\theta _i}^{\prime }=\frac{s_{\theta _i}}s\,\!" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(12)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">パラメータの標準誤差により、フィット値の精度がわかります。通常、標準誤差値の大きさは、フィット値よりも低くする必要があります。標準誤差の値がフィットパラメータより非常に大きい場合、フィッティングモデルは過剰パラメータである可能性があります。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="The_Standard_Error_for_Derived_Parameter" id="The_Standard_Error_for_Derived_Parameter"></a>派生パラメータの標準誤差</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">Originは、近似式であるError Propagation式に従って、導出されたパラメータの標準誤差を推定します。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-9886143d781b18fae944d111614266b3.png" title="z = f\left (\theta _1, \theta _2, ..., \theta _p \right )" alt="z = f\left (\theta _1, \theta _2, ..., \theta _p \right )" class="tex" border="0" />を<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5a34bb082daf037b3c4b14c13af6855b.png" title="p\," alt="p\," class="tex" border="0" />変数<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-4a096a413b1ea45201f320996396be49.png" title="\theta _1, \theta _2, ..., \theta _p \," alt="\theta _1, \theta _2, ..., \theta _p \," class="tex" border="0" />の組み合わせ（線形または非線形）を持つ関数とします。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">誤差伝播の一般的な法則は次のとおりです。</span></span></p>
+<dl>
+<dd><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-a1a4895080bf724c87cfcd4c7b64292f.png" title="\sigma_z^2 = \sum_i^p \sum_j^p \frac {\partial z}{\partial \theta_i} COV_{\theta_i \theta_j} \frac {\partial z}{\partial \theta_j}" alt="\sigma_z^2 = \sum_i^p \sum_j^p \frac {\partial z}{\partial \theta_i} COV_{\theta_i \theta_j} \frac {\partial z}{\partial \theta_j}" class="tex" border="0" /></span></span></dd>
+</dl>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f3bfa311268b39ae3ce3ae42e47f6937.png" title="COV_{\theta_i \theta_j}\," alt="COV_{\theta_i \theta_j}\," class="tex" border="0" />は、<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f633d81011ebbdb486d3bfee35e4789e.png" title="\left (\theta_i, \theta_j \right )" alt="\left (\theta_i, \theta_j \right )" class="tex" border="0" />および<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-edb838306186ccc2230aa890ba0bad64.png" title="\left (i = 1, 2, ..., p \right ), \left (j = 1, 2, ..., p \right )" alt="\left (i = 1, 2, ..., p \right ), \left (j = 1, 2, ..., p \right )" class="tex" border="0" />の共分散値です。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">共分散行列 <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-94e8fbdc16330d396a135eb8ff7c399e.png" title="COV_{\theta_i \theta_j}" alt="COV_{\theta_i \theta_j}" class="tex" border="0" /> を計算するときに、派生パラメータの標準誤差値に影響を与える平均残差分散 <img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e25a9ed7a5b522d46c98a8813634ab5d.png" title="s^2" alt="s^2" class="tex" border="0" /> を除外するかどうか選択できます。<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e25a9ed7a5b522d46c98a8813634ab5d.png" title="s^2" alt="s^2" class="tex" border="0" />を除外する場合、<b>フィット制御</b>の<b>詳細</b>ページにある<b>縮小したカイ二乗値を使う</b>のチェックを外します。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">例えば、3つの変数を使用する場合、</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5a9033d9c4d88c1ee1a786cbfbbf1d27.png" title="z = f\left (\theta_1, \theta_2, \theta_3 \right )" alt="z = f\left (\theta_1, \theta_2, \theta_3 \right )" class="tex" border="0" /></span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">以下を入手します。</span></span></p>
+<dl>
+<dd><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-37a2eeec5b384e170c8c1a0ddda74e60.png" title="\sigma_z^2 = \left (\frac {\partial z}{\partial \theta_1} \right )^2 \sigma_{\theta_1}^2 + \left (\frac {\partial z}{\partial \theta_2} \right )^2 \sigma_{\theta_2}^2 + \left (\frac {\partial z}{\partial \theta_3} \right )^2 \sigma_{\theta_3}^2 + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_2} \right ) COV_{\theta_1 \theta_2} + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_1 \theta_3} + 2 \left (\frac {\partial z}{\partial \theta_2} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_2 \theta_3} " alt="\sigma_z^2 = \left (\frac {\partial z}{\partial \theta_1} \right )^2 \sigma_{\theta_1}^2 + \left (\frac {\partial z}{\partial \theta_2} \right )^2 \sigma_{\theta_2}^2 + \left (\frac {\partial z}{\partial \theta_3} \right )^2 \sigma_{\theta_3}^2 + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_2} \right ) COV_{\theta_1 \theta_2} + 2 \left (\frac {\partial z}{\partial \theta_1} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_1 \theta_3} + 2 \left (\frac {\partial z}{\partial \theta_2} \frac {\partial z}{\partial \theta_3} \right ) COV_{\theta_2 \theta_3} " class="tex" border="0" /></span></span></dd>
+</dl>
+<p><span class="mw-headline"><span class="mw-headline"><br />
+ここで、派生パラメータを<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77698ae92ac0435f8da1e266eeb528e3.png" title="z\," alt="z\," class="tex" border="0" />、フィットパラメータを<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-2170397abaa4c195e1337c282185dacb.png" title="\theta_1, \theta_2, ..., \theta_p\," alt="\theta_1, \theta_2, ..., \theta_p\," class="tex" border="0" />とします。派生パラメータの標準誤差<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77698ae92ac0435f8da1e266eeb528e3.png" title="z\," alt="z\," class="tex" border="0" />は<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-62f8edd0067312992b259e2cea2f98fa.png" title="\sigma_z\," alt="\sigma_z\," class="tex" border="0" />です。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Confidence_Intervals" id="Confidence_Intervals"></a>信頼区間</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">パラメータの信頼区間を計算するために、Originでは、<a href="../../UserGuide/UserGuide/Settings_Tab_Upper_Panel.html#Advanced" title="ユーザガイド:『設定』タブ (上側パネル)">漸近対称法とモデル比較法</a>の2つの手法を提供しています。</span></span></p>
+<h5><span class="mw-headline"><span class="mw-headline"><a name="Asymptotic-Symmetry_Method" id="Asymptotic-Symmetry_Method"></a>漸近対称法</span></span></h5>
+<p><span class="mw-headline"><span class="mw-headline">回帰分析の前提のひとつとして、データが正規分布しているため、標準誤差値を使用して<b>パラメータの信頼区間</b>を構築できます。与えられた信頼水準 α に対して、パラメータの (1-α)x100% の信頼区間は次のようになります。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f9deaed4f0f2b676163099e46b6375b1.png" title="\hat \theta _j-t_{(\frac \alpha 2,n-p)}s_{\theta _j}\leq \hat \theta _j\leq \hat \theta _j+t_{(\frac \alpha 2,n-p)}s_{\theta _j}" alt="\hat \theta _j-t_{(\frac \alpha 2,n-p)}s_{\theta _j}\leq \hat \theta _j\leq \hat \theta _j+t_{(\frac \alpha 2,n-p)}s_{\theta _j}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(13)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">パラメータの信頼区間は、区間に真の値が含まれる可能性を示します。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">上記の信頼区間は<b>漸近的</b>です。これは、信頼区間を計算するために最も頻繁に使用される方法です。ここでの「漸近的」とは、近似値であることを意味します。</span></span></p>
+<h5><span class="mw-headline"><span class="mw-headline"><a name="Model-Comparison_Method" id="Model-Comparison_Method"></a>モデル比較法</span></span></h5>
+<p><span class="mw-headline"><span class="mw-headline">より正確な値が必要な場合、信頼区間を推定する<b>モデル比較ベースの手法</b>を使うことができます。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><b>モデル比較</b>法を使う場合、上側/下側の信頼限界は、<i>RSS(θ<sub>j</sub>)</i> (残りのパラメータで最小化される) を<i>(1+F/(n-p))</i> の因数による<i>RSS</i>より大きする、各パラメータ<i>p</i> の値を探して計算されます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e4335f63c75b0341e9888b260ef77e7f.png" title="RSS(\theta _j)=RSS(1+F\frac 1{n-p})" alt="RSS(\theta _j)=RSS(1+F\frac 1{n-p})" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(14)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで<i>、F = Ftable</i>(<i>α,1,n-p</i>)であり、<i>RSS</i> はフィットセッションで見つかった最小の残差二乗和です。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="t_Value" id="t_Value"></a>t値</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">各パラメータに<i>t</i> 検定を実行することができ、その値が0かどうかを調べることができます。<i>j</i> 番目のパラメータに対する<i>t</i>検定の帰無仮説は</span></span></p>
+<table class="formula">
+<tr>
+<td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-e1506f5dbd3c5df22513df890dba20fb.png" title="H_0: \theta_j = 0 \," alt="H_0: \theta_j = 0 \," class="tex" border="0" /></td>
+<td>&#160;</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">そして、対立仮説は、次のようになります。</span></span></p>
+<table class="formula">
+<tr>
+<td><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-11a56a7d0ca6131863575566cc7117c9.png" title="H_\alpha&#160;: \theta_j \ne 0" alt="H_\alpha&#160;: \theta_j \ne 0" class="tex" border="0" /></td>
+<td>&#160;</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline"><i>t</i>値は、次の式で計算できます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-7ddf34c66dcaeadff80cfc8fe6a519b4.png" title="t=\frac{\hat \beta _j-0}{s_{\hat \beta _j}}" alt="t=\frac{\hat \beta _j-0}{s_{\hat \beta _j}}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(15)</p>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Prob.3E.7Ct.7C" id="Prob.3E.7Ct.7C"></a>Prob&gt;|t|</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">上記の<i>t</i> 検定の <i>H</i><sub>0</sub> が真である確率</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-3e5335a131705b3ef0bb8b250033167d.png" title="prob=2(1-tcdf(|t|,df_{Error}))\,\!" alt="prob=2(1-tcdf(|t|,df_{Error}))\,\!" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(16)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、<i>tcdf(t, df)</i> は、自由度 <i>df</i> を持つスチューデント<i>t</i> 分布の下側の確率を計算します。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Dependency" id="Dependency"></a>依存度</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">方程式が過剰パラメータ化されている場合、パラメータ間に相互依存関係があります。<i>i</i> 番目のパラメータの依存度は次のように定義されます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-20b1f9a2fd5f5c4f53e55b4d9e537e8d.png" title="1-\frac 1{c_{ii}(c^{-1})_{ii}}" alt="1-\frac 1{c_{ii}(c^{-1})_{ii}}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(17)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">そして、 (<b><i>C</i></b><sup>-1</sup>)<sub>ii</sub> は、行列<b><i><b><i>C</i></b></i></b>の逆行列の(<i>i</i>, <i>i</i> )番目の対角要素です。この値が1に近い場合、強い依存度があります。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline">フィットモデルの品質を評価する方法の詳細については、<a href="../../UserGuide/UserGuide/Model_Diagnosis_Using_Dependency_Values.html" title="ユーザガイド：依存度の値を使ったモデル診断">依存度を使ったモデル診断</a>を参照してください。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="CI_Half_Width" id="CI_Half_Width"></a>CI半幅</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">信頼区間の半値幅は以下の通りです。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-77ec7c61ac9d06bfc9ad4c0ae47b85ce.png" title="CI=\frac{UCL-LCL}2" alt="CI=\frac{UCL-LCL}2" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(18)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここでUCLとLCLは、それぞれ上側信頼区間と下側信頼区間です。</span></span></p>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="Statistics" id="Statistics"></a>統計</span></span></h2>
+<p><span class="mw-headline"><span class="mw-headline">いくつかのフィット統計式を以下に要約します。</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><a class="image"><img alt="The Fit Results 02.png" src="../images/Theory_of_Nonlinear_Curve_Fitting/The_Fit_Results_02.png" width="216" height="129" border="0" /></a></span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Degree_of_Freedom" id="Degree_of_Freedom"></a>自由度</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline"><i>誤差</i>の自由度詳細は <a href="#ANOVA_Table">ANOVA表</a>を参照してください。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Residual_Sum_of_Squares" id="Residual_Sum_of_Squares"></a>残差平方和</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">残差平方和。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-098376be8e9d0c82d36905f8384a9f90.png" title="RSS(X,\hat \theta )=\sum_{i=1}^n w_i[Y_i-f(x_i^{\prime },\hat \theta )]^2" alt="RSS(X,\hat \theta )=\sum_{i=1}^n w_i[Y_i-f(x_i^{\prime },\hat \theta )]^2" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(19)</p>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Reduced_Chi-Sqr" id="Reduced_Chi-Sqr"></a>自由度あたりカイ二乗</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">自由度あたりカイ二乗値は、自由度で除算された残差平方和と等しくなります。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-b8e3b965a160ce8b28ff9f67113f6a4a.png" title="Reduced\chi ^2=\frac{\chi ^2}{df_{Error}}=\frac{RSS}{df_{Error}}" alt="Reduced\chi ^2=\frac{\chi ^2}{df_{Error}}=\frac{RSS}{df_{Error}}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(20)</p>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="R-Square_.28COD.29" id="R-Square_.28COD.29"></a>R二乗(COD)</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline"><i>R</i><sup>2</sup> 値は、フィットがどの程度の良さであるかを表す量で次式で計算することができます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-85527db992f009b94c01e40bd6650d3d.png" title="R^2=\frac{Explained\,variation}{Total\,variation}=\frac{TSS-RSS}{TSS}=1-\frac{RSS}{TSS}" alt="R^2=\frac{Explained\,variation}{Total\,variation}=\frac{TSS-RSS}{TSS}=1-\frac{RSS}{TSS}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(21)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、 <i>TSS</i> は合計平方和、<i>RSS</i>は残差平方和です。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Adj._R-Square" id="Adj._R-Square"></a>補正R二乗</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">調整された<i>R</i><sup>2</sup>値です。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-3dce278823ecfde5fe7c017ab3681a62.png" title="\bar R^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" alt="\bar R^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(22)</p>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="R_Value" id="R_Value"></a>R値</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline"><i>R</i> 値は<i>R</i><sup>2</sup>の平方根に等しくなります。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-8dea6550a6f24458c884bb59c192c935.png" title="R=\sqrt{R^2}" alt="R=\sqrt{R^2}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(23)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline"><i>R</i><sup>2</sup>、補正<i>R</i><sup>2</sup>および<i>R</i>の詳細については、<a href="../../UserGuide/Category/Interpreting_Regression_Results.html#Goodness_of_Fit" title="カテゴリ：回帰結果の解釈" style="text-decoration: none;">フィット結果の良さ</a>を参照してください。</span></span></p>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Root-MSE_.28SD.29" id="Root-MSE_.28SD.29"></a>Root MSE(SD)</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">誤差の二乗平均平方根または残差の<b>標準偏差</b>は、既約χ<sup>2</sup>の平方根に等しくなります。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-54a849a10ec028930b7e06f130fd19fe.png" title="Root\,MSE=\sqrt{Reduced \,\chi ^2}" alt="Root\,MSE=\sqrt{Reduced \,\chi ^2}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(24)</p>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="ANOVA_Table" id="ANOVA_Table"></a>ANOVA表</span></span></h2>
+<p><span class="mw-headline"><span class="mw-headline">ANOVA表：</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><b>Note:</b><b>ANOVA</b>表は陰関数フィットでは使用できません。</span></span></p>
+<table class="simple">
+<tr>
+<th>&#160;</th>
+<th>df</th>
+<th>平方和</th>
+<th>平均平方</th>
+<th>F値</th>
+<th>Prob &gt; F</th>
+</tr>
+<tr>
+<th>モデル</th>
+<td>
+<p><i>p</i></p>
+</td>
+<td>
+<p><i>SS</i><sub>reg</sub> = <i>TSS</i> - <i>RSS</i></p>
+</td>
+<td>
+<p><i>MS</i><sub>reg</sub> = <i>SS</i><sub>reg</sub> / <i>p</i></p>
+</td>
+<td>
+<p><i>MS</i><sub>reg</sub> / <i>MSE</i></p>
+</td>
+<td>
+<p><i>p</i>-<i>値</i></p>
+</td>
+</tr>
+<tr>
+<th>誤差</th>
+<td>
+<p><i>n</i> - <i>p</i></p>
+</td>
+<td>
+<p><i>RSS</i></p>
+</td>
+<td>
+<p><i>MSE</i> = <i>RSS</i> / (<i>n</i> - <i>p</i>)</p>
+</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr>
+<th>未修正合計</th>
+<td>
+<p><i>n</i></p>
+</td>
+<td>
+<p><i>TSS</i></p>
+</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr>
+<th>修正合計</th>
+<td>
+<p><i>n-1</i></p>
+</td>
+<td>
+<p><i>TSS</i><sub>補正</sub></p>
+</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline"><b>Note:</b>非線形フィッティングで、Originは補正と未補正の合計平方和を出力します。補正モデル：</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-88dbe70110d96ad89fd62c2370948912.png" title="TSS_{corrected}=\sum_{i=1}w_{i}y_{i}^2-\left(\sum_{i=1}\left(y_{i}w_{i} \right )/\sum_{i=1}w_{i} \right )^2\sum_{i=1}w_{i}" alt="TSS_{corrected}=\sum_{i=1}w_{i}y_{i}^2-\left(\sum_{i=1}\left(y_{i}w_{i} \right )/\sum_{i=1}w_{i} \right )^2\sum_{i=1}w_{i}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(25)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">未補正モデル:</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-5fccc733e8b665c322ce58f630c39be1.png" title="TSS=\sum_{i=1}^nw_iy_i^2" alt="TSS=\sum_{i=1}^nw_iy_i^2" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(26)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">F値で、フィットモデルがモデル「y=一定」と、有意に異なるかどうかを検定します。また、<i>p</i>値、または、有意水準は、<i>F</i>検定と一緒に出力されます。<i>p</i>値が、フィットモデルがモデル「y=一定」と有意に異なっていることを意味する<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex" border="0" />よりも小さい場合、帰無仮説を棄却できます。</span></span></p>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="Confidence_and_Prediction_Bands" id="Confidence_and_Prediction_Bands"></a>信頼帯と推定帯</span></span></h2>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Confidence_Band" id="Confidence_Band"></a>信頼帯</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">フィット関数の信頼区間は、フィット関数の値の推定値が独立変数の特定の値でどれほど良いかを示します。フィット関数の正確な値が信頼区間に含まれるように、100α%で指定することができます。ここで、α は指定した信頼水準です。フィット関数に対して、この定義済みの信頼区間は、以下の式で計算できます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-82c86845ee3d0efa23d2a1ce2450a05f.png" title="f(x_{1i},x_{2i},\ldots&#160;;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2fcf^{\prime }]^{\frac 12}" alt="f(x_{1i},x_{2i},\ldots&#160;;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2fcf^{\prime }]^{\frac 12}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(27)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで、</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-f04def5c58d56a887955d9132f42b968.png" title="f=[\frac{\partial f}{\partial \theta _1},\frac{\partial f}{\partial \theta _2},\cdots ,\frac{\partial f}{\partial \theta _p}]" alt="f=[\frac{\partial f}{\partial \theta _1},\frac{\partial f}{\partial \theta _2},\cdots ,\frac{\partial f}{\partial \theta _p}]" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(28)</p>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline"><span class="mw-headline"><a name="Prediction_Band" id="Prediction_Band"></a>推定帯</span></span></h3>
+<p><span class="mw-headline"><span class="mw-headline">指定した有意水準αに対する推定帯は、特定の独立変数の値で、一連の繰り返し実験によるすべての測定データの100α%がその範囲に含まれるような区間です。フィット関数に対して、この定義済みの推定区間は、以下の式で計算できます。</span></span></p>
+<table class="formula">
+<tr>
+<td>
+<p><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-29ebc8680acd0d1962dee476a98e9926.png" title="f(x_{1i},x_{2i},\ldots&#160;;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2(1+fcf^{\prime })]^{\frac 12}" alt="f(x_{1i},x_{2i},\ldots&#160;;\theta _{1i},\theta _{2i},\ldots )\pm t_{(\frac \alpha 2,dof)}[s^2(1+fcf^{\prime })]^{\frac 12}" class="tex" border="0" /></p>
+</td>
+<td>
+<p>(29)</p>
+</td>
+</tr>
+</table>
+<p><span class="mw-headline"><span class="mw-headline">ここで</span></span></p>
+<p><span class="mw-headline"><span class="mw-headline"><img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-4f08a0e1ff8ccb6f9fa6b1bf64d3f75f.png" title="\chi _*^2" alt="\chi _*^2" class="tex" border="0" /> は規約<img src="../images/Theory_of_Nonlinear_Curve_Fitting/math-ea14eb92a09af346481a999c310094f2.png" title="\chi ^2" alt="\chi ^2" class="tex" border="0" />です。</span></span></p>
+<table class="note">
+<tr>
+<td><b>Note:</b>フィット曲線プロットの<b>信頼帯</b>と<b>推定帯</b>は陰関数では利用できません。</td>
+</tr>
+</table>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="Topics_for_Further_Reading" id="Topics_for_Further_Reading"></a>参考</span></span></h2>
+<ul>
+<li><span class="mw-headline"><span class="mw-headline"><a href="../../UserGuide/UserGuide/Quick_Start.html" title="ユーザガイド:クィックスタート">非線形曲線フィット: クイックスタート</a></span></span></li>
+<li><span class="mw-headline"><span class="mw-headline"><a href="../../UserGuide/Category/The_NLFit_Dialog_Box.html" title="カテゴリー: NLFitダイアログボックス">NLFitダイアログボックス</a></span></span></li>
+<li><span class="mw-headline"><span class="mw-headline"><a href="../../UserGuide/Category/Interpreting_Regression_Results.html" title="カテゴリ：回帰結果の解釈">回帰結果の解釈</a></span></span></li>
+</ul>
+<h2><span class="mw-headline"><span class="mw-headline"><a name="Reference" id="Reference"></a>参考文献</span></span></h2>
+<ol>
+<li><span class="mw-headline"><span class="mw-headline">William.H. Press, etc. <i>Numerical Recipes in C++</i>.Cambridge University Press, 2002.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">Norman R. Draper, Harry Smith.<i>Applied Regression Analysis</i>, Third Edition.John Wiley &amp; Sons, Inc. 1998.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">George Casella, et al.<i>Applied Regression Analysis: A Research Tool</i>, Second Edition.Springer-Verlag New York, Inc. 1998.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">G. A. F. Seber, C. J. Wild.<i>Nonlinear Regression</i>.John Wiley &amp; Sons, Inc. 2003.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">David A. Ratkowsky.<i>Handbook of Nonlinear Regression Models</i>.Marcel Dekker, Inc. 1990.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">Douglas M. Bates, Donald G. Watts.<i>Nonlinear Regression Analysis &amp; Its Applications</i>.John Wiley &amp; Sons, Inc. 1988.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">Marko Ledvij.<i>Curve Fitting Made Easy</i>.The Industrial Physicist.Apr./May 2003.9:24-27.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">"J. W. Zwolak, P.T.Boggs, and L.T.Watson, ``Algorithm 869: ODRPACK95: A weighted orthogonal distance regression code with bound constraints<i>, ACM Transactions on Mathematical Software Vol. 33, Issue 4, August 2007."</i></span></span></li>
+<li><span class="mw-headline"><span class="mw-headline">Nelder, J.A., and R. Mead.1965.<i>Computer Journal</i>, vol. 7, pp. 308 -313</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline"><i>Numerical Recipes in C</i>, Ch. 10.4, Downhill Simplex Method in Multidimensions.</span></span></li>
+<li><span class="mw-headline"><span class="mw-headline"><i>Numerical Recipes in C</i>, Ch. 15.5, Nonlinear Models.</span></span></li>
+</ol>

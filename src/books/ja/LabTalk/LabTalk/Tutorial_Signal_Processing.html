@@ -1,0 +1,217 @@
+﻿<h1 class="firstheading">LabTalkによる信号処理</h1>
+
+  <p class='urlname' style='display: none'>Tutorial-Signal-Processing</p>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_You_Will_Learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Create_a_result_sheet"><span class="tocnumber">3.1</span> <span class="toctext">結果シートを作成</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Searches_the_files_with_the_string"><span class="tocnumber">3.2</span> <span class="toctext">文字列でファイルを検索</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Perform_FFT_on_files_by_loop_script"><span class="tocnumber">3.3</span> <span class="toctext">ループで複数ファイルのFFTを実行</span></a></li>
+
+          <li class="toclevel-2 tocsection-7"><a href="#Create_a_new_graph_by_result_sheet"><span class="tocnumber">3.4</span> <span class="toctext">結果シートで新しいグラフを作成</span></a></li>
+
+          <li class="toclevel-2 tocsection-8"><a href="#Linear_Fit"><span class="tocnumber">3.5</span> <span class="toctext">線形フィット</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <p>Originは、信号処理、ノイズデータのスムージングからFFT、短時間 FFT（STFT）、コンボリューションと相関、FFTフィルタリング、ウェーブレット分析といったXファンクションを提供しています。このチュートリアルでは、データに対して1D FFTを実行するサンプルを紹介します。</p>
+
+  <h2><a name="What_You_Will_Learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、LabTalk スクリプトを使用して次のことを行う方法を説明します。</p>
+
+  <ul>
+    <li>事前に定義したフィルタでファイルをインポート</li>
+
+    <li>複数のファイルに対して FFT (高速フーリエ変換) を実行</li>
+
+    <li>すべてのファイルをループ</li>
+
+    <li>FFTピークの位置をサマリーシートに保存し、ファイル名からの変数の関数としてピーク位置をプロット</li>
+
+    <li>線形フィットを実行し、傾きと切片の値を返す</li>
+  </ul>
+
+  <p>&#160;</p>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <h3><a name="Create_a_result_sheet"></a><span class="mw-headline">結果シートを作成</span></h3>
+
+  <p>以下のスクリプトを実行してプロジェクトエクスプローラのディレクトリを変更し、<a class="external text" href="../../XFunction/X-Function/Pe_cd.html">pe_cd</a>および<a class="external text" href="../../XFunction/X-Function/Newbook.html">newbook</a> Xファンクションを使用して新しいワークブックを開きます。次に、列の範囲を定義し、ロングネームと単位を割り当てます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// プロジェクトエクスプローラフォルダをルートに設定</span>
+pe_cd <span style="color: #000080;">/</span>;
+<span style="color: #008000;">// FFT分析の結果を保持する新しいブックを作成</span>
+<span style="color: #008000;">// 新しいブックのショートネームを文字列 &apos;&apos;&apos;ResultBook&apos;&apos;&apos; に保存</span>
+newbook result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ResultBook<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// 結果を後で保存するために、列1と2の範囲を定義</span>
+<span style="color: #008000;">//複数の範囲変数をカンマで区切って同じ行に宣言できます。</span>
+range rx <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rp <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// 列1 と 2のロングネームと単位を設定</span>
+rx<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;X&quot;</span>;
+rx<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;mm&quot;</span>;
+rp<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Frequency&quot;</span>;
+rp<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;kHz&quot;</span>;
+</pre>
+
+  <h3><a name="Searches_the_files_with_the_string"></a><span class="mw-headline">文字列でファイルを検索</span></h3>
+
+  <p><i>&lt;Origin EXE Folder&gt;\Samples\Signal Processing\</i>にあるファイルをワイルドカードと<a class="external text" href="../../XFunction/X-Function/FindFiles.html">findfiles</a> Xファンクションを使って検索します。そしてファイル数を数えます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// データファイルがある場所を指定</span>
+string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\&quot;</span>;
+<span style="color: #008000;">// &apos;&apos;TR*.dat&apos;&apos;というすべてのファイルを検索</span>
+findfiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR*.dat&quot;</span>;
+<span style="color: #008000;">// ファイル数取得。LF は改行のこと</span>
+int numFiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">(</span>LF<span style="color: #000000;">)</span>;
+</pre>
+
+  <h3><a name="Perform_FFT_on_files_by_loop_script"></a><span class="mw-headline">ループで複数ファイルのFFTを実行</span></h3>
+
+  <p><b>1 つのファイルで FFT を実行</b><br>
+  <i>TR*.dat</i> ファイルを見つけたら、それらをインポートしてFFTを実行し、FFTピークの位置をサマリーシートに保存します。このサンプルでは、1つのデータファイルに対してこれらの操作を実行する手順を詳しく説明します。</p>
+
+  <ol>
+    <li>データフォルダにあるインポートフィルタ<i>TR Data Files.oif</i> を使用して、ファイル名とインポートデータファイルを取得します。フィルタは、 frequency列を作成して値を設定することで、データの後処理を行います。 <br>
+この場合、Xファンクション<a class="external text" href="../../XFunction/X-Function/Pe_mkdir.html">pe_mkdir</a> および <a class="external text" href="../../XFunction/X-Function/ImpFile.html">impFile</a>が使用されます。
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// &apos;&apos;ifile&apos;&apos; 整数変数をファイル インデックスとして宣言</span>
+<span style="color: #008000;">// 最初のファイルでは、この変数を1に設定</span>
+int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">// 2 つの文字列変数を作成</span>
+string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>;      
+<span style="color: #008000;">// ファイル名を取得</span>
+filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span>ifile,LF<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// パスなし、拡張子なしのファイル名だけを解析</span>
+file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> filepath.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span>filepath.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">(</span>\<span style="color: #000000;">)</span>,\<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,.<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        
+<span style="color: #008000;">// 新しいプロジェクトエクスプローラサブフォルダーを作成し、アクティブに設定</span>
+pe_mkdir file<span style="color: #000080;">$</span> cd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+        
+<span style="color: #008000;">// データファイルをインポートするための新しいブックを追加</span>
+newbook;
+<span style="color: #008000;">// データフォルダに存在する定義済みフィルタを含むファイルをインポート</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR Data Files.oif&quot;</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+</pre>
+    </li>
+
+    <li><a class="external text" href="../../XFunction/X-Function/Fft1.html">FFT</a>を実行します。
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// インポートされたデータの列 2 と 3 で デフォルト設定でFFTを実行</span>
+fft1 <span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+</pre>
+    </li>
+
+    <li>最大ピーク位置を見つけ、関連する周波数値を出力し、ファイル名を解析して ResultBook に渡します。<br>
+      <a href="../../LabTalk/LabTalk/Wks_(object).html" title="LabTalk:Wks (オブジェクト)">wks.ncols</a>を使用してワークシートの列数を取得し、<a href="../../LabTalk/LabTalk/Limit_(command).html" title="LabTalk:Limit (コマンド)">limit</a>コマンドでデータセットの制限値を見つけます。
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// FFT結果シートをアクティブにする - シート2</span>
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// ワークシートに新しい列を追加</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 新しい列はこのシートの最後の列なので</span>
+<span style="color: #008000;">// 列のインデックスはワークシートの列数と等しい</span>
+<span style="color: #008000;">// ワークシートの列数で新しい整数変数 &apos;&apos;nmag&apos;&apos; を宣言</span>
+int nmag <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+<span style="color: #008000;">// 列 には複素データが含まれ、それを使用してマグニチュードを計算し、ピーク位置を検索</span>
+<span style="color: #008000;">// 列 2 の絶対値を最後の列に入力</span>
+wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> abs<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// limitコマンドを使用して、最後の列の最大ピーク位置を検索</span>
+limit wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 関連付けられた周波数値を列1からPEフォルダのResultBookシート1の列2に保存</span>
+<span style="color: #008000;">// limit.imax最大Y値に対応するインデックス</span>
+rp<span style="color: #000000;">[</span>ifile<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>limit.<span style="color: #000080;">imax</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>;
+<span style="color: #008000;">// 最終列を削除</span>
+delete wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span>;
+        
+<span style="color: #008000;">// ファイル名を解析し、文字列値 &apos;&apos;aa&apos;&apos; を取得</span>
+string aa<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">&apos;R&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span>aa.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">&apos;M&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// &apos;&apos;aa&apos;&apos;値を ResultBook シート1列1に保存</span>
+rx<span style="color: #000000;">[</span>ifile<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>aa<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// PE フォルダを前のレベルに設定</span>
+pe_cd ..;
+</pre>
+    </li>
+  </ol>
+
+  <p><br>
+  <b>複数のファイルに対してFFTを実行</b><br>
+  複数のファイルに対して操作を繰り返すために<a href="../../LabTalk/LabTalk/For_(command).html" title="LabTalk:For (コマンド)">for</a>ループコマンドを使用します。このセクションでは、ファイルをインポート後FFTを実行し、FFTピークの位置をサマリーシートに保存するための完全なループスクリプトを示します。<br>
+  <b>Note:</b> スクリプトウィンドウでループスクリプトを実行する場合は、スクリプト全体を選択状態にしてから、Enterキーを押してください。</p>
+  <pre class="lt" style="font-family:monospace;">
+for<span style="color: #000000;">(</span>int ifile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ifile <span style="color: #000080;">&lt;=</span> numFiles; ifile<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string filepath<span style="color: #000080;">$</span>, file<span style="color: #000080;">$</span>;
+        filepath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>fname.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span>ifile,LF<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> filepath.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span>filepath.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">(</span>\<span style="color: #000000;">)</span>,\<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,.<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        pe_mkdir file<span style="color: #000080;">$</span> cd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+        newbook;
+        impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filepath<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;TR Data Files.oif&quot;</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+        
+        fft1 <span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+        
+        page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+        wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        int nmag <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+        wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> abs<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        limit wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span>;
+        rp<span style="color: #000000;">[</span>ifile<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>limit.<span style="color: #000080;">imax</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>;
+        delete wcol<span style="color: #000000;">(</span>nmag<span style="color: #000000;">)</span>;
+        string aa<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> file.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">&apos;R&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span>aa.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">&apos;M&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+        rx<span style="color: #000000;">[</span>ifile<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>aa<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+        
+        pe_cd ..; 
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Create_a_new_graph_by_result_sheet"></a><span class="mw-headline">結果シートで新しいグラフを作成</span></h3>
+
+  <p>すべてのファイルに対してFFTを実行した後、<a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a> Xファンクションを使用して、ファイル名から抽出されたX値とピーク周波数値を使用して散布図を作成します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// ResultBook をアクティブにする</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span><span style="color: #000000;">(</span>ResultBook<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 列1と2でプロット</span>
+plotxy <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+</pre>
+
+  <h3><a name="Linear_Fit"></a><span class="mw-headline">線形フィット</span></h3>
+
+  <p>結果データに対して線形回帰を実行し、傾きと切片を出力します。この場合、 <a href="../../LabTalk/LabTalk/LR_(commmand).html" title="LabTalk:LR (コマンド)">LR</a>コマンドを使用します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//ResultBookのシート1列2で線形フィットを実行</span>
+range bb <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>ResultBook<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;
+Lr bb;
+<span style="color: #008000;">//&apos;&apos;lr.b&apos;&apos; は傾き</span>
+type <span style="color: #ff00ff;">&quot;Slope is $(lr.b)&quot;</span>; 
+<span style="color: #008000;">//&apos;&apos;lr.a&apos;&apos; は切片</span>
+type <span style="color: #ff00ff;">&quot;Intercept is $(lr.a)&quot;</span>;
+</pre>

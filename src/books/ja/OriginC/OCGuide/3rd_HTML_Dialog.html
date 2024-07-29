@@ -1,0 +1,492 @@
+﻿<h1 class="firstheading">グラフ付HTMLダイアログ</h1>
+<p><span class="OIndex" style="display: none;">グラフ付HTMLダイアログ</span><span class="OIndex" style="display: none;">HTMLダイアログ</span></p>
+<p class="urlname" style="display: none;">third-HTML-dialog</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>目次</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">サマリー</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Sample_Files"><span class="tocnumber">2</span> <span class="toctext">サンプルファイル</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Preparation"><span class="tocnumber">3</span> <span class="toctext">準備</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Creating_an_HTML_Page_for_Dialog"><span class="tocnumber">4</span> <span class="toctext">ダイアログ用のHTMLページの作成</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Adding_JavaScript_Code_for_Dialog"><span class="tocnumber">5</span> <span class="toctext">ダイアログ用のJavaScriptコードの追加</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Creating_an_HTML_Dialog_with_Graph"><span class="tocnumber">6</span> <span class="toctext">グラフ付HTMLダイアログの作成</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Calling_JavaScript_in_Origin_C"><span class="tocnumber">7</span> <span class="toctext">Origin CでJavaScriptを呼び出す</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Adding_JavaScript_Callable_Prototypes_in_Origin_C"><span class="tocnumber">8</span> <span class="toctext">Origin Cでプロトタイプを呼び出しできるJavaScript</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Adding_Labtalk_Callable_Prototypes_in_Origin_C"><span class="tocnumber">9</span> <span class="toctext">Origin Cでプロトタイプを呼び出しできるLabTalk</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Launching_The_Dialog"><span class="tocnumber">10</span> <span class="toctext">ダイアログの起動</span></a></li>
+</ol>
+</div>
+<h2><a name="Summary" id="Summary"></a><span class="mw-headline">サマリー</span></h2>
+<p>このチュートリアルでは以下のようにダイアログ機能を構築します。</p>
+<ol>
+<li>ダイアログには3つのパネルがあります。このうち、左のパネルにテキストボックス、中央パネルにグラフがあり、右のパネルはブランクになっています。</li>
+<li>手動でグラフに垂直線を移動すると、プログラムによってテキストボックスにXの値が表示されます。</li>
+<li>また、テキストボックスのXの値を入力してEnterキーを押すと、プログラムによって垂直線は指定した位置に移動します。</li>
+</ol>
+<p>ここでは、以下の項目を解説します。</p>
+<ol>
+<li>HTMLダイアログでグラフを含む方法</li>
+<li>好きなようにダイアログのサイズを変更する方法</li>
+<li>JavaScriptでOriginCを呼び出す方法（チュートリアル<a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Calling_Origin_C_Function_in_JavaScript" title="OCガイド:2番目のHTMLダイアログ">計算機の作成</a>にも解説があります。</li>
+<li>Origin CでJavaScriptを呼び出す</li>
+</ol>
+<p>このチュートリアルを終えると、異なる番号を除いて以下の画像のようにダイアログが表示されます。</p>
+<dl>
+<dd><a class="image"><img alt="Result.png" src="../images/3rd_HTML_Dialog/500px-Result.png" width="500" border="0" /></a></dd>
+</dl>
+<p class="version">必要なOriginのバージョン: Origin 2017 以降</p>
+<h2><a name="Sample_Files" id="Sample_Files"></a><span class="mw-headline">サンプルファイル</span></h2>
+<ol>
+<li>Composite Spectrum.opj: このOPJにはダイアログに表示されるグラフを含んでいます。</li>
+<li>index.html: htmlページのHTMLコード</li>
+<li>DlgWithGraph.cpp: HTMLダイアログを呼び出して、OriginCとJacaScriptの連携を行うOriginCのコードです。</li>
+<li>Background_image1.png: ダイアログの背景用の最初の画像です。</li>
+<li>Background_image2.jpg: ダイアログの背景用の二番目の画像です。</li>
+</ol>
+<table class="note">
+<tr>
+<td><b>Note:</b> <a class="external text" href="http://blog.originlab.com/wp-content/uploads/2016/11/HTMLDlgExamples.zip" target="_blank">こちら</a>から、サンプルファイルをダウンロードできます。</td>
+</tr>
+</table>
+<h2><a name="Preparation" id="Preparation"></a><span class="mw-headline">準備</span></h2>
+<ol>
+<li>「Composite Spectrum.opj」というOriginのプロジェクトを作成して、「HTML Dialog with A Graph」フォルダに保存します。</li>
+<li>Originのメニューから<b>ファイル: インポート: 単一ASCII</b> を選択して「\Samples\Curve Fitting」にあるデータ「Composite Spectrum.dat」をインポートします。</li>
+<li><b>列B</b>から<b>列D</b>を選択して、メニューから<b>作図＞2D: 複数Y軸軸: Yオフセット付き積み上げ折れ線</b>を選択して折れ線グラフを作成します。</li>
+<li><b>Graph1</b>をダブルクリックして<b>作図の詳細</b>ダイアログを開き、<b>Graph 1</b>のフォーマットを変更します。</li>
+<li><b>直線ツール</b>ボタン<a class="image"><img alt="Button Line Tool.png" src="../images/3rd_HTML_Dialog/Button_Line_Tool.png" width="34" border="0" /></a>をクリックしてグラフに垂直線を追加します。(SHIFTキーを押して描画します。</li>
+<li>垂直線を右クリックして、コンテキストメニューから<b>プロパティ</b>を選択します。</li>
+<li><b>線</b>のタブと<b>矢印</b>のタブを開いて、垂直線の形式を変更し、<b>サイズ</b>タブで水平移動のみが有効になるように設定します。
+<dl>
+<dd><a class="image"><img alt="Line Properties.png" src="../images/3rd_HTML_Dialog/Line_Properties.png" width="700" height="267" border="0" /></a></dd>
+</dl>
+</li>
+<li><b>プログラミング</b>のタブでオブジェクトに<b>Line</b>という名前を付けます。</li>
+<li><b>のあとでスクリプトを実行</b>のドロップダウンリストから<b>移動</b>を選択して、テキストボックスに以下のLabTalkスクリプトを入力します。
+<pre class="lt" style="font-family: monospace;">
+line_move<span style="color: #000000;">(</span>this.<span style="color: #000080;">X</span><span style="color: #000000;">)</span>;
+        
+</pre>
+<dl>
+<dd><a class="image"><img alt="Line Programming Tab.png" src="../images/3rd_HTML_Dialog/300px-Line_Programming_Tab.png" width="300" border="0" /></a></dd>
+</dl>
+<table class="note">
+<tr>
+<td><b>Note:</b> 垂直線を移動する場合、この手順で関数 <code>line_move()</code>のトリガを設定します。この関数<code>line_move()</code>は、後程、OriginCで作成します。</td>
+</tr>
+</table>
+</li>
+<li><b>コードビルダ</b>を開き、<b>ワークスペース</b>ウィンドウの<b>プロジェクト</b>フォルダを開きます。「ProjectEvents.OGS」をダブルクリックしてファイルを開き、[AfterOpenDoc]のセクションにスクリプトを追加します。
+<pre class="lt" style="font-family: monospace;">
+if<span style="color: #000000;">(</span>run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%X\DlgWithGraph.cpp"</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+    @G<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;<span style="color: #008000;">//両サイドに灰色のバンドが無くなるようにグラフの背景を塗りつぶし</span>
+    HTMLandGraphDlgEx; <span style="color: #008000;">//ダイアログを立ち上げる関数</span><span style="color: #000000;">
+}</span>
+else<span style="color: #000000;">
+{</span>
+   type <span style="color: #ff00ff;">"Failed to load the dialog!"</span>;
+   return <span style="color: #0000dd;">0</span>;<span style="color: #000000;">
+}</span>
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b> Originのプロジェクトを開いた後、このスクリプトによりダイアログが起動します。ProjectEvents スクリプトについての詳細は<a class="external text" href="../../LabTalk/Script/ProjectEvents_Script.html">こちら</a>をご覧ください。</td>
+</tr>
+</table>
+</li>
+<li><b>コードビルダ</b>のProjectEvents.OGSを保存して、Originにプロジェクトを保存します。</li>
+</ol>
+<h2><a name="Creating_an_HTML_Page_for_Dialog" id="Creating_an_HTML_Page_for_Dialog"></a><span class="mw-headline">ダイアログ用のHTMLページの作成</span></h2>
+<p>HTMLダイアログを作成する際には、まず初めにHTMLページを作成します。</p>
+<ol>
+<li>「HTML Dialog with A Graph」フォルダに背景用の画像を2つ用意します。</li>
+<li><b>コードビルダ</b>を開き、新しいHTMLファイルを作成して、「index.html」という名前で「HTML Dialog with A Graph」フォルダに保存します。</li>
+<li>以下のコードをコピーして「index.html」内に貼り付けます。
+<pre class="javascript" style="font-family: monospace;">
+<span style="color: #339933;">&lt;!</span>DOCTYPE html<span style="color: #339933;">&gt;</span><span style="color: #339933;">
+&lt;</span>html<span style="color: #339933;">&gt;</span>
+    <span style="color: #339933;">&lt;</span>head<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>meta charset<span style="color: #339933;">=</span><span style="color: #3366CC;">"utf-8"</span> <span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;</span>meta http<span style="color: #339933;">-</span>equiv<span style="color: #339933;">=</span><span style="color: #3366CC;">"X-UA-Compatible"</span> content<span style="color: #339933;">=</span><span style="color: #3366CC;">"IE=Edge"</span> <span style="color: #339933;">/&gt;</span>
+            <span style="color: #339933;">&lt;</span>style<span style="color: #339933;">&gt;</span>
+            body<span style="color: #009900;">{</span>
+                background<span style="color: #339933;">-</span>image<span style="color: #339933;">:</span>url<span style="color: #009900;">(</span><span style="color: #3366CC;">"background_image1.png"</span><span style="color: #009900;">)</span>
+            <span style="color: #009900;">}</span>
+            input<span style="color: #009900;">[</span>type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span><span style="color: #009900;">]</span> <span style="color: #009900;">{</span>
+                font<span style="color: #339933;">-</span>size<span style="color: #339933;">:</span> 14px<span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+            input<span style="color: #009900;">[</span>type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span><span style="color: #009900;">]</span><span style="color: #339933;">:</span>focus <span style="color: #009900;">{</span>
+                outline<span style="color: #339933;">:</span> none<span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+            .<span style="color: #660066;">style</span><span style="color: #339933;">-</span><span style="color: #CC0000;">2</span> input<span style="color: #009900;">[</span>type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span><span style="color: #009900;">]</span> <span style="color: #009900;">{</span>
+                padding<span style="color: #339933;">:</span> 3px<span style="color: #339933;">;</span>
+                border<span style="color: #339933;">:</span> solid 5px #c9c9c9<span style="color: #339933;">;</span>
+                transition<span style="color: #339933;">:</span> border 0.3s<span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+            .<span style="color: #660066;">style</span><span style="color: #339933;">-</span><span style="color: #CC0000;">2</span> input<span style="color: #009900;">[</span>type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span><span style="color: #009900;">]</span><span style="color: #339933;">:</span>focus<span style="color: #339933;">,</span>
+            .<span style="color: #660066;">style</span><span style="color: #339933;">-</span><span style="color: #CC0000;">2</span> input<span style="color: #009900;">[</span>type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span><span style="color: #009900;">]</span>.<span style="color: #660066;">focus</span> <span style="color: #009900;">{</span>
+                border<span style="color: #339933;">:</span> solid 5px #<span style="color: #CC0000;">969696</span><span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>               
+            #container <span style="color: #009900;">{</span>
+                border<span style="color: #339933;">:</span> 3px solid #ffffff<span style="color: #339933;">;</span>
+                position<span style="color: #339933;">:</span> absolute<span style="color: #339933;">;</span>
+                left<span style="color: #339933;">:</span> <span style="color: #CC0000;">0</span><span style="color: #339933;">;</span>
+                right<span style="color: #339933;">:</span> <span style="color: #CC0000;">0</span><span style="color: #339933;">;</span>
+                bottom<span style="color: #339933;">:</span> <span style="color: #CC0000;">0</span><span style="color: #339933;">;</span>
+                top<span style="color: #339933;">:</span> <span style="color: #CC0000;">0</span><span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+            #leftcontainer <span style="color: #009900;">{</span>
+                border<span style="color: #339933;">-</span>right<span style="color: #339933;">:</span> 3px solid #ffffff<span style="color: #339933;">;</span>
+                width<span style="color: #339933;">:</span> 250px<span style="color: #339933;">;</span>
+                height<span style="color: #339933;">:</span> <span style="color: #CC0000;">100</span><span style="color: #339933;">%;</span>
+                <span style="color: #ff0000;">float</span><span style="color: #339933;">:</span> left<span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+            #rightcontainer <span style="color: #009900;">{</span>
+                border<span style="color: #339933;">-</span>left<span style="color: #339933;">:</span> 3px solid #ffffff<span style="color: #339933;">;</span>
+                width<span style="color: #339933;">:</span> 250px<span style="color: #339933;">;</span>
+                height<span style="color: #339933;">:</span> <span style="color: #CC0000;">100</span><span style="color: #339933;">%;</span>
+                <span style="color: #ff0000;">float</span><span style="color: #339933;">:</span> right<span style="color: #339933;">;</span>
+                text<span style="color: #339933;">-</span>align<span style="color: #339933;">:</span> center<span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+        <span style="color: #339933;">&lt;/</span>style<span style="color: #339933;">&gt;</span>                
+    <span style="color: #339933;">&lt;/</span>head<span style="color: #339933;">&gt;</span>
+    <span style="color: #339933;">&lt;</span>body<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">"container"</span><span style="color: #339933;">&gt;</span>
+            <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">"leftcontainer"</span><span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>h2<span style="color: #339933;">&gt;&lt;</span>font color<span style="color: #339933;">=</span><span style="color: #3366CC;">"ffffff"</span><span style="color: #339933;">&gt;</span>X<span style="color: #339933;">-</span>Value<span style="color: #339933;">&lt;/</span>font<span style="color: #339933;">&gt;&lt;/</span>h2<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>ul <span style="color: #ff0000;">class</span><span style="color: #339933;">=</span><span style="color: #3366CC;">"input-list style-2 clearfix"</span><span style="color: #339933;">&gt;</span>
+                    <span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span> name<span style="color: #339933;">=</span><span style="color: #3366CC;">"XValue"</span>  id<span style="color: #339933;">=</span><span style="color: #3366CC;">"X"</span> placeholder<span style="color: #339933;">=</span><span style="color: #3366CC;">"X"</span>  onkeydown <span style="color: #339933;">=</span> <span style="color: #3366CC;">""</span><span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;/</span>ul<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>p<span style="color: #339933;">&gt;&lt;</span>font color<span style="color: #339933;">=</span><span style="color: #3366CC;">"ffffff"</span><span style="color: #339933;">&gt;*</span>Move the vertical line <span style="color: #000066; font-weight: bold;">in</span> graph<span style="color: #339933;">,</span> and <span style="color: #000066; font-weight: bold;">get</span> the x<span style="color: #339933;">-</span>value and y<span style="color: #339933;">-</span>values.<span style="color: #339933;">&lt;/</span>font<span style="color: #339933;">&gt;&lt;/</span>p<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>p<span style="color: #339933;">&gt;&lt;</span>font color<span style="color: #339933;">=</span><span style="color: #3366CC;">"ffffff"</span><span style="color: #339933;">&gt;*</span>Enter x<span style="color: #339933;">-</span>value <span style="color: #000066; font-weight: bold;">in</span> textbox and hit ENTER key<span style="color: #339933;">,</span> then the vetical line will move to the specified position.<span style="color: #339933;">&lt;/</span>font<span style="color: #339933;">&gt;&lt;/</span>p<span style="color: #339933;">&gt;</span>
+            <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+ 
+            <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">"rightcontainer"</span><span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>h3<span style="color: #339933;">&gt;</span> <span style="color: #339933;">&amp;</span>nbsp <span style="color: #339933;">&lt;/</span>h3<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>h3<span style="color: #339933;">&gt;</span> <span style="color: #339933;">&amp;</span>nbsp <span style="color: #339933;">&lt;/</span>h3<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>h3<span style="color: #339933;">&gt;&lt;</span>font color<span style="color: #339933;">=</span><span style="color: #3366CC;">"ffffff"</span><span style="color: #339933;">&gt;</span>You can place other controls on <span style="color: #000066; font-weight: bold;">this</span> side.<span style="color: #339933;">&lt;/</span>font<span style="color: #339933;">&gt;&lt;/</span>h3<span style="color: #339933;">&gt;</span>
+            <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+    <span style="color: #339933;">&lt;/</span>body<span style="color: #339933;">&gt;</span><span style="color: #339933;">
+&lt;/</span>html<span style="color: #339933;">&gt;</span>
+        
+</pre></li>
+</ol>
+<p>この手順を終了すると、ウェブブラウザで「index.html」が開き、以下のページが表示されます。</p>
+<dl>
+<dd><a class="image"><img alt="HTMLInit.png" src="../images/3rd_HTML_Dialog/400px-HTMLInit.png" width="400" border="0" /></a></dd>
+</dl>
+<h2><a name="Adding_JavaScript_Code_for_Dialog" id="Adding_JavaScript_Code_for_Dialog"></a><span class="mw-headline">ダイアログ用のJavaScriptコードの追加</span></h2>
+<p>この手順で、JavaScriptコードを追加します。</p>
+<ol>
+<li>以下のJavaScriptコードをコピーしてhtmlファイルの&lt;script&gt;内に貼りつけます。
+<pre class="javascript" style="font-family: monospace;">
+<span style="color: #339933;">&lt;</span>script<span style="color: #339933;">&gt;</span>
+    <span style="color: #000066; font-weight: bold;">var</span> vbg <span style="color: #339933;">=</span> <span style="color: #CC0000;">1</span><span style="color: #339933;">;</span><span style="color: #006600; font-style: italic;">//html背景を交換する</span>
+    <span style="color: #000066; font-weight: bold;">function</span> lineMove<span style="color: #009900;">(</span>xVal<span style="color: #009900;">)</span> 
+    <span style="color: #009900;">{</span>
+        <span style="color: #000066; font-weight: bold;">var</span> XValue <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"X"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        XValue.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> xVal<span style="color: #339933;">;</span>
+        <span style="color: #006600; font-style: italic;">//html背景を変更を表示し、グラフには影響しない。</span>
+        <span style="color: #000066; font-weight: bold;">switch</span> <span style="color: #009900;">(</span>vbg<span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+            <span style="color: #000066; font-weight: bold;">case</span> <span style="color: #CC0000;">1</span><span style="color: #339933;">:</span>
+                document.<span style="color: #660066;">body</span>.<span style="color: #660066;">style</span>.<span style="color: #660066;">backgroundImage</span> <span style="color: #339933;">=</span> <span style="color: #3366CC;">"URL(&amp;apos;background_image2.jpg&amp;apos;)"</span><span style="color: #339933;">;</span>
+                vbg <span style="color: #339933;">=</span> <span style="color: #CC0000;">2</span><span style="color: #339933;">;</span>
+            <span style="color: #000066; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+            <span style="color: #000066; font-weight: bold;">case</span> <span style="color: #CC0000;">2</span><span style="color: #339933;">:</span>
+                document.<span style="color: #660066;">body</span>.<span style="color: #660066;">style</span>.<span style="color: #660066;">backgroundImage</span> <span style="color: #339933;">=</span> <span style="color: #3366CC;">"URL(&amp;apos;background_image1.png&amp;apos;)"</span><span style="color: #339933;">;</span>
+                vbg <span style="color: #339933;">=</span> <span style="color: #CC0000;">1</span><span style="color: #339933;">;</span>
+            <span style="color: #000066; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+    <span style="color: #009900;">}</span>
+                        
+    <span style="color: #000066; font-weight: bold;">function</span> enterXval<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+    <span style="color: #009900;">{</span>
+        <span style="color: #000066; font-weight: bold;">var</span> XValue <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"X"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>                      
+        window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"OnEnterXvalToUpdateGraph"</span><span style="color: #339933;">,</span> XValue.<span style="color: #660066;">value</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+                                                                                                
+    <span style="color: #000066; font-weight: bold;">function</span> getGraphRect<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+    <span style="color: #009900;">{</span>                  
+        <span style="color: #000066; font-weight: bold;">var</span> leftDiv <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"leftcontainer"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #000066; font-weight: bold;">var</span> leftpos <span style="color: #339933;">=</span> leftDiv.<span style="color: #660066;">getBoundingClientRect</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span>.<span style="color: #660066;">right</span><span style="color: #339933;">;</span>
+        <span style="color: #000066; font-weight: bold;">var</span> toppos <span style="color: #339933;">=</span> leftDiv.<span style="color: #660066;">getBoundingClientRect</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span>.<span style="color: #660066;">top</span><span style="color: #339933;">;</span>
+        <span style="color: #000066; font-weight: bold;">var</span> bottompos <span style="color: #339933;">=</span> leftDiv.<span style="color: #660066;">getBoundingClientRect</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span>.<span style="color: #660066;">bottom</span><span style="color: #339933;">;</span>
+                                
+        <span style="color: #000066; font-weight: bold;">var</span> rightDiv <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"rightcontainer"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #000066; font-weight: bold;">var</span> rightpos <span style="color: #339933;">=</span> rightDiv.<span style="color: #660066;">getBoundingClientRect</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span>.<span style="color: #660066;">left</span><span style="color: #339933;">;</span>
+                                
+        <span style="color: #000066; font-weight: bold;">return</span> JSON.<span style="color: #660066;">stringify</span><span style="color: #009900;">(</span><span style="color: #009900;">{</span>
+            left<span style="color: #339933;">:</span> leftpos <span style="color: #339933;">+</span> <span style="color: #CC0000;">20</span><span style="color: #339933;">,</span>
+            top<span style="color: #339933;">:</span> toppos <span style="color: #339933;">+</span> <span style="color: #CC0000;">20</span><span style="color: #339933;">,</span>
+            right<span style="color: #339933;">:</span> rightpos <span style="color: #339933;">-</span> <span style="color: #CC0000;">20</span><span style="color: #339933;">,</span>
+            bottom<span style="color: #339933;">:</span> bottompos <span style="color: #339933;">-</span> <span style="color: #CC0000;">20</span><span style="color: #009900;">}</span><span style="color: #009900;">)</span>
+    <span style="color: #009900;">}</span><span style="color: #339933;">
+&lt;/</span>script<span style="color: #339933;">&gt;</span>
+        
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b>このコードで、機能をHTMLページに追加します。
+<ul>
+<li><code>lineMove()</code>lineMove():垂直線を移動する場合に、テキストボックスのX値を更新します。</li>
+<li><code>enterXval()</code>enterXval(): テキストボックスのEnterキーを押すことに対応します。</li>
+<li><code>getGraphRect()</code>getGraphRect(): グラフが表示されている四角形のボックスを返します。</li>
+</ul>
+</td>
+</tr>
+</table>
+</li>
+<li>Enterを押すことをキャプチャするため、<code>onkeydown</code> HTMLコードのテキストボックスタブにあるイベントハンドラーを追加します。これは、Enterキーを押して関数<code>enterXval()</code>を起動するためです。
+<dl>
+<dd>
+<pre class="javascript" style="font-family: monospace;">
+<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">"text"</span> name<span style="color: #339933;">=</span><span style="color: #3366CC;">"XValue"</span>  id<span style="color: #339933;">=</span><span style="color: #3366CC;">"X"</span> placeholder<span style="color: #339933;">=</span><span style="color: #3366CC;">"X"</span>  onkeydown <span style="color: #339933;">=</span> <span style="color: #3366CC;">"javascript:if(event.keyCode == 13) enterXval();"</span><span style="color: #339933;">&gt;</span>
+                
+</pre></dd>
+</dl>
+</li>
+</ol>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/3rd_HTML_Dialog/Tip_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<ol>
+<li>関数<code>lineMove()</code>では, switch文の追加を推奨しています。 コメントの通り、グラフがHTMLページに重なり、背景を変更しても影響しないことが分かります。</li>
+<li>関数<code>enterXval()</code>, window.external.ExtCallはOrigin Cを呼び出す時に使います。<code>window.external.ExtCall</code>についての詳細は、<a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Calling_Origin_C_Function_in_JavaScript" title="OCガイド:2番目のHTMLダイアログ">こちら</a>をご覧ください。</li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="Creating_an_HTML_Dialog_with_Graph" id="Creating_an_HTML_Dialog_with_Graph"></a><span class="mw-headline">グラフ付HTMLダイアログの作成</span></h2>
+<p>OriginCコードを編集してHTMLダイアログを作成する準備ができました。</p>
+<ol>
+<li><b>コードビルダ</b>で、「HTML Dialog with A Graph」フォルダの下に、新しいcppファイル「DlgWithGraph.cpp」を作成します。</li>
+<li>必要なヘッダの追加します。
+<pre class="c" style="font-family: monospace;">
+<span style="color: #339933;">#include &lt;Origin.h&gt;</span><span style="color: #339933;">
+#include &lt;../OriginLab/DialogEx.h&gt;</span><span style="color: #339933;">
+#include &lt;../OriginLab/HTMLDlg.h&gt;</span><span style="color: #339933;">
+#include &lt;../OriginLab/GraphPageControl.h&gt;</span>
+</pre></li>
+<li>GRAPH_CONTROL_IDを定義します。
+<pre class="c" style="font-family: monospace;">
+<span style="color: #339933;">#define GRAPH_CONTROL_ID 1</span>
+        
+</pre></li>
+<li>ユーザ定義HTMLダイアログクラス<code>HTMLandGraphDlg</code>を<code>HTMLDlg</code>クラスから生成し、手法<code>GetInitURL()</code>の中にHTMLページを示します。
+<pre class="c" style="font-family: monospace;">
+class HTMLandGraphDlg<span style="color: #339933;">:</span> public HTMLDlg<span style="color: #009900;">
+{</span>
+    protected<span style="color: #339933;">:</span>
+        string GetInitURL<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//htmlファイルのパスを取得            </span>
+        <span style="color: #009900;">{</span>
+            string strFile <span style="color: #339933;">=</span> __FILE__<span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//現在のファイルの名前</span>
+            <span style="color: #b1b100;">return</span> GetFilePath<span style="color: #009900;">(</span>strFile<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> <span style="color: #ff0000;">"index.html"</span><span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+        string GetDialogTitle<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span><span style="color: #b1b100;">return</span> <span style="color: #ff0000;">"Vertical Cursor Example"</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span> <span style="color: #666666; font-style: italic;">//ダイアログのタイトルをセット</span><span style="color: #009900;">
+}</span><span style="color: #339933;">;</span>
+        
+</pre></li>
+<li>イベントハンドラー手法を<code>HTMLandGraphDlg</code>に追加して、ユーザがダイアログ開く、サイズ変更、閉じるトリガーとなるイベントに応答します。
+<pre class="c" style="font-family: monospace;">
+private<span style="color: #339933;">:</span>
+    GraphControl     m_gcCntrl<span style="color: #339933;">;</span>
+protected<span style="color: #339933;">:</span>
+    BOOL OnInitDialog<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//ダイアログが初めて表示された場合は、ダイアログを初期化する必要があります</span>
+    <span style="color: #009900;">{</span>
+        LT_execute<span style="color: #009900;">(</span><span style="color: #ff0000;">";doc -m 0"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//Originメインウィンドウを非表示にする</span>
+        HTMLDlg<span style="color: #339933;">::</span><span style="color: #202020;">OnInitDialog</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//HTMLDlgクラスからダイアログを生成</span>
+        ModifyStyle<span style="color: #009900;">(</span><span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> WS_MAXIMIZEBOX<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//標準的なHTMLダイアログリソースには、最大化ボタンがありません</span>
+        RECT rr<span style="color: #339933;">;</span>
+        m_gcCntrl.<span style="color: #202020;">CreateControl</span><span style="color: #009900;">(</span>GetSafeHwnd<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">,</span> <span style="color: #339933;">&amp;</span>rr<span style="color: #339933;">,</span> GRAPH_CONTROL_ID<span style="color: #339933;">,</span> WS_CHILD<span style="color: #339933;">|</span>WS_VISIBLE<span style="color: #339933;">|</span>WS_BORDER<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                
+        <span style="color: #666666; font-style: italic;">//グラフの様々な構成要素をクリックすることを無効にするオプションを設定でき、「OC_const.h」に詳細があります</span>
+        DWORD   dwNoClicks <span style="color: #339933;">=</span> NOCLICK_AXES <span style="color: #339933;">|</span> NOCLICK_DATA_PLOT <span style="color: #339933;">|</span> NOCLICK_LAYER <span style="color: #339933;">|</span> NOCLICK_TICKLABEL <span style="color: #339933;">|</span> NOCLICK_LAYERICON<span style="color: #339933;">;</span>
+        GraphPage m_gp <span style="color: #339933;">=</span> Project.<span style="color: #202020;">GraphPages</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"Graph1"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//OPJにあるこのグラフは手動でカスタマイズ可能です</span>
+        <span style="color: #666666; font-style: italic;">//OPJのGraph1をGraphControlに加えます</span>
+        BOOL bb <span style="color: #339933;">=</span> m_gcCntrl.<span style="color: #202020;">AttachPage</span><span style="color: #009900;">(</span>m_gp<span style="color: #339933;">,</span> dwNoClicks<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+        <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+    BOOL OnDestroy<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+    <span style="color: #009900;">{</span>
+        <span style="color: #666666; font-style: italic;">//このディベロッパーで、OPJを修正できるようにしています</span>
+        <span style="color: #666666; font-style: italic;">//この部分をエンドユーザ用に削除し、LT_execute(";doc -ss;exit;")を実行のみします</span>
+        bool bExitOrigin <span style="color: #339933;">=</span> MessageBox<span style="color: #009900;">(</span>GetSafeHwnd<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">,</span> _L<span style="color: #009900;">(</span><span style="color: #ff0000;">"Are you sure you want to exit Origin?"</span><span style="color: #009900;">)</span><span style="color: #339933;">,</span>_L<span style="color: #009900;">(</span><span style="color: #ff0000;">"Vertical Cursor Example"</span><span style="color: #009900;">)</span><span style="color: #339933;">,</span> MB_YESNO<span style="color: #009900;">)</span> <span style="color: #339933;">==</span> IDYES<span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span>bExitOrigin<span style="color: #009900;">)</span>
+            LT_execute<span style="color: #009900;">(</span><span style="color: #ff0000;">";doc -ss;exit;"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//Originを終了します</span>
+        <span style="color: #b1b100;">else</span>
+            LT_execute<span style="color: #009900;">(</span><span style="color: #ff0000;">";doc -m 1"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//Originのメインウィンドウを表示します</span>
+        <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+    <span style="color: #666666; font-style: italic;">//仮想</span>
+    <span style="color: #666666; font-style: italic;">//ダイアログの準備ができたら、ダイアログのサイズと位置を初期化する必要があります</span>
+    BOOL GetDlgInitSize<span style="color: #009900;">(</span>int<span style="color: #339933;">&amp;</span> width<span style="color: #339933;">,</span> int<span style="color: #339933;">&amp;</span> height<span style="color: #009900;">)</span> 
+    <span style="color: #009900;">{</span>
+        width <span style="color: #339933;">=</span> <span style="color: #0000dd;">1024</span><span style="color: #339933;">;</span>
+        height <span style="color: #339933;">=</span> <span style="color: #0000dd;">450</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+    <span style="color: #666666; font-style: italic;">//ダイアログのサイズを変更する場合、ダイアログのそれぞれのコントロールのサイズと位置を再度初期化する必要があります</span>
+    BOOL OnDlgResize<span style="color: #009900;">(</span><span style="color: #993333;">int</span> nType<span style="color: #339933;">,</span> <span style="color: #993333;">int</span> cx<span style="color: #339933;">,</span> <span style="color: #993333;">int</span> cy<span style="color: #009900;">)</span> 
+    <span style="color: #009900;">{</span>
+        <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span> <span style="color: #339933;">!</span>IsInitReady<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+        <span style="color: #666666; font-style: italic;">// MoveControlsHelper _temp(this); // ダイアログのサイズを変更してそれがフリックしている場合、この行のコメントを外すことができます</span>
+        HTMLDlg<span style="color: #339933;">::</span><span style="color: #202020;">OnDlgResize</span><span style="color: #009900;">(</span>nType<span style="color: #339933;">,</span> cx<span style="color: #339933;">,</span> cy<span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//ダイアログにhtmlコントロールを配置します</span>
+                
+        <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span> <span style="color: #339933;">!</span>IsHTMLDocumentCompleted<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//HTMLコントロールの状態を確認します</span>
+            <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+                
+        RECT rectGraph<span style="color: #339933;">;</span>
+        <span style="color: #666666; font-style: italic;">//GetGraphRECTはプライベート関数でJavaScriptを呼び出して、グラフコントロールに関連付く四角形のボックスを作成します</span>
+        <span style="color: #666666; font-style: italic;">//次のセクションのOriginCで、JavaScriptを呼び出す方法を得ます。</span>
+        <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span> <span style="color: #339933;">!</span>GetGraphRECT<span style="color: #009900;">(</span>rectGraph<span style="color: #009900;">)</span><span style="color: #009900;">)</span> 
+            <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+        <span style="color: #666666; font-style: italic;">//HTMLコントロールの上にGraphControlを重ねます</span>
+        m_gcCntrl.<span style="color: #202020;">SetWindowPos</span><span style="color: #009900;">(</span>HWND_TOP<span style="color: #339933;">,</span> rectGraph.<span style="color: #202020;">left</span><span style="color: #339933;">,</span> rectGraph.<span style="color: #202020;">top</span><span style="color: #339933;">,</span>RECT_WIDTH<span style="color: #009900;">(</span>rectGraph<span style="color: #009900;">)</span><span style="color: #339933;">,</span>RECT_HEIGHT<span style="color: #009900;">(</span>rectGraph<span style="color: #009900;">)</span><span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+                
+        <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+        
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b> 手法 <code>OnInitDialog()</code> がトリガーにされる場合、グラフは、新しく作成したグラフコントロールに含まれます。</td>
+</tr>
+</table>
+</li>
+<li>クラス<code>HTMLandGraphDlg</code>内のダイアログメッセージをマップして、どのイベントを扱うのか、どの関数を呼び出すのかを指定します。
+<pre class="c" style="font-family: monospace;">
+EVENTS_BEGIN_DERIV<span style="color: #009900;">(</span>HTMLDlg<span style="color: #009900;">)</span>
+    ON_INIT<span style="color: #009900;">(</span>OnInitDialog<span style="color: #009900;">)</span>
+    ON_DESTROY<span style="color: #009900;">(</span>OnDestroy<span style="color: #009900;">)</span>
+    ON_SIZE<span style="color: #009900;">(</span>OnDlgResize<span style="color: #009900;">)</span>
+    ON_RESTORESIZE<span style="color: #009900;">(</span>OnRestoreSize<span style="color: #009900;">)</span>
+EVENTS_END_DERIV
+</pre></li>
+</ol>
+<h2><a name="Calling_JavaScript_in_Origin_C" id="Calling_JavaScript_in_Origin_C"></a><span class="mw-headline">Origin CでJavaScriptを呼び出す</span></h2>
+<p>このセクションでは、OriginCでJavaScriptを呼び出して、以下を行います。</p>
+<ul>
+<li>ダイアログのサイズを変更すると、グラフコントロールは中央パネルに沿って右に移動します。そして、同時にJavaScriptを呼び出し、四角形のボックスを返します。</li>
+<li>垂直線を移動すると、テキストボックスのX値が更新されます。そして、JavaScriptを呼び出して数字を更新します。</li>
+</ul>
+<p><br />
+これらのセクションで、メンバー関数<a href="../../OriginC/OriginC/DhtmlControl-GetScript.html" title="OriginC:DhtmlControl-GetScript"><code>GetScript()</code></a>を使って、スクリプトエンジンインターフェースを得ます。この関数は、<code>DHtmlControl</code>クラスにあります。</p>
+<ol>
+<li>関数<code>GetGraphRect()</code>をクラス<code>HTMLandGraphDlg</code>に追加して、JavaScript関数<code>getGraphRECT()</code>を呼び出します。これは5番目のセクションに書かれています。
+<pre class="c" style="font-family: monospace;">
+private<span style="color: #339933;">:</span>
+    BOOL GetGraphRECT<span style="color: #009900;">(</span>RECT<span style="color: #339933;">&amp;</span> gcCntrlRect<span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//JavaScriptを呼び出してGraphControlの位置を得る関数</span>
+    <span style="color: #009900;">{</span>
+        <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span><span style="color: #339933;">!</span>m_dhtml<span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+        Object jsscript <span style="color: #339933;">=</span> m_dhtml.<span style="color: #202020;">GetScript</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>jsscript<span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//返されたCOMオブジェクトの妥当性をチェックすることが常に推奨されます</span>
+            <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+                
+        string str <span style="color: #339933;">=</span> jsscript.<span style="color: #202020;">getGraphRECT</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>  
+            JSON.<span style="color: #202020;">FromString</span><span style="color: #009900;">(</span>gcCntrlRect<span style="color: #339933;">,</span> str<span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//文字列を構造体に変換します</span>
+        <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+        
+</pre></li>
+<li>関数<code>OnMoveVlineToUpdateHtml()</code>をOrigin C クラスに加えて、JavaScriptで関数<code>lineMove()</code>を呼び出します。
+<pre class="c" style="font-family: monospace;">
+public<span style="color: #339933;">:</span>
+    <span style="color: #993333;">void</span> OnMoveVlineToUpdateHtml<span style="color: #009900;">(</span><span style="color: #993333;">double</span> dVal<span style="color: #009900;">)</span>
+    <span style="color: #009900;">{</span> 
+        Object jsscript <span style="color: #339933;">=</span> m_dhtml.<span style="color: #202020;">GetScript</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>jsscript<span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span><span style="color: #339933;">;</span>
+        string strXValue <span style="color: #339933;">=</span> ftoa<span style="color: #009900;">(</span>dVal<span style="color: #339933;">,</span> <span style="color: #ff0000;">"*5*"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//小数点桁数を5までにして、末尾のゼロを削除します</span>
+        jsscript.<span style="color: #202020;">lineMove</span><span style="color: #009900;">(</span>strXValue<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+        
+</pre></li>
+</ol>
+<h2><a name="Adding_JavaScript_Callable_Prototypes_in_Origin_C" id="Adding_JavaScript_Callable_Prototypes_in_Origin_C"></a><span class="mw-headline">Origin Cでプロトタイプを呼び出しできるJavaScript</span></h2>
+<p>このセクションでは、手法<code>OnEnterXvalToUpdateGraph()</code>をダイアログクラス<code>HTMLandGraphDlg</code>に追加します。X値を入力してEnterキーを押す際に垂直線を移動するため、このクラスはJavaScript関数<code>enterXval()</code>で呼び出します。</p>
+<ol>
+<li>手法とDECLARE_DISPATCH_MAPをダイアログクラスに追加します。
+<pre class="c" style="font-family: monospace;">
+public<span style="color: #339933;">:</span>
+    DECLARE_DISPATCH_MAP
+    <span style="color: #993333;">void</span> OnEnterXvalToUpdateGraph<span style="color: #009900;">(</span>string strXValue<span style="color: #009900;">)</span>
+    <span style="color: #009900;">{</span>
+        GraphPage gp <span style="color: #339933;">=</span> m_gcCntrl.<span style="color: #202020;">GetPage</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>gp<span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span><span style="color: #339933;">;</span>
+        GraphLayer gl <span style="color: #339933;">=</span> gp.<span style="color: #202020;">Layers</span><span style="color: #009900;">(</span><span style="color: #0000dd;">0</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>gl<span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span><span style="color: #339933;">;</span>
+        <span style="color: #993333;">double</span> xVal <span style="color: #339933;">=</span> <a href="http://www.opengroup.org/onlinepubs/009695399/functions/atof.html"><span style="color: #000066;">atof</span></a><span style="color: #009900;">(</span>strXValue<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>NANUM <span style="color: #339933;">==</span> xVal<span style="color: #009900;">)</span><span style="color: #666666; font-style: italic;">//数値を入力しません</span>
+            <span style="color: #b1b100;">return</span><span style="color: #339933;">;</span>
+        GraphObject vline<span style="color: #339933;">;</span> 
+        vline <span style="color: #339933;">=</span> gl.<span style="color: #202020;">GraphObjects</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"Line"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">//グラフの垂直線にアクセスします</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>vline<span style="color: #009900;">)</span>
+            <span style="color: #b1b100;">return</span><span style="color: #339933;">;</span>
+        vline.<span style="color: #202020;">X</span> <span style="color: #339933;">=</span> xVal<span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+        
+</pre></li>
+<li>OriginCクラスの手法をHTMLダイアログにマップします。
+<pre class="c" style="font-family: monospace;">
+BEGIN_DISPATCH_MAP<span style="color: #009900;">(</span>HTMLandGraphDlg<span style="color: #339933;">,</span> HTMLDlg<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>HTMLandGraphDlg<span style="color: #339933;">,</span> OnEnterXvalToUpdateGraph<span style="color: #339933;">,</span> VTS_VOID<span style="color: #339933;">,</span> VTS_STR<span style="color: #009900;">)</span>
+END_DISPATCH_MAP
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b>DISP_FUNCTIONの詳細については<a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Adding_JavaScript_Callable_Prototypes_in_OriginC" title="OCガイド:2番目のHTMLダイアログ">こちら</a>をご覧ください。</td>
+</tr>
+</table>
+</li>
+</ol>
+<h2><a name="Adding_Labtalk_Callable_Prototypes_in_Origin_C" id="Adding_Labtalk_Callable_Prototypes_in_Origin_C"></a><span class="mw-headline">Origin Cでプロトタイプを呼び出しできるLabTalk</span></h2>
+<p>最後に追加する項目があります。<br />
+<b>プロパティ</b>ダイアログの垂直線プロパティの設定をする際に、関数<code>line_move()</code>をLabTalkで呼び出すスクリプトを書いたことを思い出してください。<br />
+OriginCにこの関数を追加して垂直線を移動する際のトリガーにします。</p>
+<pre class="c" style="font-family: monospace;">
+<span style="color: #993333;">static</span> HTMLandGraphDlg<span style="color: #339933;">*</span> s_pDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//ダイアログクラスをLabTalkから呼び出す必要があります</span><span style="color: #666666; font-style: italic;">
+//これは、LabTalkから呼び出されるOC関数です</span><span style="color: #993333;">
+void</span> line_move<span style="color: #009900;">(</span><span style="color: #993333;">double</span> dVal<span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//直線を移動するとX値を得て、JavaScriptに値を渡します</span><span style="color: #009900;">
+{</span>
+   <span style="color: #b1b100;">if</span> <span style="color: #009900;">(</span> s_pDlg <span style="color: #009900;">)</span> <span style="color: #666666; font-style: italic;">//このダイアログで直線を移動したときのみのトリガー</span>
+                s_pDlg<span style="color: #339933;">-&gt;</span>OnMoveVlineToUpdateHtml<span style="color: #009900;">(</span>dVal<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #009900;">
+}</span>
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b>ダイアログクラスでLabTalkの手法を呼び出すには、<code>HTMLandGraphDlg</code>オブジェクトを宣言します。</td>
+</tr>
+</table>
+<h2><a name="Launching_The_Dialog" id="Launching_The_Dialog"></a><span class="mw-headline">ダイアログの起動</span></h2>
+<p>ダイアログを起動する準備ができたら、</p>
+<ol>
+<li>メイン関数を追加します。
+<pre class="c" style="font-family: monospace;">
+<span style="color: #993333;">void</span> HTMLandGraphDlgEx<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">
+{</span>
+    HTMLandGraphDlg dlg<span style="color: #339933;">;</span>
+    s_pDlg <span style="color: #339933;">=</span> <span style="color: #339933;">&amp;</span>dlg<span style="color: #339933;">;</span>
+    dlg.<span style="color: #202020;">DoModalEx</span><span style="color: #009900;">(</span>GetWindow<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    s_pDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span><span style="color: #009900;">
+}</span>
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b>ProjectEvents.OGS.に書いた関数と同じ名前を付けます。</td>
+</tr>
+</table>
+</li>
+<li>全てのコードを保存して、ビルドします。</li>
+<li>OPJをダブルクリックして、直接ダイアログを立ち上げます。</li>
+</ol>

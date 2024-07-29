@@ -1,0 +1,187 @@
+﻿<h1 class="firstheading">LabTalkによる数学的解析</h1>
+
+  <p class='urlname' style='display: none'>Tutorial-Mathematical-Analysis</p>
+
+  <p>&#160;</p>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <p>微分、積分、補間、複数曲線の平均化などのOriginの多くの数学的解析ツールは、LabTalkスクリプトからアクセスできます。これらの分析のほとんどには、1つ以上のXファンクションがに関連付けられており、多くのコマンド、オブジェクト、または算術演算子がこれらのXファンクションの実装として機能します。</p>
+
+  <p>数学的分析を実行する場合、ユーザ入力での値を使用してさらに計算するための対話型ダイアログを作成すると便利な場合があります。</p>
+
+  <h2><a name="What_You_Will_Learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ul>
+    <li>ソースデータから行を減算</li>
+
+    <li>ユーザからの入力値を利用するための対話型ダイアログ (getn) を作成</li>
+
+    <li>補間を使用して、指定したXのY値を計算</li>
+
+    <li>データ列を正規化</li>
+
+    <li>複数の曲線の平均を計算</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <ol>
+    <li><i>&lt;Origin EXE folder&gt;\Samples\Graphing</i>のデータファイル<b>Waterfall.dat</b> を関連するインポートフィルタでワークブック<b>Waterfall</b>にインポートします。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// 新規ブックを作成し、Waterfallと名前付け（ロングネームとショートネーム両方）</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Waterfall&quot;</span> option<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lsname;
+<span style="color: #008000;">// ファイル名とフィルタ名を定義</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Waterfall.dat&quot;</span>;
+string filtername<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;waterfall.oif&quot;</span>;  
+<span style="color: #008000;">// Xファンクションimpfileを使用して、インポートフィルタで指定ファイルをインポート</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filtername<span style="color: #000080;">$</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span>data orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;
+</pre>
+    </li>
+
+    <li>ループとXファンクション<a class="external text" href="../../XFunction/X-Function/Subtract_line.html">subtract_line</a>を使用して、エンドポイント接続の単純な基線を減算します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// SubtractedDataという名前の新しいシートを作成</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData;
+<span style="color: #008000;">///新しく作成したワークシート(現在アクティブ)を範囲変数として定義</span>
+range sdwk <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+<span style="color: #008000;">//Waterfallワークシートを名前でアクティブ化</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Waterfall&quot;</span>;
+<span style="color: #008000;">//Waterfallシートの列数を保持する積分を定義</span>
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+<span style="color: #008000;">//SubtractedDataシートの列数も同様に設定</span>
+sdwk.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> nc;
+<span style="color: #008000;">//ループとXファンクションsubtract_lineを使用してベースラインを減算</span>
+<span style="color: #008000;">//最初と最後のデータポイントを検出して、線形に接続</span>
+<span style="color: #008000;">//この線はをソースデータからベースラインとして差し引く</span>
+<span style="color: #008000;">//減算データは、ソースデータの励起波長で名前付け</span>
+loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  range rx <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+  range ry <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+  subtract_line iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+  x1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最初の点のX値を指定*/</span>
+  y1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最初の点のY値を指定*/</span>
+  x2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最後の点のX値を指定*/</span>
+  y2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最後の点のY値を指定*/</span>
+  oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//SubtractedDataシートの列のロングネームを変更</span>
+<span style="color: #008000;">//Waterfall シートでユーザ定義パラメータ Wavelengthを使用</span>
+ <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>D1<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+      <p> </p>
+    </li>
+
+    <li><a href="../../LabTalk/Script/Getting_Numeric_and_String_Input.html" title="Script:Getting Numeric and String Input">getn</a>ダイアログを使用して、正規化のために参照位置でのピーク高さを使用するか、単純に最大ピーク高さを使用するかをユーザに決定させます。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//参照ピーク位置のX値についてユーザ入力を取得するためのダイアログを作成</span>
+double xx;<span style="color: #008000;">//初期値を与える</span>
+<span style="color: #008000;">//getnダイアログを作成</span>
+int n;
+getn
+<span style="color: #000000;">(</span>Use Specified Reference Peak for Normalization<span style="color: #000000;">)</span> n<span style="color: #000000;">:</span>2s
+<span style="color: #000000;">(</span>Reference Peak Position X Value<span style="color: #000000;">)</span> xx
+<span style="color: #000000;">(</span>If not specified, the data will be normalized based on maximum Y value<span style="color: #000000;">)</span>;
+</pre>
+    </li>
+
+    <li>前のステップでの入力に基づいて、すべてのY列をループしてデータの正規化を行います。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// Normalizedというワークシートを作成</span>
+<span style="color: #008000;">//前のワークシートと同じ列数に設定</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Normalized cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nc outname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname1<span style="color: #000080;">$</span>;
+<span style="color: #008000;">//SubtractedDataワークシートの列Aと同じデータを列Aに入力</span>
+range r1 <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+range r2 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+r1 <span style="color: #000080;">=</span> r2;
+
+if<span style="color: #000000;">(</span>n<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #008000; font-style: regular;">/*&quot;Use Specified Reference Peak for Normalization&quot;を選択していない場合*/</span>
+  <span style="color: #000000;">{</span>
+    loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">)</span>
+       <span style="color: #000000;">{</span>
+         <span style="color: #008000;">//Xファンクションrnormalizeを使用して列を正規化</span>
+         rnormalize <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> 
+         irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+         method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>max <span style="color: #008000; font-style: regular;">/*「最大値による除算」を正規化方法として使用 */</span>
+         orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">)</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+         wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> ii;
+         col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>D1<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+       <span style="color: #000000;">}</span>
+  <span style="color: #000000;">}</span>
+if<span style="color: #000000;">(</span>n<span style="color: #000080;">==</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #008000; font-style: regular;">/*&quot;Use Specified Reference Peak for Normalization&quot;を選択した場合*/</span>
+  <span style="color: #000000;">{</span>
+     loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">)</span>
+       <span style="color: #000000;">{</span>
+         range rr<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #008000;">//指定されたXのY値を補間で計算</span>
+        double yy <span style="color: #000080;">=</span> rr<span style="color: #000000;">(</span>xx<span style="color: #000000;">)</span>;
+        <span style="color: #008000;">// Xファンクションrnormalizeで列を正規化</span>
+        rnormalize <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> 
+        irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+        method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>specify <span style="color: #008000; font-style: regular;">/*正規化方法として「指定値で除算」を使用*/</span>
+        val<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy <span style="color: #008000; font-style: regular;">/*補間により計算されたY値を基準値として使用*/</span>
+        orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">)</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> ii;
+        col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>D1<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;nm&quot;</span>;
+       <span style="color: #000000;">}</span>
+  <span style="color: #000000;">}</span>
+</pre>
+
+      <table class="noborder">
+        <tr>
+          <td style="vertical-align:top" width="60"><img src="../images/Tutorial_Mathematical_Analysis/Tip_icon.png" width="57" border="0" alt=""></td>
+
+          <td>
+            <p>range()構文を除き、<a class="external text" href="../../XFunction/X-Function/Interp1.html">interp1</a> (XからYを補間)、 <a class="external text" href="../../XFunction/X-Function/Interp1q.html">interp1q</a> (線形補間と補外)、i<a class="external text" href="../../XFunction/X-Function/Interp1xy.html">interp1xy</a> (XYデータのグループに対する1D補間/補外) など、いくつかのXファンクション使って補間できます。</p>
+          </td>
+        </tr>
+      </table>
+    </li>
+
+    <li>正規化されたデータをグループ化折れ線グラフとしてプロットします。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//正規化データをグループ化折れ線グラフとしてプロット。凡例なし</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+</pre>
+    </li>
+
+    <li>Xファンクション<a class="external text" href="../../XFunction/X-Function/Avecurves.html">avecurves</a>を使用して、複数の曲線の平均を計算します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+win <span style="color: #000080;">-</span>a Waterfall;
+<span style="color: #008000;">//Avecurveという名前の新しいシートを作成</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Avecurve;
+<span style="color: #008000;">//ループを使用して、4 つの曲線ごとに平均を計算</span>
+for<span style="color: #000000;">(</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; ii<span style="color: #000080;">&lt;</span>nc; ii<span style="color: #000080;">=</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+avecurves <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>sname1<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Avecurve<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">/</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>平均曲線の結果を別のグループ化折れ線グラフとしてプロットします。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// Avecurveワークシート全体を選択</span>
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">//グループ化折れ線としてアクティブな範囲をプロット</span>
+plotxy plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+</pre>
+    </li>
+  </ol>

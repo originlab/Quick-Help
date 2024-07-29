@@ -1,0 +1,138 @@
+﻿<h1 class="firstheading">2Dカーネル密度</h1><p class='urlname' style='display: none'>Create-2D-Kernel-Density</p>
+<p><br />
+</p><p>2Dカーネル密度グラフは、確率分布関数のノンパラメトリックな手法のカーネル密度推定をベースにした、散布図の平滑化色濃度表現です。密度推定の目的は、データの有限標本をとり、データ点がない場所を含むあらゆる場所で、根底にある確率分布関数を推定することです。カーネル密度推定では、各データポイントの寄与は、単一ポイントから周辺の範囲に平滑化されます。この平滑化密度グラフは、散布図の平均傾向を表示します。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_2D_Kernel_Density_Plot"><span class="tocnumber">1</span> <span class="toctext">2Dカーネル密度グラフの作成</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#The_Dialog_of_plot_kde2"><span class="tocnumber">2</span> <span class="toctext">plot_kde2ダイアログ</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Algorithm"><span class="tocnumber">3</span> <span class="toctext">アルゴリズム</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Density_Calculation_Method"><span class="tocnumber">3.1</span> <span class="toctext">密度計算方法</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Exact_Estimation"><span class="tocnumber">3.1.1</span> <span class="toctext">正確な推定</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Binned_Approximate_Estimation"><span class="tocnumber">3.1.2</span> <span class="toctext">ビン化概算</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Bandwidth_Methods"><span class="tocnumber">3.2</span> <span class="toctext">帯域幅の手法</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Bivariate_Kernel_Density_Estimator"><span class="tocnumber">3.2.1</span> <span class="toctext">2変数のカーネル密度推定</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Rule_of_Thumb"><span class="tocnumber">3.2.2</span> <span class="toctext">経験則</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#Interpolate_Density_Points"><span class="tocnumber">3.3</span> <span class="toctext">密度ポイントの補間</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2><a name="Creating_2D_Kernel_Density_Plot"></a><span class="mw-headline">2Dカーネル密度グラフの作成</span></h2>
+<p>2D密度推定グラフを作図するには、
+</p>
+<ol><li>1つのY列を選択します。</li>
+<li>2Dカーネル密度グラフのダイアログを開くには、メニューから<b>作図 &gt; 等高線図：2Dカーネル密度</b>を選択します。</li>
+<li>plot_kde2 ダイアログで、<i>手法</i>、<i>X/Yのグリッド点数</i>、<i>表示するポイント数</i>、<i>プロットタイプ</i> を選択します。</li>
+<li><b>OK</b>をクリックして、2D密度推定グラフを作図します。
+<dl><dd><a class="image"><img alt="2D-Kernel.png" src="../images/Create_2D_Kernel_Density/2D-Kernel.png" width="452"  /></a></dd></dl></li></ol>
+<h2><a name="The_Dialog_of_plot_kde2"></a><span class="mw-headline">plot_kde2ダイアログ</span></h2>
+<dl><dd><dl><dd><a class="image"><img alt="2D Kernel Density dialog.png" src="../images/Create_2D_Kernel_Density/2D_Kernel_Density_dialog.png" width="439"  /></a></dd></dl></dd></dl>
+<table class="dialogcontroltable">
+<tr>
+<td>
+<p><b>入力データ</b>
+</p>
+</td>
+<td>
+<p>入力データを指定します。
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b>設定</b>
+</p>
+</td>
+<td>
+<dl><dd><b>帯域幅の手法</b>
+<dl><dd>2Dカーネル密度グラフの帯域幅計算手法を指定します。
+<ul><li><b>2変数のカーネル密度推定</b></li>
+<li><b>経験則</b></li></ul></dd></dl></dd>
+<dd><b>密度の手法</b>
+<dl><dd>XYグリッドを定義するカーネル密度の計算手法を指定します。
+<ul><li><b>正確な推定</b></li></ul>
+<dl><dd> <a class="external text" href="../../LabTalk/LabTalk/Ks2density_(function).html">Ks2density</a>の式に従って密度値を計算するオプションを選択します。大きいデータセットの場合、正確な計算には大規模な計算が必要になる可能性があります。</dd></dl>
+<ul><li><b>ビン化概算</b></li></ul>
+<dl><dd>  このオプションを選択して、密度値の概算を計算します。サンプルが大きいときに推奨されるオプションです。</dd></dl></dd></dl></dd></dl>
+<dl><dd><b>表示するポイント数</b>
+<dl><dd>下からN個の密度ポイントを密度グラフに重ねます。</dd></dl></dd></dl>
+<dl><dd><b>密度点の補間</b>
+<dl><dd> 計算方法を指定して、密度画像に重ねるポイントを決定します（詳細は以下の<a href="#Interpolate_Density_Points">アルゴリズム</a>を参照してください）。通常、元データの数が大きい（50000以上など）場合、このオプションを選択して処理速度を上げることをお勧めします。 </dd></dl></dd></dl>
+<dl><dd><b>X/Yのグリッド点数</b>
+<dl><dd>密度推定のための等間隔なグリッド点の数を指定します。</dd></dl></dd>
+<dd><b>表示するポイント数</b>
+<dl><dd><b>全て</b>のチェックボックスが選択されていないときに、下からN個の密度ポイントを密度グラフに重ねます。デフォルトで選択される全てのチェックボックスが選択されていると、全てのポイントが表示されます。</dd></dl></dd>
+<dd><b>グリッド範囲</b>
+<dl><dd>当座のステップとして、X/Yデータからグリッドされた値の行列が生成され、カーネル密度プロットが行列値から作成されます。デフォルトでは、グリッド範囲は行列の最小および最大X/Y値です。手動で値を入力する場合には、<b>自動</b>のチェックを外します。
+<ul><li><b>X最小</b></li>
+<li><b>X最大</b></li>
+<li><b>Y最小</b></li>
+<li><b>Y最大</b></li></ul></dd></dl></dd>
+<dd><b>プロットタイプ</b>
+<dl><dd>プロットタイプを指定してください。
+<ul><li><b>等高線</b></li></ul>
+<dl><dd>密度行列を使用して等高線図を作成</dd></dl></dd></dl></dd></dl>
+<dl><dd><dl><dd><ul><li><b>イメージ</b></li></ul>
+<dl><dd>密度行列を使用してイメージプロットを作成</dd></dl></dd></dl></dd></dl>
+</td></tr>
+<tr>
+<td>
+<p><b>密度推定データ</b>
+</p>
+</td>
+<td>
+<p>グラフのために計算されたデータを保存する場所を設定します。
+</p>
+</td></tr>
+<tr>
+<td>
+<p><b>表示データ</b>
+</p>
+</td>
+<td>
+<p>表示する散布図のデータを保存する場所を指定します。<b>表示するポイント数</b>が0出ないときに使用できます。
+</p>
+</td></tr></table>
+<h2><a name="Algorithm"></a><span class="mw-headline">アルゴリズム</span></h2>
+<p>カーネル密度推定は、散乱した点の密度を推定するノンパラメトリック手法です。密度推定の目的は、既存の散布点から、データが観測されない場所を含むあらゆる場所で基礎となる確率密度関数を推定することです。カーネル関数は、データムを中心に作成されます。これにより、カーネルがデータムに関して対称になります。カーネル密度推定により、データポイントの寄与が平滑化され、データポイントの密度の全体像が得られます。 
+</p>
+<dl><dd><a class="image"><img alt="Density grids.png" src="../images/Create_2D_Kernel_Density/Density_grids.png" width="360"  /></a></dd></dl>
+<h4><a name="Density_Calculation_Method"></a><span class="mw-headline">密度計算方法</span></h4>
+<p>XYグリッドを定義するカーネル密度の計算手法を指定します。
+</p>
+<h5><a name="Exact_Estimation"></a><span class="mw-headline">正確な推定</span></h5>
+<p>密度の値は、以下の式に基づいて計算されます。
+</p><p><img src="../images/Create_2D_Kernel_Density/math-ca8f0550c764c6ca39d8c58ad1acbded.png" title="f(x,y,\text{vX},\text{vY},w_x,w_y) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{ 2\pi w_x w_y }  \exp \left(-\frac{(x-\text{vX}_i)^2}{2w_x ^2} - \frac{(y-\text{vY}_i)^2}{2w_y^2} \right)" alt="f(x,y,\text{vX},\text{vY},w_x,w_y) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{ 2\pi w_x w_y }  \exp \left(-\frac{(x-\text{vX}_i)^2}{2w_x ^2} - \frac{(y-\text{vY}_i)^2}{2w_y^2} \right)" class="tex"/>
+</p><p>ここで、<i>n</i> はベクトルvX または vY の用ぞの数で、<img src="../images/Create_2D_Kernel_Density/math-d42590de7df507482af1323d9ced6ebd.png" title="\text{vX}_i" alt="\text{vX}_i" class="tex"/> はベクトルvXの<i>i番目</i> の要素、<img src="../images/Create_2D_Kernel_Density/math-cc693045aa2161426c9f2b97f77a6a49.png" title="\text{vY}_i" alt="\text{vY}_i" class="tex"/> は、ベクトルvYの<i>i番目</i> の要素です。<img src="../images/Create_2D_Kernel_Density/math-4a5d1969fe1ef947082a32d547c247d7.png" title="w_x" alt="w_x" class="tex"/> と <img src="../images/Create_2D_Kernel_Density/math-e939f0323d8d49a8482b30a5284c8374.png" title="w_y" alt="w_y" class="tex"/> は、最適な帯域幅の値です。
+</p>
+<h5><a name="Binned_Approximate_Estimation"></a><span class="mw-headline">ビン化概算</span></h5>
+<p>2Dカーネル密度の正確な推定値の近似により密度計算を高速化します。
+</p><p>最初の2Dビン化が（x、y）ポイントで実行され、ビンカウントの行列を取得します。  次に、2D高速フーリエ変換を使用して、各グリッドの密度値を計算するための離散畳み込みを実行します。 
+</p><p>密度値の4乗根は、密度スケールをカラースケールにマッピングするために計算されます
+</p>
+<h4><a name="Bandwidth_Methods"></a><span class="mw-headline">帯域幅の手法</span></h4>
+<h5><a name="Bivariate_Kernel_Density_Estimator"></a><span class="mw-headline">2変数のカーネル密度推定</span></h5>
+<p>線形拡散プロセスに基づいて帯域幅を計算します。
+</p>
+<h5><a name="Rule_of_Thumb"></a><span class="mw-headline">経験則</span></h5>
+<p><i>wx</i> および<i>wy</i> の推定は、単純に以下のようにして計算されます。
+</p>
+<dl><dd><img src="../images/Create_2D_Kernel_Density/math-cec7115d5d7539d52893269c30efe6e0.png" title="w_x = \frac{\sigma_x}{2n^{1/6}}" alt="w_x = \frac{\sigma_x}{2n^{1/6}}" class="tex"/></dd>
+<dd><img src="../images/Create_2D_Kernel_Density/math-10e70e705a9ba4b7186d81a054f0ae60.png" title="w_y = \frac{\sigma_y}{2n^{1/6}}" alt="w_y = \frac{\sigma_y}{2n^{1/6}}" class="tex"/></dd></dl>
+<p>ここで、<i>n</i> は、ベクトルvXまたはvYの大きさで、<img src="../images/Create_2D_Kernel_Density/math-5bd0825b15108cd960569affb725147c.png" title="\sigma_x" alt="\sigma_x" class="tex"/>、<img src="../images/Create_2D_Kernel_Density/math-ba323dc814191392965d1fa1728664fc.png" title="\sigma_y" alt="\sigma_y" class="tex"/> はそれぞれデータセットvX、vYのサンプル標準偏差です。
+</p><p><br />
+</p>
+<h4><a name="Interpolate_Density_Points"></a><span class="mw-headline">密度点の補間</span></h4>
+<p>計算方法を指定して、密度画像に重ねるポイントを決定します。 
+</p><p>このオプションを選択すると、ポイントのカーネル密度は、定義されたXYグリッドの密度行列での補間により計算されます。元データが大きい場合は、このオプションを選択すると処理速度が大幅に向上します。
+</p><p>このオプションを選択しない場合、密度の値は、<a href="#Exact_Estimation">正確な推定手法</a>によって計算されます。
+</p>
+
+    

@@ -1,0 +1,65 @@
+﻿<h1 class="firstheading">動画のエクスポート</h1><p class='urlname' style='display: none'>Exporting-Videos</p>
+<p>グラフのグループを動画としてエクスポートするには、<a href="../../LabTalk/LabTalk/Vw_(object).html" title="LabTalk:Vw (オブジェクト)">ビデオライター(vw) オブジェクト</a>を使用する必要があります。実際のフレームと共に動画をエクスポートするには、必ずビデオライターオブジェクトを作成する必要があります。いくつかのウィンドウをフレームに見立てて作成し、ビデオライターに渡します。1度に1つのビデオライターでのみ作業できます。つまり、<b>vw.Create( )</b> メソッドでビデオライターオブジェクトを作成した後、新たな<b>vw.Create( )</b>メソッドを実行する前に、<b>vw.Release( )</b> を実行してビデオライターをリリースする必要があります。 
+</p><p>ここに、ビデオライターオブジェクトの作成、グラフの作成、ビデオライターオブジェクトのリリース方法を示すスクリプトのサンプルがあります。また、<a href="../../LabTalk/Category/Script_Examples.html" title="カテゴリー：スクリプトのサンプル">LabTalk サンプル</a>カテゴリー内にある<a href="../../LabTalk/LabTalk/Export.html#Export_Videos" title="LabTalk:エクスポート">サンプル全体</a>も合わせてご確認ください。
+</p>
+<h2><a name="Create_a_Video_Writer_Object"></a><span class="mw-headline">ビデオライターオブジェクトを作成する</span></h2>
+<p>動画をエクスポートする時に最初に行うべきことは、ビデオライターオブジェクトを<b>vw.Create( )</b>方法で作成する事です。最低限、ビデオのファイル名（ファイル名を含む）は指定する必要があります。また、ここでは圧縮方法のためのコーデック値、1秒ごとのフレーム数等を指定できます。
+</p><p>例えば、このスクリプトは動画ファイル&quot;test.avi&quot;を既存のファイルパス、<i>D:\Exported Videos\</i> に作成し、他の設定はデフォルトを維持します（つまり、圧縮なし、1フレーム毎秒、640px横×480px縦の大きさ）。
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;D:\Exported Videos\test.avi&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//上記スクリプトは次のスクリプトと同義</span>
+<span style="color: #008000;">//vw.Create(&quot;D:\Exported Videos\test.avi&quot;, 0, 1, 640, 480);</span></pre>
+<p><a href="../../LabTalk/LabTalk/FourCC_Table.html" title="LabTalk:FourCC Table">FourCC</a>コードを使用すると、圧縮方法を指定できます。例えば、以下のスクリプトはWMV1圧縮形式を使用して動画を作成します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//4つの記号コードで codec を定義</span>
+int codec <span style="color: #000080;">=</span> vw.<span style="color: #000080;">FourCC</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&apos;W&apos;</span>, <span style="color: #ff00ff;">&apos;M&apos;</span>, <span style="color: #ff00ff;">&apos;V&apos;</span>, <span style="color: #ff00ff;">&apos;1&apos;</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//800*600 動画ファイルをUser Filesフォルダ内の test.avi を作成</span>
+vw.<span style="color: #000080;">Create</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>Y\My Video.<span style="color: #000080;">avi</span>, codec, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">800</span>, <span style="color: #0000dd;">600</span><span style="color: #000000;">)</span></pre>
+<p>ビデオ作成が成功したかチェックするには、<b>vw.Create( )</b>を使用します。うまく作成できている場合は、<b>vw.Create( )</b>メソッドが、0を返します。例:
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//ファイルのパス、 D:\AAA があるなら、以下のスクリプトは0を返すはず</span>
+<span style="color: #008000;">//パスが存在しない場合、エラーコードを返す</span>
+int err <span style="color: #000080;">=</span> vw.<span style="color: #000080;">Create</span><span style="color: #000000;">(</span>D<span style="color: #000000;">:</span>\AAA\test.<span style="color: #000080;">avi</span><span style="color: #000000;">)</span>;
+if<span style="color: #000000;">(</span>err<span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+   type <span style="color: #ff00ff;">&quot;video creation is successful&quot;</span>;
+else
+   type <span style="color: #ff00ff;">&quot;video creation failure, the error code is $(err)&quot;</span>;</pre>
+<h2><a name="Write_Graph.28s.29_to_a_Video_Writer_Object"></a><span class="mw-headline">ビデオライターオブジェクトでグラフを作成する</span></h2>
+<p>ビデオライターオブジェクトが作成されると、<b>vw.WriteGraph( )</b> 方法を使用してビデオライターオブジェクトの中にグラフを作成します。ぐらふウィンドウに加え、関数グラフや行列、レイアウトページなどの他のウィンドウを使用することもできます。  
+</p><p>例えば、このスクリプトは現在のアクティブなウィンドウをビデオに渡します。
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">(</span> <span style="color: #000000;">)</span>;</pre>
+<p>ウィンドウ名や書き出すフレームの数を指定できます。例えば、以下のスクリプトはGraph1を5フレーム分追加します。
+</p>
+<pre class="lt" style="font-family:monospace;">vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">(</span>Graph1,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>;</pre>
+<p>ループ構造を使用してグラフをビデオに追加する事もできます。これにより、複数のスクリプト行を記入する手間を省く事ができます。以下のサンプルはプロジェクト内の全てのグラフウィンドウを動画にまとめ、各グラフは2フレームとして挿入されます。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">{</span>
+   vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">(</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>このメソッドで、先程のサンプルと同じように、エラーコードの有無を確認できます。返ってくる値が0の場合、グラフ作成（または他のウィンドウ）がうまくいっている事を示します。
+</p>
+<h2><a name="Release_a_Video_Writer_Object"></a><span class="mw-headline">ビデオライターオブジェクトをリリースする</span></h2>
+<p>各ビデオライターオブジェクトでは、リリースしないと実際のビデオが作成されないので、この操作はとても重要です。このステップで使用するメソッドは、<b>vw.Release( )</b>です。
+</p><p>以下のスクリプトは、空のグラフウィンドウと共に、動画ファイル&quot;example.avi&quot;をUser Filesフォルダに作成するスクリプトのサンプルです。
+</p>
+<pre class="lt" style="font-family:monospace;">int err <span style="color: #000080;">=</span> vw.<span style="color: #000080;">Create</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>Y\example.<span style="color: #000080;">avi</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//ビデオが作成できる場合、既存のグラフをビデオに書き出す</span>
+if<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> err<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">//デフォルトのテンプレートで空のグラフウィンドウを作成</span>
+    win <span style="color: #000080;">-</span>t plot;
+    vw.<span style="color: #000080;">WriteGraph</span><span style="color: #000000;">(</span> <span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">//ビデオライターのリリース</span>
+vw.<span style="color: #000080;">Release</span><span style="color: #000000;">(</span> <span style="color: #000000;">)</span>;</pre>
+<p><b>vw.Release( ) </b>メソッドも値を返します。0は動画作成がうまくいったことを示しますが、1の場合は作成に失敗した事を示します。
+</p>
+
+
+
+
+
+
+    

@@ -1,0 +1,122 @@
+﻿<h1 class="firstheading">DataRange::SetTree</h1>
+
+  <p><span class="OIndex" style="display:none">SetTree</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Specify a datarange from a tree</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> SetTree<span style="color: #000000;">(</span> TreeNode <span style="color: #000040;">&amp;</span> tr, <span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> DRTREE_DEFAULT <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>tr</dt>
+
+    <dd>[input]the TreeNode containing the range data</dd>
+
+    <dt>nOption</dt>
+
+    <dd>[input]one of the values from the enumeration:</dd>
+
+    <dd>enum {</dd>
+
+    <dd>DRTREE_DEFAULT = 0, // multiple ranges are added such that node name is used for the corresponding range name</dd>
+
+    <dd>DRTREE_ONE_DATA, // like DRTREE_DEFAULT, except that only one data node is considered</dd>
+
+    <dd>DRTREE_ANOVA_ONE_WAY_RAW, // the tree node passed is appropriate for one-way ANOVA data in raw form</dd>
+
+    <dd>DRTREE_ANOVA_ONE_WAY_INDEXED, // the tree node passed is appropriate for one-way ANOVA data in indexed form</dd>
+
+    <dd>DRTREE_ANOVA_TWO_WAY_RAW, // the tree node passed is appropriate for two-way ANOVA data in raw form</dd>
+
+    <dd>DRTREE_ANOVA_TWO_WAY_INDEXED, // the tree node passed is appropriate for two-way ANOVA data in indexed form</dd>
+
+    <dd>};</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>TRUE if successful.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//This example need active one or multiple selected xy subranges. Will</span>
+<span style="color: #008000;">//print out the minimum and maximum X and Y values of active worksheet.</span>
+<span style="color: #0000ff;">void</span> DataRange_Create_Ex2<span style="color: #000000;">(</span><span style="color: #0000ff;">BOOL</span> bOneData <span style="color: #000080;">=</span> <span style="color: #0000ff;">FALSE</span><span style="color: #000000;">)</span><span style="color: #008000;">//TRUE means only one range is added to tree. FALSE means add multiple ranges. </span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+ 
+        Tree trXYSelection;
+        DWORD dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+        init_input_data_branch_from_selection<span style="color: #000000;">(</span>trXYSelection, dwRules<span style="color: #000000;">)</span>;
+        out_tree<span style="color: #000000;">(</span>trXYSelection<span style="color: #000000;">)</span>;
+ 
+ 
+        DataRange dr,drSub;
+        string strRange;
+        dr.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trXYSelection, bOneData<span style="color: #000000;">)</span>;
+ 
+        DWORD dwPlotID; <span style="color: #008000;">// This is to retrieve DataPlot UID if present</span>
+        vector vX, vY;
+        <span style="color: #0000ff;">double</span> xmin, xmax, ymin, ymax;
+        <span style="color: #0000ff;">int</span> nNumDatasets <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>dwRules<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nIndex <span style="color: #000080;">&lt;</span> nNumDatasets; nIndex<span style="color: #000040;">++</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #008000;">// Copy data associated with nIndex of dr into vectors using DataRange::GetData</span>
+            dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>dwRules, nIndex, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">)</span>;
+ 
+            <span style="color: #008000;">// Now we have made a copy of XY data into vectors vX and vY</span>
+            <span style="color: #008000;">// so we can do analysis on the data...for example:</span>
+            vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>xmin, xmax<span style="color: #000000;">)</span>;
+            vY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>ymin, ymax<span style="color: #000000;">)</span>;
+            dr.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">(</span>drSub, dwRules, nIndex<span style="color: #000000;">)</span>;
+            strRange <span style="color: #000080;">=</span> drSub.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s<span style="color: #666666; font-weight: bold;">\n</span>xmin = %g<span style="color: #666666; font-weight: bold;">\n</span>xmax = %g<span style="color: #666666; font-weight: bold;">\n</span>ymin = %g<span style="color: #666666; font-weight: bold;">\n</span>ymax = %g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strRange, xmin, xmax, ymin, ymax<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/DataRange-GetTree.html" title="OriginC:DataRange-GetTree">DataRange::GetTree</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

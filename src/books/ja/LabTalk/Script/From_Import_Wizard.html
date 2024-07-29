@@ -1,0 +1,49 @@
+﻿<h1 class="firstheading">インポートウィザードから</h1>
+<p class="urlname" style="display: none;">From-Import-Wizard</p>
+<p><span class="OIndex" style="display: none;">インポートウィザード</span>は、ASCII、バイナリ、カスタムファイル形式(Origin Cで記述したカスタムプログラムを使用)をインポートするのに使用します。ウィザードは、選択した位置でフィルタを保存でき、インポートした後に実行するスクリプトを含めることができます。フィルタを作成すると、データをインポートするのに使うことができ、自動的にスクリプトを実行します。Originにファイルをドラッグ&amp;ドロップしたとき、<b>フィルタマネジャー</b>がそのファイル形式をサポートしていれば、これと同じ機能が適用されます。</p>
+<p>例えば、</p>
+<ol>
+<li>インポートウィザードを開始します。</li>
+<li>OriginのSamples\Spectroscopyフォルダを開き、<b>Peaks with Base.DAT</b>を選びます。</li>
+<li>追加をクリックし、OKをクリックします。</li>
+<li>進むを6回クリックして、<i>フィルターの保存</i>ページに移動します。</li>
+<li><b>フィルタの保存</b>チェックボックスにチェックを付けます。</li>
+<li><b>Subtract Base and Find Peaks</b>のような適切なフィルタファイル名を入力します。</li>
+<li><b>詳細なフィルタオプション</b>チェックボックスにチェックを付けます。</li>
+<li>進むをクリックします。</li>
+<li>テキストボックスに次のスクリプトを貼り付けます。
+<pre class="lt" style="font-family: monospace;">
+range raTime <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;              <span style="color: #008000;">// Time列を範囲として取得</span>
+range raAmp <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;               <span style="color: #008000;">// Amp列を範囲として取得</span>
+range raBase <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;              <span style="color: #008000;">// Base列を範囲として取得</span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;            <span style="color: #008000;">// スプレッドシートセル表記オフ</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>Subtracted<span style="color: #000000;">)</span>;        <span style="color: #008000;">// Subtractedという列を作成</span>
+range raSubtracted <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;        <span style="color: #008000;">// Subtracted列を範囲として取得</span>
+raSubtracted <span style="color: #000080;">=</span> raAmp <span style="color: #000080;">-</span> raBase; <span style="color: #008000;">// AmpからBaseを減算</span>
+pkFind iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;              <span style="color: #008000;">// 減算されたデータからピークを探す</span>
+range raPeaks <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;             <span style="color: #008000;">// ピークインデックス列を範囲として取得</span>
+for<span style="color: #000000;">(</span> idx <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; idx <span style="color: #000080;">&lt;=</span> raPeaks.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> ; idx<span style="color: #000080;">++</span> <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+    pkidx <span style="color: #000080;">=</span> raPeaks<span style="color: #000000;">[</span>idx<span style="color: #000000;">]</span>;
+    ty Peak found at <span style="color: #000080;">$</span><span style="color: #000000;">(</span>raTime<span style="color: #000000;">[</span>pkidx<span style="color: #000000;">]</span><span style="color: #000000;">)</span> with height of <span style="color: #000080;">$</span><span style="color: #000000;">(</span>raSubtracted<span style="color: #000000;">[</span>pkidx<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+</pre>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/From_Import_Wizard/Tip_icon.png" alt="" width="57" height="57" border="0" /></td>
+<td>
+<p>ワークブックの<a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">スプレッドシートセル表記</a>については、<a class="external text" href="../../QuickHelp/QuickHelp/Turn_off_spreadsheet_cell_notation.html"><b>FAQ-849</b></a> を参照してください。</p>
+</td>
+</tr>
+</table>
+</li>
+<li>完了をクリックします。</li>
+</ol>
+<p><br />
+<br />
+これにより、次のことが行われます。</p>
+<ul>
+<li>フィルタの保存</li>
+<li>このフィルタを使ってインポートを実行</li>
+<li>インポート後、スクリプトはデータを減算するスクリプトを実行し、 <b><a class="external text" href="../../XFunction/X-Function/PkFind.html">pkFind</a></b> 関数がピークインデックスを位置づけます。結果がスクリプトウィンドウに出力されます。</li>
+</ul>

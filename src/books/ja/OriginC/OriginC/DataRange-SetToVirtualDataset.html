@@ -1,0 +1,152 @@
+﻿<h1 class="firstheading">DataRange::SetToVirtualDataset</h1>
+
+  <p><span class="OIndex" style="display:none">SetToVirtualDataset</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>It sets a DataRange object into a virtual dataset.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> SetToVirtualDataset<span style="color: #000000;">(</span>LPCSTR lpcszVSName<span style="color: #000000;">)</span>
+</pre>
+
+  <p> </p>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>lpcszVSName</dt>
+
+    <dd>[input]</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>True if Successful</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This method is used by the following OC code to fix all the virtual matrices in the corrupted project</span>
+<span style="color: #0000ff;">static</span>     <span style="color: #0000ff;">BOOL</span>       _fix_virt_series<span style="color: #000000;">(</span>LPCSTR lpcszVirtSeries, Worksheet <span style="color: #000040;">&amp;</span>wks,
+                                                                <span style="color: #0000ff;">int</span> nRowXValues,
+                                                                <span style="color: #0000ff;">int</span> nColumnYValues,
+                                                                <span style="color: #0000ff;">int</span> nR1,
+                                                                <span style="color: #0000ff;">int</span> nR2,
+                                                                <span style="color: #0000ff;">int</span> nC1,
+                                                                <span style="color: #0000ff;">int</span> nC2
+                                                                <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        DataRange       rng;
+        <span style="color: #008000;">//int                     nn = rng.Add("X", wks, int nR1, int nC1, int nR2, int nC2);</span>
+        <span style="color: #0000ff;">int</span>                        nn <span style="color: #000080;">=</span> rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wks, nRowXValues, nC1, nRowXValues, nC2<span style="color: #000000;">)</span>;
+        nn <span style="color: #000080;">=</span> rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Y"</span>, wks, nR1, nColumnYValues, nR2, nColumnYValues<span style="color: #000000;">)</span>;
+        nn <span style="color: #000080;">=</span> rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Z"</span>, wks, nR1, nC1, nR2, nC2<span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">BOOL</span>               bb <span style="color: #000080;">=</span> rng.<span style="color: #000000;">SetToVirtualDataset</span><span style="color: #000000;">(</span>lpcszVirtSeries<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span> bb <span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">return</span> bb;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">static</span>     <span style="color: #0000ff;">BOOL</span>       _fix_virt_matrix_ORG_17473<span style="color: #000000;">(</span>LPCSTR lpcszVirtSeries, Worksheet <span style="color: #000040;">&amp;</span>wks<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">int</span>                nRowXValues <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;              <span style="color: #008000;">// the first row of data always contains the X-values</span>
+        <span style="color: #0000ff;">int</span>                nColumnYValues <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;           <span style="color: #008000;">// the first column always contains the Y-values</span>
+        <span style="color: #0000ff;">int</span>                nR1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        <span style="color: #0000ff;">int</span>                nR2 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+        <span style="color: #0000ff;">int</span>                nC1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        <span style="color: #0000ff;">int</span>                nC2 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+        
+        <span style="color: #0000ff;">return</span> _fix_virt_series<span style="color: #000000;">(</span>lpcszVirtSeries, wks, nRowXValues, nColumnYValues, nR1, nR2, nC1, nC2<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #0000ff;">static</span>     <span style="color: #0000ff;">BOOL</span>       _fix_virt_matrix_ORG_17473<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> string <span style="color: #000040;">&amp;</span>strVMname, <span style="color: #0000ff;">int</span> index<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Get the long name:</span>
+        MatrixObject mo<span style="color: #000000;">(</span> strVMname <span style="color: #000000;">)</span>; 
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>mo<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+        <span style="color: #000000;">}</span>
+        
+        string          strVMLongName <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetLongName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> strVMLongName.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// Assume that the VM's long name matches the sheet name of the source worksheet</span>
+        <span style="color: #008000;">// for this virtual matrix </span>
+        <span style="color: #008000;">// Need to find the worksheet:</span>
+        foreach<span style="color: #000000;">(</span>WorksheetPage wp in Project.<span style="color: #000000;">WorksheetPages</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                foreach<span style="color: #000000;">(</span>Layer lay in wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        Worksheet       wksh <span style="color: #000080;">=</span> lay;
+                        string          strName <span style="color: #000080;">=</span> wksh.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strName.<span style="color: #000000;">CompareNoCase</span><span style="color: #000000;">(</span>strVMLongName<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                string          strDump;
+                                strDump.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"index = %d,<span style="color: #666666; font-weight: bold;">\t</span> VM Name: %s,<span style="color: #666666; font-weight: bold;">\t</span> Workbook: %s,<span style="color: #666666; font-weight: bold;">\t</span> Sheet: %s"</span>, index, strVMname, wp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, wksh.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+                                out_str<span style="color: #000000;">(</span>strDump<span style="color: #000000;">)</span>;
+                                _fix_virt_matrix_ORG_17473<span style="color: #000000;">(</span>strVMname, wksh<span style="color: #000000;">)</span>;
+                                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+                        <span style="color: #000000;">}</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// For fixing virtual matrices in the corrupted project</span>
+<span style="color: #0000ff;">void</span>       fix_virt_matrices<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Get all the virtual matrices:</span>
+        QueryResult qr;
+        qr.<span style="color: #000000;">Build</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Select VIRTUALMATRIX from Project"</span><span style="color: #000000;">)</span>;
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>  vsVMListNames;
+        qr.<span style="color: #000000;">GetNames</span><span style="color: #000000;">(</span>vsVMListNames, QUERYRESULTNAME_SNAME<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> vsVMListNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                _fix_virt_matrix<span style="color: #000000;">(</span>vsVMListNames<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>, ii<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

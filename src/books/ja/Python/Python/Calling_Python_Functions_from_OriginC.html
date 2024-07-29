@@ -1,0 +1,77 @@
+﻿<h1 class="firstheading">Origin Cから Python関数を呼び出す</h1><p><br />
+</p><p>次のシンタックスを使用して、Origin CからPython関数を呼び出せます。
+</p>
+<pre class="oc" style="font-family:monospace;">Python.<span style="color: #000000;">function_name</span><span style="color: #000000;">(</span>arg1, arg2...<span style="color: #000000;">)</span></pre>
+<p>デフォルトでは、C/CPPまたはXFファイルと同じフォルダに<b>.py</b>ファイルを置く必要があります。
+ファイル名は<b>origin.py</b>にしてください。
+</p><p>サンプル - ベイズ回帰を実行するPython関数
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">from</span> sklearn <span style="color: #ff7700;font-weight:bold;">import</span> linear_model
+
+<span style="color: #ff7700;font-weight:bold;">def</span> bayesian<span style="color: #000;">(</span>vX<span style="color: #000;">,</span> vY<span style="color: #000;">)</span>:
+    blr <span style="color: #000;">=</span> linear_model.<span style="color: #000;">BayesianRidge</span><span style="color: #000;">(</span>tol<span style="color: #000;">=</span><span style="color: #000;">1e-6</span><span style="color: #000;">,</span> fit_intercept<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">,</span> compute_score<span style="color: #000;">=</span><span style="color: #900090;">False</span><span style="color: #000;">,</span> alpha_init<span style="color: #000;">=</span><span style="color: #000;">1</span><span style="color: #000;">,</span> lambda_init<span style="color: #000;">=</span><span style="color: #000;">1e-3</span><span style="color: #000;">)</span>
+    blr.<span style="color: #000;">fit</span><span style="color: #000;">(</span>np.<span style="color: #000;">vander</span><span style="color: #000;">(</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">)</span><span style="color: #000;">,</span> vY<span style="color: #000;">)</span>
+    mean <span style="color: #000;">=</span> blr.<span style="color: #000;">predict</span><span style="color: #000;">(</span>np.<span style="color: #000;">vander</span><span style="color: #000;">(</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">)</span><span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> mean</pre>
+<p>その後OCコードから関数を呼び出せます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> bayesian_reg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// 3列あるワークシートをアクティブにする</span>
+        <span style="color: #008000;">// 列1および2はフィットするXYデータ</span>
+        <span style="color: #008000;">// 列3は結果のフィット曲線を入力する列 </span>
+	Worksheet wks<span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;	
+	Dataset dsx, dsy, dsypred;
+	dsx.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+	dsy.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+	dsypred.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+
+	dsypred <span style="color: #000080;">=</span> Python.<span style="color: #000000;">bayesian</span><span style="color: #000000;">(</span>dsx, dsy<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>引数を介してPython関数から複数の変数を返せます。引数名の前の&amp;記号は、それが返された変数であることを示します。 
+</p>
+<pre class="oc" style="font-family:monospace;">Python.<span style="color: #000000;">function_name</span><span style="color: #000000;">(</span>arg1, arg2..., <span style="color: #000040;">&amp;</span> ret1, <span style="color: #000040;">&amp;</span> ret2...<span style="color: #000000;">)</span></pre>
+<p>サンプル - フィット値とフィット誤差を返すベイズ回帰を実行するPython関数
+</p>
+<pre class="python" style="font-family:monospace;"><span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">from</span> sklearn <span style="color: #ff7700;font-weight:bold;">import</span> linear_model
+
+<span style="color: #ff7700;font-weight:bold;">def</span> bayesian<span style="color: #000;">(</span>vX<span style="color: #000;">,</span> vY<span style="color: #000;">,</span> vYmean<span style="color: #000;">,</span> vYstd<span style="color: #000;">)</span>:
+    blr <span style="color: #000;">=</span> linear_model.<span style="color: #000;">BayesianRidge</span><span style="color: #000;">(</span>tol<span style="color: #000;">=</span><span style="color: #000;">1e-6</span><span style="color: #000;">,</span> fit_intercept<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">,</span> compute_score<span style="color: #000;">=</span><span style="color: #900090;">False</span><span style="color: #000;">,</span> alpha_init<span style="color: #000;">=</span><span style="color: #000;">1</span><span style="color: #000;">,</span> lambda_init<span style="color: #000;">=</span><span style="color: #000;">1e-3</span><span style="color: #000;">)</span>
+    blr.<span style="color: #000;">fit</span><span style="color: #000;">(</span>np.<span style="color: #000;">vander</span><span style="color: #000;">(</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">)</span><span style="color: #000;">,</span> vY<span style="color: #000;">)</span>
+    mean<span style="color: #000;">,</span> std <span style="color: #000;">=</span> blr.<span style="color: #000;">predict</span><span style="color: #000;">(</span>np.<span style="color: #000;">vander</span><span style="color: #000;">(</span>vX<span style="color: #000;">,</span> <span style="color: #000;">10</span><span style="color: #000;">)</span><span style="color: #000;">,</span> return_std<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">)</span>
+    vYmean<span style="color: #000;">[</span>:<span style="color: #000;">]</span> <span style="color: #000;">=</span> mean <span style="color: #d00; font-style: italic;"># 変数vYmeanに平均値を渡す</span>
+    vYstd<span style="color: #000;">[</span>:<span style="color: #000;">]</span> <span style="color: #000;">=</span> std  <span style="color: #d00; font-style: italic;"># 変数vYstdに誤差の値を返す</span></pre>
+<p>その後OCコードから関数を呼び出せます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> bayesian_reg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// 4列あるワークシートをアクティブにする</span>
+        <span style="color: #008000;">// 列1と2はフィットするXYデータ</span>
+        <span style="color: #008000;">// 列3とフィット結果の曲線とフィット誤差を出力する列</span>
+	Worksheet wks<span style="color: #000080;">=</span>Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;	
+	Dataset dsx, dsy, dsypred, dsystd;
+	dsx.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+	dsy.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+	dsypred.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+	dsystd.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+	vector vYmean, vYstd;
+	Python.<span style="color: #000000;">bayesian</span><span style="color: #000000;">(</span>dsx, dsy, <span style="color: #000040;">&amp;</span>vYmean, <span style="color: #000040;">&amp;</span>vYstd<span style="color: #000000;">)</span>;  
+	dsypred <span style="color: #000080;">=</span> vYmean;
+	dsystd <span style="color: #000080;">=</span> vYstd;
+<span style="color: #000000;">}</span></pre>
+<p>ファイルの位置を変更するには、LabTalkのPythonオブジェクトプロパティである、<b>Python.OCWD$</b>を目的のフォルダ（作業ディレクトリ）のフルパスに設定します。
+</p><p>ファイル名を変更するには、LabTalkのPythonオブジェクトプロパティである、<b>Python.OCWF$</b>を作業ディレクトリ内の目的のファイル名に設定します。
+</p>
+
+
+
+
+
+
+    

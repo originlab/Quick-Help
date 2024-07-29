@@ -1,0 +1,48 @@
+﻿<h1 class="firstheading">タイマー操作</h1><p class='urlname' style='display: none'>On-A-Timer</p>
+<p><a href="../../LabTalk/LabTalk/Timer_(command).html" title="LabTalk:Timer (コマンド)"><b>Timer</b> (コマンド)</a> は<b>TimerProc</b> マクロを実行し、組合せによって、 <b>n</b> 秒ごとに<span class="OIndex">スクリプト</span>を実行するのに使用することができます。  
+</p><p>次のサンプルは、2秒ごとに <span class="OIndex">timer</span> 操作を実行し、ディスク上のデータファイルが修正されたかどうかをチェックし、新しければ再インポートします。
+</p><p>このスクリプトサンプルを実行するには、まず次のステップを実行します。
+</p>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/On_A_Timer/Tutorial_icon.png" width="57"  border="0" />
+	</td>
+	<td><ol><li> 単純な2列のASCIIファイル <b>c:\temp\mydata.dat</b> を作成します。別の名前や場所でも構いません。</li>
+<li> 新しいプロジェクトを開始し、デフォルトのASCII設定でファイルを新しいブックにインポートします。ブックのショートネームは<b>mydata</b>に変わります。</li>
+<li> データの線＋シンボルプロットを作成し、グラフのXY軸スケールプロパティを自動にセットし、新しいデータが追加されたらグラフを更新します。</li>
+<li> グラフをアクティブウィンドウのままにします。</li>
+<li> プロジェクトに添付したProjectEvents.OGSファイルの[AfterOpenDoc]セクションに下記のスクリプトを保存します。</li>
+<li> ProjectEvents.OGSの[BeforeCloseDoc]に次のコマンドを追加します。 <pre class="lt" style="font-family:monospace;">timer <span style="color: #000080;">-</span>k;</pre> </li>
+<li> Originプロジェクトを保存し、閉じ、プロジェクトを再度開きます。プロジェクトを開いた時に、timerが開始し、プロジェクトを閉じたときに、timerが実行を停止します。</li>
+<li> ディスク上のデータファイルに行き、編集して、2, 3のデータポイントを追加します。</li>
+<li> timer操作により再インポートが実行され、グラフが新しいデータで更新されます。</li></ol>
+</td></tr></table>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// TimerProcマクロのセットアップ</span>
+def TimerProc <span style="color: #000000;">{</span>
+	<span style="color: #008000;">// ファイルが存在するかをチェック、無ければ終了</span>
+	string str<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;c:\temp\mydata.dat&quot;</span>;
+	if<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> exist<span style="color: #000000;">(</span>str<span style="color: #000080;">$</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> return;
+&nbsp;
+	<span style="color: #008000;">// ディスク上のファイルの日付/時間を取得</span>
+	double dtDisk <span style="color: #000080;">=</span> exist<span style="color: #000000;">(</span>str<span style="color: #000080;">$</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>;
+&nbsp;
+	<span style="color: #008000;">// データブックのスクリプトを実行</span>
+	<span style="color: #008000;">// ここでブックのショートネームはmydataであることが前提</span>
+	win <span style="color: #000080;">-</span>o mydata <span style="color: #000000;">{</span>
+		<span style="color: #008000;">// 最後のインポートの日付/時間を取得</span>
+		double dtLast <span style="color: #000080;">=</span> page.<span style="color: #000080;">info</span>.<span style="color: #000080;">system</span>.<span style="color: #000080;">import</span>.<span style="color: #000080;">filedate</span>;
+&nbsp;
+		<span style="color: #008000;">// ディスクのファイルが新しければ、ファイルを再インポート</span>
+		if<span style="color: #000000;">(</span> dtDisk <span style="color: #000080;">&gt;</span> dtLast <span style="color: #000000;">)</span> reimport;
+	<span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+&nbsp;
+<span style="color: #008000;">// 2秒ごとにTimerProcを実行するようセット</span>
+timer <span style="color: #0000dd;">2</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/On_A_Timer/Tip_icon.png" width="57"  border="0" /></td><td><p><b>Samples\LabTalk Script Examples</b> サブフォルダには、<b>Reimport File Using Timer.OPJ</b> というOriginプロジェクトがあり、これは上記でセットアップしたスクリプトに似ています。このOPJを開き、スクリプトを表示して、この機能を試します。
+</p></td></tr></table>
+
+
+
+    

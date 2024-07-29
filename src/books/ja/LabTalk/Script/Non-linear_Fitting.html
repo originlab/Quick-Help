@@ -1,0 +1,126 @@
+﻿<h1 class="firstheading">非線形曲線フィット</h1><p class='urlname' style='display: none'>Non-linear-Fitting</p>
+<p>LabTalkの非線形フィットは、Xファンクションベースのコマンドです。3つのステップで操作し、各ステップで少なくとも1つのXファンクションを呼び出します。
+</p>
+<ol>
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbegin.html">nlbegin</a>: フィット処理を開始します。入力データ、フィット関数の種類、入力パラメータを定義します。
+<li> <a class="external text" href="../../XFunction/X-Function/Nlfit.html">nlfit</a>: フィット計算を実行します。
+<li> <a class="external text" href="../../XFunction/X-Function/Nlend.html">nlend</a> どのパラメータをどのような形式で出力するかを選択します。
+</ol>
+<p><i>nlbegin</i>ではなく、以下のXファンクションでフィットモデルやデータにしたがってフィット処理を開始することもできます。
+</p>
+<ul>
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginr.html">nlbeginr</a>: 複数の従属/独立変数のモデルをフィットします。
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginm.html">nlbeginm</a>: 行列をフィットします。
+<li> <a class="external text" href="../../XFunction/X-Function/Nlbeginz.html">nlbeginz</a>: XYZワークシートデータをフィットします。
+</ul></ul>
+<div id="toc" class="toc"><div id="toctitle"><h2>内容</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Script_Example"><span class="tocnumber">1</span> <span class="toctext">スクリプトサンプル</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Notes_on_the_Parameter_Tree"><span class="tocnumber">2</span> <span class="toctext">パラメータツリーの注意</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Table_of_X-functions_Supporting_Non-Linear_Fitting"><span class="tocnumber">3</span> <span class="toctext">非線形フィットをサポートするXファンクションのテーブル</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Qualitative_Differences_from_Linear_Fitting"><span class="tocnumber">4</span> <span class="toctext">線形フィットとの質の違い</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Script_Example"></a><span class="mw-headline">スクリプトサンプル</span></h2>
+<p>以下は、上記で簡単に説明した手順のスクリプトサンプルです。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 非線形フィットを開始、アクティブワークシートから </span>
+<span style="color: #008000;">// 列1 (X)と列2 (Y)の入力データを取り</span>
+<span style="color: #008000;">// フィット関数を Gaussianとして指定し </span>
+<span style="color: #008000;">// ParamTreeという入力パラメータツリーを作成</span>
+nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gauss nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ParamTree;
+  <span style="color: #008000;">// 任意: ピークの中心をX = 5で固定 </span>
+  ParamTree.<span style="color: #000080;">xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;     <span style="color: #008000;">// ピークの中心のXの値に5を割り当て</span>
+ParamTree.<span style="color: #000080;">f_xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;   <span style="color: #008000;">// ピーク中心を固定(f_xc = 0は固定ではない)</span>
+<span style="color: #008000;">// フィットを実行</span>
+nlfit;
+<span style="color: #008000;">// 任意: スクリプトウィンドウに結果を表示</span>
+type Baseline y0 is <span style="color: #008000;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">y0</span><span style="color: #000000;">)</span>,; 
+  type Peak Center is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">xc</span><span style="color: #000000;">)</span>, and; 
+  type Peak width <span style="color: #000000;">(</span>FWHM<span style="color: #000000;">)</span> is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">w</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// レポートシートなしでフィットセッションを終了</span>
+nlend;</pre>
+<h2><a name="Notes_on_the_Parameter_Tree"></a><span class="mw-headline">パラメータツリーの注意</span></h2>
+<p>フィットパラメータを保存するデータツリーには、上記サンプルで述べた以外にも多くのオプションがあります。  以下のスクリプトコマンドは、ツリーノードのすべて(名前と値)を、<b>スクリプトウィンドウ</b>に表示することで、同時に見ることができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 値を持つ全ツリー構造を見るには</span>
+ParamTree.<span style="color: #000080;">=</span>;</pre>
+<p>Note: 計算を行うので、(パラメータツリーで固定オプションを0にセットして)固定でないフィットのパラメータ値は、初期値から変動します。  初期パラメータは、パラメータツリーの個々のノードにアクセスすることで、上記のサンプルで示すように、手動でセットしたり、Originで自動的にセットできます(下表の<b>nlfn</b> Xファンクションをご覧下さい)。
+</p>
+<h2><a name="Table_of_X-functions_Supporting_Non-Linear_Fitting"></a><span class="mw-headline">非線形フィットをサポートするXファンクションのテーブル</span></h2>
+<p>上記で与えられた3つに加え、非線形フィットを手助けするXファンクションがあります。  下表は、非線形フィットを制御するのに使用するXファンクションをまとめたものです。
+</p>
+<table class="simple">
+<tr>
+<th> 名前</th>
+<th> 説明
+</th></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbegin.html">nlbegin</a>
+</td>
+<td>
+<p>ワークシートまたはグラフにあるXYデータに対してLabTalkのnlfitセッションを開始します。<br />
+<font color="red">Note:</font><br />このXファンクションは、独立/従属モデルのみをフィットします。複数の従属/独立関数に対しては、代わりに<i>nlbeginr</i> を使用します。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginr.html">nlbeginr</a>
+</td>
+<td> ワークシートデータに対してLabTalkのnlfitセッションを開始します。複数の従属/独立変数の関数をフィットに使用します。
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginm.html">nlbeginm</a>
+</td>
+<td>
+<p>行列オブジェクトまたはグラフから行列データに対してLabTalkのnlfitセッションを開始します。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlbeginz.html">nlbeginz</a>
+</td>
+<td>
+<p>ワークシートまたはグラフにあるXYZデータに対してLabTalkのnlfitセッションを開始します。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlfn.html">nlfn</a>
+</td>
+<td>
+<p>パラメータ自動初期化オプションをセットします。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlpara.html">nlpara</a>
+</td>
+<td>
+<p>パラメータ値と境界のGUI編集のためのパラメータダイアログを開きます。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlfit.html">nlfit</a>
+</td>
+<td>
+<p>反復計算を実行してデータをフィットします。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Nlend.html">nlend</a>
+</td>
+<td>
+<p>フィットセッションを終了し、任意でレポートを作成します。
+</p>
+</td></tr>
+</table>
+<p>これらのXファンクションのそれぞれの説明については、<a class="external text" href="../../XFunction/Category/Fitting.html">Xファンクションリファレンス</a>をご覧下さい。
+</p>
+<h2><a name="Qualitative_Differences_from_Linear_Fitting"></a><span class="mw-headline">線形フィットとの質の違い</span></h2>
+<p>線形フィットとは違い、非線形フィットは、分析解が無い方程式を反復計算によって、解きます。しかし、Xファンクションを呼び出して分析を実行するという考え方は同じです。  線形フィットが1つのXファンクション（<a href="../../LabTalk/Script/Linear_Fitting.html" title="Script:線形フィット">線形フィット</a>のセクションを参照)で1行のスクリプトを実行するのに対して、非線形フィットは少なくとも3つのXファンクションが必要です。
+</p>
+
+
+
+
+
+
+    

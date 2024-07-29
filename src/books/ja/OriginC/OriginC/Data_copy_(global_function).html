@@ -1,0 +1,140 @@
+﻿<h1 class="firstheading">Data_copy</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Copy a range of data from one data set to another.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> Data_copy<span style="color: #000000;">(</span> Dataset <span style="color: #000040;">*</span> pdsDest, Dataset <span style="color: #000040;">*</span> pdsSrc, <span style="color: #0000ff;">int</span> nSrcFrom <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nSrcTo <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nDestFrom <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">BOOL</span> bIgnoreMask <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>pdsDest</dt>
+
+    <dd>[output] pointer to destination dataset</dd>
+
+    <dt>pdsSrc</dt>
+
+    <dd>[input] pointer to source dataset</dd>
+
+    <dt>nSrcFrom</dt>
+
+    <dd>[input] starting index of the source dataset (0 based offset)</dd>
+
+    <dt>nSrcTo</dt>
+
+    <dd>[input] ending index of the source dataset (0 based offset, default -1 copies to upper index)</dd>
+
+    <dt>nDestFrom</dt>
+
+    <dd>[input] starting index of the destination dataset (0 based offset, default -1 uses nSrcFrom)</dd>
+
+    <dt>bIgnoreMask</dt>
+
+    <dd>[input] TRUE ignores masking in source dataset, FALSE copies masked values as missing values</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>Returns TRUE if successful and FALSE if:</p>
+
+  <p>1) nSrcFrom &lt; 0 or nSrcFrom &gt; source UpperIndex</p>
+
+  <p>2) nSrcTo &lt; nSrcFrom or nSrcTo &gt; UpperIndex</p>
+
+  <p>3) nDestFrom &lt; -1 (-1 means to use nSrcFrom)</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This is a self contained sample program for the function Data_copy, </span>
+<span style="color: #008000;">// Its sample data is created at the beginning of the program. </span>
+<span style="color: #008000;">// To run the program, enter the following command in the Script window:</span>
+<span style="color: #008000;">//   Data_copy_ex1</span>
+<span style="color: #008000;">// This will return the result like following:</span>
+<span style="color: #008000;">//   Copying Data2_B[3:5] to Data2_Destination[6:8] succeeded.</span>
+<span style="color: #008000;">// In this example, the copied range exceeds the original range of the </span>
+<span style="color: #008000;">// destination, but copying results the expansion.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #0000ff;">void</span> Data_copy_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">BOOL</span> rc;
+    
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Dataset myXDs<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    Dataset dsSrc<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// Dataset as a source</span>
+    String strSrcName <span style="color: #000080;">=</span> dsSrc.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Destination"</span><span style="color: #000000;">)</span>;     <span style="color: #008000;">// Add a column for the destination</span>
+    Dataset dsDest<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    String strDestName <span style="color: #000080;">=</span> dsDest.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">//******* Create sample data *****************</span>
+    myXDs.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    dsSrc.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    dsDest.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.097</span>;     dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.41256</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.24909</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.47304</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.2476</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.64529</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    myXDs<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">7</span>;    dsSrc<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.44514</span>;    dsDest<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    <span style="color: #008000;">//******** End of Sample Data Creation *******</span>
+
+    <span style="color: #0000ff;">int</span> nSrcFrom <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+    <span style="color: #0000ff;">int</span> nSrcTo <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+    <span style="color: #0000ff;">int</span> nDestFrom <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+    
+    rc<span style="color: #000080;">=</span>Data_copy<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>dsDest, <span style="color: #000040;">&amp;</span>dsSrc, nSrcFrom, nSrcTo, nDestFrom<span style="color: #000000;">)</span>; <span style="color: #008000;">// Demonstration of Data_copy</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>rc<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Copying %s[%d:%d] to %s[%d:%d] succeeded.<span style="color: #666666; font-weight: bold;">\n</span>"</span>,
+          strSrcName,nSrcFrom<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>,nSrcTo<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>,strDestName,nDestFrom<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>,<span style="color: #000000;">(</span>nDestFrom<span style="color: #000040;">+</span>nSrcTo<span style="color: #000040;">-</span>nSrcFrom<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error: Data_copy failed<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>Copy a range of data from one data set to another. If need the destination data set will be automatically resized.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

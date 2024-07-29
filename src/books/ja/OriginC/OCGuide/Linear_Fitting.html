@@ -1,0 +1,226 @@
+﻿<h1 class="firstheading">線形フィット</h1><p>Origin Cで線形フィットのルーチンを実行するには、<b><a href="../../OriginC/OriginC/Ocmath_linear_fit_(global_function).html" title="OriginC:Ocmath linear fit (global function)">ocmath_linear_fit</a></b> 関数を使用します。この関数では、重み付き線形フィットを実行し、パラメータ値や統計情報を含むフィット結果を取得できます。
+</p><p>以下の手順で、この関数を使用し、Origin Cでの線形フィットを実行して結果を指定したウィンドウとワークシートに出力します。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Perform_Linear_Fitting"><span class="tocnumber">1</span> <span class="toctext"><span class="OIndex">線形フィット</span>を実行</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Result_to_Output_Window"><span class="tocnumber">2</span> <span class="toctext">結果をウィンドウに出力</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Result_to_Worksheet"><span class="tocnumber">3</span> <span class="toctext">結果をワークシートに出力 </span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Output_to_Normal_Worksheet"><span class="tocnumber">3.1</span> <span class="toctext">通常のワークシートに結果を出力</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Output_to_Tree_Format_Worksheet"><span class="tocnumber">3.2</span> <span class="toctext">ツリー形式のワークシートに結果を出力</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Perform_Linear_Fitting"></a><span class="mw-headline"><span class="OIndex">線形フィット</span>を実行</span></h2>
+<p>線形フィットを実行する前に、データをインポートします。ここでは、独立、従属変数ともに1つずつ必要です。
+</p><p>Origin Cのルーチンを始めます。3つのステップが必要です。
+</p>
+<ol>
+<li>cファイルを作成し、以下ように空の関数を追加します。この関数に、次のステップからコードをコピーします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>GetNBox.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// GETN_ マクロに使用</span>
+<span style="color: #0000ff;">void</span> linearfit<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+<span style="color: #000000;">}</span></pre></li>
+<li>線形フィットを実行するデータを取得します。独立/従属変数ともにベクトル変数を使用します。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// XY データをワークシートウィンドウから取得</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+    <span style="color: #0000ff;">return</span>;  <span style="color: #008000;">// データ付きワークシートをアクティブにする必要がある</span>
+WorksheetPage wp <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// x列</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// y列</span>
+ 
+vector vX;  
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vX, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// x列のデータを取得しベクトルへ</span>
+ 
+vector vY;
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// y列のデータを取得しベクトルへ</span></pre></li>
+<li>GetN ダイアログを表示して、フィットオプションをコントロールし、ocmath_linear_fit 関数を呼び出して、このオプションで線形フィットします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// GetNダイアログでフィットオプションを表示するためにGUI ツリーを用意</span>
+GETN_TREE<span style="color: #000000;">(</span>trGUI<span style="color: #000000;">)</span>	
+GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>Fit, _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fit Options&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+GETN_ID_BRANCH<span style="color: #000000;">(</span>IDST_LR_OPTIONS<span style="color: #000000;">)</span> GETN_OPTION_BRANCH<span style="color: #000000;">(</span>GETNBRANCH_OPEN<span style="color: #000000;">)</span>
+	GETN_CHECK<span style="color: #000000;">(</span>FixIntercept, _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fix Intercept&quot;</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> 
+		GETN_ID<span style="color: #000000;">(</span>IDE_LR_FIX_INTCPT<span style="color: #000000;">)</span>
+	GETN_NUM<span style="color: #000000;">(</span>FixInterceptAt, _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fix Intercept at&quot;</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> 
+		GETN_ID<span style="color: #000000;">(</span>IDE_LR_FIX_INTCPT_AT<span style="color: #000000;">)</span>
+	GETN_CHECK<span style="color: #000000;">(</span>FixSlope, _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fix Slope&quot;</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> 
+		GETN_ID<span style="color: #000000;">(</span>IDE_LR_FIX_SLOPE<span style="color: #000000;">)</span>
+	GETN_NUM<span style="color: #000000;">(</span>FixSlopeAt, _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fix Slope at&quot;</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> 
+		GETN_ID<span style="color: #000000;">(</span>IDE_LR_FIX_SLOPE_AT<span style="color: #000000;">)</span>
+	GETN_CHECK<span style="color: #000000;">(</span>UseReducedChiSq, STR_FITTING_CHECKBOX_USE_RED_CHI_SQR, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> 
+		GETN_ID<span style="color: #000000;">(</span>IDE_FIT_REDUCED_CHISQR<span style="color: #000000;">)</span>
+GETN_END_BRANCH<span style="color: #000000;">(</span>Fit<span style="color: #000000;">)</span>	
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>GetNBox<span style="color: #000000;">(</span>trGUI<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>; <span style="color: #008000;">// キャンセルボタンが押される</span>
+<span style="color: #000000;">}</span>	
+LROptions stLROptions;
+stLROptions <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">Fit</span>; <span style="color: #008000;">// GUIツリーからstructに値を割り当て</span>
+
+<span style="color: #008000;">// 上の入力データとフィットオプションで線形フィットを実行</span>
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// データサイズ</span>
+FitParameter psFitParameter<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;  <span style="color: #008000;">// 2つのパラメータ	 </span>
+RegStats stRegStats;  <span style="color: #008000;">// フィットの統計</span>
+RegANOVA stRegANOVA;  <span style="color: #008000;">// anova statistics	</span>
+
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_linear_fit<span style="color: #000000;">(</span>vX, vY, nSize, psFitParameter, <span style="color: #0000ff;">NULL</span>, 
+                        <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>stLROptions, <span style="color: #000040;">&amp;</span>stRegStats, <span style="color: #000040;">&amp;</span>stRegANOVA<span style="color: #000000;">)</span>;	
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> STATS_NO_ERROR<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Error&quot;</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span></pre></li>
+</ol>
+<h2><a name="Result_to_Output_Window"></a><span class="mw-headline">結果をウィンドウに出力</span></h2>
+<p>計算が終了すると、フィット結果を特定のウィンドウに出力できます。ここで、パラメータの値は、ツリーとして<a href="../../OriginC/OCGuide/Script_Window.html" title="OCGuide:スクリプトウィンドウ">スクリプトウィンドウに出力</a>し、統計情報は<a href="../../OriginC/OCGuide/Results_Log.html" title="OCGuide:結果ログ">結果ログウィンドウに出力</a>します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> put_to_output_window<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> FitParameter<span style="color: #000040;">*</span> psFitParameter, 
+			<span style="color: #0000ff;">const</span> RegStats<span style="color: #000040;">&amp;</span> stRegStats, <span style="color: #0000ff;">const</span> RegANOVA<span style="color: #000040;">&amp;</span> stRegANOVA<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>	
+	<span style="color: #008000;">// スクリプトウィンドウ、結果ログ、ワークシートに分析結果を出力</span>
+	<span style="color: #008000;">// フィットパラメータをスクリプトウィンドウに印字</span>
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParams <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">&quot;Intercept&quot;</span>, <span style="color: #ff00ff;">&quot;Slope&quot;</span><span style="color: #000000;">}</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> iPara <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iPara <span style="color: #000080;">&lt;</span> vsParams.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; iPara<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%s =&nbsp;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParams<span style="color: #000000;">[</span>iPara<span style="color: #000000;">]</span>, psFitParameter<span style="color: #000000;">[</span>iPara<span style="color: #000000;">]</span>.<span style="color: #000000;">Value</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	
+	<span style="color: #008000;">// 統計結果を結果ログに出力</span>
+	Tree trResults;
+	TreeNode trResult <span style="color: #000080;">=</span> trResults.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;LinearFit&quot;</span><span style="color: #000000;">)</span>;
+	TreeNode trStats <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Stats&quot;</span><span style="color: #000000;">)</span>;
+	trStats <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegStats;  <span style="color: #008000;">// フィットの統計をツリーノードに追加</span>
+	 
+	TreeNode trANOVA <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;ANOVA&quot;</span><span style="color: #000000;">)</span>;
+	trANOVA <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegANOVA;  <span style="color: #008000;">// anova 統計をツリーノードに追加</span>
+	 
+	string strResult;
+	tree_to_str<span style="color: #000000;">(</span>trResult, strResult<span style="color: #000000;">)</span>;  <span style="color: #008000;">// ツリーを文字列に変換</span>
+	
+	Project.<span style="color: #000000;">OutStringToResultsLog</span><span style="color: #000000;">(</span>strResult<span style="color: #000000;">)</span>;  <span style="color: #008000;">// 結果ログに出力</span>
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Result_to_Worksheet"></a><span class="mw-headline"><a href="../../OriginC/OCGuide/Report_Sheet.html" title="OCGuide:レポートシート">結果をワークシートに出力 </a></span></h2>
+<p>フィット結果を、指定したワークシートに出力することもできます。そして、ワークシートウィンドウ内の一般的な列フォーマットか、ツリー表示フォーマットで結果を出力できます。
+</p><p>以下の2つの方法は、<b><a href="../../OriginC/OriginC/Datasheet-SetReportTree.html" title="OriginC:Datasheet-SetReportTree">Datasheet::SetReportTree</a></b> メソッドを使用してツリー変数によるワークシートに結果を出力します。異なる点は、ワークシート作成時のWP_SHEET_HIERARCHYオプションで、2番目の変数は<b>AddLayer</b>メソッドを使用しているのがわかります。
+</p>
+<h3><a name="Output_to_Normal_Worksheet"></a><span class="mw-headline">通常のワークシートに結果を出力</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> output_to_wks<span style="color: #000000;">(</span>WorksheetPage wp, <span style="color: #0000ff;">const</span> FitParameter<span style="color: #000040;">*</span> psFitParameter<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #008000;">// レポートツリーを用意		</span>
+	<span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// ノードは固有のノードIDが必要</span>
+	Tree tr;
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	TreeNode trReport <span style="color: #000080;">=</span> tr.<span style="color: #000000;">Report</span>;
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>TREE_Table, GETNBRANCH_TRANSPOSE<span style="color: #000000;">)</span>;		
+	
+	<span style="color: #008000;">// 1列</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Parameter&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列ラベル</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">)</span>;
+	
+	<span style="color: #008000;">// 2列</span>
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Value&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列ラベル</span>
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">)</span>;
+	
+	<span style="color: #008000;">// 3列</span>
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>;
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Prob&gt;|t|&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列ラベル</span>
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_COL_DESIGNATION_ATTRIB, OKDATAOBJ_DESIGNATION_Y<span style="color: #000000;">)</span>;	
+	
+	<span style="color: #008000;">// 表中に表示するためのベクトルを用意</span>
+	vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsParamNames <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">&quot;Intercept&quot;</span>, <span style="color: #ff00ff;">&quot;Slope&quot;</span><span style="color: #000000;">}</span>;  <span style="color: #008000;">// パラメータ名</span>
+	vector vValues, vProbs;  <span style="color: #008000;">// パラメータ値とprob</span>
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vsParamNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	    vValues.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>psFitParameter<span style="color: #000000;">[</span>nParam<span style="color: #000000;">]</span>.<span style="color: #000000;">Value</span><span style="color: #000000;">)</span>;
+	    vProbs.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>psFitParameter<span style="color: #000000;">[</span>nParam<span style="color: #000000;">]</span>.<span style="color: #000000;">Prob</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	
+	<span style="color: #008000;">// ツリーノードにベクトルを割り当て</span>
+	trReport.<span style="color: #000000;">P1</span>.<span style="color: #000000;">strVals</span> <span style="color: #000080;">=</span> vsParamNames;
+	trReport.<span style="color: #000000;">P2</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vValues;
+	trReport.<span style="color: #000000;">P3</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vProbs;
+	
+	<span style="color: #008000;">// レポートツリーをワークシートに</span>
+	<span style="color: #0000ff;">int</span> iLayer <span style="color: #000080;">=</span> wp.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Linear Fit Params&quot;</span><span style="color: #000000;">)</span>; 
+	Worksheet wksResult <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>iLayer<span style="color: #000000;">)</span>;		 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wksResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> wksResult.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">(</span>trReport<span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">)</span>;
+	    <span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">}</span>
+	wksResult.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;	
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Output_to_Tree_Format_Worksheet"></a><span class="mw-headline">ツリー形式のワークシートに結果を出力</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> output_to_tree_view_wks<span style="color: #000000;">(</span>WorksheetPage<span style="color: #000040;">&amp;</span> wp, <span style="color: #0000ff;">const</span> RegStats<span style="color: #000040;">&amp;</span> stRegStats<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	Tree tr;
+	<span style="color: #0000ff;">int</span> nID <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>; <span style="color: #008000;">// 各ノードは固有のノードIDが必要</span>
+	uint nTableFormat <span style="color: #000080;">=</span> GETNBRANCH_OPEN	
+						<span style="color: #000040;">|</span> GETNBRANCH_HIDE_COL_headINGS 
+						<span style="color: #000040;">|</span> GETNBRANCH_HIDE_ROW_headINGS 
+						<span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH 
+						<span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+	
+	<span style="color: #008000;">// ルートテーブルノードを用意</span>
+	tr.<span style="color: #000000;">Report</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// Report ツリーノードを追加し、ノードIDを割り当て</span>
+	TreeNode trReport <span style="color: #000080;">=</span> tr.<span style="color: #000000;">Report</span>; 
+	<span style="color: #008000;">// テーブルノードに表属性が必要</span>
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>TREE_Table, nTableFormat<span style="color: #000000;">)</span>; 
+	<span style="color: #008000;">// ルートテーブルのタイトル</span>
+	trReport.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Linear Fit Stats&quot;</span><span style="color: #000000;">)</span>; 
+	
+	<span style="color: #008000;">// 統計テーブルノードを用意</span>
+	trReport.<span style="color: #000000;">Table</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// Table ツリーノードとノードIDを割り当て</span>
+	TreeNode trTable <span style="color: #000080;">=</span> trReport.<span style="color: #000000;">Table</span>;
+	<span style="color: #008000;">// テーブルノードに表属性が必要</span>
+	trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>TREE_Table, nTableFormat<span style="color: #000040;">|</span>GETNBRANCH_TRANSPOSE<span style="color: #000000;">)</span>; 
+	<span style="color: #008000;">// 統計表のタイトル</span>
+	trTable.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Regression Statistics&quot;</span><span style="color: #000000;">)</span>; 
+	
+	<span style="color: #008000;">// 結果ノードを用意</span>
+	trTable.<span style="color: #000000;">Stats</span>.<span style="color: #000000;">ID</span> <span style="color: #000080;">=</span> nID<span style="color: #000040;">++</span>; <span style="color: #008000;">// Stats ツリーノードを追加してノードidを割り当て</span>
+	TreeNode trStats <span style="color: #000080;">=</span> trTable.<span style="color: #000000;">Stats</span>;		
+	trStats <span style="color: #000040;">+</span><span style="color: #000080;">=</span> stRegStats; <span style="color: #008000;">// sturct から結果をツリーノードに追加をサポート</span>
+	
+	<span style="color: #008000;">// ラベル設定。表の行ヘッダにこれらのテキストが表示</span>
+	trStats.<span style="color: #000000;">N</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Number of Points&quot;</span><span style="color: #000000;">)</span>;
+	trStats.<span style="color: #000000;">DOF</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Degrees of Freedom&quot;</span><span style="color: #000000;">)</span>;
+	trStats.<span style="color: #000000;">SSR</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Residual Sum of Squares&quot;</span><span style="color: #000000;">)</span>;
+	trStats.<span style="color: #000000;">AdjRSq</span>.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_LABEL_ATTRIB, <span style="color: #ff00ff;">&quot;Adj.R-Square&quot;</span><span style="color: #000000;">)</span>;
+	
+	<span style="color: #008000;">// 他のノードを非表示にする</span>
+	trStats.<span style="color: #000000;">ReducedChiSq</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">Correlation</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">Rvalue</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">RSqCOD</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">RMSESD</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	trStats.<span style="color: #000000;">NormResiduals</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>;
+	
+	<span style="color: #008000;">// 階層フォーマットとして新しいワークシートを作成するコントロール</span>
+	DWORD   dwOptions <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE; 
+	<span style="color: #0000ff;">int</span> iLayer <span style="color: #000080;">=</span> wp.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Linear Fit Stats&quot;</span>, dwOptions<span style="color: #000000;">)</span>; 
+	
+	Worksheet wksResult <span style="color: #000080;">=</span> wp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>iLayer<span style="color: #000000;">)</span>;		 
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wksResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> wksResult.<span style="color: #000000;">SetReportTree</span><span style="color: #000000;">(</span>trReport<span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to set report tree.<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">)</span>;
+	    <span style="color: #0000ff;">return</span>;
+	<span style="color: #000000;">}</span>
+	wksResult.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

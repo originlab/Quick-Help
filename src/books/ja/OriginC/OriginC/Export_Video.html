@@ -1,0 +1,100 @@
+﻿<h1 class="firstheading">Export Video</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 9 SR0</p>
+
+  <h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+
+  <p>The example will create a new matrixbook, set its values, and plot the values as a contour graph. The program will then loop for fifty times. For each iteration it will adjust the matrix values, update the graph, and add the updated graph to the video as a frame. So when the code finished running, a video with fifty frames will be created.</p>
+
+  <p><br>
+  To specify the codecs, please refer to <a class="external text" href="../../LabTalk/LabTalk/FourCC_Table.html">FourCC Table</a>.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\VideoWriter.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">int</span> VideoWriter_Ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Create a new Matrixbook.</span>
+        MatrixPage mp;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin.otm"</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+        MatrixLayer ml<span style="color: #000000;">(</span>mp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>ml <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span>;
+        MatrixObject mo<span style="color: #000000;">(</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>;
+
+        <span style="color: #008000;">// Initialize the matrix data.</span>
+        string strFormula <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"i*sin(1*x)-j*cos(y/1)"</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> mo.<span style="color: #000000;">SetFormula</span><span style="color: #000000;">(</span>strFormula, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                mo.<span style="color: #000000;">ExecuteFormula</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">// Create a new graph and plot the matrix as a contour plot.</span>
+        GraphPage gp;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>gp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"contour.otp"</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">4</span>;
+        GraphLayer gl<span style="color: #000000;">(</span>gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">5</span>;
+        gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">(</span>mo, IDM_PLOT_CONTOUR<span style="color: #000000;">)</span>;
+
+    <span style="color: #008000;">// Define the codec</span>
+    <span style="color: #008000;">// You can not expect all codecs to be available on all computers.</span>
+    <span style="color: #008000;">// Here are a few examples:</span>
+    <span style="color: #008000;">// int codec = CV_FOURCC(0,0,0,0); // No compression, can create large files.</span>
+<span style="color: #008000;">// int codec = CV_FOURCC(1,0,0,0); // Microsoft Run Length Encoded</span>
+       <span style="color: #0000ff;">int</span> codec <span style="color: #000080;">=</span> CV_FOURCC<span style="color: #000000;">(</span><span style="color: #ff00ff;">'D'</span>, <span style="color: #ff00ff;">'I'</span>, <span style="color: #ff00ff;">'V'</span>, <span style="color: #ff00ff;">'X'</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// MPEG-4 codec</span>
+      
+        <span style="color: #008000;">// Create a VideoWriter object.</span>
+        VideoWriter vw;
+        <span style="color: #0000ff;">int</span> err <span style="color: #000080;">=</span> vw.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"D:<span style="color: #666666; font-weight: bold;">\\</span>testVideoWriter.avi"</span>, codec, <span style="color: #0000dd;">15</span>, <span style="color: #0000dd;">1024</span>, <span style="color: #0000dd;">768</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> err <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// Create a string with LabTalk code that will be called</span>
+                <span style="color: #008000;">// inside the loop.  The script will pause execution until</span>
+                <span style="color: #008000;">// the graph window as finished redrawing.  This allows</span>
+                <span style="color: #008000;">// watching the animation while creating the video file.</span>
+                string strLT;
+                strLT.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"sec -pw %s"</span>, gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; a <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">1.5</span>; a <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0.01</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #008000;">// Update the matrix data.</span>
+                        strFormula.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"i*sin(%f*x)-j*cos(y/%f)+grnd()"</span>, a, a<span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> mo.<span style="color: #000000;">SetFormula</span><span style="color: #000000;">(</span>strFormula, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                                mo.<span style="color: #000000;">ExecuteFormula</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                        gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Rescale the plot.</span>
+         
+                        <span style="color: #008000;">// Wait for graph window to redraw.</span>
+                        LT_execute<span style="color: #000000;">(</span>strLT<span style="color: #000000;">)</span>;
+
+                        <span style="color: #008000;">// Write the graph to the video as a single frame.</span>
+                        err <span style="color: #000080;">=</span> vw.<span style="color: #000000;">WriteFrame</span><span style="color: #000000;">(</span>gp<span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> err <span style="color: #000000;">)</span>
+                                <span style="color: #0000ff;">break</span>;
+                <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// Release the video object when finished.</span>
+            vw.<span style="color: #000000;">Release</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">return</span> err;
+<span style="color: #000000;">}</span>
+</pre>

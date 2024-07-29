@@ -1,0 +1,139 @@
+﻿<h1 class="firstheading">Re-Import</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Description"><span class="tocnumber">2</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">Steps</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Import_and_Re-Import"><span class="tocnumber">4</span> <span class="toctext">Import and Re-Import</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8.5.1</p>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Origin improve Re-Importing for the data format type in File: Import submenu. From 8.5.1, Re-Import supports the user define data format file. The following is an example on how to create an X-Function to import a binary file to Worksheet with the re-import options.</p>
+
+  <h2><a name="Steps"></a><span class="mw-headline">Steps</span></h2>
+
+  <ol>
+    <li>New an X-Function named impuser like the following picture.<br>
+    <a class="image"><img alt="XF impuser.png" src="../images/Re-Import/XF_impuser.png" width="699"></a> <b>reimp</b> variable for internal used to specify this X-Function be called from the 1st importing or re-importing.<br>
+    <b>reimportable</b> also for internal used to specify this X-Function if can do reimport. So the value in Data column should be 1.<br>
+    The two variables both are hidden on dailog. See "V:0" in Option String column. This option used to set control as hidden.</li>
+
+    <li>Open this X-Function in Origin Code Builder. Add the following codes to impuser function:
+      <pre class="oc" style="font-family:monospace;">
+Worksheet wks;
+okxf_resolve_string_get_origin_object<span style="color: #000000;">(</span>orng.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, <span style="color: #000040;">&amp;</span>wks<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//Fill target page with numbers</span>
+_import_to_wks<span style="color: #000000;">(</span>fname, options, wks<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// add import information for reimport</span>
+add_import_info<span style="color: #000000;">(</span>wks, fname, options, orng, reimp<span style="color: #000000;">)</span>;
+</pre>
+    </li>
+
+    <li>Copy the following funtions to the line after //put your own support static functions here.
+      <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//put your own support static functions here</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\fu_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> add_import_info<span style="color: #000000;">(</span>Worksheet<span style="color: #000040;">&amp;</span> wks, <span style="color: #0000ff;">const</span> string<span style="color: #000040;">&amp;</span> fname, TreeNode<span style="color: #000040;">&amp;</span> options, <span style="color: #0000ff;">const</span> Range<span style="color: #000040;">&amp;</span> orng, <span style="color: #0000ff;">int</span> reimp<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        <span style="color: #008000;">// save X-Function name into options tree</span>
+        fuSetXFunctionName<span style="color: #000000;">(</span>options, <span style="color: #ff00ff;">"impuser"</span><span style="color: #000000;">)</span>;
+        
+        TreeNode tnUsingFilter; <span style="color: #008000;">// filter is none</span>
+        <span style="color: #0000ff;">double</span> dDefault <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> fuGetDouble<span style="color: #000000;">(</span>options, IDE_DISP_IMP_ORIGINVER, dDefault<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                tnUsingFilter <span style="color: #000080;">=</span> options;
+        
+        Tree trInput;
+        TreeNode trRange <span style="color: #000080;">=</span> trInput.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Range"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>trRange.<span style="color: #000000;">SetDataRange</span><span style="color: #000000;">(</span>orng<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>impinfo_AddFile<span style="color: #000000;">(</span>wks, fname, <span style="color: #0000ff;">NULL</span>, ASCIMP_MODE_NEW_SHEETS, FILTER_TYPE_XFUNC, tnUsingFilter, <span style="color: #0000dd;">1</span>, trRange, reimp<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">bool</span> _import_to_wks<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> string<span style="color: #000040;">&amp;</span> fname, TreeNode<span style="color: #000040;">&amp;</span> options, Worksheet <span style="color: #000040;">&amp;</span>wks<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> 
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #0000ff;">file</span> fIn;  
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> fIn.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>fname, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeRead</span> <span style="color: #000040;">|</span> <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">shareDenyWrite</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000000;">)</span> 
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        vector vv<span style="color: #000000;">(</span><span style="color: #0000dd;">10</span><span style="color: #000000;">)</span>;
+        fIn.<span style="color: #000000;">Read</span><span style="color: #000000;">(</span>vv, <span style="color: #0000dd;">10</span> <span style="color: #000040;">*</span> <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>; 
+        fIn.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+        Column col <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        vectorbase <span style="color: #000040;">&amp;</span>vb <span style="color: #000080;">=</span> col.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        vb <span style="color: #000080;">=</span> vv;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Put the codes below into <b>impuser_make_tree</b> function to construct options tree. If want to remove options tree to keep X-Function simple, you can add "V:0" for this variable in Option String column in X-Function Builder to hide this control. But cannot remove this variable since re-import need put some useful information into this tree.
+      <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> <span style="color: #000000;">strcmp</span><span style="color: #000000;">(</span>lpcszVarName, <span style="color: #ff00ff;">"options"</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// add import mode related treenodes              </span>
+        constructOptionsForXF<span style="color: #000000;">(</span>tr, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Click Compile button on the top of this X-Function.</li>
+  </ol>
+
+  <h2><a name="Import_and_Re-Import"></a><span class="mw-headline">Import and Re-Import</span></h2>
+
+  <ol>
+    <li>In Origin Code Builder, new a c/cpp file and copy the following codes to it. This function used to write a data array to a *.dat file. This file will be used to do import in the below step. Click Build toobar button to compile and link.
+      <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> write_binary_file<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> dd<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string fname <span style="color: #000080;">=</span> GetOriginPath<span style="color: #000000;">(</span>ORIGIN_PATH_USER<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"TestFile.dat"</span>;
+        <span style="color: #0000ff;">file</span> fIn;  
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> fIn.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>fname, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeWrite</span> <span style="color: #000040;">|</span> <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeCreate</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000000;">)</span> 
+                <span style="color: #0000ff;">return</span>;
+        
+        vector vData;
+        vData.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        vData <span style="color: #000040;">+</span><span style="color: #000080;">=</span> dd;
+        fIn.<span style="color: #000000;">Write</span><span style="color: #000000;">(</span>vData, <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span>vData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;        
+        fIn.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Run "write_binary_file 0" in Command window to create file TestFile.dat under Origin User File Folder and write data 1,2,... 10 to file.</li>
+
+    <li>Run "impuser -d" in Command window and click OK button to import this file.</li>
+
+    <li>Run "write_binary_file 10" in Command window to rewrite data 11,12,...20, into the same data file.</li>
+
+    <li>Choose Origin menu File: Re-Import Directly to do re-import.</li>
+  </ol>

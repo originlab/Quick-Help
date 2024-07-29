@@ -1,0 +1,331 @@
+﻿<h1 class="firstheading">ピーク解析</h1>
+
+  <p class='urlname' style='display: none'>Peaks-and-Baseline</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Integrate_Active_Curve_in_Graph_over_a_Specific_X_Range"><span class="tocnumber">1</span> <span class="toctext">グラフ内のアクティブな曲線を指定したX範囲で積分</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Subtract_Baseline_and_Integrate_Peaks"><span class="tocnumber">2</span> <span class="toctext">ベースラインの減算とピークの積分</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Process_Multiple_DSC_Files_to_Find_and_Integrate_Peaks"><span class="tocnumber">3</span> <span class="toctext">ピークの検索と積分を複数のDSCファイルで行う</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Compare_Fitting_Results_of_PA"><span class="tocnumber">4</span> <span class="toctext">PAのフィット結果を比較</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Integrate_Active_Curve_in_Graph_over_a_Specific_X_Range"></a><span class="mw-headline">グラフ内のアクティブな曲線を指定したX範囲で積分</span></h2>
+
+  <p>Xファンクションinteg1を使って、グラフ内のアクティブな曲線を指定したX範囲で積分します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// このサンプルでは以下を行います:</span>
+<span style="color: #008000;">//        1. ファイルインポート</span>
+<span style="color: #008000;">//        2. グラフ作成</span>
+<span style="color: #008000;">//        3. グラフ内の指定したX範囲で曲線を積分</span>
+
+
+<span style="color: #008000;">// 新しいブックを作成してサンプルファイルをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;samples\curve fitting\multiple peaks.dat&quot;</span>;
+impasc;
+
+<span style="color: #008000;">// 1列目に対して4列目のデータを折れ線でプロット</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+<span style="color: #008000;">// 3番目のピークがあるX範囲6.5から9.5の行インデックスを取得</span>
+int ix1<span style="color: #000080;">=</span>xindex<span style="color: #000000;">(</span><span style="color: #0000dd;">6.5</span>,<span style="color: #000080;">%</span>c<span style="color: #000000;">)</span>;
+int ix2<span style="color: #000080;">=</span>xindex<span style="color: #000000;">(</span><span style="color: #0000dd;">9.5</span>,<span style="color: #000080;">%</span>c<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// この範囲の曲線を積分し、結果を表示</span>
+range rr<span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>c<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ix1<span style="color: #000000;">)</span><span style="color: #000000;">:</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ix2<span style="color: #000000;">)</span><span style="color: #000000;">]</span>;
+integ1 rr;
+integ1.<span style="color: #000080;">=</span>;
+</pre>
+
+  <h2><a name="Subtract_Baseline_and_Integrate_Peaks"></a><span class="mw-headline">ベースラインの減算とピークの積分</span></h2>
+
+  <p>このサンプルでは、1つのファイルに対して処理しますが、複数ファイルでループするように修正して使用することもできます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// このサンプルでは以下を行います:</span>
+<span style="color: #008000;">//        1. ファイルをインポート</span>
+<span style="color: #008000;">//        2. ベースラインの検索と減算 </span>
+<span style="color: #008000;">//        3. ピークの検索</span>
+<span style="color: #008000;">//        4. 各ピークを積分</span>
+<span style="color: #008000;">//        5. 各ピークの積分面積をサマリーシートに追加</span>
+
+<span style="color: #008000;">//プロジェクトをクリアして空のスペースで開始</span>
+doc <span style="color: #000080;">-</span>s;doc <span style="color: #000080;">-</span>n;<span style="color: #000000;">{</span>win <span style="color: #000080;">-</span>cd<span style="color: #000000;">}</span>;
+
+<span style="color: #008000;">// 複数ピークの分析結果を保存するための新しいブックを作成</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Integ Peaks&quot;</span> sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+string result<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>h;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;NXYXY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Results&quot;</span>;
+<span style="color: #008000;">// 全列の範囲を定義し、列に名前を付ける</span>
+range rFilename<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>, rPkindex<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>, rArea<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>, rCenter<span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>, rHeight<span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+rFilename<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;File Name&quot;</span>;
+rPkindex<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+rArea<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Area&quot;</span>;
+rCenter<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Center&quot;</span>;
+rHeight<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Height&quot;</span>;
+<span style="color: #008000;">// filename列の幅を広げる</span>
+wcolwidth irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> width<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">20</span>;
+
+<span style="color: #008000;">// データファイルを指定</span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\Peaks with Base.dat&quot;</span>; 
+
+newbook;<span style="color: #008000;">// データ用の新しいブックを使用（結果用ブックとは異なる）</span>
+
+<span style="color: #008000;">//impfile filtername:=&quot;ASCII.oif&quot;;</span>
+impASC;
+<span style="color: #008000;">// 最初の2列のみ使用</span>
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+range baseline<span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;<span style="color: #008000;">// col(1)のXを共有できるように、アンカーXYの前に配置</span>
+range subtracted<span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;<span style="color: #008000;">// ピーク検索、積分を行う減算データ</span>
+range <span style="color: #000080;">-</span>x anchors <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">//ピーク検索結果をいれる列</span>
+range pcenter<span style="color: #000080;">=</span><span style="color: #0000dd;">7</span>, pleft<span style="color: #000080;">=</span><span style="color: #0000dd;">8</span>, pright<span style="color: #000080;">=</span><span style="color: #0000dd;">9</span>;
+<span style="color: #008000;">// ベースラインのアンカーポイントを検索して列5、6に入れる</span>
+blauto iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors;
+
+<span style="color: #008000;">// 3次B－スプラインで補間して列5に入れる</span>
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>baseline;
+baseline<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Baseline&quot;</span>;
+baseline<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Interpolated from Found Anchor Pts&quot;</span>;
+<span style="color: #008000;">//ベースラインを減算</span>
+subtracted <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000080;">-</span> baseline;
+subtracted<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Subtracted&quot;</span>;
+
+<span style="color: #008000;">//ピーク検索</span>
+pkfind subtracted ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright;
+
+<span style="color: #008000;">//各ピークでループして面積を求める</span>
+for<span style="color: #000000;">(</span>int ipeak <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ipeak <span style="color: #000080;">&lt;=</span> pcenter.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ipeak<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        range rint <span style="color: #000080;">=</span> subtracted<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n1<span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n2<span style="color: #000000;">)</span><span style="color: #000000;">]</span>; <span style="color: #008000;">// 積分するデータ範囲</span>
+        double aa, x0, y0;
+        integ1 rint oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span> area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xx y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy;
+        
+        rFilename<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">info</span>.<span style="color: #000080;">system</span>.<span style="color: #000080;">import</span>.<span style="color: #000080;">filename</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+        rPkindex<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ipeak;
+        rArea<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> aa;
+        rCenter<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> xx;
+        rHeight<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> yy;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Process_Multiple_DSC_Files_to_Find_and_Integrate_Peaks"></a><span class="mw-headline">ピークの検索と積分を複数のDSCファイルで行う</span></h2>
+
+  <p>このサンプルでは、サンプルサブフォルダ内のすべてのファイルをループして処理し、サマリーシートを作成します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">///////////////////////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// このサンプルでは以下を行います:</span>
+<span style="color: #008000;">//        1.拡張子dscのファイルをインポート</span>
+<span style="color: #008000;">//        2.各データファイルをループし、ベースラインの検索と減算、</span>
+<span style="color: #008000;">//           ピークの検索、ピークの積分、異なるワークシートに積分面積などの結果を出力</span>
+<span style="color: #008000;">//        3.ピークのインデックスでサマリーシートをソート</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">//        このコードは、単独でアクセスできるように、セクション付きのOGS形式で記述されています。</span>
+<span style="color: #008000;">//        このコードを拡張子OGS付きのファイルとしてユーザファイルフォルダ内に保存してください。</span>
+<span style="color: #008000;">//        実行するときは、run.section(filename,Main) で実行します。</span>
+<span style="color: #008000;">//        または、</span>
+<span style="color: #008000;">//        DIR *.OGS&lt;Enter&gt; と入力してOGSファイルのスキャンを行い、filename&lt;Enter&gt;と入力して実行します。</span>
+<span style="color: #008000;">/////////////////////////////////////////////////////////////////////////////////////////////////////////</span>
+
+<span style="color: #000000;">[</span>Help<span style="color: #000000;">]</span>
+type Load one more files with dsc extension and then integrate area of each peak.;
+type One argument <span style="color: #000000;">:</span> <span style="color: #000080;">%</span>1 <span style="color: #000080;">=</span> number of files to load, <span style="color: #0000dd;">0</span> to load all.;
+
+<span style="color: #000000;">[</span>Main<span style="color: #000000;">]</span>
+int nfiles <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1;
+
+string LoadDSCogsPath<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\LoadDSC.ogs&quot;</span>;
+<span style="color: #000080;">%</span>A<span style="color: #000080;">=</span>LoadDSCogsPath<span style="color: #000080;">$</span>;
+if<span style="color: #000000;">(</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span><span style="color: #000080;">%</span>A, Main, nfiles<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        return <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// データはアクティブブックにロードされる</span>
+string dscBook<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H;
+if<span style="color: #000000;">(</span>dscBook.<span style="color: #000080;">GetLength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  type <span style="color: #ff00ff;">&quot;new book &quot;</span> <span style="color: #000080;">+</span> dscBook<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; is not valid&quot;</span>;
+  return <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">}</span>
+nfiles <span style="color: #000080;">=</span> page.<span style="color: #000080;">nLayers</span>;
+
+<span style="color: #008000;">// サマリーレポート用の新しいシートを作成して範囲を定義</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">8</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;LYYYYYYY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Summary&quot;</span>;
+range rColName <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, rCntrInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, rLtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>, rRtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+range rArea <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>, rCntr <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>, rHt <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+rColName<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data Name&quot;</span>;
+rIndex<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+rCntrInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+rLtInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+rRtInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+rArea<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Area&quot;</span>;
+rCntr<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center&quot;</span>;
+rHt<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>      <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Height&quot;</span>;
+
+
+for<span style="color: #000000;">(</span>int ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span> nfiles; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   if<span style="color: #000000;">(</span><span style="color: #000080;">!</span>run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>, IntegOneData, <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        return <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">}</span>
+
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">nLayers</span><span style="color: #000000;">)</span>;
+dataset sbc <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">2</span><span style="color: #000000;">}</span>;  <span style="color: #008000;">//最初のソート順のためにピークのインデックスを選択</span>
+dataset sodr<span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>;  <span style="color: #008000;">//昇順</span>
+wsort nestcols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sbc order<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sodr; <span style="color: #008000;">//ソートを実行</span>
+
+return <span style="color: #0000dd;">1</span>;<span style="color: #008000;"></span>
+
+<span style="color: #000000;">[</span>IntegOneData<span style="color: #000000;">]</span>
+int sheet <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1;
+page.<span style="color: #000080;">active</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>sheet<span style="color: #000000;">)</span>;
+range rinput <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>sheet<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;
+string strData<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rinput<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">//ベースラインと減算データとために列を追加</span>
+wks.<span style="color: #000080;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+int n <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+range baseline <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>n<span style="color: #000000;">)</span>;
+baseline<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Baseline&quot;</span>;
+baseline<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Interpolated from Found Anchor Pts&quot;</span>;
+wks.<span style="color: #000080;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+n <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+range subtracted <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>n<span style="color: #000000;">)</span>;
+subtracted<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Subtracted&quot;</span>;
+
+<span style="color: #008000;">// ベースラインのアンカーポイントを検索 </span>
+range <span style="color: #000080;">-</span>x anchors <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>AnchorX, AnchorsY<span style="color: #000000;">)</span>;
+blauto iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rinput  oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors;
+
+        
+<span style="color: #008000;">// スプラインで補間</span>
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>anchors method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>spline ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>baseline;
+
+<span style="color: #008000;">//ベースラインを減算</span>
+subtracted <span style="color: #000080;">=</span> rinput <span style="color: #000080;">-</span> baseline;
+
+
+<span style="color: #008000;">//ピーク検索結果を入れる列</span>
+int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+loop<span style="color: #000000;">(</span>cc, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//ピーク検索</span>
+range pindex <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>, pcenter<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>, pleft<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>, pright<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>, parea<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>, px <span style="color: #000080;">=</span>  <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span>, py <span style="color: #000080;">=</span>  <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nn<span style="color: #000080;">+</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+pkfind subtracted ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright;
+
+<span style="color: #008000;">// 各ピークをループして面積を計算</span>
+int nNumPeaks <span style="color: #000080;">=</span> pcenter.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+for<span style="color: #000000;">(</span>int ipeak <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ipeak <span style="color: #000080;">&lt;=</span> nNumPeaks; ipeak<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        range rint <span style="color: #000080;">=</span> subtracted<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n1<span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n2<span style="color: #000000;">)</span><span style="color: #000000;">]</span>; <span style="color: #008000;">// 積分するデータ範囲</span>
+        double aa, x0, y0;
+        integ1 rint area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xx y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>yy oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+        
+        pindex<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ipeak;
+        parea<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> aa;
+        px<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> xx;
+        py<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> yy;
+        
+        <span style="color: #008000;">// 現ピークの結果をサマリーシートにコピー</span>
+        int irow <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>sheet<span style="color: #000000;">)</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">*</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>nNumPeaks<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">+</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ipeak<span style="color: #000000;">)</span> ;
+        rColName<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> rinput<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+        rIndex<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ipeak;
+        rCntrInd<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> pcenter<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        rLtInd<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> pleft<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        rRtInd<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> pright<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        rArea<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> parea<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        rCntr<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> px<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+        rHt<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>irow<span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> py<span style="color: #000000;">[</span>ipeak<span style="color: #000000;">]</span>;
+<span style="color: #000000;">}</span>
+
+pindex<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Index&quot;</span>;
+pcenter<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+pleft<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+pright<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+parea<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Area&quot;</span>;
+px<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Center&quot;</span>;
+py<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Height&quot;</span>;
+
+return <span style="color: #0000dd;">1</span>;
+</pre>
+
+  <h2><a name="Compare_Fitting_Results_of_PA"></a><span class="mw-headline">PAのフィット結果を比較</span></h2>
+
+  <p>一連のサンプルデータにPAを実行したあとに特定のピークのフィットを比較します。</p>
+
+  <p>（あらかじめ<a class="external text" href="http://www.originlab.com/ftp/the3ndpeak.zip" target="_blank">ZIPファイル</a>をダウンロードして解凍し、ユーザファイルフォルダの\Themes\AnalysisAndReportTable\に保存してください。）</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// このサンプルでは以下を行います:</span>
+<span style="color: #008000;">//        1. 一連のdscファイルのインポート</span>
+<span style="color: #008000;">//        2. ベースラインの自動検索と減算 </span>
+<span style="color: #008000;">//        3. テーマファイルからロードした設定でピークの検索とフィット</span>
+<span style="color: #008000;">//        4.最初のシートに3番目のピークのフィット曲線をプロット</span>
+<span style="color: #008000;">//        5.グラフセル下にこのピークの初期パラメータを追加</span>
+<span style="color: #008000;">//      6.最後に、ソースデータの同じピークについて比較</span>
+
+path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\DSC\Data\&quot;</span>;
+
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bkn<span style="color: #000080;">$</span>;
+int nfrom <span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;
+int nto<span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+range ww <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+ww.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nto <span style="color: #000080;">-</span> nfrom <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//最初の列は変数リストのラベル</span>
+        
+<span style="color: #008000;">//比較変数のフォーマット</span>
+range rLabel <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+rLabel<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Curve&quot;</span>;
+rLabel<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;xc&quot;</span>;
+rLabel<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;A&quot;</span>;
+rLabel<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;w&quot;</span>;
+
+int ii;
+loop<span style="color: #000000;">(</span>ii,nfrom,nto<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">//1, 一連のファイルから2データファイルをインポート</span>
+        ind<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+        filename<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;tcal&quot;</span><span style="color: #000080;">+</span> ind<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #ff00ff;">&quot;.dsc&quot;</span>;
+        file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> path<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filename<span style="color: #000080;">$</span>;
+        newsheet bkn<span style="color: #000080;">$</span>;
+        impfile file<span style="color: #000080;">$</span> ;
+                
+        <span style="color: #008000;">//2, paスクリプトモードを実行して結果ワークシート名とレポートツリーを保存</span>
+        aa<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;(1,2)&quot;</span>;
+        pa iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa<span style="color: #000080;">$</span> theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span>the3ndpeaks;
+                
+        <span style="color: #008000;">//3, 結果を取得して3番目のピークのプロットを作成</span>
+        string pp, fitc, resid, peak3;
+        pp<span style="color: #000080;">$</span> <span style="color: #000080;">=</span>__PEAK<span style="color: #000080;">$</span>;
+        fitc<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> __FITCURVE<span style="color: #000080;">$</span>;
+        resid<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> __RESIDUAL<span style="color: #000080;">$</span>;
+        getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>trRes iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>__REPORT<span style="color: #000080;">$</span>;
+                
+        <span style="color: #008000;">//4, 3番目のピークをSheet1にプロットして比較</span>
+        range r_peak <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+        peak3<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fitc<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;(7,8)&quot;</span>;
+                
+        plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>peak3<span style="color: #000080;">$</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+        graphname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H; 
+        insertGraph gname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>graphname<span style="color: #000080;">$</span> embed<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> resizecell<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> cell<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r_peak;
+                
+        <span style="color: #008000;">//5, ピーク情報を追加</span>
+        range r_info <span style="color: #000080;">=</span>  <span style="color: #0000dd;">1</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">:</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>;
+        r_info<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">xc__3</span>.<span style="color: #000080;">Value</span>;
+        r_info<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">A__3</span>.<span style="color: #000080;">Value</span>;
+        r_info<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> trRes.<span style="color: #000080;">Parameters</span>.<span style="color: #000080;">w__3</span>.<span style="color: #000080;">Value</span>;
+
+<span style="color: #000000;">}</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+</pre>

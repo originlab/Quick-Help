@@ -1,0 +1,177 @@
+﻿<h1 class="firstheading">スクリプトからXファンクションを呼び出す</h1><p><span class="OIndex" style="display:none">Xファンクション、スクリプトからの実行</span><span class="OIndex" style="display:none">Xファンクション、ダイアログなしでの実行</span>
+</p><p>ほとんどの組み込み<b>Xファンクション</b>はデフォルトで<b>LabTalk</b>から呼び出すことができます。つまり、<b>コマンドウィンドウ</b>、 <b>スクリプトウィンドウ</b>、ツールバーボタン、ワークシートに埋め込まれたスクリプト、ボタンに埋め込まれたスクリプトなど、LabTalkスクリプトを実行できるところならどこでもXファンクションを呼び出すことができます。 
+<br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Syntax_to_Call_X-Functions"><span class="tocnumber">1</span> <span class="toctext">Xファンクションを呼び出すシンタックス</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Use_File_Metadata_as_Input"><span class="tocnumber">2</span> <span class="toctext">ファイルメタデータを入力として使用する</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Access_Input_and_Output_Variable_Values_after_Execution"><span class="tocnumber">3</span> <span class="toctext">実行後の入出力変数値へのアクセス</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Quick_Way_in_Command_Window"><span class="tocnumber">4</span> <span class="toctext">コマンドウィンドウでの簡単な実行方法</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Save_X-Function_settings_as_a_Dialog_Theme_File_and_Call_it"><span class="tocnumber">5</span> <span class="toctext">Xファンクション設定をダイアログテーマファイルとして保存し、それを呼び出す</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Generate_Script_from_X-Function_Dialog"><span class="tocnumber">6</span> <span class="toctext">Xファンクションダイアログからスクリプトを生成</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Make_an_X-Function_not_callable_in_LabTalk"><span class="tocnumber">7</span> <span class="toctext">XファンクションをLabTalkで呼び出せないようにする</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Related_Links"><span class="tocnumber">8</span> <span class="toctext">関連項目</span></a></li>
+</ul>
+</div>
+<h3><a name="Syntax_to_Call_X-Functions"></a><span class="mw-headline">Xファンクションを呼び出すシンタックス</span></h3>
+<p>各Xファンクションには、int、double、string、range、さらにはtreeなど、さまざまな<a class="external text" href="../../LabTalk/LabTalk/Data_Types_and_Variables.html">データ型</a>の独自の入力変数と出力変数のセットがあります。 <br /> 
+<i><b>&lt;xfunction&gt; -&lt;option1&gt; option1value -&lt;option2&gt; option2value var1:=value1 var2:=value2  ....</b></i>
+</p><p><br />
+ここでは、Xファンクション<i>smooth</i>を使用してXファンクションを呼び出す方法を紹介します。 <br />
+</p>
+<ul><li> オプションの完全な名前と短縮名をサポートしています。例）下記のスクリプトは、どちらもsmoothのヘルプをダンプします。</li></ul>
+<p><code>
+smooth -h
+</p><p>smooth -help
+</code>
+</p>
+<ul><li> 変数の完全な名前と短縮名をサポートしています。例）下記のスクリプトは、どちらも<i>method</i>変数に対して方式1<b>Savitzky-Golay</b>（インデックス付けは0から開始）を指定します。</li></ul>
+<p><code>
+smooth m:=1 
+</p><p>smooth method:=1 
+</code>
+</p>
+<ul><li> 一部の変数では、文字列またはインデックス番号としての値をサポートしています。例）下記のスクリプトは、どちらも<i>method</i>変数に対して方式1<b>Savitzky-Golay</b>を指定します。</li></ul>
+<p><code>
+smooth method:=1
+</p><p>smooth method:=sg
+</code>
+</p>
+<ul><li> オプションと変数の順序は混同することができます。例）下記のスクリプトは、どちらも方式1、ポイント数5、再計算オプション「自動」を指定します。</li></ul>
+<p><code>
+smooth -r 1 method:=1 npts:=5
+</p><p>smooth  method:=1 -r 1 npts:=5
+</code>
+</p>
+<ul><li> ほとんどの変数にはデフォルト値があります。デフォルト値を使用する場合は、var1:=valueを指定する必要はありません。例）デフォルトの<i>iy</i> （入力）変数は&lt;active&gt;（グラフ内のアクティブなプロットまたはワークシート内で選択された列）です。下記のすべてのスクリプトは、グラフ内のアクティブなプロットまたはワークシートの選択されたデータをスムージングします。</li></ul>
+<p><code>
+smooth //smooth on active plot or selected data with all default smoothing settings
+</p><p>smooth m:=2 //アクティブプロットまたは選択されたデータを方式2でスムージング
+</p><p>smooth npt:=7 //アクティブプロットをデフォルトの方式1でスムージング、ただしウィンドウのポイント数は7とする
+</code>
+</p>
+<ul><li> 変数名の<i>var1:=</i>の部分は、変数値を順番に入力するとスキップできます。例）smooth -h と入力して全ての変数を表示すると、1番目の変数は<i>iy</i>、2番目の変数は<i>method</i>であることがわかります。下記のスクリプトは、どちらも<i>smooth iy:=(1,2) method:=2</i>と同じで、データセット（アクティブなワークシートの第1列がX、第2列がY）を方式2でスムージングします。</li></ul>
+<p><code>
+smooth (1,2) 2 //iy:= is skipped, method:= is skipped. It&apos;s same as smooth iy:=(1,2) method:=2
+</p><p>smooth (1,2) method:=2 //iy:= はスキップされる。smooth iy:=(1,2) method:=2　と同様
+</code>
+</p>
+<ul><li> -dを実行してXファンクションダイアログを開きます。ほとんどのXファンクションには対応するダイアログがあります。次のスクリプトを実行すると、変数を簡単に指定して実行できます。</li></ul>
+<p><code>
+smooth -d //opens smooth dialog with all default settings.
+</p><p>smooth method:=2 -d //方式が方式2に設定されたスムージングダイアログを開く
+</code>
+</p>
+<ul><li> -dbを実行してXファンクションダイアログを開き、現在のウィンドウにドッキングします。その後、ウィンドウをドッキング可能なダイアログとともに保存して、将来使用することができます。</li></ul>
+<p><code>
+smooth -db //opens smooth dialog with default settings and the dialog is docked to the left of active window
+</code>
+</p>
+<ul><li> 元に戻すをサポートするには-uを実行します。</li></ul>
+<p><code>
+smooth -u // X-Function become undoable, i.e. you can undo by Ctrl + Z or select Undo from Edit menu 
+</code>
+</p>
+<h3><a name="Use_File_Metadata_as_Input"></a><span class="mw-headline">ファイルメタデータを入力として使用する</span></h3>
+<p>Xファンクションでファイルのメタデータを参照できます。スクリプトウィンドウ（<b>ウィンドウ：スクリプトウィンドウ</b>）を開き、次のように入力します。
+<code>
+page.info.=
+</code>
+これにより、Xファンクションの実行時に使用できるユーザー変数を含む、ファイルメタデータのリストがダンプされます。
+</p><p><code>
+rnormalize -r 2 method:=specify val:=page.info.USER.VARIABLES.NOOFPOINTS; // runs the X-Function rnormalize, dividing values in the selected column by the value of page.info.USER.VARIABLES.NOOFPOINTS.
+</code>
+</p><p>スクリプトウィンドウに変数をダンプする代わりに、ファイルをインポートしたワークシート列の右側の灰色の部分で右クリックして<b>オーガナイザを表示</b>することも可能です。<b>page.info</b>を展開して、ノード上で右クリックし<b>ノードパスをコピーする</b>を選択します。
+</p>
+<h3><a name="Access_Input_and_Output_Variable_Values_after_Execution"></a><span class="mw-headline">実行後の入出力変数値へのアクセス</span></h3>
+<p>Xファンクションが呼び出された後、入力または出力に関係なく、変数値にアクセスできます。一部のXファンクション出力は、ツリー変数に入れてからアクセスする必要があります。ここでは、いくつかの簡単な例のみを示します。
+</p>
+<ul><li> はじめに、Y列を選択して<i>smooth</i>を実行します。次のスクリプトを実行します。</li></ul>
+<p><code>
+smooth.= //gives all variables and corresponding values
+</p><p>smooth.method= //方式の番号を与える
+</code>
+</p>
+<ul><li> はじめに1列を選択して<i>stats</i>を実行します。次のスクリプトを実行します。</li></ul>
+<p><code>
+stats.= //gives all output values
+</p><p>stats.min= //計算された平均値を与える
+</code>
+</p><p><br />
+レポートツリーにアクセスするには、例えばANOVAの場合、Xファンクション<a href="../../XFunction/X-Function/Getresults.html" title="Xファンクション:Getresults">Getresults</a>を使用します。
+</p><p>既存の操作の構成ツリーを取得するには、Xファンクション <a href="../../XFunction/X-Function/Op_change.html" title="Xファンクション：Op change">Op_change</a>を使用します。
+</p>
+<h3><a name="Quick_Way_in_Command_Window"></a><span class="mw-headline">コマンドウィンドウでの簡単な実行方法</span></h3>
+<p>コマンドウィンドウ（ウィンドウ：コマンドウィンドウ）を使用して、Xファンクションを呼び出す方法を簡単に学ぶことができます。コマンドウィンドウではXファンクション名、オプション、変数を自動入力できます。
+次をお試しください。
+</p>
+<ol><li> ワークシートで、最初の列に行番号を入力し、2番目の列に乱数を入力します。2番目の列を選択します。 </li>
+<li> <b>ウィンドウ：コマンドウィンドウ</b>を選択してコマンドウィンドウを開きます。</li>
+<li> sを入力すると、名前が<b>s</b>から始まるXファンクションのリストが表示されます。
+<dl><dd> <a  class="image"><img alt="Cm1.png" src="../images/Calling_X-Functions_from_Script/Cm1.png" width="441"  /></a></dd></dl></li>
+<li> <b>Down</b>キーを押して<b>smooth</b>まで移動し、<b>Enter</b>キーを押して選択します。マウスで<b>smooth</b>をダブルクリックして選択することもできます。</li>
+<li> コマンドラインに smooth が表示されます。<b>Space</b>キーを押します。smoothの変数が表示されます。
+<dl><dd> <a  class="image"><img alt="Cm2.png" src="../images/Calling_X-Functions_from_Script/Cm2.png" width="441"  /></a></dd></dl></li>
+<li> <b>Down</b>キーを押して<b>method:=1</b>まで移動し、<b>Enter</b>キーを押して選択します。 </li>
+<li> 利用可能な方式が表示されます。
+<dl><dd> <a  class="image"><img alt="Cm3.png" src="../images/Calling_X-Functions_from_Script/Cm3.png" width="441"  /></a></dd></dl></li>
+<li> <b>Down</b>キーを押して<b>pf=2 Percentile Filter</b>まで移動し、<b>Enter</b>キーを押して選択します。</li>
+<li> <b>Space</b>キーを押した後に<b>-</b>キーを押します。オプションが表示されます。すべてのオプションが表示されます。
+<dl><dd> <a  class="image"><img alt="Cm4.png" src="../images/Calling_X-Functions_from_Script/Cm4.png" width="441"  /></a></dd></dl></li>
+<li> <b>Down</b>キーを押して<b>recalculate</b>まで移動し、<b>Enter</b>キーを押して選択します。</li>
+<li> <b>Space</b>キーをのあとに1を押して、再計算オプションを1にします。これにより、入力データに変更があると自動再計算されます。 </li>
+<li> <b>Enter</b>キーを押して実行します。3列目にスムージング結果が表示されます。
+<dl><dd> <a  class="image"><img alt="Cm5.png" src="../images/Calling_X-Functions_from_Script/Cm5.png" width="823"  /></a></dd></dl></li>
+<li> コマンドウィンドウでsmooth.=と入力し、Enterキーを押すと、実行されたXファンクションで指定されたすべての変数値が表示されます。
+<dl><dd> <a  class="image"><img alt="Cm6.png" src="../images/Calling_X-Functions_from_Script/Cm6.png" width="517"  /></a></dd></dl></li>
+<li> smooth.method= を実行すると方式の値が得られます。</li></ol>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Calling_X-Functions_from_Script/Tip_icon.png" width="57"  border="0" /></td><td><ol><li> <b>上</b>および<b>下</b>のキーを使用して、 現在のセッションで入力した前のコマンドを前後にスクロールできます。</li>
+<li> <b>コマンドウィンドウ</b>の左パネルには、現在のセッションで実行されたすべてのコマンドをが表示されます。そこにカーソルを置いて<b>Enter</b>キーを押すと、そのコマンドラインが再度実行されます。</li></ol>
+</td></tr></table>
+<h3><a name="Save_X-Function_settings_as_a_Dialog_Theme_File_and_Call_it"></a><span class="mw-headline">Xファンクション設定をダイアログテーマファイルとして保存し、それを呼び出す</span></h3>
+<p>Xファンクションの変数設定はテーマファイルに保存できます。Xファンクションを呼び出し、<b>-theme</b>または<b>-t</b>オプションを使用して、テーマファイルに保存された設定を使用できます。
+</p><p><b>例：</b>
+</p>
+<ol><li> スクリプトウィンドウで smooth -d を実行、またはメニューの<b>解析：信号処理：スムージング</b>を選択してsmoothダイアログを開きます。</li>
+<li> いくつかの設定を変更します。例）方式と再計算モード </li>
+<li> ダイアログ上部の<b>ダイアログテーマ</b>の隣の &gt; ボタンを押して名<b>前を付けて保存...</b>を選択します。<b>mytheme</b>のような名前を付けます。</li>
+<li> ファイルは次の場所に保存されます。 &lt;ユーザファイルフォルダ&gt;\Themes\AnalysisAndReportTable\（ファイル名の例： 0-smooth-mytheme.ois）Originはいくつかの接頭辞を追加するため、ユーザはそれがスムージングのXファンクションであることが分かります。 </li>
+<li> スクリプトウィンドウで次を実行して、アクティブなデータに対して<b>mytheme</b>テーマでスムージングをかけます。</li></ol>
+<p><code>
+1. smooth -t mytheme //Do smoothing with mytheme
+</p><p>2. smooth -t mytheme -d; // mythemeがロードされたスムージングダイアログを開く
+</code>
+</p>
+<h3><a name="Generate_Script_from_X-Function_Dialog"></a><span class="mw-headline">Xファンクションダイアログからスクリプトを生成</span></h3>
+<p>いくつかのXファンクションには、Xファンクションスクリプトを生成するためのスクリプトの生成コンテキストメニューがあります。
+</p>
+<ol><li> スクリプトウィンドウで smooth -d を実行、またはメニューの<b>解析：信号処理：スムージング</b>を選択してsmoothダイアログを開きます。</li>
+<li> いくつかの設定を変更します。例）方式と再計算モード </li>
+<li> ダイアログ上部の<b>ダイアログ・テーマ</b>の隣の &gt; ボタンを押して<b>スクリプトの生成を選択します。 </b>
+<dl><dd><a  class="image"><img alt="Smooth GS.png" src="../images/Calling_X-Functions_from_Script/Smooth_GS.png" width="776"  /></a></dd></dl></li>
+<li> スクリプトがスクリプトウィンドウにダンプされます。</li></ol>
+<pre class="lt" style="font-family:monospace;">smooth <span style="color: #000080;">-</span>r <span style="color: #0000dd;">1</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fft;</pre>
+<h3><a name="Make_an_X-Function_not_callable_in_LabTalk"></a><span class="mw-headline">XファンクションをLabTalkで呼び出せないようにする</span></h3>
+<p>最初に述べたように、ほとんどのX関数はLabTalkで呼び出すことができます。呼び出しを禁止するには、 
+</p>
+<ol><li> メニューから<b>ツール：Xファンクション・ビルダ</b>を選択します。</li>
+<li> <b>ファイル</b>メニューからXファンクションを開きます。</li>
+<li> <b>ツール：ツリービュー</b>メニュー（またはツリービューボタン） を選択してXファンクションをツリービュー表示します。</li>
+<li> <b>使用のコンテクスト</b>ブランチを展開します。</li>
+<li> <b>LabTalk</b>のチェックを外します。</li>
+<li> Xファンクションを保存します。 </li></ol>
+<p>Note: 組み込みXファンクションの上書き保存はできません。ユーザ定義Xファンクションとして保存する必要があります。ユーザファイルフォルダとシステムフォルダに同じ名前のXファンクションがある場合、ユーザファイルフォルダの下にあるXファンクションが使用されます。
+</p><p><br />
+</p>
+<h3><a name="Related_Links"></a><span class="mw-headline">関連項目</span></h3>
+<ul><li> <a class="external text" href="../../LabTalk/Script/X-Functions_Overview.html">Xファンクションの概要</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Input_and_Output.html">Xファンクションの入力と出力</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">Xファンクションの実行オプション</a> </li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/X-Function_Exception_Handling.html">Xファンクションの例外の扱い</a></li>
+<li> <a class="external text" href="../../LabTalk/LabTalk/Tutorial_X-Function.html">LabTalkチュートリアルでXファンクションを使用する</a></li>
+<li> <a href="../../XFunction/X-Function/Calling_X-Functions_in_Origin_C.html" title="Xファンクション：Origin CでXファンクションを呼び出す">Origin CでXファンクションを呼び出す</a></li></ul>
+
+
+    

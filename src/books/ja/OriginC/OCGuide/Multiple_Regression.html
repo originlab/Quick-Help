@@ -1,0 +1,59 @@
+﻿<h1 class="firstheading">多重回帰</h1><p>Origin は、<b><a href="../../OriginC/OriginC/Ocmath_multiple_linear_regression_(global_function).html" title="OriginC:Ocmath multiple linear regression (global function)">ocmath_multiple_linear_regression</a></b>関数を使用して多重回帰を行います。この関数は、データの重みと線形回帰オプションを提供しています。この関数を実行した後、フィットパラメータやANOVA統計、推定の共分散と相関の行列といった詳細な出力が可能です。
+</p><p>次のセクションでは、この関数を使用して多重線形回帰を実行する方法を示します。
+</p>
+<h2><a name="Perform_Multiple_Linear_Regression"></a><span class="mw-headline">線形多重回帰を実行</span></h2>
+<p>多重線形回帰を実行する前に、データをインポートします。ここでは、3つの独立変数と1つの従属変数が必要です。
+</p><p>1.多重線形回帰のためのデータをロードします。独立データｙは、matrixに、従属データはvectorに格納する必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 1. 多重線形回帰のデータを取得</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+    <span style="color: #0000ff;">return</span>; <span style="color: #008000;">// データのワークシートがアクティブであることを確認  </span>
+
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 最初の3列</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 4列目</span>
+
+matrix mX;  
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>mX, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 最初の3列のデータをmatrixへ取得</span>
+
+vector vY;
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 4列目のデータを取得</span></pre>
+<p>2.パラメータ初期値を宣言して関数に渡します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 2. 入力と出力変数を用意</span>
+UINT nOSizeN <span style="color: #000080;">=</span> mX.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 観測数</span>
+UINT nVSizeM <span style="color: #000080;">=</span> mX.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 独立変数の合計数</span>
+
+LROptions stLROptions;  <span style="color: #008000;">// 線形回帰オプションの設定のために使用</span>
+stLROptions.<span style="color: #000000;">UseReducedChiSq</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+
+FitParameter stFitParameters<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>; <span style="color: #008000;">// nVSizeM+1にする</span>
+UINT nFitSize <span style="color: #000080;">=</span> nVSizeM<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// FitParameterのサイズ</span>
+
+RegStats stRegStats;  <span style="color: #008000;">// フィットの統計取得のために使用</span>
+RegANOVA stRegANOV;  <span style="color: #008000;">// anova統計取得のために使用</span></pre>
+<p>3.用意したパラメータを関数に渡し、多重線形回帰を実行します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 3. 多重線形回帰を実行 </span>
+<span style="color: #008000;">// ここでは推定の共分散と相関の行列は取得せず、重みも使用しない</span>
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_multiple_linear_regression<span style="color: #000000;">(</span>mX, nOSizeN, nVSizeM, vY, <span style="color: #0000ff;">NULL</span>, 
+		<span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>stLROptions, stFitParameters, nFitSize, <span style="color: #000040;">&amp;</span>stRegStats, <span style="color: #000040;">&amp;</span>stRegANOV<span style="color: #000000;">)</span>;
+            
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> STATS_NO_ERROR <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>   
+    out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Error&quot;</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Output_the_Results"></a><span class="mw-headline">結果を出力</span></h2>
+<p>計算が完了したら、スクリプトウィンドウ、結果ログ、ワークシートなどに結果を出力できます。
+</p><p>詳細は、<b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Output_Window" title="線形フィットを実行">結果ウィンドウに出力</a></b>、<b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Worksheet" title="OCGuide:Linear Fitting">ワークシートに出力</a></b> のセクションを確認してください（ <b><a href="../../OriginC/OCGuide/Linear_Fitting.html" title="OCGuide:Linear Fitting">分析とアプリケーション：カーブフィッティング：線形フィット</a></b> ）
+
+</p>
+
+
+
+
+
+
+    

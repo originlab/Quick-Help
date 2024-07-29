@@ -1,0 +1,54 @@
+﻿<h1 class="firstheading">スクリプトウィンドウやコマンドウィンドウから</h1><p class='urlname' style='display: none'>From-Script-and-Command-Window</p>
+<p><span class="OIndex" style="display:none">コマンドウィンドウからスクリプトを実行</span>　LabTalkを直接実行する2つのウィンドウがあります。(古い) <span class="OIndex">スクリプトウィンドウ</span> と (新しい)<span class="OIndex">コマンドウィンドウ</span>です。
+各ウィンドウは、1行以上のスクリプトを実行できます。
+</p>
+<ul><li> コマンドウィンドウにはプロンプトがあり、プロンプトに入力したすべてのコードを実行します。</li>
+<li> スクリプトウィンドウには、カーソルだけがあり、Enterキーを押すと、マウスで選択したコードまたはカーソルが存在する行のコードを実行します。</li>
+<li> どちらのウィンドウもCtrl+Enterキーで実行なしで改行します。Ctrl+Enterキーを使って改行するとき、複数行の実行のためにステートメントの最後にセミコロン<b>;</b>を含める必要があります。 </li>
+<li> スクリプトウィンドウには、メニューの<b>編集：改行を挿入</b>を選択して改行したり、<b>編集</b>メニューの<b>スクリプトの実行</b>をチェックする、またはチェックを外してスクリプトの実行をオフにすることもできます。</li>
+<li> スクリプトウィンドウとコマンドウィンドウは、X-Functionのオートコンプリートのための<span class="OIndex">インテリセンス</span>をサポートしています。コマンドウィンドウのみ、<span class="OIndex">コマンド履歴</span>と行履歴の呼び出し（上下の矢印）があります。</li>
+<li> スクリプトウィンドウでは複数行や長いスクリプトを編集するのが簡単です。</li></ul>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png" width="57"  border="0" /></td><td><p>Origin 2023では、Unicode、オートコンプリート、シンタックスカラーリング、フォントサイズのコントロール（Ctrl + マウスによるズーム）をサポートするScintillaベースのスクリプトウィンドウを追加しました。この変更により、特に4kモニタを使用している場合に使いやすくなりました。元のスクリプトウィンドウに戻す場合には<a href="../../LabTalk/LabTalk/System_Variable_List.html#N" title="LabTalk:システム変数リスト"><b>@NSW=0</b></a>にしてください。
+</p></td></tr></table>
+<p><br />
+以下は、1つのX列と複数のY列の形式でデータを持つワークシートを処理するサンプルスクリプトです。   コードは、すべてのYデータからY値の最大値および最小値を見つけ、すべてのYをその範囲で正規化するものです。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 最も小さい最小値と最も大きい最大値を探す</span>
+double absMin <span style="color: #000080;">=</span> 1E300;
+double absMax <span style="color: #000080;">=</span> <span style="color: #000080;">-</span>1E300;
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">2</span>,wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    stats <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+    if<span style="color: #000000;">(</span>absMin <span style="color: #000080;">&gt;</span> stats.<span style="color: #000080;">min</span><span style="color: #000000;">)</span> absMin <span style="color: #000080;">=</span> stats.<span style="color: #000080;">min</span>;
+    if<span style="color: #000000;">(</span>absMax <span style="color: #000080;">&lt;</span> stats.<span style="color: #000080;">max</span><span style="color: #000000;">)</span> absMax <span style="color: #000080;">=</span> stats.<span style="color: #000080;">max</span>;
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// 各列をその範囲に正規化</span>
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">2</span>,wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    stats <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+    wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span>stats.<span style="color: #000080;">min</span>;                 <span style="color: #008000;">// ゼロの最小値にシフト</span>
+    wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">/</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>stats.<span style="color: #000080;">max</span> <span style="color: #000080;">-</span> stats.<span style="color: #000080;">min</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">// 1に正規化</span>
+    wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">*</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>absMax <span style="color: #000080;">-</span> absMin<span style="color: #000000;">)</span>;         <span style="color: #008000;">// 範囲に正規化</span>
+    wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span>absMin;                    <span style="color: #008000;">// 最小値にシフト</span>
+<span style="color: #000000;">}</span></pre>
+<p>スクリプトウィンドウで実行するには、コードを貼り付け、マウスですべてのコードを選択し、Enterキーを押します。(選択したテキストは反転表示されます)
+</p><p>コマンドウィンドウでスクプトを実行するには、コードを貼り付けEnterキーを押します。コードに誤りがある場合、スクリプトウィンドウではすべてを利用して編集することができますが、コマンドウィンドウの履歴パネルでは編集できず、スクリプトすべてを再呼び出しすることもできません。
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png" width="57"  border="0" /></td><td><p>Originには、コードビルダというスクリプトエディタがあり、これはLabTalkやOrigin Cコードを編集したり、デバッグすることができます。コードビルダを開くには、スクリプトまたはコマンドウィンドウに<b>ed.open()</b> と入力するか、標準ツールバーから <a  class="image"><img alt="Button Code Builder.png" src="../images/From_Script_and_Command_Window/Button_Code_Builder.png" width="23"  /></a> ボタンを選択します。
+</p></td></tr></table>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/From_Script_and_Command_Window/Tip_icon.png" width="57"  border="0" /></td><td><p><span class="OIndex">スクリプトウィンドウ</span>内のフォントは次の方法で変更できます。
+</p>
+<ol><li>User FilesフォルダのOrigin.iniファイルを開き、 [font] セクションを検索して、 [font] セクション内に以下を貼り付けます。</li>
+<li>Originを再起動し、<span class="OIndex">スクリプトウィンドウ</span>を確認してフォントとサイズが変更されていることを確認して下さい。</li></ol>
+<pre class="lt" style="font-family:monospace;">ScriptWindowFontHeight<span style="color: #000080;">=</span><span style="color: #0000dd;">24</span>
+ScriptWindowCharset<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>
+ScriptWindowFaceName<span style="color: #000080;">=</span>Times New Roman</pre>
+<p>文字コードの詳細は、<a class="external free" href="http://msdn.microsoft.com/en-us/library/cc250412.aspx" target="_blank">http://msdn.microsoft.com/en-us/library/cc250412.aspx</a> を参照してください。
+</p></td></tr></table>
+
+
+
+    

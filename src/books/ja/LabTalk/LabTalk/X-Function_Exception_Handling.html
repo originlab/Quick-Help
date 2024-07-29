@@ -1,0 +1,45 @@
+﻿<h1 class="firstheading">Xファンクションの例外の扱い</h1><p class='urlname' style='display: none'>XF-Exception-Handling</p>
+<p>以下のサンプルはLabTalkを使ってXファンクションのエラーを捕まえる例です。これにより、エラーを引き起こす可能性のあるXファンクションを呼び出しによってスクリプト全体を中断させません。
+</p><p><span class="OIndex">エラーコード</span>を返さ<b><i>ない</i></b>Xファンクションに対して、最後に実行したXファンクションのエラーをチェックする次の2つの関数、  <b>xf_get_last_error_code()</b> と<b> xf_get_last_error_message()$</b> があります。これらの関数は、特定のXファンクションがエラーとなる可能性がある場所で使います。
+</p><p>この例では、ユーザにインポートするファイルを選択するオプションが与えられます。しかし、そのインポートがエラーとなる場合(例、ユーザがインポートに適さないファイルタイプを選択する) 、残りのコードを取り扱う必要があります。
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">txt</span>;  <span style="color: #008000;">// ユーザからファイル名とパスを取得</span>
+impasc <span style="color: #000080;">-</span>se;  <span style="color: #008000;">// -se スイッチを使用して実行を継続する必要がある、下記note参照</span>
+if<span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> xf_get_last_error_code<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    strError<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;XFunction Failed: &quot;</span> <span style="color: #000080;">+</span> xf_get_last_error_message<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+    type strError<span style="color: #000080;">$</span>;
+    break <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 実行の停止
+</span>
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// データインポートは恐らく成功し、スクリプトの実行を継続可能</span>
+type continuing...;</pre>
+<p>通常のXファンクションのオプション <b>-se</b> を使って、エラーメッセージを出さないようにします。<b>-sl</b> オプションを使うと、エラーログを出力しません。 <b>-sb</b> オプションは両方を出力しません。スクリプトの実行を継続して次の行へ移動するには、これら2つの内のどちらかのオプションを使用する必要があります。 
+</p>
+<h2><a name="Looping_Over_to_Find_Peaks"></a><span class="mw-headline">ループしてピークを見つける</span></h2>
+<p>次のサンプルでは、ワークシートのすべての列をループしてピークを見つけます。特定の列にピークが見つからない場合、スクリプトは残りの列に対して継続されます。ここでは適切なデータを持つワークシートがアクティブであると見なしています。
+</p>
+<pre class="lt" style="font-family:monospace;">for<span style="color: #000000;">(</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>; ii<span style="color: #000080;">&lt;=</span>wks.<span style="color: #000080;">ncols</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  <span style="color: #008000;">// 現在の列のにピークが見つけ、XFからエラーメッセージを出力しない</span>
+  Dataset mypeaks;
+  pkfind <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span> ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mypeaks <span style="color: #000080;">-</span>se; <span style="color: #008000;">// 継続するには-seを使用する必要がある</span>
+&nbsp;
+  <span style="color: #008000;">// XFがエラーになったかどうかをチェック</span>
+  if<span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> xf_get_last_error_code<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+  <span style="color: #000000;">{</span>
+    type <span style="color: #ff00ff;">&quot;Failed on column $(ii):&nbsp;%(xf_get_last_error_message()$)&quot;</span>;
+  <span style="color: #000000;">}</span>
+  else
+  <span style="color: #000000;">{</span>
+    type Found <span style="color: #000080;">$</span><span style="color: #000000;">(</span>mypeaks.<span style="color: #000080;">getsize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> peaks in column <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+  <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

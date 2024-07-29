@@ -1,0 +1,242 @@
+﻿<h1 class="firstHeading">別のスレッドでファイルをダウンロードするフローティングダイアログ</h1><p><span class="OIndex" style="display:none">別のスレッドのファイルをダウンロードするフローティングダイアログ</span><span class="OIndex" style="display:none">HTMLダイアログ</span>
+</p>
+<p class='urlname' style='display: none'>fourth-HTML-dialog</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_an_HTML_Page_for_Dialog"><span class="tocnumber">2</span> <span class="toctext">ダイアログ用HTMLページの作成</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Creating_an_Floating_HTML_Dialog"><span class="tocnumber">3</span> <span class="toctext">フローティングHTMLダイアログの作成</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Adding_JavaScript_Callable_Prototypes_in_Origin_C"><span class="tocnumber">4</span> <span class="toctext">Origin CにJavaScript呼び出し可能なプロトタイプの追加</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Launching_The_Dialog"><span class="tocnumber">5</span> <span class="toctext">ダイアログの起動</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+<p>このチュートリアルでは、次のようにダイアログを構築します。
+</p>
+<ol><li> 入力/出力ボックスと2つのボタンを備えたフローティングダイアログ。</li>
+<li> ユーザがURLを入力した後、ダウンロードするファイルを指定し、Origin別のスレッドでファイルをダウンロードし、Originを使用して他のことを実行できるようにします。</li>
+<li> ダイアログはダウンロードステータスを更新します。 </li>
+<li> ユーザはダウンロードスレッドを中止できます。</li></ol>
+<p class="version" ><b>必要なOriginのバージョン</b>: Origin 2024b以降</p>
+<h2><a name="Creating_an_HTML_Page_for_Dialog"></a><span class="mw-headline">ダイアログ用HTMLページの作成</span></h2>
+<ol>
+<li> <b>コードビルダ</b>を開き、新しいHTMLファイルを作成してDownloadFile.htmlという名前でDownload Exampleフォルダに保存します。
+<li> 次のコードをコピーし、DownloadFile.html内に貼り付けます。
+
+<pre class="javascript" style="font-family:monospace;"><span style="color: #339933;">&lt;!</span>doctype html<span style="color: #339933;">&gt;</span>
+<span style="color: #339933;">&lt;</span>html<span style="color: #339933;">&gt;</span>
+	<span style="color: #339933;">&lt;</span>head<span style="color: #339933;">&gt;</span>
+		<span style="color: #339933;">&lt;</span>meta charset<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;utf-8&quot;</span> <span style="color: #339933;">/&gt;</span>
+		<span style="color: #339933;">&lt;</span>meta http<span style="color: #339933;">-</span>equiv<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;X-UA-Compatible&quot;</span> content<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;IE=Edge&quot;</span> <span style="color: #339933;">/&gt;</span>
+	<span style="color: #339933;">&lt;/</span>head<span style="color: #339933;">&gt;</span>
+	<span style="color: #339933;">&lt;</span>body<span style="color: #339933;">&gt;</span>
+		<span style="color: #339933;">&lt;</span>input id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;path&quot;</span> style<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;width:350px&quot;</span> placeholder<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;input file url and click Download&quot;</span> onchange<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;On_Path()&quot;</span><span style="color: #339933;">&gt;&lt;/</span>input<span style="color: #339933;">&gt;</span>		
+		<span style="color: #339933;">&lt;</span>br<span style="color: #339933;">&gt;</span>
+		<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnDownload&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Download&quot;</span> onclick<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Invoke_Download()&quot;</span><span style="color: #339933;">/&gt;</span>		
+		<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnAbort&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Abort&quot;</span> onclick<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Invoke_Abort()&quot;</span><span style="color: #339933;">/&gt;</span>	
+		<span style="color: #339933;">&lt;</span>br<span style="color: #339933;">&gt;</span>
+		<span style="color: #339933;">&lt;</span>input id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;hint&quot;</span> style<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;width:350px;border:none&quot;</span> disabled<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;true&quot;</span><span style="color: #339933;">&gt;&lt;/</span>div<span style="color: #339933;">&gt;</span>
+	<span style="color: #339933;">&lt;/</span>body<span style="color: #339933;">&gt;</span>
+	<span style="color: #339933;">&lt;</span>script<span style="color: #339933;">&gt;</span>
+		<span style="color: #000066; font-weight: bold;">function</span> On_Path<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+			document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;btnDownload&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+			document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;hint&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> <span style="color: #3366CC;">&quot;&quot;</span><span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #000066; font-weight: bold;">function</span> Invoke_Download<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+			<span style="color: #000066; font-weight: bold;">var</span> Result <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;DownloadOnlineFile&quot;</span><span style="color: #339933;">,</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;path&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;hint&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> Result<span style="color: #339933;">;</span>
+			document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;btnDownload&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>		
+		<span style="color: #000066; font-weight: bold;">function</span> Invoke_Abort<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+			window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;DownloadAbort&quot;</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;btnDownload&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #000066; font-weight: bold;">function</span> Update<span style="color: #009900;">(</span>str<span style="color: #009900;">)</span> <span style="color: #009900;">{</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;hint&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> str<span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+	<span style="color: #339933;">&lt;/</span>script<span style="color: #339933;">&gt;</span>    
+<span style="color: #339933;">&lt;/</span>html<span style="color: #339933;">&gt;</span></pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> このコードは、作成したHTMLページに機能を追加します。
+<ul><li> <code>On_Path()</code>:ダウンロードボタンを有効にし、ユーザ入力のファイルURLの後にメッセージを出力</li>
+<li> <code>Invoke_Download()</code>:ユーザがダウンロードボタンを押したイベントに応答</li>
+<li> <code>Invoke_Abort()</code>:ユーザが中止ボタンを押したイベントに応答</li>
+<li> <code>Update()</code>:ダウンロードメッセージの出力</li></ul>
+</td></tr></table>
+</ol>
+<p>この手順が完了したら、WebブラウザでDownloadFile.htmlを開くと、HTMLページが表示されます。
+</p>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/4th_HTML_Dialog/Tip_icon.png" width="57"  border="0" /></td><td><p>関数 <code>Invoke_Download</code> と <code>Invoke_Abort</code>、 <code>window.external.ExtCall</code> はOrigin Cを呼び出すために使用されます。<code>window.external.ExtCall</code>の詳細については、<a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Calling_Origin_C_Function_in_JavaScript" title="OCGuide: 2番目のHTMLダイアログ">こちら</a>を参照してください。
+</p></td></tr></table>
+<h2><a name="Creating_an_Floating_HTML_Dialog"></a><span class="mw-headline">フローティングHTMLダイアログの作成</span></h2>
+<p>これで、Origin Cコードを編集してHTMLダイアログを作成する準備が整いました。
+</p>
+<ol>
+<li> <b>コードビルダ</b>で、DownloadDlg.cppという名前の新しいcppファイルをDownload Exampleフォルダに作成します。
+<li> 必要なヘッダを含めます。
+<pre class="c" style="font-family:monospace;"><span style="color: #339933;">#include &lt;Origin.h&gt;</span>
+<span style="color: #339933;">#include &lt;../OriginLab/DialogEx.h&gt;</span>
+<span style="color: #339933;">#include &lt;../OriginLab/HTMLDlg.h&gt;</span></pre>
+<li> HTMLダイアログクラスDownloadDialogを宣言し、DownloadDialogのポインタを定義します。このポインタは、HTMLダイアログをフローティングにするためのものです。
+<pre class="c" style="font-family:monospace;">class DownloadDialog<span style="color: #339933;">;</span>
+<span style="color: #993333;">static</span> DownloadDialog<span style="color: #339933;">*</span> s_pDLDlg<span style="color: #339933;">;</span></pre>
+<li> <code>HTMLDlg</code>クラスから<code>DownloadDialog</code>クラスを派生し、メソッド<code>GetInitURL()</code>内のHTMLページをポイントします。
+<pre class="c" style="font-family:monospace;">class DownloadDialog<span style="color: #339933;">:</span> public HTMLDlg
+<span style="color: #009900;">{</span>
+protected<span style="color: #339933;">:</span>
+	string GetInitURL<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span><span style="color: #b1b100;">return</span> GetFilePath<span style="color: #009900;">(</span>__FILE__<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> <span style="color: #ff0000;">&quot;DownloadFile.html&quot;</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span>
+	string GetDialogTitle<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span><span style="color: #b1b100;">return</span> <span style="color: #ff0000;">&quot;&quot;</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span>
+	BOOL GetDlgInitSize<span style="color: #009900;">(</span>int<span style="color: #339933;">&amp;</span> width<span style="color: #339933;">,</span> int<span style="color: #339933;">&amp;</span> height<span style="color: #009900;">)</span><span style="color: #009900;">{</span> width <span style="color: #339933;">=</span> <span style="color: #0000dd;">400</span><span style="color: #339933;">;</span> height <span style="color: #339933;">=</span> <span style="color: #0000dd;">150</span><span style="color: #339933;">;</span> <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+<span style="color: #009900;">}</span><span style="color: #339933;">;</span></pre>
+<li> モードレスダイアログボックスを呼び出すCreate関数を追加します。
+<pre class="c" style="font-family:monospace;">public<span style="color: #339933;">:</span>
+	<span style="color: #993333;">int</span> Create<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+	<span style="color: #009900;">{</span>
+		InitMsgMap<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		<span style="color: #993333;">int</span> nRet <span style="color: #339933;">=</span> Create<span style="color: #009900;">(</span>NULL<span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		Visible <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+		<span style="color: #b1b100;">return</span> nRet<span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span></pre>
+<li> クラス<code>DownloadDialog</code>内のダイアログメッセージをマップして、処理するイベントと処理する関数を指定します。イベントに応答するイベントハンドラメソッドを追加します。
+<pre class="c" style="font-family:monospace;">protected<span style="color: #339933;">:</span>
+EVENTS_BEGIN_DERIV<span style="color: #009900;">(</span>HTMLDlg<span style="color: #009900;">)</span>
+	ON_DESTROY<span style="color: #009900;">(</span>OnDestroy<span style="color: #009900;">)</span>
+	ON_IDLE<span style="color: #009900;">(</span>OnIdle<span style="color: #009900;">)</span>
+EVENTS_END_DERIV
+	BOOL OnDestroy<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+	<span style="color: #009900;">{</span>
+		BOOL bRet <span style="color: #339933;">=</span> HTMLDlg<span style="color: #339933;">::</span><span style="color: #202020;">OnDestroy</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		
+		delete this<span style="color: #339933;">;</span>
+		s_pDLDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span>
+		<span style="color: #b1b100;">return</span> bRet<span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span>
+	BOOL OnIdle<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+	<span style="color: #009900;">{</span>
+		string strMsg<span style="color: #339933;">,</span> strJS<span style="color: #339933;">;</span>
+		<span style="color: #993333;">double</span> err<span style="color: #339933;">;</span>
+		LT_get_var<span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;@OCDL&quot;</span><span style="color: #339933;">,</span> <span style="color: #339933;">&amp;</span>err<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+		<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> err <span style="color: #339933;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #009900;">)</span> 
+		<span style="color: #009900;">{</span>
+			<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> <span style="color: #339933;">!</span>m_strFile.<span style="color: #202020;">IsEmpty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+			<span style="color: #009900;">{</span>
+				<span style="color: #b1b100;">switch</span><span style="color: #009900;">(</span>err<span style="color: #009900;">)</span>
+				<span style="color: #009900;">{</span>
+				<span style="color: #b1b100;">case</span> OHTTP_E_INVALID_URL<span style="color: #339933;">:</span>
+					strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">&quot;Invalid URL&quot;</span><span style="color: #339933;">;</span> 
+					<span style="color: #000000; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+				<span style="color: #b1b100;">case</span> OHTTP_E_USER_CANCEL<span style="color: #339933;">:</span> 
+					strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">&quot;Abort&quot;</span><span style="color: #339933;">;</span>
+					<span style="color: #000000; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+				<span style="color: #b1b100;">default</span><span style="color: #339933;">:</span>
+					strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;err =&nbsp;%g&quot;</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+				<span style="color: #009900;">}</span>
+				m_strFile.<span style="color: #202020;">Empty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			<span style="color: #009900;">}</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #b1b100;">else</span> <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> err <span style="color: #339933;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #009900;">)</span> 
+		<span style="color: #009900;">{</span>
+			<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> m_strFile.<span style="color: #202020;">IsFile</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+			<span style="color: #009900;">{</span>
+				strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;download complete:&nbsp;%s&quot;</span><span style="color: #339933;">,</span> m_strFile<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+				m_strFile.<span style="color: #202020;">Empty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			<span style="color: #009900;">}</span>			
+		<span style="color: #009900;">}</span>
+		<span style="color: #b1b100;">else</span>
+			strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;downloading&nbsp;%.2f%%&quot;</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		
+		
+		<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> <span style="color: #339933;">!</span>strMsg.<span style="color: #202020;">IsEmpty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+		<span style="color: #009900;">{</span>
+			strJS.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;Update(<span style="color: #000099; font-weight: bold;">\&apos;</span>%s<span style="color: #000099; font-weight: bold;">\&apos;</span>)&quot;</span><span style="color: #339933;">,</span> strMsg<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//call Update() in html code			</span>
+			CallJavaScript<span style="color: #009900;">(</span>strJS<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #b1b100;">return</span> TRUE<span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span></pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> Originがアイドル状態のときに<code>OnIdle()</code>がトリガーされ、ダウンロードステータスを取得し、<code>DHtmlControl</code>クラスのメンバ関数<code>CallJavaScript()</code>によってJavaScript<code>Update()</code>を呼び出します。
+</td></tr></table>
+</ol>
+<h2><a name="Adding_JavaScript_Callable_Prototypes_in_Origin_C"></a><span class="mw-headline">Origin CにJavaScript呼び出し可能なプロトタイプの追加</span></h2>
+<p>このセクションでは、ダイアログクラス<code>DownloadDialog</code>内でメソッドを追加します。 
+</p>
+<ul><li> <code>DownloadOnlineFile()</code>はユーザがDownloadキーを押したときにファイルをダウンロードするために、JavaScript関数<code>Invoke_Download()</code>で呼び出されます。</li>
+<li> <code>DownloadAbort()</code>は、ユーザがAbortキーを押したときにダウンロードスレッドを中止するためにJavaScript関数<code>Invoke_Abort()</code>で呼び出されます。</li></ul>
+<ol>
+
+<li> ダイアログクラス内にメソッドと DECLARE_DISPATCH_MAP を追加します。
+<pre class="c" style="font-family:monospace;">public<span style="color: #339933;">:</span>	
+	DECLARE_DISPATCH_MAP
+	string DownloadOnlineFile<span style="color: #009900;">(</span>string strURL<span style="color: #009900;">)</span> 
+	<span style="color: #009900;">{</span>
+		string strMsg<span style="color: #339933;">,</span> strName <span style="color: #339933;">=</span> GetFileName<span style="color: #009900;">(</span>strURL<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		m_strFile <span style="color: #339933;">=</span> GetOriginPath<span style="color: #009900;">(</span>ORIGIN_PATH_USER<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> strName<span style="color: #339933;">;</span>
+		BOOL bWait <span style="color: #339933;">=</span> FALSE<span style="color: #339933;">,</span> bShowMsg <span style="color: #339933;">=</span> TRUE<span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">// ファイルを別のスレッドでダウンロードするとダウンロード完了後にメッセージログにメッセージが表示</span>
+		<span style="color: #993333;">double</span> err<span style="color: #339933;">;</span>
+		<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> okutil_http_download<span style="color: #009900;">(</span>strURL<span style="color: #339933;">,</span> m_strFile<span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> FALSE<span style="color: #339933;">,</span> bWait<span style="color: #339933;">,</span> bShowMsg<span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+		<span style="color: #009900;">{</span>
+			LT_get_var<span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;@OCDL&quot;</span><span style="color: #339933;">,</span> <span style="color: #339933;">&amp;</span>err<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+			strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;previous download not completed&nbsp;%.2f%%&quot;</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #b1b100;">else</span>
+			strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">&quot;downloading...&quot;</span><span style="color: #339933;">;</span>
+		<span style="color: #b1b100;">return</span> strMsg<span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span>	
+	<span style="color: #993333;">void</span> DownloadAbort<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span> LT_set_var<span style="color: #009900;">(</span><span style="color: #ff0000;">&quot;@OCDL&quot;</span><span style="color: #339933;">,</span> <span style="color: #0000dd;">2</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+private<span style="color: #339933;">:</span>
+	string m_strFile<span style="color: #339933;">;</span></pre>
+<li> OriginCダイアログクラスのメソッドをこのHTMLダイアログにマッピングします。
+<pre class="c" style="font-family:monospace;">BEGIN_DISPATCH_MAP<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> HTMLDlg<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> DownloadOnlineFile<span style="color: #339933;">,</span> VTS_STR<span style="color: #339933;">,</span> VTS_STR<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> DownloadAbort<span style="color: #339933;">,</span> VTS_VOID<span style="color: #339933;">,</span> VTS_VOID<span style="color: #009900;">)</span>
+END_DISPATCH_MAP</pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>
+<ul><li> DISP_FUNCTIONの詳細は<a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Adding_JavaScript_Callable_Prototypes_in_OriginC" title="OCGuide:2nd HTML Dialog">こちら</a>をご覧ください。</li>
+<li> <code>okutil_http_download()</code>の詳細は<a href="../../OriginC/OriginC/Okutil_http_download_(global_function).html" title="OriginC:Okutil http download (global function)">こちら</a>をご覧ください。</li>
+<li> システム変数 <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#O">@OCDL</a> はダウンロードステータスを返し、@OCDL&gt; 1はダウンロードスレッドを中止します。</li></ul>
+</td></tr></table>
+</ol>
+<h2><a name="Launching_The_Dialog"></a><span class="mw-headline">ダイアログの起動</span></h2>
+<p>これで、ダイアログを起動する準備ができました。
+</p>
+<ol>
+<li> メイン機能の追加
+<pre class="c" style="font-family:monospace;"><span style="color: #993333;">int</span> DownloadDlg<span style="color: #009900;">(</span><span style="color: #993333;">int</span> nMsg<span style="color: #339933;">,</span> DWORD dwCntrl <span style="color: #339933;">=</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> LPVOID lpData <span style="color: #339933;">=</span> NULL<span style="color: #009900;">)</span>
+<span style="color: #009900;">{</span>
+	bool bClose <span style="color: #339933;">=</span> OMSG_CLOSE<span style="color: #339933;">==</span>nMsg<span style="color: #339933;">?</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">:</span><span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+	<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>bClose<span style="color: #009900;">)</span>
+	<span style="color: #009900;">{</span>
+		<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>s_pDLDlg<span style="color: #009900;">)</span>
+		<span style="color: #009900;">{</span>
+			Window winDlg <span style="color: #339933;">=</span> s_pDLDlg<span style="color: #339933;">-&gt;</span>GetWindow<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>winDlg<span style="color: #009900;">)</span>
+				winDlg.<span style="color: #202020;">SendMessage</span><span style="color: #009900;">(</span>WM_CLOSE<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+			delete s_pDLDlg<span style="color: #339933;">;</span>
+			s_pDLDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span>
+		<span style="color: #009900;">}</span>
+		<span style="color: #b1b100;">return</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span>
+	
+	<span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>s_pDLDlg<span style="color: #009900;">)</span>
+	<span style="color: #009900;">{</span>
+		s_pDLDlg <span style="color: #339933;">=</span> new DownloadDialog<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+		s_pDLDlg<span style="color: #339933;">-&gt;</span>Create<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+	<span style="color: #009900;">}</span>
+	<span style="color: #b1b100;">return</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span>
+
+<span style="color: #993333;">void</span> open_downloaddlg<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span>DownloadDlg<span style="color: #009900;">(</span>OMSG_OPEN<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span></pre>
+<li> すべてのコードを保存してビルドします。
+<li> <code>open_downloaddlg</code> を実行してダイアログを表示します。
+</ol>
+
+
+
+    

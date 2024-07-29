@@ -1,0 +1,270 @@
+﻿<h1 class="firstheading">ChiSquare Space</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Calculating_and_Plotting_Chi-Square_Space"><span class="tocnumber">2</span> <span class="toctext">Calculating and Plotting Chi-Square Space</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#How_to_Use_the_chiSqrSurf_Function"><span class="tocnumber">3</span> <span class="toctext">How to Use the chiSqrSurf Function</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR6 or later</p>
+
+  <h2><a name="Calculating_and_Plotting_Chi-Square_Space"></a><span class="mw-headline">Calculating and Plotting Chi-Square Space</span></h2>
+
+  <p>The following Origin C function, chiSqrSurf, calculates the Chi-Square space over two fit parameters. The parameter values are varied over a specified range of values, and the chi-square value is computed and stored in a matrix. The data is then plotted as a contour plot allowing user to examine the shape of the chi-square surface as a function of the parameter space.</p>
+
+  <ul>
+    <li><b>Parameters</b></li>
+  </ul>
+
+  <dl>
+    <dd>
+      <b>vX</b>
+
+      <dl>
+        <dd>[input]X data range.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>xY</b>
+
+      <dl>
+        <dd>[input]Y data range.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>vParams</b>
+
+      <dl>
+        <dd>[input]Parameters of the specified fitting function.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>dXFrom</b>
+
+      <dl>
+        <dd>[input]The starting value of the first varied parameter, and this varied parameter is considered as X axis of the matrix.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>dXTo</b>
+
+      <dl>
+        <dd>[input]The end value of the first varied parameter.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>nXNumSteps</b>
+
+      <dl>
+        <dd>[input]The number of steps for the first varied parameter.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>dYFrom</b>
+
+      <dl>
+        <dd>[input]The starting value of the second varied parameter, and this varied parameter is considered as Y axis of the matrix.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>dYTo</b>
+
+      <dl>
+        <dd>[input]The end value of the second varied parameter.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>nYNumSteps</b>
+
+      <dl>
+        <dd>[input]The number of steps for the second varied parameter.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>strFunc</b>
+
+      <dl>
+        <dd>[input]The name of the fitting function.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>nVaryParamX</b>
+
+      <dl>
+        <dd>[input]The zero-basic index of the first varied parameter.</dd>
+      </dl>
+    </dd>
+
+    <dd>
+      <b>nVaryParamY</b>
+
+      <dl>
+        <dd>[input]The zero-basic index of the second varied parameter.</dd>
+      </dl>
+    </dd>
+  </dl>
+
+  <ul>
+    <li><b>Source Code</b></li>
+  </ul>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+<span style="color: #0000ff;">BOOL</span> chiSqrSurf<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vX, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vY, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vParams, <span style="color: #0000ff;">double</span> dXFrom, <span style="color: #0000ff;">double</span> dXTo, <span style="color: #0000ff;">int</span> nXNumSteps, <span style="color: #0000ff;">double</span> dYFrom, <span style="color: #0000ff;">double</span> dYTo, <span style="color: #0000ff;">int</span> nYNumSteps, string strFunc <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Poly"</span>, <span style="color: #0000ff;">int</span> nVaryParamX <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nVaryParamY <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Check input arguments</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nVaryParamX <span style="color: #000080;">&gt;=</span> vParams.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> nVaryParamY <span style="color: #000080;">&gt;=</span> vParams.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">"VaryParamN argument beyond the parameter number"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// report error information to Code Builder Output window    </span>
+  
+    <span style="color: #008000;">// Construct function tree from the specified function name</span>
+    string strFDF;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlf_get_fdf_filename<span style="color: #000000;">(</span>strFunc, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>strFDF<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot find FDF file for "</span> <span style="color: #000040;">+</span> strFunc <span style="color: #000040;">+</span> <span style="color: #ff00ff;">" Function"</span><span style="color: #000000;">)</span>;
+ 
+    Tree tr;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">(</span>strFDF, <span style="color: #000040;">&amp;</span>tr<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to load "</span> <span style="color: #000040;">+</span> strFDF <span style="color: #000040;">+</span> <span style="color: #ff00ff;">" file to Tree."</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Construct NumericFunction object with function tree</span>
+    NumericFunction NF;
+    NF.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>tr<span style="color: #000000;">)</span>;
+ 
+    matrix mm;
+    mm.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nYNumSteps, nXNumSteps<span style="color: #000000;">)</span>; 
+    <span style="color: #0000ff;">double</span> dXInc <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>dXTo <span style="color: #000040;">-</span> dXFrom<span style="color: #000000;">)</span> <span style="color: #000040;">/</span> <span style="color: #000000;">(</span>nXNumSteps<span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">double</span> dYInc <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>dYTo <span style="color: #000040;">-</span> dYFrom<span style="color: #000000;">)</span> <span style="color: #000040;">/</span> <span style="color: #000000;">(</span>nYNumSteps<span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> mm.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; jj <span style="color: #000080;">&lt;</span> mm.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; jj<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>           
+            vParams<span style="color: #000000;">[</span>nVaryParamX<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dXFrom <span style="color: #000040;">+</span> ii <span style="color: #000040;">*</span> dXInc; 
+            vParams<span style="color: #000000;">[</span>nVaryParamY<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dYFrom <span style="color: #000040;">+</span> jj <span style="color: #000040;">*</span> dYInc; 
+ 
+            <span style="color: #0000ff;">double</span> dChisqr <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+            <span style="color: #0000ff;">int</span> nNumMissing <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+            <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> kk <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; kk <span style="color: #000080;">&lt;</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; kk<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">double</span> dY2 <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>vX<span style="color: #000000;">[</span>kk<span style="color: #000000;">]</span>, vParams<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>is_missing_value<span style="color: #000000;">(</span>dY2<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>                    
+                    dChisqr <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #000000;">pow</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>dY2 <span style="color: #000040;">-</span> vY<span style="color: #000000;">[</span>kk<span style="color: #000000;">]</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">else</span>
+                    nNumMissing<span style="color: #000040;">++</span>;
+            <span style="color: #000000;">}</span>
+            <span style="color: #0000ff;">double</span> dd <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">2</span> <span style="color: #000040;">-</span> nNumMissing;
+            mm<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">[</span>jj<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> dChisqr <span style="color: #000040;">/</span> dd ;
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">// prepare matrix window</span>
+    MatrixPage matPage;
+    matPage.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+    MatrixLayer ml <span style="color: #000080;">=</span> matPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    Matrix<span style="color: #000040;">&amp;</span> mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">(</span>dXFrom, dYFrom, dXTo, dYTo<span style="color: #000000;">)</span>; 
+    mat <span style="color: #000080;">=</span> mm;
+ 
+    <span style="color: #008000;">// plot a contour graph with matrix</span>
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Contour"</span><span style="color: #000000;">)</span>;
+    GraphLayer gl <span style="color: #000080;">=</span> gp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">(</span>mo, IDM_PLOT_CONTOUR<span style="color: #000000;">)</span> <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+        gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="How_to_Use_the_chiSqrSurf_Function"></a><span class="mw-headline">How to Use the chiSqrSurf Function</span></h2>
+
+  <ol>
+    <li>Create a new worksheet and import the data <i>&lt;Origin Installation Directory&gt;\Samples\Curve Fitting\Exponential Decay.dat</i>.</li>
+
+    <li>Highlight column B and select menu Plot: Line: Line to make a line plot.</li>
+
+    <li>Run the following LabTalk script to load and compile the desired Origin C file, "nlsf_utils.c".
+
+      <dl>
+        <dd>
+          <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\nlsf_utils.<span style="color: #000080;">c</span><span style="color: #000000;">)</span>;
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Copy and compile the above chiSqrSurf function and the following function in Code Builder, and then run "chiSqrSurf_ex1" in Command Window.</li>
+  </ol>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> chiSqrSurf_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        MessageBox<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">"Please active a graph window with data plot"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+
+    <span style="color: #008000;">// Get XY data from the active graph window</span>
+    string strRange;
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    dp.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">(</span>strRange<span style="color: #000000;">)</span>;
+ 
+    DataRange       dr;
+    dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">(</span>dr<span style="color: #000000;">)</span>; 
+    vector          vX, vY;
+    DWORD           dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+    dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span> dwRules, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX <span style="color: #000000;">)</span>;    
+    
+    <span style="color: #008000;">// The following 3 steps to access NLFitSession to get parameter init values</span>
+    <span style="color: #008000;">// 1. Set fucntion</span>
+        string strFunc <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Poly"</span>;
+    NLFitSession    FitSession;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span>strFunc, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #008000;">// set function, category name can be ignore</span>
+    <span style="color: #000000;">{</span>
+        MessageBox<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">"Fail to set fitting function"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">// 2. Set the dataset</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span> vY, vX <span style="color: #000000;">)</span> <span style="color: #000000;">)</span>  
+    <span style="color: #000000;">{</span>
+        MessageBox<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">"Fail to set data"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">// 3. get parameter init values</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>FitSession.<span style="color: #000000;">ParamsInitValues</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        MessageBox<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, <span style="color: #ff00ff;">"Fail to init parameter value"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    vector vParams;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnOffset;
+    FitSession.<span style="color: #000000;">GetParamValuesAndOffsets</span><span style="color: #000000;">(</span>vParams, vnOffset<span style="color: #000000;">)</span>; 
+    
+    <span style="color: #008000;">// Call ScaleMatrix function</span>
+    chiSqrSurf<span style="color: #000000;">(</span>vX, vY, vParams, <span style="color: #0000dd;">200</span>, <span style="color: #0000dd;">300</span>, <span style="color: #0000dd;">6</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">3200</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">2600</span>, <span style="color: #0000dd;">6</span>, strFunc<span style="color: #000000;">)</span>;   
+<span style="color: #000000;">}</span>
+</pre>

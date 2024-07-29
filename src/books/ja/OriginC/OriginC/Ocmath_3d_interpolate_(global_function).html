@@ -1,0 +1,174 @@
+﻿<h1 class="firstheading">ocmath_3d_interpolate</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>This function interpolates an input scattered data points at given 3d xyz coordinates, with the modified Shepard method.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_3d_interpolate<span style="color: #000000;">(</span> <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pZ, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pQ, UINT nSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcY, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcZ, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSrcF, UINT nSrcSize <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>pX</dt>
+
+    <dd>[input] pointer to X coordinate to be evaluated. size is nSize</dd>
+
+    <dt>pY</dt>
+
+    <dd>[input] pointer to Y coordinate to be evaluated. size is nSize</dd>
+
+    <dt>pZ</dt>
+
+    <dd>[input] pointer to Z coordinate to be evaluated. size is nSize</dd>
+
+    <dt>pQ</dt>
+
+    <dd>[output] pointer to the interpolation values at evaluation points. size is nSize</dd>
+
+    <dt>nSize</dt>
+
+    <dd>[input] size of evaluation points, nSize &gt; 0</dd>
+
+    <dt>pSrcX</dt>
+
+    <dd>[input] pointer to the X value of original scattered data points, size is nSrcSize.</dd>
+
+    <dt>pSrcY</dt>
+
+    <dd>[input] pointer to the Y value of original scattered data points. size is nSrcSize.</dd>
+
+    <dt>pSrcZ</dt>
+
+    <dd>[input] pointer to the Z value of original scattered data points. size is nSrcSize.</dd>
+
+    <dt>pSrcF</dt>
+
+    <dd>[input] pointer to the F value of original scattered data points. size is nSrcSize.</dd>
+
+    <dt>nSrcSize</dt>
+
+    <dd>[input] size of original scattered data points, nSrcSize ≥ 10.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>Return 0 if succeed, or a non-zero Nag error codes:</p>
+
+  <p>NE_INT = 90: nSrcSize must be not less than 10. nSize must be larger than 1</p>
+
+  <p>NE_DATA_COPLANAR = 2083: All nodes are coplanar. There is no unique solution</p>
+
+  <p>NE_DUPLICATE_NODE = 2084: There are duplicate nodes in the dataset. The interpolant can not be derived.</p>
+
+  <p>NE_BAD_POINT = 2085: At least one evaluation points lies outside the region of definition of the interpolant.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//Before running, make sure a worksheet is active in current project</span>
+<span style="color: #0000ff;">void</span> ocmath_3d_interpolate_ex1<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nSize<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;
+    DataRange drIn;
+    drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Range1"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Range2"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Range3"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Range4"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+    
+    vector vSrcX, vSrcY, vSrcZ, vSrcF;
+    drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcX, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcY, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcZ, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    drIn.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcF, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">int</span> nSrcSize <span style="color: #000080;">=</span> vSrcX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">double</span> dmin,dmax;
+    vector vx,vy,vz,vf;
+    
+    vSrcX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dmin,dmax<span style="color: #000000;">)</span>;
+    vx.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span>dmin, dmax, <span style="color: #000000;">(</span>dmax<span style="color: #000040;">-</span>dmin<span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>nSize<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    
+    vSrcY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dmin,dmax<span style="color: #000000;">)</span>;
+    vy.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span>dmin, dmax, <span style="color: #000000;">(</span>dmax<span style="color: #000040;">-</span>dmin<span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>nSize<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    
+    vSrcZ.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dmin,dmax<span style="color: #000000;">)</span>;
+    vz.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span>dmin, dmax, <span style="color: #000000;">(</span>dmax<span style="color: #000040;">-</span>dmin<span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>nSize<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    
+    vf.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nSize<span style="color: #000000;">)</span>;
+
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_3d_interpolate<span style="color: #000000;">(</span>vx, vy, vz, vf, nSize, vSrcX, vSrcY, vSrcZ,vSrcF, nSrcSize<span style="color: #000000;">)</span>;
+     <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> OE_NOERROR<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error occurs when calling ocmath function!<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>
+    <span style="color: #000000;">}</span>
+    Worksheet    wksResult;
+    wksResult.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"InterResult"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span>wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        wksResult.<span style="color: #000000;">DeleteCol</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> n<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; n <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span>; n<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        wksResult.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    DataRange drOut;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wksResult, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wksResult, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wksResult, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wksResult, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vx, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vy, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vz, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vf, <span style="color: #0000ff;">false</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;        
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>This function interpolates the input data exactly and has quadratic accuracy.</p>
+
+  <p>The time taken will depend in general on the distribution of the data points.</p>
+
+  <p>At worst, O(nSrcSize*(nSrcSize+nSize)) time will be required.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/Ocmath_2d_interpolate_(global_function).html" title="OriginC:Ocmath 2d interpolate (global function)">ocmath_2d_interpolate</a>, <a href="../../OriginC/OriginC/Ocmath_interpolate_(global_function).html" title="OriginC:Ocmath interpolate (global function)">ocmath_interpolate</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>
+
+  <p>nag_3d_shep_interp(e01tgc), nag_3d_shep_eval(e01thc)</p>

@@ -1,0 +1,636 @@
+﻿<h1 class="firstheading">Accessing X-Function</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Calling_X-Function"><span class="tocnumber">1</span> <span class="toctext">Calling X-Function</span></a></li>
+
+      <li class="toclevel-1 tocsection-2">
+        <a href="#Examples"><span class="tocnumber">2</span> <span class="toctext">Examples</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-3"><a href="#Example_to_Call_integ1_X-Function"><span class="tocnumber">2.1</span> <span class="toctext">Example to Call integ1 X-Function</span></a></li>
+
+          <li class="toclevel-2 tocsection-4"><a href="#Example_to_Call_corrcoef_X-Function"><span class="tocnumber">2.2</span> <span class="toctext">Example to Call corrcoef X-Function</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Example_with_Controlling_X-Function_Settings_Tree"><span class="tocnumber">2.3</span> <span class="toctext">Example with Controlling X-Function Settings Tree</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Example_calling_getnlr_X-Function"><span class="tocnumber">2.4</span> <span class="toctext">Example calling getnlr X-Function</span></a></li>
+
+          <li class="toclevel-2 tocsection-7"><a href="#Calling_the_stats_X-Function"><span class="tocnumber">2.5</span> <span class="toctext">Calling the stats X-Function</span></a></li>
+
+          <li class="toclevel-2 tocsection-8"><a href="#Calling_X-Function_with_XYRange_arguments"><span class="tocnumber">2.6</span> <span class="toctext">Calling X-Function with XYRange arguments</span></a></li>
+
+          <li class="toclevel-2 tocsection-9"><a href="#Calling_X-Function_with_theme"><span class="tocnumber">2.7</span> <span class="toctext">Calling X-Function with theme</span></a></li>
+
+          <li class="toclevel-2 tocsection-10"><a href="#Running_X-Function_with_Auto_Update"><span class="tocnumber">2.8</span> <span class="toctext">Running X-Function with Auto Update</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Calling_X-Function"></a><span class="mw-headline">Calling X-Function</span></h2>
+
+  <p>When programming in an X-Function or in a normal Origin C function, you may need to call another X-Function which has accomplished the desired purpose.</p>
+
+  <p>To call an X-Function in Origin C, class <b>XFBase</b> is needed (add #include &lt;XFbase.h&gt; for the header file).</p>
+
+  <p>A typical simple process will include:</p>
+  <pre class="oc" style="font-family:monospace;">
+XFBase   xf<span style="color: #000000;">(</span>LPCSTR lpcszName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//Which can declare the class and load the X-Function.</span>
+
+<span style="color: #008000;">//set value for a specific variable for X-Function by variable name or variable index. </span>
+<span style="color: #008000;">//var variable below can be other data type like matrix&amp;, int&amp;, string&amp;, double&amp;, DataRange&amp; and so on.</span>
+xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span>LPCSTR lpcszName, vector<span style="color: #000040;">&amp;</span> var<span style="color: #000000;">)</span>; 
+xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nVarIndex, vector<span style="color: #000040;">&amp;</span> var<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//sequentially set values for the variables for X-Function. </span>
+<span style="color: #008000;">//Both the order of the variable in the X-Function variables list and the name can be used.</span>
+xf.<span style="color: #000000;">SetArgs</span><span style="color: #000000;">(</span>...<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//Execute the X-Function ''without'' executing event handling functions.</span>
+xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>...<span style="color: #000000;">)</span>;
+</pre>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <h3><a name="Example_to_Call_integ1_X-Function"></a><span class="mw-headline">Example to Call integ1 X-Function</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span>    <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// XFbase.h is included for accessing the class XFBase.</span>
+
+<span style="color: #008000;">// The example shows how to call an X-Function and get the result via Origin C</span>
+<span style="color: #008000;">// A typical process of using XFBase will be the following. </span>
+
+<span style="color: #0000ff;">void</span>       Call_XF_from_OC_Ex1_integ1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">//////// Prepare the input data and put into worksheet ////////</span>
+        vector vX;
+        vector vY;
+
+        vX.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>., <span style="color: #0000dd;">20.0</span>, <span style="color: #0000dd;">0.05</span><span style="color: #000000;">)</span>;
+        vY.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">double</span> dA <span style="color: #000080;">=</span> <span style="color: #0000dd;">100.0</span>;
+        <span style="color: #0000ff;">double</span> dXc <span style="color: #000080;">=</span> <span style="color: #0000dd;">8.0</span>;
+        <span style="color: #0000ff;">double</span> dW <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.0</span>;
+        vY <span style="color: #000080;">=</span> dA <span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">0.5</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>vX<span style="color: #000040;">-</span>dXc<span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>vX<span style="color: #000040;">-</span>dXc<span style="color: #000000;">)</span><span style="color: #000040;">/</span>dW<span style="color: #000040;">/</span>dW<span style="color: #000000;">)</span>;
+        
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span>wks.<span style="color: #000000;">Columns</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000000;">SetColDesignations</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"XY"</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Raw"</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Integration"</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>.<span style="color: #000000;">SetLongName</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Normalized"</span><span style="color: #000000;">)</span>;
+        
+        DataRange drIn;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span>,<span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>drIn.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set the data!"</span><span style="color: #000000;">)</span>;    
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+                
+        <span style="color: #008000;">//////// Call X-Function integ1 to do the integration and plotting.////////</span>
+
+        <span style="color: #008000;">//// Load the X-Function</span>
+        string          strXFNameToCall <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"integ1"</span>;
+        XFBase          xf<span style="color: #000000;">(</span>strXFNameToCall<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load xfunction."</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">//// Set the arguments for the X-Function</span>
+        <span style="color: #008000;">// Prototype for X-Function integ1.</span>
+        <span style="color: #008000;">// void integ1(const XYRange&amp; iy, const int&amp; baseline, const int&amp; type, </span>
+<span style="color: #008000;">// XYRange&amp; oy, const int&amp; plot, double&amp; x1, double&amp; x2, int&amp; i1, int&amp; i2, </span>
+<span style="color: #008000;">// double&amp; area, double&amp; y0, double&amp; x0, double&amp; dx, TreeNode&amp; tr, const int&amp; rescale)</span>
+        DataRange drInteg;
+        drInteg.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        drInteg.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">double</span> dArea; 
+        <span style="color: #008000;">// DataRange can be directly passed as the arguments though the prototype for the argument is XYRange because class XYRange is derived from class DataRange.</span>
+        <span style="color: #008000;">// We need get the result of integrated area, so set the 9th argument (area) separately.</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArgs</span><span style="color: #000000;">(</span>drIn, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, drInteg, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #0000dd;">9</span>, dArea<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>  
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set the arguments!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">//// Execute the X-Function</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to execute the X-Function!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">//////// Use the result of integ1 to do some calculation. ////////</span>
+        vector vXInteg;
+        vector vYInteg;
+        vector vYNorm;
+        DataRange drNorm;
+        drNorm.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">4</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        drNorm.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">5</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        drInteg.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vXInteg, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        drInteg.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vYInteg, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        vYNorm <span style="color: #000080;">=</span> vYInteg<span style="color: #000040;">/</span>dArea;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>drNorm.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vYNorm, <span style="color: #000040;">&amp;</span>vXInteg<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set the normalized data!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Example_to_Call_corrcoef_X-Function"></a><span class="mw-headline">Example to Call corrcoef X-Function</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span>    <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span>   <span style="color: #000080;">&lt;</span>ReportTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> Call_XF_from_OC_Ex2_corrcoef<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">//Prepare data</span>
+        ASCIMP    ascimp;
+        Worksheet wks;
+        string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Statistics<span style="color: #666666; font-weight: bold;">\\</span>automobile.dat"</span>;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile,<span style="color: #000040;">&amp;</span>ascimp<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ascimp<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+        DataRange drIn;         
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> i <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; i <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">7</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+           drIn.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, i, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+                
+        string          strXFNameInner <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"corrcoef"</span>;
+        
+        XFBase          xf<span style="color: #000000;">(</span>strXFNameInner<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf <span style="color: #000000;">)</span>
+                XF_THROW<span style="color: #000000;">(</span>XFERR_FAIL_LOAD_XF<span style="color: #000000;">)</span>;
+
+        Tree trDummy1, trDummy2, trDummy3;
+        ReportData rd<span style="color: #000000;">(</span>trDummy1<span style="color: #000000;">)</span>;
+        ReportTree rt<span style="color: #000000;">(</span>trDummy2<span style="color: #000000;">)</span>;
+        ReportTree rtPlot<span style="color: #000000;">(</span>trDummy3<span style="color: #000000;">)</span>;
+                                
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArgs</span><span style="color: #000000;">(</span>drIn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">95</span>, <span style="color: #0000dd;">0</span>, rd, rtPlot, rt<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                XF_THROW<span style="color: #000000;">(</span>XFERR_FAIL_SET_ARG<span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">//set plot data to destination worksheet for graph in report tree.</span>
+        WorksheetPage   wksPage <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nLayer <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        Worksheet       wksReportData <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>nLayer<span style="color: #000000;">)</span>;
+        rd.<span style="color: #000000;">SetWorksheet</span><span style="color: #000000;">(</span>wksReportData<span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                XF_THROW<span style="color: #000000;">(</span>XFERR_FAIL_EVAL<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// prepare worksheet for hierarchical report tree</span>
+        DWORD dwNewLayerBits <span style="color: #000080;">=</span> WP_SHEET_HIERARCHY <span style="color: #000040;">|</span> CREATE_NO_DEFAULT_TEMPLATE <span style="color: #000040;">|</span> WP_SHEET_THIN_COL_headERS <span style="color: #000040;">|</span> WP_SHEET_MAIN_NAN_AS_BLANK;    
+        nLayer <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>LPCSTR<span style="color: #000000;">)</span><span style="color: #0000ff;">NULL</span>, dwNewLayerBits<span style="color: #000000;">)</span>;
+        Worksheet       wksReportTree <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>nLayer<span style="color: #000000;">)</span>;
+        rt.<span style="color: #000000;">GenerateReport</span><span style="color: #000000;">(</span>wksReportTree, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>;
+        wksReportTree.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;        
+        
+        DWORD dwOptions <span style="color: #000080;">=</span> GETNBRANCH_HIDE_COL_LABELS <span style="color: #000040;">|</span> GETNBRANCH_FIT_COL_WIDTH <span style="color: #000040;">|</span> GETNBRANCH_FIT_ROW_HEIGHT;
+        nLayer <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>LPCSTR<span style="color: #000000;">)</span><span style="color: #0000ff;">NULL</span>, dwNewLayerBits, <span style="color: #0000ff;">NULL</span>, dwOptions<span style="color: #000000;">)</span>;
+        Worksheet       wksRTPlot <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>nLayer<span style="color: #000000;">)</span>;
+        rtPlot.<span style="color: #000000;">GenerateReport</span><span style="color: #000000;">(</span>wksRTPlot, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>;
+        wksReportTree.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;        
+
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Example_with_Controlling_X-Function_Settings_Tree"></a><span class="mw-headline">Example with Controlling X-Function Settings Tree</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span>    Call_XF_from_OC_Ex3_expGraph<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// Load the X-Function</span>
+    string      strXFNameToCall <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"expGraph"</span>;
+    XFBase      xf<span style="color: #000000;">(</span>strXFNameToCall<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load xfunction."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>    
+    
+    <span style="color: #008000;">// Set the arguments for the X-Function</span>
+    <span style="color: #0000ff;">int</span> nType <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"type"</span>, nType<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>         <span style="color: #008000;">//7:jpg</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument image type"</span><span style="color: #000000;">)</span>;
+ 
+    string strFilename <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"abc"</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"filename"</span>, strFilename<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument filename"</span><span style="color: #000000;">)</span>;
+    
+    string strPath <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"d:<span style="color: #666666; font-weight: bold;">\\</span>"</span>;                    <span style="color: #008000;">// the page export to</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"path"</span>, strPath<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument path"</span><span style="color: #000000;">)</span>;
+    
+    string strPages <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Graph1"</span>;         <span style="color: #008000;">//assuming Graph1 is exist</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"pages"</span>, strPages<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument pages"</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">// Set tree argument for the X-Function </span>
+    Tree tr1;
+    xf.<span style="color: #000000;">GetXFCreatedTree</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"tr1"</span>, tr1<span style="color: #000000;">)</span>;                    <span style="color: #008000;">//get the tree</span>
+    tr1.<span style="color: #000000;">Width</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;                 <span style="color: #008000;">//set tree value</span>
+    tr1.<span style="color: #000000;">Height</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+    tr1.<span style="color: #000000;">Unit</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"tr1"</span>, tr1<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument tr"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Execute the X-Function, and before_execute is called without dialog.</span>
+    TreeNode trGetN; 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Run</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, trGetN<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to execute the X-Function!"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Example_calling_getnlr_X-Function"></a><span class="mw-headline">Example calling getnlr X-Function</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> call_XF_getnlr<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Load the getnlr X-Function</span>
+        XFBase xfGetNLR<span style="color: #000000;">(</span><span style="color: #ff00ff;">"getnlr"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfGetNLR.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load getnlr X-Function."</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// Set the output tree argument</span>
+        Tree tnMyFit;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfGetNLR.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"tr"</span>, tnMyFit<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  tr"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// Set the source worksheet argument</span>
+        Worksheet wks;
+        <span style="color: #0000ff;">char</span> szWks<span style="color: #000000;">[</span>MAX_PATH<span style="color: #000000;">]</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> LT_get_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"__REPORT$"</span>, szWks, MAX_PATH<span style="color: #000000;">)</span> <span style="color: #000040;">&amp;&amp;</span> lstrlen<span style="color: #000000;">(</span>szWks<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                wks.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>szWks<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfGetNLR.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"iw"</span>, wks<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  iw"</span><span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">return</span>;
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// Set the notation argument</span>
+        <span style="color: #008000;">// Allowed values:</span>
+        <span style="color: #008000;">// 0 = Parameter names</span>
+        <span style="color: #008000;">// 1 = Abbreviations</span>
+        <span style="color: #008000;">// 2 = Both</span>
+        <span style="color: #0000ff;">int</span> nPNotation <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// Parameter names and abbreviations</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfGetNLR.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"pnotation"</span>, nPNotation<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  pnotation"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// With arguments set we can now execute the X-Function</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfGetNLR.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to evaluate the getnlr X-Function."</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// Output the whole tree to the script window</span>
+        out_tree<span style="color: #000000;">(</span>tnMyFit<span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">// Put the p1 value into a new workbook</span>
+        <span style="color: #0000ff;">double</span> p1;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> tnMyFit.<span style="color: #000000;">p1</span>.<span style="color: #000000;">GetValue</span><span style="color: #000000;">(</span>p1<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// Create a new workbook using the default Origin template</span>
+                WorksheetPage wksPgNew;
+                wksPgNew.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin.otw"</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">// Get the active worksheet</span>
+                Worksheet wksNew <span style="color: #000080;">=</span> wksPgNew.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">// Get the worksheet's first column</span>
+                Column col <span style="color: #000080;">=</span> wksNew.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">// Get the column's data values</span>
+                vector <span style="color: #000040;">&amp;</span>colVals <span style="color: #000080;">=</span> col.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">// Put the p1 value into the column's data</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> colVals.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span>
+                        colVals.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>p1<span style="color: #000000;">)</span>; <span style="color: #008000;">// Add a new row with the p1 value</span>
+                <span style="color: #0000ff;">else</span>
+                        colVals<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> p1; <span style="color: #008000;">// Set first row to the p1 value</span>
+        <span style="color: #000000;">}</span>
+        
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Calling_the_stats_X-Function"></a><span class="mw-headline">Calling the stats X-Function</span></h3>
+
+  <p>The following function can be called from Origin C to execute the stats X-Function.</p>
+
+  <p>In this example the stats X-Function is called to operate on one column of the specified worksheet, shows how to set vector data type input argument, and how to get double type result after X-Function execute.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+<span style="color: #0000ff;">bool</span> callStatsXF<span style="color: #000000;">(</span>Worksheet<span style="color: #000040;">&amp;</span> wks, <span style="color: #0000ff;">int</span> nCol, 
+    <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> dMean, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> dSD, <span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> n,
+    <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> dMin, <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> dMax,
+    <span style="color: #0000ff;">double</span><span style="color: #000040;">&amp;</span> dSum, <span style="color: #0000ff;">int</span><span style="color: #000040;">&amp;</span> nMissing<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">//========== Load the stats X-Function</span>
+ 
+    XFBase xfStats<span style="color: #000000;">(</span><span style="color: #ff00ff;">"stats"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load stats X-Function."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">//========== Set the ix argument</span>
+ 
+    <span style="color: #008000;">// Get stats on the specified column     </span>
+    <span style="color: #008000;">// Create a data range </span>
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, nCol, <span style="color: #ff00ff;">"Range1"</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">// Get the data represented by the data range into a local vector.</span>
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> vData;    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vData, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get data."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> vData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Dataset is empty."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">// Now with the local vector we can set the ix argument.</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"ix"</span>, vData<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  ix"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">//========== Set the output arguments</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"mean"</span>, dMean<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  mean"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"sd"</span>, dSD<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  sd"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"n"</span>, n<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  n"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"min"</span>, dMin<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  min"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"max"</span>, dMax<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  max"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"sum"</span>, dSum<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  sum"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"missing"</span>, nMissing<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  missing"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">//========== Execute the X-Function</span>
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xfStats.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to evaluate the stats X-Function."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+ 
+<span style="color: #008000;">// Test function for calling the above function.</span>
+<span style="color: #0000ff;">void</span> testCallStatsXF<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Activate a worksheet and try again."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #0000ff;">double</span> dMean, dSD, dMin, dMax, dSum;
+    <span style="color: #0000ff;">int</span> n, nMissing; 
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> callStatsXF<span style="color: #000000;">(</span>wks, nCol, dMean, dSD, n, dMin, dMax, dSum, nMissing<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>         
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"For Column %d:<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>dMean = %f<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>dSD = %f<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>dMin = %f<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>dMax = %f<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>dSum = %f<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>DataPoints = %d<span style="color: #666666; font-weight: bold;">\</span>
+                <span style="color: #666666; font-weight: bold;">\n</span>nMissing = %d<span style="color: #666666; font-weight: bold;">\n</span>"</span>, nCol <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, dMean, dSD, dMin, dMax, dSum, n, nMissing<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Calling_X-Function_with_XYRange_arguments"></a><span class="mw-headline">Calling X-Function with XYRange arguments</span></h3>
+
+  <p>This example shows how to construct XYRange variables and use them as X-Function arguments in Origin C.</p>
+
+  <p>To run the following function, a workhseet with 5 columns should be active. Fill the first two columns with XY data, the next two with XY data where the number of point is different but the range of X is similar to the first, and one empty column. The example illustrates the <i>subtract_ref</i> functions ability to interpolate. Note the comments for alternately using Y input as output.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFbase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> run_subtract_ref<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">5</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please make sure there are 5 columns in worksheet"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    XYRange in;
+    in.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 1st column as X</span>
+    in.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 2nd column as Y</span>
+    
+    XYRange ref;
+    ref.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 3rd column as X</span>
+    ref.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 4th column as Y</span>
+    
+    XYRange out;
+    out.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Use the same X as Input and Output</span>
+    out.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">4</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Use the empty Y as Output</span>
+    <span style="color: #008000;">// Comment line above and uncomment line below to overwrite Y data</span>
+    <span style="color: #008000;">// out.Add(wks, 1, "Y"); // Use the input Y as output</span>
+    
+    XFBase xf<span style="color: #000000;">(</span><span style="color: #ff00ff;">"subtract_ref"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// construct X-Function object with X-Function name  </span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"iy1"</span>, in<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  iy1"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"iy2"</span>, ref<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  iy2"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>   
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"oy"</span>, out<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  oy"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>   
+ 
+    <span style="color: #0000ff;">double</span> xmean, ymean;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"xmean"</span>, xmean<span style="color: #000000;">)</span> <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"ymean"</span>, ymean<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to set argument:  xmean or ymean"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span> 
+ 
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to evaluate the subtract_ref X-Function."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>  
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"xmean = %f, ymean = %f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, xmean, ymean<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>To check the argument data types of a function, open the X-Function Builder (F10), or type "xfname -h" or "help xfname" in the Command or Script Window.</p>
+
+  <h3><a name="Calling_X-Function_with_theme"></a><span class="mw-headline">Calling X-Function with theme</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">bool</span> test_xf_with_theme<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;      
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        XFBase xf<span style="color: #000000;">(</span><span style="color: #ff00ff;">"averagexy"</span><span style="color: #000000;">)</span>;        
+        
+        <span style="color: #008000;">// use theme name as input, can use STR_LAST_USED to apply last used settings to replace "abc" here.</span>
+        xf.<span style="color: #000000;">ApplyTheme</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"abc"</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// set XFunctioin input varaible</span>
+        XYRange ry;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"S"</span>, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"iy"</span>, ry<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #008000;">//// set XFunction output variables</span>
+        <span style="color: #0000ff;">int</span> iColx <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>iColx<span style="color: #000000;">)</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">(</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">)</span>;
+    
+        <span style="color: #0000ff;">int</span> iColy <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;      
+        Dataset dsOutX<span style="color: #000000;">(</span>wks, iColx<span style="color: #000000;">)</span>, dsOutY<span style="color: #000000;">(</span>wks, iColy<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"x"</span>, dsOutX<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>; 
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"y"</span>, dsOutY<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #0000ff;">return</span> xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;       
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Running_X-Function_with_Auto_Update"></a><span class="mw-headline">Running X-Function with Auto Update</span></h3>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..<span style="color: #000040;">/</span>Originlab<span style="color: #000040;">/</span>xfunctionex.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">bool</span> running_xf_with_autoupdate<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;      
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #008000;">// prepare input XY Range</span>
+        XYRange ry;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"S"</span>, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;
+
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"S"</span>, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;
+
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        ry.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #008000;">// prepre output X&amp;Y columns</span>
+    <span style="color: #0000ff;">int</span> iColx <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>iColx<span style="color: #000000;">)</span>.<span style="color: #000000;">SetType</span><span style="color: #000000;">(</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">)</span>;
+    
+        <span style="color: #0000ff;">int</span> iColy <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;      
+        Dataset dsOutX<span style="color: #000000;">(</span>wks, iColx<span style="color: #000000;">)</span>, dsOutY<span style="color: #000000;">(</span>wks, iColy<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// running XFunction "averagexy" with XFunction class</span>
+        XFunction xf;
+        Tree trXF;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>xf.<span style="color: #000000;">Load</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>trXF, <span style="color: #ff00ff;">"averagexy"</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #008000;">// load a xfunction by name</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #008000;">// set XFunctioin input varaible</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"iy"</span>, ry<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        <span style="color: #008000;">// set XFunction output variables</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"x"</span>, dsOutX<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>; 
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"y"</span>, dsOutY<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        
+        Tree tr;
+        TreeNode trGetN;
+        xf.<span style="color: #000000;">GetGUI</span><span style="color: #000000;">(</span>tr, trGetN<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// AU_AUTO means Auto Update is on.</span>
+    xf.<span style="color: #000000;">Run</span><span style="color: #000000;">(</span>AU_AUTO, trGetN<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;  
+<span style="color: #000000;">}</span>
+</pre>

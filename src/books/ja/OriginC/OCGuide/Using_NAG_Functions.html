@@ -1,0 +1,225 @@
+﻿<h1 class="firstheading">NAG関数を使用する</h1><p><span class="OIndex" style="display:none">NAG関数を使用する</span><span class="OIndex" style="display:none">NAG Functions</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#header_FilesNAG_header_Files"><span class="tocnumber">1</span> <span class="toctext">ヘッダファイル<span class="OIndex" style="display:none">NAG header Files</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Error_StructureNAG_Error_Structure"><span class="tocnumber">2</span> <span class="toctext">エラー構造体<span class="OIndex" style="display:none">NAG Error Structure</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Callback_FunctionsNAG_Callback_Functions"><span class="tocnumber">3</span> <span class="toctext">コールバック関数<span class="OIndex" style="display:none">NAG Callback Functions</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Calling_c05adc_Example"><span class="tocnumber">3.1</span> <span class="toctext">c05adcを呼び出すサンプル</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#NAG_Get_Data_From_Origin"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex">NAGがOriginからデータを取得</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Dataset"><span class="tocnumber">4.1</span> <span class="toctext">Dataset</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#DataRange"><span class="tocnumber">4.2</span> <span class="toctext">DataRange</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#How_to_Call_NAG_e04_Functions"><span class="tocnumber">5</span> <span class="toctext">NAG e04関数の呼び出し方法</span></a></li>
+</ul>
+</div>
+
+<h2><a name="header_FilesNAG_header_Files"></a><span class="mw-headline">ヘッダファイル<span class="OIndex" style="display:none">NAG header Files</span></span></h2>
+<p>NAG関数を呼ぶには、ヘッダーファイルまたはNAG関数が宣言されているファイルをインクルードする必要があります。 
+</p><p>すべてのNAGヘッダファイルを共通で使用する1つのヘッダファイルを下記に示します。通常、このヘッダファイルだけをコードにインクルードします。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// 全てに共通のNAGヘッダファイル</span></pre>
+<p>1つまたは数個のみのNAG関数が使われている場合、それぞれ個々のNAGヘッダファイルをインクルードすることもできます。例えば、NAG関数 <i>f02abc</i>がコード内で使われている場合、2つの関連ヘッダファイルをインクルードする必要があります。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>NAG\nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>    <span style="color: #008000;">// NAG 構造体と型の定義</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>NAG\nagf02.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// f02 関数の宣言も含む</span></pre>
+<h2><a name="Error_StructureNAG_Error_Structure"></a><span class="mw-headline">エラー構造体<span class="OIndex" style="display:none">NAG Error Structure</span></span></h2>
+<p>すべてのNAG関数は、NagError構造体へのポインタの1つの引数を取ります。この構造体は、NAG関数の実行が成功したかどうかをテストするために使われます。 
+</p><p>下記のサンプルは、NAG関数<i>f02abc</i> がうまく動作するかどうかを示します。 
+</p>
+<pre class="oc" style="font-family:monospace;">NagError err;                    <span style="color: #008000;">// エラー構造体を宣言</span>
+f02abc<span style="color: #000000;">(</span>n, mx, n, r, v, n, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">)</span>; <span style="color: #008000;">// NAG f02abc 関数の呼び出し</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> err.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR <span style="color: #000000;">)</span>     <span style="color: #008000;">// エラーが発生したら</span>
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span>err.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;         <span style="color: #008000;">// エラーメッセージを出力</span></pre>
+<p>呼び出しが成功したかどうかを知る必要が無ければ、エラー構造体の宣言は必要ありません。そして<b>NAGERR_DEFAULT</b> マクロが代わりに渡されます。このマクロはNULLポインタです。NAG関数の将来のバージョンとの互換性を確実にするため、エラー構造体無しで操作できるなら、このマクロを使用した方がよいでしょう。
+</p>
+<pre class="oc" style="font-family:monospace;">f02abc<span style="color: #000000;">(</span>n, mx, n, r, v, n, NAGERR_DEFAULT<span style="color: #000000;">)</span>;</pre>
+<h2><a name="Callback_FunctionsNAG_Callback_Functions"></a><span class="mw-headline">コールバック関数<span class="OIndex" style="display:none">NAG Callback Functions</span></span></h2>
+<p>NAGライブラリで、ほとんどのルーチンはコールバック関数を含みます。コールバック関数を定義する前に、関数が呼ばれるときにNAGが期待している戻り型と引数の型を知る必要があります。 
+</p><p>例えば、NAG関数 <i>d01ajc</i> は次のようになります。ヘッダファイル<i>nagd01.h</i> で、最初の引数が <b>NAG_D01AJC_FUN f</b> であることが分かります。この引数はコールバック関数です。そして、<i>nag_types.h </i>で、<b>NAG_D01AJC_FUN</b> が<b>NAG_D01_FUN</b> の型であることがわかり、以下のように定義されます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">typedef</span> <span style="color: #0000ff;">double</span> <span style="color: #000000;">(</span>NAG_CALL <span style="color: #000040;">*</span> NAG_D01_FUN<span style="color: #000000;">)</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span>;</pre>
+<p>そして、次のようにコールバック関数を定義します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL myFunc<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">double</span> result;
+    <span style="color: #008000;">// &apos;x&apos;で処理</span>
+    <span style="color: #0000ff;">return</span> result;
+<span style="color: #000000;">}</span></pre>
+<p>NAG 関数<i>d01ajc</i> を呼び出すと、上述で定義した <i>myFunc</i> は、最初の引く数として渡されます。
+</p>
+<h3><a name="Calling_c05adc_Example"></a><span class="mw-headline">c05adcを呼び出すサンプル</span></h3>
+<p>このサンプルは、NAG関数<i>c05adc</i> を呼び出す方法を示し、この4番目の引数がコールバック関数の引数です。<b>NAG_C05ADC_FUN</b> 型のこのコールバック関数は、<i>nag_types.h</i> で定義されます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">typedef</span> <span style="color: #0000ff;">double</span> <span style="color: #000000;">(</span>NAG_CALL <span style="color: #000040;">*</span> NAG_C05ADC_FUN<span style="color: #000000;">)</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span>;</pre>
+<p>定義から、戻り型と引数の型がdoubleであることが分かります。そして、次のようにコールバック関数を定義できます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL myC05ADCfunc<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span>x<span style="color: #000000;">)</span><span style="color: #000040;">-</span>x;
+<span style="color: #000000;">}</span></pre>
+<p>以下のコードは、コールバック関数<i>myC05ADCfunc</i> を渡して、関数 <i>c05adc</i> を呼び出す方法を示しています。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>, b <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>, x, ftol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>, xtol <span style="color: #000080;">=</span> 1e<span style="color: #000040;">-</span>05;
+NagError err;
+
+c05adc<span style="color: #000000;">(</span>a, b, <span style="color: #000040;">&amp;</span>x, myC05ADCfunc, xtol, ftol, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">)</span>;</pre>
+<h2><a name="NAG_Get_Data_From_Origin"></a><span class="mw-headline"><span class="OIndex">NAGがOriginからデータを取得</span></span></h2>
+<p>多くのNAG関数は、数値データの配列へのポインタを取ります。Originのワークシートおよび行列シートは、そのデータのポインタを取得できます。このポインタはNAG関数に渡すことができます。Origin Cで、データはDataset または DataRange オブジェクトを使って渡されます。 以下のセクションでは、DatasetおよびDataRangeを使ってワークシートからデータを渡す方法を示しています。DataRangeを使う方法がお勧めです。
+</p>
+<h3><a name="Dataset"></a><span class="mw-headline">Dataset</span></h3>
+<p>DatasetがNAG関数で期待されているデータ型であれば、DatasetオブジェクトをNAG関数に渡すことができます。Originワークシート列のデータ型は、デフォルトで<b>文字と数値</b>です。すべてではありませんが、ほとんどのNAG関数に対しては、NAG関数が浮動小数点または整数型のポインタを期待しているので、このデータ型を渡すことができません。 
+</p><p>DatasetがNAG関数で期待されているデータ型であることが確実な場合、次のコードはDatasetオブジェクトをNAG関数に渡すのに使うことができます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// アクティブワークシートへのアクセス</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// データセットを構築し、wksデータにアクセス</span>
+Dataset dsX, dsY;
+dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// NAGの nag_1d_spline_interpolant(e01bac)関数を呼び出し</span>
+NagError err;
+Nag_Spline spline;
+e01bac<span style="color: #000000;">(</span>m, dsX, dsY, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">)</span>;</pre>
+<h3><a name="DataRange"></a><span class="mw-headline">DataRange</span></h3>
+<p>DataRangeクラスは、仮にワークシート列が<b>文字と数値</b>データ型であったとしても、ワークシートからのデータをvectorに取得するGetDataメソッドを提供します。GetDataメソッドは、欠損値を持つ行を簡単に無視でき、これはNAG関数にデータを渡すときに大変重要です。 
+</p><p>DataRangeを使って、OriginからNAG関数にデータを渡すのはより安全で、お勧めです。以下のサンプルで、実際の方法を示しています。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> call_NAG_example<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">int</span> i, numPoints <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+
+	<span style="color: #008000;">// 新しいワークシートページを作成.</span>
+	WorksheetPage pg;
+	pg.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// アクティブワークシートにアクセスして2列追加</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	<span style="color: #008000;">// X2列追加</span>
+	i <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	Column col<span style="color: #000000;">(</span>wks, i<span style="color: #000000;">)</span>;
+	col.<span style="color: #000000;">SetType</span><span style="color: #000000;">(</span>OKDATAOBJ_DESIGNATION_X<span style="color: #000000;">)</span>;
+	<span style="color: #008000;">// Y2列追加</span>
+	wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// 最初の2列でいくつかの開始XY値を作成</span>
+	Dataset dsX, dsY;
+	dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+	dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; i <span style="color: #000080;">&lt;</span> numPoints; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #0000ff;">int</span> r <span style="color: #000080;">=</span> rnd<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">10</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>r <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+			r <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>i <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+			r <span style="color: #000040;">+</span><span style="color: #000080;">=</span> dsX<span style="color: #000000;">[</span>i <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+		dsX.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>r<span style="color: #000000;">)</span>;
+		dsY.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>rnd<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+
+	<span style="color: #008000;">// データ範囲オブジェクトを作成</span>
+	DataRange dr;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">)</span>;
+	dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// データ範囲を使用してwks からデータをvedtorにコピー</span>
+	<span style="color: #008000;">// このコピーは、欠損値を持つ行を無視</span>
+	vector vX1, vY1;
+	dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>DRR_GET_DEPENDENT, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY1, <span style="color: #000040;">&amp;</span>vX1<span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// NAGを呼び出して係数を計算</span>
+	NagError err;
+	Nag_Spline spline;
+	e01bac<span style="color: #000000;">(</span>vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vX1, vY1, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// スプラインの XY 値を取得</span>
+	vector vX2, vY2;
+	<span style="color: #0000ff;">double</span> fit, xarg;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; i <span style="color: #000080;">&lt;</span> vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		vX2.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>vX1<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+		vY2.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>vY1<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+		<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>i <span style="color: #000080;">&lt;</span> vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+		<span style="color: #000000;">{</span>
+			xarg <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>vX1<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000040;">+</span> vX1<span style="color: #000000;">[</span>i <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">0.5</span>;
+			e02bbc<span style="color: #000000;">(</span>xarg, <span style="color: #000040;">&amp;</span>fit, <span style="color: #000040;">&amp;</span>spline, <span style="color: #000040;">&amp;</span>err<span style="color: #000000;">)</span>;
+			vX2.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>xarg<span style="color: #000000;">)</span>;
+			vY2.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>fit<span style="color: #000000;">)</span>;
+		<span style="color: #000000;">}</span>
+	<span style="color: #000000;">}</span>
+
+	<span style="color: #008000;">//NAGで割り当てられたメモリを解放</span>
+	NAG_FREE<span style="color: #000000;">(</span>spline.<span style="color: #000000;">lamda</span><span style="color: #000000;">)</span>;
+	NAG_FREE<span style="color: #000000;">(</span>spline.<span style="color: #000000;">c</span><span style="color: #000000;">)</span>;
+
+	<span style="color: #008000;">// ワークシートにスプライン値をコピー</span>
+	dsX.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+	dsX <span style="color: #000080;">=</span> vX2;
+
+	dsY.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+	dsY <span style="color: #000080;">=</span> vY2;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="How_to_Call_NAG_e04_Functions"></a><span class="mw-headline">NAG e04関数の呼び出し方法</span></h2>
+<p>次のサンプルは、NAG関数<b>nag_opt_simplex_easy</b>を安全に呼び出す方法を示します。結果はファイルに出力します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#define</span> NULLFN <span style="color: #0000ff;">NULL</span>
+
+<span style="color: #0000ff;">void</span> text_e04cbc<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> objf;
+	<span style="color: #0000ff;">double</span> x<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+	Integer maxcal, n;
+        NagError fail; 
+
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>e04cbc example: <span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">)</span>;
+
+        maxcal <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+	n <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+	x<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.4</span>;
+	x<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">0.8</span>;
+        tolf <span style="color: #000080;">=</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span>nag_machine_precision<span style="color: #000000;">)</span>;
+	tolx <span style="color: #000080;">=</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span>tolf<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">try</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #008000;">// NAG関数 e04cbc = nag_opt_simplex_easy 呼び出し</span>
+		nag_opt_simplex_easy<span style="color: #000000;">(</span>n, x, <span style="color: #000040;">&amp;</span>objf, tolf, tolx, funct, NULLFN, maxcal, NAGCOMM_NULL, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;  
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">catch</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> err<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>error =&nbsp;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, err<span style="color: #000000;">)</span>;  <span style="color: #008000;">// 例外がある場合</span>
+	<span style="color: #000000;">}</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;fail-&gt;code =&nbsp;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">code</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// エラーコード</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;fail-&gt;message =&nbsp;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// エラーメッセージ</span>
+
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;The final function value is&nbsp;%12.4f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, objf<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;at the point&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii <span style="color: #000080;">&lt;=</span> n; <span style="color: #000040;">++</span>ii<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;&nbsp;%12.4f&quot;</span>, x<span style="color: #000000;">[</span>ii<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// nag_opt_simplex_easy のコールバック関数</span>
+<span style="color: #0000ff;">void</span> NAG_CALL funct<span style="color: #000000;">(</span>Integer n, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> xc, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> objf, Nag_Comm<span style="color: #000040;">*</span> comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #000040;">*</span>objf <span style="color: #000080;">=</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">+</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000040;">+</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2.0</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>xc<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000000;">)</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

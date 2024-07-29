@@ -1,0 +1,66 @@
+﻿<h1 class="firstheading">置換表記</h1><p class='urlname' style='display: none'>LabTalk-Substitution-Notation</p>
+<p>Originでは定期的にLabTalk変数と式の置換が行われます。置換された文字列の値は、そのステートメントが実際に実行されるまでわからないため、実行時文字列置換と呼ばれます。また、繰り返し行うバッチ操作（インポート、解析、グラフ作成、グラフエクスポート）の基礎にもなります。 
+</p><p>置換表記は<b>%</b>または<b>$</b>で始まり、LabTalkスクリプトに限定されません。軸のタイトル、凡例、目盛ラベル、通常のテキスト、列とセルの表示形式、列とセルの数式など、さまざまなウィンドウのラベルでも使用します。置換表記が検出されると、Originはそれを文字列に置き換えます。 
+</p>
+<h2><a name="Types_of_Substitution"></a><span class="mw-headline">置換のタイプ</span></h2>
+<p>実行時置換には4つのタイプがあります。
+</p>
+<ul><li><a href="../../LabTalk/LabTalk/String_registers.html" title="LabTalk:文字列レジスタ"><b>文字列レジスタ置換</b></a> %A - %Z、など</li>
+<li><a href="../../LabTalk/LabTalk/String_Substitution.html" title="LabTalk:文字列置換"><b>%( )文字列置換</b></a>、<b>%(str$)</b>、<b>%(range)</b>、ワークシート情報、列データセット名、ワークシートセル、凡例などの置換に利用する表記</li>
+<li><a href="../../LabTalk/LabTalk/Numeric_to_String_Conversion.html" title="LabTalk:数値から文字列への変換"><b>$( )置換</b></a>、数値変数または数式を解釈し、結果を文字列の形式にする</li>
+<li> <b>%<i>n</i></b>形式の <a href="../../LabTalk/LabTalk/Macro_and_Script_Substitution.html" title="LabTalk:マクロとスクリプトの置換"><b>%<i>n</i> マクロとスクリプトの置換</b></a>、マクロ または スクリプトに渡される引数。</li></ul>
+<h2><a name="Examples"></a><span class="mw-headline">サンプル</span></h2>
+<p>次のスクリプトでは、その使用法を示すためにさまざまな置換表記が使用されています。
+</p>
+<ul><li>&nbsp;%H は現在のウィンドウ名のための予約文字列レジスタ</li>
+<li>&nbsp;%1、&nbsp;%2 はマクロの引数</li>
+<li> $(ii,##) はゼロパティング付きの2桁の文字列に変換するために使用（例：1は01に変換）</li>
+<li> $(ii) はwks.col$(ii)で使用してワークシート列オブジェクトwks.col<i>n</i>を作成</li>
+<li>&nbsp;%(1, @WS) は最初のプロットのワークシート名で文字列を作成するために使用</li></ul>
+<p>新しいプロジェクトを開始して、以下をお試しください。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//2つの引数&nbsp;%1 および&nbsp;%2のマクロを定義</span>
+define import_plot 
+<span style="color: #000000;">{</span>
+	for<span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>1; ii <span style="color: #000080;">&lt;=</span><span style="color: #000080;">%</span>2&nbsp;; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span> 
+	<span style="color: #000000;">{</span>
+		if <span style="color: #000000;">(</span><span style="color: #000080;">!</span>isEmpty<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> newsheet; 
+		<span style="color: #008000;">//連結された文字列でfn$文字列変数を作成</span>
+		string fn<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\curve fitting\step$(ii, ##).dat&quot;</span>;
+		impasc fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fn<span style="color: #000080;">$</span>; 
+		delete col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span>; 
+		if <span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #008000;">//現在のウィンドウタイプがワークシートの場合</span>
+		<span style="color: #000000;">{</span>
+			<span style="color: #008000;">//奇数列ごとにXに設定</span>
+			for<span style="color: #000000;">(</span> jj <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>&nbsp;; jj <span style="color: #000080;">&lt;=</span> wks.<span style="color: #000080;">ncols</span>&nbsp;; jj<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>
+			<span style="color: #000000;">{</span>
+				wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>jj<span style="color: #000000;">)</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//wks.col1 は最初の列を参照</span>
+			<span style="color: #000000;">}</span>
+		<span style="color: #000000;">}</span>
+	<span style="color: #000000;">}</span>
+	page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">//最初のシートをアクティブ化</span>
+	doc <span style="color: #000080;">-</span>e LB <span style="color: #008000;">//全シートでループ</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #008000;">//すべての列をXY列属性で散布図としてプロット</span>
+		plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;
+		xb.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;X&quot;</span>; <span style="color: #008000;">//X軸タイトルをX</span>
+		yl.<span style="color: #000080;">text</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, @WS<span style="color: #000000;">)</span>; <span style="color: #008000;">//Y軸タイトルをワークシート名</span>
+	<span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>;
+
+<span style="color: #008000;">//2 つの引数1と 5でマクロを実行。1と 5は%1と%2に渡される</span>
+import_plot <span style="color: #0000dd;">1</span> <span style="color: #0000dd;">5</span>; <span style="color: #008000;">//step01.datからstep05.datをインポートし、すべてのデータをプロット</span></pre>
+<p><br />
+冒頭で述べたように、このような置換表記は LabTalkスクリプトでだけでなく、Origin のさまざまな場所で使用されています。例えば、
+</p>
+<ul><li> 軸タイトルなどのテキストラベルの編集<a href="../../LabTalk/LabTalk/Text_Label_Options.html" title="LabTalk:テキストラベルオプション">テキストラベルの置換</a>を参照してください。</li>
+<li> 凡例の編集<a href="../../LabTalk/LabTalk/Legend_Substitution_Notation.html" title="LabTalk:凡例の置換表記">凡例の置換表記</a>を参照してください。</li>
+<li> 範囲変数の範囲文字列を構築します。<a href="../../LabTalk/LabTalk/Range_Notation.html" title="LabTalk:範囲表記">範囲表記</a>を参照してください。</li></ul>
+
+
+
+
+
+
+
+    

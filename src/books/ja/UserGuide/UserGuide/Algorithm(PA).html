@@ -1,0 +1,138 @@
+﻿<h1 class="firstheading">アルゴリズム(ピークアナライザ)</h1><p class='urlname' style='display: none'>ODR(直交距離回帰) アルゴリズム</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Baseline_Detection_Algorithm"><span class="tocnumber">1</span><span class="toctext">基線検知アルゴリズム</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#User_Defined"><span class="tocnumber">1.1</span> <span class="toctext">ユーザ定義</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#2nd_Derivative_.28zeroes.29"><span class="tocnumber">1.1.1</span> <span class="toctext">二次微分（ゼロ)</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#2nd_Derivative_.28peaks.29"><span class="tocnumber">1.1.2</span> <span class="toctext">二次微分（ピーク）</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#1st_Derivative_and_2nd_Derivative"><span class="tocnumber">1.1.3</span> <span class="toctext">一次微分と二次微分</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#XPS"><span class="tocnumber">1.2</span> <span class="toctext">XPS</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Shirley"><span class="tocnumber">1.2.1</span> <span class="toctext">Shirley</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Tougaard"><span class="tocnumber">1.2.2</span> <span class="toctext">Tougaard</span></a>
+<ul>
+<li class="toclevel-4 tocsection-9"><a href="#Reference"><span class="tocnumber">1.2.2.1</span><span class="toctext">参考文献</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#End_points_weighted"><span class="tocnumber">1.3</span> <span class="toctext">最終ポイント重み付け</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Asymmetric_least_squares_smoothing.28Pro.29"><span class="tocnumber">1.4</span> <span class="toctext">非対称最小二乗スムージング(Pro)</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Reference_2"><span class="tocnumber">1.4.1</span> <span class="toctext">参考文献</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Peak_Finding_Algorithm"><span class="tocnumber">2</span> <span class="toctext">ピーク検索アルゴリズム</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Local_Maximum"><span class="tocnumber">2.1</span> <span class="toctext">局所最大</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Window_Search"><span class="tocnumber">2.2</span> <span class="toctext">ウィンドウサーチ</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#First_Derivative"><span class="tocnumber">2.3</span> <span class="toctext">一次微分</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Second_Derivative"><span class="tocnumber">2.4</span> <span class="toctext">二次微分</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Residual_after_First_Derivative"><span class="tocnumber">2.5</span> <span class="toctext">一次微分後の残差</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Fourier_Self-Deconvolution"><span class="tocnumber">2.6</span> <span class="toctext">フーリエセフルデコンボリューション</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2><a name="Baseline_Detection_Algorithm"></a><span class="mw-headline">基線認知アルゴリズム</span></h2>
+<p>データから自動で基線を検知する方法は次の4つです：<b>ユーザ定義</b>は基線モデルの全体的な目的で使われ、<b>XPS</b>モードはX線の電子放出素ペクトロム用に使われます。また、<b>重み付けした終端</b>、<b>直線</b>があります。 (<b>基線の作成</b>目的には使えません。)定数の基線を定義したり、既存の基線のポイントをデータシート内で定義する事も可能です。
+</p>
+<h3><a name="User_Defined"></a><span class="mw-headline">ユーザ定義</span></h3>
+<p>アンカーポイントを見つけるために4つの手法が準備されていますが、「自動的に基線を検知する」には、次の2手法が使われています。
+</p>
+<h4><a name="2nd_Derivative_.28zeroes.29"></a><span class="mw-headline">二次微分(ゼロ)</span></h4>
+<p>この方法は、基線の下の面積はピークの下の面積より曲率が少ないことを元にしています。曲線の曲率は次のように定義されます。
+</p><p><img src="../images/Algorithm(PA)/math-e89cf9fbd875874b8818340c292e1dcf.png" title="\kappa=\frac{y&apos;&apos;}{(1+y&apos;^2)^{ \frac{3}{2}}}" alt="\kappa=\frac{y&apos;&apos;}{(1+y&apos;^2)^{ \frac{3}{2}}}" class="tex"/>
+</p><p><img src="../images/Algorithm(PA)/math-d8ba4afe808679595d07bfca1e43afc6.png" title="y&apos;" alt="y&apos;" class="tex"/> と <img src="../images/Algorithm(PA)/math-e57fa423968c1523c644fbc29d451dfc.png" title="y&apos;&apos;" alt="y&apos;&apos;" class="tex"/> は、それぞれ曲線の一次微分と二次微分です。<a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_adjacent-averaging_method" title="ユーザガイド:アルゴリズム (Smooth)">隣接平均法スムージング</a>が算出された後、各データポイントの二次微分が計算されます。次に、全ての二次微分でしきい値を通過する値を使用して2項式フィットを行います。フィットした基線を元に、一番フィット曲線に近いポイントをアンカーポイントとします。
+</p>
+<h4><a name="2nd_Derivative_.28peaks.29"></a><span class="mw-headline">二次微分(ピーク)</span></h4>
+<p>この方法は、基線が信号の下向きピークを元に作成される場合に有効です。
+</p><p><a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="ユーザガイド:アルゴリズム (Smooth)"><b>Savitzky-Golay</b>スムージング</a>が算出された後、各データポイントの二次微分が計算されます。次に、二次微分曲線の全ての値は<a href="#Local_Maximum"><b>局所最大</b>方式</a>により検出されます。二次微分したピーク値で、一番フィット曲線に近いポイントをアンカーポイントとします。
+</p><p><a class="image"><img alt="2nd derivative peaks.png" src="../images/Algorithm(PA)/2nd_derivative_peaks.png" width="372"  /></a>
+</p>
+<h4><a name="1st_Derivative_and_2nd_Derivative"></a><span class="mw-headline">一次微分と二次微分</span></h4>
+<p>この方法では、<a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html#The_Savitzky-Golay_method" title="ユーザガイド:アルゴリズム (Smooth)"><b>Savitzky-Golay</b></a>のスムージングアルゴリズムを使用します。二次微分のしきい値とは他にこの方法は一次微分のポイントのしきい値を超えたものも含みます。通常、より小さな一次微分は元のデータセットに小さな変化を与えるだけなためです。 
+</p><p>この方法は基線がほぼ定数の時、より効果を発揮します。その場合、基線の一次と二次微分はほぼ0になります。
+</p>
+<h3><a name="XPS"></a><span class="mw-headline">XPS</span></h3>
+<p>このモードはX線電子放出スペクトル分析のために設計されました。このモードでは、2つのオプション、<b>Shirley</b>と<b>Tougaard</b>があります。
+</p>
+<h4><a name="Shirley"></a><span class="mw-headline">Shirley</span></h4>
+<p><b>Shirley</b>アルゴリズムはスペクトルの情報を使用してバックグランドを作成し、データの変更に敏感な状態を作る事です。Shirleyアルゴリズムの中で特に重要なことは、バックグランドの特定をピークの下の面積で行い、バックグランドの強度は<img src="../images/Algorithm(PA)/math-4e84da3481926f7b0ee2e86ea08806fe.png" title="B(E)" alt="B(E)" class="tex"/>、エネルギーは<img src="../images/Algorithm(PA)/math-3a3ea00cfc35332cedf6e5e9a32e94da.png" title="E" alt="E" class="tex"/>です。
+</p><p><img src="../images/Algorithm(PA)/math-c26f125d1710579c37d07ceeaff01589.png" title="B_n (E)=k_n \int_{E}^{E_{max}}dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)]" alt="B_n (E)=k_n \int_{E}^{E_{max}}dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)]" class="tex"/>
+</p><p><br />
+ここで、<img src="../images/Algorithm(PA)/math-d97304cbafc40d74d35ee27c96d0c58f.png" title="I_{max}" alt="I_{max}" class="tex"/>はエネルギーのビンの中で上部にある終点の強度です。ダイアログでは、このパラメータは<b>最終高さ</b>と呼ばれます。散布的なファクターに関する値は次のように算出されます。
+</p><p><img src="../images/Algorithm(PA)/math-728f59a444cfbe06fad8568ccf82064b.png" title="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)]}" alt="k_n=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}}dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)]}" class="tex"/>
+</p><p><b>Shirley</b>基線は指定された範囲、[<img src="../images/Algorithm(PA)/math-5fba6c1b3978b674cd5c9fefa85993e9.png" title="E_{min}" alt="E_{min}" class="tex"/>, <img src="../images/Algorithm(PA)/math-cdc0075bc9741ac77d7a35a4bac6468a.png" title="E_{max}" alt="E_{max}" class="tex"/>]の外では0にセットされます。
+</p>
+<h4><a name="Tougaard"></a><span class="mw-headline">Tougaard</span></h4>
+<p><img src="../images/Algorithm(PA)/math-abcf3a0db1cb878affe073165665502a.png" title="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE&apos;[I(E&apos; )-I_{max}-B_{n-1}(E&apos; )](E&apos;-E)}{[1643+(E&apos;-E)^2]^2}" alt="B_n (E)=B_{n-1}+k \int_{E}^{E_{max}}\frac{dE&apos;[I(E&apos; )-I_{max}-B_{n-1}(E&apos; )](E&apos;-E)}{[1643+(E&apos;-E)^2]^2}" class="tex"/>
+</p><p><img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png" title="k" alt="k" class="tex"/> は先に設定したオプションに依存します
+</p><p><img src="../images/Algorithm(PA)/math-69d0a27bbe50442b8d1122dfe20ea15e.png" title="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)](E&apos;-E)}{[1643+(E&apos;-E)^2]^2}}" alt="k=\frac{I_{min}-I_{max}}{\int_{E_{min}}^{E_{max}} \frac{dE&apos;[I(E&apos;)-I_{max}-B_{n-1}(E&apos;)](E&apos;-E)}{[1643+(E&apos;-E)^2]^2}}" class="tex"/>
+</p><p>ユーザが<b>変更可能なパラメータ</b>オプションを選択した場合、 <b>最終高さ</b>のオプションと<img src="../images/Algorithm(PA)/math-8ce4b16b22b58894aa86c421e8759df3.png" title="k" alt="k" class="tex"/>は<b>変更可能なパラメータ</b>と同じになります。
+</p>
+<h5><a name="Reference"></a><span class="mw-headline">参考文献</span></h5>
+<ul><li>Shirley D.A.High-resolution X-ray photoemission spectrum of valence bands of gold.Phys.Rev. B 1972; 5(12):4709&ndash;14.</li>
+<li>Tougaard S. Practical Algorithm for Background Subtraction.Surface Science 1989; 216(3): 343-360.</li>
+<li>Tougaard S., Jansson C. Comparison of validity and consistency of methods for quantitative XPS peak analysis.Surface Interface Anal.20, 1993; 1013-1046.</li></ul>
+<h3><a name="End_points_weighted"></a><span class="mw-headline">終端重み付け</span></h3>
+<p>この方法は、最初と最後の終点を元に基線を作成したいという特殊な場合に使用します。 
+</p><p>特定の関数の一部分にあるポイントを使用して基線を検知します。それから、隣接した平均的スムージング方法を使用してノイズを取り除きます。デフォルトウィンドウのスムージング率は選択されたポイントの合計の6パーセント分です。これらのポイントは基線として使われ、シンプルな線形補間を使って基線が作成されます。 
+</p><p><b>Note:</b> この方法は終点の選択に多くの比重が置かれます。終点の選択には注意を払ってください。
+</p>
+<h3><a name="Asymmetric_least_squares_smoothing.28Pro.29"></a><span class="mw-headline">Asymmetric least squares smoothing(Pro)</span></h3>
+<p>非対称最小二乗スムージング(<b>ALS</b>)手法は、次のように、基線を検出する際に使います。
+</p>
+<ol><li> 基線は、滑らかになります。</li>
+<li> 基線は、元の曲線に忠実です。</li></ol>
+<p>これは、「値と基線の距離」と「基線の二次微分」の項の合計を最小化して実行します。この合計は、次のように表されます。
+</p>
+<dl><dd><img src="../images/Algorithm(PA)/math-4ffed4d6b92df8a5bf711cefa2039f56.png" title="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" alt="S=\sum_{i=1}^n w_i(y_i-{y_b}_i)^2 + \lambda \sum_{i=2}^{n-1} [ {(y_b}_{i+1}-{y_b}_i) - ({y_b}_i-{y_b}_{i-1}) ]^2" class="tex"/></dd></dl>
+<p>ここで、yは元データで、<img src="../images/Algorithm(PA)/math-7f3121d5be753123b397f22e2a1fb3e3.png" title="y_b" alt="y_b" class="tex"/>はベースラインから計算され、<img src="../images/Algorithm(PA)/math-aa38f107289d4d73d516190581397349.png" title="w_i" alt="w_i" class="tex"/>はそれぞれの点の重み、<img src="../images/Algorithm(PA)/math-c6a6eb61fd9c6c913da73b3642ca147d.png" title="\lambda" alt="\lambda" class="tex"/>は残差と二次微分のバランス、Xファンクションのスムージング因子は、この値の対数になります。
+</p><p>反復手法は次の通りです。
+</p>
+<ol><li> 第一反復では<img src="../images/Algorithm(PA)/math-ddb823a593bbbb3dfaf0d602adc5e422.png" title="w_i=1" alt="w_i=1" class="tex"/>を使い、いったん基線を計算すると、非対称因子pが（正のピークの）基線の上部にあるポイント上に重みとして適用され、残されたポイントの重みは、1-ｐになります。</li>
+<li> 次の反復では、計算した重みを最後の基線に使って、新しい基線を計算し、重みを更新します。</li>
+<li> 指定した反復回数に到達するまで、この計算を繰り返します。</li></ol>
+<h5><a name="Reference_2"></a><span class="mw-headline">参考文献</span></h5>
+<ul><li> P.H.C.Eilers and H.F.M.Boelens.Baseline correction with asymmetric least squares smoothing, Leiden University Medical Centre Report, 2005.</li></ul>
+<h2><a name="Peak_Finding_Algorithm"></a><span class="mw-headline">ピーク検索アルゴリズム</span></h2>
+<p>Originには自動的にピークを検出する手法として、<b>局所最大</b>, <b>ウィンドウサーチ</b>, <b>一次微分</b>, <b>二次微分</b>, <b>一次微分後の残差</b>の5つがあります。最初の3つは一般的なピークを検索するデータに、残りの2つは隠されたピークの検索に使用します。
+</p>
+<h3><a name="Local_Maximum"></a><span class="mw-headline">局所最大法</span></h3>
+<p>局所最大法は移動するウィンドウ内で局所的な最大ピークを検索する、力技のアルゴリズムです。  ウィンドウのサイズはあらかじめ設定されたローカルなポイント数で決まります。 
+</p><p>最初はn-ポイントウィンドウが配置され、データストリームの始点となります。このウィンドウの最大値は、インデックスと同様に記録されます。ウィンドウは1ステップ移動します。新しい最大値が、その保存されている最大値よりも大きい場合、インデックスと最大値を更新して先に進みます。最大値がウィンドウの外に出てしまった場合、すなわち、ウィンドウにある全てのポイントが最大値よりも小さい場合は、ピークはウィンドウ全体で検出され、次のピークを再構成します。
+</p>
+<h3><a name="Window_Search"></a><span class="mw-headline">ウィンドウサーチ</span></h3>
+<p>ウィンドウサーチ法は局所最大法とは検索する項目が異なるだけです。この方法は固定されたウィンドウのサイズ、つまり高さと幅のクライテリアで作成します。一方、局所最大法は固定のポイント数を検索します。
+</p>
+<h3><a name="First_Derivative"></a><span class="mw-headline">一次微分</span></h3>
+<p>一次微分法は関数の一次微分が局所ポイントに当てはまる場合、0と等しくなることを利用します。この方法には2つのオプションがあり、どのようにオリジナルデータをスムージングするか選択できます。それは<b>なし</b>と <b>Savitzky-Golay</b>方法です。   
+</p><p>上記の3つの方法はデータ内ですぐに見分けがつくピークを検索します。しかし、中にはデータ内に隠されたピークがあるかもしれません（下記グラフ参照）。Originはこのような隠されたピークを探す方法を2つ提供しています。
+</p>
+<dl><dd><a class="image"><img alt="First Derivative.png" src="../images/Algorithm(PA)/First_Derivative.png" width="250"  /></a></dd></dl>
+<h3><a name="Second_Derivative"></a><span class="mw-headline">二次微分</span></h3>
+<p>二次微分は元のデータ内にあるシグナルを拡大することができる為、隠されたピークを検出する時に使用できます。隠されたピーク(黒い実線)があるデータの二次微分（赤い実線）は次のグラフに書き込まれています。 
+</p>
+<dl><dd><a class="image"><img alt="Second Derivative.png" src="../images/Algorithm(PA)/Second_Derivative.png" width="250"  /></a></dd></dl>
+<p>上記のグラフから、隠れたピークのシグナルが大きくなったため、隠れたピークを探すことができます。 
+</p><p>Originは微分をスムーズにする4つの手法、<b>FFT フィルタ</b>, <b>Savitzky-Golay</b>, <b>隣の平均</b>, <b>二次Savitzky-Golay</b>を提供しています。詳細については<a href="../../UserGuide/UserGuide/Algorithm_(Smooth).html" title="ユーザガイド:アルゴリズム (Smooth)">スムーズアルゴリズム</a>ページを参照してください。
+</p>
+<h3><a name="Residual_after_First_Derivative"></a><span class="mw-headline">一次微分後の残差</span></h3>
+<p>まず、Originは一次微分を使用して可視可能なピークを検出します。そして、Gaussianピーク関数を使用して局所最大をデータストリーム中に使用します。隠れたピークはこの局所最大を作成できないピークとして定義されます。Originは一次微分法を再度使って残差の中にピークが無いか探します。
+</p>
+<dl><dd><a class="image"><img alt="Residual after First Derivative.png" src="../images/Algorithm(PA)/Residual_after_First_Derivative.png" width="238"  /></a></dd></dl>
+<h3><a name="Fourier_Self-Deconvolution"></a><span class="mw-headline">Fourier Self-Deconvolution</span></h3>
+<p>フーリエセフルデコンボリューション(FSD)法はスペクトルのオーバーラップを探す際に利用されます。
+</p><p>まず、FSDはスペクトル上で計算されます。そして、FSDの結果から<b>局所最大法</b>を用いて、ピークが検索されます。検索されたピークの中心位置から高さを計算し、ピークフィルタオプションの制約と整合するかを確認します。
+</p>
+
+    

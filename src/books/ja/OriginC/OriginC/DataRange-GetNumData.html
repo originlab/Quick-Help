@@ -1,0 +1,181 @@
+﻿<h1 class="firstheading">DataRange::GetNumData</h1>
+
+  <p><span class="OIndex" style="display:none">GetNumData</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Get the number of data ranges according to the rules dwRules.</p>
+
+  <p><br>
+  Get the number of subranges.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> GetNumData<span style="color: #000000;">(</span> DWORD dwRules, TreeNode <span style="color: #000040;">&amp;</span> trAdditionalData <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, Worksheet <span style="color: #000040;">*</span> pwksFirstRange <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> <span style="color: #000040;">*</span> pvFactorSizes <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span> pnNumSubRanges <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <p> </p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> GetNumData<span style="color: #000000;">(</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>dwRules</dt>
+
+    <dd>[input]the optional bits from the DRR_ enumeration.</dd>
+
+    <dt>trAdditionalData</dt>
+
+    <dd>[input]</dd>
+
+    <dt>pwksFirstRange</dt>
+
+    <dd>[output] worksheet object of the first data range.</dd>
+
+    <dt>pvFactorSizes</dt>
+
+    <dd>[output] the number of items for each factor</dd>
+
+    <dt>pnNumSubRanges</dt>
+
+    <dd>[output] the number of sub ranges.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>return the number of data ranges according to the rules dwRules.</p>
+
+  <p>If dwRules == DRR_RM_ANOVA, it returns one of the values from the enumeration</p>
+
+  <p>RMDATA which describes the success or failure of the case of Repeated</p>
+
+  <p>Measurements ANOVA data extraction. The number of subranges including separator.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//This example need active a graph with selected plot. Will prints out the minimum and </span>
+<span style="color: #008000;">//maximum X and Y values in the selected subranges of the active graph.</span>
+<span style="color: #0000ff;">void</span> DataRange_GetNumData_Ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Tree trXYSelection;
+    DWORD dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+    init_input_data_branch_from_selection<span style="color: #000000;">(</span>trXYSelection, dwRules<span style="color: #000000;">)</span>;
+    <span style="color: #008000;">//    out_tree(trXYSelection);</span>
+ 
+    DataRange dr, drSub;
+    dr.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span>trXYSelection, <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>;
+ 
+    DWORD dwPlotID; <span style="color: #008000;">// This is to retrieve DataPlot UID if present</span>
+    vector vX, vY;
+    <span style="color: #0000ff;">double</span> xmin, xmax, ymin, ymax;
+    string strRange;
+    <span style="color: #0000ff;">int</span> nNumRanges <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>dwRules<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nIndex <span style="color: #000080;">&lt;</span> nNumRanges; nIndex<span style="color: #000040;">++</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Copy data associated with nIndex of dr into vectors using DataRange::GetData</span>
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>dwRules, nIndex, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">)</span>;
+ 
+        <span style="color: #008000;">// Now we have made a copy of XY data into vectors vX and vY</span>
+        <span style="color: #008000;">// so we can do analysis on the data...for example:</span>
+        vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>xmin, xmax<span style="color: #000000;">)</span>;
+        vY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>ymin, ymax<span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">GetSubRange</span><span style="color: #000000;">(</span>drSub, dwRules, nIndex<span style="color: #000000;">)</span>;
+        strRange <span style="color: #000080;">=</span> drSub.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s<span style="color: #666666; font-weight: bold;">\n</span>xmin = %g<span style="color: #666666; font-weight: bold;">\n</span>xmax = %g<span style="color: #666666; font-weight: bold;">\n</span>ymin = %g<span style="color: #666666; font-weight: bold;">\n</span>ymax = %g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strRange, xmin, xmax, ymin, ymax<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX2</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This example assumes 1 or more columns of main data, 1 column of factor or grouping data, and 1 column of weight data</span>
+<span style="color: #008000;">//Print out the maximum, minimum, mean, and factor of the main data in the datarange.</span>
+<span style="color: #0000ff;">void</span> DataRange_GetNumData_Ex2<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nXColStart <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> nXColEnd <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nFCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, <span style="color: #0000ff;">int</span> nWCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> wks <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        DWORD dwRules <span style="color: #000080;">=</span> DRR_GET_MISSING <span style="color: #000040;">|</span> DRR_BAD_WEIGHT_TREATMENT;
+        DataRange dr;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wks, <span style="color: #0000dd;">0</span>, nXColStart, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nXColEnd<span style="color: #000000;">)</span>; <span style="color: #008000;">// Main data</span>
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"F"</span>, wks, <span style="color: #0000dd;">0</span>, nFCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nFCol<span style="color: #000000;">)</span>; <span style="color: #008000;">// Factor data</span>
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"W"</span>, wks, <span style="color: #0000dd;">0</span>, nWCol, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, nWCol<span style="color: #000000;">)</span>; <span style="color: #008000;">// Weight data</span>
+        <span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>dwRules<span style="color: #000000;">)</span>;
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vstrFactors;
+        vector vX, vW;
+        <span style="color: #0000ff;">double</span> dN, dMean, dMax, dMin;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> nNumData; ii<span style="color: #000040;">++</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">int</span> nCol <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>dwRules, ii, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vX, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vstrFactors, <span style="color: #000040;">&amp;</span>vW<span style="color: #000000;">)</span>;
+            <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">&lt;=</span> nCol <span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                vX <span style="color: #000040;">*</span><span style="color: #000080;">=</span> vW;
+                dN <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                vX.<span style="color: #000000;">Sum</span><span style="color: #000000;">(</span>dMean<span style="color: #000000;">)</span>;
+                dMean <span style="color: #000040;">/</span><span style="color: #000080;">=</span> dN;
+                vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dMin, dMax<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Column = %s, Factor = %s<span style="color: #666666; font-weight: bold;">\n</span>Mean = %g<span style="color: #666666; font-weight: bold;">\n</span>Minimum = %g<span style="color: #666666; font-weight: bold;">\n</span>Maximum = %g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, 
+                        wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>nCol<span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vstrFactors<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, dMean, dMin, dMax<span style="color: #000000;">)</span>;
+            <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><br>
+  <b>EX3</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This example assumes a worksheet with two columns of data is active.</span>
+<span style="color: #008000;">//Get number of subranges.</span>
+<span style="color: #0000ff;">void</span> DataRange_GetNumData_Ex3<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;
+    
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"A"</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"B"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// should return 3, range A, separator and range B.</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/DataRange-GetNumRanges.html" title="OriginC:DataRange-GetNumRanges">DataRange::GetNumRanges</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

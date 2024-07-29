@@ -1,0 +1,273 @@
+﻿<h1 class="firstheading">計算機の作成</h1><p><span class="OIndex" style="display:none">Calculator</span><span class="OIndex" style="display:none">HTML Dialog</span>
+</p>
+<p class='urlname' style='display: none'>second-HTML-dialog</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">サマリー</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Sample_Files"><span class="tocnumber">2</span> <span class="toctext">サンプルファイル</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Creating_an_HTML_Page_for_Calculator"><span class="tocnumber">3</span> <span class="toctext">計算機用のHTMLページの作成</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Adding_Onclick_Event_Handlers_for_Buttons"><span class="tocnumber">4</span> <span class="toctext">ボタン用のワンクリックヘッダーを追加</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Calling_OriginC_Function_in_JavaScript"><span class="tocnumber">5</span> <span class="toctext">OriginC関数をJavaScriptで呼び出す</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Creating_an_HTML_Dialog"><span class="tocnumber">6</span> <span class="toctext">HTMLダイアログの作成</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Adding_JavaScript_Callable_Prototypes_in_OriginC"><span class="tocnumber">7</span> <span class="toctext">OriginCでプロトタイプを呼び出し可能なJavaScriptを追加</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Summary"></a><span class="mw-headline">サマリー</span></h2>
+<p>このチュートリアルでは、算術演算（足し算、引き算、掛け算、割り算）を実行する計算機を構築します。 
+<br />
+ここでは、以下の項目を解説します。
+</p>
+<ol><li> HTMLページ内のコントロールを使って発生するトリガーイベント</li>
+<li> イベントハンドラー関数を構築してJavaScriptによるイベントに応答します。</li>
+<li> OriginC関数をJavaScriptで呼び出します。</li>
+<li> OriginCで基本的な算術演算を実行します。</li></ol>
+<p>これにより、以下の画像のような計算機になります。
+</p>
+<dl><dd><a  class="image"><img alt="Calculator.png" src="../images/2nd_HTML_Dialog/Calculator.png" width="250"  /></a></dd></dl>
+<p class="version" >必要なOriginのバージョン: Origin 2017 以降</p>
+<h2><a name="Sample_Files"></a><span class="mw-headline">サンプルファイル</span></h2>
+<ul><li> SimpleCalc.html: htmlページのHTMLコード</li>
+<li> Calculator.cpp: HTMダイアログを呼び出して算術演算を実行するOriginCのコード</li></ul>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> <a class="external text" href="http://blog.originlab.com/wp-content/uploads/2016/11/HTMLDlgExamples.zip" target="_blank">こちら</a>から、サンプルファイルをダウンロードできます。
+</td></tr></table>
+<h2><a name="Creating_an_HTML_Page_for_Calculator"></a><span class="mw-headline">計算機用のHTMLページの作成</span></h2>
+<p>この計算機を作には、まず初めに、HTMLページを作成して、算術式表示ボックス、数字入力ボタン、オペレーターボタン、計算ボタン、消去ボタンをこのページに追加します。
+</p>
+<ol>
+<li> Originを起動して、<b>コードビルダ</b>を開き、SimpleCalc.html という名前の新しいHTMLファイルを作成します。Simple Calculatorという名前の新しいフォルダに、このファイルを保存します。
+
+<li> SimpleCalc.htmlの中に、以下のコードを使って、計算機用のシンプルなインターフェースを作成します。
+<pre class="javascript" style="font-family:monospace;"><span style="color: #339933;">&lt;!</span>DOCTYPE html<span style="color: #339933;">&gt;</span>
+<span style="color: #339933;">&lt;</span>html<span style="color: #339933;">&gt;</span>
+
+    <span style="color: #339933;">&lt;</span>head<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>meta charset<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;utf-8&quot;</span> <span style="color: #339933;">/&gt;</span>
+	<span style="color: #339933;">&lt;</span>meta http<span style="color: #339933;">-</span>equiv<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;X-UA-Compatible&quot;</span> content<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;IE=Edge&quot;</span><span style="color: #339933;">/&gt;</span>
+    <span style="color: #339933;">&lt;/</span>head<span style="color: #339933;">&gt;</span>
+
+    <span style="color: #339933;">&lt;</span>body<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;!--</span>equation display textbox<span style="color: #339933;">--&gt;</span>
+	<span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Equation&quot;</span> style<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;border:solid;height:20px;&quot;</span><span style="color: #339933;">&gt;&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;/</span>br<span style="color: #339933;">&gt;</span>
+
+        <span style="color: #339933;">&lt;!--</span>four arithmetic operations buttons<span style="color: #339933;">--&gt;</span>
+	<span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Ops&quot;</span><span style="color: #339933;">&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnPlus&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;+&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnMinus&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;-&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnMultiply&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;X&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnDiv&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;/&quot;</span><span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;/</span>br<span style="color: #339933;">&gt;</span>
+
+        <span style="color: #339933;">&lt;!--</span>number input buttons from <span style="color: #CC0000;">0</span> to <span style="color: #CC0000;">9</span><span style="color: #339933;">--&gt;</span>
+        <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Num789&quot;</span><span style="color: #339933;">&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn7&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;7&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn8&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;8&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn9&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;9&quot;</span><span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Num456&quot;</span><span style="color: #339933;">&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn4&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;4&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn5&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;5&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn6&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;6&quot;</span><span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Num123&quot;</span><span style="color: #339933;">&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn1&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;1&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn2&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;2&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn3&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;3&quot;</span><span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+	<span style="color: #339933;">&lt;</span>div id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Num0&quot;</span><span style="color: #339933;">&gt;</span>
+		<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btn0&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;0&quot;</span><span style="color: #339933;">/&gt;</span>
+	<span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;/</span>br<span style="color: #339933;">&gt;</span>
+
+	<span style="color: #339933;">&lt;!--</span>calculation button and clear button	<span style="color: #339933;">--&gt;</span>
+        <span style="color: #339933;">&lt;</span>div<span style="color: #339933;">&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnCalculate&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Calculate&quot;</span><span style="color: #339933;">/&gt;</span>
+        	<span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnClear&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Clear&quot;</span><span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>div<span style="color: #339933;">&gt;</span>
+    <span style="color: #339933;">&lt;/</span>body<span style="color: #339933;">&gt;</span>
+
+<span style="color: #339933;">&lt;/</span>html<span style="color: #339933;">&gt;</span></pre>
+</ol>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>編集を終えたら、ブラウザでこのページを開いて、確認します。
+</td></tr></table>
+<h2><a name="Adding_Onclick_Event_Handlers_for_Buttons"></a><span class="mw-headline">ボタン用のワンクリックヘッダーを追加</span></h2>
+<p>以下のように計算機は動作します。
+</p>
+<ol><li> 数字入力ボタンをクリックすると、プログラムによってテキストボックスに入力数字が表示されます。</li>
+<li> オペレーターボタンをクリックすると、先にインプットした数字にオペレーターが追加されます。</li>
+<li> テキストボックスにも追加する別の数字をクリックして入力します。</li>
+<li> 最後に、計算ボタンをクリックしてテキストボックスの算術式と結果を確認します。</li>
+<li> テキストボックスのテキストは消去ボタンをクリックして、いつでも消去することができます。</li></ol>
+<p>この方法でプログラムを実行するには、<code>onclick</code>イベントハンドラーを追加して、HTMLページのボタンをマウスでクリックすることを追跡する必要があります。この操作により、計算を実行する際に使うJavaScriptが呼び出されます。
+</p><p>計算ボタン<a  class="image"><img alt="Calculation button.png" src="../images/2nd_HTML_Dialog/Calculation_button.png" width="62"  /></a>を使う:
+</p>
+<ol>
+
+<li> 要素&lt; script &gt;の中に、関数<code>Invoke_Cal()</code>を加えます。ここで、この関数を使って、手順2に記載してある<code>onclick</code>イベントハンドラで、ボタンのクリックに応答するようにします。
+
+<pre class="javascript" style="font-family:monospace;">    <span style="color: #339933;">&lt;</span>script<span style="color: #339933;">&gt;</span>
+        <span style="color: #000066; font-weight: bold;">function</span> Invoke_Cal<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span><span style="color: #009900;">}</span> 
+    <span style="color: #339933;">&lt;/</span>script<span style="color: #339933;">&gt;</span></pre>
+<li> 計算ボタンタグの中にワンクリックハンドラーイベントを追加して、ボタンクリックによって関数<code>Invoke_Cal()</code>が起動されます。
+
+<pre class="javascript" style="font-family:monospace;"><span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;button&quot;</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;btnCalculate&quot;</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Calculate&quot;</span> onclick<span style="color: #339933;">=</span><span style="color: #3366CC;">&quot;Invoke_Cal()&quot;</span><span style="color: #339933;">/&gt;</span></pre>
+<li> これまでの手順と同様に、 <code>onclick</code>イベントハンドラをボタンすべてに加えてクリック操作を追跡して、&lt;script&gt;内のの対応するJavaScript関数に追加することができます。
+</ol>
+<h2><a name="Calling_OriginC_Function_in_JavaScript"></a><span class="mw-headline">OriginC関数をJavaScriptで呼び出します。</span></h2>
+<p>このサンプルでは、OriginCで算術演算を実行してみることにより、JavaScriptのOriginCを呼び出す方法を説明します。
+</p><p>JavaScriptで関数<code>window.external.ExtCall</code>を使って、OriginCを使います。
+</p>
+<pre class="javascript" style="font-family:monospace;">window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span>&ldquo;OriginC <span style="">Function</span> Name&rdquo;<span style="color: #339933;">,</span> Parameter1<span style="color: #339933;">,</span> Parameter2…<span style="color: #009900;">)</span></pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>
+<ol><li> 5つ以下のパラメータがOriginC関数名を含んでExtCallに渡すことができる場合、 </li>
+<li> OriginCの入力引数として渡されるパラメータは、 bool, integer, double , stringを含むプリミティブ型のみになります。</li></ol>
+</td></tr></table>
+<p>JavaScriptのOriginCを呼び出す方法を理解した後、以下のように&lt;script&gt;内の関数を変更することができ、<a class="external text" href="http://blog.originlab.com/wp-content/uploads/2016/11/HTMLDlgExamples.zip" target="_blank">HTMLサンプルファイル</a>でコンプリートコードを利用できます。
+</p>
+<pre class="javascript" style="font-family:monospace;"><span style="color: #339933;">&lt;</span>script<span style="color: #339933;">&gt;</span>
+    <span style="color: #000066; font-weight: bold;">var</span> PlusOp <span style="color: #339933;">=</span> <span style="color: #3366CC;">&quot;+&quot;</span><span style="color: #339933;">;</span>
+    <span style="color: #000066; font-weight: bold;">var</span> MinusOp <span style="color: #339933;">=</span> <span style="color: #3366CC;">&quot;-&quot;</span><span style="color: #339933;">;</span>
+    <span style="color: #000066; font-weight: bold;">var</span> MultiplyOp <span style="color: #339933;">=</span> <span style="color: #3366CC;">&quot;*&quot;</span><span style="color: #339933;">;</span>
+    <span style="color: #000066; font-weight: bold;">var</span> DivOp <span style="color: #339933;">=</span> <span style="color: #3366CC;">&quot;/&quot;</span><span style="color: #339933;">;</span>
+
+    <span style="color: #000066; font-weight: bold;">function</span> Invoke_AddOp<span style="color: #009900;">(</span>strOp<span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> OriginStr <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span><span style="color: #339933;">;</span>
+        <span style="color: #006600; font-style: italic;">//OriginC関数AddOpを呼び出してテキストボックスにオペレータシンボルを表示</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> NewStr <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;AddOp&quot;</span><span style="color: #339933;">,</span> OriginStr<span style="color: #339933;">,</span> strOp<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    	document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span> <span style="color: #339933;">=</span> NewStr<span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+
+    <span style="color: #000066; font-weight: bold;">function</span> Invoke_AddNum<span style="color: #009900;">(</span>NewNum<span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> OriginStr <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span><span style="color: #339933;">;</span>
+        <span style="color: #006600; font-style: italic;">//OriginC関数AddNumでテキストボックスに入力文字を表示</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> NewStr <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;AddNum&quot;</span><span style="color: #339933;">,</span> OriginStr<span style="color: #339933;">,</span> NewNum<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    	document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span> <span style="color: #339933;">=</span> NewStr<span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+
+    <span style="color: #000066; font-weight: bold;">function</span> Invoke_Cal<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> Str <span style="color: #339933;">=</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span><span style="color: #339933;">;</span>
+        <span style="color: #006600; font-style: italic;">//OriginC関数Calculateを呼び出して算術結果を取得</span>
+    	<span style="color: #000066; font-weight: bold;">var</span> Result <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;Calculate&quot;</span><span style="color: #339933;">,</span> Str<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    	document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span> <span style="color: #339933;">=</span> Result<span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+
+    <span style="color: #000066; font-weight: bold;">function</span> Invoke_Clear<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+        <span style="color: #006600; font-style: italic;">//OriginC関数Clearを呼び出してテキストボックスのテキストを消去</span>
+    	document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&apos;Equation&apos;</span><span style="color: #009900;">)</span>.<span style="color: #660066;">innerHTML</span> <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">&quot;Clear&quot;</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    <span style="color: #009900;">}</span>
+<span style="color: #339933;">&lt;/</span>script<span style="color: #339933;">&gt;</span></pre>
+<h2><a name="Creating_an_HTML_Dialog"></a><span class="mw-headline">HTMLダイアログの作成</span></h2>
+<p>このセクションでは、OriginCのコードを編集して実行し、Originに計算機ダイアログを作成します。
+</p>
+<ol>
+<li> <b>コードビルダ</b>で、SimpleCalc.htmlのパスの下に、新しいcppファイルCalculator.cppを作成します。
+
+<li> 必要なヘッダの追加します。
+
+<pre class="c" style="font-family:monospace;"><span style="color: #339933;">#include &lt;Origin.h&gt;</span>
+<span style="color: #339933;">#include &lt;..\OriginLab\DialogEx.h&gt;</span>
+<span style="color: #339933;">#include &lt;..\OriginLab\HTMLDlg.h&gt;</span></pre>
+<li> ユーザ定義HTMLダイアログクラスをクラスから生成します。 <code>HTMLDlg</code>
+
+<pre class="c" style="font-family:monospace;">class OriginCalculatorDlg<span style="color: #339933;">:</span> public HTMLDlg 
+<span style="color: #009900;">{</span>
+    public<span style="color: #339933;">:</span>
+        string GetInitURL<span style="color: #009900;">(</span><span style="color: #009900;">)</span> 
+            <span style="color: #009900;">{</span> 
+                <span style="color: #b1b100;">return</span> GetFilePath<span style="color: #009900;">(</span>__FILE__<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> <span style="color: #ff0000;">&quot;SimpleCalc.html&quot;</span><span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+	string GetDialogTitle<span style="color: #009900;">(</span><span style="color: #009900;">)</span> 
+            <span style="color: #009900;">{</span>
+                <span style="color: #b1b100;">return</span> <span style="color: #ff0000;">&quot;Simple Calculator&quot;</span><span style="color: #339933;">;</span>
+            <span style="color: #009900;">}</span>
+<span style="color: #009900;">}</span><span style="color: #339933;">;</span></pre>
+<li> 計算機ダイアログを作成するメイン関数<code>calc</code> を追加します。
+
+<pre class="c" style="font-family:monospace;"><span style="color: #993333;">void</span> calc<span style="color: #009900;">(</span><span style="color: #009900;">)</span> 
+<span style="color: #009900;">{</span>
+    OriginCalculatorDlg dlg<span style="color: #339933;">;</span>
+    dlg.<span style="color: #202020;">DoModalEx</span><span style="color: #009900;">(</span>GetWindow<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span></pre>
+<li>全てのコードを保存してビルドし、<code>calc()</code> 関数を実行してダイアログを開きます。
+</ol>
+<h2><a name="Adding_JavaScript_Callable_Prototypes_in_OriginC"></a><span class="mw-headline">OriginCでプロトタイプを呼び出し可能なJavaScriptを追加</span></h2>
+<p>このセクションでは、JavaScriptで呼び出すダイアログクラス<code>OriginCalculatorDlg</code>を追加して基本的な算術演算を実行します。
+</p>
+<ol>
+<li> ダイアログクラスのAdd DECLARE_DISPATCH_MAPを追加して、JavaScriptで関数を配置します。
+
+<pre class="c" style="font-family:monospace;">public<span style="color: #339933;">:</span>
+    DECLARE_DISPATCH_MAP</pre>
+<li> 算術演算を実行する手法を追加して、テキストボックス内の式を表示・削除します。
+
+<pre class="c" style="font-family:monospace;"><span style="color: #666666; font-style: italic;">//オペレータのどれかをクリックする場合</span>
+string OriginCalculatorDlg<span style="color: #339933;">::</span><span style="color: #202020;">AddOp</span><span style="color: #009900;">(</span>string str<span style="color: #339933;">,</span> string strOp<span style="color: #009900;">)</span> 
+<span style="color: #009900;">{</span>
+    <span style="color: #b1b100;">return</span> str <span style="color: #339933;">+</span> <span style="color: #ff0000;">&quot; &quot;</span> <span style="color: #339933;">+</span> strOp <span style="color: #339933;">+</span> <span style="color: #ff0000;">&quot; &quot;</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span>
+<span style="color: #666666; font-style: italic;">//数字のどれかをクリックする場合</span>
+string OriginCalculatorDlg<span style="color: #339933;">::</span><span style="color: #202020;">AddNum</span><span style="color: #009900;">(</span>string str<span style="color: #339933;">,</span> <span style="color: #993333;">int</span> NewNum<span style="color: #009900;">)</span> 
+<span style="color: #009900;">{</span>
+    <span style="color: #b1b100;">return</span> str <span style="color: #339933;">+</span> ftoa<span style="color: #009900;">(</span>NewNum<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span>
+
+<span style="color: #666666; font-style: italic;">//LabTalk表記を使って計算</span>
+<span style="color: #993333;">double</span> OriginCalculatorDlg<span style="color: #339933;">::</span><span style="color: #202020;">Calculate</span><span style="color: #009900;">(</span>string str<span style="color: #009900;">)</span> 
+<span style="color: #009900;">{</span>
+    <span style="color: #993333;">double</span> dd<span style="color: #339933;">;</span>
+    LT_evaluate<span style="color: #009900;">(</span>str <span style="color: #339933;">,&amp;</span>dd<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+    <span style="color: #b1b100;">return</span> dd<span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span>
+
+string OriginCalculatorDlg<span style="color: #339933;">::</span><span style="color: #202020;">Clear</span><span style="color: #009900;">(</span><span style="color: #993333;">void</span><span style="color: #009900;">)</span> 
+<span style="color: #009900;">{</span>
+    <span style="color: #b1b100;">return</span> <span style="color: #ff0000;">&quot;&quot;</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span></pre>
+<li> ダイアログクラスの手法を宣言
+
+<pre class="c" style="font-family:monospace;">public<span style="color: #339933;">:</span>
+    string AddOp<span style="color: #009900;">(</span>string str<span style="color: #339933;">,</span> string strOp<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    string AddNum<span style="color: #009900;">(</span>string str<span style="color: #339933;">,</span> <span style="color: #993333;">int</span> NewNum<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    <span style="color: #993333;">double</span> Calculate<span style="color: #009900;">(</span>string str<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+    string Clear<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span></pre>
+<li> OriginCクラスの手法をHTMLダイアログにマップします。
+
+<pre class="c" style="font-family:monospace;">BEGIN_DISPATCH_MAP<span style="color: #009900;">(</span>OriginCalculatorDlg<span style="color: #339933;">,</span> HTMLDlg<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>OriginCalculatorDlg<span style="color: #339933;">,</span> AddOp<span style="color: #339933;">,</span> VTS_STR<span style="color: #339933;">,</span> VTS_STR VTS_STR<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>OriginCalculatorDlg<span style="color: #339933;">,</span> AddNum<span style="color: #339933;">,</span> VTS_STR<span style="color: #339933;">,</span> VTS_STR VTS_I4<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>OriginCalculatorDlg<span style="color: #339933;">,</span> Calculate<span style="color: #339933;">,</span> VTS_R8<span style="color: #339933;">,</span> VTS_STR<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>OriginCalculatorDlg<span style="color: #339933;">,</span> Clear<span style="color: #339933;">,</span> VTS_STR<span style="color: #339933;">,</span> VTS_VOID<span style="color: #009900;">)</span>
+END_DISPATCH_MAP</pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> DISP_FUNCTIONのシンタックスは、以下のようになります。
+<pre class="c" style="font-family:monospace;">DISP_FUNCTION<span style="color: #009900;">(</span><span style="color: #339933;">-</span>defined Dialog Class<span style="color: #339933;">,</span> Function Name<span style="color: #339933;">,</span> Type of Ouput<span style="color: #339933;">,</span> Type of Input Type of Input…<span style="color: #009900;">)</span></pre>
+<p>ここで、VTS_BOOL = bool, VTS_I4 = integer, VTS_R8 = double, VTS_STR = string and VTS_VOID = voidです。
+</p>
+</td></tr></table>
+<li> コードを保存してビルドし、calc()関数を再度実行すれば、この簡易計算機で計算ができます。</li>
+</li>
+</li>
+</li>
+</li>
+</ol>
+
+
+
+
+
+
+
+    

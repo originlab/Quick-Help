@@ -1,0 +1,280 @@
+﻿<h1 class="firstheading">グラフから点を取得</h1><p class='urlname' style='display: none'>Getting-Points-from-Graph</p>
+<p>Originの<b>プロット操作・オブジェクト作成</b>ツールバのどのボタンも、スクリプトから初期化でき、3つはマクロとリンクして、プログラミングすることができます。
+</p><p>ツールをプログラミングするには、<b>pointproc</b> マクロを定義して、適切なコードを実行します。<b>pointproc</b> マクロは、ユーザがダブルクリックまたはシングルクリックしてEnterキーを押すときに実行します。
+</p>
+<h2><a name="Screen_Reader"></a><span class="mw-headline">スクリーンリーダ</span></h2>
+<p>このスクリプトは、<span class="OIndex">スクリーンリーダ</span>ツールを使って、グラフにラベルを配置します。
+</p>
+<pre class="lt" style="font-family:monospace;">dotool <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// スクリーンリーダツールを開始</span>
+dotool <span style="color: #000080;">-</span>d; <span style="color: #008000;">// シングルクリックをダブルクリックのように動作させる</span>
+<span style="color: #008000;">// ここで&apos;&apos;&apos;pointproc&apos;&apos;&apos; マクロを定義</span>
+def pointproc <span style="color: #000000;">{</span>
+    label <span style="color: #000080;">-</span>a x y <span style="color: #000080;">-</span>n MyLabel Hello;
+    dotool <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// ツールをポインタにリセット</span>
+    done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 変数を終わりまで無限ループを許可するようにセット</span>
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// ツールを使うときスクリプトは停止しない </span>
+<span style="color: #008000;">// そのため、これ以上の実行を止める必要がある</span>
+<span style="color: #008000;">// この無限ループはユーザが点を選択するのを待つ</span>
+for<span style="color: #000000;">(</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&nbsp;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>; <span style="color: #000000;">)</span> sec <span style="color: #000080;">-</span>p .1; 
+<span style="color: #008000;">// A .1 秒の遅延によりループに何かを与える</span>
+type Continuing script ...; 
+<span style="color: #008000;">// マクロが実行されると無限ループは解放される</span></pre>
+<h2><a name="Data_Reader"></a><span class="mw-headline">データリーダ</span></h2>
+<p><span class="OIndex">データリーダ</span>ツールは、スクリーンリーダに似ていますが、カーソルは実際のデータポイントで固定されます。
+定義されると、ユーザが<b>Esc</b> キーを押すか、ポインタツールをクリックして、データリーダを停止する場合に<b>quittoolbox</b> マクロが実行されます。
+</p><p>この例は、グラフウィンドウがアクティブであることが前提で、そのグラフ上の3つのポイントを選択することを待ちます。
+</p>
+<pre class="lt" style="font-family:monospace;">@global <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+dataset dsx, dsy;  <span style="color: #008000;">// XとY値を保持する2つのデータセットを作成</span>
+dotool <span style="color: #0000dd;">3</span>;          <span style="color: #008000;">// ツールを開始</span>
+<span style="color: #008000;">// 各点の選択に対して実行するマクロを定義</span>
+def pointproc <span style="color: #000000;">{</span>
+    dsx<span style="color: #000000;">[</span>count<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> x;  <span style="color: #008000;">//  X座標を取得</span>
+    dsy<span style="color: #000000;">[</span>count<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> y;  <span style="color: #008000;">//  Y座標を取得</span>
+    count<span style="color: #000080;">++</span>;         <span style="color: #008000;">// 増分をカウント</span>
+    if<span style="color: #000000;">(</span>count <span style="color: #000080;">==</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> dotool <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// 3つの点を持つかどうかを見ることをチェック</span>
+    else type <span style="color: #000080;">-</span>a Select next point;
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// ユーザがEscキーを押すかポインタツールをクリックすると</span>
+<span style="color: #008000;">// 実行するマクロを定義:</span>
+def quittoolbox <span style="color: #000000;">{</span>
+    <span style="color: #008000;">// Error&nbsp;: Not enough points</span>
+    if<span style="color: #000000;">(</span>count <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> ty <span style="color: #000080;">-</span>b You did not specify three datapoints;  
+    else
+    <span style="color: #000000;">{</span>
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">{</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>,dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000000;">}</span>;
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">{</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>,dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000000;">}</span>;
+        draw <span style="color: #000080;">-</span>l <span style="color: #000000;">{</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>,dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>,dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">}</span>;
+        double ds12 <span style="color: #000080;">=</span> dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">-</span> dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+        double ds13 <span style="color: #000080;">=</span> dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">-</span> dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+        double ds23 <span style="color: #000080;">=</span> dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">-</span> dsy<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">*</span>dsx<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+        area <span style="color: #000080;">=</span> abs<span style="color: #000000;">(</span>.5<span style="color: #000080;">*</span><span style="color: #000000;">(</span>ds12 <span style="color: #000080;">+</span> ds13 <span style="color: #000080;">+</span> ds23<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        type <span style="color: #000080;">-</span>b Area is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>area<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 初期の点</span>
+type DoubleClick your first point <span style="color: #000000;">(</span>or SingleClick and press Enter<span style="color: #000000;">)</span>;</pre>
+<p>次のサンプルは、Escキー押されるか、ユーザがポインタツールをクリックまで任意のポイントを選択するものです。
+</p>
+<pre class="lt" style="font-family:monospace;">@global <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+dataset dsx, dsy;  <span style="color: #008000;">// XとY値を保持する2つのデータセットを作成</span>
+dotool <span style="color: #0000dd;">3</span>;          <span style="color: #008000;">// ツールの開始</span>
+<span style="color: #008000;">// 各ポイントの選択を実行するマクロを定義</span>
+def pointproc <span style="color: #000000;">{</span>
+    count<span style="color: #000080;">++</span>;         <span style="color: #008000;">// 増分のカウント</span>
+    dsx<span style="color: #000000;">[</span>count<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> x;  <span style="color: #008000;">//  X座標を取得</span>
+    dsy<span style="color: #000000;">[</span>count<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> y;  <span style="color: #008000;">//  Y座標を取得</span>
+<span style="color: #000000;">}</span>
+&nbsp;
+<span style="color: #008000;">// ユーザがEscキー押すか、ポインタツールをクリックすると </span>
+<span style="color: #008000;">// 実行するマクロを定義</span>
+def quittoolbox <span style="color: #000000;">{</span>
+   count<span style="color: #000080;">=</span>;
+   for<span style="color: #000000;">(</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>count; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+   <span style="color: #000000;">{</span>
+      type <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>, <span style="color: #000080;">$</span><span style="color: #000000;">(</span>dsx<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>, <span style="color: #000080;">$</span><span style="color: #000000;">(</span>dsy<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+   <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// 初期の点</span>
+type <span style="color: #ff00ff;">&quot;Click to select point, then press Enter&quot;</span>;
+type <span style="color: #ff00ff;">&quot;Press Esc or click on Pointer tool to stop&quot;</span>;</pre>
+<table class="noborder"><tr>
+	<td style="vertical-align:top" width="60"><img src="../images/Getting_Points_from_Graph/Tip_icon.png" width="57"  border="0" /></td><td><p>Enterキーを押してポイントを選択することは、ダブルクリックしてポイントを選択するより確実です。 
+</p></td></tr></table>
+<p>また、グラフからデータ値を収集する <b><a href="../../LabTalk/LabTalk/GetPts_(command).html" title="LabTalk:GetPts (コマンド)">getpts</a></b> コマンドを使うこともできます。
+</p>
+<h2><a name="Data_Selector"></a><span class="mw-headline">データセレクタ</span></h2>
+<p><span class="OIndex">データセレクタ</span>ツールは、データセットの範囲をセットするのに使うことができます。
+範囲は開始行番号(インデックス)と終了行番号で定義されます。
+データセットの複数範囲を定義でき、Originの分析ルーチンは、これらの範囲を入力に使い、これらの範囲外のデータは除外されます。
+</p><p>以下は、グラフの範囲を選択させるスクリプトです。
+</p>
+<pre class="lt" style="font-family:monospace;">    <span style="color: #008000;">// ツールの開始</span>
+    dotool <span style="color: #0000dd;">4</span>;
+    <span style="color: #008000;">// ユーザが行ったとき実行するマクロを定義</span>
+    def pointproc <span style="color: #000000;">{</span>
+        done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        dotool <span style="color: #0000dd;">0</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #008000;">// ループで待ち押すことで完了 </span>
+    <span style="color: #008000;">// (1) Enterキーまたは (2) ダブルクリック</span>
+    for<span style="color: #000000;">(</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&nbsp;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>&nbsp;; <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        sec <span style="color: #000080;">-</span>p .1;
+    <span style="color: #000000;">}</span>
+    <span style="color: #008000;">// ユーザがツールを終了させると、追加のスクリプトが実行</span>
+    ty continuing ..;</pre>
+<p><span class="OIndex">領域データセレクタ</span> または <span class="OIndex">領域マスクツール</span> を使うとき、ユーザがEscキーを押すことをきっかけとして、quittoolboxマクロを実行できます。
+</p>
+<pre class="lt" style="font-family:monospace;">    <span style="color: #008000;">// グラフをアクティブにして、領域データ選択ツールを開始</span>
+    dotool <span style="color: #0000dd;">17</span>;
+    <span style="color: #008000;">// ユーザが行ったとき実行するマクロを定義</span>
+    def quittoolbox <span style="color: #000000;">{</span>
+        done <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #008000;">// ループで待ち押すことで完了 ...</span>
+    <span style="color: #008000;">// (1) Escキーまたは (2) ポインタツールをクリック</span>
+    for<span style="color: #000000;">(</span> done <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>&nbsp;; done <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>&nbsp;; <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        sec <span style="color: #000080;">-</span>p .1;
+    <span style="color: #000000;">}</span>
+    <span style="color: #008000;">// ユーザがツールを終了させると、追加のスクリプトが実行</span>
+    ty continuing ..;</pre>
+<p>Xファンクションを使って、これらの範囲を見つけ、使用することができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// データセット内の範囲を取得</span>
+dataset dsB, dsE;
+mks ob<span style="color: #000000;">:</span><span style="color: #000080;">=</span>dsB oe<span style="color: #000000;">:</span><span style="color: #000080;">=</span>dsE;
+<span style="color: #008000;">// For each range</span>
+for<span style="color: #000000;">(</span>idx <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>&nbsp;; idx <span style="color: #000080;">&lt;=</span> dsB.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>&nbsp;; idx<span style="color: #000080;">++</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// その範囲に対して曲線以下の積分を取得</span>
+    integ <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>b dsB<span style="color: #000000;">[</span>idx<span style="color: #000000;">]</span> <span style="color: #000080;">-</span>e dsE<span style="color: #000000;">[</span>idx<span style="color: #000000;">]</span>;
+    type Area of <span style="color: #000080;">%</span>C from <span style="color: #000080;">$</span><span style="color: #000000;">(</span>dsB<span style="color: #000000;">[</span>idx<span style="color: #000000;">]</span><span style="color: #000000;">)</span> to <span style="color: #000080;">$</span><span style="color: #000000;">(</span>dsE<span style="color: #000000;">[</span>idx<span style="color: #000000;">]</span><span style="color: #000000;">)</span> is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>integ.<span style="color: #000080;">area</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<hr />
+<p>プロット操作・オブジェクト作成ツールバーのリスト<b>太字</b>はプログラミングで役立ちます。
+</p>
+<table class="simple">
+<tr>
+<th> ツールの番号</th>
+<th> 説明
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td>
+<p>ポインタ - ポインタはマウスのデフォルトの状態で、マウスはセレクタとして動作します。
+</p>
+</td></tr>
+<tr>
+<td> 1
+</td>
+<td>
+<p>拡大 - グラフ上で矩形を選択し、その矩形の範囲の軸で再スケールします。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 2
+</td>
+<td>
+<p><b>スクリーンリーダ</b> - ページ上のポイントの位置を読み込みます。
+</p>
+</td></tr>
+<tr>
+<td> 3
+</td>
+<td>
+<p><b>データリーダ</b> - ページ上のデータポイントの位置を読み込みます。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 4
+</td>
+<td>
+<p><b>データセレクタ</b> - データ範囲を示すデータマーカをセットします。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 5
+</td>
+<td>
+<p>マウスで作図 - グラフ上にデータポイントを描画します。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 6
+</td>
+<td>
+<p>テキスト - テキスト注釈をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 7
+</td>
+<td>
+<p>矢印 - 矢印をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 8
+</td>
+<td>
+<p>曲線矢印 - 曲線矢印をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 9
+</td>
+<td>
+<p>直線 - 直線をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 10
+</td>
+<td>
+<p>四角形 - 四角形をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 11
+</td>
+<td>
+<p>円 - 円図形をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 12
+</td>
+<td>
+<p>多角形 - 多角形の図形をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 13
+</td>
+<td>
+<p>折れ線 - 折れ線をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 14
+</td>
+<td>
+<p>自由閉曲線 - 閉曲線をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 15
+</td>
+<td>
+<p>自由曲線 - 自由曲線をページに追加します。
+</p>
+</td></tr>
+<tr>
+<td> 16
+</td>
+<td>
+<p>縮小 - グラフ上のクリックした場所を中心に縮小します。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 17
+</td>
+<td>
+<p><b>領域データセレクタ</b> - データ範囲を選択します。(グラフのみ)
+</p>
+</td></tr>
+<tr>
+<td> 18
+</td>
+<td>
+<p><b>領域<span class="OIndex">マスク</span>ツール</b> - データ範囲のポイントをマスクします。(グラフのみ)
+</p>
+</td></tr></table>
+
+
+
+    

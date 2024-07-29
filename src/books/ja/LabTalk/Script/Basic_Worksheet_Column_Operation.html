@@ -1,0 +1,348 @@
+﻿<h1 class="firstheading">基本ワークシート列操作</h1>
+<p>ワークシート列に操作を行う場合、ほとんどの状況で<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col</a> オブジェクトを使用できます。または、<a href="../../LabTalk/LabTalk/Range_Notation.html" title="LabTalk:範囲表記">範囲表記</a>を列オブジェクトに指定して操作します。</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Add_ColumnInsert_ColumnAdd_or_Insert_Column"><span class="tocnumber">1</span> <span class="toctext">列の追加・挿入</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Insert_or_Delete_Rows_in_Columns"><span class="tocnumber">2</span> <span class="toctext">列内の行を挿入または削除</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Move_ColumnMove_Column"><span class="tocnumber">3</span> <span class="toctext">列の移動</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Rename_and_Label_ColumnRename_ColumnColumn_Label"><span class="tocnumber">4</span> <span class="toctext">列の名前を変更する・ラベルを付ける</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Hide.2FUnhide_ColumnHide_Column"><span class="tocnumber">5</span> <span class="toctext">列の表示/非表示</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Swap_Column"><span class="tocnumber">6</span> <span class="OIndex">列の入れ替え</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Modify_Column_Formats"><span class="tocnumber">7</span> <span class="toctext">列の形式を変更する</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Plot_Designation"><span class="tocnumber">7.1</span> <span class="OIndex">プロット属性</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Column_Width"><span class="tocnumber">7.2</span> <span class="OIndex">列幅</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Data_Format_and_Display"><span class="tocnumber">7.3</span> <span class="toctext">データ形式と表示</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Add_Sparkline_to_Column"><span class="tocnumber">8</span> <span class="toctext">列にスパークラインを追加する</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Delete_Column"><span class="tocnumber">9</span> <span class="OIndex">列の削除</span></a></li>
+</ul>
+</div>
+<h2><a name="Add_ColumnInsert_ColumnAdd_or_Insert_Column" id="Add_ColumnInsert_ColumnAdd_or_Insert_Column"></a><span class="mw-headline">列の追加・挿入</span></h2>
+<p>ワークシートの最後に列を追加するには、<a href="../../LabTalk/LabTalk/Wks_(object).html#Methods" title="LabTalk:Wks (オブジェクト)">wks.addCol()</a>方法を使用します。これは指定の名前を有する列を追加し、その名前が使用済みまたは無視された場合、追加される列には一般的な名前が選択されます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;<span style="color: #008000;">
+//「スプレッドシートセル表記」 (SCN)をオフ</span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;<span style="color: #008000;">
+// Resultという新しい列を最後に追加</span>
+wks.<span style="color: #000080;">addCol</span><span style="color: #000000;">(</span>Result<span style="color: #000000;">)</span>;
+</pre>
+<p>上記方法は最後に1列ずつ追加する事しかできません。複数の列を追加する場合、<a href="../../LabTalk/LabTalk/Wks_(object).html#Properties" title="LabTalk:Wks (オブジェクト)">wks.nCols</a>プロパティを使用してワークシートの列数を指定する事で列を追加できます。例えば、以下のスクリプトはアクティブなワークシートに3列を追加し、一般的な名前を付けます。（Note:この方法で名前を指定する事はできません。以下の<b>列に名前とラベルをつける</b>を参照してください。）</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;
+ <span style="color: #008000;">
+// ワークシートの最後に3列分追加</span>
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">3</span>;
+</pre>
+<p>ワークシートの最後に列を追加する他に、現在の列の前に指定した数の列を挿入する事もできます。まず、<a href="../../LabTalk/LabTalk/Wks_(object).html#Properties" title="LabTalk:Wks (オブジェクト)">wks.col</a>を使用して現在の列を指定します。そして<a href="../../LabTalk/LabTalk/Wks_(object).html#Methods" title="LabTalk:Wks (オブジェクト)">wks.insert()</a>メソッドを使用して現在の列の前に <span class="OIndex">新たな列を挿入</span>します。この方法では、それぞれの列の名前をスペース区切りでリストする必要があります。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;<span style="color: #008000;">
+// 列2を現在の列として設定</span>
+wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;<span style="color: #008000;">
+//「スプレッドシートセル表記」 (SCN)をオフ</span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;<span style="color: #008000;">
+// 列2の前に列名を指定した3列挿入</span>
+wks.<span style="color: #000080;">insert</span><span style="color: #000000;">(</span>DataX DataY Result<span style="color: #000000;">)</span>;
+</pre>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Basic_Worksheet_Column_Operation/Tip_icon.png" alt="" width="57" height="57" border="0" /></td>
+<td>
+<p>ワークブックの<a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">スプレッドシートセル表記</a>については、<a class="external text" href="../../QuickHelp/QuickHelp/Turn_off_spreadsheet_cell_notation.html"><b>FAQ-849</b></a> を参照してください。</p>
+</td>
+</tr>
+</table>
+<h2><a name="Insert_or_Delete_Rows_in_Columns" id="Insert_or_Delete_Rows_in_Columns"></a><span class="mw-headline">列内の行を挿入または削除</span></h2>
+<p>ワークシート列内の行を削除あるいは挿入するには、<a class="external text" href="../../LabTalk/LabTalk/Wks_(object).html#Methods">wks.deleteRows() または wks.insertRows() methods</a>を使用します。</p>
+<p>シンタックスは次のようになります。</p>
+<p>wks.deleteRows(<i>rowBegin</i>[,<i>numRows</i>, <i>colBegin</i>, <i>colEnd</i>])<br />
+wks.insertRows(<i>rowBegin</i>[,<i>numRows</i>, <i>colBegin</i>, <i>colEnd</i>])</p>
+<p>角括弧内の引数はオプションです。</p>
+<p>以下にサンプルを示します。</p>
+<pre class="lt" style="font-family: monospace;">
+wks.<span style="color: #000080;">deleteRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//全列の3番目の行を削除</span>
+wks.<span style="color: #000080;">deleteRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//  全列で3番目の行から5行削除</span>
+wks.<span style="color: #000080;">deleteRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//  2番目以降の列の3行目から5行分削除</span>
+wks.<span style="color: #000080;">deleteRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//列2から4の3行目から5行分削除</span>
+wks.<span style="color: #000080;">insertRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// すべての列の3行目の前に行を挿入</span>
+wks.<span style="color: #000080;">insertRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//すべての列の3行目の前に5行挿入</span>
+wks.<span style="color: #000080;">insertRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//2番目以降の列の3行目の前に5行挿入 </span>
+wks.<span style="color: #000080;">insertRows</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//2から4列の3行目の前に5列挿入</span>
+</pre>
+<p><a class="external text" href="../../XFunction/X-Function/Wdelrows.html">wdelrows</a> Xファンクションでもワークシート行の削除が可能です。</p>
+<h2><a name="Move_ColumnMove_Column" id="Move_ColumnMove_Column"></a><span class="mw-headline">列の移動</span></h2>
+<p><a class="external text" href="../../XFunction/X-Function/Colmove.html">colmove</a> Xファクションは、ワークシート内のデータ列を移動するのに使用します。 (範囲変数とは対照的に)明示的な範囲と入力としての移動操作を受け付けます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 最初の列をワークシートの最後(左から右)にする</span>
+colmove rng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> operation<span style="color: #000000;">:</span><span style="color: #000080;">=</span>last; 
+ <span style="color: #008000;">
+// 列2-4をワークシートの最も左に移動</span>
+colmove rng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> operation<span style="color: #000000;">:</span><span style="color: #000080;">=</span>first;
+</pre>
+<h2><a name="Rename_and_Label_ColumnRename_ColumnColumn_Label" id="Rename_and_Label_ColumnRename_ColumnColumn_Label"></a><span class="mw-headline">列の名前を変更する・ラベルを付ける</span></h2>
+<p>列の名前（ショートネーム）を変更するために、Originは<i>name$</i>プロパティと共に<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col</a>オブジェクトを使用できます。また、<a href="../../LabTalk/LabTalk/Column_Label_Row_Characters.html" title="LabTalk:列ラベル行の文字">列ラベル行の文字</a>、<b><i>G</i></b>を使用して列のショートネームを変更できます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;
+ <span style="color: #008000;">
+// 列1の名前を DataX に変更</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> DataX;<span style="color: #008000;">
+// 範囲を使用して列２の名前をDataYに変更</span>
+range rY <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// 範囲を列2に設定する</span>
+rY.<span style="color: #000080;">name</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> DataY;
+ <span style="color: #008000;">
+// 新しい列を追加する</span>
+wks.<span style="color: #000080;">addCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;<span style="color: #008000;">
+// 「スプレッドシートセル表記」 (SCN)をオフ </span>
+page.<span style="color: #000080;">xlcolname</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">
+// "G"に名前変更</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>G<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Result"</span>;
+</pre>
+<p><a href="../../LabTalk/LabTalk/Column_Label_Row_Characters.html" title="LabTalk:列ラベル行の文字">列ラベル行の文字</a>は列ラベルに簡単にアクセスできる方法です。列ラベルにはロングネーム、単位、コメント、列パラメータ、ユーザ定義パラメータなどが含まれます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook result<span style="color: #000000;">:</span><span style="color: #000080;">=</span>BkName<span style="color: #000080;">$</span>;
+ <span style="color: #008000;">
+// 以下のラベル行を表示する</span><span style="color: #008000;">
+// ロングネーム、単位、コメント、最初の列パラメータ</span><span style="color: #008000;">
+// 最初のユーザ定義パラメータ</span>
+wks.<span style="color: #000080;">labels</span><span style="color: #000000;">(</span>LUCP1D1<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 列1と列2を定義する</span>
+range r1 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>BkName<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+range r2 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>BkName<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;<span style="color: #008000;">
+// col を使用してロングネームをセットする</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Time;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Voltage;<span style="color: #008000;">
+// 範囲で単位をセット</span>
+r1<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Sec;
+r2<span style="color: #000000;">[</span>U<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> V;<span style="color: #008000;">
+// 範囲を使用して列コメントをセット</span>
+r1<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Sample1;
+r2<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Sample1;<span style="color: #008000;">
+// 範囲を使用して列パラメータをセット</span>
+r1<span style="color: #000000;">[</span>P1<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Machine1"</span>;
+r2<span style="color: #000000;">[</span>P1<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Machine1"</span>;
+ <span style="color: #008000;">
+// 最初のユーザ定義パラメータの名前を変更</span>
+wks.<span style="color: #000080;">UserParam1</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Current;
+ <span style="color: #008000;">
+// 現在のラベル行をセット</span>
+r1<span style="color: #000000;">[</span>Current<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> 1mA;
+r2<span style="color: #000000;">[</span>Current<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> 1mA;
+</pre>
+<h2><a name="Hide.2FUnhide_ColumnHide_Column" id="Hide.2FUnhide_ColumnHide_Column"></a><span class="mw-headline">列の表示/非表示</span></h2>
+<p>列を表示/非表示にするには、<a class="external text" href="../../XFunction/X-Function/Colhide.html">colHide</a> Xファンクションを使用します。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;
+ <span style="color: #008000;">
+// ワークシートの列番号をセット</span>
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+ <span style="color: #008000;">
+// 2列目を非表示にする</span>
+colHide <span style="color: #0000dd;">2</span> hide;
+ <span style="color: #008000;">
+//3列目と5列目を非表示にする</span>
+colHide <span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span><span style="color: #000000;">)</span> hide;
+</pre>
+<p>非表示にした列を表示にするには、2つ目の引数を <i>hide</i> から<i>unhide</i>に変更して実行します。</p>
+<h2><a name="Swap_Column" id="Swap_Column"></a><span class="mw-headline"><span class="OIndex">列の入れ替え</span></span></h2>
+<p>2つの特定の列を入れ替えるには<a class="external text" href="../../XFunction/X-Function/Colswap.html">colSwap</a> Xファンクションを使用します。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;
+ <span style="color: #008000;">
+// 列1と列2の位置を入れ替える</span>
+colSwap <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+</pre>
+<p>ここで指定する2つの列は、必ずしも隣り合っている必要はありません。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 新しいワークブックを作成</span>
+newbook;
+ <span style="color: #008000;">
+// 列の数を６としてセット</span>
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+ <span style="color: #008000;">
+// 2列目と4列目を入れ替える</span>
+colswap <span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;
+</pre>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Basic_Worksheet_Column_Operation/Alert_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<p>2つの列を交換するとき、ワークブックで<a class="external text" href="../../UserGuide/UserGuide/Column_Short_Name_Restriction.html">スプレッドシートセル表記</a>が有効になっている場合、ショートネームは常にA～Zから連続して自動的に割り当てられるため、列のショートネームが交換されない場合があります。つまり、列のショートネームを交換する場合は、<b>colswap</b>コマンドを実行する前に<b>スプレッドシートセル表記</b>を無効にする必要がある場合があります。詳細は、<a class="external text" href="../../QuickHelp/QuickHelp/Turn_off_spreadsheet_cell_notation.html"><b>FAQ-849</b></a>を参照してください。</p>
+</td>
+</tr>
+</table>
+<h2><a name="Modify_Column_Formats" id="Modify_Column_Formats"></a><span class="mw-headline"><span class="OIndex">列の形式を変更する</span></span></h2>
+<h3><a name="Plot_Designation" id="Plot_Designation"></a><span class="mw-headline"><span class="OIndex">プロットの割り当て</span></span></h3>
+<p>列へのプロット属性は選択したデータがデフォルトでどのように扱い、作図をするのか決定します。プロット属性は、X、Y、Z、Zエラー、Yエラー、ラベルなどを含みます。これらは<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col.type</a>を使用して変更できます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// データをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Matrix Conversion and Gridding\XYZ Random Gaussian.dat"</span>;
+impasc;
+ <span style="color: #008000;">
+// プロット属性をセット</span>
+wks.<span style="color: #000080;">col</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// 列3を現在の列にセット</span>
+wks.<span style="color: #000080;">col</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;  <span style="color: #008000;">// Z</span>
+ <span style="color: #008000;">
+// 3番目の列（Z列）を選択</span>
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">1</span> <span style="color: #0000dd;">3</span> <span style="color: #000080;">-</span><span style="color: #0000dd;">1</span>;<span style="color: #008000;">
+// 温度を元にしたカラーマップ曲面図をOpenGLで作成</span>
+worksheet <span style="color: #000080;">-</span>p <span style="color: #0000dd;">103</span> glcmap;
+</pre>
+<h3><a name="Column_Width" id="Column_Width"></a><span class="mw-headline"><span class="OIndex">列幅</span></span></h3>
+<p>列幅をセットするには、<a class="external text" href="../../XFunction/X-Function/Wcolwidth.html">wcolwidth</a> Xファンクションを使用します。または、<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col.width</a>も使用できます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// ワークブックを開く</span>
+string strPath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strPath<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Graphing\Automobile Data.ogw"</span>;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 列2を ###ではなく、数字を全て表示する</span><span style="color: #008000;">
+// 列2の長さを6文字分にセット</span>
+wcolwidth irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> width<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+</pre>
+<h3><a name="Data_Format_and_Display" id="Data_Format_and_Display"></a><span class="mw-headline"><span class="OIndex">データ形式</span>と表示</span></h3>
+<p>列に正しいデータ形式（データ型）を設定して、列データを正しく表示できます。また、作図やデータ分析などの操作を行う際の助けになります。列は、数値、テキスト、日付、時間、月、曜日等多くのデータ型を選択できます。データ型をセットするには<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col</a>オブジェクトの<i>format</i>プロパティを使用してください。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// データをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Signal Processing\Average Sunspot.dat"</span>;
+impasc;
+ <span style="color: #008000;">
+// 列2に数値（現在はテキストと数値）に設定</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 数値 = 1</span>
+ <span style="color: #008000;">
+// 桁数指定法を "小数桁数"にし、</span><span style="color: #008000;">
+// 桁数を2にする</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">digitMode</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 小数点以下の桁数を指定</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">digits</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// 書数点以下2桁</span>
+</pre>
+<p>以下のサンプルはそれぞれの対応する形式に対応する設定を紹介します。</p>
+<ol>
+<li>数値
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// データをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Curve Fitting\Enzyme.dat"</span>;
+impasc;
+ <span style="color: #008000;">
+//  列2に数値（現在はテキストと数値）にセット</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 数値 = 1</span><span style="color: #008000;">
+// 表示フォーマットをカンマ付にする</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;  <span style="color: #008000;">// 小数点として表示1,000</span><span style="color: #008000;">
+// データ型は短い整数にする</span>
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+ 
+ <span style="color: #008000;">
+// 列3にも同じような操作をする</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// 数値 = 1</span><span style="color: #008000;">
+// 表示フォーマットはカンマ付にする</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;  <span style="color: #008000;">// 小数桁として表示1,000</span><span style="color: #008000;">
+// データ型を短い整数にする</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+        
+</pre></li>
+<li>日付
+<p>日付と時間のフォーマットに関して、列内のデータがユリウス歴（日付と時間のフォーマットに見えますが、実際には時間です）ではない場合、直接日付や時間としてセットできません。あるいは日付と時間フォーマットに見える場合、数値が欠損値になるか、別のものになります。この問題を避けるために、Originは <b><a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">wks.col.setformat()</a></b>メソッドを提供しています。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// データをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Import and Export\Custom Date and Time.dat"</span>;
+impasc;
+ <span style="color: #008000;">
+// 列1のデータ型を日付にセット</span><span style="color: #008000;">
+// カスタム表示形式では、</span><span style="color: #008000;">
+// 現在のようなテキスト表示を列に行う</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">setformat</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">22</span>, dd<span style="color: #ff00ff;">&amp;apos;.&amp;apos;</span>MM<span style="color: #ff00ff;">&amp;apos;.&amp;apos;</span>yyyy HH<span style="color: #ff00ff;">&amp;apos;:&amp;apos;</span>mm<span style="color: #ff00ff;">&amp;apos;:&amp;apos;</span>ss<span style="color: #ff00ff;">&amp;apos;.&amp;apos;</span>##<span style="color: #000000;">)</span>;<span style="color: #008000;">
+// データ型 yyyy/MM/dd HH:mm:ss をセット</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+        
+</pre></li>
+<li>時間
+<p>上記の日付の説明を参照してください。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// データをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Import and Export\IRIG Time.dat"</span>;
+impasc;
+ <span style="color: #008000;">
+// 列1のデータ型を時間にセット</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// 時間 = 3</span><span style="color: #008000;">
+// IRIG 時間形式「DDD:HH:mm:ss.##」で表示</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">16</span>;
+        
+</pre></li>
+<li>月
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 列1のデータ型を月にセット</span><span style="color: #008000;">
+// そして、月の名前を全て表示</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;  <span style="color: #008000;">// 月 = 5</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// 月の名前を全て表示</span>
+        
+</pre></li>
+<li>曜日
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// 列1のデータ型を曜日にセット</span><span style="color: #008000;">
+// 各曜日の最初の文字のみを表示</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;  <span style="color: #008000;">// 曜日 = 6</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// 各曜日の最初の文字を表示</span>
+        
+</pre></li>
+</ol>
+<h2><a name="Add_Sparkline_to_Column" id="Add_Sparkline_to_Column"></a><span class="mw-headline">列に<span class="OIndex">スパークライン</span>を追加する</span></h2>
+<p><a class="external text" href="../../XFunction/X-Function/Sparklines.html">sparklines</a> Xファンクションは指定した列にスパークラインを追加するのに使用します。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// ワークブックを開く</span>
+string strPath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strPath<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Graphing\Automobile Data.ogw"</span>;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+//ロングネームに"Year" とついている列以外全てにスパークラインを追加</span>
+for<span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; ii <span style="color: #000080;">&lt;=</span> wks.<span style="color: #000080;">nCols</span>; ii<span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        sparklines sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> c1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ii c2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span>;<span style="color: #000000;">
+}</span>
+</pre>
+<h2><a name="Delete_Column" id="Delete_Column"></a><span class="mw-headline"><span class="OIndex">列の削除</span></span></h2>
+<p><a href="../../LabTalk/LabTalk/Delete_(command).html" title="LabTalk:Delete (コマンド)">delete</a>コマンドはワークシートから列を削除する事ができます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// ワークブックを作成</span>
+newbook;<span style="color: #008000;">
+// 列Bを削除</span>
+delete col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span>;<span style="color: #008000;">
+// 4列ある新しいワークシートを追加</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;<span style="color: #008000;">
+// rangeを使って3列削除</span>
+range r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// 新しく追加したワークシートの列3</span>
+delete r1;<span style="color: #008000;">
+// rangeを使って複数列削除</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+range r2 <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 複数列をrangeに割り当て</span>
+delete r2;
+</pre>
+<p>削除したい列がワークシートの最後にある場合、削除する列を<a href="../../LabTalk/LabTalk/Wks_(object).html#Properties" title="LabTalk:Wks (オブジェクト)">wks.nCols</a>により指定すると、削除できます。</p>
+<pre class="lt" style="font-family: monospace;">
+<span style="color: #008000;">// ワークブックを開く</span>
+string strPath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strPath<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples\Graphing\Automobile Data.ogw"</span>;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 開いたワークシートの最後の20列分を削除</span>
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span><span style="color: #000080;">-</span><span style="color: #0000dd;">20</span>;
+</pre>

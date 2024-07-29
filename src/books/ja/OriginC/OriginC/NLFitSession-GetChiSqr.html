@@ -1,0 +1,209 @@
+﻿<h1 class="firstheading">NLFitSession::GetChiSqr</h1>
+
+  <p><span class="OIndex" style="display:none">GetChiSqr</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Calculate the current reduced Chi-square value.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span>        GetChiSqr<span style="color: #000000;">(</span>vector<span style="color: #000040;">&amp;</span> vChiSqr <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">bool</span> bGenerateOutputs <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>vChiSqr</dt>
+
+    <dd>[output] If not NULL, it receives Chi-Sqr value.</dd>
+
+    <dt>bGenerateOutputs</dt>
+
+    <dd>[input] If true, will generate(update) outputs that can be retrieved by GetFitResultsParams, else will not recalculate the outputs and the outputs retrieved by GetFitResultsParams will only be junk.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>There is no return value for this function.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+
+  <p>This example shows how to get reduced chi-sqr and output results on multiple datasets.</p>
+
+  <ol>
+    <li>Prior to running the following example, the nlsf_utils.c file need to be loaded and compiled. This can be done from script with the command <b>run.LoadOC(Originlab\nlsf_utils.c)</b> or just add this file to your workspace.</li>
+
+    <li>New a worksheet and import \Samples\Curve Fitting\Gaussian.dat.</li>
+
+    <li>Copy and compile the following codes, and run "NLFitSession_GetChiSqr_ex1" in Command window.</li>
+  </ol>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> NLFitSession_GetChiSqr_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000040;">||</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">3</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+        
+        NLFitSession nlfSession;
+        
+        <span style="color: #008000;">//set fit function</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Gauss"</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to set function!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+                
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nDatasets <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">//two datasets</span>
+        <span style="color: #008000;">//prepare input dataset 1</span>
+        XYRange drInput;
+        drInput.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        drInput.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        
+        vector vX, vY;
+        drInput.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vY, vX<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">//set data 1</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vY, vX, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">0</span>, nDatasets <span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to set data 1!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">//prepare input dataset 2</span>
+        drInput.<span style="color: #000000;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        drInput.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        drInput.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;    
+        drInput.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vY, vX<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">//set data 2</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vY, vX, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">1</span>, nDatasets <span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to set data 2!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        
+        <span style="color: #008000;">//set parameters</span>
+        vector vParams<span style="color: #000000;">(</span><span style="color: #0000dd;">8</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//gauss function need y0, xc, w, A each dataset, and there are two datasets.</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">25</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">255</span>;
+        
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">15</span>;
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">7</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">25</span>;
+        
+        nlfSession.<span style="color: #000000;">SetParamFix</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//y0 of dataset 2 as fixed.</span>
+        
+        nlfSession.<span style="color: #000000;">SetEnableLinearConstraints</span><span style="color: #000000;">(</span><span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">SetParamValues</span><span style="color: #000000;">(</span>vParams<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to set parameter values!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">//generate and show results.</span>
+        vector  vChiSqr;
+        <span style="color: #0000ff;">bool</span>       bGenerateOutputs <span style="color: #000080;">=</span> <span style="color: #0000ff;">true</span>;
+        nlfSession.<span style="color: #000000;">GetChiSqr</span><span style="color: #000000;">(</span>vChiSqr, bGenerateOutputs<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> vChiSqr.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nDatasets <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to get Chi-Sqr of all datasets!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> iData <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iData <span style="color: #000080;">&lt;</span> nDatasets; iData<span style="color: #000040;">++</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> vChiSqr.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&gt;</span> iData <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Reduced Chi-Sqr of dataset %d is : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iData <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, vChiSqr<span style="color: #000000;">[</span>iData<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> bGenerateOutputs <span style="color: #000000;">)</span> <span style="color: #008000;">//the output results is updated and reliable</span>
+                <span style="color: #000000;">{</span>
+                        FitParameter arrFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>; <span style="color: #008000;">//y0, xc, w, A</span>
+                        RegStats regStats;
+                        NLSFFitInfo fitInfo;
+                        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> nlfSession.<span style="color: #000000;">GetFitResultsStats</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>regStats, <span style="color: #000040;">&amp;</span>fitInfo, <span style="color: #0000ff;">false</span>, iData<span style="color: #000000;">)</span> <span style="color: #000040;">&amp;&amp;</span> nlfSession.<span style="color: #000000;">GetFitResultsParams</span><span style="color: #000000;">(</span>arrFitParams, <span style="color: #000040;">&amp;</span>regStats, iData<span style="color: #000000;">)</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Fit parameters : <span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                                vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vParaNames <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">"y0"</span>, <span style="color: #ff00ff;">"xc"</span>, <span style="color: #ff00ff;">"w"</span>, <span style="color: #ff00ff;">"A"</span><span style="color: #000000;">}</span>;
+                                <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> iPara <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iPara <span style="color: #000080;">&lt;</span> vParaNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; iPara<span style="color: #000040;">++</span> <span style="color: #000000;">)</span>
+                                <span style="color: #000000;">{</span>
+                                        _show_fitparams<span style="color: #000000;">(</span>arrFitParams<span style="color: #000000;">[</span>iPara<span style="color: #000000;">]</span>, vParaNames<span style="color: #000000;">[</span>iPara<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                                <span style="color: #000000;">}</span>
+                                
+                                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Regular statistics : <span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                                _show_regstats<span style="color: #000000;">(</span>regStats<span style="color: #000000;">)</span>;
+                        <span style="color: #000000;">}</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">static</span>     <span style="color: #0000ff;">void</span> _show_fitparams<span style="color: #000000;">(</span>FitParameter<span style="color: #000040;">&amp;</span> fitParams, LPCSTR lpcszParamName<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Parameter %s value : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, lpcszParamName, fitParams.<span style="color: #000000;">Value</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Parameter %s fix : %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, lpcszParamName, fitParams.<span style="color: #000000;">Fix</span> ? <span style="color: #ff00ff;">"True"</span> <span style="color: #000000;">:</span> <span style="color: #ff00ff;">"False"</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Parameter %s error : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, lpcszParamName, fitParams.<span style="color: #000000;">Error</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+        
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> _show_regstats<span style="color: #000000;">(</span>RegStats<span style="color: #000040;">&amp;</span> regStats<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Number of points : %d<span style="color: #666666; font-weight: bold;">\n</span>"</span>, <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span>regStats.<span style="color: #000000;">N</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Degrees of freedom : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">DOF</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"ReducedChisq(Chi^2/DOF) : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">ReducedChiSq</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Regression sum of squares : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">SSR</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Correlation : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">Correlation</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"R Value : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">Rvalue</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Coefficient of determination : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">RSqCOD</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Adjusted residual sum of squares : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">AdjRSq</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Root_MSE(SD) : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">RMSESD</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Norm of Residuals : %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, regStats.<span style="color: #000000;">NormResiduals</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/NLFitSession-GetFitResultsParams.html" title="OriginC:NLFitSession-GetFitResultsParams">GetFitResultsParams</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>Originlab\NLFitSession.h</p>

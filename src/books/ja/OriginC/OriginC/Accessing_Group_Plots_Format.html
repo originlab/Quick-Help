@@ -1,0 +1,282 @@
+﻿<h1 class="firstheading">Accessing Group Plots Format</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Setting_Grouped_Format_of_Line_.2B_Symbol_Plots"><span class="tocnumber">1</span> <span class="toctext">Setting Grouped Format of Line + Symbol Plots</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Setting_Colors_for_Grouped_Bars"><span class="tocnumber">2</span> <span class="toctext">Setting Colors for Grouped Bars</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Setting_Offset_Individually_for_Grouped_Plots"><span class="tocnumber">3</span> <span class="toctext">Setting Offset Individually for Grouped Plots</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Setting_special_point_format_of_one_plot_of_group_plots"><span class="tocnumber">4</span> <span class="toctext">Setting special point format of one plot of group plots</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Setting_Grouped_Format_of_Line_.2B_Symbol_Plots"></a><span class="mw-headline">Setting Grouped Format of Line + Symbol Plots</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin8 SR2</p>
+
+  <p>This example is used to set grouped format for grouped plots with Line + Symbol type, including line color, line style, symbol shape and symbol interior.</p>
+
+  <p>To run this example, please run the following LabTalk first to create the desired graph.</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;  <span style="color: #008000;">// create a new workbook</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"Samples\Curve Fitting\Multiple Gaussians.dat"</span>;  <span style="color: #008000;">// file path</span>
+impasc;  <span style="color: #008000;">// import data file</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;  <span style="color: #008000;">// plot line+symbol</span>
+</pre>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> grouped_line_symbol<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot get the graph layer!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        GroupPlot gplot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">Groups</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gplot<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot get the group plot!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vNester;
+        
+        <span style="color: #008000;">// the Nester is an array of types of objects to do nested cycling in the group</span>
+        vNester.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// four types of setting to do nested cycling in the group</span>
+        vNester<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// cycling line color in the group</span>
+        vNester<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// cycling symbol type in the group</span>
+        vNester<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// cycling line style in the group</span>
+        vNester<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;  <span style="color: #008000;">// cycling symbol interior in the group</span>
+        
+        gplot.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">Nester</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vNester;  <span style="color: #008000;">// set Nester of the grouped plot</span>
+        
+        <span style="color: #0000ff;">int</span> nNumPlots <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// nNumPlots = 4 in this example</span>
+        
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vLineColor, vSymbolShape, vLineStyle, vSymbolInterior;
+        
+        <span style="color: #008000;">// four vectors for setting line color, symbol shape, line style and symbol interior of grouped plots</span>
+        vLineColor.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPlots<span style="color: #000000;">)</span>;
+        vSymbolShape.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPlots<span style="color: #000000;">)</span>;
+        vLineStyle.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPlots<span style="color: #000000;">)</span>;
+        vSymbolInterior.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPlots<span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// setting corresponding values to four vectors</span>
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nPlot<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; nPlot<span style="color: #000080;">&lt;</span>nNumPlots; nPlot<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nNumPlots<span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #0000ff;">switch</span> <span style="color: #000000;">(</span>nPlot<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">:</span>  <span style="color: #008000;">// setting for plot 0</span>
+                                        vLineColor<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> SYSCOLOR_BLUE;
+                                        vSymbolShape<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// square</span>
+                                        vLineStyle<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;    <span style="color: #008000;">// dash</span>
+                                        vSymbolInterior<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// open</span>
+                                        <span style="color: #0000ff;">break</span>;
+                                <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>  <span style="color: #008000;">// setting for plot 1</span>
+                                        vLineColor<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> SYSCOLOR_OLIVE;
+                                        vSymbolShape<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// up triangle</span>
+                                        vLineStyle<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;    <span style="color: #008000;">// dot</span>
+                                        vSymbolInterior<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// dot center</span>
+                                        <span style="color: #0000ff;">break</span>;
+                                <span style="color: #0000ff;">case</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>  <span style="color: #008000;">// setting for plot 2</span>
+                                        vLineColor<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> SYSCOLOR_RED;
+                                        vSymbolShape<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;  <span style="color: #008000;">// diamond</span>
+                                        vLineStyle<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;    <span style="color: #008000;">// short dot</span>
+                                        vSymbolInterior<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;  <span style="color: #008000;">// x center</span>
+                                        <span style="color: #0000ff;">break</span>;
+                                <span style="color: #0000ff;">default</span><span style="color: #000000;">:</span>  <span style="color: #008000;">// setting for other plot</span>
+                                        vLineColor<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> SYSCOLOR_CYAN;
+                                        vSymbolShape<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;  <span style="color: #008000;">// hexagon</span>
+                                        vLineStyle<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;    <span style="color: #008000;">// solid</span>
+                                        vSymbolInterior<span style="color: #000000;">[</span>nPlot<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;  <span style="color: #008000;">// solid</span>
+                                        <span style="color: #0000ff;">break</span>;
+                        <span style="color: #000000;">}</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        
+        Tree trFormat;
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">LineColor</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vLineColor;  <span style="color: #008000;">// set line color to theme tree</span>
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">Shape</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vSymbolShape;  <span style="color: #008000;">// set symbol shape to theme tree</span>
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">LineStyle</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vLineStyle;  <span style="color: #008000;">// set line style to theme tree</span>
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">SymbolInterior</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vSymbolInterior;  <span style="color: #008000;">// set symbol interior to theme tree</span>
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> gplot.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">(</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>    
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">bool</span> bb <span style="color: #000080;">=</span> gplot.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">(</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;    <span style="color: #008000;">// apply theme tree</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Setting_Colors_for_Grouped_Bars"></a><span class="mw-headline">Setting Colors for Grouped Bars</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 7.5</p>
+
+  <p>The following example is used to set the colors of grouped bars. The colors are customized according to the column names. So, you can specify the unique color to the bar created from the column with the specified name. As the example shows, the bar created from the column named "N" will always have the red color.</p>
+
+  <p>To run this example, please run the following LabTalk script first to create the desired graph.</p>
+  <pre class="lt" style="font-family:monospace;">
+win <span style="color: #000080;">-</span>n wks ColumnColor;   <span style="color: #008000;">// create a new window</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>A<span style="color: #000000;">)</span>;            <span style="color: #008000;">// add column named A</span>
+ColumnColor_A<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;     <span style="color: #008000;">// set cell one with 1;</span>
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;        <span style="color: #008000;">// set to X column</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>B<span style="color: #000000;">)</span>;
+ColumnColor_B<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>O<span style="color: #000000;">)</span>;
+ColumnColor_O<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>P<span style="color: #000000;">)</span>;
+ColumnColor_P<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>C<span style="color: #000000;">)</span>;
+ColumnColor_C<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>N<span style="color: #000000;">)</span>;
+ColumnColor_N<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span>D<span style="color: #000000;">)</span>;
+ColumnColor_D<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>;
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span> <span style="color: #0000dd;">1</span> wks.<span style="color: #000080;">ncols</span> <span style="color: #0000dd;">1</span>;   <span style="color: #008000;">// select cell one of all columns</span>
+worksheet <span style="color: #000080;">-</span>p <span style="color: #0000dd;">203</span> column;        <span style="color: #008000;">// make grouped bar plots;</span>
+</pre>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> bar_color_map<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">// get active graph layer</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot get the active graph layer!"</span> <span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        GroupPlot gpl <span style="color: #000080;">=</span> gl.<span style="color: #000000;">Groups</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">// get first grouped plots</span>
+        
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vcColors;  
+        <span style="color: #0000ff;">int</span> nPlotCount <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get number of plots</span>
+        vcColors.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nPlotCount<span style="color: #000000;">)</span>;      <span style="color: #008000;">// set vector size</span>
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nColor<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; nColor<span style="color: #000080;">&lt;</span>nPlotCount; nColor<span style="color: #000040;">++</span><span style="color: #000000;">)</span>   <span style="color: #008000;">// set color vector according to the column name</span>
+        <span style="color: #000000;">{</span>
+                DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>nColor<span style="color: #000000;">)</span>;           <span style="color: #008000;">// get dataplot</span>
+                
+                string strDatasetName <span style="color: #000080;">=</span> dp.<span style="color: #000000;">GetDatasetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">int</span> nStart <span style="color: #000080;">=</span> strDatasetName.<span style="color: #000000;">Find</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">'_'</span><span style="color: #000000;">)</span>;     <span style="color: #008000;">// find delimited "_", between workbook name and colcumn name </span>
+                <span style="color: #0000ff;">int</span> nEnd <span style="color: #000080;">=</span> strDatasetName.<span style="color: #000000;">Find</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">'@'</span><span style="color: #000000;">)</span>;     <span style="color: #008000;">// find delimited "@", between column name and worksheet index</span>
+                
+                string strColName;
+                
+                <span style="color: #008000;">// get column name</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nEnd <span style="color: #000080;">==</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>   <span style="color: #008000;">// workbook contains only one worksheet</span>
+                        strColName <span style="color: #000080;">=</span> strDatasetName.<span style="color: #000000;">GetToken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">'_'</span><span style="color: #000000;">)</span>;        
+                <span style="color: #0000ff;">else</span>            <span style="color: #008000;">// workbook contains more than one worksheet</span>
+                        strColName <span style="color: #000080;">=</span> strDatasetName.<span style="color: #000000;">Mid</span><span style="color: #000000;">(</span>nStart<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, nEnd<span style="color: #000040;">-</span>nStart<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strColName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"C"</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>                 <span style="color: #008000;">// set color value one by one</span>
+                        vcColors<span style="color: #000000;">[</span>nColor<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;       <span style="color: #008000;">// 0 = black</span>
+                <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strColName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"N"</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                        vcColors<span style="color: #000000;">[</span>nColor<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;       <span style="color: #008000;">// 1 = red</span>
+                <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strColName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"O"</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                        vcColors<span style="color: #000000;">[</span>nColor<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;       <span style="color: #008000;">// 2 = green</span>
+                <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strColName.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"P"</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                        vcColors<span style="color: #000000;">[</span>nColor<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;       <span style="color: #008000;">// 3 = blue</span>
+                <span style="color: #0000ff;">else</span>
+                        vcColors<span style="color: #000000;">[</span>nColor<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;       <span style="color: #008000;">// 4 = cyan</span>
+        <span style="color: #000000;">}</span>
+        
+        gpl.<span style="color: #000000;">Increment</span>.<span style="color: #000000;">BackgroundColor</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vcColors;  <span style="color: #008000;">// set increment colors</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Setting_Offset_Individually_for_Grouped_Plots"></a><span class="mw-headline">Setting Offset Individually for Grouped Plots</span></h2>
+
+  <p>This example is used to set the offset of the grouped plot individually.</p>
+
+  <p>Please run the following LabTalk script to create the desired graph first.</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;  <span style="color: #008000;">// create a new workbook</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"Samples\Graphing\Group.DAT"</span>;  <span style="color: #008000;">// file path</span>
+impasc;  <span style="color: #008000;">// import data file</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?, <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;  <span style="color: #008000;">// plot line</span>
+</pre>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> set_offset<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nPlotLTIndex, <span style="color: #0000ff;">double</span> xOffset, <span style="color: #0000ff;">double</span> yOffset<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get the active graph layer</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please activate a graph!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        GroupPlot grPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">Groups</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get the first grouped plot</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>grPlot<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid grouped plot!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nPlotLTIndex <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> nPlotLTIndex <span style="color: #000080;">&gt;</span> grPlot.<span style="color: #000000;">GetCount</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid plot index!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        Tree trFormat;
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Offset</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;  <span style="color: #008000;">// set Stack to Individual</span>
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// enable X offset</span>
+        trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Stack</span>.<span style="color: #000000;">Y</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// enable Y offset</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> gl.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">(</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> gl.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">(</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// enable settings of offset individually</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>bRet<span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        DataPlot dp <span style="color: #000080;">=</span> grPlot.<span style="color: #000000;">GetDataPlot</span><span style="color: #000000;">(</span>nPlotLTIndex <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get the plot in the layer</span>
+                        string strPlotName <span style="color: #000080;">=</span> dp.<span style="color: #000000;">GetDatasetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get the plot name</span>
+                        string strLTPlotXOffset, strLTPlotYOffset;  
+                        strLTPlotXOffset.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"set %s -sx %f;"</span>, strPlotName, xOffset<span style="color: #000000;">)</span>;  <span style="color: #008000;">// set x offset of the plot</span>
+                        strLTPlotYOffset.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"set %s -sy %f;"</span>, strPlotName, yOffset<span style="color: #000000;">)</span>;  <span style="color: #008000;">// set y offset of the plot</span>
+                        gl.<span style="color: #000000;">LT_execute</span><span style="color: #000000;">(</span>strLTPlotXOffset <span style="color: #000040;">+</span> strLTPlotYOffset<span style="color: #000000;">)</span>;  <span style="color: #008000;">// execute the LabTalk command</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>To set the offset of the 2nd plot in x and y direction with 2 and 3 respectively, run</p>
+  <pre class="lt" style="font-family:monospace;">
+set_offset <span style="color: #0000dd;">2</span> <span style="color: #0000dd;">2</span> <span style="color: #0000dd;">3</span>;
+</pre>
+
+  <h2><a name="Setting_special_point_format_of_one_plot_of_group_plots"></a><span class="mw-headline">Setting special point format of one plot of group plots</span></h2>
+
+  <p>This example shows how to access theme of one plot in group.</p>
+
+  <p>To run this example, please</p>
+
+  <ol>
+    <li>select 3 columns(XYY) to plot a 2d scatter graph</li>
+
+    <li>select one data point of the 2nd plot and double click to open Plot Details dialog</li>
+
+    <li>go to label tab, check enable to show the label for this point</li>
+  </ol>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> test_group_plot_special_point_format<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span>                nCount <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>nCount <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">1</span> ? <span style="color: #0000dd;">1</span> <span style="color: #000000;">:</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">//System variable @PGT: theme for plot in group, </span>
+        <span style="color: #008000;">//1 for using group theme (default, old behavior)</span>
+        <span style="color: #008000;">//0 for using plot's own theme</span>
+        LTVarTempChange pgt<span style="color: #000000;">(</span><span style="color: #ff00ff;">"@PGT"</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        
+        Tree tr;
+        tr <span style="color: #000080;">=</span> dp.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">(</span>FPB_ALL, FOB_ALL, <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span>;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Label</span>.<span style="color: #000000;">Size</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Label</span>.<span style="color: #000000;">AutoFace</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        tr.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Points</span>.<span style="color: #000000;">Point1</span>.<span style="color: #000000;">Label</span>.<span style="color: #000000;">Face</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+        dp.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">(</span>tr.<span style="color: #000000;">Root</span><span style="color: #000000;">)</span>;
+        dp.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">(</span>tr, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>

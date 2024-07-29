@@ -1,0 +1,65 @@
+﻿<h1 class="firstheading">Wavelets</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Continuous_Wavelet_Transformation_.28CWT.29"></a><span class="mw-headline">Continuous Wavelet Transformation (CWT)</span></h2>
+
+  <p>This example shows how to access NAG continuous wavelet transformation routines to calculate the wavelet coefficients.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>oc_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span>  <span style="color: #000080;">&lt;</span>nag\OC_nag_ex.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> cwt_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span> 
+        <span style="color: #008000;">// pick input data from worksheet for CWT calculation</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000040;">||</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">2</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Please make sure a worksheet is active with two columns.<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;     
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+                
+        Dataset dsSignal<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// assume that the first column is signal data</span>
+        Dataset dsScale<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// the second column is scale data</span>
+        
+        <span style="color: #0000ff;">int</span> nSignal <span style="color: #000080;">=</span> dsSignal.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nScale <span style="color: #000080;">=</span> dsScale.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+ 
+        <span style="color: #008000;">// copy the data from columns to vectors</span>
+        vector vSignal<span style="color: #000000;">(</span>nSignal<span style="color: #000000;">)</span>;
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnScale<span style="color: #000000;">(</span>nScale<span style="color: #000000;">)</span>;
+        vSignal <span style="color: #000080;">=</span> dsSignal; 
+        vnScale <span style="color: #000080;">=</span> dsScale; 
+ 
+        <span style="color: #008000;">// prepare the parameters for NAG cwt routine</span>
+        <span style="color: #008000;">// types of wavelet can be used:  Nag_Morlet, Nag_DGauss, Nag_MexHat</span>
+        Nag_WavType nagType <span style="color: #000080;">=</span> Nag_Morlet;  
+        <span style="color: #0000ff;">int</span> nWavePara  <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;
+        <span style="color: #0000ff;">static</span> NagError fail; 
+ 
+        matrix mat<span style="color: #000000;">(</span>nScale, nSignal<span style="color: #000000;">)</span>;
+        nag_cwt_real<span style="color: #000000;">(</span>nagType, nWavePara, nSignal, vSignal, nScale, vnScale, mat, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+ 
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">)</span> <span style="color: #008000;">//examine error if there is</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s<span style="color: #666666; font-weight: bold;">\n</span>"</span>,fail.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span> 
+ 
+        <span style="color: #008000;">// prepare the output matrixbook for the matrix coefficient</span>
+        MatrixLayer ml;        
+        ml.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Origin"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// create new matrix layer with default template named "Origin"</span>
+        
+        <span style="color: #008000;">// set the number of rows and columns and XY range for matrix window</span>
+        MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; 
+        mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nScale, nSignal<span style="color: #000000;">)</span>;
+        mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, nSignal <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, nScale <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// copy result from mat variable to the matrix window</span>
+        matrix<span style="color: #000040;">&amp;</span> matData <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;      
+        matData <span style="color: #000080;">=</span> mat;        
+<span style="color: #000000;">}</span>
+</pre>

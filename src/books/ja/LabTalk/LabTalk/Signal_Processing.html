@@ -1,0 +1,234 @@
+﻿<h1 class="firstheading">信号処理</h1>
+
+  <p class='urlname' style='display: none'>Signal-Processing</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Smoothing_Plotted_Datasets"><span class="tocnumber">1</span> <span class="toctext">グラフ内のデータセットのスムージング</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Finding_Envelopes_.28Pro_Only.29"><span class="tocnumber">2</span> <span class="toctext">包絡線（Proのみ）</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#FFT_on_Data_with_Missing_Values"><span class="tocnumber">3</span> <span class="toctext">欠損値のあるデータのFFT</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Compute_Basic_Statistics_on_FFT_Result"><span class="tocnumber">4</span> <span class="toctext">FFT結果の基本統計量を計算</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Compute_Convolution_for_two_signal_.28Pro_only.29"><span class="tocnumber">5</span> <span class="toctext">2つの信号のコンボリューションを算出（Proのみ）</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Hilbert_transform_.28Pro_only.29"><span class="tocnumber">6</span> <span class="toctext">ヒルベルト変換（Proのみ）</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Smoothing_Plotted_Datasets"></a><span class="mw-headline">グラフ内のデータセットのスムージング</span></h2>
+
+  <p>次のサンプルでは、アクティブレイヤにプロットされたすべてのデータをスムージングします。スムージング後のデータは新しいブックに出力されます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// レイヤ内のデータプロットの数を数える</span>
+<span style="color: #008000;">//結果は変数&quot;count&quot;に入る &quot;count&quot;</span>
+layer <span style="color: #000080;">-</span>c; 
+string gname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;   <span style="color: #008000;">// グラフページの名前を取得</span>
+<span style="color: #008000;">// smoothed という名前で新しいワークブックを作成 </span>
+<span style="color: #008000;">//名前はbkname$に入る</span>
+newbook na<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Smoothed; 
+wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;          <span style="color: #008000;">// 列なしで開始</span>
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,count<span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 入力範囲はii番目のプロット</span>
+    range riy <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>gname<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;    
+    <span style="color: #008000;">// 出力範囲は新しい2列            </span>
+    range roy <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>bkname<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+   <span style="color: #008000;">// 3次多項式を使用したSavitsky-Golayスムージング</span>
+    smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>riy meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>roy;   
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Finding_Envelopes_.28Pro_Only.29"></a><span class="mw-headline">包絡線（Proのみ）</span></h2>
+
+  <p>以下のスクリプトは、Xファンクションenvelopeを使用して、信号の上下の包絡線を検索します。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Envelope.png" src="../images/Signal_Processing/Envelope.png" width="378"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//ガウスの包絡線を持つ信号をインポート</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;samples\signal processing\Gaussian Envelope.dat&quot;</span>;
+impasc;
+envelope iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span>both;
+<span style="color: #008000;">//作図</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+</pre>
+
+  <h2><a name="FFT_on_Data_with_Missing_Values"></a><span class="mw-headline">欠損値のあるデータのFFT</span></h2>
+
+  <p>OriginのFFT機能では、入力データに欠損値がないことを前提としています。そのため、FFTするデータに欠損値がある場合、何か値を入れる必要があります。簡単なのは、単純な線形補間を実行し、欠損している部分の値を得ることです。</p>
+
+  <p>このサンプルでは、欠損値を含む11年の太陽黒点周期を表す2つのデータ範囲について、線形補間し、FFT振幅をプロットします。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Sunspot.png" src="../images/Signal_Processing/Sunspot.png" width="400"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// データをインポート</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\dayssn.dat&quot;</span>;
+<span style="color: #008000;">//col(1) = 年, col(2)= 月, col(3)= 日, </span>
+<span style="color: #008000;">//col(4) = 日付の値（1年を1とする）</span>
+<span style="color: #008000;">//col(5) = 観測データ</span>
+<span style="color: #008000;">//col(4)=X、col(5)=Yとして5列必要</span>
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;NNNXY&quot;</span>; 
+impasc;
+
+<span style="color: #008000;">// 欠損値を補間して、結果をcol(6)に入れる</span>
+interp1q <span style="color: #0000dd;">4</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span> <span style="color: #0000dd;">6</span>;
+<span style="color: #008000;">// このデータを使う</span>
+range rData1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">14609</span><span style="color: #000000;">]</span>;<span style="color: #008000;">// 1818から1858年</span>
+range rData2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span><span style="color: #000000;">[</span><span style="color: #0000dd;">54057</span><span style="color: #000000;">:</span>end<span style="color: #000000;">]</span>;<span style="color: #008000;">// 1966から2006年</span>
+<span style="color: #008000;">// Xファンクションfft1を使ってFFT </span>
+<span style="color: #008000;">// ReportDataシートとReportTableシートが作成される</span>
+fft1 rData1;
+<span style="color: #008000;">//Xファンクション実行後同じ名前のツリーが作成される</span>
+<span style="color: #008000;">//ReportDataノードのfft1.rd を使う</span>
+range rReportData1<span style="color: #000080;">=</span>fft1.<span style="color: #000080;">rd</span><span style="color: #000080;">$</span>;<span style="color: #008000;">//FFT結果からのReport Dataを保持</span>
+range rAmp1<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rReportData1.<span style="color: #000080;">getlayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>col<span style="color: #000000;">(</span>Amplitude<span style="color: #000000;">)</span>;
+rAmp1<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;1818 - 1858&quot;</span>; <span style="color: #008000;">// グラフ凡例に適切なコメントに変更</span>
+
+fft1 rData2;
+range rReportData2<span style="color: #000080;">=</span>fft1.<span style="color: #000080;">rd</span><span style="color: #000080;">$</span>;
+range rAmp2<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>rReportData2.<span style="color: #000080;">getlayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>col<span style="color: #000000;">(</span>Amplitude<span style="color: #000000;">)</span>;
+rAmp2<span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;1966 - 2006&quot;</span>;
+
+<span style="color: #008000;">// 空のグラフウィンドウを開く。必要に応じて自身のテンプレートを使用</span>
+win <span style="color: #000080;">-</span>t plot;
+<span style="color: #008000;">// 結果をアクティブグラフレイヤにプロット</span>
+plotxy rAmp1 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>red<span style="color: #000000;">)</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+plotxy rAmp2 plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>blue<span style="color: #000000;">)</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>active<span style="color: #000080;">&gt;</span>;
+<span style="color: #008000;">// ピークを表示するために拡大</span>
+x1<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;x2<span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;y1<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;y2<span style="color: #000080;">=</span><span style="color: #0000dd;">100</span>;
+<span style="color: #008000;">// 11年に垂直線で印をつける</span>
+draw <span style="color: #000080;">-</span>n peakval <span style="color: #000080;">-</span>l <span style="color: #000080;">-</span>v <span style="color: #0000dd;">1</span><span style="color: #000080;">/</span><span style="color: #0000dd;">11</span>; 
+peakval.<span style="color: #000080;">linewidth</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+peakval.<span style="color: #000080;">color</span> <span style="color: #000080;">=</span> color<span style="color: #000000;">(</span>orange<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// テキストラベルを追加</span>
+label <span style="color: #000080;">-</span>n peaklabel \b<span style="color: #000000;">(</span><span style="color: #0000dd;">11</span> Year Cycle of Sunspots<span style="color: #000000;">)</span>;
+peaklabel.<span style="color: #000080;">x</span> <span style="color: #000080;">=</span> peakval.<span style="color: #000080;">x</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">1.1</span> <span style="color: #000080;">*</span> peaklabel.<span style="color: #000080;">dx</span> <span style="color: #000080;">/</span> <span style="color: #0000dd;">2</span>;
+peaklabel.<span style="color: #000080;">y</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>y1 <span style="color: #000080;">+</span> y2<span style="color: #000000;">)</span> <span style="color: #000080;">/</span> <span style="color: #0000dd;">2</span>;
+peaklabel.<span style="color: #000080;">fsize</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;
+</pre>
+
+  <h2><a name="Compute_Basic_Statistics_on_FFT_Result"></a><span class="mw-headline">FFT結果の基本統計量を計算</span></h2>
+
+  <p>FFT結果を元にした最大振幅および対応する周波数、平均周波数、メディアン周波数といった基本統計量を計算します。このサンプルでは、統計量を計算する際に途中で算出される内容は表示しません。</p>
+  <pre class="lt" style="font-family:monospace;">
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\Signal with Discrete Frequencies.dat&quot;</span>;
+newbook;
+impasc;
+ 
+Tree myfft;<span style="color: #008000;">// 全てのツリー変数を確認するのに&quot;list vt&quot;を使用できる</span>
+<span style="color: #008000;">// &quot;myfft&quot;ツリーにFFT結果を出力</span>
+<span style="color: #008000;">//ツリー構造を確認するときは&quot;myfft.=&quot;を実行</span>
+fft1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfft rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>;
+dataset tmp_x<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">freq</span>; <span style="color: #008000;">// ツリーのベクトルノードはどんなデータセットも割り当て可能</span>
+dataset tmp_y<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">amp</span>;
+ 
+diststats iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>tmp_x, tmp_y<span style="color: #000000;">)</span>;
+type <span style="color: #ff00ff;">&quot;For data from %(fname$)&quot;</span>;
+type <span style="color: #ff00ff;">&quot;the mean frequency is $(diststats.mean)&quot;</span>;
+</pre>
+
+  <p> </p>
+
+  <p> </p>
+
+  <h2><a name="Compute_Convolution_for_two_signal_.28Pro_only.29"></a><span class="mw-headline">2つの信号のコンボリューションを算出（Proのみ）</span></h2>
+
+  <p>OriginProでは、Xファンクション<a class="external text" href="../../XFunction/X-Function/Conv.html">conv</a>を使って2つの信号のコンボリューションを算出できます。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Conv.png" src="../images/Signal_Processing/Conv.png" width="304"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+newbook s<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Convolution;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYY&quot;</span>;
+<span style="color: #008000;">//コンボリューションする2つの信号をセットアップ</span>
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>Data<span style="color: #000000;">(</span><span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">0.1</span><span style="color: #000000;">)</span>;
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>exp<span style="color: #000000;">(</span><span style="color: #000080;">-</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">^</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;   
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>?sqrt<span style="color: #000000;">(</span><span style="color: #000080;">-</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #0000dd;">0</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal_1&quot;</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal_2&quot;</span>;
+<span style="color: #008000;">//signal_1とsignal_2のコンボリューションを計算</span>
+conv ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Signal_1&quot;</span><span style="color: #000000;">)</span> response<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Signal_2&quot;</span><span style="color: #000000;">)</span> interval<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.1</span> circular<span style="color: #000000;">:</span><span style="color: #000080;">=</span>circular oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>,<span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">)</span>;
+
+range rr<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Convolution<span style="color: #000000;">]</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 元の信号に一致させるX</span>
+rr<span style="color: #000080;">=</span>rr<span style="color: #000080;">-</span><span style="color: #0000dd;">10</span>;
+range rc<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Convolution<span style="color: #000000;">]</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>; 
+rc<span style="color: #000080;">=</span>rc<span style="color: #000080;">*</span><span style="color: #0000dd;">0.1</span>;   <span style="color: #008000;">//コンボリューション結果にサンプリング間隔0.1をかける</span>
+rc<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Convolution&quot;</span>;
+
+<span style="color: #008000;">//グラフに結果をプロット</span>
+plotxy <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">from</span><span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>;
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">to</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">from</span><span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">0.2</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">to</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>;
+</pre>
+
+  <h2><a name="Hilbert_transform_.28Pro_only.29"></a><span class="mw-headline">ヒルベルト変換（Proのみ）</span></h2>
+
+  <p>以下のLabTalkスクリプトは、Xファンクション<a class="external text" href="../../XFunction/X-Function/Hilbert.html">Hilbert</a>を使ったヒルベルト変換の計算を行います。そして、<a class="external text" href="../../LabTalk/LabTalk/Set_(command).html">Set</a>および<a class="external text" href="../../LabTalk/LabTalk/Set_(command).html">Get</a>コマンドを使って結果を投影付きの3D線グラフとしてプロットします。</p>
+
+  <dl>
+    <dd><a class="image"><img alt="Hilbert.png" src="../images/Signal_Processing/Hilbert.png" width="446"></a></dd>
+  </dl>
+  <pre class="lt" style="font-family:monospace;">
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Hilbert1;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XY&quot;</span>;
+
+<span style="color: #008000;">//データをセットアップ</span>
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>Data<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">6</span>,<span style="color: #0000dd;">0.02</span><span style="color: #000000;">)</span>;
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>sin<span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000080;">*</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">(</span><span style="color: #0000dd;">0.5</span><span style="color: #000080;">*</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>; 
+ 
+<span style="color: #008000;">//ヒルベルト変換</span>
+hilbert ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Hilbert1<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span>;
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>ImReal<span style="color: #000000;">(</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>Imaginary<span style="color: #000000;">(</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//列ロングネームを設定</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Time&quot;</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Real&quot;</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Imag&quot;</span>;
+
+<span style="color: #008000;">//ヒルベルト変換の結果を3Dグラフにプロット</span>
+plotxyz iz<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">240</span>;
+
+<span style="color: #008000;">//複素信号の線とシンボルを設定</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>lo <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Z方向のドロップラインを非表示</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// シンボルを線で接続</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// 線の幅を設定</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">9</span>; <span style="color: #008000;">// 線の色をネイビーにする</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>so <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// シンボルサイズは0にして非表示</span>
+
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// XY投影を表示</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// シンボルを線で接続</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// シンボルサイズを0にして非表示</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// 線の幅を設定</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sz <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">15</span>; <span style="color: #008000;">// 線の色を橙色にする</span>
+
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// XZ投影を表示</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>l <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// シンボルを線で接続</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>z <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// シンボルサイズを0にして非表示</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>w <span style="color: #0000dd;">1500</span>; <span style="color: #008000;">// 線の幅を設定</span>
+set <span style="color: #000080;">%</span>C <span style="color: #000080;">-</span>sy <span style="color: #000080;">-</span>cl <span style="color: #0000dd;">15</span>; <span style="color: #008000;">// 線の色を橙色にする</span>
+
+<span style="color: #008000;">//軸範囲を設定</span>
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">z</span>.<span style="color: #000080;">from</span><span style="color: #000080;">-</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">x</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">y</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+layer.<span style="color: #000080;">z</span>.<span style="color: #000080;">to</span><span style="color: #000080;">+</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+</pre>

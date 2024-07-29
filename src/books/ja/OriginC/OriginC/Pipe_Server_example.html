@@ -1,0 +1,104 @@
+﻿<h1 class="firstheading">Pipe Server example</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>This sample read data file "gamma.dat" come with Origin, and send to local "OriginTestPipe" pipe. Here use "LT_execute("sec -p 1");" as time delay to simulate sending a data to pipe every second. See <a href="../../OriginC/OriginC/Pipe_Client_example.html" title="OriginC:Pipe Client example">Client Sample</a></p>
+
+  <h2><a name="Sameple_codes"></a><span class="mw-headline">Sameple codes</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// Start your functions here.</span>
+<span style="color: #0000ff;">#define</span> PIPE_TIMEOUT <span style="color: #0000dd;">10000</span>
+<span style="color: #0000ff;">#define</span> BUFSIZE <span style="color: #0000dd;">10000</span>
+<span style="color: #0000ff;">#define</span> PIPENAME  <span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\\</span><span style="color: #666666; font-weight: bold;">\\</span>.<span style="color: #666666; font-weight: bold;">\\</span>pipe<span style="color: #666666; font-weight: bold;">\\</span>OriginTestPipe"</span>
+
+<span style="color: #008000;">//err will just printf in this function so just return void</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> do_pipe_process<span style="color: #000000;">(</span>HANDLE hPipe, string strFileName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>gamma.dat"</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span> 
+        stdioFile ff;
+        string strFilename <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strFileName;
+        <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>strFilename, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeRead</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>bRet<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            out_str<span style="color: #000000;">(</span>strFilename <span style="color: #000040;">+</span> <span style="color: #ff00ff;">" not found!"</span><span style="color: #000000;">)</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Pipe handle = %X<span style="color: #666666; font-weight: bold;">\n</span>Hit Escape to abort!<span style="color: #666666; font-weight: bold;">\n</span>Sending Data..<span style="color: #666666; font-weight: bold;">\n</span>"</span>, <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span>hPipe<span style="color: #000000;">)</span>;
+        
+        waitCursor              cur;
+        string                  strTemp;
+        <span style="color: #0000ff;">int</span>                                ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+    <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>cur.<span style="color: #000000;">CheckEsc</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">&amp;&amp;</span> ff.<span style="color: #000000;">ReadString</span><span style="color: #000000;">(</span>strTemp<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                DWORD   nWritten, nBytes <span style="color: #000080;">=</span> strTemp.<span style="color: #000000;">GetLength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;
+                LPSTR   lpbuff <span style="color: #000080;">=</span> strTemp.<span style="color: #000000;">GetBuffer</span><span style="color: #000000;">(</span>nBytes<span style="color: #000000;">)</span>;
+                
+                out_str<span style="color: #000000;">(</span>lpbuff<span style="color: #000000;">)</span>; <span style="color: #008000;">// show locally to script window</span>
+                
+        <span style="color: #0000ff;">BOOL</span>       bSuccess <span style="color: #000080;">=</span> WriteFile<span style="color: #000000;">(</span> 
+                                                                hPipe,          <span style="color: #008000;">// handle to pipe </span>
+                                                                lpbuff,         <span style="color: #008000;">// buffer to write from </span>
+                                                                nBytes,         <span style="color: #008000;">// number of bytes to write </span>
+                                                                <span style="color: #000040;">&amp;</span>nWritten,   <span style="color: #008000;">// number of bytes written </span>
+                                                                <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;        <span style="color: #008000;">// not overlapped I/O </span>
+      
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span> bSuccess <span style="color: #000040;">||</span> nBytes <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nWritten<span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"success=%d, %d bytes written out of %d<span style="color: #666666; font-weight: bold;">\n</span>"</span>, bSuccess, nWritten, nBytes<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">break</span>; 
+        <span style="color: #000000;">}</span>
+        <span style="color: #008000;">// just simulate the speed of slow external hardware data generator</span>
+        <span style="color: #008000;">// delay 1 sec,  </span>
+            LT_execute<span style="color: #000000;">(</span><span style="color: #ff00ff;">"sec -p 1"</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span> 
+        ff.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"END!"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">int</span> testpipserver<span style="color: #000000;">(</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span> 
+        <span style="color: #0000ff;">BOOL</span> bConnected; 
+        HANDLE hPipe; 
+ 
+    <span style="color: #008000;">// create named pipe </span>
+        hPipe <span style="color: #000080;">=</span> CreateNamedPipe<span style="color: #000000;">(</span> 
+          PIPENAME,             <span style="color: #008000;">// pipe name </span>
+          PIPE_ACCESS_DUPLEX,       <span style="color: #008000;">// read/write access </span>
+          PIPE_TYPE_MESSAGE <span style="color: #000040;">|</span>       <span style="color: #008000;">// message type pipe </span>
+          PIPE_READMODE_MESSAGE <span style="color: #000040;">|</span>   <span style="color: #008000;">// message-read mode </span>
+          PIPE_WAIT,                <span style="color: #008000;">// blocking mode </span>
+          PIPE_UNLIMITED_INSTANCES, <span style="color: #008000;">// max. instances  </span>
+          BUFSIZE,                  <span style="color: #008000;">// output buffer size </span>
+          BUFSIZE,                  <span style="color: #008000;">// input buffer size </span>
+          PIPE_TIMEOUT,             <span style="color: #008000;">// client time-out </span>
+          <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;                    <span style="color: #008000;">// no security attribute </span>
+
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>hPipe <span style="color: #000080;">==</span> INVALID_HANDLE_VALUE<span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Could not CreatePipe: "</span> <span style="color: #000040;">+</span> PIPENAME<span style="color: #000000;">)</span>; 
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;       
+        <span style="color: #000000;">}</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s is setup, waiting for client request.<span style="color: #666666; font-weight: bold;">\n</span>"</span>, PIPENAME<span style="color: #000000;">)</span>;
+ 
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>ConnectNamedPipe<span style="color: #000000;">(</span>hPipe, <span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span> 
+                do_pipe_process<span style="color: #000000;">(</span>hPipe<span style="color: #000000;">)</span>;
+                
+                DisconnectNamedPipe<span style="color: #000000;">(</span>hPipe<span style="color: #000000;">)</span>; 
+                CloseHandle<span style="color: #000000;">(</span>hPipe<span style="color: #000000;">)</span>; 
+        <span style="color: #000000;">}</span> 
+        <span style="color: #0000ff;">else</span> 
+        <span style="color: #000000;">{</span>  
+                <span style="color: #008000;">// The client could not connect, so close the pipe. </span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed in connect!"</span><span style="color: #000000;">)</span>;
+                CloseHandle<span style="color: #000000;">(</span>hPipe<span style="color: #000000;">)</span>; 
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; 
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #000000;">}</span>
+</pre>

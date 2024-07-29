@@ -1,0 +1,137 @@
+﻿<h1 class="firstheading">非線形フィット</h1><p><span class="OIndex" style="display:none">Curve Fitting</span>
+NLFit はOrigin のバージョン8以降の機能です。この新しいフィット機構は、反復実行中にデータのコピーでフィットプロセスを扱います。新しいフィット機構はワークシートデータを直接繰り返しアクセスするので、古いフィット機構に比べ、早い操作を実行できます。 
+</p><p>非線形曲線フィットでは、2つのクラスを利用可能です。
+</p>
+<dl><dt>NLFit</dt>
+<dd> 新しいフィットエンジンからの低いレベルのAPIを持つOrigin Cクラスです。このクラスには、Originのナレッジがなく、バッファ内のデータのコピーで動作します。このクラスを使用するためには、すべての必要なバッファ（ポインタ）を用意する必要があります。この区分けは、バックグラウンド処理としてフィットを実行する機能の開発のために用意されています。</dd></dl>
+<dl><dt>NLFitSession</dt>
+<dd> NLFitクラスをOriginオブジェクトに内包した、使いやすいインターフェースで、より高いレベルのOrigin Cクラスです。このクラスは、NLFit ダイアログ内のカーネルです。Originとインターフェースで接続するための処理は難しく、NLFitSessionクラス はこの複雑性をうまく扱うので、Origin Cコードではこのクラスを使用することをお勧めします。</dd></dl>
+<h2><a name="Nonlinear_Fitting"></a><span class="mw-headline"><span class="OIndex">非線形フィット</span></span></h2>
+<p>NLFitSession クラスを使用する前に、特定のヘッダファイルをインクルードする必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\NLFitSession.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<p>また、<i>OriginC\Originlab\nlsf_utils.c </i> を現在のワークスペースに含め、コンパイルする必要があります。プログラムでファイルを追加するため、コマンドウィンドウまたはスクリプトファイルから下記のLabTalkコマンドを実行します。
+</p>
+<pre class="lt" style="font-family:monospace;">Run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\nlsf_utils.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span></pre>
+<p>NLFitSession オブジェクトを定義し、フィット関数を Gaussにします。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 関数を設定</span>
+NLFitSession nlfSession;
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Gauss&quot;</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to set function!&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// パラメータ名と数を取得:</span>
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span>  vsParamNames;
+<span style="color: #0000ff;">int</span> nNumParamsInFunction <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">GetParamNamesInFunction</span><span style="color: #000000;">(</span>vsParamNames<span style="color: #000000;">)</span>;</pre>
+<p>DATA_MODE_GLOBALモデル付きの2つのXY データセットをパラメータ共有のグローバルフィットを実行するためにセットします。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nNumData <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// 第1データセットをセット</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vY1, vX1, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">0</span>, nNumData<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to set data for the first dataset!&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>    	
+
+<span style="color: #008000;">// 第2データセットをセット</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>vY2, vX2, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000dd;">1</span>, nNumData, DATA_MODE_GLOBAL<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to set data for the second dataset!&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span></pre>
+<p>パラメータ値を初期化するためのパラメータ初期化コードをセットします。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// パラメータ初期化</span>
+<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlfSession.<span style="color: #000000;">ParamsInitValues</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to init parameters values!&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span></pre>
+<p>または、1つずつパラメータ値を設定することもできます。
+</p>
+<pre class="oc" style="font-family:monospace;">vector vParams<span style="color: #000000;">(</span>nNumParamsInFunction<span style="color: #000040;">*</span>nNumData<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 第1データセットのパラメータ値をセット
+</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.5</span>; <span style="color: #008000;">// y0</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>; <span style="color: #008000;">// A</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>; <span style="color: #008000;">// xc</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">976</span>; <span style="color: #008000;">// w</span>
+
+<span style="color: #008000;">// 第2データセットのパラメータ値をセット
+</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.3</span>; <span style="color: #008000;">// y0</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>; <span style="color: #008000;">// A</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">10.3</span>; <span style="color: #008000;">// xc</span>
+vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">7</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">102</span>; <span style="color: #008000;">// w</span>
+
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">SetParamValues</span><span style="color: #000000;">(</span>vParams<span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nRet <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #008000;">// 0 はエラーなしを示す</span>
+    <span style="color: #0000ff;">return</span>;</pre>
+<p>2つのデータセットでパラメータxcを共有します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nSharedParamIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 1, これはGauss関数でのxcのインデックス</span>
+nlfSession.<span style="color: #000000;">SetParamShare</span><span style="color: #000000;">(</span>nSharedParamIndex<span style="color: #000000;">)</span>;</pre>
+<p>フィットを実行し、ステータスメッセージを出力します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// フィット実行</span>
+<span style="color: #0000ff;">int</span> nFitOutcome;
+nlfSession.<span style="color: #000000;">Fit</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>nFitOutcome<span style="color: #000000;">)</span>;    
+
+string strOutcome <span style="color: #000080;">=</span> nlfSession.<span style="color: #000000;">GetFitOutCome</span><span style="color: #000000;">(</span>nFitOutcome<span style="color: #000000;">)</span>;
+out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Outcome of the fitting session&nbsp;: &quot;</span> <span style="color: #000040;">+</span> strOutcome<span style="color: #000000;">)</span>;</pre>
+<p>フィット統計結果を取得します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nDataIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+RegStats        fitStats;
+NLSFFitInfo     fitInfo;
+nlfSession.<span style="color: #000000;">GetFitResultsStats</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>fitStats, <span style="color: #000040;">&amp;</span>fitInfo, <span style="color: #0000ff;">false</span>, nDataIndex<span style="color: #000000;">)</span>;
+<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;# Iterations=%d, Reduced Chisqr=%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fitInfo.<span style="color: #000000;">Iterations</span>,
+ fitStats.<span style="color: #000000;">ReducedChiSq</span><span style="color: #000000;">)</span>;</pre>
+<p>最終的なパラメータ値を取得します。
+</p>
+<pre class="oc" style="font-family:monospace;">vector          vFittedParamValues, vErrors;
+nlfSession.<span style="color: #000000;">GetFitResultsParams</span><span style="color: #000000;">(</span>vFittedParamValues, vErrors<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// パラメータ xc は2つの入力データで共有</span>
+<span style="color: #008000;">// そのため、xc の値は同じで、</span>
+<span style="color: #008000;">// vParamValuesには、1回しか表示しない	</span>
+<span style="color: #008000;">// vsParamNames はGauss関数のパラメータ名が含まれる - y0, xc, w, A.</span>
+<span style="color: #008000;">// 以下でxc以外の2番目のデータセットのパラメータ名を追加</span>
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;y0&quot;</span><span style="color: #000000;">)</span>;
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;w&quot;</span><span style="color: #000000;">)</span>;
+vsParamNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;A&quot;</span><span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nParam <span style="color: #000080;">&lt;</span> vFittedParamValues.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; nParam<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>    	
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%s =&nbsp;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vsParamNames<span style="color: #000000;">[</span>nParam<span style="color: #000000;">]</span>, vFittedParamValues<span style="color: #000000;">[</span>nParam<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>最終フィットパラメータを使用して、フィット曲線のY値を計算します。
+</p>
+<pre class="oc" style="font-family:monospace;">vector vFitY1<span style="color: #000000;">(</span>vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>, vFitY2<span style="color: #000000;">(</span>vX2.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 第1データセットのためのフィットYデータセットを取得</span>
+nlfSession.<span style="color: #000000;">GetYFromX</span><span style="color: #000000;">(</span>vX1, vFitY1, vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 2番目のデータセットのフィットYを取得</span>
+nlfSession.<span style="color: #000000;">GetYFromX</span><span style="color: #000000;">(</span>vX2, vFitY2, vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;</pre>
+<h2><a name="Accessing_FDF_FileFDF_File"></a><span class="mw-headline">FDFファイルにアクセスする</span></h2>
+<p>FDFファイルに保存されているフィット関数設定はツリー変数にロードすることができます。  <i>OriginC\system\FDFTree.h</i> ファイルをインクルードする必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<p>そして、<i>nlsf_FDF_to_tree</i> 関数を使います。 
+</p>
+<pre class="oc" style="font-family:monospace;">string strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;*.FDF&quot;</span><span style="color: #000000;">)</span>;
+Tree tr;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nlsf_FDF_to_tree<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>tr<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_tree<span style="color: #000000;">(</span>tr<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

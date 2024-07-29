@@ -1,0 +1,797 @@
+﻿<h1 class="firstheading">アルゴリズム: Xエラーあり線形フィット</h1><p class='urlname' style='display: none'>Ref-Linear-XErr</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#The_Fitting_Model"><span class="tocnumber">1</span> <span class="toctext">フィッティングモデル</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Fit_Control"><span class="tocnumber">2</span><span class="toctext">フィット制御</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Computation_Method"><span class="tocnumber">2.1</span><span class="toctext">計算法</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Quantities_.28York_Method.29"><span class="tocnumber">3</span><span class="toctext">値(York 法)</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Fit_Parameters"><span class="tocnumber">3.1</span><span class="toctext">フィットパラメータ</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Fitted_Value_and_Standard_Errors"><span class="tocnumber">3.1.1</span><span class="toctext">フィット値と標準誤差</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#t-Value_and_Confidence_Level"><span class="tocnumber">3.1.2</span><span class="toctext">t値と信頼水準</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Prob.3E.7Ct.7C"><span class="tocnumber">3.1.3</span><span class="toctext">Prob&gt;|t|</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#LCL_and_UCL"><span class="tocnumber">3.1.4</span><span class="toctext">下側信頼限界(LCL)と上側信頼限界(UCL)</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#CI_Half_Width"><span class="tocnumber">3.1.5</span><span class="toctext">CI 半幅</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Fit_Statistics"><span class="tocnumber">3.2</span><span class="toctext">フィット統計</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Degrees_of_Freedom"><span class="tocnumber">3.2.1</span><span class="toctext">自由度</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Residual_Sum_of_Squares"><span class="tocnumber">3.2.2</span><span class="toctext">残差平方和</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Reduced_Chi-Sqr"><span class="tocnumber">3.2.3</span><span class="toctext">既約カイ二乗</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Pearson.27s_r"><span class="tocnumber">3.2.4</span><span class="toctext">ピアソンのR</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Root-MSE_.28SD.29"><span class="tocnumber">3.2.5</span><span class="toctext">Root-MSE (SD)</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#Covariance_and_Correlation_Matrix"><span class="tocnumber">3.2.6</span><span class="toctext">共分散行列と相関行列</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#Quantities_.28FV_Method.29"><span class="tocnumber">4</span><span class="toctext">値 (FV法)</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Quantities_.28Deming_Method.29"><span class="tocnumber">5</span><span class="toctext">値 (Deming法)</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#Fit_Parameters_2"><span class="tocnumber">5.1</span><span class="toctext">フィットパラメータ</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#Fitted_Value_and_Standard_Errors_2"><span class="tocnumber">5.1.1</span><span class="toctext">フィット値と標準誤差</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#t-Value_and_Confidence_Level_2"><span class="tocnumber">5.1.2</span><span class="toctext">t値と信頼水準</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Prob.3E.7Ct.7C_2"><span class="tocnumber">5.1.3</span><span class="toctext">Prob&gt;|t|</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#LCL_and_UCL_2"><span class="tocnumber">5.1.4</span><span class="toctext">下側信頼限界(LCL)と上側信頼限界(UCL)</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#CI_Half_Width_2"><span class="tocnumber">5.1.5</span><span class="toctext">CI 半幅</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-26"><a href="#Fit_Statistics_2"><span class="tocnumber">5.2</span><span class="toctext">フィット統計</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#Degrees_of_Freedom_2"><span class="tocnumber">5.2.1</span><span class="toctext">自由度</span></a></li>
+<li class="toclevel-3 tocsection-28"><a href="#Residual_Sum_of_Squares_2"><span class="tocnumber">5.2.2</span><span class="toctext">残差平方和</span></a></li>
+<li class="toclevel-3 tocsection-29"><a href="#Reduced_Chi-Sqr_2"><span class="tocnumber">5.2.3</span><span class="toctext">既約カイ二乗</span></a></li>
+<li class="toclevel-3 tocsection-30"><a href="#Pearson.27s_r_2"><span class="tocnumber">5.2.4</span><span class="toctext">ピアソンのR</span></a></li>
+<li class="toclevel-3 tocsection-31"><a href="#Root-MSE_.28SD.29_2"><span class="tocnumber">5.2.5</span><span class="toctext">Root-MSE (SD)</span></a></li>
+<li class="toclevel-3 tocsection-32"><a href="#Covariance_and_Correlation_Matrix_2"><span class="tocnumber">5.2.6</span><span class="toctext">共分散行列と相関行列</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-33"><a href="#Finding_X.2FY"><span class="tocnumber">6</span><span class="toctext">X/Y検索</span></a></li>
+<li class="toclevel-1 tocsection-34"><a href="#Residual_Plots"><span class="tocnumber">7</span> <span class="toctext">残差プロット</span></a>
+<ul>
+<li class="toclevel-2 tocsection-35"><a href="#Residual_vs._Independent"><span class="tocnumber">7.1</span><span class="toctext">残差vs.独立</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Residual_vs._Predicted_Value"><span class="tocnumber">7.2</span><span class="toctext">残差vs.予測値</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Residual_vs._Order_of_the_Data"><span class="tocnumber">7.3</span><span class="toctext">残差vs.データの順序 </span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Histogram_of_the_Residual"><span class="tocnumber">7.4</span><span class="toctext">残差のヒストグラム</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Residual_Lag_Plot"><span class="tocnumber">7.5</span><span class="toctext">残差のラグプロット</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#Normal_Probability_Plot_of_Residuals"><span class="tocnumber">7.6</span><span class="toctext">残差の正規確率プロット</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-41"><a href="#Reference"><span class="tocnumber">8</span> <span class="toctext">参考文献</span></a></li>
+</ul>
+</div>
+<h2><a name="The_Fitting_Model"></a><span class="mw-headline">フィッティングモデル</span></h2>
+<p>与えられたデータセット<img src="../images/Linear_XError_Results/math-170b5dfcdac249cee2093c4610a34edc.png" title="(X_i,Y_i), (\sigma_{x_i},\sigma_{y_i}), i=1,2,\ldots n" alt="(X_i,Y_i), (\sigma_{x_i},\sigma_{y_i}), i=1,2,\ldots n" class="tex"/>において、Xは独立変数、Yは従属変数であり、<img src="../images/Linear_XError_Results/math-afea82b04c63850353a3fb8edecf44c4.png" title="(\sigma_{x_i},\sigma_{y_i})" alt="(\sigma_{x_i},\sigma_{y_i})" class="tex"/>はX,Yそれぞれのエラーを表します。  Xエラー付き線形フィットは、データを次の形式のモデルに適合させます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-6f0706d5e7020e7b145421a393c3ca56.png" title="y=\beta _0+\beta _1x+\varepsilon" alt="y=\beta _0+\beta _1x+\varepsilon" class="tex"/>
+</th>
+<td>
+<p>(1)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8da8ff23a00993b1a55ee023f9ba0db6.png" title="\left\{\begin{matrix}
+x_i=X_i+\sigma_{x_i}\\ 
+y_i=Y_i+\sigma_{y_i}
+\end{matrix}\right." alt="\left\{\begin{matrix}
+x_i=X_i+\sigma_{x_i}\\ 
+y_i=Y_i+\sigma_{y_i}
+\end{matrix}\right." class="tex"/>
+</th>
+<td>
+<p>(2)   
+</p>
+</td></tr></table>
+<h2><a name="Fit_Control"></a><span class="mw-headline">フィット制御</span></h2>
+<h3><a name="Computation_Method"></a><span class="mw-headline">計算法</span></h3>
+<ul>
+<li><b>York法</b><br />
+<dl><dd>York法はD.Yorkの計算法であり、<i>最良の傾き、切片、標準偏差を持つ最善の直線</i>について説明されています。</dd></dl>
+<li><b>FV法</b><br />
+<dl><dd>FV法はGiocanniFasano &amp; Roberto Vioによる計算方法で、<i>両方の座標にエラーのある直線へのフィット</i>について説明されています。</dd></dl>
+<li><b>Deming法</b><br />
+<dl><dd>Deming回帰は、変数内誤差モデルの最尤推定であり、X/Y 誤差は独立して等分布していると仮定されます。</dd></dl>
+<li><b>XおよびYエラーの相関</b>
+<dl><dd>XおよびYエラーの相関<img src="../images/Linear_XError_Results/math-af2593b49488f8bc44396795792c2d79.png" title="r_i" alt="r_i" class="tex"/>(York法のみ)</dd></dl>
+<li><b>X/Yの標準偏差</b>
+<dl><dd>X/Yの標準偏差(Deming法のみ）</dd></dl>
+</ul></ul>
+<h2><a name="Quantities_.28York_Method.29"></a><span class="mw-headline">値(York法)</span></h2>
+<p>線形フィットを実行すると、<a class="external text" href="../../UserGuide/UserGuide/Analysis_Report_Sheets_and_Columns.html">分析レポートシート</a>に計算された値が出力されます。  パラメータ表にはモデルの傾きと切片（カッコ内の数字は計算された値を示す）が表示されます。 
+</p>
+<h3><a name="Fit_Parameters"></a><span class="mw-headline">フィットパラメータ</span></h3>
+<p><a  class="image"><img alt="York Error.png" src="../images/Linear_XError_Results/York_Error.png" width="537"  /></a>
+</p>
+<h4><a name="Fitted_Value_and_Standard_Errors"></a><span class="mw-headline">フィット値と標準誤差</span></h4>
+<p>xとyの重み（誤差）に関する<img src="../images/Linear_XError_Results/math-540bdf656419f2a308d7ad1571c664a0.png" title="W_i" alt="W_i" class="tex"/>を定義します。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-4641c94cc1de495f820ae7e04f6f773b.png" title="W_i = \frac{\omega_{x_i}\omega_{y_i}}{\omega_{x_i}+\beta_1^2\omega_{y_i}-2\beta_1 r_ia_i} =\frac{1}{\sigma_{y_i}^2+\beta_1^2\sigma_{x_i}^2 - 2\beta_1 r_i \sigma_{x_i} \sigma_{y_i}}" alt="W_i = \frac{\omega_{x_i}\omega_{y_i}}{\omega_{x_i}+\beta_1^2\omega_{y_i}-2\beta_1 r_ia_i} =\frac{1}{\sigma_{y_i}^2+\beta_1^2\sigma_{x_i}^2 - 2\beta_1 r_i \sigma_{x_i} \sigma_{y_i}}" class="tex"/>
+</th>
+<td>
+<p>(3)  
+</p>
+</td></tr></table>
+<p>このとき<img src="../images/Linear_XError_Results/math-04e382d5a60b9af5117b1c5ae29d51fb.png" title="\omega_{x_i}=\frac{1}{\sigma_{x_i}^2}, \ \omega_{y_i}=\frac{1}{\sigma_{y_i}^2}" alt="\omega_{x_i}=\frac{1}{\sigma_{x_i}^2}, \ \omega_{y_i}=\frac{1}{\sigma_{y_i}^2}" class="tex"/>は<img src="../images/Linear_XError_Results/math-6e6fd7f03c691b16aaea1383f4c04a4a.png" title="(X_i, Y_i)" alt="(X_i, Y_i)" class="tex"/>の重みで、<img src="../images/Linear_XError_Results/math-af2593b49488f8bc44396795792c2d79.png" title="r_i" alt="r_i" class="tex"/>は<b>XとYの誤差の相関係数</b>(すなわち<img src="../images/Linear_XError_Results/math-e01da6570365bb9bcdd31bf5d02c17e4.png" title="\sigma_{x_i}" alt="\sigma_{x_i}" class="tex"/>と<img src="../images/Linear_XError_Results/math-51def96939771aad32a8144ed6298ea7.png" title="\sigma_{y_i}" alt="\sigma_{y_i}" class="tex"/>)で<img src="../images/Linear_XError_Results/math-77943a8eacd84180926cb531c129e23d.png" title="\alpha_i=\sqrt{\omega_{x_i} \omega_{y_i}}" alt="\alpha_i=\sqrt{\omega_{x_i} \omega_{y_i}}" class="tex"/>です。
+</p><p>重みづけ（誤差）のない<img src="../images/Linear_XError_Results/math-6e6fd7f03c691b16aaea1383f4c04a4a.png" title="(X_i, Y_i)" alt="(X_i, Y_i)" class="tex"/>のフィット線の傾きは<img src="../images/Linear_XError_Results/math-b4ceec2c4656f5c1e7fc76c59c4f80f3.png" title="\beta_1" alt="\beta_1" class="tex"/>の初期値になります。設定した許容値<img src="../images/Linear_XError_Results/math-b4ceec2c4656f5c1e7fc76c59c4f80f3.png" title="\beta_1" alt="\beta_1" class="tex"/>に収まるまでこれらは反復計算されます。
+</p><p>X_Y誤差のあるもっとフィットする線の推定パラメータ<img src="../images/Linear_XError_Results/math-9dabc344cb060be9355c54cc39a038db.png" title="\hat{\beta_0}" alt="\hat{\beta_0}" class="tex"/>と<img src="../images/Linear_XError_Results/math-4db6565d3866d2baeaf7a66f389744f9.png" title="\hat{\beta_1}" alt="\hat{\beta_1}" class="tex"/>の簡潔な方程式は次のようになります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-68bd787a470493a132e4266994ea8e05.png" title="\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\bar{X}" alt="\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\bar{X}" class="tex"/>
+</th>
+<td>
+<p>(4)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8d5bb50bef2c77df3ef066239cf869f9.png" title="\hat{\beta_1}=\frac{\sum{W_i b_i V_i}}{\sum{W_i b_i U_i}}" alt="\hat{\beta_1}=\frac{\sum{W_i b_i V_i}}{\sum{W_i b_i U_i}}" class="tex"/>
+</th>
+<td>
+<p>(5)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_XError_Results/math-5dee071df132e443c3cee0626dffcb37.png" title="\bar{X} = \frac{ \sum{W_i X_i} }{ \sum{W_i} }, \ \bar{Y} = \frac{ \sum{W_i Y_i} }{ \sum{Y_i} }" alt="\bar{X} = \frac{ \sum{W_i X_i} }{ \sum{W_i} }, \ \bar{Y} = \frac{ \sum{W_i Y_i} }{ \sum{Y_i} }" class="tex"/>です。
+</p><p>UとVはXとYの偏差です。
+</p><p><img src="../images/Linear_XError_Results/math-8a09d2f12018fd535029e8c26fc1b583.png" title="\left\{\begin{matrix}
+U=X-\bar{X}\\
+V=Y-\bar{Y}
+\end{matrix}\right.
+" alt="\left\{\begin{matrix}
+U=X-\bar{X}\\
+V=Y-\bar{Y}
+\end{matrix}\right.
+" class="tex"/>
+</p><p>および、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-739e4473271361ddc22a8a83eebe1710.png" title="b_i=W_i \left[\frac{U_i}{\omega_{y_i}}+\frac{\hat{\beta_1}}{\omega_{x_i}}{V_i}-(\beta U_i+V_i)\frac{r_i}{\alpha_i} \right]" alt="b_i=W_i \left[\frac{U_i}{\omega_{y_i}}+\frac{\hat{\beta_1}}{\omega_{x_i}}{V_i}-(\beta U_i+V_i)\frac{r_i}{\alpha_i} \right]" class="tex"/>
+</th>
+<td>
+<p>(6)  
+</p>
+</td></tr></table>
+<p>パラメータの対応する変数<img src="../images/Linear_XError_Results/math-10e16c6a764d367ca5077a54bf156f7e.png" title="\sigma^2" alt="\sigma^2" class="tex"/>と標準誤差<img src="../images/Linear_XError_Results/math-03c7c0ace395d80182db07ae2c30f034.png" title="s" alt="s" class="tex"/>は次のようになります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-40ef0222004a7df6913a5b312f797702.png" title="\sigma_{\hat{\beta_0}}^2=\frac{1}{\sum{W_i}}+\bar{x}^2\sigma_{\hat{\beta_1}}^2" alt="\sigma_{\hat{\beta_0}}^2=\frac{1}{\sum{W_i}}+\bar{x}^2\sigma_{\hat{\beta_1}}^2" class="tex"/>
+</th>
+<td>
+<p>(7)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-2ea99c183266ba8295bceec8e5a6d093.png" title="\sigma_{\hat{\beta_1}}^2=\frac{1}{\sum{W_i u_i^2}}" alt="\sigma_{\hat{\beta_1}}^2=\frac{1}{\sum{W_i u_i^2}}" class="tex"/>
+</th>
+<td>
+<p>(8)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_XError_Results/math-ad19c90fa0b0d544d1e448948119e9cf.png" title="\bar{x} = \frac{ \sum{W_i x_i} }{ \sum{W_i} }" alt="\bar{x} = \frac{ \sum{W_i x_i} }{ \sum{W_i} }" class="tex"/>、<img src="../images/Linear_XError_Results/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/>は<img src="../images/Linear_XError_Results/math-a97118fb9e8d7e006a466bfc0771f888.png" title="X_i" alt="X_i" class="tex"/>の推定値で、<img src="../images/Linear_XError_Results/math-07a832aec0fd752f69267520da32aea3.png" title="u_i=x_i - \bar{x}" alt="u_i=x_i - \bar{x}" class="tex"/>です。
+</p><p>パラメータの標準誤差は最終的に次のようになります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8799bdc2ab7c55a491ea8eb1db6fb88c.png" title="\varepsilon_{\hat{\beta_0}}=\sqrt{\sigma _{\hat{\beta_0}}^2}\sqrt{\frac{S}{n-2}}" alt="\varepsilon_{\hat{\beta_0}}=\sqrt{\sigma _{\hat{\beta_0}}^2}\sqrt{\frac{S}{n-2}}" class="tex"/>
+</th>
+<td>
+<p>(9)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-aa7c7a7784c8c3747374fe60e336fe06.png" title="\varepsilon_{\hat{\beta_1}}=\sqrt{\sigma _{\hat{\beta_1}}^2}\sqrt{\frac{S}{n-2}}" alt="\varepsilon_{\hat{\beta_1}}=\sqrt{\sigma _{\hat{\beta_1}}^2}\sqrt{\frac{S}{n-2}}" class="tex"/>
+</th>
+<td>
+<p>(10)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_XError_Results/math-5dbc98dcc983a70728bd082d1a47546e.png" title="S" alt="S" class="tex"/>は
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-a4414d3acaf054a46d95a8c4b3ad9489.png" title="S=\sum W_i(Y_i - \beta_1 X_i- \beta_0)^2" alt="S=\sum W_i(Y_i - \beta_1 X_i- \beta_0)^2" class="tex"/>
+</th>
+<td>
+<p>(11)  
+</p>
+</td></tr></table>
+<h4><a name="t-Value_and_Confidence_Level"></a><span class="mw-headline">t値と信頼水準</span></h4>
+<p>回帰の仮定が成り立つ場合次のようになります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-0ed681c4ca83831abc9e0afe2f959db2.png" title="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" class="tex"/>  かつ  <img src="../images/Linear_XError_Results/math-b502ef25a978991781d791a9f6275a83.png" title="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" class="tex"/>
+</th>
+<td>
+<p>(12)  
+</p>
+</td></tr></table>
+<p>フィッティングパラメータが0ではないことを調べるために<i>t</i> 検定を使うことができます。これは、 <img src="../images/Linear_XError_Results/math-ae198091d3f29f3101f5b0b86bf85b5d.png" title="\beta _0= 0\,\!" alt="\beta _0= 0\,\!" class="tex"/> (真ならば、フィット直線が原点を通る) または <img src="../images/Linear_XError_Results/math-c1cb3b8aa03a36c23962a83cf7d2dc40.png" title="\beta _1= 0\,\!" alt="\beta _1= 0\,\!" class="tex"/> であるかどうかを検定します。<i>t </i> 検定の仮説検定は次のようになります。 
+</p>
+<dl><dd><img src="../images/Linear_XError_Results/math-d15540fa2e02fa998eea73fd85bf1952.png" title="H_0&nbsp;: \beta _0= 0\,\! " alt="H_0&nbsp;: \beta _0= 0\,\! " class="tex"/>                  <img src="../images/Linear_XError_Results/math-57dce98807a9a866ee09b5bbe88bb68e.png" title="H_0&nbsp;: \beta _1= 0\,\!" alt="H_0&nbsp;: \beta _1= 0\,\!" class="tex"/> </dd>
+<dd><img src="../images/Linear_XError_Results/math-00f883e098653776a99683aae70c3783.png" title="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" alt="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" class="tex"/>         <img src="../images/Linear_XError_Results/math-27aac7aa6524d0b486a1890feffff3e1.png" title="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" alt="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" class="tex"/>     </dd></dl>
+<p><i>t</i> 値は、次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-6368690db66f6b16f642c2976ba74d59.png" title="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" alt="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" class="tex"/>  かつ <img src="../images/Linear_XError_Results/math-abcdef6859e44b55ed86ce261400d36c.png" title="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" alt="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" class="tex"/>
+</th>
+<td>
+<p>(13)  
+</p>
+</td></tr></table>
+<p>計算された<i>t</i>値を使って対応する帰無仮説を棄却するかどうかを決定できます。通常与えられた有意水準<img src="../images/Linear_XError_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/>に対して、<img src="../images/Linear_XError_Results/math-9d38e8e7363d66af41530c3fbdf494f5.png" title="|t|&gt;t_{\frac \alpha 2}" alt="|t|&gt;t_{\frac \alpha 2}" class="tex"/>のときに<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>を棄却します。また、<i>p</i>値または有意水準が<i>t</i>検定とともに出力されます。<i>p</i>値が<img src="../images/Linear_XError_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/>よりも小さい場合に帰無仮説<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>を棄却することができます。
+</p>
+<h4><a name="Prob.3E.7Ct.7C"></a><span class="mw-headline">Prob&gt;|t|</span></h4>
+<p>上記の<i>t</i>検定における<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>が真である確率 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-3e5335a131705b3ef0bb8b250033167d.png" title="prob=2(1-tcdf(|t|,df_{Error}))\,\!" alt="prob=2(1-tcdf(|t|,df_{Error}))\,\!" class="tex"/>
+</th>
+<td>
+<p>(14)  
+</p>
+</td></tr></table>
+<p>ここで、<i>tcdf(t, df)</i> は、自由度 <i>df</i> を持つスチューデント<i>t</i> 分布の下側の確率を計算します。
+</p>
+<h4><a name="LCL_and_UCL"></a><span class="mw-headline">LCLとUCL</span></h4>
+<p><i>t</i>値から各パラメータの<b>信頼区間</b><img src="../images/Linear_XError_Results/math-0cdaba532a6f8ad706e6b8e5e97f0d36.png" title="(1-\alpha )\times 100\%" alt="(1-\alpha )\times 100\%" class="tex"/>を次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-a27fc4294ee80efb51793fbcd4e23df2.png" title="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" alt="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" class="tex"/>
+</th>
+<td>
+<p>(15)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_XError_Results/math-fd9dfeda668ac9b0c5ef311ffdca8f71.png" title="UCL" alt="UCL" class="tex"/>と<img src="../images/Linear_XError_Results/math-a4df64dc5e32716f6de0ec15b0340950.png" title="LCL" alt="LCL" class="tex"/>はそれぞれ<b>上限信頼区間</b>と<b>下限信頼区間</b>の略です。
+</p>
+<h4><a name="CI_Half_Width"></a><span class="mw-headline">CI 半幅</span></h4>
+<p>信頼区間の半値幅は以下の通りです。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-77ec7c61ac9d06bfc9ad4c0ae47b85ce.png" title="CI=\frac{UCL-LCL}2" alt="CI=\frac{UCL-LCL}2" class="tex"/>
+</th>
+<td>
+<p>(16)  
+</p>
+</td></tr></table>
+<p>ここでUCLとLCLは、それぞれ<b>上側信頼区間</b>と<b>下側信頼区間</b>です。
+</p><p>より詳細は<a class="external text" href="../../UserGuide/UserGuide/Linear_XError_Results.html#Reference">参考文献1（下記）</a>をご覧ください。
+</p>
+<h3><a name="Fit_Statistics"></a><span class="mw-headline">フィット統計</span></h3>
+<p><a  class="image"><img alt="York Stats.png" src="../images/Linear_XError_Results/York_Stats.png" width="187"  /></a>
+</p>
+<h4><a name="Degrees_of_Freedom"></a><span class="mw-headline">自由度</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8dbf22cb95c3b3dc33d43f0dcb4582b7.png" title="df=n-2" alt="df=n-2" class="tex"/>
+</th>
+<td>
+<p>(17) 
+</p>
+</td></tr></table>
+<p>nは合計ポイント数です。
+</p>
+<h4><a name="Residual_Sum_of_Squares"></a><span class="mw-headline">残差平方和</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c1140af1d30d301bb79328c09bdf9741.png" title="RSS=\sum^n_{i=1} \frac{(\beta_0+\beta_1 x_i - y_i)^2}{\sigma^2_{y_i}+\beta_1^2\sigma^2_{x_i}}" alt="RSS=\sum^n_{i=1} \frac{(\beta_0+\beta_1 x_i - y_i)^2}{\sigma^2_{y_i}+\beta_1^2\sigma^2_{x_i}}" class="tex"/>
+</th>
+<td>
+<p>(18) 
+</p>
+</td></tr></table>
+<h4><a name="Reduced_Chi-Sqr"></a><span class="mw-headline">自由度あたりカイ二乗</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c0df1f687a05ad41611867fa7424fbeb.png" title="\sigma^2=\frac{RSS}{n-2}" alt="\sigma^2=\frac{RSS}{n-2}" class="tex"/>
+</th>
+<td>
+<p>(19) 
+</p>
+</td></tr></table>
+<h4><a name="Pearson.27s_r"></a><span class="mw-headline">ピアソンのｒ</span></h4>
+<p>単純な線形回帰では、xとyの相関係数は、<i>r</i> で表され、次の式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-f7f1dc7cce20e9b9b19e47b012ee173d.png" title="r=R\,\!" alt="r=R\,\!" class="tex"/>   <i><img src="../images/Linear_XError_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が正の場合</i>
+</th>
+<td>
+<p>(20)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-556cec8e44138ef9cf002c70434cb55d.png" title="r=-R\,\!" alt="r=-R\,\!" class="tex"/>   <i><img src="../images/Linear_XError_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が負の場合</i>
+</th></tr></table>
+<p><b><img src="../images/Linear_XError_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/></b> これは次式のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-9ce15fecaa71e5021c67564b9f212551.png" title="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" alt="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" class="tex"/>
+</th>
+<td>
+<p>(21)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-143fa9a82ab7c4beeb5f48ff2f737e5f.png" title="TSS=\sum_{i=1}^n(y_i-\bar{y})^2" alt="TSS=\sum_{i=1}^n(y_i-\bar{y})^2" class="tex"/>
+</th></tr></table>
+<h4><a name="Root-MSE_.28SD.29"></a><span class="mw-headline">Root MSE(SD)</span></h4>
+<p>誤差の平均平方の平方根または、残差標準偏差は、次式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-5d65f33336e7ea1ead5adec051bf5572.png" title="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" alt="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" class="tex"/>
+</th>
+<td>
+<p>(22) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c20f8bb6c5735ccda8a5e88cff767c30.png" title="df_{Error}=n-2" alt="df_{Error}=n-2" class="tex"/>
+</th></tr></table>
+<h4><a name="Covariance_and_Correlation_Matrix"></a><span class="mw-headline">共分散行列と相関行列</span></h4>
+<p>線形回帰における共分散行列は次のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-b0bcaee4a98e9106fc977c7ab6cf5b79.png" title="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\sigma ^2\frac 1{SXX}\begin{pmatrix} \sum \frac{x_i^2}n &amp; -\bar x \\-\bar x &amp; 1 \end{pmatrix}" alt="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\sigma ^2\frac 1{SXX}\begin{pmatrix} \sum \frac{x_i^2}n &amp; -\bar x \\-\bar x &amp; 1 \end{pmatrix}" class="tex"/>
+</th>
+<td>
+<p>(23)  
+</p>
+</td></tr></table>
+<p>2つのパラメータ間の相関は、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-b029662d99694045f6e48fab550e2b23.png" title="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " alt="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " class="tex"/>
+</th>
+<td>
+<p>(24)  
+</p>
+</td></tr></table>
+<h2><a name="Quantities_.28FV_Method.29"></a><span class="mw-headline">値 (FV法)</span></h2>
+<p>FV法はGiocanniFasano &amp; Roberto Vioによる計算方法で、<i>両方の座標にエラーのある直線へのフィット</i>について説明されています。
+</p><p>重みは次のように定義されます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-9cf5235a06cda7abe1a09a6f38559885.png" title="W_i=\frac{1}{\beta_1^2\sigma_{x_{i}}^2+\sigma_{y_{i}}^2}" alt="W_i=\frac{1}{\beta_1^2\sigma_{x_{i}}^2+\sigma_{y_{i}}^2}" class="tex"/>
+</th>
+<td>
+<p>(25) 
+</p>
+</td></tr></table>
+<p>重みづけ（誤差）のない<img src="../images/Linear_XError_Results/math-6e6fd7f03c691b16aaea1383f4c04a4a.png" title="(X_i, Y_i)" alt="(X_i, Y_i)" class="tex"/>のフィット線の傾きは<img src="../images/Linear_XError_Results/math-b4ceec2c4656f5c1e7fc76c59c4f80f3.png" title="\beta_1" alt="\beta_1" class="tex"/>です。
+</p><p>次のようにします。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-b51de36fa852cbc25f343e160be11748.png" title="\bar{x}=\frac{\sum{W_i x_i}}{\sum W_i}" alt="\bar{x}=\frac{\sum{W_i x_i}}{\sum W_i}" class="tex"/>
+</th>
+<td>
+<p>(26) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-3c0019f33af7b65eabc78ad4fcee6048.png" title="\bar{y}=\frac{\sum{W_i y_i}}{\sum W_i}" alt="\bar{y}=\frac{\sum{W_i y_i}}{\sum W_i}" class="tex"/>
+</th>
+<td>
+<p>(27) 
+</p>
+</td></tr></table>
+<p>合計<img src="../images/Linear_XError_Results/math-7609b577fc585f58d9bc5f5c8ceb96d0.png" title="K^2=\sum{W_i (y_i-\beta_0-\beta_1 x_i)^2}" alt="K^2=\sum{W_i (y_i-\beta_0-\beta_1 x_i)^2}" class="tex"/>を最小化し、偏微分を0に設定することで値<img src="../images/Linear_XError_Results/math-5af9e28d609b16eb25693f44ea9d7a8f.png" title="\beta_0" alt="\beta_0" class="tex"/>と<img src="../images/Linear_XError_Results/math-b4ceec2c4656f5c1e7fc76c59c4f80f3.png" title="\beta_1" alt="\beta_1" class="tex"/>を推定することができます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-bc7d13600bde08b898a24ed825398bc5.png" title="\hat{\beta_0}=\bar{y}-\hat{\beta_1}\bar{x}" alt="\hat{\beta_0}=\bar{y}-\hat{\beta_1}\bar{x}" class="tex"/>
+</th>
+<td>
+<p>(28) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-5c5608c30636231eeb691a4efcb34493.png" title="a\hat{\beta_1}^2+b\hat{\beta_1}-c=0" alt="a\hat{\beta_1}^2+b\hat{\beta_1}-c=0" class="tex"/>
+</th>
+<td>
+<p>(29) 
+</p>
+</td></tr></table>
+<p>ここで
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-b96e947ec0b5a7c613457b9ea2d7ac02.png" title="a=\sum{W_i^2\sigma_{x_i}^2(y_i-\bar{y_i})(x_i-\bar{x_i})}" alt="a=\sum{W_i^2\sigma_{x_i}^2(y_i-\bar{y_i})(x_i-\bar{x_i})}" class="tex"/>
+</th>
+<td>
+<p>(30) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-dcc2ce5179902638125db68c2d6ea365.png" title="b=\sum{W_i^2[\sigma_{y_i}^2(x_i-\bar{x_i})^2-\sigma_{x_i}^2(y_i-\bar{y_i})^2]}" alt="b=\sum{W_i^2[\sigma_{y_i}^2(x_i-\bar{x_i})^2-\sigma_{x_i}^2(y_i-\bar{y_i})^2]}" class="tex"/>
+</th>
+<td>
+<p>(31) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-08271c784412d72127509ff01d0f968a.png" title="c=\sum{W_i^2\sigma_{y_i}^2(y_i-\bar{y_i})(x_i-\bar{x_i})}" alt="c=\sum{W_i^2\sigma_{y_i}^2(y_i-\bar{y_i})(x_i-\bar{x_i})}" class="tex"/>
+</th>
+<td>
+<p>(32) 
+</p>
+</td></tr></table>
+<p>設定した許容値<img src="../images/Linear_XError_Results/math-4db6565d3866d2baeaf7a66f389744f9.png" title="\hat{\beta_1}" alt="\hat{\beta_1}" class="tex"/>に収まるまで<img src="../images/Linear_XError_Results/math-4db6565d3866d2baeaf7a66f389744f9.png" title="\hat{\beta_1}" alt="\hat{\beta_1}" class="tex"/>は反復計算されます。
+</p><p>それぞれのパラメータの標準誤差については<a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#Simple_Linear_Regression_Model" title="ユーザガイド:線形回帰結果">線形回帰モデル</a>を参照してください。
+</p><p>より詳細は<a class="external text" href="../../UserGuide/UserGuide/Linear_XError_Results.html#Reference">参考文献2（下記）</a>をご覧ください。
+</p>
+<h2><a name="Quantities_.28Deming_Method.29"></a><span class="mw-headline">5値 (Deming法)</span></h2>
+<p>線形フィットを実行すると、<a class="external text" href="../../UserGuide/UserGuide/Analysis_Report_Sheets_and_Columns.html">分析レポートシート</a>に計算された値が出力されます。  パラメータ表にはモデルの傾きと切片（カッコ内の数字は計算された値を示す）が表示されます。 
+</p>
+<h3><a name="Fit_Parameters_2"></a><span class="mw-headline">フィットパラメータ</span></h3>
+<p><a  class="image"><img alt="Deming Error.png" src="../images/Linear_XError_Results/Deming_Error.png" width="537"  /></a>
+</p><p>Deming回帰はxとyに測定誤差あることが前提とされる場合に使われます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-6f0706d5e7020e7b145421a393c3ca56.png" title="y=\beta _0+\beta _1x+\varepsilon" alt="y=\beta _0+\beta _1x+\varepsilon" class="tex"/>
+</th>
+<td>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8da8ff23a00993b1a55ee023f9ba0db6.png" title="\left\{\begin{matrix}
+x_i=X_i+\sigma_{x_i}\\ 
+y_i=Y_i+\sigma_{y_i}
+\end{matrix}\right." alt="\left\{\begin{matrix}
+x_i=X_i+\sigma_{x_i}\\ 
+y_i=Y_i+\sigma_{y_i}
+\end{matrix}\right." class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<p><img src="../images/Linear_XError_Results/math-e01da6570365bb9bcdd31bf5d02c17e4.png" title="\sigma_{x_i}" alt="\sigma_{x_i}" class="tex"/>は、<img src="../images/Linear_XError_Results/math-4e0901de034a98e2154ac97b77c7b03d.png" title="\sigma_{x_i} \sim \mathcal{N}(0,\sigma^2)" alt="\sigma_{x_i} \sim \mathcal{N}(0,\sigma^2)" class="tex"/>と独立で同一の分布に従い、<img src="../images/Linear_XError_Results/math-51def96939771aad32a8144ed6298ea7.png" title="\sigma_{y_i}" alt="\sigma_{y_i}" class="tex"/>は、<img src="../images/Linear_XError_Results/math-34b628842156af60063c3ee3bd6c2ddf.png" title="\sigma_{y_i} \sim \mathcal{N}(0,\lambda \sigma^2)" alt="\sigma_{y_i} \sim \mathcal{N}(0,\lambda \sigma^2)" class="tex"/>と独立で同一の分布に従うと仮定します。 ここで、<img src="../images/Linear_XError_Results/math-4efc64d95120928b599f8c26260906bb.png" title="\mathcal{N}(0,\sigma^2)" alt="\mathcal{N}(0,\sigma^2)" class="tex"/>は平均0と標準偏差<img src="../images/Linear_XError_Results/math-a2ab7d71a0f07f388ff823293c147d21.png" title="\sigma" alt="\sigma" class="tex"/>の正規分布を示します。<img src="../images/Linear_XError_Results/math-0f95d2f2265095c8032bb38dd0790e74.png" title="\lambda=1" alt="\lambda=1" class="tex"/>の場合それは直交回帰です。
+モデルの加重残差平方和は最小化され、
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-fe8384be6fd283bb5de696a280b51535.png" title="RSS=\sum^n_{i=1}\left ((x_i-X_i)^2+\frac{(y_i-\beta_0-\beta_1X_i)^2}{\lambda}\right)" alt="RSS=\sum^n_{i=1}\left ((x_i-X_i)^2+\frac{(y_i-\beta_0-\beta_1X_i)^2}{\lambda}\right)" class="tex"/>
+</th>
+<td>
+<p>(33)
+</p>
+</td></tr></table>
+<h4><a name="Fitted_Value_and_Standard_Errors_2"></a><span class="mw-headline">フィット値と標準誤差</span></h4>
+<p>パラメータを解くことができます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c53c84a2f0e13365be6e8065a25e7bf7.png" title="\hat{\beta_1}=\frac{SYY-\lambda SXX+\sqrt{(SYY-\lambda SXX)^2+4\lambda SXY^2}}{2SXY}" alt="\hat{\beta_1}=\frac{SYY-\lambda SXX+\sqrt{(SYY-\lambda SXX)^2+4\lambda SXY^2}}{2SXY}" class="tex"/>
+</th>
+<td>
+<p>(34)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-bc7d13600bde08b898a24ed825398bc5.png" title="\hat{\beta_0}=\bar{y}-\hat{\beta_1}\bar{x}" alt="\hat{\beta_0}=\bar{y}-\hat{\beta_1}\bar{x}" class="tex"/>
+</th>
+<td>
+<p>(35)  
+</p>
+</td></tr></table>
+<p>ここで、
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-d81bb6610b25c48703ab9159111acedd.png" title="\bar{x}=\frac{1}{n}\sum_{i=1}^2{x_i}, \bar{y}=\frac{1}{n}\sum_{i=1}^n{y_i}" alt="\bar{x}=\frac{1}{n}\sum_{i=1}^2{x_i}, \bar{y}=\frac{1}{n}\sum_{i=1}^n{y_i}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-4910699030b9a518c1d2b906e5ad20fe.png" title="u_i=x_i-\bar{x}" alt="u_i=x_i-\bar{x}" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-0724e00259fc5379b680c7cd71f5236a.png" title="v_i=y_i-\bar{y}" alt="v_i=y_i-\bar{y}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<p>さらに
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-e498d793b11998cf2c483b0e48283e2c.png" title="SXX=\sum_{i=1}^n u_i^2" alt="SXX=\sum_{i=1}^n u_i^2" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-eb43ff9d88ffadb8d766bcd9733f182b.png" title="SYY=\sum_{i=1}^n v_i^2" alt="SYY=\sum_{i=1}^n v_i^2" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-5689ac81685be69663ca6d33159f0c93.png" title="SXY=\sum_{i=1}^n u_iv_i" alt="SXY=\sum_{i=1}^n u_iv_i" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<p>パラメータの対応する変数は次のようになります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8a1845ed44ea8ea860f03425357bfd46.png" title="\sigma^2_{\hat \beta _0}=\frac{1}{nw}+2(\bar{x}+2\bar{z})\bar{z}Q+(\bar{x}+2\bar{z})^2 \sigma_{\bar{\beta_1}}^2" alt="\sigma^2_{\hat \beta _0}=\frac{1}{nw}+2(\bar{x}+2\bar{z})\bar{z}Q+(\bar{x}+2\bar{z})^2 \sigma_{\bar{\beta_1}}^2" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-cbe84ea88ec11012ef86e702fc7ee54a.png" title="\sigma^2_{\hat \beta _1}=Q^2w^2\sigma^2\sum^n_{i=1}(\lambda u_i^2+v_i^2)" alt="\sigma^2_{\hat \beta _1}=Q^2w^2\sigma^2\sum^n_{i=1}(\lambda u_i^2+v_i^2)" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<p>パラメータの標準誤差は次のように推定できます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-6632645192059c2282b23580a508a66e.png" title="\varepsilon _{\hat \beta _0}=\sqrt{\sigma^2_{\hat \beta _0}}" alt="\varepsilon _{\hat \beta _0}=\sqrt{\sigma^2_{\hat \beta _0}}" class="tex"/>
+</th>
+<td>
+<p>(37)
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-49d10be0d0c9f5af09d8f54a0f0c07a9.png" title="\varepsilon _{\hat \beta _1}=\sqrt{\sigma^2_{\hat \beta _1}}" alt="\varepsilon _{\hat \beta _1}=\sqrt{\sigma^2_{\hat \beta _1}}" class="tex"/>
+</th>
+<td>
+<p>(38) 
+</p>
+</td></tr></table>
+<p>および、
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-42ef22057c063c56ff7aaebd77af194e.png" title="w=\frac{1}{\sigma^2(\lambda+\hat{\beta_1}^2)}" alt="w=\frac{1}{\sigma^2(\lambda+\hat{\beta_1}^2)}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-3e7fef69e46279e49712a17851cc28d1.png" title="z_i=w\sigma^2(\lambda u_i+\hat{\beta_1} v_i)" alt="z_i=w\sigma^2(\lambda u_i+\hat{\beta_1} v_i)" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-bca17961c43098a1fa2d3ee1a32879b1.png" title="\bar{z}=\frac{1}{n}\sum_{i=1}^n z_i" alt="\bar{z}=\frac{1}{n}\sum_{i=1}^n z_i" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-ea78829455669cb7414deb799ae782b9.png" title="Q=\frac{1}{w \sum_{i=1}^n \left(\frac{u_iv_i}{\hat{\beta_1}}+4(z_i-\bar{z})(z_i-u_i)\right)}" alt="Q=\frac{1}{w \sum_{i=1}^n \left(\frac{u_iv_i}{\hat{\beta_1}}+4(z_i-\bar{z})(z_i-u_i)\right)}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-0dec0855e663537c4e849312f0364319.png" title="\sigma=\sqrt{\frac{\sum^n_{i=1}(x_i-X_i)^2+\frac{\sum^n_{i=1}(y_i-\hat{\beta_0}-\hat{\beta_1}x_i)^2}{\lambda}}{n-2}}" alt="\sigma=\sqrt{\frac{\sum^n_{i=1}(x_i-X_i)^2+\frac{\sum^n_{i=1}(y_i-\hat{\beta_0}-\hat{\beta_1}x_i)^2}{\lambda}}{n-2}}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<h4><a name="t-Value_and_Confidence_Level_2"></a><span class="mw-headline">t値と信頼水準</span></h4>
+<p>回帰の仮定が成り立つ場合次のようになります。 
+</p>
+<table class="formula">
+<tr>
+<td><img src="../images/Linear_XError_Results/math-0ed681c4ca83831abc9e0afe2f959db2.png" title="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" class="tex"/>  かつ  <img src="../images/Linear_XError_Results/math-b502ef25a978991781d791a9f6275a83.png" title="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" class="tex"/>
+</td>
+<td>
+</td></tr></table>
+<p>フィッティングパラメータが0ではないことを調べるために<i>t</i> 検定を使うことができます。これは、 <img src="../images/Linear_XError_Results/math-ae198091d3f29f3101f5b0b86bf85b5d.png" title="\beta _0= 0\,\!" alt="\beta _0= 0\,\!" class="tex"/> (真ならば、フィット直線が原点を通る) または <img src="../images/Linear_XError_Results/math-c1cb3b8aa03a36c23962a83cf7d2dc40.png" title="\beta _1= 0\,\!" alt="\beta _1= 0\,\!" class="tex"/> であるかどうかを検定します。<i>t </i> 検定の仮説検定は次のようになります。 
+</p>
+<dl><dd><img src="../images/Linear_XError_Results/math-d15540fa2e02fa998eea73fd85bf1952.png" title="H_0&nbsp;: \beta _0= 0\,\! " alt="H_0&nbsp;: \beta _0= 0\,\! " class="tex"/>                  <img src="../images/Linear_XError_Results/math-57dce98807a9a866ee09b5bbe88bb68e.png" title="H_0&nbsp;: \beta _1= 0\,\!" alt="H_0&nbsp;: \beta _1= 0\,\!" class="tex"/> </dd>
+<dd><img src="../images/Linear_XError_Results/math-00f883e098653776a99683aae70c3783.png" title="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" alt="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" class="tex"/>         <img src="../images/Linear_XError_Results/math-27aac7aa6524d0b486a1890feffff3e1.png" title="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" alt="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" class="tex"/>     </dd></dl>
+<p><i>t</i> 値は、次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-6368690db66f6b16f642c2976ba74d59.png" title="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" alt="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" class="tex"/>  かつ <img src="../images/Linear_XError_Results/math-abcdef6859e44b55ed86ce261400d36c.png" title="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" alt="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" class="tex"/>
+</th>
+<td>
+<p>(38)  
+</p>
+</td></tr></table>
+<p>計算された<i>t</i>値を使って対応する帰無仮説を棄却するかどうかを決定できます。通常与えられた有意水準<img src="../images/Linear_XError_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/>に対して、<img src="../images/Linear_XError_Results/math-9d38e8e7363d66af41530c3fbdf494f5.png" title="|t|&gt;t_{\frac \alpha 2}" alt="|t|&gt;t_{\frac \alpha 2}" class="tex"/>のときに<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>を棄却します。また、<i>p</i>値または有意水準が<i>t</i>検定とともに出力されます。<i>p</i>値が<img src="../images/Linear_XError_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/>よりも小さい場合に帰無仮説<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>を棄却することができます。
+</p>
+<h4><a name="Prob.3E.7Ct.7C_2"></a><span class="mw-headline">Prob&gt;|t|</span></h4>
+<p>上記の<i>t</i>検定における<img src="../images/Linear_XError_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/>が真である確率 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-3e5335a131705b3ef0bb8b250033167d.png" title="prob=2(1-tcdf(|t|,df_{Error}))\,\!" alt="prob=2(1-tcdf(|t|,df_{Error}))\,\!" class="tex"/>
+</th>
+<td>
+<p>(39)  
+</p>
+</td></tr></table>
+<p>ここで、<i>tcdf(t, df)</i> は、自由度 <i>df</i> を持つスチューデント<i>t</i> 分布の下側の確率を計算します。
+</p>
+<h4><a name="LCL_and_UCL_2"></a><span class="mw-headline">LCLとUCL</span></h4>
+<p><i>t</i>値から各パラメータの<b>信頼区間</b><img src="../images/Linear_XError_Results/math-0cdaba532a6f8ad706e6b8e5e97f0d36.png" title="(1-\alpha )\times 100\%" alt="(1-\alpha )\times 100\%" class="tex"/>を次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-a27fc4294ee80efb51793fbcd4e23df2.png" title="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" alt="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" class="tex"/>
+</th>
+<td>
+<p>(40)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_XError_Results/math-fd9dfeda668ac9b0c5ef311ffdca8f71.png" title="UCL" alt="UCL" class="tex"/>と<img src="../images/Linear_XError_Results/math-a4df64dc5e32716f6de0ec15b0340950.png" title="LCL" alt="LCL" class="tex"/>はそれぞれ<b>上限信頼区間</b>と<b>下限信頼区間</b>の略です。
+</p>
+<h4><a name="CI_Half_Width_2"></a><span class="mw-headline">CI 半幅</span></h4>
+<p>信頼区間の半値幅は以下の通りです。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-77ec7c61ac9d06bfc9ad4c0ae47b85ce.png" title="CI=\frac{UCL-LCL}2" alt="CI=\frac{UCL-LCL}2" class="tex"/>
+</th>
+<td>
+<p>(41)  
+</p>
+</td></tr></table>
+<p>ここでUCLとLCLは、それぞれ<b>上側信頼区間</b>と<b>下側信頼区間</b>です。
+</p><p>より詳細は<a class="external text" href="../../UserGuide/UserGuide/Linear_XError_Results.html#Reference">参考文献1（下記）</a>をご覧ください。
+</p>
+<h3><a name="Fit_Statistics_2"></a><span class="mw-headline">フィット統計</span></h3>
+<p><a  class="image"><img alt="Deming Stats.png" src="../images/Linear_XError_Results/Deming_Stats.png" width="188"  /></a>
+</p>
+<h4><a name="Degrees_of_Freedom_2"></a><span class="mw-headline">自由度</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-8dbf22cb95c3b3dc33d43f0dcb4582b7.png" title="df=n-2" alt="df=n-2" class="tex"/>
+</th>
+<td>
+<p>(42) 
+</p>
+</td></tr></table>
+<p>nは合計ポイント数です。
+</p>
+<h4><a name="Residual_Sum_of_Squares_2"></a><span class="mw-headline">残差平方和</span></h4>
+<p>式(33)を参照
+</p>
+<h4><a name="Reduced_Chi-Sqr_2"></a><span class="mw-headline">自由度あたりカイ二乗</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c0df1f687a05ad41611867fa7424fbeb.png" title="\sigma^2=\frac{RSS}{n-2}" alt="\sigma^2=\frac{RSS}{n-2}" class="tex"/>
+</th>
+<td>
+<p>(43) 
+</p>
+</td></tr></table>
+<h4><a name="Pearson.27s_r_2"></a><span class="mw-headline">ピアソンのｒ</span></h4>
+<p>単純な線形回帰では、xとyの相関係数は、<i>r</i> で表され、次の式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-f7f1dc7cce20e9b9b19e47b012ee173d.png" title="r=R\,\!" alt="r=R\,\!" class="tex"/>   <i><img src="../images/Linear_XError_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が正の場合</i>
+</th>
+<td>
+<p>(44)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-556cec8e44138ef9cf002c70434cb55d.png" title="r=-R\,\!" alt="r=-R\,\!" class="tex"/>   <i><img src="../images/Linear_XError_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が負の場合</i>
+</th></tr></table>
+<p><b><img src="../images/Linear_XError_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/></b> これは次式のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-9ce15fecaa71e5021c67564b9f212551.png" title="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" alt="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" class="tex"/>
+</th>
+<td>
+<p>(45)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-143fa9a82ab7c4beeb5f48ff2f737e5f.png" title="TSS=\sum_{i=1}^n(y_i-\bar{y})^2" alt="TSS=\sum_{i=1}^n(y_i-\bar{y})^2" class="tex"/>
+</th></tr></table>
+<h4><a name="Root-MSE_.28SD.29_2"></a><span class="mw-headline">Root MSE(SD)</span></h4>
+<p>誤差の平均平方の平方根は、次式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-5d65f33336e7ea1ead5adec051bf5572.png" title="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" alt="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" class="tex"/>
+</th>
+<td>
+<p>(46) 
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_XError_Results/math-c20f8bb6c5735ccda8a5e88cff767c30.png" title="df_{Error}=n-2" alt="df_{Error}=n-2" class="tex"/>
+</th></tr></table>
+<h4><a name="Covariance_and_Correlation_Matrix_2"></a><span class="mw-headline">共分散行列と相関行列</span></h4>
+<p>線形回帰における共分散行列は次のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-30e3c5c9127c7982f5851e6a515d2bf5.png" title="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\begin{pmatrix} \ \sigma^2_{\hat{\beta_0}}  &amp; -\bar{x}\sigma^2_{\hat \beta _1} \\-\bar{x}\sigma^2_{\hat \beta _1} &amp;\sigma^2_{\hat{\beta_1}} \end{pmatrix}" alt="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\begin{pmatrix} \ \sigma^2_{\hat{\beta_0}}  &amp; -\bar{x}\sigma^2_{\hat \beta _1} \\-\bar{x}\sigma^2_{\hat \beta _1} &amp;\sigma^2_{\hat{\beta_1}} \end{pmatrix}" class="tex"/>
+</th>
+<td>
+<p>(47)  
+</p>
+</td></tr></table>
+<p>2つのパラメータ間の相関は、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_XError_Results/math-b029662d99694045f6e48fab550e2b23.png" title="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " alt="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " class="tex"/>
+</th>
+<td>
+<p>(48)  
+</p>
+</td></tr></table>
+<h2><a name="Finding_X.2FY"></a><span class="mw-headline"><a href="../../UserGuide/UserGuide/Finding_Y_X_from_X_Y_Standard_Curves.html" title="ユーザガイド：X/YからY/Xを検索  &ndash; 標準曲線">X/Y検索</a></span></h2>
+<h2><a name="Residual_Plots"></a><span class="mw-headline">残差プロット</span></h2>
+<h3><a name="Residual_vs._Independent"></a><span class="mw-headline">残差vs.独立</span></h3>
+<p>残差<img src="../images/Linear_XError_Results/math-9b207167e5381c47682c6b4f58a623fb.png" title="res" alt="res" class="tex"/> vs. 独立変数<img src="../images/Linear_XError_Results/math-75087036f44bb88958df97586ae3bd1e.png" title="x_1,x_2,\dots,x_k" alt="x_1,x_2,\dots,x_k" class="tex"/>の散布図プロットではそれぞれのプロットは別々のグラフに配置されます。
+</p>
+<h3><a name="Residual_vs._Predicted_Value"></a><span class="mw-headline">残差vs.予測値</span></h3>
+<p>残差<img src="../images/Linear_XError_Results/math-9b207167e5381c47682c6b4f58a623fb.png" title="res" alt="res" class="tex"/>の散布図プロット vs. フィット結果<img src="../images/Linear_XError_Results/math-c9e53cbdffe795c0913cd927f13ffb9b.png" title="\hat{y_i}" alt="\hat{y_i}" class="tex"/>
+</p>
+<h3><a name="Residual_vs._Order_of_the_Data"></a><span class="mw-headline">残差vs.データ順序</span></h3>
+<p><img src="../images/Linear_XError_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/> vs. 順序<img src="../images/Linear_XError_Results/math-865c0c0b4ab0e063e5caa3387c1a8741.png" title="i" alt="i" class="tex"/>
+</p>
+<h3><a name="Histogram_of_the_Residual"></a><span class="mw-headline">残差のヒストグラム</span></h3>
+<p>残差<img src="../images/Linear_XError_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/>のヒストグラムプロット
+</p>
+<h3><a name="Residual_Lag_Plot"></a><span class="mw-headline">残差のラグプロット</span></h3>
+<p>残差<img src="../images/Linear_XError_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/> vs. ラグ残差<img src="../images/Linear_XError_Results/math-00407b58eb35fecbfea6dc5d4413e493.png" title="res_{(i&ndash;1)}" alt="res_{(i&ndash;1)}" class="tex"/>
+</p>
+<h3><a name="Normal_Probability_Plot_of_Residuals"></a><span class="mw-headline">正規残差確率プロット</span></h3>
+<p>残差の正規確率プロットは分散が成否分布しているかどうかを調べるために使います。結果のプロットはおおよそ線形で、誤差範囲は正規分布していると仮定することができます。プロットはパーセンタイル対順序化された残差をベースにしており、パーセンタイルは次のように仮定されます。 
+</p><p><img src="../images/Linear_XError_Results/math-ec995bff3922b2290f85bed243de5eb3.png" title="\frac{(i-\frac{3}{8})}{(n+\frac{1}{4})}" alt="\frac{(i-\frac{3}{8})}{(n+\frac{1}{4})}" class="tex"/> 
+</p><p>ここで、<i>n</i> はデータセットの合計数で、<i>i</i>は<i>i</i>番目のデータを表します。
+<a href="../../UserGuide/UserGuide/Probability_Plot_and_Q-Q_Plot.html" title="ユーザガイド：確率プロットとQ-Qプロット">確率プロットとQ-Qプロット</a>もご覧ください。
+</p>
+<h2><a name="Reference"></a><span class="mw-headline">参考文献</span></h2>
+<ol><li> York D, Unified equations for the slope, intercept, and standard error of the best straight line, American Journal of Physics, Volume 72, Issue 3, pp. 367-375 (2004).</li>
+<li> G. Fasano and R. Vio, &quot;Fitting straight lines with errors on both coordinates&quot;, Newsletter of Working Group for Modern Astronomical Methodology, No. 7, 2-7, Sept. 1988.</li></ol>
+
+
+
+
+    

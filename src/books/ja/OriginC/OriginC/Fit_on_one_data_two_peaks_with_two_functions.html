@@ -1,0 +1,289 @@
+﻿<h1 class="firstheading">Fit on one data two peaks with two functions</h1>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR1</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// before running this function, import \Samples\Curve Fitting\Multiple Peaks.dat to worksheet.</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span>       NLFit_example4<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// Two functions:</span>
+        <span style="color: #008000;">// (1) Gauss</span>
+        string                  strFDF1 <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">(</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">"FitFunc"</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Gauss.FDF"</span>;
+        Tree                    trFF1;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">(</span> strFDF1, <span style="color: #000040;">&amp;</span>trFF1 <span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to load FDF function file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// (2) Lorentz</span>
+        string                  strFDF2 <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">(</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">"FitFunc"</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Lorentz.FDF"</span>;
+        Tree                    trFF2;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">(</span> strFDF2, <span style="color: #000040;">&amp;</span>trFF2 <span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to load FDF function file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;    
+        <span style="color: #000000;">}</span>
+        
+        
+        <span style="color: #008000;">//////////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 1. Setting the fitting function and parameter sharing for multipeak fit  //</span>
+
+        <span style="color: #008000;">// The fit object:</span>
+        NLFit                   fit;
+        
+        <span style="color: #008000;">// We will fit to a total of four peaks, two Gaussian and two Lorentzian peaks,</span>
+        <span style="color: #008000;">// with some parameter sharing between peaks.</span>
+        <span style="color: #008000;">// Each function will therefore have the multiplicity of 2 (i.e. one replica in each function).</span>
+        <span style="color: #008000;">//</span>
+        <span style="color: #008000;">// The first function has 4 original paramaters, 3 of which are in replicas unit.</span>
+        <span style="color: #008000;">// Since the function will have multiplicity of 2, this means that per function</span>
+        <span style="color: #008000;">// (i.e. for its two peaks) there are 7 paramaters:</span>
+        <span style="color: #008000;">//                7 = replicas Offset - 1 + nFitFunctionMultiplicity * replicas unit</span>
+        <span style="color: #008000;">// since for both Gauss and Lorentz replicas Offset = 2, replicas unit = 3</span>
+        <span style="color: #008000;">// and we use nFitFunctionMultiplicity = 2.</span>
+        <span style="color: #0000ff;">int</span>                                nFitFunctionMultiplicity <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+        
+        <span style="color: #008000;">// To set up parameter sharing between peaks, we use an auxiliary vector of integers:</span>
+        <span style="color: #008000;">// First we will set the first function (Gauss).</span>
+        <span style="color: #008000;">// The first function has 7 parameters</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span>                vnSharingGroupsGauss<span style="color: #000000;">(</span><span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>;
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;                   <span style="color: #008000;">// y0 (baseline), not shared</span>
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;                   <span style="color: #008000;">// xc for the first Gauss peak, not shared</span>
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;                   <span style="color: #008000;">// w for the first Gauss peak, shared with vnSharingGroupsLorentz[4] (see below) </span>
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;                   <span style="color: #008000;">// A for the first Gauss peak, shared with vnSharingGroupsLorentz[2] (see below)</span>
+        
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;                   <span style="color: #008000;">// xc for the second Gauss peak, not shared</span>
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;                   <span style="color: #008000;">// w for the second Gauss peak, shared with vnSharingGroupsLorentz[1] (see below)</span>
+        vnSharingGroupsGauss<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;                   <span style="color: #008000;">// A for the second Gauss peak, shared with vnSharingGroupsLorentz[5] (see below)</span>
+        <span style="color: #008000;">// Set the Gauss fitting function with the multiplicity of 2 (i.e. one replica).</span>
+        <span style="color: #0000ff;">int</span>                                nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span>trFF1, nFitFunctionMultiplicity, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, vnSharingGroupsGauss, vnSharingGroupsGauss.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nn <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed setting fitting function!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// The second function does not have the baseline parameter y0 (the baseline parameters are those that</span>
+        <span style="color: #008000;">// do not belong to ther replicas unit, both Gauss and Lorentz have exactly one such paramater - y0).</span>
+        <span style="color: #008000;">// (only one baseline makes sense and it is always associated with the first function)</span>
+        <span style="color: #008000;">// so the total number of params for this function is 6.</span>
+        <span style="color: #008000;">// This is the auxiliary vector of integers for specifying the parameter sharing</span>
+        <span style="color: #008000;">// for the Lorentz peaks:</span>
+        <span style="color: #008000;">// The</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span>                vnSharingGroupsLorentz<span style="color: #000000;">(</span><span style="color: #0000dd;">6</span><span style="color: #000000;">)</span>;
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;                 <span style="color: #008000;">// xc for the first Lorentx peak, not shared</span>
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;                 <span style="color: #008000;">// w for the first Lorentz peak, shared with vnSharingGroupsGauss[5]</span>
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;                 <span style="color: #008000;">// A for the first Lorentz peak, shared with vnSharingGroupsGauss[3]</span>
+        
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;                 <span style="color: #008000;">// xc for the second Lorentz peak, not shared</span>
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;                 <span style="color: #008000;">// w for the second Lorentz peak, shared with vnSharingGroupsGauss[2]</span>
+        vnSharingGroupsLorentz<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;                 <span style="color: #008000;">// A for the second Lorentz peak, shared with vnSharingGroupsGauss[6]</span>
+        <span style="color: #008000;">// Append the Lorentz fitting function with the multiplicity of 2 (i.e. one replica).</span>
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span>trFF2, nFitFunctionMultiplicity, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, vnSharingGroupsLorentz, vnSharingGroupsLorentz.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nn <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed setting fitting function!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 3. Setting data for fitting ////////////////////////////////////////////</span>
+        Worksheet       wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"No active worksheet to get input data"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        DataRange       dr;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Y data from 3th column (Column C) has four peaks</span>
+        
+        DWORD           dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+        <span style="color: #0000ff;">int</span>                nNumData <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>dwRules<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> nNumData <span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nNumData <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> nNumData <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Not proper input data to do fit"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;    
+        <span style="color: #000000;">}</span>
+        
+        DWORD                   dwPlotID;
+        vector                  vX, vY;
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span> dwRules, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY, <span style="color: #000040;">&amp;</span>vX<span style="color: #000000;">)</span>;
+        
+        NLSFONEDATA             stDep, stIndep;
+        stIndep.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX;
+        stIndep.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        stDep.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY;
+        stDep.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">&amp;</span>stDep, <span style="color: #000040;">&amp;</span>stIndep<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nn <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"SetData() failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 4. Setting paramaters //////////////////////////////////////////////////</span>
+
+        <span style="color: #008000;">// Total number of fitting parameters is dependent on the parameter sharing between peaks.</span>
+        <span style="color: #008000;">// It is crucial that the number of parameters as specifed</span>
+        <span style="color: #008000;">// in the SetParams() call below agrees with the numbers of parameters in the functions and with the parameter</span>
+        <span style="color: #008000;">// sharing as specifed in step 2.</span>
+        <span style="color: #008000;">//</span>
+        <span style="color: #008000;">// This is how the parameters are lined up:</span>
+        <span style="color: #008000;">// First all the parameters for the first function. Their total number is the same as the total</span>
+        <span style="color: #008000;">// number of parameters for one Gauss function with one replica, which is, as explained above, 7. Note</span>
+        <span style="color: #008000;">// that there is no paramater sharing between paramaters within Gauss function peaks alone, since all</span>
+        <span style="color: #008000;">// the values in the vector vnSharingGroupsGauss are different (with the exception of 0, which, by</span>
+        <span style="color: #008000;">// denition, means that those parameters are not shared).</span>
+        <span style="color: #008000;">// Now we need to add the parameters for Lorentz. The vector vnSharingGroupsLorentz has 6 elements,</span>
+        <span style="color: #008000;">// but 4 of the 6 have nonzero values which have already appeared in vnSharingGroupsGauss (which means they</span>
+        <span style="color: #008000;">// are shared with some paramaters in Gauss), so only 2 more parameters (vnSharingGroupsLorentz[0]</span>
+        <span style="color: #008000;">// and vnSharingGroupsLorentz[3]) are contributed by Lorentz peaks.</span>
+        <span style="color: #008000;">// That amounts to a total of 9.</span>
+        <span style="color: #0000ff;">int</span>                                nNumParams <span style="color: #000080;">=</span> <span style="color: #0000dd;">9</span>;
+        
+        vector                  vParams<span style="color: #000000;">(</span>nNumParams<span style="color: #000000;">)</span>;                  <span style="color: #008000;">// this vector should be initialized to the total number of paramaters</span>
+        <span style="color: #008000;">// The vector vParams will be used to supply the initial values of parameters, and it will also receive</span>
+        <span style="color: #008000;">// the parameter values after fitting.</span>
+        <span style="color: #008000;">// The paramaters are lined up in this vector such that the first come all the parameters for the Gauss, and</span>
+        <span style="color: #008000;">// then the additional ones for the Lorentz:</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">12</span>;                       <span style="color: #008000;">// the baseline y0 (vnSharingGroupsGauss[0])</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6.3</span>;              <span style="color: #008000;">// xc for the first Gauss peak (vnSharingGroupsGauss[1])</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.1</span>;              <span style="color: #008000;">// w for the first Gauss peak (vnSharingGroupsGauss[2]) and for the second Lorentz peak (vnSharingGroupsLorentz[4]).</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">85</span>;               <span style="color: #008000;">// A for the first Gauss peak (vnSharingGroupsGauss[3]) and for the first Lorentz peak (vnSharingGroupsLorentz[2]).</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;                <span style="color: #008000;">// xc for the second Gauss peak (vnSharingGroupsGauss[4])</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.1</span>;              <span style="color: #008000;">// w for the second Gauss peak (vnSharingGroupsGauss[5]) and for the first Lorentz peak (vnSharingGroupsLorentz[1]).</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">40</span>;                       <span style="color: #008000;">// A for the second Gauss peak (vnSharingGroupsGauss[6]) and for the second Lorentz peak (vnSharingGroupsLorentz[5]).</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">7</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3.8</span>;              <span style="color: #008000;">// xc for the first Lorentz peak (vnSharingGroupsLorentz[0])</span>
+        vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">8</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.2</span>;              <span style="color: #008000;">// xc for the second Lorentz peak (vnSharingGroupsLorentz[3])</span>
+        
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetParams</span><span style="color: #000000;">(</span>nNumParams, vParams<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nn <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid paramater setting!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 5. Fitting /////////////////////////////////////////////////////////////</span>
+        <span style="color: #0000ff;">int</span>                                nMaxNumIterations <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">Fit</span><span style="color: #000000;">(</span>nMaxNumIterations<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fit(%ld) returned: %ld<span style="color: #666666; font-weight: bold;">\n</span>"</span>, nMaxNumIterations, nn<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nn <span style="color: #000000;">)</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fit Done!<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;    
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 6. Dump all the results and compare with what was expected /////////////</span>
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> iparam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iparam <span style="color: #000080;">&lt;</span> nNumParams; iparam<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"param index = %d   value obtained = %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iparam <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, vParams<span style="color: #000000;">[</span>iparam<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+        _calc_fitted_data_for_multi_funcs_fit<span style="color: #000000;">(</span>trFF1, trFF2, vParams, vX, wks<span style="color: #000000;">)</span>;
+        
+        
+        <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span>   _calc_fitted_data_for_multi_funcs_fit<span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> TreeNode<span style="color: #000040;">&amp;</span> trFF1, <span style="color: #0000ff;">const</span> TreeNode<span style="color: #000040;">&amp;</span> trFF2, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vParams, <span style="color: #0000ff;">const</span> vector<span style="color: #000040;">&amp;</span> vX, Worksheet<span style="color: #000040;">&amp;</span> wks<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        vector          vOnePeakParams; 
+        vector          vY1, vY2, vY3, vY4; <span style="color: #008000;">// Y data for each peak</span>
+        <span style="color: #0000ff;">int</span>                        nNumPts <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// calculate for first peak</span>
+        vOnePeakParams.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Gauss and Lorentz original both have 4 parameters</span>
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;      
+
+        NumericFunction         NF;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>NF.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trFF1<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid function"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        vY1.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPts<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">BOOL</span>                       bb <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>vOnePeakParams, vY1, vX, <span style="color: #0000ff;">NULL</span>, nNumPts<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>bb<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// calculate for second peak</span>
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span>;      
+        
+        vY2.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPts<span style="color: #000000;">)</span>;
+        bb <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>vOnePeakParams, vY2, vX, <span style="color: #0000ff;">NULL</span>, nNumPts<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>bb<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// calculate for third peak</span>
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">7</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;      
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>NF.<span style="color: #000000;">SetTree</span><span style="color: #000000;">(</span>trFF2<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid function"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        vY3.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPts<span style="color: #000000;">)</span>;
+        bb <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>vOnePeakParams, vY3, vX, <span style="color: #0000ff;">NULL</span>, nNumPts<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>bb<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// calculate for fourth peak</span>
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">8</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+        vOnePeakParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span>;      
+        
+        vY4.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumPts<span style="color: #000000;">)</span>;
+        bb <span style="color: #000080;">=</span> NF.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span>vOnePeakParams, vY4, vX, <span style="color: #0000ff;">NULL</span>, nNumPts<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>bb<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        vector                  vYOut;
+        vYOut <span style="color: #000080;">=</span> vY1 <span style="color: #000040;">+</span> vY2 <span style="color: #000040;">+</span> vY3 <span style="color: #000040;">+</span> vY4 <span style="color: #000040;">-</span> vParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000040;">*</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// added fitted value for 4 peaks and reduce duplicate y0</span>
+        
+        <span style="color: #008000;">// put fitted data into new column</span>
+        <span style="color: #0000ff;">int</span>        nCol <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        Dataset dsOut<span style="color: #000000;">(</span>wks, nCol<span style="color: #000000;">)</span>;
+        dsOut <span style="color: #000080;">=</span> vYOut;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fitted data putted into Column %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>nCol<span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">return</span>;    
+<span style="color: #000000;">}</span>
+</pre>

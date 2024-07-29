@@ -1,0 +1,182 @@
+﻿<h1 class="firstheading">アップグレードユーザ向け情報</h1><p class="urlname" style="display: none">Upgrade-LT-Note</p>
+<table id="toc" class="toc"><tr><td><div id="toctitle"><h2>内容</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">イントロダクション</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Key_Limitations_in_Version_7.x"><span class="tocnumber">2</span> <span class="toctext">バージョン7.xでの主な制限事項</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Key_Improvements_in_Version_8.0"><span class="tocnumber">3</span> <span class="toctext">バージョン8.0.xでの主な改善事項</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#An_Example"><span class="tocnumber">4</span> <span class="toctext">例</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#The_old_way"><span class="tocnumber">4.1</span> <span class="toctext">過去の方法</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#The_New_Way"><span class="tocnumber">4.2</span> <span class="toctext">現在の方法</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Incompatibilities"><span class="tocnumber">5</span> <span class="toctext">不適合</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#String_assignment"><span class="tocnumber">5.1</span> <span class="toctext">文字列の代入</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#String_Registers"><span class="tocnumber">5.2</span> <span class="toctext">文字列レジスタ</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Column_Justify"><span class="tocnumber">5.3</span> <span class="toctext">列の両端揃え</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></table>
+<h2><a name="Introduction"></a><span class="mw-headline">イントロダクション</span></h2>
+<p>これらのノートは、Originのバージョン8.0でのLabTalkスクリプト言語に加えられた変更や改善に関連しています。もしスクリプトコードを7.5などの古いバージョンで開発している場合は、新しい機能を活用するだけでなく、Originの新しいバージョンでスクリプトの互換性の問題を修正するようにコードを更新したい場合があります。
+</p>
+<h2><a name="Key_Limitations_in_Version_7.x"></a><span class="mw-headline">バージョン7.xでの主な制限事項</span></h2>
+<p>多くのLabTalkコマンドはワークシート、グラフデータや列など「アクティブな」オブジェクトで動作します。このため、ワークシートやグラフ（または2番目のワークシート）などのウィンドウを記憶することによってウィンドウを管理し、&quot;window -a&quot; コマンドを使用してこれらのウィンドウ間を行ったり来たり切り替えるためのスクリプトが頻繁に要求されます。
+</p><p>変数はスコープ内で宣言されていないとグローバル変数となっていました​​。
+</p><p>いくつかのコマンドは、データが消滅するため、元のデータが必要な場合は、コピーで作業をする必要があります。
+</p>
+<h2><a name="Key_Improvements_in_Version_8.0"></a><span class="mw-headline">バージョン8.0.xでの主な改善事項</span></h2>
+<p>3つの追加事項によりOrigin8では前項で説明されている問題が解決しています。LabTalk プログラマはそれらのコンセプトを知る必要があります。
+</p>
+<ul><li><a href="../../LabTalk/LabTalk/Data_Types_and_Variables.html#Scope_of_Variables" title="LabTalk:Data Types and Variables">変数の宣言とスコープ</a>
+</li><li><a href="../../LabTalk/LabTalk/Range_Notation.html" title="LabTalk:Range Notation">範囲変数</a>
+</li><li><a href="../../XFunction/Category/X-Functions.html" title="Category:X-Functions">Xファンクション</a>
+</li></ul>
+<p>宣言された変数は、それらが宣言されたプロシージャでのみコンテキストを持っています。
+</p><p>範囲変数は様々なOriginのオブジェクトを指し示すことができ、オブジェクトがアクティブである必要がなくなります。
+</p><p>Xファンクションは、範囲変数を入力、出力変数として受け入れ、分析結果からデータを分離し、自動更新や高レベルのプログラム機能を提供します。
+</p>
+<h2><a name="An_Example"></a><span class="mw-headline">例</span></h2>
+<p>複数ファイルのデータの導関数の折れ線グラフを確認したいとします。
+</p>
+<h3><a name="The_old_way"></a><span class="mw-headline">過去の方法</span></h3>
+<p>Origin 7.5では、複数ASCIIAファイルを新しいシート、新しい列または行にインポートできました。これらのオプションは、ワークシート内の特別な構造を読み込み、書き込むことで行われていましたが、後者の2つは、管理が難しいため、新しいシート（デフォルト）にします。どのシートが作成されるか知るのが難しいため、最初に新しいOriginプロジェクト内の空のワークシートを削除します。
+</p><p>次のようにインポートします。
+</p>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>cd <span style="color: #000080;">%</span>H; <span style="color: #008000;">// デフォルトのワークシートウィンドウを削除</span>
+<span style="color: #008000;">// ファイルを指定しインポート</span>
+run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>file,MultiImportToolbar<span style="color: #000000;">)</span>;</pre>
+<p>次のようにしてインポートされた全てのシートをループできます。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e W <span style="color: #000000;">{</span> <span style="color: #008000;">// 全ワークシートでループ</span>
+		...
+	<span style="color: #000000;">}</span></pre>
+<p>しかし、必要な導関数のコマンドは元のデータを置き換えます。ここではインポートされたデータを保持したいので、データをコピーし、これを導関数の計算に使用します。
+</p>
+<pre class="lt" style="font-family:monospace;">wo <span style="color: #000080;">-</span>a <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 列を追加</span>
+copy col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列3は列2のコピー</span>
+derivative col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列3は導関数で置換えられる</span></pre>
+<p>データをプロットするには、グラフウィンドウを作成し（グラフウィンドウの名前を憶えて置く必要があります）、全てのワークシートでループし、グラフに追加するデータの名前を取得し、データを追加するグラフに切り替えます。
+</p><p>その代わりに、ワークシートの最初のパスにいるときに変数(count)を使用し、グラフ作成のためにループします。そして、続くループで導関数データの名前だけに注意し、グラフにデータを追加するために一時的にグラフに切り替えます。
+</p><p>スクリプトは次のようになります。
+</p>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>cd <span style="color: #000080;">%</span>H;
+run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>file,MultiImportToolbar<span style="color: #000000;">)</span>;
+count <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+doc <span style="color: #000080;">-</span>e W <span style="color: #000000;">{</span>
+	wo <span style="color: #000080;">-</span>a <span style="color: #0000dd;">1</span>;
+	copy col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+	derivative col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+	if<span style="color: #000000;">(</span> count <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		wo <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">0</span>;
+		wo <span style="color: #000080;">-</span>p <span style="color: #0000dd;">200</span> LINE;
+		<span style="color: #000080;">%</span>M <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;
+	<span style="color: #000000;">}</span>
+	else
+	<span style="color: #000000;">{</span>
+		<span style="color: #000080;">%</span>N <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+		win <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span>M
+		<span style="color: #000000;">{</span>
+			layer <span style="color: #000080;">-</span>i <span style="color: #000080;">%</span>N;
+		<span style="color: #000000;">}</span>
+	<span style="color: #000000;">}</span>
+	count<span style="color: #000080;">++</span>;
+<span style="color: #000000;">}</span>
+win <span style="color: #000080;">-</span>a <span style="color: #000080;">%</span>M;
+layer <span style="color: #000080;">-</span>a;</pre>
+<p>以下は、上述のスクリプトで(一時的に)アクティブになるウィンドウです。 
+</p><p>Worksheet1
+</p><p>Worksheet2
+</p><p>Worksheet3
+</p><p>Worksheet1
+</p><p>Graph1
+</p><p>Worksheet1
+</p><p>Worksheet2
+</p><p>Graph1
+</p><p>Worksheet2
+</p><p>Worksheet3
+</p><p>Graph1
+</p><p>Worksheet3
+</p><p>Graph1
+</p><p>このシーケンスを理解することは、コードを記述する要件でした。
+</p>
+<h3><a name="The_New_Way"></a><span class="mw-headline">現在の方法</span></h3>
+<p>次に範囲(range)とXファンクションを使用して、新しいバージョンでどのように処理を行うかを見てみましょう。
+</p><p>ここでは、2つのXファンクションを使用します。最初のプロンプトは、インポート、次はファイルをどのようにインポートするかを指定します。
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">dat</span> mu<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+impASC options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBk</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;</pre>
+<p>以前のバージョンでの、&quot;run.section(file,MultiImportToolbar);&quot;は、2つに分けられますが、&quot;dlgfile&quot;関数は、他の多くの場合でファイルの指定に使用できます。&quot;impasc&quot; Xファンクションは、引数の一部として様々なオプションを統合し、オプションが定義する必要のある時に多くの行を置換えます。
+</p><p>次に、作図に使用する文字列変数を宣言します。
+</p>
+<pre class="lt" style="font-family:monospace;">string strRanges;</pre>
+<p>ワークブック内の各ワークシート(インポートされたファイル)をループします。
+</p>
+<pre class="lt" style="font-family:monospace;">loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">)</span> <span style="color: #008000;">// ワークブック(ページ)は、複数ワークシート(レイヤ)を持つ</span>
+<span style="color: #000000;">{</span>
+		...
+<span style="color: #000000;">}</span></pre>
+<p>ループ内では、導関数を計算するデータを指定する範囲を宣言し、differentiate Xファンクションで使用します。
+</p>
+<pre class="lt" style="font-family:monospace;">range raD <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 列1をX、列2をYとして使用したインデックスでシートを参照した範囲</span>
+differentiate iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raD; <span style="color: #008000;">// デフォルトで新しい列を作成するXファンクションに範囲を渡す</span></pre>
+<p>文字列変数は、各範囲をカンマ区切りリストとして統合する範囲シンタックスにあたる文字列の定義に使用されます。
+</p>
+<pre class="lt" style="font-family:monospace;">if<span style="color: #000000;">(</span>ii <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+else strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">)</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;</pre>
+<p>ループが終了すると、文字列は次のようになります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">3</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span></pre>
+<p>最後の行は括弧で囲みます。
+</p>
+<pre class="lt" style="font-family:monospace;">strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;</pre>
+<p>次のようになります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">2</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">3</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span></pre>
+<p>Xファンクション plotxy は、1つのコマンドで最後のグラフを作成するために複数XY範囲として理解します。
+</p><p>最終的なコードは、次のようになります。
+</p>
+<pre class="lt" style="font-family:monospace;">dlgfile gr<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000080;">*</span>.<span style="color: #000080;">dat</span> mu<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+impASC options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> options.<span style="color: #000080;">FileStruct</span>.<span style="color: #000080;">NumericSeparator</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> options.<span style="color: #000080;">Names</span>.<span style="color: #000080;">FNameToBk</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+string strRanges;
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	range raD <span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+	differentiate iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raD;
+	if<span style="color: #000000;">(</span>ii <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+	else strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">)</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+strRanges<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+plotxy <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strRanges<span style="color: #000080;">$</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h2><a name="Incompatibilities"></a><span class="mw-headline">不適合</span></h2>
+<p>言語の新機能への適合や問題の修正のための変更により、古いスクリプトが動作しない場合があります。
+</p><p>いくつかの修正方法は以下の通りです。
+</p>
+<h3><a name="String_assignment"></a><span class="mw-headline">文字列の代入</span></h3>
+<p>文字列変数へ値を代入する場合、変数名と'$'の間にスペースは必要ありません。
+</p><p>過去の方法	
+</p>
+<pre class="lt" style="font-family:monospace;">str <span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Hello&quot;</span>; <span style="color: #008000;">// 現在は動作しません</span></pre>
+<p>現在の方法	
+</p>
+<pre class="lt" style="font-family:monospace;">str<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Hello&quot;</span>;</pre>
+<h3><a name="String_Registers"></a><span class="mw-headline">文字列レジスタ</span></h3>
+<p>%D は以前は最後のセットのデータセットの名前が含まれていました。現在は、コマンドウィンドウやスクリプトウィンドウでコマンドを実行する場合には、現在の作業ディレクトリが含まれています。
+</p>
+<h3><a name="Column_Justify"></a><span class="mw-headline">列の両端揃え</span></h3>
+<p>以前は&quot;wks.col#.justify&quot;プロパティで列の左/中央/右揃えを操作しました。
+</p><p>新バージョンでは以下のように操作します。
+</p>
+<pre class="lt" style="font-family:monospace;">DoMenu <span style="color: #0000dd;">35152</span>; <span style="color: #008000;">// 左</span>
+DoMenu <span style="color: #0000dd;">35153</span>; <span style="color: #008000;">// 中央</span>
+DoMenu <span style="color: #0000dd;">35154</span>; <span style="color: #008000;">// 右</span></pre>
+<p><br />
+</p>
+
+
+
+
+    

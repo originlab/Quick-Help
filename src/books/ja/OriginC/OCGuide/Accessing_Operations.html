@@ -1,0 +1,69 @@
+﻿<h1 class="firstheading">操作にアクセスする</h1><p><br />
+</p>
+<h2><a name="List_All_OperationsOperation.2C_List_AllProject.2C_List_All_Operations"></a><span class="mw-headline">すべての操作のリスト<span class="OIndex" style="display:none">Operation, List All</span><span class="OIndex" style="display:none">Project, List All Operations</span></span></h2>
+<p>列の統計や非線形曲線フィットなど、多くのダイアログにある再計算分析ツールは、Operationクラスに基づいています。操作全体が完了したら、結果シートまたは結果グラフに錠前アイコンが現れます。すべての操作を<b><a href="../../OriginC/OriginC/Project-Operations.html" title="OriginC:Project-Operations"> Project::Operations</a></b>を使って、一覧表示することができます。次のコードは、すべての操作を取得し、操作の名前を印刷するのに使うことができます。
+</p>
+<pre class="oc" style="font-family:monospace;">OperationManager opManager;
+opManager <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Operations</span>;
+
+<span style="color: #0000ff;">int</span> count <span style="color: #000080;">=</span> opManager.<span style="color: #000000;">GetCount</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> index<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; index <span style="color: #000080;">&lt;</span> count; index<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>		
+	OperationBase<span style="color: #000040;">&amp;</span> op <span style="color: #000080;">=</span> opManager.<span style="color: #000000;">GetOperation</span><span style="color: #000000;">(</span>index<span style="color: #000000;">)</span>;
+	string strName <span style="color: #000080;">=</span> op.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	out_str<span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Check_Worksheet_if_HierarchyWorksheet.2C_Check_If_Hierarchy"></a><span class="mw-headline">ワークシートが階層であるかチェック<span class="OIndex" style="display:none">Worksheet, Check If Hierarchy</span></span></h2>
+<p>ワークシートが結果テーブルのシートであるかどうかをチェックする場合、次のコードのようにレイヤシステムパラメータを使ってチェックすることができます。
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">bool</span> bHierarchySheet <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>wks.<span style="color: #000000;">GetSystemParam</span><span style="color: #000000;">(</span>GLI_PCD_BITS<span style="color: #000000;">)</span> <span style="color: #000040;">&amp;</span> WP_SHEET_HIERARCHY<span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> bHierarchySheet <span style="color: #000000;">)</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;This is a report table sheet&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">else</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;This is not a report table sheet&quot;</span><span style="color: #000000;">)</span>;</pre>
+<h2><a name="Accessing_Report_Sheet"></a><span class="mw-headline">レポートシートにアクセスする</span></h2>
+<p>次のコードは、レポートシートからレポートツリーを取得し、レポートツリーから得られる結果を文字フォーマットにリンクしたセルに変換し、新しいワークシートに配置する方法を示しています。
+</p><p>これはレポートシートからレポートツリーを取得する方法です。このコードを実行するには、レポートシートをアクティブにする必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+Tree trResult;
+wks.<span style="color: #000000;">GetReportTree</span><span style="color: #000000;">(</span>trResult<span style="color: #000000;">)</span>;</pre>
+<p>次のコードは、レポートツリーから必要な結果を取得し、それらを文字フォーマットにリンクしたセルに変換し、新しく作成したワークシートに配置する方法を示しています。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// サマリー表に新しいシートを追加</span>
+WorksheetPage wksPage <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span> index <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+Worksheet wksSummary <span style="color: #000080;">=</span> wksPage.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span>index<span style="color: #000000;">)</span>;	
+
+string strCellPrefix;
+strCellPrefix.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;cell://%s!&quot;</span>, wks.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+	
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsLabels, vsValues;
+<span style="color: #008000;">// パラメータ</span>
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Intercept.row_label2&quot;</span><span style="color: #000000;">)</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Intercept.Value&quot;</span><span style="color: #000000;">)</span>;
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Slope.row_label2&quot;</span><span style="color: #000000;">)</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Parameters.Slope.Value&quot;</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 統計</span>
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.DOF.row_label&quot;</span><span style="color: #000000;">)</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.C1.DOF&quot;</span><span style="color: #000000;">)</span>;
+vsLabels.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.SSR.row_label&quot;</span><span style="color: #000000;">)</span>;
+vsValues.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strCellPrefix <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;RegStats.C1.SSR&quot;</span><span style="color: #000000;">)</span>;
+	
+<span style="color: #008000;">// 列に配置</span>
+Column colLabel<span style="color: #000000;">(</span>wksSummary, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+Column colValue<span style="color: #000000;">(</span>wksSummary, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;	
+colLabel.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">(</span>vsLabels<span style="color: #000000;">)</span>;
+colValue.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">(</span>vsValues<span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

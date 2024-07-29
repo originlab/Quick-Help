@@ -1,0 +1,182 @@
+﻿<h1 class="firstheading">ocmath_smooth</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>smoothing. have 3 methods: median filter, Savitzky-Golay smoothing and adjacent averaging smoothing.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_smooth<span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSmooth, <span style="color: #0000ff;">int</span> nLeftpts, <span style="color: #0000ff;">int</span> nMethod <span style="color: #000080;">=</span> SMOOTH_SG, <span style="color: #0000ff;">int</span> nBoundary <span style="color: #000080;">=</span> EDGEPAD_NONE, <span style="color: #0000ff;">int</span> nRightpts <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nPolydeg <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, <span style="color: #0000ff;">int</span> nDervOrder <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">double</span> dPercent <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span>, <span style="color: #0000ff;">bool</span> bWeight <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">bool</span> bAveraging <span style="color: #000080;">=</span> <span style="color: #0000ff;">false</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>nSize</dt>
+
+    <dd>[input] vector size of both pY and pSmooth</dd>
+
+    <dt>pY</dt>
+
+    <dd>[input] pointer to Y vector data.</dd>
+
+    <dt>pSmooth</dt>
+
+    <dd>[output] pointer to smoothed data, or derivatives, depending on nDervOrder(only for Savitzky-Golay smoothing).</dd>
+
+    <dt>nLeftpts</dt>
+
+    <dd>[input] if do Savitzky-Golay smoothing,number of data points to the left to be used in filter convolution,</dd>
+
+    <dd>if do median filter, Number of surrounding points to left and right. Thus the number of points considered in each segment is (2*nPts + 1).</dd>
+
+    <dd>if do adjacent averaging smoothing, is the window's size.</dd>
+
+    <dt>nMethod</dt>
+
+    <dd>[input] smoothing method.</dd>
+
+    <dd>SMOOTH_ADJAVE adjacent averaging smoothing</dd>
+
+    <dd>SMOOTH_SG Savitzky-Golay smoothing</dd>
+
+    <dd>SMOOTH_MEDIAN_FILTER median filter</dd>
+
+    <dt>nBoundary</dt>
+
+    <dd>[input] data are padded on both ends. Possible values are</dd>
+
+    <dd>EDGEPAD_NONE no padding</dd>
+
+    <dd>EDGEPAD_REFLECT pad reflect, end points are repeated such that on the left, [-1] = [0], [-2] = [1], [-3] = [2] and etc</dd>
+
+    <dd>EDGEPAD_REPEAT pad with [0] values the left and with [nSize-1] on the right</dd>
+
+    <dd>EDGEPAD_EXTRAPOLATE linear extrapolation using nLeft points on the left and nRight points on the right</dd>
+
+    <dd>EDGEPAD_PERIODIC pad periodic, [-1] = [nSize -1], [-2] = [nSize - 2]</dd>
+
+    <dt>nRightpts</dt>
+
+    <dd>[input] for Savitzky-Golay smoothing. number of data points to the right to be used in filter convolution, default (-1) will assume nLeft.</dd>
+
+    <dd>Total number of points used in the polynomial fits are (nLeft + nRight + 1) and it must be odd, namely nLeft + nRight must be even.</dd>
+
+    <dt>nPolydeg</dt>
+
+    <dd>[input] for Savitzky-Golay smoothing.The polynomial order. Higher order will preserve sharper features. nPolyDeg must be less then (nLeft + nRight + 1).</dd>
+
+    <dt>nDervOrder</dt>
+
+    <dd>[input] for Savitzky-Golay smoothing. order of derivative desired (0 = smoothing). To generate a fourth derivative, a minimum quartic (order 4) smoothing must be used.</dd>
+
+    <dd>For a third derivative, a minimum cubic (order 3) smoothing is needed. Similarly, a second derivative requires a minimum quadratic (order 2) smoothing.</dd>
+
+    <dt>dPercent</dt>
+
+    <dd>[input] for median filter.The percent for computing median.</dd>
+
+    <dt>bWeight</dt>
+
+    <dd>[input] for adjacent averaging smoothing. weight smooth or not. default is not(FALSE)</dd>
+
+    <dt>bAveraging</dt>
+
+    <dd>[input] for median filter.If true, the function will average the most nearest neighbors if there is no match to the given percent.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>OE_NOERROR for success</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//Assume in the current graph, curve's XY data is in the first data plot. This piece</span>
+<span style="color: #008000;">//of code get the XY data of the curve from the first data plot and smooth on it. </span>
+<span style="color: #008000;">//The result is output in a new worksheet and the smoothing curve will plot in the </span>
+<span style="color: #008000;">//original data plot with color red.</span>
+<span style="color: #0000ff;">void</span> ocmath_smooth_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Active layer is not a graph."</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">//get XY data from the first dataplot</span>
+    DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;                
+    DataRange dr;
+    vector vx, vy;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">(</span>dr<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        DWORD dwPlotID;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vy, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"get data failed GetData"</span><span style="color: #000000;">)</span>;
+            <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+    vector vSmooth;
+    vSmooth.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">//do Savitzky-Golay smoothing, Left=Right=7, quadratic</span>
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_smooth<span style="color: #000000;">(</span>vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vy, vSmooth, <span style="color: #0000dd;">3</span>,SMOOTH_SG, EDGEPAD_NONE, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">//new a worksheet to put the result</span>
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Smooth"</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">SetColDesignations</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"XY"</span><span style="color: #000000;">)</span>;
+    
+    DataRange drOut;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Y"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSmooth, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">//plot the curve after smoothing</span>
+    <span style="color: #0000ff;">int</span> nPlot <span style="color: #000080;">=</span> gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">(</span>drOut, IDM_PLOT_LINE<span style="color: #000000;">)</span>;
+    dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>nPlot<span style="color: #000000;">)</span>;
+    dp.<span style="color: #000000;">SetColor</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

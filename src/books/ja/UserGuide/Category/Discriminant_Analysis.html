@@ -1,0 +1,166 @@
+﻿<h1 class="firstheading">判別分析</h1>
+<p class="urlname" style="display: none;">Discriminant-Analysis</p>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Goals"><span class="tocnumber">1</span> <span class="toctext">目的</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Assumptions"><span class="tocnumber">2</span> <span class="toctext">仮定</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Processing_Procedure"><span class="tocnumber">3</span> <span class="toctext">手順の流れ</span></a>
+<ol>
+<li class="toclevel-2 tocsection-4"><a href="#Preparing_Analysis_Data"><span class="tocnumber">3.1</span> <span class="toctext">分析データの準備</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Verifying_Assumptions"><span class="tocnumber">3.2</span> <span class="toctext">仮定の検証</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Selecting_Discriminant_Methods"><span class="tocnumber">3.3</span> <span class="toctext">判別手法を選ぶ</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Interpreting_and_Verifying_the_Results"><span class="tocnumber">3.4</span> <span class="toctext">結果の確認と解釈</span></a></li>
+</ol>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Performing_Discriminant_Analysis"><span class="tocnumber">4</span> <span class="toctext">判別分析を実行する</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<p><br />
+判別分析は明確な違いがある観測値を識別し、新たな観測値を以前組み分けしたグループに配置するために使用されます。この方法は生物学の種の分類や、医学的な腫瘍の分類、顔認識のテクノロジー、またクレジットカードや保険業界でリスクを割り出すのに使用されます。</p>
+<a name="Goals" id="Goals"></a>
+<h2><span class="mw-headline">目的</span></h2>
+<p>判別分析には2つの大きな目的があります。</p>
+<ul>
+<li><b style="font-weight: bold;">識別</b>
+<dl>
+<dd>現在わかっている集団で観測データの分類子を組み立て、識別できるようにします。</dd>
+</dl>
+</li>
+</ul>
+<ul>
+<li><b style="font-weight: bold;">分類</b>
+<dl>
+<dd>ラベル付されていない観測データをラベル付されている観測グループに作成した分類子を使って振り分ます。この時、重要な点は新たな観測データをきちんと分類できる分類子の作成にあります。</dd>
+</dl>
+</li>
+</ul>
+<a name="Assumptions" id="Assumptions"></a>
+<h2><span class="mw-headline">仮定</span></h2>
+<p>判別モデルには次の仮定があります。</p>
+<ul>
+<li>多変量正規性
+<dl>
+<dd>データの値は正規分布から来たものです。<a href="../../UserGuide/Category/Normality_Test.html" title="カテゴリー：正規性検定">正規性検定</a> を使い、これを確認できます。しかし、通常正規の仮定を置くことは”致命的”ではありません。結果の優位性検定の信頼性はまだあるかもしれません<sup>[2]</sup>。</dd>
+</dl>
+</li>
+</ul>
+<ul>
+<li>グループ内分散―共分散の均一性
+<dl>
+<dd>各グループ内の共分散行列は均一です。<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="ユーザガイド：判別分析の結果を解釈するには">共分散行列における相当性の検定</a>を使用して確認できます。もし迷ったら分析を2次式方法でやり直すか、観測値を追加するまたは1つや2つのクループを取り除いてやり直してみてください。</dd>
+</dl>
+</li>
+</ul>
+<ul>
+<li>変数の多重共線性の低さ
+<dl>
+<dd>2個以上の変数がある中で多重共線性が高い場合、判別関数の係数はグループメンバーシップの予測を高い信頼性で行うことはできません。多重共線性を確認するには <a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Pooled_Within-group_Covariance.2FCorrelation_Matrix" title="ユーザガイド:判別分析の結果を解釈するには">プールされた郡内の相関行列</a>を使うことができます。相関係数が0.8より大きかった場合、いくつかの変数を取り除くか主成分分析を先に行ってください。</dd>
+</dl>
+</li>
+</ul>
+<a name="Processing_Procedure" id="Processing_Procedure"></a>
+<h2><span class="mw-headline">手順の流れ</span></h2>
+<a name="Preparing_Analysis_Data" id="Preparing_Analysis_Data"></a>
+<h3><span class="mw-headline">分析データの準備</span></h3>
+<ul>
+<li>十分なサンプルサイズ
+<dl>
+<dd>ルールとして、最も小さなサンプルサイズは変数の数より大きくしてください。通常、最低20ずつの値を各変数ごとに取るのがベストです。この小さいサンプルサイズはうまくいくかもしれませんがあまりお勧めされません。各変数に付き、最低5つの観測値が必要です。</dd>
+</dl>
+</li>
+<li>独立した乱数サンプル(外れ値なし)
+<dl>
+<dd>判別分析は各観測値がお互いに独立していることが必要になってきます。つまり、繰り返しの観測やマッチペアデータ(お互いに関連しあうデータ)がない状態です。さらに、判別分析は外れ値を含んだとき、結果が大きく変わってきてしまいます。外れ値を観測するには<a href="../../UserGuide/UserGuide/Creating_Box_Charts.html" title="ユーザガイド：ボックスチャートの作成">ボックスチャート</a> を使用するか<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Canonical_Score_Plot" title="ユーザガイド:判別分析の結果を解釈するには">正準判別関数のスコアプロット</a>で外れ値の疑いがあるデータを確認します。</dd>
+</dl>
+</li>
+</ul>
+<ul>
+<li>正しい変数を設定する
+<dl>
+<dd>抑制変数は取り除いてください。これは<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Univariate_ANOVA" title="ユーザガイド:判別分析の結果を解釈するには">一変量 ANOVA</a>表を見ることで確認できます。</dd>
+</dl>
+</li>
+</ul>
+<ul>
+<li>サンプルを分けます。
+<dl>
+<dd><a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Classification_Summary_for_Training_Data" title="ユーザガイド:判別分析の結果を解釈するには" style="color: #0000ff; text-decoration: underline;">トレーニングデータの分類サマリー</a>は同じデータの観測値を判別関数で判断したものです。”エラー率”は通常テストデータで判断した時の方が大きくなりますが、判別関数判断には使われていません。ですので、今回は観測データのセットをさらに小さく分け、初めの1つを判別モデルの判断に使い(トレーニングセット)、もう1つのセットをその結果の信頼性の確認のために使います(テストセット)。しかし、もしユーザがサンプルを分けたい場合、十分な大きさが必要です。サンプルサイズは100以上の大きさである必要があります<sup>[3],[4]</sup>。</dd>
+</dl>
+</li>
+</ul>
+<a name="Verifying_Assumptions" id="Verifying_Assumptions"></a>
+<h3><span class="mw-headline">仮定の検証</span></h3>
+<p><a href="../../UserGuide/Category/Normality_Test.html" title="カテゴリー：正規性検定">正規性検定</a>、<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="ユーザガイド:判別分析の結果を解釈するには">共分散行列における相当性の検定</a>と<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Pooled_Within-group_Covariance.2FCorrelation_Matrix" title="ユーザガイド:判別分析の結果を解釈するには">プールされた郡内の相関行列</a>を使用して仮定を検証できます。詳しくは<a href="#Assumptions">仮定</a>をご覧ください。</p>
+<a name="Selecting_Discriminant_Methods" id="Selecting_Discriminant_Methods"></a>
+<h3><span class="mw-headline">判別手法を選ぶ</span></h3>
+<ul>
+<li>線形または二次
+<dl>
+<dd>二次式判別分析(QDA)は線形判別分析(LDA)とほぼ同じですが、線形の共分散行列が等しいという違いがあります。もし<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Equality_Test_of_Covariance_Matrices" title="ユーザガイド:判別分析の結果を解釈するには">共分散行列の正規性検定</a>が棄却できない場合は、QDA を選んでください。</dd>
+<dd>しかし、二次式 は線形より柔軟に対応できますが、推定するパラメータの量が増えます。二次式では各グループごとに別々の共分散行列が必要になるので、たくさんのグループはあるが各観測値が少ない場合おすすめされません。</dd>
+</dl>
+</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<table class="note">
+<tr>
+<td><b style="font-weight: bold;">Note:</b> 線形判別関数(LDA)は<b>判別関数</b>内の<b>線形</b>で、二次式判別関数(QDA)は<b>判別関数</b>内の<b>二次式</b>になります。</td>
+</tr>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>特定できる事前確率
+<dl>
+<dd>判別分析はグループメンバーシップの事前確率は特定可能であると仮定しています。もしグループ集団数が等しくない場合、事前確率は変わってくるかもしれません。各グループの記述統計表からNが各グループで異なった場合、<b>事前確率</b>で<b>グループサイズに比例</b>を選んでください。</dd>
+</dl>
+</li>
+</ul>
+<a name="Interpreting_and_Verifying_the_Results" id="Interpreting_and_Verifying_the_Results"></a>
+<h3><span class="mw-headline">結果の確認と解釈</span></h3>
+<p>判別関数を編集する情報、判別関数が良いかどうか判断する、または観測値を分類することについては<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html" title="ユーザガイド:判別分析の結果を解釈するには">結果の解釈</a>ページをご覧ください。</p>
+<p>結果の確認には<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Classification_Summary_for_Test_Data" title="ユーザガイド:判別分析の結果を解釈するには">テストデータ</a>の結果、または<a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html#Cross-validation_Summary_for_Training_Data" title="ユーザガイド:判別分析の結果を解釈するには">トレーニングデータの交差確認</a>から判断できます。しかし上記の方法はサンプルサイズにより結果が変動しやすいので注意してください。サンプルサイズが小さい場合、結果の信頼性が損なわれる可能性があります。</p>
+<table class="note">
+<tr>
+<td><b style="font-weight: bold;">Note:</b> クロス検証は「ひとつを取り除くクロス検証」とも呼ばれています。N個の観測値がある場合、判別分析はN回実行されます。各回で1つのポイント以外のデータに付いて検証され、そのポイントについての推定がなされるからです。</td>
+</tr>
+</table>
+<a name="Performing_Discriminant_Analysis" id="Performing_Discriminant_Analysis"></a>
+<h2><span class="mw-headline">判別分析を実行する</span></h2>
+<ul>
+<li>メニューから<b>統計：多変量解析：判別分析</b>と選択します。
+<dl>
+<dd>または</dd>
+</dl>
+</li>
+<li>スクリプトウィンドウで<b>discrim -d</b>と打ち込んでください。</li>
+</ul>
+<p>&#160;</p>
+<table class="topiclist">
+<tr>
+<td>
+<p><i style="font-style: italic;"><b style="font-weight: bold;">このセクションで説明している項目</b></i></p>
+<ul>
+<li><a href="../../UserGuide/UserGuide/The_Discriminant_Analysis_Dialog_Box.html" title="ユーザガイド：判別分析ダイアログボックス">判別分析ダイアログボックス</a></li>
+<li><a href="../../UserGuide/UserGuide/Interpreting_Results_of_Discriminant_Analysis.html" title="ユーザガイド:判別分析の結果を解釈するには">結果の解釈</a></li>
+<li><a href="../../UserGuide/UserGuide/Algorithm_(Discriminant_Analysis).html" title="ユーザガイド：アルゴリズム(判別分析)">アルゴリズム</a></li>
+<li><a class="external text" href="../../Tutorial/Tutorial/Discriminant_Analysis.html">チュートリアル</a></li>
+<li><a href="../../UserGuide/UserGuide/Reference(Discriminant_Analysis).html" title="ユーザガイド：参考(判別分析)">参考文献</a></li>
+</ul>
+</td>
+</tr>
+</table>
+
+

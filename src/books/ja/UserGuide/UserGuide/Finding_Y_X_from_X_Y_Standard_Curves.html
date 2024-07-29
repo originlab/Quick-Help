@@ -1,0 +1,52 @@
+﻿<h1 class="firstheading">X/YからY/Xを検索 - 標準曲線</h1>
+<p class="urlname" style="display: none;">FitRef-FindVal-StandardCurve</p>
+<div style="text-align: left; direction: ltr; margin-left: 1em;">
+<p><a class="image"><img alt="Video Image.png" src="../images/Finding_Y_X_from_X_Y_Standard_Curves/Video_Image.png" width="33" height="33" border="0" /></a> 関連する動画は<a class="external text" target="_blank" href="http://www.originlab.com/index.aspx?go=Products/Origin/DataAnalysis/CurveFitting/NonlinearFitting&amp;ss=chm&amp;pid=1767">こちら</a></p>
+</div>
+<p>X/Yの検索テーブルは、フィットを実行した後のフィット曲線から指定した独立変数の値から従属変数の値または指定した従属変数の値から独立変数の値を取得できます。</p>
+<p>フィットを行ったら、<i>*FindXfromY*</i> (または、FindYfromX)というワークシートが作成されます。Y (またはX) 値を、新規シートの最初の列に入力すると、X (またはY)値が自動的に計算されます。</p>
+<p>フィットツールで出力オプションを変更します。例えば、線形フィットダイアログでは、X/Y検索の項目にチェックボックスがあり、X/Y検索と95%信頼区間を計算するかを指定できます。非線曲線フィットツール(NLFit)では、ドロップダウンで、追加のX/Yの列を指定できます。複数の解がある場合、値は追加の列に追加されます。例えば、モデルで与えられたy値に対して、2つのx値がある場合を考えます。この場合、<b>YからXを検索</b>の項目でX列の数を2と指定します。</p>
+<p>一般的に、<b>XからYを検索</b>は、<b>YからXを検索</b>よりも高速です。XからYを検索では、OriginはY値を計算するためにフィットモデルに直接フィットパラメータ値を使います。しかし、YからXを検索の場合、Originは、X~Y方程式を自動的に微分できません。そのため、反復計算による近似値を計算します。アルゴリズムは下記のようになります。</p>
+<p>Originは最初に均一な線形曲線を作成します。与えられたY値に対して、それが含まれる範囲を見つけます。例えば、与えられたポイントのY値は、範囲 [yn, yn+1]に入ります。すると、X値は範囲 [xn, xn+1]に入ることが分かります。そして、X = (xn + xn+1) / 2に対応する新しいY値y’が計算されます。計算された y’を使って、範囲 [yn, yn+1] を2つの範囲 [yn, y’] と [y’, yn+1]に分けます。y と y’ が比較され、yが入る範囲を調べます。y と y’ の差が許容値 <img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-a432b1b093a6525296d56817d1d726b8.png" title="1e^{-8}" alt="1e^{-8}" class="tex" border="0" /> の範囲内になるまで、このような手順が繰り返されます。</p>
+<p>この反復計算法は、YからXを検索で使用されます。Y値に対するX値は元のデータ範囲内でのみ検索できます。</p>
+<h2><a name="Algorithm_for_Calculating_95.25_Confidence_Interval" id="Algorithm_for_Calculating_95.25_Confidence_Interval"></a><span class="mw-headline">95%信頼区間を算出するアルゴリズム</span></h2>
+<p>YからXを検索したり、XからYを検索する際に、95%信頼区間を算出するかどうかを選択することができます。</p>
+<ul>
+<li><b>線形フィット</b></li>
+</ul>
+<dl>
+<dd>1.YからXを検索</dd>
+<dd>現在のOriginでは、非複製データの95%信頼区間の計算のみをサポートしています。指定したY値<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />の場合、X値は<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-3e0d691f3a530e6c7e079636f20c111b.png" title="x_0" alt="x_0" class="tex" border="0" />になります。</dd>
+<dd><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" />が、計測範囲内にある場合、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-3e0d691f3a530e6c7e079636f20c111b.png" title="x_0" alt="x_0" class="tex" border="0" />の標準偏差<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-72760aa5f0e2e765475d8183dd4256a3.png" title="s_{x_0}" alt="s_{x_0}" class="tex" border="0" />は、次のように与えられます。
+<dl>
+<dd><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-c8824e6a82e89589a2b5f635fadc5b26.png" title="s_{x_0} = \frac{s_\varepsilon}{b} \sqrt{1+\frac{1}{n}+\frac{\left(y_0-\bar{y}\right)^2}{b^2\sum_{i=1}^n \left(x_i-\bar{x}\right)^2}}" alt="s_{x_0} = \frac{s_\varepsilon}{b} \sqrt{1+\frac{1}{n}+\frac{\left(y_0-\bar{y}\right)^2}{b^2\sum_{i=1}^n \left(x_i-\bar{x}\right)^2}}" class="tex" border="0" /></dd>
+</dl>
+</dd>
+<dd>ここで、 <img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-92eb5ffee6ae2fec3ad71c777531578f.png" title="b" alt="b" class="tex" border="0" /> はフィットした傾き、 <img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-7b8b965ad4bca0e41ab51de7b31363a1.png" title="n" alt="n" class="tex" border="0" /><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-7db27a440000c9858319d79169f3d2e1.png" title="s_\varepsilon^2" alt="s_\varepsilon^2" class="tex" border="0" />はデータポイント数、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-7db27a440000c9858319d79169f3d2e1.png" title="s_\varepsilon^2" alt="s_\varepsilon^2" class="tex" border="0" />は<a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#The_Parameter_Standard_Errors" title="ユーザガイド:線形回帰の結果">標本分散</a>、 <img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-6fbdf291cda891b99cf211417ad1df18.png" title="\bar{x}" alt="\bar{x}" class="tex" border="0" />と<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-bacfc7141fdfd692244b6c50891d1f7b.png" title="\bar{y}" alt="\bar{y}" class="tex" border="0" />はそれぞれXとYの平均値を示します。</dd>
+<dd><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-ffe0f1c55b374ed8643060926316c1e6.png" title="y_0" alt="y_0" class="tex" border="0" /> が、計測範囲外にある場合、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-3e0d691f3a530e6c7e079636f20c111b.png" title="x_0" alt="x_0" class="tex" border="0" />の標準偏差<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-72760aa5f0e2e765475d8183dd4256a3.png" title="s_{x_0}" alt="s_{x_0}" class="tex" border="0" />は、次のように与えられます。
+<dl>
+<dd><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-70f613275f81e3a9282cfa914b849a47.png" title="s_{x_0} = \frac{s_\varepsilon}{b} \sqrt{\frac{1}{n}+\frac{\bar{y}^2}{b^2\sum_{i=1}^n \left(x_i-\bar{x}\right)^2}}" alt="s_{x_0} = \frac{s_\varepsilon}{b} \sqrt{\frac{1}{n}+\frac{\bar{y}^2}{b^2\sum_{i=1}^n \left(x_i-\bar{x}\right)^2}}" class="tex" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>補間または補外された、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-0cdaba532a6f8ad706e6b8e5e97f0d36.png" title="(1-\alpha )\times 100\%" alt="(1-\alpha )\times 100\%" class="tex" border="0" />の信頼区間を持つX値は以下のように計算されます。
+<dl>
+<dd><img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-8a707c459e02cab0f9b9c0d13e2f608d.png" title="[x_0 - t_{(\frac{\alpha}{2},n-2)}s_{x_0}, x_0 + t_{(\frac{\alpha}{2},n-2)}s_{x_0}]" alt="[x_0 - t_{(\frac{\alpha}{2},n-2)}s_{x_0}, x_0 + t_{(\frac{\alpha}{2},n-2)}s_{x_0}]" class="tex" border="0" /></dd>
+</dl>
+</dd>
+<dd>ここで、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-51ca378c5b0834dbd9f0f02bdc8b58de.png" title="t_{(\frac{\alpha}{2},n-2)}" alt="t_{(\frac{\alpha}{2},n-2)}" class="tex" border="0" />は、<img src="../images/Finding_Y_X_from_X_Y_Standard_Curves/math-ac3208eb7e666b807007d129407d0009.png" title="\alpha /2" alt="\alpha /2" class="tex" border="0" />(片側検定)で、n-2の自由度を持つ <b>t</b>値の棄却値です。</dd>
+<dd><b>Note</b>:重み付けを設定した場合や、固定パラメータがある場合は、YからXを検索する信頼区間は計算されません。<b>95%信頼区間を算出する</b>というボックスにチェックが付いている場合、結果は欠損値となります。</dd>
+<dd>2.XからYを検索</dd>
+<dd>Yの信頼区間を計算するのに、<a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#Confidence_and_Prediction_Band" title="ユーザガイド:線形回帰の結果">信頼帯</a>が使用されます。</dd>
+</dl>
+<p>&#160;</p>
+<ul>
+<li><b>多項式フィットと非線形曲線フィット</b></li>
+</ul>
+<dl>
+<dd>1.YからXを検索</dd>
+<dd><a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#Confidence_and_Prediction_Band" title="ユーザガイド:線形回帰の結果">信頼帯</a>は求めるYの値で補間され、Xの信頼区間を算出します。もしXまたはYの入力データ範囲外の場合、信頼区間は計算されません。</dd>
+<dd>2.XからYを検索</dd>
+<dd>Yの信頼区間を計算するのに、<a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#Confidence_and_Prediction_Band" title="ユーザガイド:線形回帰の結果">信頼帯</a>が使用されます。</dd>
+</dl>

@@ -1,0 +1,160 @@
+﻿<h1 class="firstheading">ocmath_find_baseline_part_by_small_curvature</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Get baseline points of the input curve by second derivative method or small curvature</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_find_baseline_part_by_small_curvature<span style="color: #000000;">(</span> UINT nSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> px, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> py, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pBasePtsX, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pBasePtsY, <span style="color: #0000ff;">double</span> dThresh, <span style="color: #0000ff;">double</span> dTrimThresh <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.8</span>, <span style="color: #0000ff;">int</span> nLeftRightPts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>nSize</dt>
+
+    <dd>[input] size of data px,py;</dd>
+
+    <dt>px</dt>
+
+    <dd>[input] The x data of the curve;</dd>
+
+    <dt>py</dt>
+
+    <dd>[input] The y data of the curve;</dd>
+
+    <dt>pBasePtsX</dt>
+
+    <dd>[output] The x data of baseline of the curve</dd>
+
+    <dt>pBasePtsY</dt>
+
+    <dd>[output] The y data of baseline of the curve</dd>
+
+    <dt>dThresh</dt>
+
+    <dd>[input] The threshold of curvature (or 2nd derivative) restricted in (0,1), suggested value 0.005 but can be increased to return more baseline points, the most likely baselines points are sorted to put in the beginning of the vector (while there may exist spurious baseline points in the end of the vector)</dd>
+
+    <dt>dTrimThresh</dt>
+
+    <dd>[input] The trim threshold, restricted in (0,1), suggested value 0.8, (near 1 trim less points, while near 0 trim more points). This is used to trim out spurious baseline points in the end of the vector.</dd>
+
+    <dt>nLeftRightPts</dt>
+
+    <dd>[input] Number of points to one side of symmetric window(left or right) of given point.</dd>
+
+    <dd>Zero leaves the data unchanged.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>Return number of baseline points if succeed, otherwise, non-zero error code is returned.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//Assume in the current worksheet, the first column is X data and second column is</span>
+<span style="color: #008000;">//Y data. This piece of code get the XY data from the above two clomns and find the </span>
+<span style="color: #008000;">//baseline. Another two new columns will be added into current worksheet to show the </span>
+<span style="color: #008000;">//result. The data plots of the original curve and the baseline curve will be given. </span>
+<span style="color: #0000ff;">void</span> ocmath_find_baseline_part_in_smooth_curve_ex1<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> dThresh<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"no active worksheet found<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>; 
+    <span style="color: #008000;">//get X&amp;Y Data of the curve</span>
+    Dataset dsSrcX<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    Dataset dsSrcY<span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> dsSrcY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    vector vx<span style="color: #000000;">(</span>nSize<span style="color: #000000;">)</span>;
+    vector vy<span style="color: #000000;">(</span>nSize<span style="color: #000000;">)</span>;
+    vx <span style="color: #000080;">=</span> dsSrcX;
+    vy <span style="color: #000080;">=</span> dsSrcY;
+ 
+    vector vxBaseLine<span style="color: #000000;">(</span>nSize<span style="color: #000000;">)</span>;
+    vector vyBaseLine<span style="color: #000000;">(</span>nSize<span style="color: #000000;">)</span>;
+ 
+    <span style="color: #0000ff;">int</span> nNumBaselinePts <span style="color: #000080;">=</span> ocmath_find_baseline_part_by_small_curvature<span style="color: #000000;">(</span><span style="color: #000000;">(</span>UINT<span style="color: #000000;">)</span>nSize,vx,vy,vxBaseLine,vyBaseLine,dThresh<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nNumBaselinePts<span style="color: #000080;">&lt;</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span><span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"error<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>; <span style="color: #0000ff;">return</span>;<span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+    <span style="color: #000000;">{</span>
+        vxBaseLine.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumBaselinePts<span style="color: #000000;">)</span>;
+        vyBaseLine.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumBaselinePts<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+ 
+    <span style="color: #008000;">//add two new columns to show the result</span>
+    <span style="color: #0000ff;">int</span> nColX <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">int</span> nColY <span style="color: #000080;">=</span> wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    Dataset dsBaseLineX<span style="color: #000000;">(</span>wks,nColX<span style="color: #000000;">)</span>;
+    Dataset dsBaseLineY<span style="color: #000000;">(</span>wks,nColY<span style="color: #000000;">)</span>;
+    dsBaseLineX <span style="color: #000080;">=</span> vxBaseLine;
+    dsBaseLineY <span style="color: #000080;">=</span> vyBaseLine;
+ 
+    XYRange xySrc, xyBaseLine;
+    xySrc.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">0</span>,<span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    xySrc.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,<span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+    xyBaseLine.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,nColX,<span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+    xyBaseLine.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks,nColY,<span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #008000;">//new a graphlayer to plot the original data and baseline</span>
+    GraphPage gp;
+    gp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gp<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"graph page creation failed<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    GraphLayer gl<span style="color: #000000;">(</span>gp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Graph layer failed<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+ 
+    gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">(</span>xySrc<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">int</span> nDataPlot<span style="color: #000080;">=</span>gl.<span style="color: #000000;">AddPlot</span><span style="color: #000000;">(</span>xyBaseLine<span style="color: #000000;">)</span>;
+    DataPlot dp<span style="color: #000080;">=</span>gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>nDataPlot<span style="color: #000000;">)</span>;
+    dp.<span style="color: #000000;">SetColor</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;    
+    gl.<span style="color: #000000;">Rescale</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

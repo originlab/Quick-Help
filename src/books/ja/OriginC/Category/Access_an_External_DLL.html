@@ -1,0 +1,58 @@
+﻿<h1 class="firstheading">サードパーティ製DLL関数にアクセスする</h1><p><span class="OIndex" style="display:none">External DLL, Access</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Declaration"><span class="tocnumber">1</span> <span class="toctext">宣言</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Loading_DLL"><span class="tocnumber">2</span> <span class="toctext">DLLをロード</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Version_Control"><span class="tocnumber">3</span> <span class="toctext">バージョン制御</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">サンプル</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Declaration"></a><span class="mw-headline">宣言</span></h2>
+<p>Origin C関数は、C、C++、C++(.Net)、C#、Fortran コンパイラで作成した外部DLL の関数<b>（Cリンケージのみ）</b>を呼び出すことができます。
+
+これを行うには、ヘッダファイルの関数のプロトタイプを提供し、DLLファイルに関数本体が含まれていることをOrigin Cに通知する必要があります。関数は、<b>myFunc.h</b>というヘッダファイルで宣言されているものとします。  次のようにこれらの関数を呼び出したい場所でOrigin Cファイルにこのファイルを<b>インクルード</b>します。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>myFunc.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">//\OriginC\System フォルダ内</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;myFunc.h&quot;</span> <span style="color: #008000;">//Origin Cコードと同じフォルダ内</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;C:<span style="color: #666666; font-weight: bold;">\m</span>yFile.h&quot;</span> <span style="color: #008000;">//特定のパス内</span></pre>
+<h2><a name="Loading_DLL"></a><span class="mw-headline">DLLをロード</span></h2>
+<p>それから、Origin Cに関数本体をリンクする場所を通知し、ヘッダーファイル <b>myFunc.h</b>内の外部DLLを呼び出す直前に次のOrigin C <b><span class="OIndex">pragma</span></b> ディレクティブを含めます。DLLファイルは<b>UserFunc.dll</b>とします。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>UserFunc<span style="color: #000000;">)</span> <span style="color: #008000;">//Origin exe フォルダ内</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>C<span style="color: #000000;">:</span>\UserFunc<span style="color: #000000;">)</span> <span style="color: #008000;">//特定パス内</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>UserFunc, header<span style="color: #000000;">)</span> <span style="color: #008000;">//hファイルと同じフォルダ内</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>UserFunc, <span style="color: #000000;">system</span><span style="color: #000000;">)</span> <span style="color: #008000;">//Windowsシステムフォルダ</span></pre>
+<p>Origin Cコンパイラは次の3つの呼び出し方法をサポートしています。<b>__cdecl</b>(デフォルト),<b> __stdcall</b>, <b>__fastcall</b>です。これらの呼び出し方法は、引数がスタックに渡される順番を決定するだけでなく、呼び出している関数または呼び出された外部関数がスタックから引数を除去します。
+</p><p>Note: ファイル名にdllという拡張子を含める必要はありません。<b>pragma</b> ディレクティブの後のすべての関数宣言は、外部または特定のDLLからであると考えられます。この前提は、2番目の<b>#pragma dll(filename)</b> ディレクティブが現れるか、ファイルの最後まで続きます。 
+</p>
+<h2><a name="Version_Control"></a><span class="mw-headline">バージョン制御</span></h2>
+<p>外部dllを正常に動作させるには、32bitのdllはOriginの32bit版で行う必要があります（64bit版も同様）。<b>#ifdef _OWIN64</b> は、現在のOriginが32/64bitどちらのバージョンであるか確認するため、どちらのバージョンのdllがロードされたか決定するために使用されます。例えば、 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#ifdef</span>	_OWIN64
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>UserFunc_64, header<span style="color: #000000;">)</span>
+<span style="color: #0000ff;">#else</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>UserFunc, header<span style="color: #000000;">)</span>
+<span style="color: #0000ff;">#endif</span>	<span style="color: #008000;">//_OWIN64</span></pre>
+<h2><a name="Examples"></a><span class="mw-headline">サンプル</span></h2>
+<p>外部DLLにアクセスする方法のサンプルは、<a href="../../OriginC/OCGuide/Accessing_SQLite_Database.html" title="OCGuide:SQLiteデータベースへのアクセス">SQLiteデータベースへのアクセス</a>です。Origin CでC DLL、Matlab、Fortran DLLからの関数の呼び出し方法を示すサンプルプロジェクトがあります。これらは、<a class="external text" href="http://blog.originlab.com/wp-content/uploads/2017/01/OriginCExamples.zip" target="_blank">このZIPファイル</a>の<i>\Programming Guide\Calling Fortran</i>, <i>\Programming Guide\Calling MATLAB DLL</i>, <i>\Programming Guide\Calling C DLL</i>サブフォルダにあります。
+</p>
+<table class="catlist">
+
+<tr>
+<td><i><b>このセクションでは以下の項目について説明します</b></i>
+<div class="CategoryTreeTag" data-ct-mode="20" data-ct-options="{&quot;mode&quot;:20,&quot;hideprefix&quot;:10,&quot;showcount&quot;:false,&quot;namespaces&quot;:false}"><li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Calling_GNU_Scientific_Library.html">GNU Scientific Libraryを呼び出す</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Access_CPlusPlus(.Net)_And_CSharp_DLL.html">C++(.Net) と C# DLL にアクセスする</a></li>
+		
+		<li> <a class="CategoryTreeLabel  CategoryTreeLabelNs114 CategoryTreeLabelPage" href="../../OriginC/OCGuide/Access_Python_via_External_DLL.html">外部DLLからPythonにアクセスする</a></li>
+		
+		</div>
+</td></tr></table>
+
+
+
+
+
+    

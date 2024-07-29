@@ -1,0 +1,273 @@
+﻿<h1 class="firstheading">C++(.Net) と C# DLL にアクセスする</h1><p><br />
+この章では、Origin CでC++(.Net) や C# から作成されたDLLにアクセスする方法を紹介しています。
+</p>
+<h2><a name="Access_C.23_Class_DLL"></a><span class="mw-headline">C# クラス DLL にアクセスする</span></h2>
+<p>Microsoft Visual Studio 2005 でC#のDLLを作成し、Origin Cでそれにアクセスする方法を紹介しています。このDLLは、プロパティと関数をクラスに提供するものです。関数Sumは、Origin CベクトルからC#関数にデータ配列を渡す方法を示しています。
+</p>
+<ol>
+<li>Microsoft Visual Studio 2005で、メニューからファイル -&gt; 新規 -&gt; プロジェクト...を選択し、新しいプロジェクトダイアログで、 次のように設定を選択してください。 
+<div><a  class="image"><img alt="Ocguide externaldll csharp1 newproject.png" src="../images/Access_CPlusPlus(.Net)_And_CSharp_DLL/Ocguide_externaldll_csharp1_newproject.png" width="578"  /></a></div></li>
+<li>次のコードをcsファイルにコピーします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Collections</span>.<span style="color: #000000;">Generic</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Text</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Runtime</span>.<span style="color: #000000;">InteropServices</span>;
+
+<span style="color: #0000ff;">namespace</span> temp
+<span style="color: #000000;">{</span>
+    <span style="color: #000000;">[</span>Guid<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;4A5BFDFA-7D41-49d1-BB57-C6816E9EDC87&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">public</span> interface INet_Temp
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> Celsius<span style="color: #000000;">{</span> get; set; <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">double</span> Fahrenheit<span style="color: #000000;">{</span> get; set; <span style="color: #000000;">}</span>
+ 
+        <span style="color: #0000ff;">double</span> GetCelsius<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">double</span> GetFahrenheit<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">double</span> Sum<span style="color: #000000;">(</span>object obj<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">namespace</span> temp
+<span style="color: #000000;">{</span>
+    <span style="color: #000000;">[</span>Guid<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;2AE913C6-795F-49cc-B8DF-FAF7FBA49538&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> NET_Temperature <span style="color: #000000;">:</span> INet_Temp
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">double</span> celsius;
+        <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">double</span> fahrenheit;
+
+        <span style="color: #0000ff;">public</span> NET_Temperature<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span> Celsius
+        <span style="color: #000000;">{</span>
+            get<span style="color: #000000;">{</span> <span style="color: #0000ff;">return</span> celsius; <span style="color: #000000;">}</span>
+            set <span style="color: #000000;">{</span> celsius <span style="color: #000080;">=</span> value; fahrenheit <span style="color: #000080;">=</span> celsius <span style="color: #000040;">+</span> <span style="color: #0000dd;">273.5</span>;  <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span> Fahrenheit
+        <span style="color: #000000;">{</span>
+            get <span style="color: #000000;">{</span> <span style="color: #0000ff;">return</span> fahrenheit; <span style="color: #000000;">}</span>
+            set <span style="color: #000000;">{</span> fahrenheit <span style="color: #000080;">=</span> value; celsius <span style="color: #000080;">=</span> fahrenheit <span style="color: #000040;">-</span> <span style="color: #0000dd;">273.5</span>; <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span> GetCelsius<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">return</span> celsius;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span> GetFahrenheit<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">return</span> fahrenheit;
+        <span style="color: #000000;">}</span>      
+
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span> Sum<span style="color: #000000;">(</span>object obj<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">double</span><span style="color: #000000;">[</span><span style="color: #000000;">]</span> arr <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">[</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>obj;
+            <span style="color: #0000ff;">double</span> sum <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+            <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; nn <span style="color: #000080;">&lt;</span> arr.<span style="color: #000000;">Length</span>; nn<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                sum <span style="color: #000040;">+</span><span style="color: #000080;">=</span> arr<span style="color: #000000;">[</span>nn<span style="color: #000000;">]</span>;
+            <span style="color: #000000;">}</span>
+            <span style="color: #0000ff;">return</span> sum;
+        <span style="color: #000000;">}</span> 
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre></li>
+<li>メニューから、ツール -&gt; GUIDの作成 を選択して、開いたダイアログで Registry Format を選択して New GUID をクリックし、Copyボタンをクリックします。このGUIDを貼り付けて、上述のコードの[Guid(&quot;...&quot;)] 内のものを削除します。コード内の2番目のGUIDを置き換えるためには、このアクションを再度行います。  </li>
+<li>プロジェクト上で右クリックして、プロパティを選択し、プロパティページを開きます。そして、アセンブリをCOM参照可能にするのチェックボックスにチェックを付けます。32 bit版の場合、ビルドタブを開き、COM相互運用機能の登録のチェックボックスをチェックします。64 bit版の場合、ビルドイベントタブを開き、次のコマンドラインをコピーしてビルド前に実行するコマンドラインテキストボックスに貼り付けます。F6キーを押してソリューションをビルドします。 </li>
+<pre class="oc" style="font-family:monospace;"><span style="color: #ff00ff;">&quot;%Windir%<span style="color: #666666; font-weight: bold;">\M</span>icrosoft.NET<span style="color: #666666; font-weight: bold;">\F</span>ramework64<span style="color: #666666; font-weight: bold;">\v</span>4.0.30319<span style="color: #666666; font-weight: bold;">\r</span>egasm&quot;</span> <span style="color: #ff00ff;">&quot;$(TargetPath)&quot;</span> <span style="color: #000040;">/</span>CodeBase</pre>
+<li>Originを開き、コードビルダを開いて、新しいCファイルに次のOrigin Cコードをコピーします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> access_DLL<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	Object obj <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;temp.NET_Temperature&quot;</span><span style="color: #000000;">)</span>;
+	
+	obj.<span style="color: #000000;">Celsius</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// プロパティにアクセス</span>
+	out_double<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;&quot;</span>, obj.<span style="color: #000000;">GetFahrenheit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 関数にアクセス</span>
+	
+	obj.<span style="color: #000000;">Fahrenheit</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">300</span>;
+	out_double<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;&quot;</span>, obj.<span style="color: #000000;">GetCelsius</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+	vector vec;
+	vec.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">10</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+	_VARIANT var <span style="color: #000080;">=</span> vec.<span style="color: #000000;">GetAs1DArray</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	out_double<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;&quot;</span>, obj.<span style="color: #000000;">Sum</span><span style="color: #000000;">(</span>var<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre></li>
+</ol>
+<h2><a name="Access_C.23_and_C.2B.2B_Resource_DLL"></a><span class="mw-headline">C# と C++ リソースDLLにアクセスする</span></h2>
+<p>C#によるActiveXコントロールを作成し、Origin C内のダイアログで使用する方法を示しています。
+</p><p>ステップ1～7では、C# ActiveX コントロールを Microsoft Visual Studio 2005 で作成する方法を示しています。
+</p>
+<ol>
+<li>Microsoft Visual Studio 2005を起動し、メニューからファイル -&gt; 新規 -&gt; プロジェクト... を選択して、新しいプロジェクトダイアログを開きます。そして、次のように設定してOKボタンをクリックします。 
+<div><a  class="image"><img alt="Ocguide externaldll csharp2 newproject.png" src="../images/Access_CPlusPlus(.Net)_And_CSharp_DLL/Ocguide_externaldll_csharp2_newproject.png" width="572"  /></a></div>
+</li>
+<li>UserControl.cs ファイルに次のコードをコピーしてprotected override functionを追加し、色塗りの制御とpublic functionを追加して境界の制御をします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Collections</span>.<span style="color: #000000;">Generic</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">ComponentModel</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Drawing</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Data</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Text</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Windows</span>.<span style="color: #000000;">Forms</span>;
+<span style="color: #0000ff;">using</span> <span style="color: #000000;">System</span>.<span style="color: #000000;">Runtime</span>.<span style="color: #000000;">InteropServices</span>;
+
+<span style="color: #0000ff;">namespace</span> SampleControl
+<span style="color: #000000;">{</span>
+    <span style="color: #000000;">[</span>Guid<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;A31FE123-FD5C-41a1-9102-D25EBD5FDFAF&quot;</span><span style="color: #000000;">)</span>,
+    ComSourceInterfaces<span style="color: #000000;">(</span>typeof<span style="color: #000000;">(</span>UserEvents<span style="color: #000000;">)</span><span style="color: #000000;">)</span>,
+    ClassInterface<span style="color: #000000;">(</span>ClassInterfaceType.<span style="color: #000000;">None</span><span style="color: #000000;">)</span>,<span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">public</span> partial <span style="color: #0000ff;">class</span> UserControl1 <span style="color: #000000;">:</span> UserControl, UserControl1Interface
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">public</span> UserControl1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            InitializeComponent<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">protected</span> override <span style="color: #0000ff;">void</span> OnPaint<span style="color: #000000;">(</span>PaintEventArgs pe<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            Brush brush <span style="color: #000080;">=</span> <span style="color: #0000ff;">new</span> SolidBrush<span style="color: #000000;">(</span>Color.<span style="color: #000000;">Beige</span><span style="color: #000000;">)</span>;
+
+            pe.<span style="color: #000000;">Graphics</span>.<span style="color: #000000;">FillRectangle</span><span style="color: #000000;">(</span>brush, ClientRectangle<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> SetBorder<span style="color: #000000;">(</span><span style="color: #0000ff;">bool</span> bSet<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">this</span>.<span style="color: #000000;">BorderStyle</span> <span style="color: #000080;">=</span> bSet&nbsp;?BorderStyle.<span style="color: #000000;">FixedSingle</span> <span style="color: #000000;">:</span>
+                        BorderStyle.<span style="color: #000000;">None</span>;
+            Refresh<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+
+    <span style="color: #008000;">//設定制御のためのインターフェースを宣言</span>
+    <span style="color: #000000;">[</span>Guid<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;CCBD6133-813D-4dbb-BB91-16E3EFAE66B0&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">public</span> interface UserControl1Interface
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">void</span> SetBorder<span style="color: #000000;">(</span><span style="color: #0000ff;">bool</span> bSet<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre></li>
+<li>メニューからツール -&gt; GUIDの作成を選択して、GUIDの作成ダイアログを開き、Registry Formatラジオボタンを選択します。New GUID と Copy ボタンをクリックして新しく作成されたGUIDをコピーします。新しいGUIDを使用して上述のコード[Guid(&quot;...&quot;)] 内のものと置き換えます。 </li>
+<li>UserControl1.cs[Design] タブを選択し、プロパティウィンドウでイベントボタン<a  class="image"><img alt="Ocguide externaldll csharp2 eventbutton.png" src="../images/Access_CPlusPlus(.Net)_And_CSharp_DLL/Ocguide_externaldll_csharp2_eventbutton.png" width="23"  /></a> をクリックし、スクロールバーをドラッグして MouseClick をダブルクリックしてマウスクリックイベント関数をUserControl.cs ファイルに追加します。同じ方法で、マウスダブルクリックイベントを追加します。 </li>
+<li>UserControl1l.cs ファイルでは、UserControl1 クラス外部に次のコードをコピーします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//イベントのためのデリゲートを宣言 </span>
+<span style="color: #0000ff;">public</span> delegate <span style="color: #0000ff;">void</span> MouseAction<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y<span style="color: #000000;">)</span>;</pre></li>
+<li>UserControl1 クラスで、次のインプリメントを追加します。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">public</span> event MouseAction OnUserClick;
+<span style="color: #0000ff;">public</span> event MouseAction OnUserDbClick;
+
+<span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> UserControl1_MouseClick<span style="color: #000000;">(</span>object sender, MouseEventArgs e<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+      <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OnUserClick <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000ff;">null</span><span style="color: #000000;">)</span>
+      <span style="color: #000000;">{</span>
+          OnUserClick<span style="color: #000000;">(</span>e.<span style="color: #000000;">X</span>, e.<span style="color: #000000;">Y</span><span style="color: #000000;">)</span>;
+      <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> UserControl1_MouseDoubleClick<span style="color: #000000;">(</span>object sender, MouseEventArgs e<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+      <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>OnUserDbClick <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000ff;">null</span><span style="color: #000000;">)</span>
+      <span style="color: #000000;">{</span>
+          OnUserDbClick<span style="color: #000000;">(</span>e.<span style="color: #000000;">X</span>, e.<span style="color: #000000;">Y</span><span style="color: #000000;">)</span>;
+      <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre></li>
+<li>UserControl1 クラス外部で、次のインターフェースを追加します。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//イベントのためのインターフェースを宣言
+</span>
+<span style="color: #000000;">[</span>Guid<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;DA090A6F-FFAC-4a39-ACD3-351FA509CA86&quot;</span><span style="color: #000000;">)</span>, 
+    InterfaceType<span style="color: #000000;">(</span>ComInterfaceType.<span style="color: #000000;">InterfaceIsIDispatch</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+<span style="color: #0000ff;">public</span> interface UserEvents
+<span style="color: #000000;">{</span>
+    <span style="color: #000000;">[</span>DispIdAttribute<span style="color: #000000;">(</span>0x60020001<span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">void</span> OnUserClick<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y<span style="color: #000000;">)</span>;
+
+    <span style="color: #000000;">[</span>DispIdAttribute<span style="color: #000000;">(</span>0x60020002<span style="color: #000000;">)</span><span style="color: #000000;">]</span>
+    <span style="color: #0000ff;">void</span> OnUserDbClick<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre></li>
+<li>
+Visual Studio 2008 でリソースのみのDLLを作成する方法は、<a href="../../OriginC/OCGuide/Simple_Hello_World_Dialog.html#Create_Resource-only_DLL_in_Visual_Studio_2008" title="OCGuide:Hello Worldダイアログ">ダイアログビルダ:単純なHello Worldダイアログ:Visual Studio 2008 でリソースのみのDLLを作成する</a> を参照してください。
+</li>
+<li>
+Origin Cによって、ダイアログでActiveXコントロールを使用し、表示します。Originのコードビルダで、cファイルを作成し、次のコードをコピーします。 
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//ダイアログとIdsのコントロール。実際の利用に応じてダイアログidは変更する必要がある。</span>
+<span style="color: #0000ff;">#define</span> IDD_DIALOG1                     <span style="color: #0000dd;">101</span>
+<span style="color: #0000ff;">#define</span> IDC_DOTNET						<span style="color: #0000dd;">1000</span>
+
+<span style="color: #008000;">//コントロールから公開されたイベント</span>
+<span style="color: #0000ff;">#define</span>	ON_INTEROP_CLICK<span style="color: #000000;">(</span>_idCntl, _ocFunc<span style="color: #000000;">)</span>	
+ON_ACTIVEX_EVENT<span style="color: #000000;">(</span>0x60020001, _idCntl, _ocFunc, VTS_CTRL VTS_I4 VTS_I4<span style="color: #000000;">)</span>
+
+<span style="color: #0000ff;">#define</span>	ON_INTEROP_DBLCLICK<span style="color: #000000;">(</span>_idCntl, _ocFunc<span style="color: #000000;">)</span>	
+ON_ACTIVEX_EVENT<span style="color: #000000;">(</span>0x60020002, _idCntl, _ocFunc, VTS_CTRL VTS_I4 VTS_I4<span style="color: #000000;">)</span>
+
+
+<span style="color: #0000ff;">class</span> CDotNetComInteropDlg <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> Dialog
+<span style="color: #000000;">{</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	CDotNetComInteropDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+	EVENTS_BEGIN
+	ON_INIT<span style="color: #000000;">(</span>OnInitDialog<span style="color: #000000;">)</span> 
+	<span style="color: #008000;">//公開されたイベントのためのイベントハンドラ</span>
+	ON_INTEROP_CLICK<span style="color: #000000;">(</span>IDC_DOTNET, OnClick<span style="color: #000000;">)</span>
+	ON_INTEROP_DBLCLICK<span style="color: #000000;">(</span>IDC_DOTNET, OnDblClick<span style="color: #000000;">)</span>
+	EVENTS_END
+	
+	<span style="color: #0000ff;">BOOL</span> OnClick<span style="color: #000000;">(</span>Control ctrl, <span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Clicked at (%d,%d)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, x,y<span style="color: #000000;">)</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">}</span>
+	
+	<span style="color: #0000ff;">BOOL</span> OnDblClick<span style="color: #000000;">(</span>Control ctrl, <span style="color: #0000ff;">int</span> x, <span style="color: #0000ff;">int</span> y<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;DblClicked at (%d,%d)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, x,y<span style="color: #000000;">)</span>;
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+	<span style="color: #000000;">}</span>
+
+	
+	<span style="color: #0000ff;">BOOL</span> OnInitDialog<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	
+	Control m_ctrlDotNet;
+<span style="color: #000000;">}</span>;
+
+
+<span style="color: #008000;">// ここではDLLファイルのパスを指定しない。DLLファイルは  </span>
+<span style="color: #008000;">//現在のcファイルと同じパスにあると仮定</span>
+CDotNetComInteropDlg<span style="color: #000000;">::</span><span style="color: #000000;">CDotNetComInteropDlg</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">:</span> Dialog<span style="color: #000000;">(</span>IDD_DIALOG1, <span style="color: #ff00ff;">&quot;DialogBuilder.dll&quot;</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	InitMsgMap<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #0000ff;">BOOL</span> CDotNetComInteropDlg<span style="color: #000000;">::</span><span style="color: #000000;">OnInitDialog</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>	
+	<span style="color: #008000;">//[Guid(&quot;A31FE123-FD5C-41a1-9102-D25EBD5FDFAF&quot;)]</span>
+	GUID guid <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>0xA31FE123, 0xFD5C, 0x41a1, 
+		<span style="color: #000000;">{</span>0x91, 0x02, 0xD2, 0x5E, 0xBD, 0x5F, 0xDF, 0xAF<span style="color: #000000;">}</span><span style="color: #000000;">}</span>;
+	
+	RECT rect <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">20</span>,<span style="color: #0000dd;">20</span>,<span style="color: #0000dd;">200</span>,<span style="color: #0000dd;">100</span><span style="color: #000000;">}</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>m_ctrlDotNet.<span style="color: #000000;">CreateActiveXControl</span><span style="color: #000000;">(</span>guid, WS_CHILD<span style="color: #000040;">|</span>WS_VISIBLE,
+		rect, GetSafeHwnd<span style="color: #000000;">(</span><span style="color: #000000;">)</span>, IDC_DOTNET<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #008000;">//DotNet コントロールのインターフェースを使用して </span>
+		<span style="color: #008000;">//初期化をコントロール</span>
+		Object ctrlObj <span style="color: #000080;">=</span> m_ctrlDotNet.<span style="color: #000000;">GetActiveXControl</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+		ctrlObj.<span style="color: #000000;">SetBorder</span><span style="color: #000000;">(</span><span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">TRUE</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">void</span> Launch_CDotNetComInteropDlg<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	CDotNetComInteropDlg dlgDotNet;
+	dlgDotNet.<span style="color: #000000;">DoModal</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+</li>
+</ol>
+
+
+
+
+
+
+
+    

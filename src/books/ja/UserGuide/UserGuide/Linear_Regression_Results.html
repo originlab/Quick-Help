@@ -1,0 +1,813 @@
+﻿<h1 class="firstheading">アルゴリズム（線形回帰）</h1><p class='urlname' style='display: none'>LR-Algorithm</p>
+<div class="toclimit-3"><div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#The_Linear_Regression_Model"><span class="tocnumber">1</span> <span class="toctext">線形回帰モデル</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Simple_Linear_Regression_Model"><span class="tocnumber">1.1</span> <span class="toctext">単一線形回帰モデル</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Fit_Control"><span class="tocnumber">2</span> <span class="toctext">フィット制御</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Errors_as_Weight"><span class="tocnumber">2.1</span> <span class="toctext">誤差を重みとする</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#No_Weighting"><span class="tocnumber">2.1.1</span> <span class="toctext">重み付けなし</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Direct_Weighting"><span class="tocnumber">2.1.2</span> <span class="toctext">直接重み付け</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Instrumental"><span class="tocnumber">2.1.3</span> <span class="toctext">機械的重み付け</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Fix_Intercept_.28at.29"><span class="tocnumber">2.2</span> <span class="toctext">切片固定</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Scale_Error_with_sqrt.28Reduced_Chi-Sqr.29"><span class="tocnumber">2.3</span> <span class="toctext">sqrt(補正カイ二乗値)のスケールエラー</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Fit_Results"><span class="tocnumber">3</span> <span class="toctext">フィット結果</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Fit_Parameters"><span class="tocnumber">3.1</span> <span class="toctext">フィットパラメータ</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Fitted_value"><span class="tocnumber">3.1.1</span> <span class="toctext">フィット値</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#The_Parameter_Standard_Errors"><span class="tocnumber">3.1.2</span> <span class="toctext">パラメータの標準誤差</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#t-Value_and_Confidence_Level"><span class="tocnumber">3.1.3</span> <span class="toctext">t値と信頼水準</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Prob.3E.7Ct.7C"><span class="tocnumber">3.1.4</span> <span class="toctext">Prob&gt;|t|</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#LCL_and_UCL"><span class="tocnumber">3.1.5</span> <span class="toctext">下側信頼限界(LCL)と上側信頼限界(UCL)</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#CI_Half_Width"><span class="tocnumber">3.1.6</span> <span class="toctext">CI 半幅</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-18"><a href="#Fit_Statistics"><span class="tocnumber">3.2</span>  <span class="toctext">フィット統計</span></a>
+<ul>
+<li class="toclevel-3 tocsection-19"><a href="#Degrees_of_Freedom"><span class="tocnumber">3.2.1</span> <span class="toctext">自由度</span></a></li>
+<li class="toclevel-3 tocsection-20"><a href="#Residual_Sum_of_Squares"><span class="tocnumber">3.2.2</span> <span class="toctext">残差平方和</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#Reduced_Chi-Sqr"><span class="tocnumber">3.2.3</span> <span class="toctext">既約カイ二乗</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#R-Square_.28COD.29"><span class="tocnumber">3.2.4</span> <span class="toctext">R二乗 (COD)</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Adj._R-Square"><span class="tocnumber">3.2.5</span> <span class="toctext">調整済みR二乗</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#R_Value"><span class="tocnumber">3.2.6</span> <span class="toctext">R値</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#Pearson.27s_r"><span class="tocnumber">3.2.7</span> <span class="toctext">ピアソンのR</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#Root-MSE_.28SD.29"><span class="tocnumber">3.2.8</span> <span class="toctext">Root-MSE (SD)</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#Norm_of_Residuals"><span class="tocnumber">3.2.9</span> <span class="toctext">残差のノルム</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-28"><a href="#ANOVA_Table"><span class="tocnumber">4</span> <span class="toctext">ANOVA表</span></a></li>
+<li class="toclevel-1 tocsection-29"><a href="#Lack_of_fit_table"><span class="tocnumber">5</span> <span class="toctext">適合度検定表</span></a></li>
+<li class="toclevel-1 tocsection-30"><a href="#Covariance_and_Correlation_Matrix"><span class="tocnumber">6</span> <span class="toctext">共分散行列と相関行列</span></a></li>
+<li class="toclevel-1 tocsection-31"><a href="#Outliers"><span class="tocnumber">7</span> <span class="toctext">外れ値</span></a></li>
+<li class="toclevel-1 tocsection-32"><a href="#Residual_Analysis"><span class="tocnumber">8</span> <span class="toctext">残差解析</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33"><a href="#Standardized"><span class="tocnumber">8.1</span> <span class="toctext">正規化</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Studentized"><span class="tocnumber">8.2</span> <span class="toctext">スチューデント化</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#Studentized_deleted"><span class="tocnumber">8.3</span> <span class="toctext">スチューデント化削除</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-36"><a href="#Confidence_and_Prediction_Bands"><span class="tocnumber">9</span> <span class="toctext">信頼帯と推定帯</span></a></li>
+<li class="toclevel-1 tocsection-37"><a href="#Confidence_Ellipses"><span class="tocnumber">10</span> <span class="toctext">信頼楕円</span></a></li>
+<li class="toclevel-1 tocsection-38"><a href="#Finding_Y.2FX_from_X.2FY"><span class="tocnumber">11</span> <span class="toctext">X/YからY/Xを検索</span></a></li>
+<li class="toclevel-1 tocsection-39"><a href="#Residual_Plots"><span class="tocnumber">12</span> <span class="toctext">残差プロット</span></a>
+<ul>
+<li class="toclevel-2 tocsection-40"><a href="#Resudial_Type"><span class="tocnumber">12.1</span> <span class="toctext">残差タイプ</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#Residual_vs._Independent"><span class="tocnumber">12.2</span> <span class="toctext">残差vs.独立</span></a></li>
+<li class="toclevel-2 tocsection-42"><a href="#Residual_vs._Predicted_Value"><span class="tocnumber">12.3</span> <span class="toctext">残差vs.予測値</span></a></li>
+<li class="toclevel-2 tocsection-43"><a href="#Residual_vs._Order_of_the_Data"><span class="tocnumber">12.4</span> <span class="toctext">残差vs.データの順序 </span></a></li>
+<li class="toclevel-2 tocsection-44"><a href="#Histogram_of_the_Residual"><span class="tocnumber">12.5</span> <span class="toctext">残差のヒストグラム</span></a></li>
+<li class="toclevel-2 tocsection-45"><a href="#Residual_Lag_Plot"><span class="tocnumber">12.6</span> <span class="toctext">残差のラグプロット</span></a></li>
+<li class="toclevel-2 tocsection-46"><a href="#Normal_Probability_Plot_of_Residuals"><span class="tocnumber">12.7</span> <span class="toctext">残差の正規確率プロット</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div> 
+<h2><a name="The_Linear_Regression_Model"></a><span class="mw-headline">線形回帰モデル</span></h2>
+<h3><a name="Simple_Linear_Regression_Model"></a><span class="mw-headline">単一線形回帰モデル</span></h3>
+<p>与えたられたデータセット<img src="../images/Linear_Regression_Results/math-f243bd7bc9626358c4cbdace83fad108.png" title="(x_i,y_i),i=1,2,\ldots n" alt="(x_i,y_i),i=1,2,\ldots n" class="tex"/> -- ここで、xは独立変数、yは従属変数、<img src="../images/Linear_Regression_Results/math-5af9e28d609b16eb25693f44ea9d7a8f.png" title="\beta_0" alt="\beta_0" class="tex"/>と<img src="../images/Linear_Regression_Results/math-b4ceec2c4656f5c1e7fc76c59c4f80f3.png" title="\beta_1" alt="\beta_1" class="tex"/>はパラメータ、<img src="../images/Linear_Regression_Results/math-3ac22ebe353c690d089056a1a61e884d.png" title="\varepsilon_i" alt="\varepsilon_i" class="tex"/>は平均値<img src="../images/Linear_Regression_Results/math-e08f05e02ca7379fa770d67c7f995ec4.png" title="E\left \{\varepsilon_i\right \}=0" alt="E\left \{\varepsilon_i\right \}=0" class="tex"/>と変数<img src="../images/Linear_Regression_Results/math-57e78781f84e3e3175bcc12c95318cfb.png" title="Var\left \{\varepsilon_i\right \}=\sigma^2" alt="Var\left \{\varepsilon_i\right \}=\sigma^2" class="tex"/>のときの誤差項です。--- 線形回帰は、以下の式のモデルに、データを合わせます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-e7275a1e9849b30e085befefdcf649e4.png" title="y_i=\beta _0+\beta _1x_i+\varepsilon_i" alt="y_i=\beta _0+\beta _1x_i+\varepsilon_i" class="tex"/>
+</th>
+<td>
+<p>(1)
+</p>
+</td></tr></table>
+<p>最小二乗推定を使って、<i>n</i>偏差平方和を最小化します。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-88e33546e2dca0c68fbd64d62f733914.png" title="\sum_{i=1}^{n}(Y_i-\beta_0-\beta_1X_i)^2" alt="\sum_{i=1}^{n}(Y_i-\beta_0-\beta_1X_i)^2" class="tex"/>
+</th>
+<td>
+<p>(2)
+</p>
+</td></tr></table>
+<p>線形モデルの推定パラメータは、次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-befdde5b640aa0a77538792c238ed5cd.png" title="\hat\beta _1=\frac{SXY}{SXX}" alt="\hat\beta _1=\frac{SXY}{SXX}" class="tex"/>
+</th>
+<td>
+<p>(3)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-fb3f1891e62df179b758521b10084aa6.png" title="\hat\beta _0=\bar y-\hat\beta _1\bar x " alt="\hat\beta _0=\bar y-\hat\beta _1\bar x " class="tex"/>
+</th>
+<td>
+<p>(4)  
+</p>
+</td></tr></table>
+<p>ここで、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-322527b1ed6496cd6cdf25a0002dfc7f.png" title="\bar x=\frac {1}{n}\sum_{i=1}^nx_i" alt="\bar x=\frac {1}{n}\sum_{i=1}^nx_i" class="tex"/>,<img src="../images/Linear_Regression_Results/math-595a61adb4402eacacded49c4e4bbf1a.png" title="\bar y=\frac {1}{n}\sum_{i=1}^ny_i" alt="\bar y=\frac {1}{n}\sum_{i=1}^ny_i" class="tex"/>
+</th>
+<td>
+<p>(5)  
+</p>
+</td></tr></table>
+<p>および、
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-475a6b18f39e0bc196ab8aeee961b0f0.png" title="SXY=\sum_{i=1}^nx_iy_i\; \; \; \; \; \; \; SXX=\sum_{i=1}^nx_i^2" alt="SXY=\sum_{i=1}^nx_iy_i\; \; \; \; \; \; \; SXX=\sum_{i=1}^nx_i^2" class="tex"/>       (補正)
+</th>
+<td>
+<p>(6)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-2b50c9938d5981cb89ffaec033abab1c.png" title="SXY=\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y)\; \; \; \; \; \; \; SXX=\sum_{i=1}^n(x_i-\bar x)^2" alt="SXY=\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y)\; \; \; \; \; \; \; SXX=\sum_{i=1}^n(x_i-\bar x)^2" class="tex"/> 　(未補正)
+</th>
+<td>
+<p>(7)  
+</p>
+</td></tr></table>
+<table class="note">
+<tr>
+<td><b>Note:</b> 切片がモデル内で除外されると、係数は<b>未補正</b>の式で計算されます。
+</td></tr></table>
+<p>したがって、回帰関数は次の通りに推定されます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-4629c75f122b9d4b551eb493d45a295e.png" title="\hat{y}=\hat{\beta_0}+\hat{\beta_1}x" alt="\hat{y}=\hat{\beta_0}+\hat{\beta_1}x" class="tex"/>
+</th>
+<td>
+<p>(8)  
+</p>
+</td></tr></table>
+<p>残差<img src="../images/Linear_Regression_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/>は次のように定義されます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-1eccdc0d4d12d0c892775e7682366d77.png" title="res_i=y_i-\hat{y_i}" alt="res_i=y_i-\hat{y_i}" class="tex"/>
+</th>
+<td>
+<p>(9)  
+</p>
+</td></tr></table>
+<p>式(2)は残差平方和を最小化します
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-3b4c813cc6108fdfb9d72a3346e2cd15.png" title="RSS=\sum_{i=1}^nres_i^2" alt="RSS=\sum_{i=1}^nres_i^2" class="tex"/>
+</th>
+<td>
+<p>(10)  
+</p>
+</td></tr></table>
+<p>最小二乗推定 <img src="../images/Linear_Regression_Results/math-9dabc344cb060be9355c54cc39a038db.png" title="\hat{\beta_0}" alt="\hat{\beta_0}" class="tex"/>と<img src="../images/Linear_Regression_Results/math-4db6565d3866d2baeaf7a66f389744f9.png" title="\hat{\beta_1}" alt="\hat{\beta_1}" class="tex"/>は、 <img src="../images/Linear_Regression_Results/math-5af9e28d609b16eb25693f44ea9d7a8f.png" title="\beta_0" alt="\beta_0" class="tex"/>と<img src="../images/Linear_Regression_Results/math-4db6565d3866d2baeaf7a66f389744f9.png" title="\hat{\beta_1}" alt="\hat{\beta_1}" class="tex"/>の推定に使います。
+</p>
+<h2><a name="Fit_Control"></a><span class="mw-headline">フィット制御</span></h2>
+<h3><a name="Errors_as_Weight"></a><span class="mw-headline">誤差を重みとする</span></h3>
+<p>上記のセクションでは、誤差に定数分散があると仮定しています。しかし、実験値をフィッティングする場合、（計測器の確度と精度に影響を及ぼす）機器誤差を考慮する必要があります。したがって、誤差の定数分散推定は、棄却されます。そして、<img src="../images/Linear_Regression_Results/math-3ac22ebe353c690d089056a1a61e884d.png" title="\varepsilon_i" alt="\varepsilon_i" class="tex"/>を非定数分散の正規分布であると推定する必要があります。また、誤差は、<img src="../images/Linear_Regression_Results/math-10e16c6a764d367ca5077a54bf156f7e.png" title="\sigma^2" alt="\sigma^2" class="tex"/>のようになり、フィッティングで重みとして使用することができます。重みは、次のように定義されます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-8845a41888129439e7f1b3fbdaeb2078.png" title="W=\begin{bmatrix}
+ w_1&amp; 0 &amp; \dots &amp;0 \\ 
+0 &amp; w_2 &amp; \dots &amp;0 \\ 
+ \vdots&amp; \vdots &amp;\ \ddots &amp;\vdots \\ 
+ 0&amp; 0 &amp;\dots  &amp; w_n
+\end{bmatrix}" alt="W=\begin{bmatrix}
+ w_1&amp; 0 &amp; \dots &amp;0 \\ 
+0 &amp; w_2 &amp; \dots &amp;0 \\ 
+ \vdots&amp; \vdots &amp;\ \ddots &amp;\vdots \\ 
+ 0&amp; 0 &amp;\dots  &amp; w_n
+\end{bmatrix}" class="tex"/>
+</th>
+<td>
+</td></tr></table>
+<p>フィッティングモデルは、次の式になります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-b91af30efe2f541053551a9080cdf9de.png" title="\sum_{i=1}^n w_i (y_i-\hat y_i)^2=\sum_{i=1}^n w_i [y_i-(\hat{\beta _0}+\hat{\beta _1}x_i)]^2" alt="\sum_{i=1}^n w_i (y_i-\hat y_i)^2=\sum_{i=1}^n w_i [y_i-(\hat{\beta _0}+\hat{\beta _1}x_i)]^2" class="tex"/>
+</th>
+<td>
+<p>(11)  
+</p>
+</td></tr></table>
+<p>重み因子<img src="../images/Linear_Regression_Results/math-aa38f107289d4d73d516190581397349.png" title="w_i" alt="w_i" class="tex"/> は、3つの式によって与えられます。
+</p>
+<h4><a name="No_Weighting"></a><span class="mw-headline">重み付けなし</span></h4>
+<p>エラーバーは、計算では重みとして取り扱われません。
+</p>
+<h4><a name="Direct_Weighting"></a><span class="mw-headline">直接重み付け</span></h4>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-05c143b7a8ecc59d8edb905c4b6e3397.png" title="w_i=\sigma_i " alt="w_i=\sigma_i " class="tex"/>
+</th>
+<td>
+<p>(12)
+</p>
+</td></tr></table>
+<h4><a name="Instrumental"></a><span class="mw-headline">Instrumental</span></h4>
+<p>機械的重みとして、値は、機械的誤差に反比例します。大きな誤差がある場合よりも正確であるため、小さな誤差の試行には、大きな重みがあります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-63f1838aba2791cf68521fe43a435763.png" title="w_i=\frac 1{\sigma_i^2}" alt="w_i=\frac 1{\sigma_i^2}" class="tex"/>
+</th>
+<td>
+<p>(13)
+</p>
+</td></tr></table>
+<table class="note">
+<tr>
+<td>重みとしての誤差は、ワークシートの「YError」として構築されています。
+</td>
+<td>
+</td></tr></table>
+<h3><a name="Fix_Intercept_.28at.29"></a><span class="mw-headline">切片固定</span></h3>
+<p>固定切片は、y切片<img src="../images/Linear_Regression_Results/math-5af9e28d609b16eb25693f44ea9d7a8f.png" title="\beta_0" alt="\beta_0" class="tex"/>を設定して、値を固定します。また、 固定切片のため、全ての自由度は、n*=n-1となります。
+</p>
+<h3><a name="Scale_Error_with_sqrt.28Reduced_Chi-Sqr.29"></a><span class="mw-headline">sqrt(補正カイ二乗値)のスケールエラー</span></h3>
+<p><b>sqrt(補正カイ二乗値)のスケールエラー</b>は、重みを付けたフィットで、使用することができます。このオプションは、フィット処理で出力されるパラメータの誤差だけに影響し、フィット処理やデータには影響しません。 
+デフォルトで、チェックが付き、<img src="../images/Linear_Regression_Results/math-10e16c6a764d367ca5077a54bf156f7e.png" title="\sigma^2" alt="\sigma^2" class="tex"/>は、 パラメータ誤差の計算を考慮しているか、 あるいは、<img src="../images/Linear_Regression_Results/math-10e16c6a764d367ca5077a54bf156f7e.png" title="\sigma^2" alt="\sigma^2" class="tex"/>は、誤差計算を考慮していません。
+共分散行列を例にすると、sqrt(補正カイ二乗値)のスケールエラーは、以下のようになります。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-a219511b6fc22ebe963c31f36a1b4dd7.png" title="Cov(\beta _i,\beta _j)=\sigma^2 (X^{\prime }X)^{-1}" alt="Cov(\beta _i,\beta _j)=\sigma^2 (X^{\prime }X)^{-1}" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-aa0f6ec7a20808737c0ce43c3cba8892.png" title="\sigma^2=\frac{RSS}{n^{*}-1}" alt="\sigma^2=\frac{RSS}{n^{*}-1}" class="tex"/>
+</th>
+<td>
+<p>(14)
+</p>
+</td></tr></table>
+<p>sqrt(補正カイ二乗値)のスケールエラーでは無い場合は、次の通りです。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-d654da511627b08f8bb2817849d7a889.png" title="Cov(\beta _i,\beta _j)=(X&apos;X)^{-1}\,\!" alt="Cov(\beta _i,\beta _j)=(X&apos;X)^{-1}\,\!" class="tex"/>
+</th>
+<td>
+<p>(15)
+</p>
+</td></tr></table>
+<p>重み付けフィットには、<img src="../images/Linear_Regression_Results/math-8f5640d983fa3d67b37e5356b6a62a78.png" title="(X&apos;X)^{-1}\,\!" alt="(X&apos;X)^{-1}\,\!" class="tex"/>の代わりに、<img src="../images/Linear_Regression_Results/math-6f369f83036bd2eab887744dd10a6eb7.png" title="(X&apos;WX)^{-1}\,\!" alt="(X&apos;WX)^{-1}\,\!" class="tex"/>を使います。
+</p>
+<h2><a name="Fit_Results"></a><span class="mw-headline">フィット結果</span></h2>
+<p>線形フィットを実行すると、<a class="external text" href="../../UserGuide/UserGuide/Analysis_Report_Sheets_and_Columns.html">分析レポートシート</a>に計算された値が出力されます。  パラメータ表には、モデルの傾きと切片（括弧内の数字は生成された値を示す）が表示されます。 
+</p>
+<h3><a name="Fit_Parameters"></a><span class="mw-headline">フィットパラメータ</span></h3>
+<p><a class="image"><img alt="Fitted-paramater.png" src="../images/Linear_Regression_Results/Fitted-paramater.png" width="655"  /></a>
+</p>
+<h4><a name="Fitted_value"></a><span class="mw-headline">フィット値</span></h4>
+<p>式(3)と(4)を参照してください。
+</p>
+<h4><a name="The_Parameter_Standard_Errors"></a><span class="mw-headline">パラメータの標準誤差</span></h4>
+<p>各パラメータにおいて、標準誤差は以下のように得られます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-a2e4c535ba2702d3744f6a49bfa4ac1c.png" title="\varepsilon _{\hat \beta _0}=s_\varepsilon \sqrt{\frac{\sum x_i^2}{nSXX}}" alt="\varepsilon _{\hat \beta _0}=s_\varepsilon \sqrt{\frac{\sum x_i^2}{nSXX}}" class="tex"/>
+</th>
+<td>
+<p>(16)  
+</p>
+</td></tr></table>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-01aff625e5ad40105a12347ba05339bc.png" title="\varepsilon _{\hat \beta _1}=\frac{s_\varepsilon }{\sqrt{SXX}}" alt="\varepsilon _{\hat \beta _1}=\frac{s_\varepsilon }{\sqrt{SXX}}" class="tex"/>
+</th>
+<td>
+<p>(17)  
+</p>
+</td></tr></table>
+<p>ここで、標本の分散  <img src="../images/Linear_Regression_Results/math-f5fccf3ce2663df316135e66a00c0a74.png" title="s_\varepsilon ^2" alt="s_\varepsilon ^2" class="tex"/>（または、誤差平均二乗<img src="../images/Linear_Regression_Results/math-a9fc1a03386ae38b64e06c8172994963.png" title="MSE" alt="MSE" class="tex"/>）は、 次のように推定できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-63b692ed73b623d4f2f13eddcc9c7fb0.png" title="s_\varepsilon ^2=\frac{RSS}{df_{Error}}=\frac{\sum_{i=1}^n (y_i-\hat y_i)^2}{n^{*}-1}" alt="s_\varepsilon ^2=\frac{RSS}{df_{Error}}=\frac{\sum_{i=1}^n (y_i-\hat y_i)^2}{n^{*}-1}" class="tex"/>
+</th>
+<td>
+<p>(18)  
+</p>
+</td></tr></table>
+<p>そして、RSSは残差平方和(または平方誤差和SSE)のことで、実際には、各データポイントからフィット曲線までの垂直方向での差の平方和となります。これは次式のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-60dcb5431cb468da75a936e22c6b4470.png" title="RSS=\sum_{i=1}^n e_i=\sum_{i=1}^n w_i (y_i-\hat y_i)^2=\sum_{i=1}^n w_i [y_i-(\beta _0+\beta _1x_i)]^2" alt="RSS=\sum_{i=1}^n e_i=\sum_{i=1}^n w_i (y_i-\hat y_i)^2=\sum_{i=1}^n w_i [y_i-(\beta _0+\beta _1x_i)]^2" class="tex"/>
+</th>
+<td>
+<p>(19)  
+</p>
+</td></tr></table>
+<table class="note">
+<tr>
+<td><b>Note</b>&nbsp;:<img src="../images/Linear_Regression_Results/math-be2982d2ce999da5c6b4601e87933c95.png" title="n*" alt="n*" class="tex"/>について、モデルに切片が含まれている場合、<img src="../images/Linear_Regression_Results/math-31a8d4eab62ae5b74866f9e002f08ce5.png" title="n*=n-1" alt="n*=n-1" class="tex"/>で、それ以外は <img src="../images/Linear_Regression_Results/math-b53ed76ba17eb8f2704fb7b8c9e36d44.png" title="n*=n" alt="n*=n" class="tex"/> です。
+</td></tr></table>
+<h4><a name="t-Value_and_Confidence_Level"></a><span class="mw-headline">t値と信頼水準</span></h4>
+<p>回帰の前提から次式があります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-0ed681c4ca83831abc9e0afe2f959db2.png" title="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _0}-\beta _0}{\varepsilon _{\hat \beta _0}}\sim t_{n^{*}-1}" class="tex"/>  および  <img src="../images/Linear_Regression_Results/math-b502ef25a978991781d791a9f6275a83.png" title="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" alt="\frac{{\hat \beta _1}-\beta _1}{\varepsilon _{\hat \beta _1}}\sim t_{n^{*}-1}" class="tex"/>
+</th>
+<td>
+<p>(20)  
+</p>
+</td></tr></table>
+<p>フィッティングパラメータが0ではないことを調べるために<i>t</i> 検定を使うことができます。これは、 <img src="../images/Linear_Regression_Results/math-ae198091d3f29f3101f5b0b86bf85b5d.png" title="\beta _0= 0\,\!" alt="\beta _0= 0\,\!" class="tex"/> (真ならば、フィット直線が原点を通る) または <img src="../images/Linear_Regression_Results/math-c1cb3b8aa03a36c23962a83cf7d2dc40.png" title="\beta _1= 0\,\!" alt="\beta _1= 0\,\!" class="tex"/> であるかどうかを検定します。<i>t </i> 検定の仮説検定は次のようになります。 
+</p>
+<dl><dd><img src="../images/Linear_Regression_Results/math-d15540fa2e02fa998eea73fd85bf1952.png" title="H_0&nbsp;: \beta _0= 0\,\! " alt="H_0&nbsp;: \beta _0= 0\,\! " class="tex"/>                  <img src="../images/Linear_Regression_Results/math-57dce98807a9a866ee09b5bbe88bb68e.png" title="H_0&nbsp;: \beta _1= 0\,\!" alt="H_0&nbsp;: \beta _1= 0\,\!" class="tex"/> </dd>
+<dd><img src="../images/Linear_Regression_Results/math-00f883e098653776a99683aae70c3783.png" title="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" alt="H_\alpha &nbsp;: \beta _0  \neq 0\,\!" class="tex"/>         <img src="../images/Linear_Regression_Results/math-27aac7aa6524d0b486a1890feffff3e1.png" title="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" alt="H_\alpha &nbsp;: \beta _1 \neq  0\,\!" class="tex"/>     </dd></dl>
+<p>The <i>t</i>-values can be computed by: 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-6368690db66f6b16f642c2976ba74d59.png" title="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" alt="t_{\hat \beta _0}=\frac{{\hat \beta _0}-0}{\varepsilon _{\hat \beta _0}}" class="tex"/> および <img src="../images/Linear_Regression_Results/math-abcdef6859e44b55ed86ce261400d36c.png" title="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" alt="t_{\hat \beta _1}=\frac{{\hat \beta _1}-0}{\varepsilon _{\hat \beta _1}}" class="tex"/>
+</th>
+<td>
+<p>(21)  
+</p>
+</td></tr></table>
+<p>計算された<i>t</i> 値を使って、対応する帰無仮説を棄却するかどうかを決めることができます。通常、与えられた有意水準 <img src="../images/Linear_Regression_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/> に対して、<img src="../images/Linear_Regression_Results/math-9d38e8e7363d66af41530c3fbdf494f5.png" title="|t|&gt;t_{\frac \alpha 2}" alt="|t|&gt;t_{\frac \alpha 2}" class="tex"/> のときに <img src="../images/Linear_Regression_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/> を棄却できます。また、 <i>p</i>値または有意水準が <i>t</i>検定と一緒に出力されます。p値が <img src="../images/Linear_Regression_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/> より小さい場合、帰無仮説 <img src="../images/Linear_Regression_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/> を棄却することができます。
+</p>
+<h4><a name="Prob.3E.7Ct.7C"></a><span class="mw-headline">Prob&gt;|t|</span></h4>
+<p>上記の<i>t</i> 検定の <img src="../images/Linear_Regression_Results/math-647d2f77597fee86bb9c3c77cdfdaa3a.png" title="H_0 \,\!" alt="H_0 \,\!" class="tex"/> が真である確率 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-3e5335a131705b3ef0bb8b250033167d.png" title="prob=2(1-tcdf(|t|,df_{Error}))\,\!" alt="prob=2(1-tcdf(|t|,df_{Error}))\,\!" class="tex"/>
+</th>
+<td>
+<p>(22)  
+</p>
+</td></tr></table>
+<p>ここで<i>tcdf(t, df)</i> は、自由度 <i>df</i> を持つスチューデント<i>t</i>分布の下側の確率を計算します。
+</p>
+<h4><a name="LCL_and_UCL"></a><span class="mw-headline">LCLとUCL</span></h4>
+<p><i>t</i>値から各パラメータの <img src="../images/Linear_Regression_Results/math-0cdaba532a6f8ad706e6b8e5e97f0d36.png" title="(1-\alpha )\times 100\%" alt="(1-\alpha )\times 100\%" class="tex"/> <b>信頼区間</b>を次式で計算することができます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-a27fc4294ee80efb51793fbcd4e23df2.png" title="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" alt="\hat \beta _j-t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}\leq \hat \beta _j\leq \hat \beta _j+t_{(\frac \alpha 2,n^{*}-k)}\varepsilon _{\hat \beta _j}" class="tex"/>
+</th>
+<td>
+<p>(23)  
+</p>
+</td></tr></table>
+<p>ここで<img src="../images/Linear_Regression_Results/math-fd9dfeda668ac9b0c5ef311ffdca8f71.png" title="UCL" alt="UCL" class="tex"/>と<img src="../images/Linear_Regression_Results/math-a4df64dc5e32716f6de0ec15b0340950.png" title="LCL" alt="LCL" class="tex"/>は、それぞれ<b>上側信頼区間</b>と<b>下側信頼区間</b>のことです。
+</p>
+<h4><a name="CI_Half_Width"></a><span class="mw-headline">CI 半幅</span></h4>
+<p>信頼区間の半値幅は以下の通りです。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-77ec7c61ac9d06bfc9ad4c0ae47b85ce.png" title="CI=\frac{UCL-LCL}2" alt="CI=\frac{UCL-LCL}2" class="tex"/>
+</th>
+<td>
+<p>(24)  
+</p>
+</td></tr></table>
+<p>ここでUCLとLCLは、それぞれ<b>上側信頼区間</b>と<b>下側信頼区間</b>です。
+</p>
+<h3><a name="Fit_Statistics"></a><span class="mw-headline">フィット統計</span></h3>
+<p>重要な線形フィットの統計値は統計表に表示されます（括弧内の数字は生成された値を示す）。 
+</p>
+<dl><dd><a class="image"><img alt="FitStats.png" src="../images/Linear_Regression_Results/FitStats.png" width="284"  /></a></dd></dl>
+<h4><a name="Degrees_of_Freedom"></a><span class="mw-headline">自由度</span></h4>
+<p><i>誤差</i>の自由度。詳細は <a href="../../UserGuide/UserGuide/Linear_Regression_Results.html#ANOVA_Table" title="ユーザガイド:線形回帰結果">ANOVA表</a>を参照してください。
+</p>
+<h4><a name="Residual_Sum_of_Squares"></a><span class="mw-headline">残差平方和</span></h4>
+<p>残差平方和。式(19)を参照。
+</p>
+<h4><a name="Reduced_Chi-Sqr"></a><span class="mw-headline">自由度あたりカイ二乗</span></h4>
+<p>式(14)を参照。
+</p>
+<h4><a name="R-Square_.28COD.29"></a><span class="mw-headline">R二乗(COD)</span></h4>
+<p>線形回帰の質は、<b>決定係数(COD)</b>または <b><img src="../images/Linear_Regression_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/></b> で計測でき、次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-9ce15fecaa71e5021c67564b9f212551.png" title="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" alt="R^2=\frac{SXY}{SXX*TSS}=1-\frac{RSS}{TSS}" class="tex"/>
+</th>
+<td>
+<p>(25)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-700ffa56572a1641462ec2aadfb69b87.png" title="TSS=\sum(y_i-\bar{y})^2" alt="TSS=\sum(y_i-\bar{y})^2" class="tex"/>
+</th></tr></table>
+<p>ここで、 <i>TSS</i> は合計平方和、<i>RSS</i>は残差平方和です。<img src="../images/Linear_Regression_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/> の値は、0から1の間にあります。一般的に、1に近いほど、XとYの関係は非常に強いと見なされ、回帰モデルに高い信頼性を持たせることができます。
+</p>
+<h4><a name="Adj._R-Square"></a><span class="mw-headline">補正R二乗</span></h4>
+<p><b>補正</b> <img src="../images/Linear_Regression_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/> 値も次の式で計算できます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-68a88ab44a828cde18104979d28917fe.png" title="{\bar R}^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" alt="{\bar R}^2=1-\frac{RSS/df_{Error}}{TSS/df_{Total}}" class="tex"/>
+</th>
+<td>
+<p>(26)  
+</p>
+</td></tr></table>
+<h4><a name="R_Value"></a><span class="mw-headline">R値</span></h4>
+<p><i>R</i> 値は <i><img src="../images/Linear_Regression_Results/math-e31b458b48dd58470b662e66b9742071.png" title="R^2" alt="R^2" class="tex"/></i> の平方根に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-8dea6550a6f24458c884bb59c192c935.png" title="R=\sqrt{R^2}" alt="R=\sqrt{R^2}" class="tex"/>
+</th>
+<td>
+<p>(27)  
+</p>
+</td></tr></table>
+<h4><a name="Pearson.27s_r"></a><span class="mw-headline">ピアソンのｒ</span></h4>
+<p>単純な線形回帰では、xとyの相関係数は、 <i>r</i> で表され、次の式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-f7f1dc7cce20e9b9b19e47b012ee173d.png" title="r=R\,\!" alt="r=R\,\!" class="tex"/>   <i><img src="../images/Linear_Regression_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が正の場合</i>
+</th>
+<td>
+<p>(28)  
+</p>
+</td></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-556cec8e44138ef9cf002c70434cb55d.png" title="r=-R\,\!" alt="r=-R\,\!" class="tex"/>   <i><img src="../images/Linear_Regression_Results/math-3a1e29703e364979554e6bd76761bed6.png" title="\beta _1\,\!" alt="\beta _1\,\!" class="tex"/> が負の場合</i>
+</th></tr></table>
+<h4><a name="Root-MSE_.28SD.29"></a><span class="mw-headline">Root MSE(SD)</span></h4>
+<p>誤差の平均平方の平方根または、残差標準偏差は、次式に等しくなります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-5d65f33336e7ea1ead5adec051bf5572.png" title="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" alt="RootMSE=\sqrt{\frac{RSS}{df_{Error}}}" class="tex"/>
+</th>
+<td>
+<p>(29)  
+</p>
+</td></tr></table>
+<h4><a name="Norm_of_Residuals"></a><span class="mw-headline">残差のノルム</span></h4>
+<p>Equals to square root of RSS: 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-edb52b53a5f0e033c1872d55206bf72f.png" title="Norm \,of \,Residuals=\sqrt{RSS}" alt="Norm \,of \,Residuals=\sqrt{RSS}" class="tex"/>
+</th>
+<td>
+<p>(30)  
+</p>
+</td></tr></table>
+<h2><a name="ANOVA_Table"></a><span class="mw-headline">ANOVA表</span></h2>
+<p>線形フィットのANOVA表は
+</p>
+<table class="simple">
+<tr>
+<th>
+</th>
+<th>DF
+</th>
+<th>平方和
+</th>
+<th>平均平方
+</th>
+<th>F値
+</th>
+<th>Prob &gt; F
+</th></tr>
+<tr>
+<th>モデル
+</th>
+<td><i>1</i>
+</td>
+<td><i><img src="../images/Linear_Regression_Results/math-76d28c12ecef51969ed6e4493c3934cf.png" title="SS_{reg} = TSS - RSS" alt="SS_{reg} = TSS - RSS" class="tex"/> </i>
+</td>
+<td><i><img src="../images/Linear_Regression_Results/math-e5dc62d3c446d80f3ce90dab19161a25.png" title="MS_{reg} = SS_{reg} / 1 " alt="MS_{reg} = SS_{reg} / 1 " class="tex"/></i>
+</td>
+<td><i><img src="../images/Linear_Regression_Results/math-d5ea59127172a534421d4b08fd6d3135.png" title="MS_{reg} / MSE " alt="MS_{reg} / MSE " class="tex"/></i>
+</td>
+<td><i>p-値 </i>
+</td></tr>
+<tr>
+<th>誤差
+</th>
+<td><i>n* - 1</i>
+</td>
+<td><i>RSS</i>
+</td>
+<td><i>MSE = RSS / (n* - 1)</i>
+</td>
+<td>
+</td>
+<td>
+</td></tr>
+<tr>
+<th>合計
+</th>
+<td><i>n*</i>
+</td>
+<td><i>TSS</i>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td></tr></table>
+<table class="note">
+<tr>
+<td><b>Note</b>: 切片がモデルに含まれてる場合、 <i>n</i>*=n-1です。それ以外は、 <i>n*=n </i>で平方和の合計は未補正となります。勾配が固定の場合、 <i><img src="../images/Linear_Regression_Results/math-dfc3cbf5cc5bf940257cfcf8c86ddec0.png" title="df_{Model}" alt="df_{Model}" class="tex"/></i>= 0です。
+</td></tr></table>
+<p>ここで、平方和の合計TSSは、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-4d28d19e4d080da070b15388db314470.png" title="TSS =\sum_{i=1}^nw_i(y_i -\frac{\sum_{i=1}^n w_i y_i} {\sum_{i=1}^n w_i})^2" alt="TSS =\sum_{i=1}^nw_i(y_i -\frac{\sum_{i=1}^n w_i y_i} {\sum_{i=1}^n w_i})^2" class="tex"/>       <i>(補正)</i>
+</th>
+<td>(31)
+</td></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-7c28116e7d91e4726fe4c0d26fa4e93e.png" title="TSS=\sum_{i=1}^n w_iy_i^2" alt="TSS=\sum_{i=1}^n w_iy_i^2" class="tex"/> 　(未補正)
+</th></tr></table>
+<p>F値で、フィットモデルがモデル「y=一定」と、有意に異なるかどうかを検定します。
+</p><p><i>p</i>値、または、有意水準は、<i>F</i>検定と一緒に出力されます。<i>p</i>値が、<img src="../images/Linear_Regression_Results/math-06f7895cd704b1cb0921cf98aec71926.png" title="\alpha\,\!" alt="\alpha\,\!" class="tex"/>よりも小さい場合、フィットモデルはモデル「y=一定」と有意に異なります。
+</p><p>ある値に切片を固定している場合、<i>F</i>検定のp値には意味が無く、切片一定としない線形回帰とは異なります。
+</p>
+<h2><a name="Lack_of_fit_table"></a><span class="mw-headline">適合度検定表</span></h2>
+<p>不適合度を実行するには、連結フィットモードが選択されている場合に、少なくともX値がデータセット内や複数データセット内で反復できるように、反復観測、つまり、「複製データ」が必要になります。
+</p><p>複製データでフィットに使われている表記：
+</p>
+<table class="formula">
+<tr>
+<td><img src="../images/Linear_Regression_Results/math-9ec98a656b3500239d77f631b67811cc.png" title="y_{ij}" alt="y_{ij}" class="tex"/>は、データセット中のi番目のx値における、j番目の観測値です。<br />
+</td></tr>
+<tr>
+<td><img src="../images/Linear_Regression_Results/math-dbebef52b4445e3b11d20855d6e8d5dd.png" title="\bar{y}_{i}" alt="\bar{y}_{i}" class="tex"/>は、i番目のx値における全てのy値の平均です。<br />
+</td></tr>
+<tr>
+<td><img src="../images/Linear_Regression_Results/math-0ff3619d52350e78a9bb731ef2c23991.png" title="\hat{y}_{ij}" alt="\hat{y}_{ij}" class="tex"/>は、i番目のx値における、j番目の観測値の予測反応です。<br />
+</td></tr></table>
+<p>残差平方和は、次の通りです。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-5c76b3b72fc70ebfe8fed6e8daf6a7c7.png" title="RSS=\sum_{i}\sum_{j}(y_{ij}-\hat{y}_{ij})^2" alt="RSS=\sum_{i}\sum_{j}(y_{ij}-\hat{y}_{ij})^2" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-3e215ad1665f7e78c1af881e4c6e4ac6.png" title="LFSS=\sum_{i}\sum_{j}(\bar{y}_{i}-\hat{y}_{ij})^2" alt="LFSS=\sum_{i}\sum_{j}(\bar{y}_{i}-\hat{y}_{ij})^2" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-b8b02bc61db58ee0bcf8927677ab3c59.png" title="PESS=\sum_{i}\sum_{j}(y_{ij}-\bar{y}_{i})^2" alt="PESS=\sum_{i}\sum_{j}(y_{ij}-\bar{y}_{i})^2" class="tex"/>
+</th></tr></table>
+<p>非線形フィッティングの適合度検定表： 
+</p>
+<table class="simple">
+<tr>
+<th>
+</th>
+<th>DF
+</th>
+<th>平方和
+</th>
+<th>平均平方
+</th>
+<th>F値
+</th>
+<th>Prob &gt; F
+</th></tr>
+<tr>
+<th>不適合度
+</th>
+<td><i>c-2</i>
+</td>
+<td><i>LFSS </i>
+</td>
+<td><i>MSLF = LFSS / (c - 2) </i>
+</td>
+<td><i>MSLF / MSPE</i>
+</td>
+<td><i>p-値 </i>
+</td></tr>
+<tr>
+<th>純誤差
+</th>
+<td><i>n - c</i>
+</td>
+<td><i>PESS</i>
+</td>
+<td><i>MSPE = PESS / (n - c)</i>
+</td>
+<td>
+</td>
+<td>
+</td></tr>
+<tr>
+<th>誤差
+</th>
+<td><i>n*-1</i>
+</td>
+<td><i>RSS</i>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td></tr></table>
+<table class="note">
+<tr>
+<td><b>Note</b>:<br />
+<p>切片がモデルに含まれてる場合、 <i>n*=n-1</i> です。それ以外は、 <i>n*=n </i>で平方和の合計は未補正となります。勾配が固定の場合、 <i><img src="../images/Linear_Regression_Results/math-dfc3cbf5cc5bf940257cfcf8c86ddec0.png" title="df_{Model}" alt="df_{Model}" class="tex"/></i>= 0です。  
+</p><p><i>c</i>は、明確なx値の数を示します。切片が固定である場合、適合度検定のDFは、c-1になります。
+</p>
+</td></tr></table>
+<h2><a name="Covariance_and_Correlation_Matrix"></a><span class="mw-headline">共分散行列と相関行列</span></h2>
+<p>線形回帰の共分散行列は次のように計算されます。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-b0bcaee4a98e9106fc977c7ab6cf5b79.png" title="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\sigma ^2\frac 1{SXX}\begin{pmatrix} \sum \frac{x_i^2}n &amp; -\bar x \\-\bar x &amp; 1 \end{pmatrix}" alt="
+\begin{pmatrix}
+Cov(\beta _0,\beta _0) &amp; Cov(\beta _0,\beta _1)\\
+Cov(\beta _1,\beta _0) &amp; Cov(\beta _1,\beta _1)
+\end{pmatrix}=\sigma ^2\frac 1{SXX}\begin{pmatrix} \sum \frac{x_i^2}n &amp; -\bar x \\-\bar x &amp; 1 \end{pmatrix}" class="tex"/>
+</th>
+<td>
+<p>(32)  
+</p>
+</td></tr></table>
+<p>2つのパラメータ間の相関は、 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-b029662d99694045f6e48fab550e2b23.png" title="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " alt="
+\rho (\beta _i,\beta _j)=\frac{Cov(\beta _i,\beta _j)}{\sqrt{Cov(\beta _i,\beta _i)}\sqrt{Cov(\beta _j,\beta _j)}} " class="tex"/>
+</th>
+<td>
+<p>(33)  
+</p>
+</td></tr></table>
+<h2><a name="Outliers"></a><span class="mw-headline">外れ値</span></h2>
+<p>外れ値は、スチューデン残差グラフ内の絶対値が2より大きいポイントです。
+</p><p><img src="../images/Linear_Regression_Results/math-3efc2a4ea2a6baf34c2d5f2bf5bd4765.png" title="abs(Studentized Residual)&gt;2" alt="abs(Studentized Residual)&gt;2" class="tex"/>
+</p><p>スチューデント化残差は、<a href="../../UserGuide/UserGuide/Graphic_Residual_Analysis.html#Detecting_outliers_by_transforming_residuals" title="ユーザガイド:グラフィカルな残差解析">残差変換による外れ値の除去</a>で説明されています。
+</p>
+<h2><a name="Residual_Analysis"></a><span class="mw-headline">残差解析</span></h2>
+<p><img src="../images/Linear_Regression_Results/math-af2593b49488f8bc44396795792c2d79.png" title="r_i" alt="r_i" class="tex"/>は、標準残差<img src="../images/Linear_Regression_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/>から成っています。
+</p>
+<h3><a name="Standardized"></a><span class="mw-headline">正規化</span></h3>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-edba44ad3ec53a729a081e552ffd8d52.png" title="r_i^{\prime }=\frac{r_i}s_\varepsilon" alt="r_i^{\prime }=\frac{r_i}s_\varepsilon" class="tex"/>
+</th>
+<td>
+<p>(34)
+</p>
+</td></tr></table>
+<h3><a name="Studentized"></a><span class="mw-headline">スチューデント化</span></h3>
+<p>内部スチューデント化残差とも呼ばれます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-5b4f1a55a60f41732cd45963fc4d7899.png" title="r_i^{\prime }=\frac{r_i}{s_\varepsilon\sqrt{1-h_i}}" alt="r_i^{\prime }=\frac{r_i}{s_\varepsilon\sqrt{1-h_i}}" class="tex"/>
+</th>
+<td>
+<p>(35)
+</p>
+</td></tr></table>
+<h3><a name="Studentized_deleted"></a><span class="mw-headline">スチューデント化削除</span></h3>
+<p>外部スチューデント化残差とも呼ばれます。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-33555ae8465559528419ee80ff636f91.png" title="r_i^{\prime }=\frac{r_i}{s_{\varepsilon-i}\sqrt{1-h_i}}" alt="r_i^{\prime }=\frac{r_i}{s_{\varepsilon-i}\sqrt{1-h_i}}" class="tex"/>
+</th>
+<td>
+<p>(36)
+</p>
+</td></tr></table>
+<p><b>スチューデント化</b>と<b>スチューデント化削除</b>の残差の数式で、<img src="../images/Linear_Regression_Results/math-57339b77b3af15427b7154f4daf8a223.png" title="h_i" alt="h_i" class="tex"/>は、行列<img src="../images/Linear_Regression_Results/math-44c29edb103a2872f519ad0c9a0fdaaa.png" title="P" alt="P" class="tex"/> の<i>i</i> 番目の対角要素です。
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-609f90ce395d2346200e55f1a632bab0.png" title="P=X(X&apos;X)^{-1}X^{\prime }" alt="P=X(X&apos;X)^{-1}X^{\prime }" class="tex"/>
+</th>
+<td>
+<p>(37)
+</p>
+</td></tr></table>
+<p><img src="../images/Linear_Regression_Results/math-7af4042b185319dd95cc2dcb158a88b2.png" title="s_{\varepsilon-i}" alt="s_{\varepsilon-i}" class="tex"/>は、分散が<i>i</i>番目を除いた全てのポイントに基づいて計算されていることを意味します。
+</p>
+<h2><a name="Confidence_and_Prediction_Bands"></a><span class="mw-headline">信頼帯と推定帯</span></h2>
+<p>特定の値 <img src="../images/Linear_Regression_Results/math-333d67b49be014c08ced5a715a0aa659.png" title="x_p\,\!" alt="x_p\,\!" class="tex"/> の場合、<img src="../images/Linear_Regression_Results/math-29b229c7c531f688ffb25ceadae2a0f6.png" title="x=x_p\,\!" alt="x=x_p\,\!" class="tex"/> における <img src="../images/Linear_Regression_Results/math-bfb6488d6c250ac5aeed1bbf139baaa5.png" title="y\,\!" alt="y\,\!" class="tex"/> の平均値の信頼区間 <img src="../images/Linear_Regression_Results/math-7f5c0246ea96d63005bb89b2c2966a90.png" title="100(1-\alpha )\% " alt="100(1-\alpha )\% " class="tex"/> は 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-2fc729f483df6668e6cfd645dcb324fb.png" title="\hat y\pm t_{(\frac \alpha 2,n^{*}-1)}s_\varepsilon \sqrt{\frac 1n+\frac{(x_p-\bar x)^2}{SXX}}" alt="\hat y\pm t_{(\frac \alpha 2,n^{*}-1)}s_\varepsilon \sqrt{\frac 1n+\frac{(x_p-\bar x)^2}{SXX}}" class="tex"/>
+</th>
+<td>
+<p>(38)  
+</p>
+</td></tr></table>
+<p><img src="../images/Linear_Regression_Results/math-29b229c7c531f688ffb25ceadae2a0f6.png" title="x=x_p\,\!" alt="x=x_p\,\!" class="tex"/> における <img src="../images/Linear_Regression_Results/math-bfb6488d6c250ac5aeed1bbf139baaa5.png" title="y\,\!" alt="y\,\!" class="tex"/> の平均値の推定区間 <img src="../images/Linear_Regression_Results/math-7f5c0246ea96d63005bb89b2c2966a90.png" title="100(1-\alpha )\% " alt="100(1-\alpha )\% " class="tex"/> は 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-6825d104f5fef27aeab6053f04b8892c.png" title="\hat y\pm t_{(\frac \alpha 2,n^{*}-1)}s_\varepsilon \sqrt{1+\frac 1n+\frac{(x_p-\bar x)^2}{SXX}}" alt="\hat y\pm t_{(\frac \alpha 2,n^{*}-1)}s_\varepsilon \sqrt{1+\frac 1n+\frac{(x_p-\bar x)^2}{SXX}}" class="tex"/>
+</th>
+<td>
+<p>(39)  
+</p>
+</td></tr></table>
+<h2><a name="Confidence_Ellipses"></a><span class="mw-headline">信頼楕円</span></h2>
+<p>一対の変数 (X, Y) が2変量の正規分布に従うと仮定すると、信頼楕円を使って、2つの変数間の相関を調べることができます。信頼楕円は(<img src="../images/Linear_Regression_Results/math-35b4d0362fcb2694d21b2abf35ccfc7f.png" title="\bar x" alt="\bar x" class="tex"/>, <img src="../images/Linear_Regression_Results/math-096544be8a676d2c106621014410cb9d.png" title="\bar y" alt="\bar y" class="tex"/>) を中心に作られ、長軸  a と短軸 <i>b</i> は、以下のようになります。 
+</p>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-eda409b7a7a814287c66467c2beba53c.png" title=" a=c\sqrt{\frac{\sigma _x^2+\sigma _y^2+\sqrt{(\sigma _x^2-\sigma _y^2)+4r^2\sigma _x^2\sigma _y^2}}2}" alt=" a=c\sqrt{\frac{\sigma _x^2+\sigma _y^2+\sqrt{(\sigma _x^2-\sigma _y^2)+4r^2\sigma _x^2\sigma _y^2}}2}" class="tex"/>
+</th></tr>
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-8fc5aa9e1aad046be36d3bf32f61d9aa.png" title=" b=c\sqrt{\frac{\sigma _x^2+\sigma _y^2-\sqrt{(\sigma _x^2-\sigma _y^2)+4r^2\sigma _x^2\sigma _y^2}}2}" alt=" b=c\sqrt{\frac{\sigma _x^2+\sigma _y^2-\sqrt{(\sigma _x^2-\sigma _y^2)+4r^2\sigma _x^2\sigma _y^2}}2}" class="tex"/>
+</th>
+<td>
+<p>(40)  
+</p>
+</td></tr></table>
+<p>指定した有意水準 <img src="../images/Linear_Regression_Results/math-d7d1320edf83ed676aa5f848c9711fe9.png" title=" (1-\alpha )\,\! " alt=" (1-\alpha )\,\! " class="tex"/> に対して
+</p>
+<ul><li>母集団の<b>平均</b>の信頼楕円は、次の式で定義されます。 </li></ul>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-97456e57ebc619b9ce5476c311cf3eef.png" title=" c=\sqrt{\frac{2(n-1)}{n(n-2)}(\alpha ^{\frac 2{2-n}}-1)} " alt=" c=\sqrt{\frac{2(n-1)}{n(n-2)}(\alpha ^{\frac 2{2-n}}-1)} " class="tex"/>
+</th>
+<td>
+<p>(41)  
+</p>
+</td></tr></table>
+<ul><li><b>推定</b>の信頼楕円は、次の式で定義されます。 </li></ul>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-cbb5ed712a41f59f2cd27d2f0e29b096.png" title=" c=\sqrt{\frac{2(n+1)(n-1)}{n(n-2)}(\alpha ^{\frac 2{2-n}}-1)} " alt=" c=\sqrt{\frac{2(n+1)(n-1)}{n(n-2)}(\alpha ^{\frac 2{2-n}}-1)} " class="tex"/>
+</th>
+<td>
+<p>(42)  
+</p>
+</td></tr></table>
+<ul><li>信頼楕円の<b>傾斜角度</b>は、次の式で定義されます。 </li></ul>
+<table class="formula">
+<tr>
+<th><img src="../images/Linear_Regression_Results/math-4c3d04a2e2be2ca32d3e4ae7960b3966.png" title="\beta =\frac 12\arctan \frac{2r\sqrt{\sigma _x^2\sigma _y^2}}{\sigma _x^2-\sigma _y^2}" alt="\beta =\frac 12\arctan \frac{2r\sqrt{\sigma _x^2\sigma _y^2}}{\sigma _x^2-\sigma _y^2}" class="tex"/>
+</th>
+<td>
+<p>(43)  
+</p>
+</td></tr></table>
+<h2><a name="Finding_Y.2FX_from_X.2FY"></a><span class="mw-headline"><a href="../../UserGuide/UserGuide/Finding_Y_X_from_X_Y_Standard_Curves.html" title="ユーザガイド:X/YからY/Xを検索  &ndash; 標準曲線">X/YからY/Xを検索</a></span></h2>
+<h2><a name="Residual_Plots"></a><span class="mw-headline">残差プロット</span></h2>
+<h3><a name="Resudial_Type"></a><span class="mw-headline">残差タイプ</span></h3>
+<p>作図するには、<b>標準</b>、<b>正規化</b>、<b>スチューデント化</b>、<b>スチューデント化残差</b>から1つの残差タイプを選択します。
+</p>
+<h3><a name="Residual_vs._Independent"></a><span class="mw-headline">残差と独立変数</span></h3>
+<p>残差散布図<img src="../images/Linear_Regression_Results/math-9b207167e5381c47682c6b4f58a623fb.png" title="res" alt="res" class="tex"/> vs.独立変数<img src="../images/Linear_Regression_Results/math-75087036f44bb88958df97586ae3bd1e.png" title="x_1,x_2,\dots,x_k" alt="x_1,x_2,\dots,x_k" class="tex"/>では、それぞれのプロットは別のグラフに配置されます。
+</p>
+<h3><a name="Residual_vs._Predicted_Value"></a><span class="mw-headline">残差vs.予測値</span></h3>
+<p>残差散布図 <img src="../images/Linear_Regression_Results/math-9b207167e5381c47682c6b4f58a623fb.png" title="res" alt="res" class="tex"/> vs. フィット結果<img src="../images/Linear_Regression_Results/math-c9e53cbdffe795c0913cd927f13ffb9b.png" title="\hat{y_i}" alt="\hat{y_i}" class="tex"/>
+</p>
+<h3><a name="Residual_vs._Order_of_the_Data"></a><span class="mw-headline">残差vs.データ順序</span></h3>
+<p><img src="../images/Linear_Regression_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/> vs. 順番<img src="../images/Linear_Regression_Results/math-865c0c0b4ab0e063e5caa3387c1a8741.png" title="i" alt="i" class="tex"/>
+</p>
+<h3><a name="Histogram_of_the_Residual"></a><span class="mw-headline">残差のヒストグラム</span></h3>
+<p>残差のヒストグラムプロット
+</p>
+<h3><a name="Residual_Lag_Plot"></a><span class="mw-headline">残差のラグプロット</span></h3>
+<p>残差<img src="../images/Linear_Regression_Results/math-2bcba7a477778a0e5cadc454c7a01628.png" title="res_i" alt="res_i" class="tex"/> vs. ラグ残差<img src="../images/Linear_Regression_Results/math-00407b58eb35fecbfea6dc5d4413e493.png" title="res_{(i&ndash;1)}" alt="res_{(i&ndash;1)}" class="tex"/>
+</p>
+<h3><a name="Normal_Probability_Plot_of_Residuals"></a><span class="mw-headline">正規残差確率プロット</span></h3>
+<p>残差の正規確率プロットは、分散が正規分布しているかどうかを調べるのに使用します。結果のプロットはおおよそ線形で、誤差範囲は正規分布していると仮定することができます。プロットはパーセンタイル対順序化された残差をベースにしており、パーセンタイルは次のように仮定されます。 
+</p><p><img src="../images/Linear_Regression_Results/math-ec995bff3922b2290f85bed243de5eb3.png" title="\frac{(i-\frac{3}{8})}{(n+\frac{1}{4})}" alt="\frac{(i-\frac{3}{8})}{(n+\frac{1}{4})}" class="tex"/> 
+</p><p>ここで、<i>n</i> はデータセットの合計数で、<i>i</i> は<i>i</i> 番目のデータです。なお、<a href="../../UserGuide/UserGuide/Probability_Plot_and_Q-Q_Plot.html" title="ユーザガイド：確率プロットとQ-Qプロット">正規確率プロットとQ-Qプロット</a>についてをご覧ください。
+</p>
+
+    

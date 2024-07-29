@@ -1,0 +1,122 @@
+﻿<h1 class="firstheading">GNU Scientific Libraryを呼び出す</h1><p><br />
+ここでは、OriginCでGSLを使用する方法を紹介します。 
+</p>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> v2.5のGSLソースコードからVisual Studioビルド64ビットDLLを使用するには、次の手順に従います。
+<ul><li><a class="external free" href="https://github.com/BrianGladman/gsl" target="_blank">https://github.com/BrianGladman/gsl</a>からファイルを取得する<br /></li>
+<li><a class="external free" href="https://github.com/BrianGladman/gsl/blob/master/build.vc/gsl.readme.txt" target="_blank">https://github.com/BrianGladman/gsl/blob/master/build.vc/gsl.readme.txt</a>の指示に従ってプロジェクト/ソリューションをビルドし、gsl.dllとcblas.dllを取得します。<br /></li>
+<li>GSL.dllは、後述のlibgsl.dllです。</li></ul>
+</td></tr></table>
+<p><br />
+まず、<a class="external free" href="http://gnuwin32.sourceforge.net/packages/gsl.htm" target="_blank">http://gnuwin32.sourceforge.net/packages/gsl.htm</a>からGSL DLLをダウンロードする必要があります。2つのDLL (libgsl.dllとlibgslcblas.dll)だけが必要で、それらをOrigin Cファイルを保持するのと同じフォルダに置くことができます。例えば、c:\oc\ フォルダに保存します。ダウンロードしたdllを使用する場合、<a href="../../OriginC/Category/Access_an_External_DLL.html#Version_Control" title="カテゴリ:外部DLLへのアクセス">バージョンの問題</a>に注意してください。
+</p>
+<dl><dt>libgsl.dll</dt>
+<dd> これはメインのgsl dllです。</dd>
+<dt>libgslcblas.dll</dt>
+<dd> このdllはlibgsl.dllに必要です。</dd></dl>
+<p><br />
+Origin Cでlibgsl.dllを使用するには、gsl関数のプロトタイプを提供するヘッダファイルが必要です。必要に応じて、GSLヘッダーファイルから必要なプロトタイプ/定義をコピーして変換できます。たとえば、<b>ocgsl.h</b>という名前を付け、c:\oc\フォルダに作成します。
+</p><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#ocgsl.h"><span class="tocnumber">1</span> <span class="toctext">ocgsl.h</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#test_gsl.c"><span class="tocnumber">2</span> <span class="toctext">test_gsl.c</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Using_GSL_in_a_Fitting_Function"><span class="tocnumber">3</span> <span class="toctext">フィット関数内でGSLを使用</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Notice_on_using_GSL_functions"><span class="tocnumber">3.1</span> <span class="toctext">GSL関数の使用に関する注意事項</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h3><a name="ocgsl.h"></a><span class="mw-headline">ocgsl.h</span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// dllをロードするとき、正しいバージョンをロードする必要があるので、 </span>
+<span style="color: #008000;">// 上の &quot;バージョンの問題&quot; のリンクを確認</span>
+<span style="color: #0000ff;">#pragma</span> dll<span style="color: #000000;">(</span>libgsl, header<span style="color: #000000;">)</span> 
+<span style="color: #008000;">// これはOCの特別なプラグマで、</span>
+<span style="color: #008000;">// libgsl.dll はこのファイルと同じ場所であることを示すキーワード</span>
+
+<span style="color: #0000ff;">#define</span> GSL_EXPORT	<span style="color: #008000;">// OCでは、これは不要なので空にする</span>
+
+<span style="color: #008000;">// gsl関数プロトタイプをここで直接検索してコピー可能</span>
+
+GSL_EXPORT <span style="color: #0000ff;">double</span> gsl_sf_zeta_int <span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> n<span style="color: #000000;">)</span>;
+
+GSL_EXPORT <span style="color: #0000ff;">int</span> gsl_fit_linear <span style="color: #000000;">(</span><span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> x, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">size_t</span> xstride,
+                               <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> y, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">size_t</span> ystride,
+                               <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">size_t</span> n,
+                               <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> c0, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> c1,
+                               <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> cov00, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> cov01, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> cov11,
+                               <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> sumsq<span style="color: #000000;">)</span>;</pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> コードに<b>#pragma dll(libgslcblas, header)</b>を記述しないでください。そうしないとコンパイルエラーが発生する可能性があります。
+</td></tr></table>
+<p><br />
+</p>
+<h3><a name="test_gsl.c"></a><span class="mw-headline">test_gsl.c</span></h3>
+<p>以下は、gsl_sf_zeta_int および gsl_fit_linearの呼び出し方法を示す簡単なOCファイルです。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #ff00ff;">&quot;ocgsl.h&quot;</span>
+
+
+<span style="color: #008000;">// GSLのRiemann Zeta関数を使用したサンプル</span>
+<span style="color: #0000ff;">void</span> gsl_test_zeta_function<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">double</span> result1 <span style="color: #000080;">=</span> gsl_sf_zeta_int<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">double</span> result2 <span style="color: #000080;">=</span> pi<span style="color: #000040;">*</span>pi<span style="color: #000040;">/</span><span style="color: #0000dd;">6</span>;
+	
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Zeta(2) =&nbsp;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result1<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;pi^2/6  =&nbsp;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result2<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #008000;">// GSLの線形フィットを使用したサンプル</span>
+<span style="color: #0000ff;">void</span> gsl_test_linear_fit<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> npts <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	vector vx<span style="color: #000000;">(</span>npts<span style="color: #000000;">)</span>, vy<span style="color: #000000;">(</span>npts<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> ds <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, di <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+		
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>npts; <span style="color: #000040;">++</span>ii<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		vx<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ii;
+		vy<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ii<span style="color: #000040;">*</span>ds <span style="color: #000040;">+</span> di <span style="color: #000040;">+</span> <span style="color: #000000;">(</span><span style="color: #000000;">rand</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">%</span>100<span style="color: #000040;">-</span><span style="color: #0000dd;">50</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #0000dd;">0.05</span>;
+	<span style="color: #000000;">}</span>
+	
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>npts; <span style="color: #000040;">++</span>ii<span style="color: #000000;">)</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%.2f<span style="color: #666666; font-weight: bold;">\t</span>%.2f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, vx<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>, vy<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+	
+	<span style="color: #0000ff;">double</span> c0, c1, cov00, cov01, cov11, sumsq;
+	
+	gsl_fit_linear<span style="color: #000000;">(</span>vx, <span style="color: #0000dd;">1</span>, vy, <span style="color: #0000dd;">1</span>, npts, <span style="color: #000040;">&amp;</span>c0, <span style="color: #000040;">&amp;</span>c1, <span style="color: #000040;">&amp;</span>cov00, <span style="color: #000040;">&amp;</span>cov01, <span style="color: #000040;">&amp;</span>cov11, <span style="color: #000040;">&amp;</span>sumsq<span style="color: #000000;">)</span>;
+	
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Slope=%f, Intercept=%f&quot;</span>, c1, c0<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p><br />
+</p>
+<h2><a name="Using_GSL_in_a_Fitting_Function"></a><span class="mw-headline">フィット関数内でGSLを使用</span></h2>
+<p>この<a class="external text" href="../../Tutorial/Tutorial/User_Defined_Fitting_Funciton_using_GNU_Scientific_Library.html">サンプル</a>でも、フィット関数内にgsl関数を使用する方法を示しています。
+</p>
+<h3><a name="Notice_on_using_GSL_functions"></a><span class="mw-headline">GSL関数の使用に関する注意事項</span></h3>
+<p>Origin Cは、構造体変数を返す外部関数をサポートしていないので、このようなデータを返す関数はOrigin Cでは使用できません。例えば、
+</p>
+<pre class="oc" style="font-family:monospace;">gsl_complex gsl_complex_add <span style="color: #000000;">(</span>gsl_complex a, gsl_complex b<span style="color: #000000;">)</span></pre>
+<p>データの gsl_complex タイプを返し、gsl_complex は次のように定義されます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">typedef</span> <span style="color: #0000ff;">struct</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">double</span> dat<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+<span style="color: #000000;">}</span>gsl_complex;</pre>
+
+
+
+
+
+
+
+    

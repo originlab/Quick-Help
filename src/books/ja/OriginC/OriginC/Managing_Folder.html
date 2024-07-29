@@ -1,0 +1,82 @@
+﻿<h1 class="firstheading">Managing Folder</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Get_Project_Tree"><span class="tocnumber">2</span> <span class="toctext">Get Project Tree</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Create_a_Subfolder_with_the_Specified_Name"><span class="tocnumber">3</span> <span class="toctext">Create a Subfolder with the Specified Name</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Get_Project_Tree"></a><span class="mw-headline">Get Project Tree</span></h2>
+
+  <p>The following code shows how to access each folder in project explorer. Copy functions to Code Builder and compile, run <b>ShowFolderTree</b> in Command Window, will print out project tree.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> ShowFolderTree<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Tree tr;
+        
+        Folder fldRoot <span style="color: #000080;">=</span> Project.<span style="color: #000000;">RootFolder</span>;
+        TreeNode trRootFolder <span style="color: #000080;">=</span> tr.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span> fldRoot.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+        
+        _get_project_tree<span style="color: #000000;">(</span>trRootFolder, fldRoot<span style="color: #000000;">)</span>;
+        out_tree<span style="color: #000000;">(</span>trRootFolder<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">void</span> _get_project_tree<span style="color: #000000;">(</span>TreeNode<span style="color: #000040;">&amp;</span> tr, Folder<span style="color: #000040;">&amp;</span> fldParent<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>     
+        foreach<span style="color: #000000;">(</span>Folder fld in fldParent.<span style="color: #000000;">Subfolders</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                string strName <span style="color: #000080;">=</span> fld.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                strName.<span style="color: #000000;">MakeValidCName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                TreeNode trThisFolder <span style="color: #000080;">=</span> tr.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span> strName <span style="color: #000000;">)</span>;
+                trThisFolder.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span> STR_LABEL_ATTRIB, fld.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+                
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> fld.<span style="color: #000000;">Subfolders</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        _get_project_tree<span style="color: #000000;">(</span>trThisFolder, fld<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>                     
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Create_a_Subfolder_with_the_Specified_Name"></a><span class="mw-headline">Create a Subfolder with the Specified Name</span></h2>
+
+  <p>This example is used to create a subfolder under the active folder by specifying a name. If the specified subfolder exists already, delete it first, including its all subfolders and other items, and then create an empty subfolder under this active folder with this specified name.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> delete_and_create_subfolder<span style="color: #000000;">(</span>string strFolder<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// trim white space</span>
+        strFolder.<span style="color: #000000;">TrimRight</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        strFolder.<span style="color: #000000;">TrimLeft</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        Folder fld <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveFolder</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get active folder in project explorer</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>fld.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"The active folder is not valid!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">// loop all subfolder</span>
+        foreach<span style="color: #000000;">(</span>Folder subfolder in fld.<span style="color: #000000;">Subfolders</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> subfolder.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">Compare</span><span style="color: #000000;">(</span>strFolder<span style="color: #000000;">)</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// if the specified subfolder exists</span>
+                <span style="color: #000000;">{</span>
+                        fld.<span style="color: #000000;">RemoveSubFolder</span><span style="color: #000000;">(</span>subfolder.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// delete this subfolder</span>
+                        <span style="color: #0000ff;">break</span>;
+                <span style="color: #000000;">}</span>     
+        <span style="color: #000000;">}</span>
+        
+        fld.<span style="color: #000000;">AddSubfolder</span><span style="color: #000000;">(</span>strFolder<span style="color: #000000;">)</span>;  <span style="color: #008000;">// add subfolder with the specified name</span>
+<span style="color: #000000;">}</span>
+</pre>

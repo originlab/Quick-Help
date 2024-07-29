@@ -1,0 +1,463 @@
+﻿<h1 class="firstheading">pkFind</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Brief_Information"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Additional_Information"><span class="tocnumber">2</span> <span class="toctext">追加の情報</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Command_Line_Usage"><span class="tocnumber">3</span> <span class="toctext">コマンドラインでの使用法</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#X-Function_Execution_Options"><span class="tocnumber">4</span> <span class="toctext">Xファンクションの実行オプション</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Variables"><span class="tocnumber">5</span> <span class="toctext">変数</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Description"><span class="tocnumber">6</span> <span class="toctext">説明</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Examples"><span class="tocnumber">7</span> <span class="toctext">サンプル</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Algorithm"><span class="tocnumber">8</span> <span class="toctext">アルゴリズム</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Basic_Concept:"><span class="tocnumber">8.1</span> <span class="toctext">基本コンセプト</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Local_Maximum_Method"><span class="tocnumber">8.2</span> <span class="toctext">局所最大法</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Window_Search_Method"><span class="tocnumber">8.3</span> <span class="toctext">ウィンドウサーチ法</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#First_Derivative_Method"><span class="tocnumber">8.4</span> <span class="toctext">一階微分法</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Second_Derivative_Method"><span class="tocnumber">8.5</span> <span class="toctext">二階微分法</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Residual_after_1st_Derivative"><span class="tocnumber">8.6</span> <span class="toctext">一階微分後の残差</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#References"><span class="tocnumber">9</span> <span class="toctext">参考文献</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Related_X-Functions"><span class="tocnumber">10</span> <span class="toctext">関連するXファンクション</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Brief_Information"></a><span class="mw-headline">概要</span></h2>
+<p>様々な検索手法を使用してピークを検出します
+</p>
+<h2><a name="Additional_Information"></a><span class="mw-headline">追加の情報</span></h2>
+<p>この機能は8.0 SR5.で更新されています。詳細は、<a class="external text" href="http://www.originlab.com/doc/ReleaseNotes" target="_blank">リリースノート</a>を参照してください。
+</p>
+<h2><a name="Command_Line_Usage"></a><span class="mw-headline">コマンドラインでの使用法</span></h2>
+<p><code>
+pkfind method:=first; // pick peaks by using the first derivative method.
+</code>
+</p>
+<h2><a name="X-Function_Execution_Options"></a><span class="mw-headline">Xファンクションの実行オプション</span></h2>
+<p><a class="external text" href="../../LabTalk/LabTalk/X-Function_Execution_Options.html">スクリプトからXファンクションにアクセスする場合、追加のオプションスイッチについてのページを参照してください。</a>
+</p>
+<h2><a name="Variables"></a><span class="mw-headline">変数</span></h2>
+<table class="xfvar">
+<tr>
+<th width="8%">表示<br />名
+</th>
+<th width="8%">変数<br />名
+</th>
+<th width="8%">I/O<br />と<br />データ型
+</th>
+<th width="8%">デフォルト<br />値
+</th>
+<th>説明
+</th></tr>
+<tr>
+<td>入力
+</td>
+<td>iy
+</td>
+<td>
+<p>入力
+</p><p>XYRange
+</p>
+</td>
+<td> <center>&lt;active&gt;</center>
+</td>
+<td> 入力データを指定します。
+</td></tr>
+<tr>
+<td>スムージングポイント数
+</td>
+<td>smooth
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> Savitzky-Golayスムージングは、ピーク検出前にスペクトルデータに実行することができます。スムージングを実行する場合、この変数を使ってSavitzky-Golayスムージングの移動ウィンドウでのポイント数(正の整数)を入力します。スムージングを実行したくない場合、この変数を0にセットします。
+</td></tr>
+<tr>
+<td>方向
+</td>
+<td>dir
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>b</center>
+</td>
+<td> ピークの方向を指定します。
+<p>オプションリスト：
+</p>
+<ul><li><i>p：正</i></li></ul>
+<dl><dd>正のピークのみを検出</dd></dl>
+<ul><li><i>n：負</i></li></ul>
+<dl><dd>負のピークのみを検出</dd></dl>
+<ul><li><i>b：両方</i></li></ul>
+<dl><dd>正負両方のピークを検出</dd></dl>
+</td></tr>
+<tr>
+<td>手法
+</td>
+<td>method
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>max</center>
+</td>
+<td> ピークを検索するのに使用する手法を指定します。
+<p>オプションリスト：
+</p>
+<ul><li><i>max：局所最大</i></li></ul>
+<dl><dd>局所最大法を使ってピークを探します。 </dd></dl>
+<ul><li><i>win:：ウィンドウサーチ</i></li></ul>
+<dl><dd>ウィンドウサーチ法を使ってピークを探します。</dd></dl>
+<ul><li><i>first:一次微分</i></li></ul>
+<dl><dd>一次微分法を使ってピークを探します。</dd></dl>
+<ul><li><i>second:2次微分(隠れたピークを探す)</i></li></ul>
+<dl><dd>2次微分法を使ってピークを探します。この方法は、データ内の隠れたピークを検出することができます。 </dd></dl>
+<ul><li><i>residue:1次微分後の残差 (隠れたピークを探す)</i></li></ul>
+<dl><dd>1次微分法後の残差を使ってピークを探します。この方法は、データ内の隠れたピークを検出することができます。 </dd></dl>
+</td></tr>
+<tr>
+<td>局所ポイント数
+</td>
+<td>npts
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>20</center>
+</td>
+<td> これは、手法の変数が0 (max)の場合のみ利用できます。局所的な領域でのポイント数を指定します。これは局所最大法でピークを検索するのみ使用します。
+</td></tr>
+<tr>
+<td>サイズオプション
+</td>
+<td>option
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>p</center>
+</td>
+<td> これは、手法の変数が1 (win)の場合のみ利用できます。これは、高さと幅の変数(下記)がどのように解釈するかを指定します。
+<p>オプションリスト：
+</p>
+<ul><li><i>r：素データのサイズ</i></li></ul>
+<dl><dd>値は元データのサイズとして解釈されます。</dd></dl>
+<ul><li><i>p：素データのパーセント</i></li></ul>
+<dl><dd>値は、入力データの合計の幅または最大高さのパーセントとして解釈されます。 </dd></dl>
+</td></tr>
+<tr>
+<td>高さ
+</td>
+<td>height
+</td>
+<td>
+<p>入力
+</p><p>double
+</p>
+</td>
+<td> <center>20</center>
+</td>
+<td> これは、手法の変数が1 (win)の場合のみ利用できます。これは矩形の高さを指定します。これはピークを検索するのに使用されます。
+</td></tr>
+<tr>
+<td>幅
+</td>
+<td>width
+</td>
+<td>
+<p>入力
+</p><p>double
+</p>
+</td>
+<td> <center>50</center>
+</td>
+<td> これは、手法の変数が1 (win)の場合のみ利用できます。これは矩形の幅を指定します。これはピークを検索するのに使用されます。
+</td></tr>
+<tr>
+<td>ピークのフィルタリング
+</td>
+<td>filter
+</td>
+<td>
+<p>入力
+</p><p>int
+</p>
+</td>
+<td> <center>h</center>
+</td>
+<td> 見つけるピークの数またはピークの高さに制限をつけるかどうかを指定します。
+<p>オプションリスト：
+</p>
+<ul><li><i>0=none:なし</i></li></ul>
+<dl><dd>見つかったピークの数やピークの高さに制限を付けません。 </dd></dl>
+<ul><li><i>1=h:高さ</i></li></ul>
+<dl><dd>下の <b>値</b> 変数と一緒に動作します。変数の値より大きい高さのピークを探します。</dd></dl>
+<ul><li><i>2=num:個数</i></li></ul>
+<dl><dd>下の <b>値</b> 変数と一緒に動作します。ピークの数は変数の値より少なくなります。</dd></dl>
+<ul><li><i>3=hp:高さ&nbsp;%</i></li></ul>
+<dl><dd>下の <b>値</b> 変数と一緒に動作します。変数の値より大きい高さのパーセントを探します。</dd></dl>
+</td></tr>
+<tr>
+<td>値
+</td>
+<td>しきい値高さ / ピークの数 / しきい値高さ(%)
+</td>
+<td>
+<p>入力
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> この変数は、上の <b>filter</b> 変数と一緒に動作します。見つかったピークの最小高さ、または見つかったピークの最大数、または見つかったピークの高さパーセントを指定します。
+</td></tr>
+<tr>
+<td>最大半幅
+</td>
+<td>hwidth
+</td>
+<td>
+<p>入力
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> ピークマーカを探す最大の範囲を指定します。
+</td></tr>
+<tr>
+<td>ピーク裾の高さ
+</td>
+<td>fheight
+</td>
+<td>
+<p>入力
+</p><p>double
+</p>
+</td>
+<td> <center>0</center>
+</td>
+<td> ピークマーカを探す高さのしきい値を指定します。
+</td></tr>
+<tr>
+<td>ピーク中央のインデックス
+</td>
+<td>ocenter
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> デフォルトでピーク中心のインデックスを出力します。ピーク中心のインデックスを出力する場所を指定します。
+</td></tr>
+<tr>
+<td>左マーカのインデックス
+</td>
+<td>oleft
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> 左ピークマーカのインデックスを出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td>右マーカのインデックス
+</td>
+<td>oright
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;input&gt;!(&lt;new&gt;)</center>
+</td>
+<td> 右ピークマーカのインデックスを出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> ピークの中心のX値
+</td>
+<td>ocenter_x
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> ピークの中心のX値を出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> ピークの中心のY値
+</td>
+<td>ocenter_y
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> ピークの中心のY値を出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> 左マーカーのX値
+</td>
+<td>oleft_x
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> 左マーカーのX値を出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> 左マーカーのY値
+</td>
+<td>oleft_y
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> 左マーカーのY値を出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> 右マーカーのX値
+</td>
+<td>oright_x
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> 右マーカーのX値を出力するかどうかを指定します。
+</td></tr>
+<tr>
+<td> 右マーカーのY値
+</td>
+<td>oright_y
+</td>
+<td>
+<p>出力
+</p><p>ベクター
+</p>
+</td>
+<td> <center>&lt;入力&gt;!(&lt;新規&gt;)</center>
+</td>
+<td> 右マーカーのY値を出力するかどうかを指定します。
+</td></tr></table>
+<h2><a name="Description"></a><span class="mw-headline">説明</span></h2>
+<p>このXファンクションは、さまざまな方法でピーク(ピークの中心とピークマーカ)を見つけ、ピーク中心のインデックスを出力するのに使用できます。
+</p>
+<h2><a name="Examples"></a><span class="mw-headline">サンプル</span></h2>
+<ul><li> コードサンプル</li></ul>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/* このサンプルでは、スペクトルデータのピークを決定する方法を示します。
+\Samples\Spectroscopy フォルダのサンプルデータを使用します。
+1.Originのブックにサンプルデータをインポート
+2.Xファンクションpkfindでピークを検索
+3.元のデータと見つかったピークをプロット
+*/</span> <span style="color: #008000;">//7つのピークがあるスペクトルデータをインポート</span> string fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Spectroscopy\HiddenPeaks.dat&quot;</span>; newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> labels<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Time|Spectrum Data|Peak Center Indices|Peak Center X|Peak Center Y&quot;</span>; impASC; string bkn<span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #000080;">%</span>H; <span style="color: #008000;">//ピーク中心を検索</span> pkFind iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>second ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> oleft<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span> oright<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>&nbsp;; <span style="color: #008000;">//ピーク中心をインデックスで検索</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>;	<span style="color: #008000;">//X位置</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">5</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>;	<span style="color: #008000;">//Y位置</span> <span style="color: #008000;">//黒線でスペクトルデータをプロット</span> plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>; <span style="color: #008000;">//ピーク中心を赤の散布図でプロット</span> plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>bkn<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">201</span>  legend<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;</pre>
+<h2><a name="Algorithm"></a><span class="mw-headline">アルゴリズム</span></h2>
+<h3><a name="Basic_Concept:"></a><span class="mw-headline">基本コンセプト</span></h3>
+<p>このXファンクションは、5つの手法でピークを探します。普通のピークは、局所最大、ウィンドウサーチ、1次微分の手法で簡単に見つけることができます。データに隠れたピークが含まれる場合、別の手法、2次微分や1次微分後の残差を使います。
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image004.jpg" src="../images/PkFind/Pkfind_help_English_files_image004.jpg" width="323"  /></a></dd></dl>
+<h3><a name="Local_Maximum_Method"></a><span class="mw-headline">局所最大法</span></h3>
+<p>ピーク検出は、極値(極大値や極小値)に基づいて行われます。手順は以下の通りです。
+</p>
+<ol>
+<li> 入力曲線上のすべてのポイントについて、Originは、範囲内のポイント間の極値（最大または最小）であるかどうかをチェックします。このポイントは、このポイントを中心とし、左側と右側の両方から<i>局所ポイント数</i>の長さを持ちます。ポイントが極値の場合、候補となるピークの中心として、この点に印が付けられます。
+<dl><dd><a  class="image"><img alt="PkFind localmax.png" src="../images/PkFind/PkFind_localmax.png" width="483"  /></a></dd></dl>
+<li> 候補となるすべてのピークに対して、Originは<i>ピークのフィルタリング</i>で指定した制約条件に合致するかチェックします。<i>ピークフィルタ</i>を<i>高さ</i>に設定し、<i>しきい値高さ</i>を20にすると、高さが参照値の20％未満のピークは除外されます。 
+<br />参照値は下記の方法で決定されます：
+まず、スペクトルの最大値と最小値を取得します。ベースラインがスペクトルから差し引かれている場合、ベースライン減算後のスペクトルが使用されます。そして、最小値と最大値の絶対値を比較します。大きい方が、<i>しきい値高さ</i>の参照値と見なされます。
+<li>データポイントが候補ピークであり、ピークフィルタリングで指定された制約を満たしている場合、この候補ピークは実際のピークと見なされ、結果に出力されます。
+</ol>
+<h3><a name="Window_Search_Method"></a><span class="mw-headline">ウィンドウサーチ法</span></h3>
+<p>このXファンクションは、移動矩形を使ってピークを検出します。この矩形はX軸に平行な2つの辺とY軸に平行な別の2つの辺を持ちます。次の4つのステップを実行し、正のピークが存在するかどうかを見つけます。
+</p><p>1. 矩形の左下のx座標をx1、右下のx座標をx2とします。入力曲線上にx値がx1であるようなポイントP1 (x1, y1) を見つけ、 また、入力曲線上にx値がx2であるような別のポイント P2 (x2, y2) を見つけます。
+</p><p>2. y1 と y2 を比較して、2つのyのうちより大きい方を y&apos;として取ります。
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 1.png" src="../images/PkFind/Pkfind_rectangle_1.png" width="135"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>3. P1とP2の間の曲線の最大値yである曲線の局所最大値(yLocalMax)が見つかります。そして、局所最大値と y&apos; の差を以下のように計算します。
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 2.png" src="../images/PkFind/Pkfind_rectangle_2.png" width="131"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>4. Diffを矩形の高さと比較します。<a  class="image"><img alt="Pkfind rectangle 411.png" src="../images/PkFind/Pkfind_rectangle_411.png" width="111"  /></a>の場合、局所最大値のポイントが正のピークだと見なされ、それ以外の場合、この矩形の中に正のピークは検出されません。
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 3.png" src="../images/PkFind/Pkfind_rectangle_3.png" width="329"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>負のピークを見つける手順も同様です。
+</p><p>1. 矩形の左下のx座標をx1、右下のx座標をx2とします。入力曲線上にx値がx1であるようなポイントQ1 (x1, y1) を見つけ、 また、入力曲線上にx値がx2であるような別のポイント Q2 (x2, y2) を見つけます。
+</p><p>2. y1 と y2 を比較して、2つのyのうちより小さい方を y&apos;として取ります。
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 11.png" src="../images/PkFind/Pkfind_rectangle_11.png" width="137"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>3. Q1とQ2の間の曲線の最小値yである曲線の局所最小値(yLocalMin)が見つかります。そして、局所最小値と y&apos; の差を以下のように計算します。
+</p>
+<dl><dd><dl><dd><dl><dd><dl><dd><a  class="image"><img alt="Pkfind rectangle 21.png" src="../images/PkFind/Pkfind_rectangle_21.png" width="133"  /></a></dd></dl></dd></dl></dd></dl></dd></dl>
+<p>4. Diff&quot;を矩形の高さと比較します。<a  class="image"><img alt="Pkfind rectangle 410.png" src="../images/PkFind/Pkfind_rectangle_410.png" width="113"  /></a>の場合、局所最小値のポイントが負のピークだと見なされ、それ以外の場合、この矩形の中に負のピークは検出されません。
+</p><p>これらのステップが終了したら、矩形が1ポイント右に動き、矩形がデータ範囲外に出るまで、これらのステップを繰り返し実行します。
+</p>
+<h3><a name="First_Derivative_Method"></a><span class="mw-headline">一階微分法</span></h3>
+<p>基本的な考え方は以下の通りです。1) 正のピークの中心が <img src="../images/PkFind/math-37f14e7725ae8fec0cacf956a69e3f6e.png" title="x_c" alt="x_c" class="tex"/> にあるとき、<img src="../images/PkFind/math-bce1e9f6a2ddb4a59309cf2286c2bade.png" title="x_c-1" alt="x_c-1" class="tex"/> での一階微分は正になりますが、 <img src="../images/PkFind/math-f410f377926ef2b58e5b00696ab57488.png" title="x_c+1" alt="x_c+1" class="tex"/>での一階微分は負になります。2) 負のピークの中心が <img src="../images/PkFind/math-37f14e7725ae8fec0cacf956a69e3f6e.png" title="x_c" alt="x_c" class="tex"/>にあるとき、 -1 での一階微分は負になりますが、 +1 での一階微分は正になります。
+</p>
+<h3><a name="Second_Derivative_Method"></a><span class="mw-headline">二階微分法</span></h3>
+<p>データの滑らかな2階微分は、元データの極値を検出でき、これは通常のピークと隠れピークの両方のピーク位置に対応します。
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image006.jpg" src="../images/PkFind/Pkfind_help_English_files_image006.jpg" width="361"  /></a></dd></dl>
+<p>図ではスペクトルデータは2つの局所最大ピークと1つの隠れたピークで構成されています。その2階微分曲線が下側に表示され、極小値により、この中に隠れたピークがあることがわかります。
+</p>
+<h3><a name="Residual_after_1st_Derivative"></a><span class="mw-headline">一階微分後の残差</span></h3>
+<p>基本的な考え方は以下の通りです。
+</p><p>1.一階微分法を使ってピークを検出し、個々にピークをフィットします。   そして、各ピークのフィット曲線を累積します。 
+</p><p>2.スペクトルデータと累積フィットデータ間の残差を計算します。 
+</p><p>3.それぞれ対応するデータポイントの残差は隠れたピークとして考えられるしきい値より大きくなります。  
+</p><p>以下は、隠れたピークを見つける一階微分法の例です。このスペクトルデータには2つの正のピークと1つの隠れたピークがあります。2つの正のピークのフィット曲線の累積データがスペクトルデータから減算されると、隠れたピークが残差プロット内にはっきりと現れます。 
+</p>
+<dl><dd><a  class="image"><img alt="Pkfind help English files image008.jpg" src="../images/PkFind/Pkfind_help_English_files_image008.jpg" width="332"  /></a></dd></dl>
+<h2><a name="References"></a><span class="mw-headline">参考文献</span></h2>
+<h2><a name="Related_X-Functions"></a><span class="mw-headline">関連するXファンクション</span></h2>
+<p><a href="../../XFunction/X-Function/Blauto.html" title="Xファンクション:Blauto">blauto</a>, <a href="../../XFunction/X-Function/Fitpeaks.html" title="Xファンクション:Fitpeaks">fitpeaks</a>, <a href="../../XFunction/X-Function/Pa.html" title="Xファンクション:Pa">pa</a>, <a href="../../XFunction/X-Function/PaMultiY.html" title="Xファンクション:PaMultiY">PaMultiY</a>, <a href="../../XFunction/X-Function/NLfitpeaks.html" title="Xファンクション:NLfitpeaks">NLfitpeaks</a>
+</p>
+<hr class='keywordshr'><p><span class='keywords'>キーワード</span><span class='keywordsInput'>スペクトル、二次微分、局所最大、ウィンドウ、しきい値</span></p>
+
+
+
+
+
+
+
+    

@@ -1,0 +1,119 @@
+﻿<h1 class="firstheading">アルゴリズム (IIRフィルタ)</h1>
+<p>IIR(Infinite Impulse Response、無限インパルス応答)フィルタは次の図のように、フィードバックを行うデジタルフィルタです。</p>
+<dl>
+<dd><img alt="Image:IIR_Filter_1.png" src="../images/Algorithm_(IIR_Filters)/IIR_Filter_1.png" width="650" height="297" border="0" /></dd>
+</dl>
+<p>デジタルフィルタはよく、差を表す数式で表記され、入力シグナルと出力シグナルの関係を定義します。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-7c08c4305c2dca88747f3e68c927c803.png" title="b_0*x(n)+b_1*x(n-1)+ \cdots +b_N*x(n-N)-a_0*y(n)-a_1*y(n-1)- \cdots -a_M*y(n-M) = 0 " alt="b_0*x(n)+b_1*x(n-1)+ \cdots +b_N*x(n-N)-a_0*y(n)-a_1*y(n-1)- \cdots -a_M*y(n-M) = 0 " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>このように変形します。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-642fe61653452fecb486feedc5c5892e.png" title="y(n) = \frac{1}{a_0} \left ( b_0*x(n)+b_1*x(n-1)+ \cdots +b_N*x(n-N)-a_1*y(n-1)-a_2*y(n-2)- \cdots -a_M*y(n-M) \right ) = \frac{1}{a_0} \left ( \sum_{i=0}^N b_i*x(n-i) - \sum_{j=1}^M a_j*y(n-j) \right )" alt="y(n) = \frac{1}{a_0} \left ( b_0*x(n)+b_1*x(n-1)+ \cdots +b_N*x(n-N)-a_1*y(n-1)-a_2*y(n-2)- \cdots -a_M*y(n-M) \right ) = \frac{1}{a_0} \left ( \sum_{i=0}^N b_i*x(n-i) - \sum_{j=1}^M a_j*y(n-j) \right )" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-34a0548b4230677f03557ee80c1e3812.png" title="a_0 \ne 0" alt="a_0 \ne 0" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> の中で、Nはフィードフォワードフィルタの順番、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-fe3e01a305f27284ff5115f4c5ea0fa4.png" title="b_i" alt="b_i" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> はフィードフォワードの係数、Mはフィードバックフィルタの順番、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-2aecb1dc57e87620a373d19b0a889efb.png" title="a_i" alt="a_i" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> はフィードバックの係数、x(n)は入力シグナル、y(n)は出力シグナルを表します。<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-b74399bf7dce6c0d36084ecad54d9bc9.png" title="\sum_{j=1}^M a_j*y(n-j)" alt="\sum_{j=1}^M a_j*y(n-j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;の表記がフィードバックを表します。</p>
+<a name="Digital_Filter_Representation" id="Digital_Filter_Representation"></a>
+<h2><span class="mw-headline">デジタルフィルタ表現</span></h2>
+<p>OriginではIIRフィルタの出力表現が4種類あります。</p>
+<ul>
+<li>変換関数</li>
+<li style="list-style: none; display: inline;">
+<p>IIRフィルタの変換関数はz-領域での2つの多数項の複合式<span class="texhtml"><i>z</i> <sup>- 1</sup></span>で表わされます。IIRフィルタの変換フィルタを見つけるには、上記数式を以下のように並び替えます。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-ca464d0160ee40522389162e89ae7615.png" title="\sum_{i=0}^N b_i*x(n-i) = \sum_{j=0}^M a_j*y(n-j)" alt="\sum_{i=0}^N b_i*x(n-i) = \sum_{j=0}^M a_j*y(n-j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>z-変換は次のように定義されます。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-24397def1f691ebc01f9e1b75b52356f.png" title="X(z) = \sum_{}^{} x(n)z^n" alt="X(z) = \sum_{}^{} x(n)z^n" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>z-変換を数式の両辺から取り除くと次のようになります。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-fb12b95cb718ea85d5df8f003fd97289.png" title="\sum_{i=0}^N b_i*z^{-i}*X(z) = \sum_{j=0}^M a_j*z^{-j}*Y(z)" alt="\sum_{i=0}^N b_i*z^{-i}*X(z) = \sum_{j=0}^M a_j*z^{-j}*Y(z)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>IIRフィルタの変換関数をz-領域内で表わすと、次のようになります。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-18f3ad22a91f07dff439dd4c90217a8b.png" title="H(z) = \frac{Y(z)}{X(z)} = \frac{\sum_{i=0}^N b_iz^{-i}}{\sum_{j=0}^M a_jz^{-j}}" alt="H(z) = \frac{Y(z)}{X(z)} = \frac{\sum_{i=0}^N b_iz^{-i}}{\sum_{j=0}^M a_jz^{-j}}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+</li>
+<li>ゼロ-極-ゲイン</li>
+<li style="list-style: none; display: inline;">
+<p>上記変換関数が示すように、分子はゼロの位置を示して分母は極の位置を示しています。つまり、変換関数はゼロ-極-ゲイン形式に書き直す事ができます。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-61c7f59968fd3b0c2f963ef65644abc4.png" title="H(z) = \frac{q(z)}{p(z)} = k*\frac{(z-q_1)(z-q_2) \cdots (z-q_N)}{(z-p_1)(z-p_2) \cdots (z-p_M)} = k* \frac{\prod_{i=1}^N (z-q_i)}{\prod_{j=1}^M (z-p_j)}" alt="H(z) = \frac{q(z)}{p(z)} = k*\frac{(z-q_1)(z-q_2) \cdots (z-q_N)}{(z-p_1)(z-p_2) \cdots (z-p_M)} = k* \frac{\prod_{i=1}^N (z-q_i)}{\prod_{j=1}^M (z-p_j)}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>ここで、変換関数のkはゲインを、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-da326f7200e158a864695985b2e2f095.png" title="q_i" alt="q_i" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> と<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-8b6f59f2af8f45b773cb64ac76c9b095.png" title="p_j" alt="p_j" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> はゼロと極をそれぞれ表しています。</p>
+</li>
+<li>状態空間</li>
+<li style="list-style: none; display: inline;">
+<p>フィルタシステムの状態空間は次のように定義されます。</p>
+<p><span style="font-style: italic;"><img src="../images/Algorithm_(IIR_Filters)/math-3ae3e1c6ae2a5c193bfceed733059a23.png" title="x(n+1) = Ax(n)+Bu(n)" alt="x(n+1) = Ax(n)+Bu(n)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></span></p>
+<p><span style="font-style: italic;"><img src="../images/Algorithm_(IIR_Filters)/math-87217aea16bef357ac1a8836b7dae1a7.png" title="y(n) = Cx(n)+Du(n)" alt="y(n) = Cx(n)+Du(n)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></span></p>
+</li>
+<li>&#160;</li>
+<li style="list-style: none; display: inline;">
+<p>ここで、u(n)は入力、x(n)は状態ベクトル、y(n)は出力、Aはm×mの行列、mはフィルタの順番、Bは列ベクトル、Cは行ベクトル、Dはスケーラを示しています。</p>
+</li>
+<li>第二順序セクション(Second Order Section, SOS)</li>
+<li style="list-style: none; display: inline;">
+<p>デジタルフィルタ変換関数に対応する第二順序セクションは以下のように書き表されます。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-bf37bbe49389eafcaa3832886b94d32c.png" title="H(z) = g \prod_{k=1}^L H_k(z) = g \prod_{k=1}^L \frac{b_{0k}+b_{1k}*z^{-1}+b_{2k}*z^{-2}}{a_{0k}+a_{1k}*z^{-1}+a_{2k}*z^{-2}}" alt="H(z) = g \prod_{k=1}^L H_k(z) = g \prod_{k=1}^L \frac{b_{0k}+b_{1k}*z^{-1}+b_{2k}*z^{-2}}{a_{0k}+a_{1k}*z^{-1}+a_{2k}*z^{-2}}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>ここで、gはゲイン、 <span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-08ccc734e6e7cec6a954203f7f803a6e.png" title="b_{0k}, b_{1k}, b_{2k}" alt="b_{0k}, b_{1k}, b_{2k}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は分子係数、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-f060a5967073e72303f4a73a855c0190.png" title="a_{0k}, a_{1k}, a_{2k}" alt="a_{0k}, a_{1k}, a_{2k}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;は分母係数を示しています。もしフィルタ順序mが偶数なら<img src="../images/Algorithm_(IIR_Filters)/math-f5415326bd653dad7fd8edc421a7eaf1.png" title="L = m/2" alt="L = m/2" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />に、mが奇数なら<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(IIR_Filters)/math-cf8d36f5878c2e80a00166b0334d5749.png" title="L = (m+1)/2" alt="L = (m+1)/2" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> になります。すると、SOS は以下のようなL×6行列で表記できます。</p>
+<p><img src="../images/Algorithm_(IIR_Filters)/math-e75c8ff51478129ca380790b69a885fa.png" title="SOS = \begin{bmatrix} b_{01} &amp; b_{11} &amp; b_{21} &amp; a_{01} &amp; a_{11} &amp; a_{21} \\ b_{02} &amp; b_{12} &amp; b_{22} &amp; a_{02} &amp; a_{12} &amp; a_{22} \\ b_{03} &amp; b_{13} &amp; b_{23} &amp; a_{03} &amp; a_{13} &amp; a_{23} \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ b_{0L} &amp; b_{1L} &amp; b_{2L} &amp; a_{0L} &amp; a_{1L} &amp; a_{2L} \\ \end{bmatrix} " alt="SOS = \begin{bmatrix} b_{01} &amp; b_{11} &amp; b_{21} &amp; a_{01} &amp; a_{11} &amp; a_{21} \\ b_{02} &amp; b_{12} &amp; b_{22} &amp; a_{02} &amp; a_{12} &amp; a_{22} \\ b_{03} &amp; b_{13} &amp; b_{23} &amp; a_{03} &amp; a_{13} &amp; a_{23} \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ b_{0L} &amp; b_{1L} &amp; b_{2L} &amp; a_{0L} &amp; a_{1L} &amp; a_{2L} \\ \end{bmatrix} " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+</li>
+</ul>
+<a name="How_to_Design_IIR_Filter" id="How_to_Design_IIR_Filter"></a>
+<h2><span class="mw-headline">IIRフィルタを設計するには</span></h2>
+<p>IIRフィルタを設計する一般的な手順は次の通りです。</p>
+<ol>
+<li>まず、フィルタの仕様を指定します。</li>
+<li>ローパスアナログフィルタのプロトタイプを指定します。OriginでサポートされているプロトタイプはButterworth、Chebyshev Type I、Chebyshev Type II、Ellipticです。
+<table class="simple">
+<tr>
+<th>手法</th>
+<th>大きさの二乗の反応関数</th>
+<th>アナログフィルタの転嫁関数</th>
+</tr>
+<tr>
+<td>Butterworth</td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-06aa264a295cbb1767cb1ca538ccdf7d.png" title="|H_a(j \Omega)|^2 = \frac{1}{1+ \Omega^{2N}}" alt="|H_a(j \Omega)|^2 = \frac{1}{1+ \Omega^{2N}}" class="tex" border="0" /></td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-d7becceda2edc8c563acd1c83c04bb98.png" title="H_a(s) = \frac{q(s)}{p(s)} = \frac{g}{(s-p_1)(s-p_2)\cdots (s-p_N)} = \frac{g}{\prod_{k=1}^N (s-p_k)}" alt="H_a(s) = \frac{q(s)}{p(s)} = \frac{g}{(s-p_1)(s-p_2)\cdots (s-p_N)} = \frac{g}{\prod_{k=1}^N (s-p_k)}" class="tex" border="0" /></td>
+</tr>
+<tr>
+<td>Chebyshev Type I</td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-49f48bd44dab8a25e536608f56232e51.png" title="|H_a(j \Omega)|^2 = \frac{1}{1+ \varepsilon^2 T_N^2(\Omega)}" alt="|H_a(j \Omega)|^2 = \frac{1}{1+ \varepsilon^2 T_N^2(\Omega)}" class="tex" border="0" /></td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-d7becceda2edc8c563acd1c83c04bb98.png" title="H_a(s) = \frac{q(s)}{p(s)} = \frac{g}{(s-p_1)(s-p_2)\cdots (s-p_N)} = \frac{g}{\prod_{k=1}^N (s-p_k)}" alt="H_a(s) = \frac{q(s)}{p(s)} = \frac{g}{(s-p_1)(s-p_2)\cdots (s-p_N)} = \frac{g}{\prod_{k=1}^N (s-p_k)}" class="tex" border="0" /></td>
+</tr>
+<tr>
+<td>Chebyshev Type II</td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-b95bd49d72c341761164082eecff58a6.png" title="|H_a(j \Omega)|^2 = \frac{1}{1+ (\varepsilon^2 T_N^2(\frac{1}{\Omega}))^{-1}} = \frac{\varepsilon^2 T_N^2(\frac{1}{\Omega})}{1+ \varepsilon^2 T_N^2(\frac{1}{\Omega})}" alt="|H_a(j \Omega)|^2 = \frac{1}{1+ (\varepsilon^2 T_N^2(\frac{1}{\Omega}))^{-1}} = \frac{\varepsilon^2 T_N^2(\frac{1}{\Omega})}{1+ \varepsilon^2 T_N^2(\frac{1}{\Omega})}" class="tex" border="0" /></td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-5d0c997cefb21c950d3f582393f4b452.png" title="H_a(s) = \frac{q(s)}{p(s)} = g \frac{(s-q_1)(s-q_2)\cdots (s-q_N)}{(s-p_1)(s-p_2)\cdots (s-p_N)} = g \prod_{k=1}^N \frac{(s-q_k)}{(s-p_k)}" alt="H_a(s) = \frac{q(s)}{p(s)} = g \frac{(s-q_1)(s-q_2)\cdots (s-q_N)}{(s-p_1)(s-p_2)\cdots (s-p_N)} = g \prod_{k=1}^N \frac{(s-q_k)}{(s-p_k)}" class="tex" border="0" /></td>
+</tr>
+<tr>
+<td>Elliptic</td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-7105d72b06ecb6d6905b6d78de137ac5.png" title="|H_a(j \Omega)|^2 = \frac{1}{1+ \varepsilon^2 U_N^2(\Omega)}" alt="|H_a(j \Omega)|^2 = \frac{1}{1+ \varepsilon^2 U_N^2(\Omega)}" class="tex" border="0" /></td>
+<td><img src="../images/Algorithm_(IIR_Filters)/math-729de22478137d4a729caf2a8a892040.png" title="H_a(s) = \frac{q(s)}{p(s)} = g \frac{(s-q_1)(s-q_2)\cdots (s-q_N)}{(s-p_1)(s-p_2)\cdots (s-p_N)} = g \frac{\prod_{i=1}^N (s-q_i)}{\prod_{j=1}^N (s-p_j)}" alt="H_a(s) = \frac{q(s)}{p(s)} = g \frac{(s-q_1)(s-q_2)\cdots (s-q_N)}{(s-p_1)(s-p_2)\cdots (s-p_N)} = g \frac{\prod_{i=1}^N (s-q_i)}{\prod_{j=1}^N (s-p_j)}" class="tex" border="0" /></td>
+</tr>
+</table>
+<p>上記表で、<span class="Apple-converted-space">&#160;</span><span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-2e9ef3d6ef62a48d70720728d3e90e31.png" title="\Omega" alt="\Omega" class="tex" border="0" /></span>は周波数、Nはフィルタの順番、<span class="Apple-converted-space">&#160;</span><span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-f8b1c5a729a09649c275fca88976d8dd.png" title="\varepsilon" alt="\varepsilon" class="tex" border="0" /></span>は通過帯域の周波数反応内での最大振幅、<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-6b49b3e15040b545164aeecec64c3eef.png" title="T_N" alt="T_N" class="tex" border="0" /></span>はChebyshev多項式、<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-8f1e4c12ae7db041de1cd3774881b534.png" title="U_N" alt="U_N" class="tex" border="0" /></span>はJacobian楕円関数、gはスケーラゲイン、sはラプラス変換の面、<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-1fcf841ba6cb2c8ae44b2ca642079582.png" title="q_k" alt="q_k" class="tex" border="0" /></span>または<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-da326f7200e158a864695985b2e2f095.png" title="q_i" alt="q_i" class="tex" border="0" /></span>はゼロ、そして<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-37776ef04e8a6a01d5ffe1dcf1322214.png" title="p_k" alt="p_k" class="tex" border="0" /></span>または<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-8b6f59f2af8f45b773cb64ac76c9b095.png" title="p_j" alt="p_j" class="tex" border="0" /></span>は極を表します。</p>
+</li>
+<li>アナログフィルタのための周波数変換
+<p>ローパスフィルタをハイパス、バンドパス、バンドストップフィルタに変換するには希望のカットオフ周波数を使用します。Originでは、状態空間法が周波数変換計算において使用されます。ローパスフィルタの元の変換関数は<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-fbd47a5691e4eedcbc4c90f7bf2052f3.png" title="H(s')" alt="H(s')" class="tex" border="0" /></span>として仮定され、返還後の変換関数は<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-f68021749ff69bf0b89869d4358ea300.png" title="H(s)" alt="H(s)" class="tex" border="0" /></span>になります。</p>
+<ul>
+<li>ローパスからローパスへは、アナログローパスフィルタをカットオフ周波数1ラジアン/秒でローパスフィルタに流し込み、そのうえで特定のカットオフ周波数を使用して変換します。
+<dl>
+<dd><img src="../images/Algorithm_(IIR_Filters)/math-fd2bc93279a3d102ef0a3f93e82944d9.png" title="H(s)= H(s')|_{s'=s/\omega_0}" alt="H(s)= H(s')|_{s'=s/\omega_0}" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li>ローパスからハイパス
+<dl>
+<dd><img src="../images/Algorithm_(IIR_Filters)/math-a23e90d8b16c089660217aee790ba06b.png" title="H(s) = H(s')|_{s'=\omega_0/s}" alt="H(s) = H(s')|_{s'=\omega_0/s}" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li>ローパスからバンドパス
+<dl>
+<dd><img src="../images/Algorithm_(IIR_Filters)/math-bc5b4a2cdcd0d0a15820481a06a34113.png" title="H(s) = H(s')|_{s'= \frac{\omega_0}{B_{\omega}} \frac{(s/\omega_0)^2+1}{s/\omega_0}}" alt="H(s) = H(s')|_{s'= \frac{\omega_0}{B_{\omega}} \frac{(s/\omega_0)^2+1}{s/\omega_0}}" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li>ローパスからバンドストップ
+<dl>
+<dd><img src="../images/Algorithm_(IIR_Filters)/math-82f207f0674fb05f44a05d8114db1a66.png" title="H(s) = H(s')|_{s'= \frac{B_{\omega}}{\omega_0} \frac{s/\omega_0}{(s/\omega_0)^2+1}}" alt="H(s) = H(s')|_{s'= \frac{B_{\omega}}{\omega_0} \frac{s/\omega_0}{(s/\omega_0)^2+1}}" class="tex" border="0" /></dd>
+</dl>
+</li>
+</ul>
+<p>ここで、 <span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-ea049d291f5de81a58a0083836cf2173.png" title="\omega_0 = sqrt(\omega_1*\omega_2)" alt="\omega_0 = sqrt(\omega_1*\omega_2)" class="tex" border="0" /></span>は中央の周波数、<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-eb703645d2ed7fb7cc88f026398cbb21.png" title="B_\omega = \omega_2 - \omega_1" alt="B_\omega = \omega_2 - \omega_1" class="tex" border="0" /></span>はバンド幅、<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-e2c2aee4747574ad34af5d8e2840607c.png" title="\omega_1" alt="\omega_1" class="tex" border="0" /></span>と<span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-a6441f0242954464393cf80fccecdc9b.png" title="\omega_2" alt="\omega_2" class="tex" border="0" /></span>は下側と上側のハンド幅の角になります。</p>
+</li>
+<li>アナログフィルタをデジタルフィルタに変換します。
+<p>アナログフィルタをデジタルフィルタに変換するのに、Originは次式で定義される双線形変換で定義します。</p>
+<p><span style="line-height: 19.2px;"><img src="../images/Algorithm_(IIR_Filters)/math-c5d7826437b319e43baea0970a4213c7.png" title="s = \frac{1-z^{-1}}{1+z^{-1}}" alt="s = \frac{1-z^{-1}}{1+z^{-1}}" class="tex" border="0" /></span></p>
+</li>
+</ol>
+<a name="Forward_and_Backward_Filtering" id="Forward_and_Backward_Filtering"></a>
+<h2><span class="mw-headline">前方と後方フィルタリング</span></h2>
+<p>Originは前方と後方フィルタリングを行う事ができ、これはゼロ段階歪みとしいう結果になります。まず、これはデータを前方でフィルタリングし、それからフィルタをかけたデータを逆順にしてからフィルタを通過させます。</p>
+<p><br /></p>

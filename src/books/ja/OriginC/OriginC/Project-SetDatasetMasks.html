@@ -1,0 +1,93 @@
+﻿<h1 class="firstheading">Project::SetDatasetMasks</h1>
+
+  <p><span class="OIndex" style="display:none">SetDatasetMasks</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Set dataset mask info</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> SetDatasetMasks<span style="color: #000000;">(</span> LPCTSTR lpcszDatasetName, <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> <span style="color: #000040;">&amp;</span> vnMaskIndices <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">const</span> vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> <span style="color: #000040;">&amp;</span> vnMaskValues <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>lpcszDatasetName</dt>
+
+    <dd>[input]name of the Dataset object</dd>
+
+    <dt>vnMaskIndices</dt>
+
+    <dd>[input] array of indices where masks should be set. If NULL, remove all masks from dataset</dd>
+
+    <dt>vnMaskValues</dt>
+
+    <dd>[input] array of mask values at corresponding indices as vnMaskIndices, if NULL, set all in vnMaskIndices to 0</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>-2 if dataset not found, -3 if both vectors given but not the same size, -4 if vnMaskIndices = NULL but vnMaskValues not, otherwise return number of masked values, which could be smaller then the input vector size if not all given indices are in the range</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// set all cells that are smaller then zero to be masked</span>
+<span style="color: #0000ff;">void</span> Project_SetDatasetMasks_ex1<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+   Column cc <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>nCol<span style="color: #000000;">)</span>;
+   
+   string str <span style="color: #000080;">=</span> cc.<span style="color: #000000;">GetDatasetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+   
+   Dataset aa<span style="color: #000000;">(</span>wks, nCol<span style="color: #000000;">)</span>;
+   vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnInd;
+   <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> aa.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+   <span style="color: #000000;">{</span>
+       <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>aa<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+           vnInd.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+   <span style="color: #000000;">}</span>
+   vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnVal;
+   vnVal.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>vnInd.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+   vnVal <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// set all mask to 1</span>
+   <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> Project.<span style="color: #000000;">SetDatasetMasks</span><span style="color: #000000;">(</span>str, vnInd, vnVal<span style="color: #000000;">)</span>;
+   out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"ret = "</span>, nn<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/Project-GetDatasetMasks.html" title="OriginC:Project-GetDatasetMasks">Project::GetDatasetMasks</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

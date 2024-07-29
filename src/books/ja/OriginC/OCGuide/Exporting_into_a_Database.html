@@ -1,0 +1,56 @@
+﻿<h1 class="firstheading">データベースへのエクスポート</h1><p>Origin Cは、ワークシートのデータを指定したデータベースのテーブルにエクスポートする機能があります。次のステップは、フィットサマリーデータをデータベースにエクスポートする方法を示しています。 
+</p>
+<ol><li> MySQLの&quot;Analysis&quot;というデータベースをセットアップし、それは&quot;Lintilla&quot;というコンピュータ上で動作しているものとします。 </li>
+<li> 9つのフィールドを持つ&quot;FittingSummary&quot;というテーブルを作成し、最初の2つのフィールドのデータタイプをvarchar(40)としてセットし、残りはdouble型としてセットします。 </li>
+<li> OriginExe\Samples\Curve Fitting\autofit.ogwを開き、&quot;Data&quot;レイヤ上の列にデータを入力します。 </li>
+<li> 再計算の後、&quot;Summary&quot;レイヤをアクティブにし、次のコードを実行して、結果をデータベースにエクスポートします。 </li></ol>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//データベースの設定に従ってユーザは接続とクエリ文字列を修正</span>
+<span style="color: #008000;">//Server, Database, UID, PWDなどの値がデータベースの設定</span>
+<span style="color: #0000ff;">#define</span>	STR_DB_CONN				<span style="color: #ff00ff;">&quot;Driver={MySQL ODBC 3.51 Driver};	<span style="color: #666666; font-weight: bold;">\</span>
+		Server=Lintilla;Port=3306;Option=4;Database=Analysis;UID=test;PWD=test;&quot;</span>
+<span style="color: #0000ff;">#define</span>	STR_QUERY				<span style="color: #ff00ff;">&quot;Select * from FittingSummary&quot;</span>
+
+<span style="color: #0000ff;">bool</span>	write_wks_to_db<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> wks <span style="color: #000000;">)</span>
+		<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+	
+	<span style="color: #008000;">//&quot;Lintilla&quot;上の&quot;Analysis&quot;に接続</span>
+	string	strConn <span style="color: #000080;">=</span> STR_DB_CONN;
+	string	strQuery <span style="color: #000080;">=</span> STR_QUERY;
+	
+	Object	oConn;
+	oConn <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;ADODB.Connection&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>oConn <span style="color: #000000;">)</span>
+		<span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to create ADODB.Connection object!&quot;</span><span style="color: #000000;">)</span>;
+	oConn.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>strConn<span style="color: #000000;">)</span>;
+	
+	Object	oRecordset;
+	oRecordset <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>oRecordset <span style="color: #000000;">)</span>
+		<span style="color: #0000ff;">return</span> error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Fail to create ADODB.Recordset object!&quot;</span><span style="color: #000000;">)</span>;
+	
+	<span style="color: #008000;">//recordsetを開く</span>
+	oRecordset.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">//adUseClient, 詳細は MSDNを参照</span>
+	oRecordset.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>strQuery, oConn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//adOpenKeyset, adLockOptimistic</span>
+
+	<span style="color: #0000ff;">int</span> iRowBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>; <span style="color: #008000;">//8行</span>
+	<span style="color: #0000ff;">int</span> iColBegin <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">9</span>; <span style="color: #008000;">//9列</span>
+	
+	<span style="color: #008000;">//LAYWKSETRECORDSET_APPEND は新しいrecordsetを追加;</span>
+	<span style="color: #008000;">//LAYWKSETRECORDSET_REPLACE は既存のrecordsetsを置き換え</span>
+	<span style="color: #0000ff;">int</span> nOption <span style="color: #000080;">=</span> LAYWKSETRECORDSET_APPEND; <span style="color: #008000;">//append.</span>
+	
+	<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">WriteRecordset</span><span style="color: #000000;">(</span>oRecordset, nOption,
+			iRowBegin, nRows, iColBegin, nCols<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

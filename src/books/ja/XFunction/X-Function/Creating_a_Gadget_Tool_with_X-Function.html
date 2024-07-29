@@ -1,0 +1,351 @@
+﻿<h1 class="firstheading">Xファンクションのついたガジェットツールの作成</h1>
+<p><span class="OIndex" style="display: none;">ガジェットツール</span>Originはグラフと行列上の操作を行うガジェットツールをいくつか提供しています。これらのツールは、グラフウィンドウまたは行列ウィンドウがアクティブなときに、ガジェットメニューにあります。</p>
+<p>ガジェットツールの1つを選択すると、Originはグラフまたは行列に四角形のオブジェクトを追加し、それを使ってデータ分析したい領域を選択します。関心のある領域（ROI）を選択したら、<a class="image"><img alt="OCguide xf gadget tool contextmenu button.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_contextmenu_button.png" width="24" height="24" border="0" /></a> ボタンをクリックしてコンテキストメニューを開き、ダイアログまたはテーマを使って、分析方法をセットアップし、結果を希望の場所に出力します。</p>
+<p><a class="image"><img alt="OCguide xf gadget tool.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool.png" width="496" height="379" border="0" /></a></p>
+<p>Originはユーザ定義のXファンクションのついたガジェットツールを追加し、このガジェットをOriginのガジェットツールメニューに追加する事ができます。</p>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#How_to_Create_a_Gadget"><span class="tocnumber">1</span> <span class="toctext">ガジェットを作成する方法</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_an_X-Function"><span class="tocnumber">2</span> <span class="toctext">Xファンクションを作成する</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Defining_a_Class_Derived_from_GraphObjCurveTool"><span class="tocnumber">3</span> <span class="toctext">GraphObjCurveToolから導かれたクラスを定義する</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Adding_Event_Functions"><span class="tocnumber">4</span> <span class="toctext">イベント関数を追加する</span></a>
+<ol>
+<li class="toclevel-2 tocsection-5"><a href="#Basic_global_event_function"><span class="tocnumber">4.1</span> <span class="toctext">基本的なグローバルイベント関数</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Overload_virtual_event_functions"><span class="tocnumber">4.2</span> <span class="toctext">仮想イベント関数のオーバーロード</span></a></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="How_to_Create_a_Gadget" id="How_to_Create_a_Gadget"></a><span class="mw-headline">ガジェットを作成する方法</span></h2>
+<p>次にガジェットツールを作成する3つのステップを示します。</p>
+<ol>
+<li>Xファンクションを作成します。<br />
+Xファンクションはダイアログテーマを制御し、Originのガジェットメニューにガジェットツールを追加します。</li>
+<li>GraphObjCurveTool または MatObjROIToolを由来とするOrigin Cクラスを作成します。<br />
+GraphObjCurveTool と MatObjROITool はOrigin Cの構築クラスで以下のファイルで宣言されます。<br />
+<i>Origin実行フォルダ</i>\OriginC\Originlab\GraphObjTools.h<br />
+これらのクラスは興味のある領域 (ROI) オブジェクトを作成し、イベントのデフォルト制御を提供します。イベント、例えばROIオブジェクトを移動したりサイズを変更したり、ROIのコンテキストメニューでアイテムを選択するような事を含みます。</li>
+<li>イベント関数を追加します。<br />
+グローバルイベント関数の名前は「 <i>xfname</i>_イベント(アルファベット)」形式である必要があり、ここで<i>xfname</i>はXファンクションの名前である事を示します。関数の引数リストは次のシンタックスを使用する必要があります。
+<pre class="oc" style="font-family: monospace;">
+void xfname_events<span style="color: #000000;">(</span>string strGrName, int nEvent, int nMsg <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        
+</pre></li>
+</ol>
+<p>次のセクションはこれらのステップをより細かく説明します。</p>
+<h2><a name="Creating_an_X-Function" id="Creating_an_X-Function"></a><span class="mw-headline">Xファンクションを作成する</span></h2>
+<ol>
+<li>Originがアクティブな状態で、Xファンクションビルダを開くためにF10キーを押してください。Xファンクションの名前と変数名を以下のように設定します。<br />
+<a class="image"><img alt="OCguide xf gadget tool xfbuilder.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_xfbuilder.png" width="548" height="285" border="0" /></a></li>
+<li><a class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_savebutton.png" width="23" height="23" border="0" /></a>ボタンをクリックして、Xファンクションを保存します。</li>
+<li><a class="image"><img alt="Ocguide xfdialog codebuilderbutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_codebuilderbutton.png" width="23" height="23" border="0" /></a>ボタンをクリックして、コードビルダでXファンクションのソースコードを開きます。</li>
+<li>include ステイトメントに以下の2つを追加します。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put additional include files here</span>
+#include <span style="color: #000080;">&lt;</span>..\Originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\Originlab\GraphObjTools.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+        
+</pre></li>
+<li><b style="font-weight: bold;">quick_curve_stats_make_tree</b>関数名を探し、そのボディ部分を以下のコードに置き換えてGUIツリーを作成します。<span class="OIndex" style="display: none;">Xファンクション, make_tree</span>
+<pre class="oc" style="font-family: monospace;">
+if<span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> strcmp<span style="color: #000000;">(</span>lpcszVarName, <span style="color: #ff00ff;">"trGUI"</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">
+{</span>
+    GETN_USE<span style="color: #000000;">(</span>tr<span style="color: #000000;">)</span> 
+    GETN_OPTION_BRANCH<span style="color: #000000;">(</span>GETNBRANCH_OPEN<span style="color: #000000;">)</span> <span style="color: #008000;">// デフォルトでブランチを開く</span>
+ 
+    int nUserID <span style="color: #000080;">=</span> GET_USER_DATAID<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    int nBranchID <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+ 
+    GETN_STR<span style="color: #000000;">(</span>toolname, STR_TOOLNAME, <span style="color: #ff00ff;">"Quick Curve Stats"</span><span style="color: #000000;">)</span>GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span> 
+        <span style="color: #008000;">// 編集ボックスと共にチェックボックスコントロールを追加</span>
+        GETN_CONTROL_OPTION_BOX<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> 
+    GETN_COLOR<span style="color: #000000;">(</span>rectColor, <span style="color: #ff00ff;">"Rectangle Fill Color"</span>, SYSCOLOR_LTYELLOW<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_COLOR_CHOICE_OPTIONS<span style="color: #000000;">(</span>COLORLIST_CUSTOM <span style="color: #000040;">|</span> COLORLIST_SINGLE<span style="color: #000000;">)</span>
+ 
+    <span style="color: #008000;">// 結果オプションを出力するためのQuantitiesブランチ</span>
+    GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>quantities, <span style="color: #ff00ff;">"Quantities"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_OPTION_BRANCH<span style="color: #000000;">(</span>GETNBRANCH_OPEN<span style="color: #000040;">|</span>GETNBRANCH_CHECK_CONTROL<span style="color: #000000;">)</span>
+ 
+        GETN_CHECK<span style="color: #000000;">(</span>dataname, <span style="color: #ff00ff;">"Dataset Name"</span>, true<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>n, <span style="color: #ff00ff;">"Total Number"</span>, true<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>sum, <span style="color: #ff00ff;">"Sum"</span>, true<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>mean, <span style="color: #ff00ff;">"Mean"</span>, true<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>sd, <span style="color: #ff00ff;">"Standard Deviation"</span>, false<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>se, <span style="color: #ff00ff;">"SE of Mean"</span>, false<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    GETN_END_BRANCH<span style="color: #000000;">(</span>quantities<span style="color: #000000;">)</span> <span style="color: #008000;">// Quantitiesブランチ終了   </span>
+ 
+    <span style="color: #008000;">// 出力先のオプションのためのOutput Toブランチ</span>
+    GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>output, <span style="color: #ff00ff;">"Output To"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">)</span> 
+        GETN_CHECK<span style="color: #000000;">(</span>script, <span style="color: #ff00ff;">"Script Window"</span>, true<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>reslog, <span style="color: #ff00ff;">"Results Log"</span>, false<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_CHECK<span style="color: #000000;">(</span>outputwks, <span style="color: #ff00ff;">"Output to Worksheet"</span>, false<span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    GETN_END_BRANCH<span style="color: #000000;">(</span>output<span style="color: #000000;">)</span> <span style="color: #008000;">// Output Toブランチの終了</span><span style="color: #000000;">
+}</span>   
+return <span style="color: #0000dd;">0</span>;
+        
+</pre></li>
+<li><a class="image"><img alt="Ocguide XF Compile Button.PNG" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_XF_Compile_Button.PNG" width="107" height="24" border="0" /></a>ボタンをクリックして変更点をコンパイルします。コンパイルが無事に終了したら、<a class="image"><img alt="Ocguide XF Returntodialog Button.PNG" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_XF_Returntodialog_Button.PNG" width="107" height="24" border="0" /></a>ボタンをクリックしてXファンクションビルダに戻ります。</li>
+<li><a class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/Ocguide_xfdialog_savebutton.png" width="23" height="23" border="0" /></a>ボタンをクリックしてXファンクションをもう一度保存し、その後Xファンクションビルダを閉じます。</li>
+<li>コマンドウィンドウで「quick_curve_stats -d」を実行します。次のダイアログが表示されます。<br />
+<a class="image"><img alt="OCguide xf gadget tool dialog.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_dialog.png" width="360" height="414" border="0" /></a></li>
+</ol>
+<p>Xファンクションは準備ができました。次のセクションでは、Origin Cの構築クラスから新しいクラスを導く方法を示します。</p>
+<h2><a name="Defining_a_Class_Derived_from_GraphObjCurveTool" id="Defining_a_Class_Derived_from_GraphObjCurveTool"></a><span class="mw-headline">GraphObjCurveToolから導かれたクラスを定義する</span></h2>
+<p>このセクションでは、Origin CのGraphObjCurveToolクラスから新しいクラスを導く方法を示します。GraphObjCurveTool クラスは新しいクラスで取り扱うほとんどの内容を扱えます。</p>
+<p>GraphObjCurveTool クラスはグラフ上で操作するガジェットを作成する際に使用します。行列データで操作するガジェットを作成する場合は、 MatObjROITool ツールを作成する必要があります。GraphObjCurveTool と MatObjROITool はどちらもGraphObjTools.h ヘッダファイルで宣言されています。</p>
+<ol>
+<li>quick_curve_stats.XFCをコードビルダで開きます。ファイルの上部で以下のように新しいクラスを定義します。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put additional include files here</span>
+#include <span style="color: #000080;">&lt;</span>GetNbox.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\Originlab\GraphObjTools.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#define XF_NAME <span style="color: #ff00ff;">"quick_curve_stats"</span>
+#define TOOL_PREFERENCES_TITLE _L<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Statistics"</span><span style="color: #000000;">)</span>
+ 
+class QuickCurveStatsTool <span style="color: #000000;">:</span> public GraphObjCurveTool<span style="color: #000000;">
+{</span>
+protected<span style="color: #000000;">:</span>
+        string  GetXFName<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> return XF_NAME; <span style="color: #000000;">}</span>
+        string  GetSignature<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> return <span style="color: #ff00ff;">"xf_addtool_quick_curve_stats"</span>; <span style="color: #000000;">}</span>
+        string  GetPreferenceTitle<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">{</span> return TOOL_PREFERENCES_TITLE; <span style="color: #000000;">}</span>
+ 
+        <span style="color: #008000;">// この関数はこの下のイベント追加関数セクションで書き換える   </span>
+        bool DoOutput<span style="color: #000000;">(</span>bool bUpdateLastOutput, bool bMarkerOnly <span style="color: #000080;">=</span> false<span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"DoOutput"</span><span style="color: #000000;">)</span>; 
+                return true;
+        <span style="color: #000000;">}</span>  <span style="color: #000000;">
+}</span>;
+</pre></li>
+<li>Xファンクションのメイン関数へ移動し、そこで上記で定義した関数を元にROIをグラフ上に作成します。
+<pre class="oc" style="font-family: monospace;">
+QuickCurveStatsTool curveTool<span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+int nErr <span style="color: #000080;">=</span> curveTool.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span>XF_NAME, LN_VERTICAL, trGUI<span style="color: #000000;">)</span>;  
+if<span style="color: #000000;">(</span>nErr<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+    error_report<span style="color: #000000;">(</span><span style="color: #ff00ff;">"quick_curve_stats failed to Init!"</span><span style="color: #000000;">)</span>;
+    return;<span style="color: #000000;">
+}</span>
+curveTool.<span style="color: #000000;">ExpandFullRange</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+</pre></li>
+<li>曲線のあるグラフをアクティブにし、コマンドウィンドウで「quick_curve_stats -d」を実行します。上部にテキストがあり、小さなボタンを2つ付けた四角形がグラフ上に追加されます。</li>
+</ol>
+<h2><a name="Adding_Event_Functions" id="Adding_Event_Functions"></a><span class="mw-headline">イベント関数を追加する</span></h2>
+<h3><a name="Basic_global_event_function" id="Basic_global_event_function"></a><span class="mw-headline">基本的なグローバルイベント関数</span></h3>
+<ol>
+<li>コードビルダでquick_curve_stats.XFCを開きます。そこで、<b>//put your own support static functions here</b>行の下に、以下のようなイベント関数を追加します。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put your own support static functions here</span>
+void quick_curve_stats_events<span style="color: #000000;">(</span>string strGrName, int nEvent, int nMsg <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        QuickCurveStatsTool sTool;
+        graphobjtool_events<span style="color: #000000;">(</span>sTool, strGrName, nEvent, nMsg<span style="color: #000000;">)</span>;  <span style="color: #000000;">
+}</span>
+</pre></li>
+<li>コマンドウィンドウで「quick_curve_stats -d」を実行してからOKボタンを押してダイアログを閉じます。ROIに付属している<a class="image"><img alt="OCguide xf gadget tool contextmenu button.png" src="../images/Creating_a_Gadget_Tool_with_X-Function/OCguide_xf_gadget_tool_contextmenu_button.png" width="24" height="24" border="0" /></a>ボタンをクリックして、コンテキストメニューを開きます。「新しい出力」をクリックするとスクリプトウィンドウに「DoOutput」を表示します。コンテキストメニューで「設定」を選択すると、Xファンクションの設定が表示されます。四角形の塗り色を変更し、「ツール名を表示する」コントロールにあるテキストを変更してOKをクリックします。塗り色と表示されるテキストは変更されます。</li>
+</ol>
+<h3><a name="Overload_virtual_event_functions" id="Overload_virtual_event_functions"></a><span class="mw-headline">仮想イベント関数のオーバーロード</span></h3>
+<p>コマンドウィンドウで「quick_curve_stats -d」を実行し、Xファンクションを起動してROIをグラフに追加します。グラフ上のROIを移動すると、左側にあるOriginのステータスバーが現在のXの開始値/終了値、そしてROIの幅を表示します。以下の3つのステップはOnMove仮想メソッドをオーバーロードしてROIの上に表示されているテキストに統計の結果と「ROI moving」を表示します。</p>
+<ol>
+<li>QuickCurveStatsTool クラスで以下の2つのメソッドを宣言します。
+<pre class="oc" style="font-family: monospace;">
+protected<span style="color: #000000;">:</span>
+        BOOL OnMove<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>  
+                string strTopText <span style="color: #000080;">=</span> getResult<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                UpdateTopLabel<span style="color: #000000;">(</span>strTopText, true<span style="color: #000000;">)</span>;             
+                return true;
+        <span style="color: #000000;">}</span>
+private<span style="color: #000000;">:</span>
+        string getResult<span style="color: #000000;">(</span>TreeNode<span style="color: #000040;">&amp;</span> trResult <span style="color: #000080;">=</span> NULL<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// 選択したROI のデータを取得</span>
+                vector vx, vy;
+                GetData<span style="color: #000000;">(</span>vx, vy<span style="color: #000000;">)</span>;
+ 
+                <span style="color: #008000;">// データで統計を計算</span>
+                int npts;
+                double sum, mean, sd, se;
+                vy.<span style="color: #000000;">Sum</span><span style="color: #000000;">(</span>sum<span style="color: #000000;">)</span>;
+                if<span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> ocmath_basic_summary_stats<span style="color: #000000;">(</span>vy.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vy, <span style="color: #000040;">&amp;</span>npts, 
+                        <span style="color: #000040;">&amp;</span>mean, <span style="color: #000040;">&amp;</span>sd, <span style="color: #000040;">&amp;</span>se<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        return <span style="color: #ff00ff;">"Error in calculation!"</span>;
+                <span style="color: #000000;">}</span>
+ 
+                <span style="color: #008000;">// GUIから出力オプションを入手</span>
+                Tree trGUI;
+                GetGUITree<span style="color: #000000;">(</span>trGUI<span style="color: #000000;">)</span>;
+                bool    bDatasetName <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">dataname</span>.<span style="color: #000000;">nVal</span>,
+                                bPoints <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">n</span>.<span style="color: #000000;">nVal</span>,
+                                bSum <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">sum</span>.<span style="color: #000000;">nVal</span>,
+                                bMean <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">mean</span>.<span style="color: #000000;">nVal</span>,
+                                bSD <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">sd</span>.<span style="color: #000000;">nVal</span>,
+                                bSE <span style="color: #000080;">=</span> trGUI.<span style="color: #000000;">quantities</span>.<span style="color: #000000;">se</span>.<span style="color: #000000;">nVal</span>;                     
+ 
+                string strDatasetName;
+                if<span style="color: #000000;">(</span> bDatasetName <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        m_dp.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">(</span>strDatasetName<span style="color: #000000;">)</span>;             
+                <span style="color: #000000;">}</span>
+ 
+                <span style="color: #008000;">// 結果を文字列に入力</span>
+                string strText;
+                string strNumDec <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"*"</span>, strNextLine <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\r</span><span style="color: #666666; font-weight: bold;">\n</span>"</span>;
+                if<span style="color: #000000;">(</span> bDatasetName <span style="color: #000000;">)</span>
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Dataset Name: "</span> <span style="color: #000040;">+</span> strDatasetName <span style="color: #000040;">+</span> strNextLine;          
+                if<span style="color: #000000;">(</span> bPoints <span style="color: #000000;">)</span>
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"N = "</span> <span style="color: #000040;">+</span> npts <span style="color: #000040;">+</span> strNextLine;
+                if<span style="color: #000000;">(</span> bSum <span style="color: #000000;">)</span>
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Sum = "</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">(</span>sum, strNumDec<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strNextLine;          
+                if<span style="color: #000000;">(</span> bMean <span style="color: #000000;">)</span>           
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Mean = "</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">(</span>mean, strNumDec<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strNextLine;        
+                if<span style="color: #000000;">(</span> bSD <span style="color: #000000;">)</span>
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"SD = "</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">(</span>sd, strNumDec<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strNextLine;
+                if<span style="color: #000000;">(</span> bSE <span style="color: #000000;">)</span>
+                        strText <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"SE = "</span> <span style="color: #000040;">+</span> ftoa<span style="color: #000000;">(</span>se, strNumDec<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strNextLine;
+                strText.<span style="color: #000000;">TrimRight</span><span style="color: #000000;">(</span>strNextLine<span style="color: #000000;">)</span>;  
+ 
+                <span style="color: #008000;">// 結果をツリーに入力</span>
+                if<span style="color: #000000;">(</span> trResult <span style="color: #000040;">&amp;&amp;</span> trResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        GETN_USE<span style="color: #000000;">(</span>trResult<span style="color: #000000;">)</span>
+                        if<span style="color: #000000;">(</span> bDatasetName <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                GETN_STR<span style="color: #000000;">(</span>DatasetName, <span style="color: #ff00ff;">"Dataset Name"</span>, strDatasetName<span style="color: #000000;">)</span>
+                                GETN_CURRENT_SUBNODE.<span style="color: #000000;">SetAttribute</span><span style="color: #000000;">(</span>STR_TYPE_ATTRIB,
+                                        TNVAL_TYPE_CSTRING<span style="color: #000000;">)</span>;
+                        <span style="color: #000000;">}</span>
+                        if<span style="color: #000000;">(</span> bPoints <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                GETN_NUM<span style="color: #000000;">(</span>N, <span style="color: #ff00ff;">"Number of Points"</span>, npts<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">}</span>
+                        if<span style="color: #000000;">(</span> bSum <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                GETN_NUM<span style="color: #000000;">(</span>Sum, <span style="color: #ff00ff;">"Sum"</span>, sum<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">}</span>
+                        if<span style="color: #000000;">(</span> bMean <span style="color: #000000;">)</span>           
+                        <span style="color: #000000;">{</span>
+                                GETN_NUM<span style="color: #000000;">(</span>Mean, <span style="color: #ff00ff;">"Mean"</span>, mean<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">}</span>
+                        if<span style="color: #000000;">(</span> bSD <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                GETN_NUM<span style="color: #000000;">(</span>SD, <span style="color: #ff00ff;">"SD"</span>, sd<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">}</span>
+                        if<span style="color: #000000;">(</span> bSE <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                GETN_NUM<span style="color: #000000;">(</span>SE, <span style="color: #ff00ff;">"SE"</span>, se<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">}</span>          
+                <span style="color: #000000;">}</span>
+ 
+                return strText;
+        <span style="color: #000000;">}</span>
+        
+</pre></li>
+<li>Xファンクションを実行して、ROIをグラフに追加します。ROIに移動すると、上部のテキストは現在選択されてる情報の統計結果に更新されます。</li>
+<li>以下はコンテキストメニューの「新しい出力」と「結果シートへ移動」が動くようになるかを示します。そのためには、導かれたQuickCurveStatsToolのクラスの中にあるDoOutput と GetReportWorksheet仮想関数をオーバーロードし、プライベート関数、acessBinaryInfoへアクセスして結果ワークシートの名前を四角形の中のバイナリ保存領域に示します。四角形からレポートワークシート名を入手できなかった場合、または結果シートの名前が不正な名前であった場合、「レポートシートへ移動」コンテキストメニューはグレーになります。QuickCurveStatsTool クラスに以下のメソッドを追加します。
+<pre class="oc" style="font-family: monospace;">
+protected<span style="color: #000000;">:</span>
+        bool DoOutput<span style="color: #000000;">(</span>bool bUpdateLastOutput<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Tree trGUI;
+                GetGUITree<span style="color: #000000;">(</span>trGUI<span style="color: #000000;">)</span>;
+ 
+                <span style="color: #008000;">// 出力結果を文字列とツリーノードに出力</span>
+                Tree tr;
+                TreeNode trResult;
+                if<span style="color: #000000;">(</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">outputwks</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">)</span>
+                        trResult <span style="color: #000080;">=</span> tr.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Result"</span><span style="color: #000000;">)</span>;     
+                string strResult <span style="color: #000080;">=</span> getResult<span style="color: #000000;">(</span>trResult<span style="color: #000000;">)</span>;
+ 
+                <span style="color: #008000;">// スクリプトウィンドウに出力、オプション</span>
+                if<span style="color: #000000;">(</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">script</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        LT_execute<span style="color: #000000;">(</span><span style="color: #ff00ff;">"type -a"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// to open Script window if closed</span>
+                        out_str<span style="color: #000000;">(</span>strResult<span style="color: #000000;">)</span>;           
+                <span style="color: #000000;">}</span>
+ 
+                <span style="color: #008000;">// 結果ログに出力、オプション</span>
+                if<span style="color: #000000;">(</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">reslog</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        Project.<span style="color: #000000;">OutStringToResultsLog</span><span style="color: #000000;">(</span>strResult<span style="color: #000000;">)</span>;                
+                <span style="color: #000000;">}</span>
+ 
+                <span style="color: #008000;">// ワークシートに出力、オプション</span>
+                if<span style="color: #000000;">(</span> trGUI.<span style="color: #000000;">output</span>.<span style="color: #000000;">outputwks</span>.<span style="color: #000000;">nVal</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #008000;">// すでに存在しているなら、出力ワークシートを確認</span>
+                        Worksheet wks;
+                        string strOutputWks;
+                        bool bCreateNew <span style="color: #000080;">=</span> true;
+                        if<span style="color: #000000;">(</span> acessBinaryInfo<span style="color: #000000;">(</span>true, strOutputWks<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                wks.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>strOutputWks<span style="color: #000000;">)</span>;
+                                bCreateNew <span style="color: #000080;">=</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                        <span style="color: #000000;">}</span>
+ 
+                        <span style="color: #008000;">// 存在しない場合、新たにワークシートを作成 </span>
+                        <span style="color: #008000;">// それからワークシート名を四角形のバイナリ保存領域に入力</span>
+                        if<span style="color: #000000;">(</span> bCreateNew <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>                  
+                                wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span>NULL, CREATE_HIDDEN<span style="color: #000000;">)</span>;
+                                wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+ 
+                                wks.<span style="color: #000000;">GetRangeString</span><span style="color: #000000;">(</span>strOutputWks<span style="color: #000000;">)</span>;
+                                acessBinaryInfo<span style="color: #000000;">(</span>false, strOutputWks<span style="color: #000000;">)</span>;
+                        <span style="color: #000000;">}</span>          
+                        out_tree_to_wks<span style="color: #000000;">(</span>trResult, wks<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>
+                return true;
+        <span style="color: #000000;">}</span>
+ 
+        BOOL GetReportWorksheet<span style="color: #000000;">(</span>Worksheet<span style="color: #000040;">&amp;</span> wksReport<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                string strWks;
+                if<span style="color: #000000;">(</span> acessBinaryInfo<span style="color: #000000;">(</span>true, strWks<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        wksReport.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>strWks<span style="color: #000000;">)</span>;
+                        return wksReport.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>
+                return false;
+        <span style="color: #000000;">}</span>
+ 
+private<span style="color: #000000;">:</span>
+        bool acessBinaryInfo<span style="color: #000000;">(</span>bool bGet, string<span style="color: #000040;">&amp;</span> strInfo<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                string strStorageName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Info"</span>;
+                Tree tr;
+ 
+                if<span style="color: #000000;">(</span> bGet <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #008000;">// 四角形のバイナリ保存領域から出力ワークシート名を入手</span>
+                        if<span style="color: #000000;">(</span> m_go.<span style="color: #000000;">GetBinaryStorage</span><span style="color: #000000;">(</span>strStorageName, tr<span style="color: #000000;">)</span> 
+                                <span style="color: #000040;">&amp;&amp;</span> tr.<span style="color: #000000;">OutputWks</span> 
+                                <span style="color: #000040;">&amp;&amp;</span> <span style="color: #000040;">!</span>tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                strInfo <span style="color: #000080;">=</span> tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">strVal</span>;
+                                return true;
+                        <span style="color: #000000;">}</span>
+                        return false;
+                <span style="color: #000000;">}</span>
+                else
+                <span style="color: #000000;">{</span>
+                        <span style="color: #008000;">// 出力ワークシート名を四角形のバイナリ保存領域に保存</span>
+                        tr.<span style="color: #000000;">OutputWks</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> strInfo;
+                        return m_go.<span style="color: #000000;">PutBinaryStorage</span><span style="color: #000000;">(</span>strStorageName, tr<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>  
+        <span style="color: #000000;">}</span>
+        
+</pre></li>
+<li>データプロットセットがアクティブな状態でグラフを作成し、コマンドウィンドウで「quick_curve_stats -d」を実行してROIを追加します。ROIをグラフ上の確認したい部分に移動して、コンテキストメニューを開いてから「設定」を選択してダイアログを開きます。Quantities と Output To ブランチ内にある全てのチェックボックスをチェックしてOKをクリックしてダイアログを閉じます。もう一度コンテキストメニューを開くと、「結果ワークシートへ移動」がグレーになっている事が分かります。「新しい出力」をメニューからクリックして、結果の文字列がスクリプトウィンドウと結果ログに出力され、非表示になるワークシートが作成されます。「結果ワークシートへ移動」を選択すると、結果ワークシートが表示されます。ワークシート内の列は結果を表示します。</li>
+</ol>

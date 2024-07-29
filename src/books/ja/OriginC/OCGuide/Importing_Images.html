@@ -1,0 +1,78 @@
+﻿<h1 class="firstheading">画像のインポート</h1><p><br />
+Originは、行列、ワークシートセル、グラフにイメージをインポートすることができます。  次のセクションは、Origin Cアプリケーションでイメージをインポートする方法を示します。 
+</p>
+<h2><a name="Import_Image_into_Matrix"></a><span class="mw-headline"><span class="OIndex">行列に画像をインポート</span></span></h2>
+<p>次のサンプル関数は、イメージファイルを行列にインポートする方法を示しています。  関数は、行列名、ファイル名、グレースケールの深度の3つの引数を取ります。  このサンプルで呼び出されるキーとなる関数は、oimg_image_infoおよびoimg_load_imageです。  前者はイメージファイルに含まれるイメージについての情報を取得するのに使われます。  取得した情報は、目的の行列を準備するのに使われます。  後者の関数は、グレースケールデータ値として目的の行列にイメージファイルに実際にインポートするのに使われます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>import_image.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// oimg_ functionsで必要</span>
+ 
+<span style="color: #0000ff;">bool</span> import_image_to_matrix_data<span style="color: #000000;">(</span>
+    LPCSTR lpcszMatrixName, <span style="color: #008000;">// 行列ブック名</span>
+    LPCSTR lpcszFileName,   <span style="color: #008000;">// 画像ファイル名</span>
+    <span style="color: #0000ff;">int</span> nGrayDepth<span style="color: #000000;">)</span>         <span style="color: #008000;">// 8ビットまたは16ビットのグレースケールとしてインポート</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 目的の行列オブジェクトを取得</span>
+    MatrixObject mo<span style="color: #000000;">(</span>lpcszMatrixName<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// 元のイメージ情報を取得</span>
+    <span style="color: #0000ff;">int</span> nWidth, nHeight, nBPP;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>oimg_image_info<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>nWidth, <span style="color: #000040;">&amp;</span>nHeight, <span style="color: #000040;">&amp;</span>nBPP<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// 目的の行列を元の画像を同じ次数にセット</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nHeight, nWidth, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+ 
+    <span style="color: #008000;">// 目的の行列のデータサイズ</span>
+    <span style="color: #0000ff;">int</span> nDataType <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">16</span> <span style="color: #000080;">==</span> nGrayDepth&nbsp;? FSI_USHORT <span style="color: #000000;">:</span> FSI_BYTE<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetInternalData</span><span style="color: #000000;">(</span>nDataType, <span style="color: #0000ff;">FALSE</span>, <span style="color: #0000ff;">FALSE</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// イメージを行列にインポート</span>
+    <span style="color: #0000ff;">bool</span> bRet;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> FSI_USHORT <span style="color: #000080;">==</span> nDataType <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        Matrix<span style="color: #000080;">&lt;</span>WORD<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">16</span>, nHeight, nWidth<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span> <span style="color: #008000;">// FSI_BYTE</span>
+    <span style="color: #000000;">{</span>
+        Matrix<span style="color: #000080;">&lt;</span>BYTE<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">8</span>, nHeight, nWidth<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">return</span> bRet;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Import_Image_into_Worksheet_Cell"></a><span class="mw-headline"><span class="OIndex">イメージをワークシートに挿入する</span></span></h2>
+<p>次のサンプルは、ファイルからJPEGファイルをワークシートセルに埋め込みます。   これは、WorksheetクラスのAttachPictureメソッドを使って行います。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nRow <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>Graph1.jpg&quot;</span>;
+DWORD dwEmbedInfo <span style="color: #000080;">=</span> EMBEDGRAPH_KEEP_ASPECT_RATIO;
+
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> wks.<span style="color: #000000;">AttachPicture</span><span style="color: #000000;">(</span>nRow, nCol, strFile, dwEmbedInfo<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>nCol<span style="color: #000000;">)</span>.<span style="color: #000000;">SetWidth</span><span style="color: #000000;">(</span><span style="color: #0000dd;">20</span><span style="color: #000000;">)</span>;
+    wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Import_Image_to_Graph"></a><span class="mw-headline"><span class="OIndex">イメージをグラフにインポートする</span></span></h2>
+<p>次のサンプルは、ファイルからJPEGファイルをグラフレイヤに埋め込みます。これは、<b><a href="../../OriginC/OriginC/Image_import_to_active_graph_layer_(global_function).html" title="OriginC:Image import to active graph layer (global function)">image_import_to_active_graph_layer</a></b>グローバル関数を使って行われます。  
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>image_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">// image_import_to_active_graph_layer関数を呼び出す前に</span>
+<span style="color: #008000;">// the image_utils.cをコンパイル</span>
+LT_execute<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;run.LoadOC(Originlab<span style="color: #666666; font-weight: bold;">\\</span>image_utils.c)&quot;</span><span style="color: #000000;">)</span>;
+
+string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;D:<span style="color: #666666; font-weight: bold;">\\</span>Graph1.jpg&quot;</span>;
+image_import_to_active_graph_layer<span style="color: #000000;">(</span>strFile<span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

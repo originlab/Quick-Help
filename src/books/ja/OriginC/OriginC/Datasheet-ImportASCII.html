@@ -1,0 +1,294 @@
+﻿<h1 class="firstheading">Datasheet::ImportASCII</h1>
+
+  <p><span class="OIndex" style="display:none">ImportASCII</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Import ASCII file into worksheet by using a ASCIMP struct that will define how to import the data</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ImportASCII<span style="color: #000000;">(</span> LPCSTR lpcszFilename, ASCIMP <span style="color: #000040;">&amp;</span> stAscImp, ASCIMPRESULT <span style="color: #000040;">*</span> pResult <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, TreeNode <span style="color: #000040;">&amp;</span> trInfo <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwCtrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>lpcszFilename</dt>
+
+    <dd>[input] A full path ASCII file name</dd>
+
+    <dt>stAscImp</dt>
+
+    <dd>[input] An ASCIMP struct that has been setup with import settings</dd>
+
+    <dd>detail could refer to Oc_types.h</dd>
+
+    <dt>pResult</dt>
+
+    <dd>[output] If not NULL, pointer to an ASCIMPRESULT struct that holds the col and row</dd>
+
+    <dd>range as well as a DataRange uid that you can obtain a DataRange obejct</dd>
+
+    <dd>resulted from the import.</dd>
+
+    <dd>Its default value = NULL.</dd>
+
+    <dt>trInfo</dt>
+
+    <dd>[output] if it is not NULL, return header info of ASCII.</dd>
+
+    <dt>dwCtrl</dt>
+
+    <dd>[input] additional options from the IMPASC_* enumeration.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>0 on success, otherwise returns error codes</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// Prompt for datafile to be imported into new worksheet</span>
+<span style="color: #0000ff;">int</span> Datasheet_ImportASCII_Ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">int</span>        iStatus;
+    ASCIMP    ai;
+    string     strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile,<span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        ai.<span style="color: #000000;">iRenameWks</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//to rename worksheet from filename            </span>
+        ai.<span style="color: #000000;">iRenameCols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//0 to keep default column names, 1 to rename columns using 1st line of header block</span>
+        
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">99</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX2</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This example to show how to set each sub headers to specified column label including uer defined parameter labels</span>
+<span style="color: #0000ff;">void</span> Datasheet_ImportASCII_Ex2<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    ASCIMP    ai;
+    string     strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// or "*.txt"</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        ai.<span style="color: #000000;">iAutoSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">//set auto detected to false since will set sub header to col label by below codes</span>
+        
+        ai.<span style="color: #000000;">iSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// 1. LongName 2. Units    3. Expanded Discription(User defined)    4. Type Indication(User defined)</span>
+        
+        <span style="color: #008000;">// Notice when iAutoSubheaderLines is 0, the index of ai.nLongName, ai.nUnits and ai.nFirstUserParams are begin from Main header</span>
+        ai.<span style="color: #000000;">nLongNames</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span>; 
+        ai.<span style="color: #000000;">nUnits</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;  
+        ai.<span style="color: #000000;">nFirstUserParams</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>;
+        ai.<span style="color: #000000;">nNumUserParams</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+        
+        ai.<span style="color: #000000;">iMaxLabels</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Not set any header line to Comments label        </span>
+        
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #008000;">// Set user parameter labels to specified names</span>
+            Grid grid;
+            grid.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;
+            vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsUserLabels <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">"Expanded Discription"</span>, <span style="color: #ff00ff;">"Type Indication"</span><span style="color: #000000;">}</span>;
+            grid.<span style="color: #000000;">SetUserDefinedLabelNames</span><span style="color: #000000;">(</span>vsUserLabels<span style="color: #000000;">)</span>;
+            
+            wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// to resize worksheet. This method is very useful when data/text is longer than the width of cell</span>
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX3</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// This example to show how to do partial import</span>
+<span style="color: #0000ff;">void</span> Datasheet_ImportASCII_Ex3<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"no acitve workbook window to import data"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    ASCIMP    ai;
+    string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Step01.dat"</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// or "*.txt"</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+            <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        ai.<span style="color: #000000;">iMode</span> <span style="color: #000080;">=</span> ASCIMP_MODE_APPEND_COLS; <span style="color: #008000;">// append imported data to this worksheet</span>
+        
+        ai.<span style="color: #000000;">iRenameCols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0 to keep default column name</span>
+        
+        ai.<span style="color: #000000;">iPartial</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 1 to specify partial import </span>
+        ai.<span style="color: #000000;">iPartialC1</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// import from 2nd column (0 offset)</span>
+        ai.<span style="color: #000000;">iPartialC2</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// set the last column, so here just import 4 columns</span>
+        ai.<span style="color: #000000;">iPartialR1</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// set the import row from</span>
+        ai.<span style="color: #000000;">iPartialR2</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">9</span>; <span style="color: #008000;">// set the import row to</span>
+        
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span>;
+        out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"nRet = "</span>, nRet<span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">)</span>
+            wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// to resize worksheet. This method is very useful when data/text is longer than the width of cell</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;    
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX4</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// Prompt for datafile to be imported into new worksheet and print out the min max of each column</span>
+<span style="color: #0000ff;">void</span> Datasheet_ImportASCII_Ex4<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>    
+    ASCIMP    ai;
+    string    strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        ASCIMPRESULT air;
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai, <span style="color: #000040;">&amp;</span>air<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> air.<span style="color: #000000;">nC1</span>; ii <span style="color: #000080;">&lt;=</span> air.<span style="color: #000000;">nC2</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">double</span> min, max;
+                Column cc <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>cc<span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                    vector v<span style="color: #000000;">(</span>cc<span style="color: #000000;">)</span>;
+                    v.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>min, max<span style="color: #000000;">)</span>;
+                    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%d Col(%s):<span style="color: #666666; font-weight: bold;">\t</span>size=%4d, min = %8.4g, max = %8.4g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, cc.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, v.<span style="color: #000000;">GetUpperBound</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, min, max<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">}</span>
+                <span style="color: #0000ff;">else</span>
+                    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"col(%d) invalid<span style="color: #666666; font-weight: bold;">\n</span>"</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+            <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX5</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// same as Example 2, but shows how to do the same thing using DataRange by the 3th output argument pResult-&gt;uid</span>
+<span style="color: #008000;">// Prompt for datafile to be imported into new worksheet and print out the min max of each column</span>
+<span style="color: #0000ff;">void</span> Datasheet_ImportASCII_Ex5<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>    
+    ASCIMP    ai;
+    string strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        ASCIMPRESULT air;
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai, <span style="color: #000040;">&amp;</span>air<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #008000;">// the following code shows how to get the DataRange object created at the end of the import</span>
+            <span style="color: #008000;">// you don't have to do this, but we want to show you anyway.</span>
+            DataRange dr;
+            dr <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>DataRange<span style="color: #000000;">)</span>Project.<span style="color: #000000;">GetObject</span><span style="color: #000000;">(</span>air.<span style="color: #000000;">uid</span><span style="color: #000000;">)</span>;
+            <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dr<span style="color: #000000;">)</span> <span style="color: #008000;">// success and getting data into wks, so we can access it now</span>
+            <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">int</span>  r1, c1, r2, c2;
+                Worksheet wksResult; <span style="color: #008000;">// this will actually be the same as wks above</span>
+                <span style="color: #008000;">// index = 0 because range can be multiple, and we just need the first</span>
+                <span style="color: #008000;">// you can verify that c1,c2,r1,r2 are the same as those inside the air struct above</span>
+                <span style="color: #008000;">// so getting them again via the DataRange is an over kill, but this is an example anyway.</span>
+                <span style="color: #008000;">// DataRange is usful if you later need to access the info again, as it is stored in</span>
+                <span style="color: #008000;">// the wkbook in the Files binary storage.</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dr.<span style="color: #000000;">GetRange</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, r1, c1, r2, c2, wksResult<span style="color: #000000;">)</span> <span style="color: #000040;">&amp;&amp;</span> wksResult.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+                <span style="color: #000000;">{</span>
+                    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> c1; ii <span style="color: #000080;">&lt;=</span> c2; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+                    <span style="color: #000000;">{</span>
+                        <span style="color: #0000ff;">double</span> min, max;
+                        Column cc <span style="color: #000080;">=</span> wksResult.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>cc<span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                            vector v<span style="color: #000000;">(</span>cc<span style="color: #000000;">)</span>;
+                            v.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>min, max<span style="color: #000000;">)</span>;
+                            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%d Col(%s):<span style="color: #666666; font-weight: bold;">\t</span>size=%4d, min = %8.4g, max = %8.4g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, cc.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, v.<span style="color: #000000;">GetUpperBound</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, min, max<span style="color: #000000;">)</span>;
+                        <span style="color: #000000;">}</span>
+                        <span style="color: #0000ff;">else</span>
+                            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"col(%d) invalid<span style="color: #666666; font-weight: bold;">\n</span>"</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                    <span style="color: #000000;">}</span>
+                <span style="color: #000000;">}</span>
+            <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>Import ASCII file into worksheet by using a ASCIMP struct that will define how to import the data.</p>
+
+  <dl>
+    <dt>After Origin 9.5b, we recommand you use <a href="../../OriginC/OriginC/Datasheet-ImportASCIIFile.html" title="OriginC:Datasheet-ImportASCIIFile">Datasheet::ImportASCIIFile</a>.</dt>
+  </dl>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/Datasheet-ImportASCIIFile.html" title="OriginC:Datasheet-ImportASCIIFile">Datasheet::ImportASCIIFile</a></p>
+
+  <p> </p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

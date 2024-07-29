@@ -1,0 +1,227 @@
+﻿<h1 class="firstheading">グラフを作成する</h1><p class='urlname' style='display: none'>Creating-Graphs</p>
+<p><span class="OIndex" style="display:none">Plot Graph</span><span class="OIndex" style="display:none">Create Graph</span>
+グラフ作成は、おそらくOriginで最も頻繁に実行される操作です。Originには、グラフ作成に関連する様々なXファンクションおよびLabTalk関数が用意されています。作図に使用されるXファンクションは、<a class="external text" href="../../XFunction/Category/Plotting.html"><b>プロット</b>カテゴリ</a>で確認できます。また、以下のコマンドを入力してリストを表示できます。
+</p>
+<pre class="lt" style="font-family:monospace;">lx cat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;plotting&quot;</span>;</pre>
+<p>Xファンクションのいくつかは、特定のデータ形式からグラフを作成します。例えば、<b>plotxy</b> は、XY範囲データからグラフを作図し、<b>plotm</b>は、行列データからグラフを作図します。他に、生データからグループ化ボックスチャートを作図する<b>plotgboxraw</b> や、トリリニアダイアグラムを作図する<b>plotpiper</b>など、特殊なグラフタイプを作図するものもあります。<a class="external text" href="../../XFunction/Category/Plotting.html">プロットカテゴリ</a>を参照して、各Xファンクションの詳細を確認できます。
+</p><p>以下のセクションは、LabTalkスクリプトから直接グラフを作成する次の2つのXファンクション、<b>plotxy</b>および<b>plotgroup</b>のサンプルです。一度、<span class="OIndex">プロット</span> が作成されると、 <a href="../../LabTalk/LabTalk/Page_(object).html" title="LabTalk:Page (オブジェクト)">ページ</a>、<a href="../../LabTalk/LabTalk/Layer_(object).html" title="LabTalk:Layer (オブジェクト)">レイヤ</a>、<a href="../../LabTalk/LabTalk/Layer.Axis_(object).html" title="LabTalk:Layer.Axis (オブジェクト)">軸</a> オブジェクトのようなオブジェクトプロパティを使って、<a href="../../LabTalk/Category/Set_(command).html" title="Category:Set (command)">set コマンド</a> で <a href="../../LabTalk/Script/Formatting_Graphs.html" title="Script:Formatting Graphs">グラフを整える</a>ことができます。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_a_Graph_with_the_PLOTXY_X-Function"><span class="tocnumber">1</span> <span class="toctext">PLOTXY Xファンクションを使ってグラフを作成する</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Plotting_X_Y_data"><span class="tocnumber">1.1</span> <span class="toctext"> X Y データをプロットする</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Input_XYRange_referencing_the_X_and_Y"><span class="tocnumber">1.1.1</span> <span class="toctext">XおよびYを参照するXYRange入力</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Input_XYRange_referencing_just_the_Y"><span class="tocnumber">1.1.2</span> <span class="toctext">Xのみを参照するXYRange入力</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#Plotting_X_YY_data"><span class="tocnumber">1.2</span> <span class="toctext">X YYデータをプロットする</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Plotting_XY_XY_data"><span class="tocnumber">1.3</span> <span class="toctext">XY XYデータをプロットする</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Plotting_using_worksheet_column_designations"><span class="tocnumber">1.4</span> <span class="toctext">ワークシート列のXY属性を使ってプロットする</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Plotting_a_subset_of_a_column"><span class="tocnumber">1.5</span> <span class="toctext">列の一部分をプロットする</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Plotting_into_a_graph_template"><span class="tocnumber">1.6</span> <span class="toctext">グラフテンプレートにプロットする</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Plotting_into_an_existing_graph_layer"><span class="tocnumber">1.7</span> <span class="toctext">既存のグラフレイヤにプロットする</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Creating_a_new_graph_layerCreate_LayerGraph_Layer"><span class="tocnumber">1.8</span> <span class="toctext">新しいグラフレイヤを作成する<span class="OIndex" style="display:none">Create Layer</span><span class="OIndex" style="display:none">Graph Layer</span></span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Creating_a_Double-Y_GraphDouble-Y_Graph"><span class="tocnumber">1.9</span> <span class="toctext">二重Yグラフの作成<span class="OIndex" style="display:none">Double-Y Graph</span></span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Create_Graph_Groups_with_the_PLOTGROUP_X-FunctionGraph_Groups"><span class="tocnumber">2</span> <span class="toctext">PLOTGROUP Xファンクションを使ってグラフグループを作成する<span class="OIndex" style="display:none">Graph Groups</span></span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#Create_3D_Graphs_with_Worksheet_-p_CommandGraph.2C_3D"><span class="tocnumber">3</span> <span class="toctext">Worksheet -p コマンドを使って3D グラフを作成する<span class="OIndex" style="display:none">Graph, 3D</span></span></a></li>
+<li class="toclevel-1 tocsection-15"><a href="#Create_3D_Graph_and_Contour_Graphs_from_Virtual_MatrixVirtual_Matrix"><span class="tocnumber">4</span> <span class="toctext">仮想行列から3Dおよび等高線グラフを作成する<span class="OIndex" style="display:none">Virtual Matrix</span></span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Create_Circular_Dendrogram"><span class="tocnumber">5</span> <span class="toctext">円形の樹形図を作成する</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Creating_a_Graph_with_the_PLOTXY_X-Function"></a><span class="mw-headline">PLOTXY Xファンクションを使ってグラフを作成する</span></h2>
+<p><a class="external text" href="../../XFunction/X-Function/Plotxy.html"><b>plotxy</b></a> は一般的な目的のグラフを作成するのに使用します。  これは <span class="OIndex">グラフウィンドウ</span>を作成したり、 <span class="OIndex">グラフテンプレート</span>にプロットしたり、新しい <span class="OIndex">グラフレイヤ</span>にプロットするのに使用されます。  すべてのXファンクションと共通のシンタックスがあります。
+</p><p><b>plotxy</b> オプション1:=<i>optionValue</i> オプション2:=<i>optionValue</i> ... オプション<i>N</i>:=<i>optionValue</i>
+</p><p>利用可能なオプションと値は <a class="external text" href="../../XFunction/X-Function/Plotxy.html">X-Functionヘルプの<b>plotxy</b></a>にまとめられています。  あまり直観的ではないので、<b>plot</b> オプションとその一般的な値はこ以下にまとめられています。
+</p>
+<table class="simple">
+<tr>
+<th> plot:=
+</th>
+<th> グラフタイプ
+</th></tr>
+<tr>
+<td> 200
+</td>
+<td> 折れ線
+</td></tr>
+<tr>
+<td> 201
+</td>
+<td> 散布図
+</td></tr>
+<tr>
+<td> 202
+</td>
+<td> 線+シンボル
+</td></tr>
+<tr>
+<td> 203
+</td>
+<td> 縦棒グラフ
+</td></tr></table>
+<p><b>plot</b> オプションで利用可能なすべての値は、<a href="../../LabTalk/LabTalk/Plot_Type_IDs.html" title="LabTalk:Plot Type IDs">プロットタイプID</a>にあります。
+</p>
+<h3><a name="Plotting_X_Y_data"></a><span class="mw-headline">X Y データをプロットする</span></h3>
+<h4><a name="Input_XYRange_referencing_the_X_and_Y"></a><span class="mw-headline">XおよびYを参照するXYRange入力</span></h4>
+<p>次のサンプルは、アクティブワークシートの最初の2列について、最初の列をXとして、2列目をYとして、折れ線グラフでプロットします。 
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h4><a name="Input_XYRange_referencing_just_the_Y"></a><span class="mw-headline">Yのみを参照するXYRangeを入力</span></h4>
+<p>次のサンプルは、アクティブワークシートの2列目を、それに関連するXデータに対するYとして、折れ線グラフでプロットします。明示的にXを指定しない場合、Originはワークシート内でYデータの左側にある直近のX列を使用します。該当するX列がない場合には &lt;自動&gt; X が使われます。   デフォルトで、&lt;自動&gt; Xは行番号です。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h3><a name="Plotting_X_YY_data"></a><span class="mw-headline">X Y データをプロットする</span></h3>
+<p>次のサンプルは、Book1、Sheet1の最初の3列について、最初の列をXとし、2列目と3列目をYとして、グループ化した散布図としてプロットします。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span>Sheet1<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">:</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">201</span>;</pre>
+<h3><a name="Plotting_XY_XY_data"></a><span class="mw-headline">XY XY データをプロットする</span></h3>
+<p>次のサンプルは、アクティブワークシートの最初の4列について、最初の列をXとし、2列目を1列目のXに対するYとして、さらに3列目をXとし、4列目を3列目のXに対するYとして、グループ化した線＋シンボルグラフでプロットします。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>,<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>,<span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span>;</pre>
+<h3><a name="Plotting_using_worksheet_column_designations"></a><span class="mw-headline">ワークシート列のXY属性を使ってプロットする</span></h3>
+<p>次のサンプルは、アクティブワークシートのすべての列をすでに設定された列XY属性を使って縦棒グラフでプロットします。  &apos;?&apos; はワークシートのXY属性を使うことを示しています。&apos;1:end&apos; はすべての列をプロットすることを示しています。 
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?,<span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">203</span>;</pre>
+<h3><a name="Plotting_a_subset_of_a_column"></a><span class="mw-headline">列の一部分をプロットする</span></h3>
+<p>次のサンプルは、アクティブワークシートのすべての列のうち1～12行目までを、グループ化折れ線グラフでプロットします。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">:</span><span style="color: #0000dd;">12</span><span style="color: #000000;">]</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<p>Note:部分範囲についての詳細は、<a href="../../LabTalk/LabTalk/Range_Notation.html#Specifying_Subrange_Using_X_Values" title="LabTalk:範囲表記">X値を使用した部分範囲指定</a>を確認してください。
+</p>
+<h3><a name="Plotting_into_a_graph_template"></a><span class="mw-headline">グラフテンプレートにプロットする</span></h3>
+<p>次のサンプルは、アクティブワークシートの最初の列をtheta(X)、2番目の列を r(Y) として、<i>極座標</i>グラフにプロットし、グラフウィンドウの名前を <i>MyPolarGraph</i>とします。  
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">192</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>polar name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>MyPolarGraph<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;</pre>
+<h3><a name="Plotting_into_an_existing_graph_layer"></a><span class="mw-headline">既存のグラフレイヤにプロットする</span></h3>
+<p>次のサンプルは、アクティブワークシートの10～20列目までを列XY属性を使って、Graph1の2番目のレイヤにプロットします。   これらの列は、すべてY列にすることができ、ワークシート内で結びついたX列に対してプロットされます。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?,<span style="color: #0000dd;">10</span><span style="color: #000000;">:</span><span style="color: #0000dd;">20</span><span style="color: #000000;">)</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Graph1<span style="color: #000000;">]</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>;</pre>
+<h3><a name="Creating_a_new_graph_layerCreate_LayerGraph_Layer"></a><span class="mw-headline">新しいグラフレイヤを作成する<span class="OIndex" style="display:none">Create Layer</span><span class="OIndex" style="display:none">Graph Layer</span></span></h3>
+<p>次のサンプルは、アクティブグラフウィンドウに新しく下X軸左Y軸のレイヤを追加し、Book1、Sheet2から最初の列をXとして3列目をYとして、折れ線グラフでプロットします。   グラフウィンドウがアクティブで出力グラフレイヤを指定しない場合には、新しいレイヤが作成されます。
+</p>
+<pre class="lt" style="font-family:monospace;">plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span>Sheet2<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;</pre>
+<h3><a name="Creating_a_Double-Y_GraphDouble-Y_Graph"></a><span class="mw-headline">二重Yグラフの作成<span class="OIndex" style="display:none">Double-Y Graph</span></span></h3>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// データファイルをインポート</span>
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Import and Export\S15-125-03.dat&quot;</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impASC;
+&nbsp;
+<span style="color: #008000;">// ブックとシート名を記憶</span>
+string bkname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>;
+string shname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> layer.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>;
+&nbsp;
+<span style="color: #008000;">// 1番目と2番目の列をXおよびYとしてプロット </span>
+<span style="color: #008000;">// ワークシートがアクティブなら列範囲を指定するだけ</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>doubleY<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;
+&nbsp;
+<span style="color: #008000;">// 2番目のレイヤに最初と3番目の列をプロット</span>
+<span style="color: #008000;">// グラフウィンドウがアクティブなので </span>
+<span style="color: #008000;">//ブックとシートを指定</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>bkname<span style="color: #000080;">$</span><span style="color: #000000;">]</span>shname<span style="color: #000080;">$!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;</pre>
+<h2><a name="Create_Graph_Groups_with_the_PLOTGROUP_X-FunctionGraph_Groups"></a><span class="mw-headline">PLOTGROUP Xファンクションを使ってグラフグループを作成する<span class="OIndex" style="display:none">Graph Groups</span></span></h2>
+<p>グループ化変数(データセット)に従って、 <a class="external text" href="../../XFunction/X-Function/Plotgroup.html"><b>plotgroup</b></a> Xファンクションはページ、レイヤ、データプロットのプロットを作成します。正しく動作させるには、最初にワークシートをグラフグループデータでソートし、次にレイヤグループデータ、最後にデータプロットグループデータでソートします。 
+</p><p>以下のサンプルはグループでプロットする方法を示しています。  
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// サンプルデータをセット</span>
+fn<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\body.dat&quot;</span>;
+newbook;
+impASC fn<span style="color: #000080;">$</span>;      <span style="color: #008000;">// 新しいワークブックにインポート</span>
+&nbsp;
+<span style="color: #008000;">// ワークシートをソート--ソートはとても重要!</span>
+wsort bycol<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;
+&nbsp;
+<span style="color: #008000;">// グループ毎にプロット</span>
+plotgroup iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">5</span><span style="color: #000000;">)</span> pgrp<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;</pre>
+<p>この次のサンプルは、1つのグループでグラフウィンドウを作成し、2番目のグループでグラフレイヤを作成します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// サンプルデータを取り入れる</span>
+fn<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Categorical Data.dat&quot;</span>;
+newbook;
+impASC fn<span style="color: #000080;">$</span>;
+<span style="color: #008000;">// ソート</span>
+dataset sortcol <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">}</span>; <span style="color: #008000;">// drug、gender順で</span>
+dataset sortord <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>; <span style="color: #008000;">// ソート（昇順）する</span>
+wsort nest<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sortcol ord<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sortord;
+<span style="color: #008000;">// 性別ごとにグラフをレイヤで分けて各薬をプロット</span>
+plotgroup iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> pgrp<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>drug<span style="color: #000000;">)</span> lgrp<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>gender<span style="color: #000000;">)</span>;</pre>
+<p>Note: 各グループ変数は任意です。例えば、ページグループとデータグループを省略することで、レイヤ内のデータを統合する1つのグループ変数を使うことができます。使用するオプションがどれであっても同じソート順にすることが重要です。
+</p>
+<h2><a name="Create_3D_Graphs_with_Worksheet_-p_CommandGraph.2C_3D"></a><span class="mw-headline">Worksheet -p コマンドを使って3D グラフを作成する<span class="OIndex" style="display:none">Graph, 3D</span></span></h2>
+<p>3Dグラフを作成するには、 <a class="external text" href="../../LabTalk/LabTalk/Worksheet_(command).html#-p.3B_Plot_the_current_worksheet_selection_in_the_nth_graph_type_into_the_template">Worksheet (コマンド) (-p スイッチ)</a>を使います。 
+</p><p>最初に、単純な3D散布図を作成します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 新しいブックを作成</span>
+newbook r<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bkn<span style="color: #000080;">$</span>;
+<span style="color: #008000;">// bkn$でスクリプトを実行</span>
+win <span style="color: #000080;">-</span>o bkn<span style="color: #000080;">$</span> <span style="color: #000000;">{</span>
+	<span style="color: #008000;">// サンプルデータをインポート</span>
+	string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span>
+		<span style="color: #ff00ff;">&quot;\samples\Matrix Conversion and Gridding&quot;</span> <span style="color: #000080;">+</span>
+		<span style="color: #ff00ff;">&quot;\XYZ Random Gaussian.dat&quot;</span>;
+	impasc;
+	<span style="color: #008000;">// 新しいブック名を保存</span>
+	bkn<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;
+	<span style="color: #008000;">// 列タイプをZに変更</span>
+	wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+	<span style="color: #008000;">// 列3を選択</span>
+	worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span>;
+	<span style="color: #008000;">// 3D散布図を&quot;3d&quot;という名前のテンプレートでプロット</span>
+	worksheet <span style="color: #000080;">-</span>p <span style="color: #0000dd;">240</span> 3d;
+<span style="color: #000000;">}</span>;</pre>
+<p>また、3Dカラーマップや3Dワイヤーフレームも作成することができます。3Dグラフは<a href="#Create_3D_Graph_and_Contour_Graphs_from_Virtual_MatrixVirtual_Matrix">ワークシート</a>または行列のどちらかから作成することができます。プロットするまえに <a class="external text" href="../../LabTalk/Script/LabTalk-Supported_X-Functions.html#Gridding"><b><span class="OIndex">グリッディング</span></b></a> を行う必要があるかもしれません。
+</p><p>上記のサンプルのあと次のスクリプトを実行すると、行列から3Dワイヤーフレームを作成できます。
+</p>
+<pre class="lt" style="font-family:monospace;">win <span style="color: #000080;">-</span>o bkn<span style="color: #000080;">$</span> <span style="color: #000000;">{</span>
+	<span style="color: #008000;">// Shepard方でグリッディング</span>
+	xyz_shep <span style="color: #0000dd;">3</span>;
+	<span style="color: #008000;">// 3Dワイヤーフレームグラフを作図</span>
+	worksheet <span style="color: #000080;">-</span>p <span style="color: #0000dd;">242</span> wirefrm;
+<span style="color: #000000;">}</span>;</pre>
+<h2><a name="Create_3D_Graph_and_Contour_Graphs_from_Virtual_MatrixVirtual_Matrix"></a><span class="mw-headline">仮想行列から3Dおよび等高線グラフを作成する<span class="OIndex" style="display:none">Virtual Matrix</span></span></h2>
+<p>Originでは、 <a class="external text" href="../../XFunction/X-Function/Plotvm.html">plotvm</a> X-ファンクションにより、ワークシートから3Dカラーマップ、等高線図、3Dワイヤーフレームといった3Dグラフを作成することもできます。この関数は、 <a href="../../LabTalk/Script/Virtual_Matrix.html" title="Script:仮想行列">仮想行列</a>を作成し、行列のような形式からプロットします。例えば、
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 新しいワークブックを作成し、サンプルデータをインポート</span>
+newbook;
+string fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\VSurface 1.dat&quot;</span>;
+impasc;
+<span style="color: #008000;">// 仮想行列としてシート全体を扱い、カラーマップ曲面プロットを作成</span>
+plotvm irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span> format<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xacross rowpos<span style="color: #000000;">:</span><span style="color: #000080;">=</span>selrow1 colpos<span style="color: #000000;">:</span><span style="color: #000080;">=</span>selcol1
+ ztitle<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;VSurface 1&quot;</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">242</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cmap<span style="color: #000080;">&gt;</span>;
+<span style="color: #008000;">// X軸スケールを対数に変更</span>
+<span style="color: #008000;">// 仮想行列から作成された3Dグラフに対してサポートされる非線形の軸タイプ</span>
+LAYER.<span style="color: #000080;">X</span>.<span style="color: #000080;">type</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;</pre>
+<p><br />
+</p>
+<h2><a name="Create_Circular_Dendrogram"></a><span class="mw-headline">円形の樹形図を作成する</span></h2>
+<p>円形の樹形図を作成するメニューは、OriginのGUIにはありません。このグラフタイプを作図する場合、<b>階層的クラスター分析</b>を実行してグラフを作成するか、次のスクリプトを使用します。
+</p>
+<pre class="lt" style="font-family:monospace;">run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>plot, CircularPhyTree<span style="color: #000000;">)</span>; 
+
+run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>plot, CircularBinPhyTree<span style="color: #000000;">)</span>;</pre>
+<p>このサンプルは、この種類のグラフを作図する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// データファイルをインポート</span>
+newbook;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\US Mean Temperature.dat&quot;</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impASC;
+<span style="color: #008000;">// 階層的クラスター分析</span>
+hcluster <span style="color: #000080;">-</span>r <span style="color: #0000dd;">2</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>USMeanTempera<span style="color: #000000;">]</span><span style="color: #ff00ff;">&quot;US Mean Temperature&quot;</span><span style="color: #000080;">!</span>D<span style="color: #ff00ff;">&quot;January&quot;</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">:</span>O<span style="color: #ff00ff;">&quot;December&quot;</span><span style="color: #000000;">[</span><span style="color: #0000dd;">100</span><span style="color: #000000;">]</span> link<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ward number<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> center<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// データセットを選択</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Cluster Plot Data1&quot;</span>&nbsp;;
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">1</span> <span style="color: #0000dd;">0</span> <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// グラフ作図</span>
+run.<span style="color: #000080;">section</span><span style="color: #000000;">(</span>plot, CircularPhyTree<span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

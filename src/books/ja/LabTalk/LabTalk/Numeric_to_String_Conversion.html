@@ -1,0 +1,398 @@
+﻿<h1 class="firstheading">$( )置換 - 数値から文字列への変換</h1><p class='urlname' style='display: none'>numeric-string-conversion</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#SyntaxSyntax"><span class="tocnumber">1</span> <span class="toctext">構文<span class="OIndex" style="display:none">構文</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Format"><span class="tocnumber">2</span> <span class="toctext">フォーマット</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Default_Format"><span class="tocnumber">2.1</span> <span class="toctext">デフォルトフォーマット</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Origin_Formats"><span class="tocnumber">2.2</span> <span class="toctext">Originフォーマット</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#C-Language_Formats"><span class="tocnumber">2.3</span> <span class="toctext">C言語フォーマット</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Combining_Origin_and_C-language_Formats"><span class="tocnumber">2.4</span> <span class="toctext">OriginとC言語の形式の組合せ</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Display_Negative_Values"><span class="tocnumber">3</span> <span class="toctext">負の値の表示</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Variable_Naming_with_.24.28.29"><span class="tocnumber">4</span> <span class="toctext">$() による変数の命名</span></a></li>
+</ul>
+</div>
+
+<h2><a name="SyntaxSyntax"></a><span class="mw-headline">構文</span></h2>
+<p>数値を文字列に変換するには$()置換を使用します。  この表記は、与えられた数式を実行時に評価し、その結果を数値文字列に変換して置き換えます。
+</p><p>この表記は次のような構成で使用します。
+</p><p><b>$(<i>expression</i> [, <i>format</i>])</b>
+</p><p>ここで、フォーマットはオプションであるか、次のセクションで説明するように、Origin形式、C言語形式、またはOriginとC言語の形式を組み合わせたものにすることができます。 
+</p><p>式は次のいずれかになります。
+</p>
+<table class="simple">
+<tr>
+<th> 式
+</th>
+<th> フォーマット
+</th>
+<th> 例
+</th>
+<th> 説明
+</th></tr>
+<tr>
+<td align="left"> number
+</td>
+<td> <i>NA</i>
+</td>
+<td>
+<pre>type $(4.567); //ANS: 4.567
+</pre>
+</td>
+<td> 最大14桁の有効数字で数値を表示します
+</td></tr>
+<tr>
+<td align="left"> 数値変数
+</td>
+<td> <i>.3</i>
+</td>
+<td>
+<pre>xx=1.2345678; 
+type $(xx, .3); //ANS: 1.235
+</pre>
+</td>
+<td> 変数xxを小数点以下3桁で表示します
+</td></tr>
+<tr>
+<td align="left"> 数値オブジェクトプロパティ
+</td>
+<td> <i>NA</i>
+</td>
+<td>
+<pre>//2列のワークブックがアクティブな場合
+type &quot;there are $(wks.ncols) columns&quot;;
+//ANS: there are 2 columns
+</pre>
+</td>
+<td> wks.ncols値の表示
+</td></tr>
+<tr>
+<td align="left"> データセット変数
+</td>
+<td> <i>NA</i>
+</td>
+<td>
+<pre>dataset ds1={2,4,6}; //データセット変数
+type $(ds1); //ANS: 2 4 6
+</pre>
+</td>
+<td> ds1をスペース区切りのリストで表示します
+</td></tr>
+<tr>
+<td align="left"> 範囲変数
+</td>
+<td><i>*3</i>
+</td>
+<td>
+<pre>//A列に 0.00012345, 6.789, 20.2 を入力
+range ra=col(A); //範囲変数
+type $(ra, *3); //ANS: 1.23E-4 6.79, 20.2
+</pre>
+</td>
+<td> raを有効数字3桁で表示します
+</td></tr>
+<tr>
+<td align="left"> 数式
+</td>
+<td> <i>.0,</i>
+</td>
+<td>
+<pre>xx = 1234.5678;
+type $(xx*4, .0,); //ANS: 4,938
+</pre>
+</td>
+<td> 式の結果を小数点以下0桁とカンマ区切りで表示します
+</td></tr></table>
+<h2><a name="Format"></a><span class="mw-headline">フォーマット</span></h2>
+<p>type コマンドを使用して、すべての形式の効果を表示します。
+</p>
+<h3><a name="Default_Format"></a><span class="mw-headline">デフォルトフォーマット</span></h3>
+<p>角括弧は、format が$() 置換表記に対して任意の引数であることを示します。<i>format</i> を指定しない場合、Originは<b>@SD</b><a href="../../LabTalk/LabTalk/System_Variables.html#DATA" title="LabTalk:システム変数">システム変数</a>（デフォルト値は14）により指定された桁または有効桁数でexpressionを実行します。  例
+</p>
+<pre class="lt" style="font-family:monospace;">double aa <span style="color: #000080;">=</span>  <span style="color: #0000dd;">3.14159265358979323846</span>;
+type <span style="color: #000080;">$</span><span style="color: #000000;">(</span>aa<span style="color: #000000;">)</span>;    <span style="color: #008000;">// ANS: 3.1415926535898</span></pre>
+<h3><a name="Origin_Formats"></a><span class="mw-headline">Originフォーマット</span></h3>
+<p>Originは、<a class="external text" href="../../UserGuide/UserGuide/Custom_Numeric_Format.html">ワークシート</a>または<a class="external text" href="../../UserGuide/UserGuide/Linking_Text_Labels_to_Data_and_Variables.html">テキストラベル</a>の数値のカスタムフォーマットをサポートしています。数値フォーマットオプションの全リストは、<a href="../../LabTalk/LabTalk/Origin_Formats.html" title="LabTalk:Originフォーマット"><b>Reference Tables: Origin Formats</b></a>を参照してください。
+</p><p><br />
+</p>
+<table class="simple">
+<tr>
+<th> フォーマット
+</th>
+<th> 説明
+</th>
+<th> 例
+</th></tr>
+<tr>
+<td align="center"> *<i>n</i>
+</td>
+<td> <i>n</i> 桁の有効桁数を表示します。
+</td>
+<td>
+<pre>xx=1.23456; 
+type &quot;xx = $(xx, *2)&quot;; //ANS: xx=1.2
+</pre>
+</td></tr>
+<tr>
+<td align="center"> .<i>n</i>
+</td>
+<td> <i>n</i> 桁の小数桁数を表示します。
+</td>
+<td>
+<pre>xx=1.23456; 
+type &quot;xx = $(xx, .2)&quot;; //ANS: xx=1.23
+</pre>
+</td></tr>
+<tr>
+<td align="center"> *<i>n</i>*
+</td>
+<td> <i>n</i>桁の有効数字を表示し、末尾のゼロを切り捨てます
+</td>
+<td>
+<pre>xx = 1.10001; 
+type &quot;xx = $(xx, *4*)&quot;; //ANS: xx=1.1
+</pre>
+</td></tr>
+<tr>
+<td align="center"> .<i>n</i>,
+</td>
+<td> カンマ区切り記号を使用して、小数点以下n桁を表示(US, UK, など)
+</td>
+<td>
+<pre>xx = 1234.5678;
+type &quot;xx = $(xx, .2,)&quot;; //ANS: xx=1,234.57
+xx= 10000;
+type &quot;$(xx, .0,)&quot;; //ANS: 10,000
+</pre>
+</td></tr>
+<tr>
+<td align="center"> E.<i>n</i>
+</td>
+<td> 工学表記で<i>n</i> 桁の小数桁数を表示します。
+</td>
+<td>
+<pre>xx=203465987;
+type &quot;xx = $(xx, E*3)&quot;; //ANS: xx=203M
+</pre>
+</td></tr>
+<tr>
+<td align="center"> S*<i>n</i>
+</td>
+<td> <b>1E3</b>の形式の科学表記で <i>n</i> 桁の有効桁数を表示
+</td>
+<td>
+<pre>xx=203465987;
+type &quot;xx = $(xx, S*3)&quot;; //ANS: xx=2.03E+08
+</pre>
+</td></tr>
+<tr>
+<td align="center"> D<i>&lt;format&gt;</i>
+</td>
+<td> カスタム日付形式を表示します。ここで、<i>&lt;format&gt;</i> は、<a class="external text" href="../../UserGuide/UserGuide/The_(Column_Properties)_Properties_Tab.html#Display">列プロパティ<b>表示</b>リスト</a>の先頭から始まる、フォーマットのインデックス番号（0からカウント）または、<a href="../../LabTalk/LabTalk/Date_and_Time_Format_Specifiers.html" title="LabTalk：日付と時間のフォーマット指示子">これらの日時形式指定子</a>を使用して作成された文字列のいずれかです。
+</td>
+<td>
+<pre>type &quot;$(date(7/20/2009), D1)&quot;;  // ANS: Monday, July 20, 2009
+type &quot;$(date(7/20/2009), Dyyyy&apos;-&apos;MM&apos;-&apos;dd)&quot;;  //ANS: 2009-07-20
+DT=2459858.6946202; //DTにユリウス日を割り当てる
+type &quot;DT = $(DT, D1)&quot;; // ANS: DT = Thursday, October 6, 2022
+type &quot;Now= $(@D, DMM-dd-yyyy h:mm:ss tt)&quot;; // @D: 現在の日付と時間
+</pre>
+</td></tr>
+<tr>
+<td align="center"> T<i>&lt;format&gt;</i>
+</td>
+<td> カスタム時間形式を表示します。ここで、<i>&lt;format&gt;</i> は、<a class="external text" href="../../UserGuide/UserGuide/The_(Column_Properties)_Properties_Tab.html#Display">列プロパティ<b>表示</b>リスト</a>の先頭から始まる、フォーマットのインデックス番号（0からカウント）または、<a href="../../LabTalk/LabTalk/Date_and_Time_Format_Specifiers.html" title="LabTalk：日付と時間のフォーマット指示子">これらの時間形式指定子</a>を使用して作成された文字列のいずれかです。
+</td>
+<td>
+<pre>type &quot;$(time(14:31:04), T4)&quot;;   //ANS: 02 PM
+type &quot;$(time(14:31:04), Thh&apos;.&apos;mm&apos;.&apos;ss)&quot;;  //ANS: 02.31.04
+DT=2459858.6946202;
+type &quot;DT = $(DT, T0)&quot;; // ANS: DT = 16:40
+type &quot;Now = $(@D, THH:mm:ss.##)&quot;; // @D: 現在の日付と時間
+</pre>
+</td></tr>
+<tr>
+<td align="center"> C<i>&lt;format&gt;</i>
+</td>
+<td> カレンダーのフォーマットで月や曜日を表示します。&lt;format&gt; は M# (月) または D# =曜日です。# は 0 (3文字), 1 (完全) または 2 (1文字)　に設定できます。
+</td>
+<td>
+<pre>type &quot;$(12, CM0)&quot;;  // ANS: Dec
+type &quot;$(3, CD1)&quot;;  // ANS: Wednesday
+</pre>
+</td></tr>
+<tr>
+<td align="center"> #<i>n</i> または ##
+</td>
+<td> <i>n</i>桁の整数を表示し、必要に応じてゼロを埋め込みます。または、<i>n</i>桁を参照するには、n個の#を使用します
+</td>
+<td>
+<pre>xx=45;
+type &quot;xx=$(xx, #5)&quot;; //ANS: 00045
+type &quot;xx=$(xx, ###)&quot;; //AnS: 045
+</pre>
+</td></tr>
+<tr>
+<td align="center"> <i>&lt;prefix&gt;</i>##<i>&lt;sep&gt;</i>###<i>&lt;suffix&gt;</i>
+</td>
+<td> 数字の間にセパレータ (<i>&lt;sep&gt;</i>) を指定して数値を表示し、オプションで接頭語(<i>&lt;prefix&gt;</i>) や接尾辞 (<i>&lt;suffix&gt;</i>)を追加します。1つの<b>#</b>記号は1桁を示します。この式の最後の<b>#</b>は、常に単位の数字を参照します。最初と2番目の部分の<b>#</b>の数は変更できます。
+</td>
+<td>
+<pre>xx=56000;
+type &quot;xx=$(xx, ##+###)&quot;; //ANS: xx=56+000
+xx=4000; 
+type &quot;xx=$(xx, ##+##M)&quot;; //ANS: xx=40+00M
+</pre>
+</td></tr>
+<tr>
+<td align="center"># #/<i>n</i>
+</td>
+<td> <i>n</i> を分母として指定して、数値を小数として丸めて表示します。分子と分母はスラッシュ<b>/</b>で区切られます。分子の桁数は調整されます。
+</td>
+<td>
+<pre>AA = 0.334;
+type &quot;AA = $(AA, # ##/##)&quot;; //ANS: AA = 1/3
+type &quot;AA = $(AA, # #/8)&quot;; //ANS: AA = 3/8
+</pre>
+</td></tr>
+<tr>
+<td align="center">D[<i>&lt;space&gt;</i>]M[S][F][<i>n</i>]
+</td>
+<td> 度数を<i>Degree° Minute&apos; Second&quot;</i>の形式で表示します。ここで、1度= 60分、1分= 60秒です。それぞれを区切るためにスペースを挿入します。<i>N</i> は、分数の小数点以下の桁を示します。<b>F</b>は、記号なしで区切り記号としてスペースを挿入して次数を表示します。
+</td>
+<td>
+<pre>DD = 37.34255;
+type &quot;DD = $(DD, DMS)&quot;; //ANS: DD = 37°20&apos;33&quot;
+type &quot;DD = $(DD, D MS)&quot;; //ANS: DD = 37° 20&apos; 33&quot;
+type &quot;DD = $(DD, DMSF)&quot;; //ANS: DD = 37 20 33
+type &quot;DD = $(DD, DMF1)&quot;; //ANS: DD = 37 20.6
+</pre>
+</td></tr></table>
+<h3><a name="C-Language_Formats"></a><span class="mw-headline">C言語の形式</span></h3>
+<p>$() 置換の <i>format </i>の部分は、C言語形式のステートメントもサポートします。
+</p>
+<table class="simple">
+<tr>
+<th> オプション
+</th>
+<th> 符号の有無
+</th>
+<th> 出力
+</th>
+<th> 入力範囲
+</th>
+<th> サンプル
+</th></tr>
+<tr>
+<td> d, i
+</td>
+<td> 符号付き
+</td>
+<td> 整数値(小数の整数部分または整数値)
+</td>
+<td> -2^31 -- 2^31 -1
+</td>
+<td>
+<pre>double nn = -247.56;
+type &quot;Value: $(nn,%d)&quot;; // ANS: -247
+</pre>
+</td></tr>
+<tr>
+<td> f, e, E, g, G
+</td>
+<td> 符号付き
+</td>
+<td> 十進数、科学表記、十進または科学表記
+</td>
+<td> +/-1e290 -- +/-1e-290
+</td>
+<td>
+<pre>double nn = 1.23456e5;
+type &quot;Values: $(nn,&nbsp;%9.4f), $(nn,&nbsp;%9.4E), $(nn,&nbsp;%g)&quot;;
+// ANS: 123456.0000, 1.2346E+005, 123456
+double nn = 1.23456e6;
+type &quot;Values: $(nn,&nbsp;%9.4f), $(nn,&nbsp;%9.4E), $(nn,&nbsp;%g)&quot;;
+// ANS: 123456.0000, 1.2346E+006, 1.23456e+006
+</pre>
+</td></tr>
+<tr>
+<td> o, u, x, X
+</td>
+<td> 符号なし
+</td>
+<td> 8進数、整数、16進数、16進数(大文字)
+</td>
+<td> -2^31 -- 2^32 - 1
+</td>
+<td>
+<pre>double nn = 65551;
+type &quot;Values: $(nn,&nbsp;%o), $(nn,&nbsp;%u), $(nn,&nbsp;%X)&quot;;
+// ANS: 200017, 65551, 1000F
+</pre>
+</td></tr></table>
+<p>Note: 最後のカテゴリでは、負の値は2つの成分で表されます。
+</p>
+<h3><a name="Combining_Origin_and_C-language_Formats"></a><span class="mw-headline">OriginとC言語の形式の組合せ</span></h3>
+<p>Originは、C言語形式の指定子を使って、<i>E</i> と <i>S</i> の形式の使用をサポートしています。  例えば、
+</p>
+<pre class="lt" style="font-family:monospace;">xx <span style="color: #000080;">=</span> 1e6;
+type <span style="color: #ff00ff;">&quot;xx = $(xx, E%4.2f)&quot;</span>;  <span style="color: #008000;">// ANS: 1.00M</span></pre>
+<h2><a name="Display_Negative_Values"></a><span class="mw-headline">負の値の表示</span></h2>
+<p>OriginのLabTalkコマンド表記のほとんどにはオプションがあり、オプションの前には常にダッシュ（&quot;-&quot;）文字が付きます。 
+したがって、次のコマンドは機能しません。
+</p>
+<pre class="lt" style="font-family:monospace;">k<span style="color: #000080;">=</span><span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>;
+type <span style="color: #000080;">$</span><span style="color: #000000;">(</span>k<span style="color: #000000;">)</span>; <span style="color: #008000;">//type -5 として解釈され、-5 が &apos;&apos;type&apos;&apos; コマンドのオプションとされる</span></pre>
+<p>このため、置換を引用符または括弧で囲んで <b>-</b> を保護する必要があります。例
+</p>
+<pre class="lt" style="font-family:monospace;">K <span style="color: #000080;">=</span> <span style="color: #000080;">-</span><span style="color: #0000dd;">5</span>;
+type <span style="color: #ff00ff;">&quot;$(K)&quot;</span>; <span style="color: #008000;">// 正しく動作</span>
+type <span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>K<span style="color: #000000;">)</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 正しく動作</span></pre>
+<h2><a name="Variable_Naming_with_.24.28.29"></a><span class="mw-headline">$() による変数の命名</span></h2>
+<p>代入ステートメントでは、置換表記$()は、代入演算子の右辺、左辺のいずれの側にあるかに関係なく、置換操作をし、値を与えます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//値2を持つ変数Aを作成します</span>
+A <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">//値2を持つ変数Aを定義します。  </span>
+
+<span style="color: #008000;">//値3を持つ変数A2を作成します</span>
+A<span style="color: #000080;">$</span><span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #000080;">$</span><span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> is resolved first so LHS is A2
+
+<span style="color: #008000;">//結果を検証</span>
+A2<span style="color: #000080;">=</span>;
+A<span style="color: #000080;">$</span><span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000080;">=</span>;</pre>
+<p><br />
+また、関数内の範囲またはデータセット型の引数に変数名が使用されている場合、最初にそれを解決するために $() 置換が必要です。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//列1から5に値を入力</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>data<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">100</span><span style="color: #000000;">)</span>; 
+int nn <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>; 
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">2</span>,nn<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">(</span><span style="color: #0000dd;">100</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//Xファンクションsmoothで変数使用の例</span>
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">2</span>,nn<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+ <span style="color: #008000;">//ii 番目の列 $(ii) をスムージング</span>
+  smooth <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aav npts<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//LabTalk関数sum()での変数使用の例</span>
+lastcolumn<span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span>;
+<span style="color: #008000;">//最後の列の後に列を追加し、値を最後の列の合計に設定</span>
+col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>lastcolumn<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span> sum<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>lastcolumn<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>lastcolumn<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span> sum; <span style="color: #008000;">//列のロングネームを設定</span></pre>
+<p><br />
+---
+$() 置換のその他の例については、<a href="../../LabTalk/Script/Converting_to_String.html" title="Script:文字列へ変換">数値から文字列へ</a>変換を参照してください。
+</p>
+
+
+
+
+
+
+    

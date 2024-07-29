@@ -1,0 +1,275 @@
+﻿<h1 class="firstheading">ウィザードダイアログを作成する</h1>
+<p><span class="OIndex" style="display: none;">Xファンクションウィザードダイアログ</span><span class="OIndex" style="display: none;">ウィザードダイアログ</span>Xファンクションはウィザードダイアログをサポートしています。ウィザードダイアログを作成するには、n+1分のXファンクションを準備する必要があります。ここでnはウィザードのページ数です。1つはメインとなるXファンクションです。メインのXファンクションはウィザードページを作成するのに視聴され、スクリプトモードがオフの場合はダイアログを開き、スクリプトモードがオンの場合はダイアログを開かずに実行されます。</p>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Creating_a_Wizard"><span class="tocnumber">1</span> <span class="toctext">ウィザードの作成</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Using_X-Function"><span class="tocnumber">2</span> <span class="toctext">Xファンクションを使用する</span></a>
+<ol>
+<li class="toclevel-2 tocsection-3"><a href="#Run_with_wizard_dialogX-Function.2C_Execution_with_Wizard_Dialog"><span class="tocnumber">2.1</span> <span class="toctext">ウィザードダイアログの実行<span class="OIndex" style="display: none;">Xファンクション, ウィザードダイアログで実行</span></span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Run_with_script_mode_without_dialog_X-Function.2C_Execution_with_Theme"><span class="tocnumber">2.2</span> <span class="toctext">ダイアログなしのスクリプトモードで実行<span class="OIndex" style="display: none;">Xファンクション, テーマで実行</span></span></a></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="Creating_a_Wizard" id="Creating_a_Wizard"></a><span class="mw-headline">ウィザードの作成</span></h2>
+<p>以下のサンプルは2ページのウィザードを作成する方法を示します。ページ1はXY範囲を指定するのに使用し、選択したデータ範囲のサブX範囲も指定します。ページ2は指定した塗り色の長方形を追加してソースグラフに反映します。長方形の左のXと右のXはページ1のX from/toと同じ値になります。</p>
+<ol>
+<li>ヘッダファイル、wizDlg.hをユーザファイルフォルダ\OriginC\ フォルダに追加します。以下のコードをヘッダファイルに入力してサブクラスをOrigin C 組み込みの X-Functionウィザードクラスに入力します。Xファンクションの基本的なウィザードクラスは次の通りです。
+<ul>
+<li>XCore、値を保存して各ページにその値を受け渡します。</li>
+<li>XFWizTheme、これは各ウィザードページでテーマを設定する時に使用します。</li>
+<li>XFWizInputOutputRange、これは各ページの入力と出力の範囲を調整する際に使用します。</li>
+<li>XFWizManager、最も重要でこれから割り当てられたユーザ定義のサブクラスを持つ必要があります。ウィザードのステップを定義するのに使用します。</li>
+</ul>
+<pre class="oc" style="font-family: monospace;">
+#ifndef __WIZ_DLG_H__
+#define __WIZ_DLG_H__
+ 
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWiz.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFCore.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\WizOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizNavigation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizManager.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizScript.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizard_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ <span style="color: #008000;">
+///////////////////////////////////////////////////////////////////////////</span>
+class WizDlgCore <span style="color: #000000;">:</span> public XFCore<span style="color: #000000;">
+{</span>
+public<span style="color: #000000;">:</span>
+        WizDlgCore<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+        <span style="color: #000000;">}</span>
+ 
+        void SetXRange<span style="color: #000000;">(</span>double from, double to<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                m_dFrom <span style="color: #000080;">=</span> from;
+                m_dTo <span style="color: #000080;">=</span> to;
+        <span style="color: #000000;">}</span>
+ 
+        void GetXRange<span style="color: #000000;">(</span>double<span style="color: #000040;">&amp;</span> from, double<span style="color: #000040;">&amp;</span> to<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                from <span style="color: #000080;">=</span> m_dFrom;
+                to <span style="color: #000080;">=</span> m_dTo;
+        <span style="color: #000000;">}</span>
+ 
+private<span style="color: #000000;">:</span>
+        double m_dFrom;
+        double m_dTo;<span style="color: #000000;">
+}</span>;
+ <span style="color: #008000;">
+///////////////////////////////////////////////////////////////////////////</span>
+class WizDlgTheme <span style="color: #000000;">:</span> public XFWizTheme<span style="color: #000000;">
+{</span><span style="color: #000000;">
+}</span>;
+ <span style="color: #008000;">
+///////////////////////////////////////////////////////////////////////////</span>
+class WizDlgInputOutputRange <span style="color: #000000;">:</span> public XFWizInputOutputRange<span style="color: #000000;">
+{</span><span style="color: #000000;">
+}</span>;
+ <span style="color: #008000;">
+///////////////////////////////////////////////////////////////////////////</span>
+class WizDlgManager <span style="color: #000000;">:</span> public XFWizManager<span style="color: #000000;">
+{</span>
+public<span style="color: #000000;">:</span>
+        WizDlgManager<span style="color: #000000;">(</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> NULL, 
+        const XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> NULL, 
+        const XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> NULL, DWORD dwUIDOp <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+ 
+protected<span style="color: #000000;">:</span> 
+        virtual XFCore<span style="color: #000040;">*</span>    CreateXFCore<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> return new WizDlgCore; <span style="color: #000000;">}</span>
+        virtual XFWizTheme<span style="color: #000040;">*</span>        CreateXFWizTheme<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> return new WizDlgTheme; <span style="color: #000000;">}</span>
+        virtual XFWizInputOutputRange<span style="color: #000040;">*</span> CreateXFWizInputOutputRange<span style="color: #000000;">(</span><span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span> 
+                return new WizDlgInputOutputRange; 
+        <span style="color: #000000;">}</span>
+ 
+        virtual string  GetClassName<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span> return <span style="color: #ff00ff;">"WizDlgExample"</span>; <span style="color: #000000;">}</span>   <span style="color: #000000;">
+}</span>;
+ 
+#define STR_XFNAME_PAGE_1                       <span style="color: #ff00ff;">"wizPage1"</span>
+#define STR_XFNAME_PAGE_2                       <span style="color: #ff00ff;">"wizPage2"</span>
+ 
+#define STR_LABEL_XFNAME_PAGE_1         <span style="color: #ff00ff;">"Page 1"</span>
+#define STR_LABEL_XFNAME_PAGE_2         <span style="color: #ff00ff;">"Page 2"</span>
+ 
+WizDlgManager<span style="color: #000000;">::</span><span style="color: #000000;">WizDlgManager</span><span style="color: #000000;">(</span>LPCSTR lpcszThemeName, 
+        const XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme, const XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO, 
+        DWORD dwUIDOp<span style="color: #000000;">)</span> <span style="color: #008000;">// = NULL, NULL, NULL, 0</span><span style="color: #000000;">
+:</span> XFWizManager<span style="color: #000000;">(</span>lpcszThemeName, pXFWizTheme, pXFWizIO, dwUIDOp<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        StringArray saMapXFNames <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>STR_XFNAME_PAGE_1, STR_XFNAME_PAGE_2<span style="color: #000000;">}</span>;
+        StringArray saMapXFLabels <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>STR_LABEL_XFNAME_PAGE_1, 
+                                STR_LABEL_XFNAME_PAGE_2<span style="color: #000000;">}</span>;
+        m_saMapXFNames <span style="color: #000080;">=</span> saMapXFNames;
+        m_saMapXFLabels <span style="color: #000080;">=</span> saMapXFLabels;
+        ASSERT<span style="color: #000000;">(</span> m_saMapXFNames.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> m_saMapXFLabels.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+ 
+        m_saDefaultXFNames <span style="color: #000080;">=</span> saMapXFNames;<span style="color: #000000;">
+}</span>
+ <span style="color: #008000;">
+///////////////////////////////////////////////////////////////////////////</span>
+int run_wiz_nodlg<span style="color: #000000;">(</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> NULL, 
+        const XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> NULL, 
+        const XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> NULL, DWORD dwOPUID <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        TEMPLATE_run_wiz_nodlg<span style="color: #000000;">(</span>WizDlgManager, lpcszThemeName, pXFWizTheme, 
+                        pXFWizIO, dwOPUID<span style="color: #000000;">)</span><span style="color: #000000;">
+}</span>
+ 
+int open_wiz_dlg<span style="color: #000000;">(</span>LPCSTR lpcszThemeName <span style="color: #000080;">=</span> NULL, 
+        const XFWizTheme <span style="color: #000040;">*</span>pXFWizTheme <span style="color: #000080;">=</span> NULL, 
+        const XFWizInputOutputRange <span style="color: #000040;">*</span>pXFWizIO <span style="color: #000080;">=</span> NULL, DWORD dwOPUID <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        TEMPLATE_open_wiz_dlg<span style="color: #000000;">(</span>WizDlgManager, lpcszThemeName, pXFWizTheme, 
+                        pXFWizIO, dwOPUID<span style="color: #000000;">)</span><span style="color: #000000;">
+}</span>
+ 
+#endif  <span style="color: #008000;">//__WIZ_DLG_H__</span>
+        
+</pre></li>
+<li>F10を押してXファンクションビルダを開き、メインのXファンクションを以下のように作成します。<br />
+<a class="image"><img alt="OCguide xf wizard main dlg vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_main_dlg_vars.png" width="433" height="294" border="0" /></a><br><a class="image"><img alt="Ocguide xfdialog savebutton.png" src="../images/Creating_Wizard_Dialog/Ocguide_xfdialog_savebutton.png" width="23" height="23" border="0" /></a>ボタンをクリックして、Xファンクションを保存します。Xファンクションビルダ を閉じます。</li>
+<li>コードビルダを開き、wizDlg.OXFファイルを開いて現在のワークスペースに追加します。<b>//put additional include files here</b>行の後に、次のヘッダファイルを追加します。
+<pre class="oc" style="font-family: monospace;">
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWiz.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#include <span style="color: #000080;">&lt;</span>event_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\WksOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\WizOperation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFCore.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizNavigation.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizManager.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizScript.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\OriginLab\XFWizard_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+ 
+#include <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// ユーザはこのサンプルのためにヘッダファイルを追加</span>
+        
+</pre></li>
+<li>以下のコードをメインの<b>wizDlg</b>関数に追加してください。
+<pre class="oc" style="font-family: monospace;">
+WizDlgInputOutputRange objXFWizIO;
+if<span style="color: #000000;">(</span><span style="color: #000040;">!</span>xfwiz_construct_input_range<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>objXFWizIO, STR_XFNAME_PAGE_1,  iy<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        XF_THROW<span style="color: #000000;">(</span>XFERR_FAIL_TO_UPDATE_GETN_TREE<span style="color: #000000;">)</span>;     <span style="color: #000000;">
+}</span>        
+ 
+if<span style="color: #000000;">(</span> script <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        run_wiz_nodlg<span style="color: #000000;">(</span>theme, NULL, <span style="color: #000040;">&amp;</span>objXFWizIO<span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+else<span style="color: #000000;">
+{</span>
+        open_wiz_dlg<span style="color: #000000;">(</span>theme, NULL, <span style="color: #000040;">&amp;</span>objXFWizIO<span style="color: #000000;">)</span>;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li>F10を押してXファンクションビルダを開き、ウィザードのページ1のためのXファンクションのwizPage1 を以下のように作成します。<br />
+<a class="image"><img alt="OCguide xf wizard page1 vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_page1_vars.png" width="573" height="294" border="0" /></a></li>
+<li><b style="font-weight: bold;">//put additional include files here</b>行の後に、次のユーザ定義ヘッダファイルを次のように入力します。
+<pre class="oc" style="font-family: monospace;">
+#include <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// ユーザはこの例のためにヘッダファイルを追加</span>
+        
+</pre></li>
+<li>以下のコードを、ページ1のメイン関数<b>wizPage1</b>に貼り付けます。
+<pre class="oc" style="font-family: monospace;">
+WizDlgCore<span style="color: #000040;">*</span> pWizCore <span style="color: #000080;">=</span> 
+        <span style="color: #000000;">(</span>WizDlgCore<span style="color: #000040;">*</span><span style="color: #000000;">)</span>get_xf_core_handler<span style="color: #000000;">(</span>NODE_NAME_XF_WIZ_CORE_POINTER<span style="color: #000000;">)</span>;
+ASSERT<span style="color: #000000;">(</span>pWizCore<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// X From/To をWizCore クラスオブジェクトにセット</span>
+pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>SetXRange<span style="color: #000000;">(</span>xfrom, xto<span style="color: #000000;">)</span>;
+        
+</pre></li>
+<li>以下のコードをwizPage1 Xファンクションの_event1関数、<b>wizPage1_before_execute</b>に追加して、xfrom とxtoのコントロールを入力データ範囲に応じて起動します。<span class="OIndex" style="display: none;">Xファンクション, before_execute</span>
+<pre class="oc" style="font-family: monospace;">
+if<span style="color: #000000;">(</span> PDS_AUTO <span style="color: #000080;">==</span> okutil_cvt_str_to_predefined_type<span style="color: #000000;">(</span>trGetN.<span style="color: #000000;">xfrom</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">)</span> 
+        <span style="color: #000040;">||</span> PDS_AUTO <span style="color: #000080;">==</span> okutil_cvt_str_to_predefined_type<span style="color: #000000;">(</span>trGetN.<span style="color: #000000;">xto</span>.<span style="color: #000000;">strVal</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        DataRange dr;
+        TreeNode trRange <span style="color: #000080;">=</span> trGetN.<span style="color: #000000;">iy</span>;
+        okxf_resolve_tree_construct_range<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>trRange, <span style="color: #000040;">&amp;</span>dr<span style="color: #000000;">)</span>;
+ 
+        vector vx;
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>DRR_GET_DEPENDENT, <span style="color: #0000dd;">0</span>, NULL, NULL, NULL, <span style="color: #000040;">&amp;</span>vx<span style="color: #000000;">)</span>;
+ 
+        double from, to;
+        vx.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>from, to<span style="color: #000000;">)</span>;
+ 
+        trGetN.<span style="color: #000000;">xfrom</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> from;
+        trGetN.<span style="color: #000000;">xto</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> to;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li>Xファンクションビルダを開き、2ページ目のwizPage2 Xファンクションを作成します。Xファンクション名と変数を以下の図のように設定して保存します。<br />
+<a class="image"><img alt="OCguide xf wizard page2 vars.png" src="../images/Creating_Wizard_Dialog/OCguide_xf_wizard_page2_vars.png" width="644" height="265" border="0" /></a></li>
+<li>コードビルダでwizPage2.OXFファイルを開き、現在のワークスペースに追加して以下のヘッダファイルを入力します。
+<pre class="oc" style="font-family: monospace;">
+<span style="color: #008000;">//put additional include files here</span>
+#include <span style="color: #000080;">&lt;</span>..\Originlab\wizDlg.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+#include <span style="color: #000080;">&lt;</span>..\Originlab\grobj_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+        
+</pre></li>
+<li>メイン関数<b>wizPage2</b>を探し、次のコードを入力します。このコードはページ1で指定したxfrom と xto の値を元に長方形を入力する際に使用します。
+<pre class="oc" style="font-family: monospace;">
+WizDlgCore<span style="color: #000040;">*</span> pWizCore <span style="color: #000080;">=</span> 
+        <span style="color: #000000;">(</span>WizDlgCore<span style="color: #000040;">*</span><span style="color: #000000;">)</span>get_xf_core_handler<span style="color: #000000;">(</span>NODE_NAME_XF_WIZ_CORE_POINTER<span style="color: #000000;">)</span>;
+ASSERT<span style="color: #000000;">(</span>pWizCore<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// ページ1で指定したx from/to の値を入手</span>
+double xfrom, xto;
+pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXRange<span style="color: #000000;">(</span>xfrom, xto<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// 入力範囲を入手</span>
+XFWizNavigation<span style="color: #000040;">*</span> pXFWizNavg <span style="color: #000080;">=</span> 
+        <span style="color: #000000;">(</span>XFWizNavigation<span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>pWizCore<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXFWizNavigation<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+WizDlgInputOutputRange<span style="color: #000040;">*</span> pwizInputOutputRange <span style="color: #000080;">=</span> 
+        <span style="color: #000000;">(</span>WizDlgInputOutputRange<span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>pXFWizNavg<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>GetXFWizInputOutputRange<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+ <span style="color: #008000;">
+// ページ1から入力範囲を入手</span>
+Array<span style="color: #000080;">&lt;</span>DataRange<span style="color: #000040;">&amp;</span><span style="color: #000080;">&gt;</span> arrdr;
+if<span style="color: #000000;">(</span> pwizInputOutputRange<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Get<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>arrdr, STR_XFNAME_PAGE_1, true<span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">
+{</span>
+        DataRange<span style="color: #000040;">&amp;</span> dr <span style="color: #000080;">=</span> arrdr.<span style="color: #000000;">GetAt</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+ 
+        vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vUIDs;
+        DataPlot dp;
+        if<span style="color: #000000;">(</span> dr.<span style="color: #000000;">GetPlots</span><span style="color: #000000;">(</span>vUIDs<span style="color: #000000;">)</span> <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// 入力範囲から元のグラフのレイヤを入手</span>
+                dp <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>DataPlot<span style="color: #000000;">)</span>Project.<span style="color: #000000;">GetObject</span><span style="color: #000000;">(</span>vUIDs<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                GraphLayer gl;
+                dp.<span style="color: #000000;">GetParent</span><span style="color: #000000;">(</span>gl<span style="color: #000000;">)</span>;
+ 
+                <span style="color: #008000;">// 長方形をグラフに追加</span>
+                GraphObject go;
+                add_rect<span style="color: #000000;">(</span>gl, go, xfrom, <span style="color: #0000dd;">0</span>, xto, <span style="color: #0000dd;">0</span>, color, <span style="color: #0000dd;">2</span>, LN_VERTICAL, 
+                        true, false<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span><span style="color: #000000;">
+}</span>
+</pre></li>
+</ol>
+<h2><a name="Using_X-Function" id="Using_X-Function"></a><span class="mw-headline">Xファンクションを使用する</span></h2>
+<p>サンプルのをざーどを実行する前に、新しいワークシートの2列にデータを入力して折れ線グラフをこの2列のデータで作図します。</p>
+<h3><a name="Run_with_wizard_dialogX-Function.2C_Execution_with_Wizard_Dialog" id="Run_with_wizard_dialogX-Function.2C_Execution_with_Wizard_Dialog"></a><span class="mw-headline">ウィザードダイアログの実行<span class="OIndex" style="display: none;">Xファンクション, ウィザードダイアログで実行</span></span></h3>
+<ol>
+<li>グラフウィンドウをアクティブのまま、次の操作を行います。コマンドウィンドウで「wizDlg」を実行します。</li>
+<li>ダイアログが開き、xfromとxtoの値をコントロール上で変更します。<b>進む</b>ボタンをクリックします。</li>
+<li>次のページで塗り色を青に変更します。</li>
+<li>テーマボタン<a class="image"><img alt="Ocguide dialog theme.png" src="../images/Creating_Wizard_Dialog/Ocguide_dialog_theme.png" width="21" height="23" border="0" /></a>をクリック、名前を付けて保存を選び、名前にtheme1と入力し、OKをクリックします。</li>
+<li>「完了」ボタンをクリックします。ウィザードダイアログが閉じ、青い長方形が元のグラフに追加されます。</li>
+</ol>
+<h3><a name="Run_with_script_mode_without_dialog_X-Function.2C_Execution_with_Theme" id="Run_with_script_mode_without_dialog_X-Function.2C_Execution_with_Theme"></a><span class="mw-headline">ダイアログなしのスクリプトモードで実行<span class="OIndex" style="display: none;">Xファンクション, テーマで実行</span></span></h3>
+<p>グラフウィンドウをアクティブのまま、次の操作を行います。コマンドウィンドウで「wizDlg s:=1 t:=theme1」を実行します。ダイアログが開かずに、指定したテーマファイルの設定に従って矩形がアクティブグラフに追加されます。</p>
+
+

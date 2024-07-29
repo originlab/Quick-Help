@@ -1,0 +1,191 @@
+﻿<h1 class="firstheading">Adding Tags to Imported Data and Displaying on Plots</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Examples"><span class="tocnumber">2</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Saving_Event_Tags_to_X_Column"><span class="tocnumber">3</span> <span class="toctext">Saving Event Tags to X Column</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Adding_Event_Tags_to_Graph"><span class="tocnumber">4</span> <span class="toctext">Adding Event Tags to Graph</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#LabTalk_Script_Using_Above_Origin_C_Functions"><span class="tocnumber">5</span> <span class="toctext">LabTalk Script Using Above Origin C Functions</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p>In this example, we use LabTalk commands to import a sample data, call an Origin C function to add event tags to the X column in the form of meta data, then after plotting the XY data, we call another Origin C function to draw those event tags as vertical lines with associated labels.</p>
+
+  <h2><a name="Saving_Event_Tags_to_X_Column"></a><span class="mw-headline">Saving Event Tags to X Column</span></h2>
+
+  <p>This OC function save an array of X values and associated labels to the specified column in the User tree so that you can also view them from Column Properties</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> putEventsInStorage<span style="color: #000000;">(</span>string strPageName<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span>strPageName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> pg <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get page named %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strPageName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+        <span style="color: #000000;">}</span>
+
+        Worksheet wks <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> wks <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get sheet from page named %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strPageName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span>;
+        <span style="color: #000000;">}</span>
+
+        Column xcol <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// assume data X column is first column</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> xcol <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get column<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>;
+        <span style="color: #000000;">}</span>
+
+        Tree trEvents;
+        trEvents.<span style="color: #000000;">Event1</span>.<span style="color: #000000;">Tag</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Jump1"</span>;
+        trEvents.<span style="color: #000000;">Event1</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">72.0</span>;
+        trEvents.<span style="color: #000000;">Event2</span>.<span style="color: #000000;">Tag</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Jump2"</span>;
+        trEvents.<span style="color: #000000;">Event2</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">301.0</span>;
+        trEvents.<span style="color: #000000;">Event3</span>.<span style="color: #000000;">Tag</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Jump3"</span>;
+        trEvents.<span style="color: #000000;">Event3</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">460.0</span>;
+        trEvents.<span style="color: #000000;">Event4</span>.<span style="color: #000000;">Tag</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Jump4"</span>;
+        trEvents.<span style="color: #000000;">Event4</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">760.0</span>;
+
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000080;">==</span> xcol.<span style="color: #000000;">PutBinaryStorage</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"TREE"</span>, trEvents<span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #008000;">// TREE is the name of the User Tree</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to put binary storage into the column<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">4</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Success</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Adding_Event_Tags_to_Graph"></a><span class="mw-headline">Adding Event Tags to Graph</span></h2>
+
+  <p>This OC function retrive the X column from the first data plot and find the stored event tags and add them as lines and labels</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> drawEventTags<span style="color: #000000;">(</span>string strGraphName, <span style="color: #0000ff;">int</span> nPlotIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span>strGraphName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> pg <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get graph named %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strGraphName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>;
+        <span style="color: #000000;">}</span>
+
+        GraphLayer gl <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// active graph layer</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> gl <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get active layer from graph named %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strGraphName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span>;
+        <span style="color: #000000;">}</span>
+
+        Column xcol;
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>nPlotIndex<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> dp <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                XYRange xy;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000080;">==</span> dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">(</span>xy<span style="color: #000000;">)</span> <span style="color: #000040;">||</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000080;">==</span> xy.<span style="color: #000000;">GetXColumn</span><span style="color: #000000;">(</span>xcol<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get X column from graph named %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strGraphName<span style="color: #000000;">)</span>;
+                        <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">3</span>;
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+
+        Tree trEvents;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000080;">==</span> xcol.<span style="color: #000000;">GetBinaryStorage</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"TREE"</span>, trEvents<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get the binary storage from the X column<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">4</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">int</span> nEvent <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+        string str;
+        vector vx<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>, vy<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+        GraphObject go;
+        Tree trFormat;
+        TreeNode tnEvent;
+
+        <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">true</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">//---------- Get Event Node</span>
+
+                str.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Event%d"</span>, nEvent<span style="color: #000000;">)</span>;
+                tnEvent <span style="color: #000080;">=</span> trEvents.<span style="color: #000000;">GetNode</span><span style="color: #000000;">(</span>str<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> tnEvent <span style="color: #000000;">)</span>
+                        <span style="color: #0000ff;">break</span>; <span style="color: #008000;">// no more events, exit loop</span>
+
+                <span style="color: #008000;">//---------- Add Vertical Line</span>
+
+                vx<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> tnEvent.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span>;
+                vy<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> vy<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        
+                go <span style="color: #000080;">=</span> gl.<span style="color: #000000;">CreateGraphObject</span><span style="color: #000000;">(</span>GROT_LINE<span style="color: #000000;">)</span>;
+                go.<span style="color: #000000;">SetName</span><span style="color: #000000;">(</span>str <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Line"</span><span style="color: #000000;">)</span>;
+                go.<span style="color: #000000;">Attach</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// 2 = attach to axes</span>
+        
+                trFormat.<span style="color: #000000;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;<span style="color: #008000;">// make sure tree is empty</span>
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Direction</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> LN_VERTICAL;
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Span</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// turn span on</span>
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Data</span>.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vx;
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Data</span>.<span style="color: #000000;">Y</span>.<span style="color: #000000;">dVals</span> <span style="color: #000080;">=</span> vy;
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Color</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> SYSCOLOR_LTGRAY;
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">BehindData</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// put line behind plot data</span>
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">States</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> GOC_NO_SELECT <span style="color: #000040;">|</span> GOC_NO_MOVE <span style="color: #000040;">|</span> GOC_NO_ROTATE <span style="color: #000040;">|</span> GOC_NO_SKEW <span style="color: #000040;">|</span> GOC_NO_EDIT <span style="color: #000040;">|</span> GOC_NO_BORDERSIZE <span style="color: #000040;">|</span> GOC_NO_IN_PLACE_EDIT;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> go.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">(</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        go.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">(</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">//---------- Add Text Label</span>
+
+                go <span style="color: #000080;">=</span> gl.<span style="color: #000000;">CreateGraphObject</span><span style="color: #000000;">(</span>GROT_TEXT<span style="color: #000000;">)</span>;
+                go.<span style="color: #000000;">SetName</span><span style="color: #000000;">(</span>str <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Text"</span><span style="color: #000000;">)</span>;
+                go.<span style="color: #000000;">Attach</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>; <span style="color: #008000;">// 2 = attach to axes</span>
+                go.<span style="color: #000000;">Text</span> <span style="color: #000080;">=</span> tnEvent.<span style="color: #000000;">Tag</span>.<span style="color: #000000;">strVal</span>;
+                go.<span style="color: #000000;">X</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>go.<span style="color: #000000;">DX</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> tnEvent.<span style="color: #000000;">X</span>.<span style="color: #000000;">dVal</span>;
+                go.<span style="color: #000000;">Y</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>go.<span style="color: #000000;">DY</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> gl.<span style="color: #000000;">Y</span>.<span style="color: #000000;">To</span>;
+
+                trFormat.<span style="color: #000000;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;<span style="color: #008000;">// make sure tree is emtpy</span>
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">Angle</span>.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">45</span>;
+                trFormat.<span style="color: #000000;">Root</span>.<span style="color: #000000;">States</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> GOC_NO_SELECT <span style="color: #000040;">|</span> GOC_NO_MOVE <span style="color: #000040;">|</span> GOC_NO_ROTATE <span style="color: #000040;">|</span> GOC_NO_SKEW <span style="color: #000040;">|</span> GOC_NO_EDIT <span style="color: #000040;">|</span> GOC_NO_BORDERSIZE <span style="color: #000040;">|</span> GOC_NO_IN_PLACE_EDIT;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> go.<span style="color: #000000;">UpdateThemeIDs</span><span style="color: #000000;">(</span>trFormat.<span style="color: #000000;">Root</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        go.<span style="color: #000000;">ApplyFormat</span><span style="color: #000000;">(</span>trFormat, <span style="color: #0000ff;">true</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #008000;">//---------- Next Event</span>
+
+                nEvent<span style="color: #000040;">++</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Success</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="LabTalk_Script_Using_Above_Origin_C_Functions"></a><span class="mw-headline">LabTalk Script Using Above Origin C Functions</span></h2>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// Import a data file from Samples folder.</span>
+<span style="color: #000080;">%</span>Z <span style="color: #000080;">=</span> System.<span style="color: #000080;">Path</span>.<span style="color: #000080;">Program</span><span style="color: #000080;">$</span>;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">"%Zsamples\signal processing\step signal with random noise.dat"</span>;
+
+<span style="color: #008000;">// Put event data into binary storage.</span>
+putEventsInStorage<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// Plot the imported data.</span>
+plotxy <span style="color: #0000dd;">2</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span>;
+
+<span style="color: #008000;">// Update plot with meta data info.</span>
+drawEventTags<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H<span style="color: #000000;">)</span>;
+</pre>

@@ -1,0 +1,103 @@
+﻿<h1 class="firstheading">JSON::TreeToVector</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Included"><span class="tocnumber">8</span> <span class="toctext">header to Included</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Convert a Tree branch into vector. This is part of JSON class due to the fact that the tree here is made from a JSON string</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> TreeToVector<span style="color: #000000;">(</span> TreeNode <span style="color: #000040;">&amp;</span> tree, vectorbase <span style="color: #000040;">&amp;</span> vv, LPCSTR lpcszTagName <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>tree</dt>
+
+    <dd>[input] this tree must be created by FromString</dd>
+
+    <dt>vv</dt>
+
+    <dd>[output] the resulting vector, string or numeric</dd>
+
+    <dt>lpcszTagName</dt>
+
+    <dd>[input] to get values from an array member with the name specified.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>FALSE return if Tree is not a valid format with _0, _1 type of tag names</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//assume new project with an empty worksheet</span>
+<span style="color: #0000ff;">void</span> odata<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string strURL <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"https://services.odata.org/TripPinRESTierService/People"</span>;
+        string result;
+        <span style="color: #0000ff;">int</span> err <span style="color: #000080;">=</span> okutil_http_get<span style="color: #000000;">(</span>strURL, <span style="color: #000040;">&amp;</span>result<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> err <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+                out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"err = "</span>, err<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        Tree tr;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>JSON.<span style="color: #000000;">FromString</span><span style="color: #000000;">(</span>tr, result<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #008000;">//out_tree(tr);</span>
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> saFields <span style="color: #000080;">=</span> <span style="color: #000000;">{</span> <span style="color: #ff00ff;">"UserName"</span>, <span style="color: #ff00ff;">"LastName"</span>, <span style="color: #ff00ff;">"FirstName"</span>, <span style="color: #ff00ff;">"Gender"</span>, <span style="color: #ff00ff;">", emails"</span><span style="color: #000000;">}</span>; 
+        <span style="color: #008000;">//", emails" so that ", " will be used as separator for multiple values</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, saFields.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vs;
+        <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> saFields.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+                JSON.<span style="color: #000000;">TreeToVector</span><span style="color: #000000;">(</span>tr.<span style="color: #000000;">value</span>, vs, saFields<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+                Column ca <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+                ca.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">(</span>vs<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>For using lpcszTagName to get array member, that member itself might be another array, and in such case, Origin supports the following special cases:</p>
+
+  <p>1. To get value into a string array, then the member array values will be concatenated. You can even specify a separator by putting into the lpcszTagName. For example, see the odata sample code. The emails field may have one or more emails, and by using tag name as ", emails", then the ", " portion will be used as separator between the multiple emails.</p>
+
+  <p>2. To get numberic values, only the first will be obtained. This is useful for many JSON files that the member array holds only one value.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/JSON-FromString.html" title="OriginC:JSON-FromString">JSON::FromString</a></p>
+
+  <h2><a name="header_to_Included"></a><span class="mw-headline">header to Included</span></h2>
+
+  <p>origin.h</p>

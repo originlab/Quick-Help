@@ -1,0 +1,117 @@
+﻿<h1 class="firstheading">日付と時間データのフィット</h1><p class='urlname' style='display: none'>Date-and-Time-Data</p>
+<p><span class="OIndex" style="display:none">日付</span>や<span class="OIndex" style="display:none">時刻</span>の情報を表示するために使われる、さまざまな文字列フォーマットは、情報をユーザに通知するのに役立ちますが、これらの値をプロットしたり分析するには、これらの値の数学的基礎が必要です。
+Originは、天文学的なユリウス暦を改訂して日付と時刻を保存しています。
+これは、時刻0は、BC4713/01/01の正午12:00です。
+数字の整数部分は時刻0からの日数を表し、小数部分は24時間表示での分数を表します。
+Originは、正午ではなく、夜中の0:00を表すように、12時間(0.50日)減算してこの値を使っています。
+</p><p>次のいくつかのサンプルでは、LabTalkスクリプトで<span class="OIndex">日付と時刻のデータ</span>を扱う方法を示しています。
+</p><p><b>Note:</b> <b>日付</b> または <b>時刻</b> で表されるテキストは、実際には、Originで数値として扱われない<b>文字</b> または <b>文字と数値</b> の形式です。
+列プロパティダイアログ（列名をダブルクリックするか列を選択し、「フォーマット：列フォーマット」）を使用して、<b>テキスト</b>または<b>文字と数値</b>列を、<b>日付</b>か<b>時間</b>フォーマットに変換します。
+表示フォーマットは、変換時に列のテキストフォーマットに一致する必要があります。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>内容</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Dates_and_Times"><span class="tocnumber">1</span> <span class="toctext">日付と時刻</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Formatting_for_Output"><span class="tocnumber">2</span> <span class="toctext">出力用のフォーマット</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Available_Formats"><span class="tocnumber">2.1</span> <span class="toctext">利用可能な形式</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Custom_Formats"><span class="tocnumber">2.2</span> <span class="toctext">カスタムフォーマット</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Dnn_notation"><span class="tocnumber">2.2.1</span> <span class="toctext">D<i>nn</i> 表記</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Wks.Col.SetFormat_object_method"><span class="tocnumber">2.2.2</span> <span class="toctext">Wks.Col.SetFormat オブジェクトメソッド</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Dates_and_Times"></a><span class="mw-headline">日付と時刻</span></h2>
+<p>例として、アクティブシートの列1に日付データ、列に時刻データがあるものとします。そして、日付と時刻を1つの列に保存するものとします。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000; font-style: regular;">/* 日付と時刻の両方は数学的基礎で成り立っているので加算可*/</span>
+Col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000080;">+</span> Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">// デフォルトで、新しい列は日数を表示 </span>
+<span style="color: #008000; font-style: regular;">/* フォーマットとサブフォーマット法を使って選択した日付と時間の表示をセット*/</span>
+&nbsp;
+<span style="color: #008000;">// Format #4 は日付フォーマット</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+<span style="color: #008000;">// サブフォーマット #11 は MM/dd/yyyy hh:mm:ss              </span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;</pre>
+<p>上記の列番号は、format ステートメントにハードコーディングされています。列数を<b>cn</b>という変数に持っている場合、<b>wks.col$(cn).format = 4</b>.のようにして、数字の<b>3</b>を<b>$(cn)</b>で置き換えることができます。  他の <b>format</b> および <b>subformat</b> オプションに対しては、<a href="../../LabTalk/LabTalk/Wks.Col_(object).html" title="LabTalk:Wks.Col (オブジェクト)">LabTalk言語リファレンス:  オブジェクトリファレンス: Wks.col (オブジェクト)</a>をご覧下さい。
+</p><p>日付と時刻の列は、列1で<b>MM/dd/yyyy</b> のフォーマット、列2で <b>hh:mm:ss</b> のフォーマットを持つテキストの場合、同じ操作がいくつかのコード行で可能です。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// ループする行数を取得</span>
+int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span>;
+
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,nn<span style="color: #000000;">)</span><span style="color: #000000;">{</span>                           
+  string dd<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+  string tt<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+  <span style="color: #008000;">// 日付と時間の文字列をテキストとして保存</span>
+  Col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> dd<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> tt<span style="color: #000080;">$</span>;  
+  <span style="color: #008000;">// 日付関数は日付と時間の文字列を数値の日付値に変換</span>
+  Col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> date<span style="color: #000000;">(</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>dd<span style="color: #000080;">$</span><span style="color: #000000;">)</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>tt<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;  
+<span style="color: #000000;">}</span>;
+<span style="color: #008000;">// 列4を真の日付列に変換</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">format</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// 日付列に変換</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">subformat</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>; <span style="color: #008000;">// M/d/yyyy hh:mm:ssとして表示</span></pre>
+<p>ここで、中間的な列は、文字列として日付と時刻の組合せを保持するように形式化され、結果の日付と時刻(数値)の値は4番目の列に保存されます。
+これらは同じテキストになるよう現れますが、列Cは文字通りのテキストで、列Dは日付です。
+</p><p>この数学的な方法によって、2つの日付の差(2つの日付の日数、時間) を計算し、その結果を時間列に入れることができます。そして、時刻を日付に加え、新しい日付の値を計算できます。また、時刻データを時刻データに追加して、有効な時刻データを取得することができますが、日付データを日付データに加えることはできません。
+</p>
+<h2><a name="Formatting_for_Output"></a><span class="mw-headline">出力用のフォーマット</span></h2>
+<h3><a name="Available_Formats"></a><span class="mw-headline">利用可能な形式</span></h3>
+<p><b>D</b>表記を使って、Originの組込の日付フォーマットの1つを使って、<span class="OIndex">数値の日付の値</span> を<span class="OIndex">文字列の日付時刻</span>に変更することができます。
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(@D, D10)&quot;</span>;</pre>
+<p>これは、現在の日付と時間(システム変数 <b>@D</b>に保存) を読み込み可能な文字列として返します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #0000dd;">7</span><span style="color: #000080;">/</span><span style="color: #0000dd;">20</span><span style="color: #000080;">/</span><span style="color: #0000dd;">2009</span> <span style="color: #0000dd;">10</span><span style="color: #000000;">:</span><span style="color: #0000dd;">30</span><span style="color: #000000;">:</span><span style="color: #0000dd;">48</span></pre>
+<p><b>D10</b> オプションは、<b>MM/dd/yyyy hh:mm:ss</b> に対応しています。上記スクリプトのD文字の後の数値を変更することで、多くの他の出力フォーマットが利用できます。これはワークシート列フォーマットダイアログの<b>日付フォーマット</b>ドロップダウンリストの選択肢のインデックス(0から)です。最初の項目(インデックス = 0)は、Windowsの短縮形式の日付で、2番目はWindowsの長い形式の日付です。
+</p><p><b>Note:</b> <i><b>D</b> は大文字でなければなりません。wks.col3.subformat = #, のようなワークシートのサブフォーマットを設定する場合、これらのインデックス値は1から始まります。</i>
+</p><p>例えば
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(date(7/20/2009), D1)&quot;</span>;</pre>
+<p>は、日本の地域の設定では以下のようになります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #0000dd;">09</span>/07/<span style="color: #0000dd;">20</span>, 月曜日となります。</pre>
+<p>同様に、時刻の値の出力フォーマットに対して、類似の<span class="OIndex">T表記</span>があります。
+</p>
+<pre class="lt" style="font-family:monospace;">type <span style="color: #ff00ff;">&quot;$(time(12:04:14), T5)&quot;</span>;   <span style="color: #008000;">// ANS:12:04 PM</span></pre>
+<p>このように日付と時刻をフォーマットすることは、一般的な <a href="../../LabTalk/LabTalk/Substitution_Notation.html#.24.28_.29_Substitution" title="LabTalk:置換表記">$() 置換</a> 表記の特殊な形式を使います。
+</p>
+<h3><a name="Custom_Formats"></a><span class="mw-headline">カスタムフォーマット</span></h3>
+<p>3つのカスタム日付と時刻のフォーマットがあります。そのうち2つはスクリプト編集可能なプロパティで、もう1つは列のプロパティダイアログで編集するか、ワークシート列オブジェクトメソッドで編集します。
+</p>
+<ol><li> <b>system.date.customformat<i>n</i>$</b></li>
+<li> <b>wks.col.SetFormat</b> オブジェクトメソッド</li></ol>
+<p>両方のメソッドは、カスタムフォーマットを示すために、 <b>yyyy&apos;.&apos;MM&apos;.&apos;dd</b> のような日付と時刻の指定子を使います。  以下に注意して下さい。
+</p>
+<ul><li> 日付時刻指定子のテキストの一部 (非スペースの区切り)は、必要に応じて変更できますが、引用符で囲む必要があります。  </li>
+<li> 指定子のトークン自体 (i.e., yyyy, HH, etc.)は、大文字小文字を区別し、表示通りに使う必要があります。&mdash; 利用可能なすべての指定子のトークンは、<a href="../../LabTalk/LabTalk/Date_and_Time_Format_Specifiers.html" title="LabTalk:日付と時間フォーマットの指定子">リファレンステーブル:  日付と時刻フォーマットの指定子</a>にあります。日付と時間フォーマットの指定子</li>
+<li> 最初の2つのフォーマットは、ローカルなファイルにその説明を保存し、他のログインアカウントで別の表示することができます。3番目のフォーマットには列自体の説明が保存されます。</li></ul>
+<h4><a name="Dnn_notation"></a><span class="mw-headline">D<i>nn</i> 表記</span></h4>
+<p>Originは、これらのカスタム日付の表示に対して、<b>D19</b> から <b>D21</b> を予約しています(Dの後の整数値は0から数えるので、サブフォーマット20から22)。  オプションのD19とD20は、それぞれシステム変数 <b>system.date.customformat1$</b> と <b>system.date.customformat2$</b> で制御されます。  このオプションを使うには、以下のサンプルをご覧下さい。
+</p>
+<pre class="lt" style="font-family:monospace;"> 
+system.<span style="color: #000080;">date</span>.<span style="color: #000080;">customformat1</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> MMM dd hh<span style="color: #ff00ff;">&apos;.&apos;</span>mm tt;
+type <span style="color: #ff00ff;">&quot;$(Date(7/25/09 14:47:21),D19)&quot;</span>;      <span style="color: #008000;">// 出力Jul 25 02.47 PM </span>
+
+system.<span style="color: #000080;">date</span>.<span style="color: #000080;">customformat2</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> yy<span style="color: #ff00ff;">&apos;,&apos;</span>MM<span style="color: #ff00ff;">&apos;,&apos;</span>dd H<span style="color: #ff00ff;">&apos;.&apos;</span>mm<span style="color: #ff00ff;">&apos;.&apos;</span>ss<span style="color: #ff00ff;">&apos;.&apos;</span>####;
+type <span style="color: #ff00ff;">&quot;$(Date(7/27/09 8:22:37.75234),D20)&quot;</span>; <span style="color: #008000;">// 出力: 09,07,27 8.22.37.7523</span></pre>
+<h4><a name="Wks.Col.SetFormat_object_method"></a><span class="mw-headline">Wks.col.SetFormat オブジェクトメソッド</span></h4>
+<p>ワークシート列に保存されている日付列のカスタム日付表示を指定するには、 <a href="../../LabTalk/LabTalk/Wks.Col_(object).html#Set_Custom_Date_Format" title="LabTalk:Wks.Col (オブジェクト)">Wks.Col.SetFormat</a> オブジェクトメソッドを使います。  カスタム日付フォーマット指定子を入力するとき、非日付文字を引用符で囲んで下さい。  このオブジェクトメソッドは、アクティブワークシートの列に対してのみ動作します。
+</p><p>次のサンプルでは、アクティブワークシートの列4は、カスタム日付/時刻フォーマットを表示するようセットされています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// wks.format=4 (日付), wks.subformat=22 (カスタム)</span>
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">SetFormat</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">22</span>, yyyy<span style="color: #ff00ff;">&apos;-&apos;</span>MM<span style="color: #ff00ff;">&apos;-&apos;</span>dd HH<span style="color: #ff00ff;">&apos;:&apos;</span>mm<span style="color: #ff00ff;">&apos;:&apos;</span>ss<span style="color: #ff00ff;">&apos;.&apos;</span>###<span style="color: #000000;">)</span>;
+doc <span style="color: #000080;">-</span>uw; <span style="color: #008000;">// リフレッシュして変更を表示</span></pre>
+
+
+
+
+
+
+
+    

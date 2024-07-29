@@ -1,0 +1,140 @@
+﻿<h1 class="firstheading">Fit on multiple datasets with one function with parameters shared</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p>Fit on two datasets with Gauss function, parameter xc is shared.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// before running this function, import \Samples\Curve Fitting\Gaussian.dat to worksheet.</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>FDFTree.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>ONLSF.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span>       NLFit_example2<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string                  strFDF <span style="color: #000080;">=</span> okutil_get_origin_path<span style="color: #000000;">(</span>ORIGIN_PATH_SYSTEM, <span style="color: #ff00ff;">"FitFunc"</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Gauss.FDF"</span>;
+        Tree                    trFF;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>nlsf_FDF_to_tree<span style="color: #000000;">(</span> strFDF, <span style="color: #000040;">&amp;</span>trFF <span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to load FDF function file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #008000;">//////////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 1. Setting the fitting function  //</span>
+        
+        <span style="color: #008000;">// The fit object:</span>
+        NLFit                   fit;
+        <span style="color: #0000ff;">int</span>                                nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetFunction</span><span style="color: #000000;">(</span>trFF<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nn <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed setting fitting function!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 2. Setting data for fitting ////////////////////////////////////////////</span>
+        Worksheet       wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"No active worksheet to get input data"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        DataRange       dr;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"X"</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">"Y"</span><span style="color: #000000;">)</span>;
+        
+        DWORD           dwRules <span style="color: #000080;">=</span> DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS;
+        <span style="color: #0000ff;">int</span>                nNumData <span style="color: #000080;">=</span> dr.<span style="color: #000000;">GetNumData</span><span style="color: #000000;">(</span>dwRules<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">ASSERT</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">2</span> <span style="color: #000080;">==</span> nNumData <span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nNumData <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">||</span> nNumData <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Not proper input data to do fit"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;    
+        <span style="color: #000000;">}</span>
+        
+        NLSFONEDATA             stDep<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>, stIndep<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>;
+        
+        DWORD                   dwPlotID;
+        vector                  vX1, vY1;
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span> dwRules, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY1, <span style="color: #000040;">&amp;</span>vX1<span style="color: #000000;">)</span>;       
+        stIndep<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX1;
+        stIndep<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        stDep<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY1;
+        stDep<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vY1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+        
+        vector                  vX2, vY2;
+        dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span> dwRules, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vY2, <span style="color: #000040;">&amp;</span>vX2<span style="color: #000000;">)</span>;       
+        stIndep<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vX2;
+        stIndep<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vX2.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        stDep<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>.<span style="color: #000000;">pdData</span> <span style="color: #000080;">=</span> vY2;
+        stDep<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> vY2.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span>nNumData, <span style="color: #000040;">&amp;</span>stDep, <span style="color: #000040;">&amp;</span>stIndep<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nn <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"SetData() failed!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>     
+
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 3. Set the initial paramater values and the sharing information/////////</span>
+        <span style="color: #0000ff;">int</span>                                numParamsInFunction <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;              <span style="color: #008000;">// there are this many paramaters in the function. y0, xc, W, A   </span>
+        <span style="color: #0000ff;">int</span>                                nTotalParams <span style="color: #000080;">=</span> nNumData <span style="color: #000040;">*</span> numParamsInFunction;
+        <span style="color: #0000ff;">int</span>                                nNumParamsIgnoreShared <span style="color: #000080;">=</span> nTotalParams <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>; 
+        
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span>        vbSharing;
+        vbSharing.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumParamsIgnoreShared<span style="color: #000000;">)</span>;
+        vbSharing <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+        vbSharing<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">//xc shared</span>
+
+        vector                  vFitParams;
+        vFitParams.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nNumParamsIgnoreShared<span style="color: #000000;">)</span>;
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">5.58</span>;  <span style="color: #008000;">//y0 for 1st data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">26</span>;            <span style="color: #008000;">//xc shared for 1st data and 2nd data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8.6</span>;   <span style="color: #008000;">// W for 1st data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">976</span>;   <span style="color: #008000;">// A for 1st data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.4</span>;   <span style="color: #008000;">// y0 for 2nd data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">5</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">9.8</span>;    <span style="color: #008000;">// W for 2nd data</span>
+        vFitParams<span style="color: #000000;">[</span><span style="color: #0000dd;">6</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">95</span>;            <span style="color: #008000;">// A for 2nd data</span>
+
+        
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">SetParams</span><span style="color: #000000;">(</span>nNumParamsIgnoreShared, vFitParams, vbSharing<span style="color: #000000;">)</span>;
+        out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"SetParams() returned: "</span>, nn<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nn <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Invalid paramater setting!"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        
+        <span style="color: #008000;">///////////////////////////////////////////////////////////////////////////</span>
+        <span style="color: #008000;">// 4. Perform fitting//////////////////////////////////////////////////////</span>
+        <span style="color: #0000ff;">int</span>                                nMaxNumIterations <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+        nn <span style="color: #000080;">=</span> fit.<span style="color: #000000;">Fit</span><span style="color: #000000;">(</span>nMaxNumIterations<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fit(%ld) returned: %ld<span style="color: #666666; font-weight: bold;">\n</span>"</span>, nMaxNumIterations, nn<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nn <span style="color: #000000;">)</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fit Done!<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// Dump results:</span>
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> iparam <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; iparam <span style="color: #000080;">&lt;</span> nNumParamsIgnoreShared; iparam<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"param index = %d   value  value is = %lf<span style="color: #666666; font-weight: bold;">\n</span>"</span>, iparam <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>, vFitParams<span style="color: #000000;">[</span>iparam<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+</pre>

@@ -1,0 +1,121 @@
+﻿<h1 class="firstheading">アルゴリズム (Smooth)</h1><p class='urlname' style='display: none'></p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Moving_window_in_adjacent-averaging.2C_Savitzky-Golay_or_percentile_filter_method"><span class="tocnumber">1</span> <span class="toctext">隣接平均、Savitzky-Golayまたはパーセンタイルフィルタ法での移動ウィンドウ</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#The_adjacent-averaging_method"><span class="tocnumber">2</span> <span class="toctext">隣接平均法</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#The_Savitzky-Golay_method"><span class="tocnumber">3</span> <span class="toctext">Savitzky-Golay法</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#The_percentile_filter_method"><span class="tocnumber">4</span> <span class="toctext">パーセンタイルフィルタ法</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#The_FFT_Filter_method"><span class="tocnumber">5</span> <span class="toctext">FFTフィルタ法</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#The_Lowess_and_Loess_method"><span class="tocnumber">6</span> <span class="toctext">LowessとLoess 手法</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#The_Binomial_method"><span class="tocnumber">7</span> <span class="toctext">2項法</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Cutoff_frenquency"><span class="tocnumber">7.1</span> <span class="toctext">カットオフ周波数</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Moving_window_in_adjacent-averaging.2C_Savitzky-Golay_or_percentile_filter_method"></a><span class="mw-headline">隣接平均、Savitzky-Golayまたはパーセンタイルフィルタ法での移動ウィンドウ</span></h2>
+<p>スムージング法が移動平均、Savitzky-Golay、パーセンタイルフィルタの場合、各スムージングポイントは、移動ウィンドウ内データポイントで計算されます。<img src="../images/Algorithm_(Smooth)/math-e1e6230760a8fc9ebc5517bbe56756ea.png" title="\left\{f_i| i = 1,2,...,N\right\}" alt="\left\{f_i| i = 1,2,...,N\right\}" class="tex"/> は入力データポイント、<img src="../images/Algorithm_(Smooth)/math-cbf2a8ae7d00ceaa3a438a13f080810a.png" title="\left\{g_i|i = 1,2,...,N\right\}" alt="\left\{g_i|i = 1,2,...,N\right\}" class="tex"/> は出力データポイントを表します。各<img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png" title="g_i" alt="g_i" class="tex"/>は<img src="../images/Algorithm_(Smooth)/math-2d0012d8e86e7519e3d6bcbcc68b10db.png" title="\left\{f_m|i - floor(npts/2) &lt; m &lt; i + floor(npts/2)\right\}" alt="\left\{f_m|i - floor(npts/2) &lt; m &lt; i + floor(npts/2)\right\}" class="tex"/>から計算されます。
+</p><p>ここで<i>npts</i>は、変数の<b>ウィンドウのポイント</b>数です。 
+</p><p>しかし、スムージング法がFFTフィルタの場合、移動ウィンドウは使われません。代わりに、信号全体が処理されます。
+</p>
+<h2><a name="The_adjacent-averaging_method"></a><span class="mw-headline">隣接平均法</span></h2>
+<p><b>隣接平均法</b>は、簡単な平均計算を行います。各<img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png" title="g_i" alt="g_i" class="tex"/>は移動ウィンドウ内のデータポイントの平均です。<b>重み付け平均</b>オプションにチェックが付いている場合、平均は加重平均を使って計算されます。この場合、パラボリック加重が使われ、重みの領域は1に正規化されます。中心が <i>i</i> にあるようなウィンドウ(つまり、<i>i</i> 番目の平均点を計算します)に対して、 <i>j</i> 番目のポイント(j=0, 1, …, npts-1) に対応する重みは次のようになります。 
+</p><p><img src="../images/Algorithm_(Smooth)/math-fd200c5c25b7b7843b83b864f39daef2.png" title="w_j=1-(\frac{(j-i)}{(N+1)/2})^2" alt="w_j=1-(\frac{(j-i)}{(N+1)/2})^2" class="tex"/>
+</p><p>ここでNは、<b>ウィンドウのポイント</b>数です。
+</p>
+<h2><a name="The_Savitzky-Golay_method"></a><span class="mw-headline">Savitzky-Golay法</span></h2>
+<p><b>Savitzky-Golay</b>法によるフィルタリングは、移動ウィンドウ内のデータポイントに多項式回帰を実行します。そして<img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png" title="g_i" alt="g_i" class="tex"/>は、<i>i</i> の位置で多項式の値として計算します。 
+</p>
+<h2><a name="The_percentile_filter_method"></a><span class="mw-headline">パーセンタイルフィルタ法</span></h2>
+<p><b>パーセンタイルフィルタ</b>に対しては、移動ウィンドウ内のデータポイントの<i>p</i>番目の四分位が<img src="../images/Algorithm_(Smooth)/math-91d8947f9447751708c1f4107beb7ab3.png" title="g_i" alt="g_i" class="tex"/>として割り当てられます。 <i>p</i> は、 <b>パーセンタイル</b>パラメータで指定されます。 <i> </i><i>p</i>番目の四分位(または100  p番目のパーセンタイル)は、平均を持つ経験分布関数から計算されます。 
+</p><p><img src="../images/Algorithm_(Smooth)/math-7ae8e6c1c298971d77efadc3dad1752c.png" title="npts\cdot p/100=j+g" alt="npts\cdot p/100=j+g" class="tex"/>のようにします。
+</p><p>ここで <i>j</i> は、  <img src="../images/Algorithm_(Smooth)/math-a0c7f13b2f9f06d3210a4130a92e4caa.png" title="npts\cdot p/100" alt="npts\cdot p/100" class="tex"/>の整数部であり、 <i>g</i> は の小数部分です。 
+</p><p>そして、<i>p</i>番目の四分位を計算でき、これは次式のようにyで表されます。 
+</p><p><img src="../images/Algorithm_(Smooth)/math-4aee7d1b3d1dbd0413eea75e0db28d4f.png" title="y=
+\begin{cases} 
+  x_j,  &amp; \mbox{if }g=0 \\
+  x_{j+1}, &amp; \mbox{if }g&gt;0 
+\end{cases}" alt="y=
+\begin{cases} 
+  x_j,  &amp; \mbox{if }g=0 \\
+  x_{j+1}, &amp; \mbox{if }g&gt;0 
+\end{cases}" class="tex"/>
+</p><p>ここで、<img src="../images/Algorithm_(Smooth)/math-1f89889020cdc84d9e1c35237cb62f65.png" title="x_j" alt="x_j" class="tex"/>は、移動ウィンドウの <i>j</i>(j=0, 1, ...<i>npts-1</i>)番目のポイント
+</p>
+<h2><a name="The_FFT_Filter_method"></a><span class="mw-headline">FFTフィルタ法</span></h2>
+<p>FFTフィルタ法が選択されていると、Originは次のように実行します。 
+</p>
+<ol>
+<li>最初の1%のデータポイントの平均と最後の1%のデータポイントの平均を計算します。 
+<li>これら2点を通る直線を形成し、入力データからこの直線を減算します。 
+<li>最後のステップで取得したデータセットにFFTを実行します。 
+<li>最終段階で得られたデータにパラボリックローパスフィルタを適用します。カットオフ値より高い周波数のフーリエ成分を除外します。カットオフ周波数は: <br />
+<img src="../images/Algorithm_(Smooth)/math-8a6ec61a846152b8540507019900a780.png" title="f_{cutoff} = \frac {1}{2n\Delta t}" alt="f_{cutoff} = \frac {1}{2n\Delta t}" class="tex"/>
+<br />のように定義されます。<i>n</i>は<b>ウィンドウ内のポイント数</b>を指定し、<img src="../images/Algorithm_(Smooth)/math-5a72f1304af0783657605aed0e38201a.png" title="\Delta t" alt="\Delta t" class="tex"/>は、任意の2点の時間(または、横軸)です。<i>n</i>を大きな値に設定すると、カットオフ周波数は低くなり、スムージングの値は大きくなります。変換されたデータは片側のウィンドウと乗算されるので、上の式はさらに2で除算し、両側ウィンドウを考慮します。<br />
+高い周波数の成分を取り除くには、周波数ゼロで最大値1を、カットオフ周波数で0を取るパラボラを利用します。
+<li>フィルタリングしたスペクトルデータへのIFFTの実行 
+<li>最後のステップで取り込んだデータセットに基線を追加します。 
+</ol>
+<table class="note">
+<tr>
+<td>
+<p><b>Note</b>: 
+</p>
+<ul><li>ここで使われるローパスパラボリックフィルタは、 <a href="../../UserGuide/UserGuide/Algorithm_(FFT_Filters).html" title="ユーザガイド:アルゴリズム (FFTフィルタ)">FFTフィルタ</a> ツールでのローパスパラボリックフィルタと同じです。 </li>
+<li>スクリプトでこの関数を使う場合には、より多くの変数が利用できます。詳細は、 <a class="external text" href="../../XFunction/X-Function/Smooth.html">Xファンクションヘルプ- smooth</a>をご覧下さい。</li></ul>
+</td></tr></table>
+<h2><a name="The_Lowess_and_Loess_method"></a><span class="mw-headline">LowessとLoess</span></h2>
+<p><b>Lowess</b> と <b>Loess</b> は&quot;locally weighted scatterplot smoothing&quot; （局所加重散布図スムージング）と&quot;locally weighted least squares&quot;（局所加重最小二乗）の略語です。ここで「局所」と使うのは、ある範囲内でを隣り合ったポイントを元に各スムージング値を計算するためです。この方法は一般的に次の手順で実行されます。 
+</p>
+<ol>
+  <li>
+  まず、中心点である<img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/>の重みを計算します。次に立方体積比重関数で、その範囲内にある隣り合ったポイント全ての重みを計算します。
+
+<dl><dd><img src="../images/Algorithm_(Smooth)/math-d2de986db2dcdfead9130a94deacc948.png" title="w_i(x)=(1-(\frac{|x-x_i|}{d_i})^3)^3" alt="w_i(x)=(1-(\frac{|x-x_i|}{d_i})^3)^3" class="tex"/></dd></dl>
+
+ここで、<img src="../images/Algorithm_(Smooth)/math-9dd4e461268c8034f5c8564e155c67a6.png" title="x" alt="x" class="tex"/>は現在の中心点<img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/>に関連した範囲内の隣り合ったポイントを、<img src="../images/Algorithm_(Smooth)/math-d247f594c78d0d2be10fc6d82512cc4e.png" title="d_i" alt="d_i" class="tex"/>はその範囲内の<img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/>から最も距離がある隣り合ったポイントの横座標距離を表わします。
+  </li>
+  <li>
+  加重最小二乗回帰を実行します。
+    <ul><li> Lowessでは、加重した線形回帰が使用されます。
+    <li>Loessでは、2次多項式回帰が使用されます。</ul></ul>
+  </li>
+  <li>ステップ2で与えられた予測値である<img src="../images/Algorithm_(Smooth)/math-aeb3b53d344586a9c3e0ec0829777ae7.png" title="(x_i,\hat{y}_i)" alt="(x_i,\hat{y}_i)" class="tex"/> から、を<img src="../images/Algorithm_(Smooth)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/>導きます。
+  </li>
+  <li>次のポイント<img src="../images/Algorithm_(Smooth)/math-84ceb2513893acb7c9ea001cc9053995.png" title="x_{i+1}" alt="x_{i+1}" class="tex"/>まで移動し、ステップ1から3を実行して推定値<img src="../images/Algorithm_(Smooth)/math-d845615daf118601c7a2d6719f7d165e.png" title="(x_{i+1},\hat{y}_{i+1})" alt="(x_{i+1},\hat{y}_{i+1})" class="tex"/>を入手します。全てのポイントの計算が終わると計算は終了します。
+  </li>
+</ol>
+<h2><a name="The_Binomial_method"></a><span class="mw-headline">2項法</span></h2>
+<p>2項フィルタは重み付け隣接平均フィルタで、 <img src="../images/Algorithm_(Smooth)/math-e447c37303aa003c6e1b9992045ddfda.png" title="{x_n}" alt="{x_n}" class="tex"/> が入力ソースデータ、<img src="../images/Algorithm_(Smooth)/math-83c66063e0d9b8864bd422ee8386d59f.png" title="{y_n}" alt="{y_n}" class="tex"/>がスムージング出力データです。
+</p><p><img src="../images/Algorithm_(Smooth)/math-ceebc9dfaa7e3ac79481ea2adf795b92.png" title="y_n=\sum_{k=-N_p}^{Np}b_kx_{n-k}" alt="y_n=\sum_{k=-N_p}^{Np}b_kx_{n-k}" class="tex"/>
+</p><p>スムージング係数の順番<img src="../images/Algorithm_(Smooth)/math-e23e5c6178fcede4de9a9673bf51cfd7.png" title="b_k" alt="b_k" class="tex"/>は下記のように与えられます。
+</p><p><img src="../images/Algorithm_(Smooth)/math-da59a8657b40db814c19a032fb1f0f9b.png" title="b_k=\begin{pmatrix} 2N_p\\  N_p+k \end{pmatrix}/4^{N_p}\; \; (k=0,1,...N_p)" alt="b_k=\begin{pmatrix} 2N_p\\  N_p+k \end{pmatrix}/4^{N_p}\; \; (k=0,1,...N_p)" class="tex"/>
+</p><p>および、
+</p><p><img src="../images/Algorithm_(Smooth)/math-d32b55686a350cbec96b05c8c8be3bbb.png" title="b_{-k}=b_{k}" alt="b_{-k}=b_{k}" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-766b775dcac93fa1cf6f6b365212665f.png" title="N_p" alt="N_p" class="tex"/>は、<b>次数</b>です。
+</p>
+<h3><a name="Cutoff_frenquency"></a><span class="mw-headline">カットオフ周波数</span></h3>
+<p><b>カットオフ周波数</b><img src="../images/Algorithm_(Smooth)/math-e05fe30750d3ea262a610d17ebc07019.png" title="fc" alt="fc" class="tex"/>は次式で計算されます。
+</p><p><img src="../images/Algorithm_(Smooth)/math-42d1e7ee57aef355b30eddda869213a7.png" title="
+fc=\frac{2}{\pi}arccos(Ac^{1/2N_p})\frac{fs}{2}
+" alt="
+fc=\frac{2}{\pi}arccos(Ac^{1/2N_p})\frac{fs}{2}
+" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-54c355936eabc80c15d1dcbc2e697d0d.png" title="
+fs=\frac{1}{dt}
+" alt="
+fs=\frac{1}{dt}
+" class="tex"/>
+</p><p><img src="../images/Algorithm_(Smooth)/math-3017d911efceb27d1de6a92b70979795.png" title="dt" alt="dt" class="tex"/>は<b>サンプリング間隔</b>です。<img src="../images/Algorithm_(Smooth)/math-8819a837186918b90b59cc316f36b1e1.png" title="Ac" alt="Ac" class="tex"/>は、-6dBのカットオフ振幅で<img src="../images/Algorithm_(Smooth)/math-57caf3aa6efe351c51c785be280b5c0d.png" title="Ac=0.5" alt="Ac=0.5" class="tex"/>です。<b>次数<img src="../images/Algorithm_(Smooth)/math-766b775dcac93fa1cf6f6b365212665f.png" title="N_p" alt="N_p" class="tex"/></b>が増加すると、カットオフ周波数は減少します。
+</p>
+
+
+
+
+
+
+    

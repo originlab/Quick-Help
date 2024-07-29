@@ -1,0 +1,53 @@
+﻿<h1 class="firstheading">ワークブックの操作</h1><p>OriginはOrigin Cを使用して、分割、統合などブックを操作するための機能を提供しています。
+</p>
+<h2><a name="Merge_Workbooks"></a><span class="mw-headline">ワークブックを統合</span></h2>
+<p>複数のワークブックを統合して一つにまとめる場合、実際には、ソースワークシートからターゲットワークブックにコピーします。ワークブックにワークシートを追加するには、<a href="../../OriginC/OriginC/Page-AddLayer.html" title="OriginC:Page-AddLayer">AddLayer</a>メソッドを使用できます。
+</p><p>次のサンプルは、現フォルダ内のすべてのワークブックを統合して新しいワークブックを作成します。
+</p>
+<pre class="oc" style="font-family:monospace;">WorksheetPage wksPgTarget;
+wksPgTarget.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 目的のワークブックを作成</span>
+Folder fld <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveFolder</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// アクティブ/現在のフォルダを取得</span>
+foreach<span style="color: #000000;">(</span>PageBase pb in fld.<span style="color: #000000;">Pages</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>  <span style="color: #008000;">// フォルダ内全ページでループ</span>
+	WorksheetPage wksPgSource <span style="color: #000080;">=</span> pb;  <span style="color: #008000;">// Page から WorksheetPageに変換</span>
+	<span style="color: #008000;">// 変換失敗の場合、つまりPageがWorksheetPageでない場合</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wksPgSource<span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>  
+		<span style="color: #0000ff;">continue</span>;  <span style="color: #008000;">// 次のぺージ</span>
+	<span style="color: #000000;">}</span>
+	<span style="color: #008000;">// 目的のワークブックをスキップ</span>
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>wksPgTarget.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> wksPgSource.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+		<span style="color: #0000ff;">continue</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #008000;">// ワークブック内のすべてのワークシートで統合をループ</span>
+	foreach<span style="color: #000000;">(</span>Layer lay in wksPgSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">)</span> 
+        <span style="color: #000000;">{</span>
+		Worksheet wks <span style="color: #000080;">=</span> lay;  <span style="color: #008000;">// ワークシート取得</span>
+		<span style="color: #008000;">// ワークブックにワークシート追加</span>
+		wksPgTarget.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>;  
+	<span style="color: #000000;">}</span>
+	<span style="color: #008000;">// ソースワークブックを保持しない場合破棄</span>
+	wksPgSource.<span style="color: #000000;">Destroy</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Split_Workbook"></a><span class="mw-headline">ワークブックの分割</span></h2>
+<p>上記のサンプルでは複数のワークブックを統合して一つにまとめました。ワークブックを分割し、単一ワークシートを持つ複数のブックにすることもできます。 
+</p>
+<pre class="oc" style="font-family:monospace;">WorksheetPage wksPgSource<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Book1&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 複数シートを持つワークブック</span>
+<span style="color: #008000;">// 全ワークシートでループ</span>
+foreach<span style="color: #000000;">(</span>Layer lay in wksPgSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	Worksheet wks <span style="color: #000080;">=</span> lay;  <span style="color: #008000;">// ワークシートを取得</span>
+	WorksheetPage wksPgTarget;
+	wksPgTarget.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 新しいワークブックを作成</span>
+	wksPgTarget.<span style="color: #000000;">AddLayer</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;  <span style="color: #008000;">// 新しいワークブックにワークシートを追加</span>
+	wksPgTarget.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>.<span style="color: #000000;">Destroy</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 最初のワークシートを削除</span>
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

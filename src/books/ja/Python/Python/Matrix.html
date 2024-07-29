@@ -1,0 +1,114 @@
+﻿<h1 class="firstheading">Matrix</h1>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#3D_Parametric_Plot_From_Matrix"><span class="tocnumber">1</span> <span class="toctext">3D Parametric Plot From Matrix</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Import_NetCDF_with_Partial_Settings"><span class="tocnumber">2</span> <span class="toctext">Import NetCDF with Partial Settings</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Matrix_Dot_Product_using_numpy"><span class="tocnumber">3</span> <span class="toctext">Matrix Dot Product using numpy</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Use_OpenCV_to_Load_TIFF_Images_into_Matrix_Sheet"><span class="tocnumber">4</span> <span class="toctext">Use OpenCV to Load TIFF Images into Matrix Sheet</span></a></li>
+</ul>
+</div>
+<p>&#160;</p>
+<p>This folder contains examples of matrix manipulation, calculation and graphing with <strong>originpro</strong> package.<br />
+For matrix related functions in <strong>originpro</strong>, see <a href="https://www.originlab.com/python/doc/originpro/classoriginpro_1_1matrix_1_1_m_sheet.html">matrixsheet</a>.<br />
+For project related functions, see <a href="https://www.originlab.com/python/doc/originpro/functions_func.html">project</a>.</p>
+<br />
+<br />
+<h2><a name="3D_Parametric_Plot_From_Matrix"></a><span class="mw-headline">3D Parametric Plot From Matrix</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''This sample shows how to plot parametric 3D surface from a matrix sheet.'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+
+<span style="color: #d00; font-style: italic;"># Generate torus mesh</span>
+angle <span style="color: #000;">=</span> np.<span style="color: #000;">linspace</span><span style="color: #000;">(</span><span style="color: #000;">0</span><span style="color: #000;">,</span> <span style="color: #000;">2</span>*np.<span style="color: #000;">pi</span><span style="color: #000;">,</span> <span style="color: #000;">32</span><span style="color: #000;">)</span>
+theta<span style="color: #000;">,</span> phi <span style="color: #000;">=</span> np.<span style="color: #000;">meshgrid</span><span style="color: #000;">(</span>angle<span style="color: #000;">,</span> angle<span style="color: #000;">)</span>
+r<span style="color: #000;">,</span> R <span style="color: #000;">=</span> <span style="color: #000;">.25</span><span style="color: #000;">,</span> <span style="color: #000;">1</span>.
+<span style="color: #000;">X</span> <span style="color: #000;">=</span> <span style="color: #000;">(</span>R + r * np.<span style="color: #000;">cos</span><span style="color: #000;">(</span>phi<span style="color: #000;">)</span><span style="color: #000;">)</span> * np.<span style="color: #000;">cos</span><span style="color: #000;">(</span>theta<span style="color: #000;">)</span>
+Y <span style="color: #000;">=</span> <span style="color: #000;">(</span>R + r * np.<span style="color: #000;">cos</span><span style="color: #000;">(</span>phi<span style="color: #000;">)</span><span style="color: #000;">)</span> * np.<span style="color: #000;">sin</span><span style="color: #000;">(</span>theta<span style="color: #000;">)</span>
+Z <span style="color: #000;">=</span> r * np.<span style="color: #000;">sin</span><span style="color: #000;">(</span>phi<span style="color: #000;">)</span>
+arr_3D <span style="color: #000;">=</span> np.<span style="color: #000;">stack</span><span style="color: #000;">(</span><span style="color: #000;">[</span>Z<span style="color: #000;">,</span>X<span style="color: #000;">,</span>Y<span style="color: #000;">]</span><span style="color: #000;">,</span> axis<span style="color: #000;">=</span><span style="color: #000;">0</span><span style="color: #000;">)</span> <span style="color: #d00; font-style: italic;"># Stack X,Y,Z to get a 3D array</span>
+
+<span style="color: #d00; font-style: italic;"># Pass the data to a matrix sheet and plot</span>
+ms <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'m'</span><span style="color: #000;">)</span>
+ms.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>arr_3D<span style="color: #000;">)</span>
+
+gp <span style="color: #000;">=</span> op.<span style="color: #000;">new_graph</span><span style="color: #000;">(</span>template<span style="color: #000;">=</span><span style="color: #0a0;">'GLparafunc'</span><span style="color: #000;">)</span>
+gp<span style="color: #000;">[</span><span style="color: #000;">0</span><span style="color: #000;">]</span>.<span style="color: #000;">add_mplot</span><span style="color: #000;">(</span>ms<span style="color: #000;">,</span><span style="color: #000;">0</span><span style="color: #000;">,</span><span style="color: #000;">1</span><span style="color: #000;">,</span><span style="color: #000;">2</span><span style="color: #000;">)</span>
+gp<span style="color: #000;">[</span><span style="color: #000;">0</span><span style="color: #000;">]</span>.<span style="color: #000;">rescale</span><span style="color: #000;">(</span><span style="color: #0a0;">'z'</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Import_NetCDF_with_Partial_Settings" id="Import_NetCDF_with_Partial_Settings"></a><span class="mw-headline">Import NetCDF with Partial Settings</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This example shows importing from the web and to specify from Jan of each year
+as well as doing proper longitude and latitude corrections.
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+mat <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'m'</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#you can actually use URL in from_file </span>
+url <span style="color: #000;">=</span> <span style="color: #0a0;">'https://www.unidata.ucar.edu/software/netcdf/examples/tos_O1_2001-2002.nc'</span>
+<span style="color: #d00; font-style: italic;">#keep the connector so after the import, you can click on the icon to </span>
+<span style="color: #d00; font-style: italic;">#choose Options... to see open the dialog to see the details indicated by the sel string</span>
+mat.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>url<span style="color: #000;">,</span> <span style="color: #900090;">True</span><span style="color: #000;">,</span> dctype<span style="color: #000;">=</span><span style="color: #0a0;">'NetCDF'</span><span style="color: #000;">,</span> sel<span style="color: #000;">=</span><span style="color: #0a0;">'NetCDF/tos[1:0|1-11][y#][x/2]'</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Matrix_Dot_Product_using_numpy" id="Matrix_Dot_Product_using_numpy"></a><span class="mw-headline">Matrix Dot Product using numpy</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This sample shows basic data transfer between Origin matrix and a NumPy array.
+Make sure you've installed pandas before trying the following sample. 
+So to check for and install if needed, open the Script Window (Shift+Alt+3), 
+type the following and press Enter:
+    pip -chk pandas
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;">#integer matrix data</span>
+aa <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">(</span><span style="color: #000;">[</span> <span style="color: #000;">[</span><span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #000;">4</span><span style="color: #000;">,</span> <span style="color: #000;">5</span><span style="color: #000;">,</span> <span style="color: #000;">6</span><span style="color: #000;">]</span> <span style="color: #000;">]</span><span style="color: #000;">)</span>
+bb <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">(</span><span style="color: #000;">[</span> <span style="color: #000;">[</span><span style="color: #000;">10</span><span style="color: #000;">,</span><span style="color: #000;">11</span><span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #000;">20</span><span style="color: #000;">,</span><span style="color: #000;">21</span><span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #000;">30</span><span style="color: #000;">,</span><span style="color: #000;">31</span><span style="color: #000;">]</span> <span style="color: #000;">]</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#create a new hidden matrix book, and get the matrix sheet</span>
+ma<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'m'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#matrix sheet can hold a 3D array, shape and data type is automatically set </span>
+ma.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>aa<span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#another sheet in same book</span>
+mb <span style="color: #000;">=</span> ma.<span style="color: #000;">get_book</span><span style="color: #000;">(</span><span style="color: #000;">)</span>.<span style="color: #000;">add_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+mb.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>bb<span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#put result into 3rd sheet</span>
+mc <span style="color: #000;">=</span> ma.<span style="color: #000;">get_book</span><span style="color: #000;">(</span><span style="color: #000;">)</span>.<span style="color: #000;">add_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'Dot Product'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#do the actual calculation using numpy</span>
+<span style="color: #d00; font-style: italic;">#here each sheet has only one matrix object, so we get it as 2d array</span>
+cc <span style="color: #000;">=</span> np.<span style="color: #000;">dot</span><span style="color: #000;">(</span>ma.<span style="color: #000;">to_np2d</span><span style="color: #000;">(</span><span style="color: #000;">)</span><span style="color: #000;">,</span> mb.<span style="color: #000;">to_np2d</span><span style="color: #000;">(</span><span style="color: #000;">)</span><span style="color: #000;">)</span>
+mc.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>cc<span style="color: #000;">)</span>
+</pre>
+<h2><a name="Use_OpenCV_to_Load_TIFF_Images_into_Matrix_Sheet" id="Use_OpenCV_to_Load_TIFF_Images_into_Matrix_Sheet"></a><span class="mw-headline">Use OpenCV to Load TIFF Images into Matrix Sheet</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This example shows how to import tif images into a 3d numpy array and then pass into Origin matrix book.
+To install openCV (cv2), do the following from Script Window
+    pip install opencv-python
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> cv2
+
+<span style="color: #d00; font-style: italic;"># import tifs into array</span>
+<span style="color: #d00; font-style: italic;"># Assume all images share the same dimesion</span>
+ImArray <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">(</span><span style="color: #000;">[</span><span style="color: #000;">]</span><span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> idx <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">(</span><span style="color: #000;">7</span><span style="color: #000;">)</span>:
+    fname <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + f<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\\</span>Image Processing and Analysis<span style="color: #000099; font-weight: bold;">\\</span>myocyte{idx+1}.tif'</span>
+    <span style="color: #000;">array</span> <span style="color: #000;">=</span> np.<span style="color: #000;">array</span><span style="color: #000;">(</span>cv2.<span style="color: #000;">imread</span><span style="color: #000;">(</span>fname<span style="color: #000;">,</span> cv2.<span style="color: #000;">IMREAD_UNCHANGED</span><span style="color: #000;">)</span><span style="color: #000;">)</span>
+    ImArray <span style="color: #000;">=</span> np.<span style="color: #000;">dstack</span><span style="color: #000;">(</span><span style="color: #000;">(</span>ImArray<span style="color: #000;">,</span> <span style="color: #000;">array</span><span style="color: #000;">)</span><span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">if</span> ImArray.<span style="color: #000;">size</span> <span style="color: #ff7700;font-weight:bold;">else</span> <span style="color: #000;">array</span>
+
+<span style="color: #d00; font-style: italic;"># put this 3d array into Origin Matrix Sheet</span>
+ms <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'m'</span><span style="color: #000;">)</span>
+ms.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>arr<span style="color: #000;">=</span>ImArray<span style="color: #000;">,</span> dstack<span style="color: #000;">=</span><span style="color: #900090;">True</span><span style="color: #000;">)</span>
+ms.<span style="color: #000;">show_slider</span><span style="color: #000;">(</span><span style="color: #900090;">True</span><span style="color: #000;">)</span>
+ms.<span style="color: #000;">show_image</span><span style="color: #000;">(</span><span style="color: #900090;">True</span><span style="color: #000;">)</span>
+</pre>

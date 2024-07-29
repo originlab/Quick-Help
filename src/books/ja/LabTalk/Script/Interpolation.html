@@ -1,0 +1,264 @@
+﻿<h1 class="firstheading">補間</h1><p class='urlname' style='display: none'>補間</p>
+<p>補間はデータに実行する一般的な数学関数の一つで、Originは2つの方法(1)範囲表記で一つの値とデータセットの補間(2)Xファンクションによる全曲線の補間、で補間をサポートしています。(1)範囲表記で一つの値とデータセットの補間、(2)Xファンクションによる全曲線の補間、で補間をサポートしています。  
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>内容</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Using_XY_Range"><span class="tocnumber">1</span> <span class="toctext">XY範囲を使う</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#From_Worksheet_Data"><span class="tocnumber">1.1</span> <span class="toctext">ワークシートデータから</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#From_Graph"><span class="tocnumber">1.2</span> <span class="toctext">グラフから</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Using_Arbitrary_Dataset"><span class="tocnumber">2</span> <span class="toctext">任意のデータセットを使う</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Creating_Interpolated_CurvesInterpolated_Curves"><span class="tocnumber">3</span> <span class="toctext">補間曲線を作成する</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#X-Functions_for_Interpolation_of_Curves"><span class="tocnumber">3.1</span> <span class="toctext">曲線補間用のXファンクション</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Using_Existing_X_Dataset"><span class="tocnumber">3.2</span> <span class="toctext">既存のXデータセットを使用</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Uniformly_Spaced_X_Output"><span class="tocnumber">3.3</span> <span class="toctext">均一な間隔のX出力</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Interpolating_Non-Monotonic_Data"><span class="tocnumber">3.4</span> <span class="toctext">非単調のデータの補間</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Matrix_InterpolationMatrix_Interpolation"><span class="tocnumber">4</span> <span class="toctext">行列の補間</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Using_XY_Range"></a><span class="mw-headline">XY範囲を使う</span></h2>
+<p>一度宣言したXY範囲（<a href="../../LabTalk/LabTalk/Range_Notation.html#Specifying_Subrange_Using_X_Values" title="LabTalk: 範囲表記">X値による部分範囲指定</a>を利用可能）は、関数として使うことができます。  この関数への引数はスカラー(スカラーを返す)またはベクター(ベクターを返す)にすることができます。  どちらの場合でも、Xデータセットは単調に増加、減少している必要があります。  例えば:
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> data<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">0</span>,<span style="color: #000080;">-</span>.05<span style="color: #000000;">)</span>;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> gauss<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>,<span style="color: #0000dd;">0</span>,.5,.2,<span style="color: #0000dd;">100</span><span style="color: #000000;">)</span>;
+range rxy <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+rxy<span style="color: #000000;">(</span>.67<span style="color: #000000;">)</span><span style="color: #000080;">=</span>;
+range newx <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// 列をX列データとして使用</span>
+newx <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0.3333</span>, <span style="color: #0000dd;">0.6667</span>, <span style="color: #0000dd;">1.0</span><span style="color: #000000;">}</span>; <span style="color: #008000;">// 新しいXデータ範囲を作成</span>
+range newy <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// これは補間する空の列</span>
+newy <span style="color: #000080;">=</span> rxy<span style="color: #000000;">(</span>newx<span style="color: #000000;">)</span>;</pre>
+<p>そして、この範囲変数を以下の形式を持つ関数として使うことができます。
+</p><p><b>XYRangeVariable(RangeVariableOrScalar[,<i>connect</i>[,<i>param</i>]])</b>
+</p><p>ここで<i>connect</i>は、以下のいずれかを指定します。
+</p>
+<dl><dt>line</dt>
+<dd> 直線の接続</dd>
+<dt>spline</dt>
+<dd> スプライン接続 </dd>
+<dt>bspline</dt>
+<dd> B-スプライン接続</dd></dl>
+<p>そして、<i>param</i> はスムージングパラメータで、bspline接続法にのみ適用されます。<i>param</i>=-1の場合、単純なbsplineが使われます。これはプロット内でbspline line接続と同じになります。<i>param</i> &gt;=0の場合、NAG関数 <b>nag_1d_spline_function</b> が使われます。
+</p>
+<table class="note">
+
+<tr>
+<td><b>Note:</b> XY範囲の補間を使うとき、 <i><b>spline</b></i> または <i><b>bspline</b></i> を接続法として使用する場合、<i><b>x</b></i> 値が重複してはいけません。代わりに、補間のXファンクションを使うことができます。
+</td></tr></table>
+<h3><a name="From_Worksheet_Data"></a><span class="mw-headline">ワークシートデータから</span></h3>
+<p>次のサンプルは、関数として範囲を使い、ワークシートからのデータを引数として補間を実行する方法を示します。
+</p><p><b>サンプル1：</b>
+次のコードは、<b>bspline</b>のさまざまなスムージングパラメータの使用法を紹介します。
+</p>
+<pre class="lt" style="font-family:monospace;">col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>data<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">9</span><span style="color: #000000;">)</span>;              <span style="color: #008000;">// 列1に行番号を入力</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">(</span><span style="color: #0000dd;">9</span><span style="color: #000000;">)</span>;              <span style="color: #008000;">//  列2に乱数を入力</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>data<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">9</span>,<span style="color: #0000dd;">0.01</span><span style="color: #000000;">)</span>;         <span style="color: #008000;">// 希望のX値でCol(3)に入力</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;             
+range bb<span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;                <span style="color: #008000;">// cols 1,2を使用する範囲を宣言;</span>
+<span style="color: #008000;">// 異なるパラメータ設定を使って補間した値を計算</span>
+loop<span style="color: #000000;">(</span>i, <span style="color: #0000dd;">4</span>, <span style="color: #0000dd;">10</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+   wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span><span style="color: #000080;">=</span>bb<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>, bspline, <span style="color: #000080;">$</span><span style="color: #000000;">(</span>i<span style="color: #000080;">*</span><span style="color: #0000dd;">0.1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p><b>サンプル2：</b>
+XY範囲を使って、次のようなコードを使ってどんなX値からでもY値のデータを取得することができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// いくつかのデータを生成</span>
+newbook;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">}</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">6</span><span style="color: #000000;">}</span>;
+<span style="color: #008000;">// XY範囲を定義</span>
+range rr <span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 線形補間で指定してX値に対するY値を探す</span>
+rr<span style="color: #000000;">(</span><span style="color: #0000dd;">1.23</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;    <span style="color: #008000;">// ANS: rr(1.23)=2.23</span>
+<span style="color: #008000;">// 線形補間でX値の配列に対してY値を探す</span>
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">1.5</span>, <span style="color: #0000dd;">2.5</span>, <span style="color: #0000dd;">3.5</span><span style="color: #000000;">}</span>;
+range rNewX <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 計算したY値を保持する新しい列を追加する</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> rr<span style="color: #000000;">(</span>rNewX<span style="color: #000000;">)</span>;</pre>
+<p><b>サンプル3：</b>
+指定したY値に対するX値を探す場合、上記の例の引数を逆にします。  YからXを探す場合、Yデータセットが単調に増加または減少している必要があります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// いくつかのデータを生成</span>
+newbook;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">}</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">6</span><span style="color: #000000;">}</span>;
+<span style="color: #008000;">// XY範囲を定義</span>
+range rr <span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//XとYを入れ替え</span>
+<span style="color: #008000;">// 線形補間で指定したY値に対するX値を探す</span>
+rr<span style="color: #000000;">(</span><span style="color: #0000dd;">2.23</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;    <span style="color: #008000;">// ANS: rr(2.23)=1.23;</span>
+<span style="color: #008000;">// 計算したX値を保持する新しい列を追加</span>
+wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+range rNewX <span style="color: #000080;">=</span> wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 線形補間でY値の配列に対するX値を探す</span>
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span><span style="color: #000000;">{</span><span style="color: #0000dd;">2.5</span>, <span style="color: #0000dd;">3.5</span>, <span style="color: #0000dd;">5.5</span><span style="color: #000000;">}</span>;
+range rNewY <span style="color: #000080;">=</span> wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;
+rNewX <span style="color: #000080;">=</span> rr<span style="color: #000000;">(</span>rNewY<span style="color: #000000;">)</span>;</pre>
+<h3><a name="From_Graph"></a><span class="mw-headline">グラフから</span></h3>
+<p>グラフページがアクティブなときに範囲補間を使うこともできます。
+</p><p><b>サンプル1：</b>
+配列の値の補間
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// アクティブプロットの範囲を定義</span>
+range rg <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>C; 
+<span style="color: #008000;">// 線形で使ったスカラー値に対する補間</span>
+rg<span style="color: #000000;">(</span><span style="color: #0000dd;">3.54</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>;
+<span style="color: #008000;">// 配列の値に対する補間</span>
+<span style="color: #008000;">// 新しいX値の位置を与える:</span>
+range newX <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book2<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// 新しいY値(出力)が行くべき場所を与える:</span>
+range newY <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book2<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// 新しいY値を計算する:</span>
+newY <span style="color: #000080;">=</span> rg<span style="color: #000000;">(</span>newX<span style="color: #000000;">)</span>;</pre>
+<p><b>サンプル2: </b>
+補間法を指定します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 指定したプロットの範囲を定義</span>
+range <span style="color: #000080;">-</span>wx rWx <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;     <span style="color: #008000;">// アクティブレイヤの2番目のプロットのX値を使う</span>
+range <span style="color: #000080;">-</span>w rWy <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;      <span style="color: #008000;">// アクティブレイヤで2プロット目のYを使用</span>
+range rr <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>rWx,rWy<span style="color: #000000;">)</span>;  <span style="color: #008000;">// 2つの範囲からXY範囲を構築</span>
+<span style="color: #008000;">// 新しいX値の出力場所を定義</span>
+range newX <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book2<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+newX <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">5</span>,<span style="color: #0000dd;">15</span>,<span style="color: #0000dd;">25</span><span style="color: #000000;">}</span>;
+range newY1 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book2<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">2</span>; <span style="color: #008000;">// 新しいYの範囲</span>
+range newY2 <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book2<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #0000dd;">3</span>; <span style="color: #008000;">// 新しいYの範囲</span>
+<span style="color: #008000;">// 線形補間でX値の配列に対する新しいYの値を探す</span>
+newY1 <span style="color: #000080;">=</span> rr<span style="color: #000000;">(</span>newX<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// bspline補間でX値の配列に対する新しいYの値を出力</span>
+newY2 <span style="color: #000080;">=</span> rr<span style="color: #000000;">(</span>newX,bspline<span style="color: #000000;">)</span>;</pre>
+<h2><a name="Using_Arbitrary_Dataset"></a><span class="mw-headline">任意のデータセットを使う</span></h2>
+<p>単調増加または減少している同じサイズの2つの任意データセットに対して、2つのデータセットを補間し、片方のデータセットにおける補間値を与える事で、もう片方のデータセットの補間値を出力できます。データセットは範囲変数、データセット変数、列にすることができます。このような補間を実行する形式は次の通りです。
+</p><p><b>dataset1(value, dataset2)</b>
+</p><p>これは、<b>dataset2</b> と <b>dataset1</b>で構築されるXYデータのグループを補間し、与えられたX (<b>dataset2</b>) <b>値</b>.での Y (<b>dataset1</b>) 値を返します。例えば、
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// データセットを使う</span>
+dataset ds1 <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">}</span>;
+dataset ds2 <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">6</span><span style="color: #000000;">}</span>;
+<span style="color: #008000;">// ds1のXが1.23での補間された値をds2に返す</span>
+ds2<span style="color: #000000;">(</span><span style="color: #0000dd;">1.23</span>, ds1<span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;  <span style="color: #008000;">// 2.23を返す</span>
+<span style="color: #008000;">// ds2のXが5.28での補間した値をds1に返す</span>
+ds1<span style="color: #000000;">(</span><span style="color: #0000dd;">5.28</span>, ds2<span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;  <span style="color: #008000;">// 3.28を返す</span>
+&nbsp;
+<span style="color: #008000;">// 範囲を使う</span>
+newbook;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+range r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// アクティブワークシートの列2</span>
+r1 <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">}</span>;
+range r2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;  <span style="color: #008000;">// アクティブワークシートの列3</span>
+r2 <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">2</span>, <span style="color: #0000dd;">3</span>, <span style="color: #0000dd;">5</span>, <span style="color: #0000dd;">6</span><span style="color: #000000;">}</span>;
+r2<span style="color: #000000;">(</span><span style="color: #0000dd;">1.23</span>, r1<span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;
+r1<span style="color: #000000;">(</span><span style="color: #0000dd;">5.28</span>, r2<span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;
+&nbsp;
+<span style="color: #008000;">// 列を使う</span>
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1.23</span>, col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;
+col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span><span style="color: #0000dd;">5.28</span>, col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span>&nbsp;;</pre>
+<h2><a name="Creating_Interpolated_CurvesInterpolated_Curves"></a><span class="mw-headline">補間曲線を作成する</span></h2>
+<h3><a name="X-Functions_for_Interpolation_of_Curves"></a><span class="mw-headline">曲線補間用のXファンクション</span></h3>
+<p>Originには、XYデータを補間して、新しい出力XYデータを作成する3つのXファンクションがあります。
+</p>
+<table class="simple">
+<tr>
+<th> 名前</th>
+<th> 説明
+</th></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Interp1xy.html">interp1xy</a>
+</td>
+<td>
+<p>XYデータの補間を実行し、均一な等間隔Xに対して出力します。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Interp1.html">interp1</a>
+</td>
+<td>
+<p>XYデータの補間を実行し、入力X値に対して出力します。
+</p>
+</td></tr>
+<tr>
+<td> <a class="external text" href="../../XFunction/X-Function/Interp1trace.html">interp1trace</a>
+</td>
+<td>
+<p>Xが単調でないXYデータの補間を実行します。
+</p>
+</td></tr>
+</table>
+<h3><a name="Using_Existing_X_Dataset"></a><span class="mw-headline">既存のXデータセットを使用</span></h3>
+<p>以下の例は、既存のXデータセットを使って補間したY値を探すものです。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 指定した列の属性を持つ新しいワークブックを作成</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYXY&quot;</span>; 
+<span style="color: #008000;">// サンプルデータファイルをインポート</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Mathematics\Interpolation.dat&quot;</span>;
+impasc;
+&nbsp;
+<span style="color: #008000;">// col(3)のX値でcol(1) と col(2) のデータを補間 </span>
+range rResult<span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;
+interp1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>linear ox<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rResult;
+&nbsp;
+<span style="color: #008000;">//元のデータと結果をプロット</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rResult plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> size<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+<h3><a name="Uniformly_Spaced_X_Output"></a><span class="mw-headline">均一で等間隔なX出力</span></h3>
+<p>次のサンプルは、均一で等間隔なX値を出力として生成し、補間を実行します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//新しいワークブックを作成し、データファイルをインポート</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Mathematics\Sine Curve.dat&quot;</span>;
+newbook;
+impasc;
+&nbsp;
+<span style="color: #008000;">//列2でデータを補間</span>
+interp1xy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bspline npts<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">50</span>; 
+range rResult <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//元のデータと結果をプロット</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rResult plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> size<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">5</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+<h3><a name="Interpolating_Non-Monotonic_Data"></a><span class="mw-headline">非単調データを補間</span></h3>
+<p>次のサンプルはX値が単調でないデータに対してトレース補間を実行します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//新しいワークブックを作成し、データファイルをインポート</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Mathematics\circle.dat&quot;</span>;
+newbook;
+impasc;
+&nbsp;
+<span style="color: #008000;">//トレース補間で列2の循環データを補間</span>
+interp1trace iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bspline; 
+range rResult<span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">//元のデータと結果をプロット</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rResult plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> color<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> size<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+<p>補間のXファンクションは、入力データのX範囲の外側にあるY値を補外するのに使用することもできます。
+</p>
+<h2><a name="Matrix_InterpolationMatrix_Interpolation"></a><span class="mw-headline">行列の補間</span></h2>
+<p><b><a class="external text" href="../../XFunction/X-Function/Minterp2.html">minterp2</a></b> Xファンクションは、行列の補間/補外を実行するのに使うことができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 新しい行列ブックを作成し、サンプルデータをインポート</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+filepath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Matrix Conversion and Gridding\Direct.dat&quot;</span>;
+string fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filepath<span style="color: #000080;">$</span>;
+impasc;
+<span style="color: #008000;">// 元のXおよびYデータサイズの10倍で行列を補間</span>
+range rin <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 入力データで行列をポイント</span>
+int nx, ny;
+nx <span style="color: #000080;">=</span> rin.<span style="color: #000080;">ncols</span> <span style="color: #000080;">*</span> <span style="color: #0000dd;">10</span>;
+ny <span style="color: #000080;">=</span> rin.<span style="color: #000080;">nrows</span> <span style="color: #000080;">*</span> <span style="color: #0000dd;">10</span>;
+minterp2 method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bicubic cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nx rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ny&nbsp;;</pre>
+<p>OriginProは、 <b><a class="external text" href="../../XFunction/X-Function/Interp3.html">interp3</a></b> Xファンクションも提供しており、これは、4次の散布データを補間するのに使うことができます。
+</p>
+
+
+
+
+
+
+    

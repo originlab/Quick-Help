@@ -1,0 +1,155 @@
+﻿<h1 class="firstheading">Importing Images</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Import_a_BMP_File"></a><span class="mw-headline">Import a BMP File</span></h2>
+
+  <p>The following function shows how to import an image into a matrix by simply calling LabTalk script using Origin C's LT_execute function. After calling this function the matrix will contain an image.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> import_image_to_matrix<span style="color: #000000;">(</span>LPCSTR lpcszMatrixName, LPCSTR lpcszFileName<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string strLT;
+        strLT.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"image.fileName$=%s;image.import.matrix(%s);"</span>, lpcszFileName, lpcszMatrixName<span style="color: #000000;">)</span>;
+        LT_execute<span style="color: #000000;">(</span>strLT<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>This next function shows how to import an image into matrix data by calling a function exported from Origin's OIMG DLL. After calling this function the matrix will contain gray scale data that represents the image.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>import_image.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// For oimg_image_info and oimg_load_image function declarations</span>
+
+<span style="color: #0000ff;">bool</span> import_image_to_matrix_data<span style="color: #000000;">(</span>LPCSTR lpcszMatrixName, LPCSTR lpcszFileName, <span style="color: #0000ff;">int</span> nGrayDepth<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">int</span> nWidth, nHeight, nBPP;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>oimg_image_info<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>nWidth, <span style="color: #000040;">&amp;</span>nHeight, <span style="color: #000040;">&amp;</span>nBPP<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+        MatrixObject mo<span style="color: #000000;">(</span>lpcszMatrixName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nHeight, nWidth, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+        <span style="color: #008000;">// init data type</span>
+        <span style="color: #0000ff;">int</span> nDataType <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">16</span> <span style="color: #000080;">==</span> nGrayDepth ? FSI_USHORT <span style="color: #000000;">:</span> FSI_BYTE<span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">// set matrix data type</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">SetInternalData</span><span style="color: #000000;">(</span>nDataType, <span style="color: #0000ff;">FALSE</span>, <span style="color: #0000ff;">FALSE</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+        <span style="color: #0000ff;">bool</span> bRet;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> FSI_USHORT <span style="color: #000080;">==</span> nDataType <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Matrix<span style="color: #000080;">&lt;</span>WORD<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">16</span>, nHeight, nWidth<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">else</span> <span style="color: #008000;">// FSI_BYTE</span>
+        <span style="color: #000000;">{</span>
+                Matrix<span style="color: #000080;">&lt;</span>BYTE<span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> mm <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                bRet <span style="color: #000080;">=</span> oimg_load_image<span style="color: #000000;">(</span>lpcszFileName, <span style="color: #000040;">&amp;</span>mm, <span style="color: #0000dd;">8</span>, nHeight, nWidth<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">return</span> bRet;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>The following function will show you how to import an image to matrix data, using the function above, and access the matrix data to get the min, max, and mean values. This function can be called from LabTalk. If no arguments are given then a new matrixbook will be created and an Origin sample image will be imported.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> MyTest<span style="color: #000000;">(</span>string strMatrixName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">""</span>, string strFileName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">""</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// If no matrix name given then use active or create</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> strMatrixName.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                MatrixPage mp <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strMatrixName<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span> <span style="color: #000040;">||</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span>strMatrixName<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">{</span>
+                                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to create and get matrix name<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                                <span style="color: #0000ff;">return</span>;
+                        <span style="color: #000000;">}</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #008000;">// If no file name given then use an Origin sample image</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> strFileName.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                strFileName.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%sSamples<span style="color: #666666; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #666666; font-weight: bold;">\C</span>ar.bmp"</span>, GetOriginPath<span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">// Import the image as 8-bit gray scale data</span>
+        import_image_to_matrix_data<span style="color: #000000;">(</span>strMatrixName, strFileName, <span style="color: #0000dd;">8</span><span style="color: #000000;">)</span>;
+
+        <span style="color: #008000;">// Access the matrix using the same data size. 8-bit gray scale equals BYTE data.</span>
+        Matrix<span style="color: #000080;">&lt;</span>BYTE<span style="color: #000080;">&gt;</span> mm<span style="color: #000000;">(</span>strMatrixName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> mm.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">double</span> dMin <span style="color: #000080;">=</span> mm.<span style="color: #000000;">GetMin</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">double</span> dMax <span style="color: #000080;">=</span> mm.<span style="color: #000000;">GetMax</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Min and Max values of %s are %g and %g respectively<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strMatrixName, dMin, dMax<span style="color: #000000;">)</span>;
+
+                <span style="color: #0000ff;">double</span> dMean <span style="color: #000080;">=</span> mm.<span style="color: #000000;">GetMean</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Mean of %s is %g<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strMatrixName, dMean<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>The following function will show you how to copy an image from a matrix to a worksheet cell. This function can be called from LabTalk.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>image_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>  <span style="color: #008000;">// needed for Image class</span>
+<span style="color: #0000ff;">bool</span> copy_image_from_matrix_to_wks_cell<span style="color: #000000;">(</span>string strMBookName, string strWBookName, <span style="color: #0000ff;">int</span> nRow <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nCol <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nRow <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                nRow<span style="color: #000040;">--</span>; <span style="color: #008000;">// LabTalk to Origin C zero based index</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nCol <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                nCol<span style="color: #000040;">--</span>; <span style="color: #008000;">// LabTalk to Origin C zero based index</span>
+
+        MatrixPage mp<span style="color: #000000;">(</span>strMBookName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mp.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get the matrix page for %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strMBookName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+
+        MatrixLayer ml <span style="color: #000080;">=</span> mp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>ml.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get the matrix layer<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+
+        MatrixObject mo <span style="color: #000080;">=</span> ml.<span style="color: #000000;">MatrixObjects</span>.<span style="color: #000000;">Item</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// get first matrix object</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mo.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get the matrix object<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+
+        pBITMAPHANDLE lbmp <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>pBITMAPHANDLE<span style="color: #000000;">)</span>mo.<span style="color: #000000;">GetLeadBitmap</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000080;">==</span> lbmp <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get the lead bitmap<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+
+        Image img;
+        img.<span style="color: #000000;">SetLBmp</span><span style="color: #000000;">(</span>lbmp, <span style="color: #0000ff;">false</span><span style="color: #000000;">)</span>;
+
+        Worksheet wks<span style="color: #000000;">(</span>strWBookName<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>wks.<span style="color: #000000;">IsValid</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get worksheet for %s<span style="color: #666666; font-weight: bold;">\n</span>"</span>, strWBookName<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+                
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000ff;">FALSE</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">SetCell</span><span style="color: #000000;">(</span>nRow, nCol, img<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to put image into worksheet cell.<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+        <span style="color: #000000;">}</span>
+
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span>
+</pre>

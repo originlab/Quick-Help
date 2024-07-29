@@ -1,0 +1,171 @@
+﻿<h1 class="firstheading">Worksheet::SelectRows</h1>
+
+  <p><span class="OIndex" style="display:none">SelectRows</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Select rows from worksheet based on a LabTalk condition expression</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> SelectRows<span style="color: #000000;">(</span> LPCSTR lpcszCondition, vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> <span style="color: #000040;">&amp;</span> vnRowIndices, <span style="color: #0000ff;">int</span> r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, <span style="color: #0000ff;">int</span> r2 <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000ff;">int</span> nMax <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, LPCSTR lpcszBeforeLoopScript <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, LPCSTR lpcszBeforeIfScript <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, LPCSTR lpcszAfterIfScript <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, LPCSTR lpcszAfterLoopScript <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>lpcszCondition</dt>
+
+    <dd>[input] LabTalk conditional expression involving columns in the worksheet. LabTalk variable i is automatically declared and can be used for each row</dd>
+
+    <dt>vnRowIndices</dt>
+
+    <dd>[output] vector to receive the row indices, 0-offset. default is 0</dd>
+
+    <dt>r1</dt>
+
+    <dd>[input] starting row index, 0 offset. default is 0.</dd>
+
+    <dt>r2</dt>
+
+    <dd>[input] ending row index, 0 offset, inclusive, -1(by default) to indicate the end of data in worksheet</dd>
+
+    <dt>nMax</dt>
+
+    <dd>[input] optional maximum number of rows to select, -1(by default) to have no limit</dd>
+
+    <dt>lpcszBeforeLoopScript</dt>
+
+    <dd>[input] LabTalk script to be executed before the looping start, this is where you can make declarations to be used in lpcszCondition.</dd>
+
+    <dd>default is NULL.</dd>
+
+    <dt>lpcszBeforeIfScript</dt>
+
+    <dd>[input] LabTalk script to be executed before the if test, this is where you can use temp variable to build more complex conditions.</dd>
+
+    <dd>default is NULL.</dd>
+
+    <dt>lpcszAfterIfScript</dt>
+
+    <dd>[Input] LabTalk script to be executed after the if test, the if test result is in the an local int variable called _IF_TRUE.</dd>
+
+    <dd>default is NULL.</dd>
+
+    <dt>dwCntrl</dt>
+
+    <dd>[input] bits to control the conditional expression, Can be:</dd>
+
+    <dd>WKS_SELECT_ROWS_CHECK_IGNORE_HIDDEN_ROW,</dd>
+
+    <dd>WKS_SELECT_ROWS_XL_COLUMN_NAME.</dd>
+
+    <dt>lpcszAfterLoopScript</dt>
+
+    <dd>[input] LabTalk script to be executed after the looping end.</dd>
+
+    <dd>default is NULL.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>number of rows (size of vnRowIndices) if success, otherwise returns</p>
+
+  <p>-1 if lpcszCondition has syntax error</p>
+
+  <p>-2 if lpcszBeforeScript has syntax error</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// example to test col(2) alias as a for missing values</span>
+<span style="color: #008000;">// we first define the NULL const as 0/0 and then</span>
+<span style="color: #008000;">// we setup alias a as col(2)</span>
+<span style="color: #0000ff;">void</span> Worksheet_SelectRows_Ex1<span style="color: #000000;">(</span>string strCond <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"a==null"</span>, string strPre <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"const null=0/0;range a=2"</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Book1"</span><span style="color: #000000;">)</span>;
+    Worksheet wksDest<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Book2"</span><span style="color: #000000;">)</span>;
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnRowIndices;
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnCols <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">0</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">}</span>;
+    <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> wks.<span style="color: #000000;">SelectRows</span><span style="color: #000000;">(</span>strCond, vnRowIndices, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, strPre<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nn <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"User cancel"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nn <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"no matching row"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">BOOL</span> bRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Extract</span><span style="color: #000000;">(</span>wksDest, vnRowIndices, vnCols<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>bRet<span style="color: #000000;">)</span>
+            out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"done"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX2</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// example on how to select cells by matching text</span>
+<span style="color: #008000;">// wildcard support is automatic if either * or ? characters are found in the</span>
+<span style="color: #008000;">// testing string.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// To try, put data into a sheet with some text in col(2)</span>
+<span style="color: #008000;">// this function can allow you to select rows by a string</span>
+<span style="color: #008000;">// like</span>
+<span style="color: #008000;">// Worksheet_SelectRows_Ex2 "my string"</span>
+<span style="color: #008000;">// Worksheet_SelectRows_Ex2 *Boston*</span>
+<span style="color: #0000ff;">void</span> Worksheet_SelectRows_Ex2<span style="color: #000000;">(</span>string strCell <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"*about*"</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strPre <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"range b=2"</span>;
+    string strCond <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"b=="</span>;
+    strCond <span style="color: #000040;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\"</span>"</span> <span style="color: #000040;">+</span> strCell <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\"</span>"</span>; 
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnRowIndices;
+    <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> wks.<span style="color: #000000;">SelectRows</span><span style="color: #000000;">(</span>strCond, vnRowIndices, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, strPre<span style="color: #000000;">)</span>;
+    Grid gg;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>gg.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnRows;
+        vnRows <span style="color: #000080;">=</span> vnRowIndices;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nn<span style="color: #000000;">)</span>
+            gg.<span style="color: #000000;">SetSelection</span><span style="color: #000000;">(</span>vnRows<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">else</span>
+            gg.<span style="color: #000000;">SetSelection</span><span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;
+            
+        out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Number of rows ="</span>, nn<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/Worksheet-Extract.html" title="OriginC:Worksheet-Extract">Worksheet::Extract</a>, <a href="../../OriginC/OriginC/Grid-SetSelection.html" title="OriginC:Grid-SetSelection">Grid::SetSelection</a>, <a href="../../OriginC/OriginC/Worksheet-SetSelectedRange.html" title="OriginC:Worksheet-SetSelectedRange">Worksheet::SetSelectedRange</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

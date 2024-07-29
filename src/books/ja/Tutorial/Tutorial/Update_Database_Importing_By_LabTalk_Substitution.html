@@ -1,0 +1,213 @@
+﻿<h1 class="firstheading">データベースからのインポートをLabTalk置換で更新する</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_you_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Import_Data_from_Database_and_Make_Column_Plot"><span class="tocnumber">3.1</span> <span class="toctext">データをデータベースからインポートし、棒グラフを作成する</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Update_Database_Importing_By_LabTalk_Substitution"><span class="tocnumber">3.2</span> <span class="toctext">データベースからのインポートをLabTalk置換で更新する</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Update_Database_Importing_By_LabTalk_Substitution/Alert_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>このチュートリアルは説明のみを目的としています。チュートリアルに示されている接続文字列は、インストールされたデータベースには接続しません。チュートリアルで説明したプロセスを実行できるように、独自のサーバーに AdventureWorks データベースをセットアップする場合は、 <a class="external text" href="https://github.com/Microsoft/sql-server-samples/releases/tag/adventureworks" target="_blank">このGitHubページ</a>を参照してください。</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>このチュートリアルでは、LabTalk置換表記とともにSQLエディタを使用してデータベースから Origin ワークシートにデータをインポートする方法を示します。さらに、インポートしたデータで棒グラフを作成します。次に、定義したLabTalk変数を変更して、ワークシートデータとプロットを更新します。</p>
+
+  <p class="version">必要なOriginのバージョン:8.5.1 SR0</p>
+
+  <h2><a name="What_you_will_learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ul>
+    <li>SQLエディタを使ってデータをインポートする</li>
+
+    <li>SQLステートメント内でLabTalk置換を使う</li>
+
+    <li>棒グラフを作図する</li>
+
+    <li>データベースからのインポートをLabTalk置換で更新する</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <p>サーバマシン<i>noho</i>上にSQLサーバ<i>AdventureWorks2008</i>を予めセットアップ済であることを想定しています。</p>
+
+  <h3><a name="Import_Data_from_Database_and_Make_Column_Plot"></a><span class="mw-headline">データをデータベースからインポートし、棒グラフを作成する</span></h3>
+
+  <ol>
+    <li>新しいプロジェクトを開始します。<b>データベースアクセス</b>ツールバーの<b>SQLエディタを開く</b>ボタンをクリックしてSQLエディタを起動します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 1.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_1.png" width="275"></a></dd>
+      </dl>
+    </li>
+
+    <li>メニューから<b>ファイル：接続文字列の編集</b>を選択してテキストボックスに以下の接続文字列を入力します。
+      <pre class="lt" style="font-family:monospace;">
+Provider<span style="color: #000080;">=</span>SQLOLEDB.1;
+Password<span style="color: #000080;">=</span>labtalk2015;
+Persist Security Info<span style="color: #000080;">=</span>TRUE;
+USER ID<span style="color: #000080;">=</span>CONNECT;
+Initial Catalog<span style="color: #000080;">=</span>AdventureWorks2008;
+DATA SOURCE<span style="color: #000080;">=</span>noho
+</pre>
+    </li>
+
+    <li><b>テスト</b>ボタンをクリックして接続を確認します。問題なければ、<b>OK</b>をクリックしてデータベースにアクセスします。</li>
+
+    <li>SQLエディタで<b>クエリー：LabTalk...</b>と操作し、<b>LabTalkサポート設定</b>ダイアログを開きます。このダイアログでは、<b>LabTalk (%,$) Substitutionをする</b>のチェックにチェックを付け、以下のLabTalkスクリプトを<b>クエリー前のスクリプト</b>テキストボックスに貼り付けます。
+      <pre class="lt" style="font-family:monospace;">
+string myStartDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2003&quot;</span>;  <span style="color: #008000;">// 最初の日付置換</span>
+string myEndDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2003&quot;</span>;  <span style="color: #008000;">// 2番目の日付置換</span>
+string myStrName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;LineTotalFor2003&quot;</span>;  <span style="color: #008000;">// 名前</span>
+</pre>
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 21.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_21.png" width="533"></a></dd>
+      </dl>
+    </li>
+
+    <li>OK  をクリックして、SQLエディタに戻ります。右側のテキストボックスに以下のSQLステートメントを入力します。
+      <pre class="sql" style="font-family:monospace;">
+<span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>Name<span style="color: #66cc66;">,</span> LINETOALANDNAMEYEAR<span style="color: #66cc66;">.</span>%<span style="color: #66cc66;">(</span>myStrName$<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">FROM</span> 
+                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> <span style="color: #993333; font-weight: bold;">SUM</span><span style="color: #66cc66;">(</span>SALEANDPRODUCTYEAR<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> %<span style="color: #66cc66;">(</span>myStrName$<span style="color: #66cc66;">)</span><span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID
+                <span style="color: #993333; font-weight: bold;">FROM</span>
+                        <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> SALEINFOYEAR<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> PRODUCTINFOYEAR<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                        <span style="color: #993333; font-weight: bold;">FROM</span>
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>ProductID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader 
+                                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail 
+                                <span style="color: #993333; font-weight: bold;">ON</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>SalesOrderID<span style="color: #66cc66;">=</span>Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>SalesOrderID
+                                <span style="color: #993333; font-weight: bold;">WHERE</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate <span style="color: #993333; font-weight: bold;">BETWEEN</span> <span style="color: #ff0000;">&apos;%(myStartDate$)&apos;</span> <span style="color: #993333; font-weight: bold;">AND</span> <span style="color: #ff0000;">&apos;%(myEndDate$)&apos;</span><span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEINFOYEAR
+                        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> 
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> PRODUCTINFOYEAR
+                        <span style="color: #993333; font-weight: bold;">ON</span> SALEINFOYEAR<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">=</span>PRODUCTINFOYEAR<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEANDPRODUCTYEAR
+                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory 
+                <span style="color: #993333; font-weight: bold;">ON</span> SALEANDPRODUCTYEAR<span style="color: #66cc66;">.</span>ProductSubcategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                <span style="color: #993333; font-weight: bold;">GROUP</span> <span style="color: #993333; font-weight: bold;">BY</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> LINETOALANDNAMEYEAR
+        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductCategory
+        <span style="color: #993333; font-weight: bold;">ON</span> LINETOALANDNAMEYEAR<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>ProductCategoryID
+</pre>
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 22.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_22.png" width="781"></a></dd>
+      </dl>
+
+      <p>上の図で確認できるように、合計で3つのLabTalk変数がステートメントの中で使用されています。</p>
+    </li>
+
+    <li>ツールバーの最後のボタン<a class="image"><img alt="Button db Preview LabTalk Substitute.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Preview_LabTalk_Substitute.png" width="23"></a>をクリックすると、置換結果を見ることができます。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 23.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_23.png" width="781"></a></dd>
+      </dl>
+    </li>
+
+    <li>メニューから、<b>ファイル：アクティブワークシートに保存</b>を選択し、この設定をワークシートに保存します。そして、<b>ワークシートにデータをインポート</b>ボタン<a class="image"><img alt="Button db Import Data.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Import_Data.png" width="25"></a>をクリックしてインポートを行います。</li>
+
+    <li>SQLエディタを閉じます。次の画像で、インポートされたデータを確認出来ます。列Bのロングネームは&quot;LineTotalFor2003&quot;で、LabTalk変数で設定されたものです。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 24.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_24.png" width="316"></a></dd>
+      </dl>
+    </li>
+
+    <li>ワークシート内の列Bを選択し、<b>作図：棒グラフ/円グラフ：縦棒グラフ</b>と操作して縦棒グラフを作図します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 25.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_25.png" width="422"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3><a name="Update_Database_Importing_By_LabTalk_Substitution"></a><span class="mw-headline">データベースからのインポートをLabTalk置換で更新する</span></h3>
+
+  <p>LabTalk変数<i>myStartDate$</i>、<i>myEndDate$</i>、<i>myStrName$</i> は、どの年のデータをデータベースからインポートするかをコントロールするために使用されます。他の年のデータをインポートする一つの方法として、この変数値をLabTalkサポート設定ダイアログで編集する方法があります。</p>
+
+  <ol>
+    <li>上記でインポートしたデータが入力されているワークシートをアクティブにします。<b>SQLエディタを開く</b>ボタン<a class="image"><img alt="Button db Create.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Create.png" width="24"></a>をクリックすると、SQLエディタが保存した設定とともに開きます。</li>
+
+    <li><b><b>クエリー:LabTalk</b></b>と選択して<b><b>LabTalkサポート設定</b></b>ダイアログを開きます。<i>myStartDate$、 myEndDate$</i> と <i>myStrName$</i> の3つの変数の値を変更します。
+      <pre class="lt" style="font-family:monospace;">
+string myStartDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2004&quot;</span>;  <span style="color: #008000;">// 最初の日付置換</span>
+string myEndDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2004&quot;</span>;  <span style="color: #008000;">// 2番目の日付の置換</span>
+string myStrName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;LineTotalFor2004&quot;</span>;  <span style="color: #008000;">// 名前</span>
+</pre>
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 26.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_26.png" width="533"></a></dd>
+      </dl>
+    </li>
+
+    <li>OK  をクリックして、SQLエディタに戻ります。<b>クエリー設定を保存</b>ボタンをクリックし、<b>ワークシートにデータをインポート</b>ボタン<a class="image"><img alt="Button db Import Data.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Import_Data.png" width="25"></a>をクリックします。SQLエディタを閉じます。</li>
+
+    <li>ワークシートのデータとグラフが更新されたことがわかります。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 27.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_27.png" width="316"></a></dd>
+
+        <dd><a class="image"><img alt="ImportDataDatabase 28.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_28.png" width="422"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <p>しかし、変数値を編集するためにSQLエディタを開く必要があるので、この方法はあまり便利ではありません。LabTalkサポート設定の修正のより良い方法は、<b>グローバル変数を使用することです。そして、グローバル変数を編集すれば、SQLエディタを使用せずに再インポートできます。</b></p>
+
+  <ol>
+    <li>再度ワークシートをアクティブにして、<a class="image"><img alt="Button db Create.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Create.png" width="24"></a>をクリックして<b>SQLエディタ</b>を開きます。</li>
+
+    <li>メニューの<b>クエリー：LabTalk</b>を選択して、LabTalkサポート設定を以下のように編集します。
+      <pre class="lt" style="font-family:monospace;">
+string myStartDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;  <span style="color: #008000;">// 最初の日付置換</span> string myEndDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;  <span style="color: #008000;">// 2番目の日付置換</span> string myStrName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span>;  <span style="color: #008000;">// 名前</span> if<span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span>startDate<span style="color: #000080;">$</span>, <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// startDate$があるかどうか</span> <span style="color: #000000;">{</span> myStartDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> startDate<span style="color: #000080;">$</span>;  <span style="color: #008000;">// あれば、それをmyStartDate$として使う</span> <span style="color: #000000;">}</span> else <span style="color: #000000;">{</span> myStartDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2003&quot;</span>;  <span style="color: #008000;">// なければ、1/1/2003 を myStartDate$とする</span> <span style="color: #000000;">}</span> if<span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span>endDate<span style="color: #000080;">$</span>, <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// endDate$があるかどうか</span> <span style="color: #000000;">{</span> myEndDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> endDate<span style="color: #000080;">$</span>;  <span style="color: #008000;">// あれば、それをmyEndDate$として使う</span> <span style="color: #000000;">}</span> else <span style="color: #000000;">{</span> myEndDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2003&quot;</span>;   <span style="color: #008000;">// なければ12/31/2003を使う</span> <span style="color: #000000;">}</span> if<span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span>strName<span style="color: #000080;">$</span>, <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// strName$があるか</span> <span style="color: #000000;">{</span> myStrName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strName<span style="color: #000080;">$</span>;  <span style="color: #008000;">// あれば、それを strName$として使う</span> <span style="color: #000000;">}</span> else <span style="color: #000000;">{</span> myStrName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;LineTotalFor2003&quot;</span>;  <span style="color: #008000;">// なければLineTotalFor2003をstrName$とする</span> <span style="color: #000000;">}</span>
+</pre>
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 29.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/ImportDataDatabase_29.png" width="533"></a></dd>
+      </dl>
+    </li>
+
+    <li style="list-style: none"><b><b>SQLエディタ</b></b>の<b>クエリー設定を保存</b>ボタンをクリックして、閉じます。</li>
+
+    <li>メインメニューの<b>ウィンドウ：スクリプトウィンドウ</b>を選択して、スクリプトウィンドウを開きます。</li>
+
+    <li>スクリプトウィンドウに以下のスクリプトを貼り付け、すべて選択してからキーボードのEnterキーを押して実行します。
+      <pre class="lt" style="font-family:monospace;">
+string startDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2003&quot;</span>; <span style="color: #008000;">// startDate$文字列変数を定義</span> string endDate<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2004&quot;</span>; <span style="color: #008000;">//endDate$文字列変数を定義</span> string strName<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;LineTotalFor2003and2004&quot;</span>; <span style="color: #008000;">// strName文字列変数を定義</span> dbimport; <span style="color: #008000;">// データベースからデータをインポート</span>
+</pre>
+    </li>
+
+    <li>ワークシートのデータとグラフが更新されます。</li>
+  </ol>
+
+  <p>Note:</p>
+
+  <ol>
+    <li>ここでは、3つの「グローバル」LabTalk変数を定義しました。この「グローバル」は、LabTalk変数を「見える」ようにし、SQLエディタの置換で使用できるようにすること意味します。</li>
+
+    <li>最後の <i>dbimport</i> LabTalkコマンドは、<b>データアクセス</b>ツールバーの<b>データのインポート</b><a class="image"><img alt="Button db Import Data.png" src="../images/Update_Database_Importing_By_LabTalk_Substitution/Button_db_Import_Data.png" width="25"></a>をクリックするのと同じです。</li>
+  </ol>

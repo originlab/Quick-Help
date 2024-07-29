@@ -1,0 +1,441 @@
+﻿<h1 class="firstheading">文字レジスタと文字列レジスタ置換</h1><p class='urlname' style='display: none'>String-registers</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">はじめに</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#String_Registers_as_System_VariablesSystem_VariableString_Register.2C_System_VariableSystem_Variable.2C_String_Register"><span class="tocnumber">2</span> <span class="toctext">システム変数としての文字列レジスタ<span class="OIndex" style="display:none">システム変数</span><span class="OIndex" style="display:none">文字列レジスタ, システム変数</span><span class="OIndex" style="display:none">システム変数, 文字列レジスタ</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#.25_String_Registers"><span class="tocnumber">2.1</span> <span class="toctext">% 文字列レジスタ</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#.25.40_String_Registers"><span class="tocnumber">2.2</span> <span class="toctext">%@ 文字列レジスタ</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#String_Registers_as_String_VariablesString_Register.2C_String_VariableString_Variable.2C_String_Register"><span class="tocnumber">3</span> <span class="toctext">文字列変数としての文字列レジスタ<span class="OIndex" style="display:none">文字列レジスタ, 文字列変数</span><span class="OIndex" style="display:none">文字列変数, 文字列レジスタ</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Assigning_Values_to_a_String_Variable"><span class="tocnumber">3.1</span> <span class="toctext">文字列変数への値の代入</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Expressing_the_Variable_Before_Assignment"><span class="tocnumber">3.2</span> <span class="toctext">割り当て前の変数の評価</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#String_ComparisonString_Comparison"><span class="tocnumber">3.3</span> <span class="toctext">文字列比較<span class="OIndex" style="display:none">文字列比較</span></span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Substring_Notation"><span class="tocnumber">3.4</span> <span class="toctext">部分文字列の表記</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#A_Note_on_Tokens"><span class="tocnumber">3.4.1</span> <span class="toctext">トークンについての注意</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Introduction"></a><span class="mw-headline">はじめに</span></h2>
+<p><span class="OIndex">文字列レジスタ</span>はOriginで文字列データを扱う1つの手段です。  V8.0より前のバージョンでは、これが唯一の方法で、現在のOriginのバージョンでも使うことができます。  しかし、文字列処理ルーチンを適切な文字列変数に移行することをお勧めします。使用の比較については<a href="../../LabTalk/Script/String_Processing.html" title="Script:文字列の処理">文字列の処理</a>をご覧下さい。  
+</p><p>長年、文字列レジスタ名が％文字とそれに続く一つのアルファベット文字（AからZまでの文字）で構成されていることが、LabTalkスクリプト作成者に知られています。これらの基本となる26個の文字列レジスタ、すなわち％A-％Zのうち、いくつかはシステム文字列レジスタとして予約されています（以下の表にリストアップされています）。 
+</p><p>Origin 2016 SR2以降、&quot;%@<i>N</i>&quot;個の読み取り専用のシステム文字列レジスタが追加されています。これらは元の &quot;％<i>N</i>&quot;文字列レジスタの下の2番目の表にリストアップされています。 
+</p>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/String_registers/Alert_icon.png" width="57"  border="0" /></td><td><p>文字列レジスタはグローバルな<span class="OIndex">スコープ</span>を持つ<span class="OIndex HasShownIndex" style="display:none">文字列レジスタのスコープ</span>です。つまり、どのスクリプトでもいつでも変更可能です。  これは便利な場合もあれば、危険な場合もあります。あるスクリプトが別のスクリプトで使用されている文字列レジスタの値を変更し、誤った混乱を招く結果になる可能性があるからです。
+</p>
+	</td>
+	</tr>
+	</table>
+<table class="noborder">
+	<tr>
+	<td style="vertical-align:top" width="60"><img src="../images/String_registers/Alert_icon.png" width="57"  border="0" /></td><td><p>いくつかの文字レジスタはシステム変数として予約されており、自作のスクリプトでそれらに値を代入しようとするとエラーが発生する可能性があります。  それらは、%C-%I、および%X-%Zの範囲でグループ化されるか、または前に%@が付きます（例：%@A = Appsルートフォルダ）。詳しくは以下の表を確認してください。
+</p>
+	</td>
+	</tr>
+	</table>
+<h2><a name="String_Registers_as_System_VariablesSystem_VariableString_Register.2C_System_VariableSystem_Variable.2C_String_Register"></a><span class="mw-headline">システム変数としての文字列レジスタ<span class="OIndex" style="display:none">システム変数</span><span class="OIndex" style="display:none">文字列レジスタ, システム変数</span><span class="OIndex" style="display:none">システム変数, 文字列レジスタ</span></span></h2>
+<p>文字列レジスタは最大260バイト文字保持します（％Zは最大6290保持します）。文字列レジスタ名は、<b>%</b>文字（または<b>%@</b>）とそれに続く単一の英字（AからZまでの文字）で構成されます。 このため文字列レジスタは、<span class="OIndex">%変数</span>としても知られています。
+</p>
+<h3><a name=".25_String_Registers"></a><span class="mw-headline">%文字列レジスタ</span></h3>
+<p>26個の文字列レジスタのうち、下表の特別な意味を持つ<span class="OIndex">システム変数</span>として予約され、これはスクリプト内で再割り当てをしてはいけません。  ただし、格納されている値にアクセス (または操作) できると便利な場合がよくあります。 
+</p>
+<table class="simple">
+<tr>
+<th>&nbsp;%変数
+</th>
+<th> 説明
+</th></tr>
+<tr>
+<td>&nbsp;%C
+</td>
+<td> 現在の<span class="OIndex">アクティブデータセット</span>の名前
+</td></tr>
+<tr>
+<td>&nbsp;%D
+</td>
+<td> <a class="external text" href="../../XFunction/X-Function/Cd.html">cd コマンド</a>で設定された現在の作業ディレクトリ。(New in Origin 8)
+</td></tr>
+<tr>
+<td>&nbsp;%E
+</td>
+<td> <span class="OIndex">最近選択したワークシート</span>を含むウィンドウの名前
+</td></tr>
+<tr>
+<td>&nbsp;%F
+</td>
+<td> 現在のフィッティングセッションにあるデータセットの名前。<span class="OIndex" style="display:none">現在のフィッティングセッションのデータセット</span>
+</td></tr>
+<tr>
+<td>&nbsp;%G
+</td>
+<td> <span class="OIndex">現在のプロジェクト名</span>
+</td></tr>
+<tr>
+<td>&nbsp;%H
+</td>
+<td> 現在の<span class="OIndex">アクティブウィンドウのタイトル</span>
+</td></tr>
+<tr>
+<td>&nbsp;%I
+</td>
+<td> <span class="OIndex">現在の基線のデータセット</span>
+</td></tr>
+<tr>
+<td>&nbsp;%X
+</td>
+<td> <span class="OIndex">現在のプロジェクトのパス</span>
+</td></tr>
+<tr>
+<td>&nbsp;%Y <span class="OIndex" style="display:none">ユーザファイルフォルダのパス</span>
+</td>
+<td>
+<p>ユーザの .INI ファイルやその他のユーザがカスタマイズ可能なファイルが配置されている<a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">ユーザファイルフォルダ</a>へのフル パス名%Y はOriginを初回起動時に選択した場所によって、各ユーザごとに別々に設定することができます。 
+</p><p>Origin 7.5 より前では、さまざまなユーザ .INI ファイルへのパスは、Origin .EXE へのパスと同じでした。  Origin7.5から、1つのPCで複数ユーザが使えるように、User Filesフォルダを作成することをサポートしています。 
+</p><p>Origin .EXE パス (<a href="../../LabTalk/LabTalk/System.Path_(object).html" title="LabTalk: System.Path(オブジェクト)"><span class="OIndex">プログラムパス</span></a>) を取得するには、次の LabTalk ステートメントを使用します。 
+</p>
+<dl><dd><pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>a <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span></pre></dd></dl>
+<p>Origin Cでは、GetAppPath()関数へ適切な引数を渡します(INIパスまたはEXEパスを返すためです)。
+</p>
+</td></tr>
+<tr>
+<td>&nbsp;%Z
+</td>
+<td> 長い文字列を一時的に保存する領域(最大6290バイト文字)。
+</td></tr></table>
+<p><br />
+システム変数を含む文字列レジスタは、名前が利用可能であれば、どこでも使用することができます。システム文字列レジスタに値を再割り当てするべきではないですが、それらが保存するシステム値にアクセスする（または操作する）と便利なことがよくあります。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//現在のアクティブなワークシートを削除:</span>
+
+del <span style="color: #000080;">%</span>C;</pre>
+<h3><a name=".25.40_String_Registers"></a><span class="mw-headline">%@文字列レジスタ</span></h3>
+<p>Origin 2016 SR2以降では、<b>%@</b>文字とそれに続く一つの英字で構成される読み取り専用のシステム文字列レジスタが追加されました。
+</p>
+<table class="simple">
+<tr>
+<th>&nbsp;%@変数
+</th>
+<th> 説明
+</th></tr>
+<tr>
+<td>&nbsp;%@A
+</td>
+<td> アプリのルートインストールフォルダ。
+</td></tr>
+<tr>
+<td>&nbsp;%@B
+</td>
+<td> OriginLabのAppDataフォルダ。
+</td></tr>
+<tr>
+<td>&nbsp;%@C
+</td>
+<td> コンピュータ名。
+</td></tr>
+<tr>
+<td>&nbsp;%@D
+</td>
+<td> Origin操作のデータと設定が保存されているProgramDataフォルダ。
+</td></tr>
+<tr>
+<td>&nbsp;%@E
+</td>
+<td> グループリーダーのマシンのグループフォルダのパス詳しくは<a class="external text" href="../../UserGuide/UserGuide/Set_Group_Folder_Location_Dialog.html">Set Group Folder Location Dialog</a>を参照してください。
+</td></tr>
+<tr>
+<td>&nbsp;%@F
+</td>
+<td> アクティブなプロジェクトエクスプローラのフォルダの名前。
+</td></tr>
+<tr>
+<td>&nbsp;%@G
+</td>
+<td> アクティブなグラフシート（シートとしてワークブックに追加されたグラフ）のグラフページショートネーム。このタイプのシートでない場合、または含まれているグラフがない場合は空です。
+</td></tr>
+<tr>
+<td>&nbsp;%@H
+</td>
+<td> グラフや行列が埋め込まれているアクティブなページを含むブックの名前。
+</td></tr>
+<tr>
+<td>&nbsp;%@I
+</td>
+<td> 最後にアクティブになったウィンドウのショートネーム。
+</td></tr>
+<tr>
+<td>&nbsp;%@J
+</td>
+<td> Origin.EXEフォルダのパス（下記、<b>%@O</b>もご覧ください。）
+</td></tr>
+<tr>
+<td>&nbsp;%@L
+</td>
+<td> OriginLabソフトウェアライセンスの所有者名。
+</td></tr>
+<tr>
+<td>&nbsp;%@M
+</td>
+<td> 拡張子を含む、新しく追加されたファイルパス。
+</td></tr>
+<tr>
+<td>&nbsp;%@N
+</td>
+<td> 表示、非表示、削除にかかわらず、最も新しく作成されたウィンドウの名前。<a href="#String_Registers_as_System_VariablesSystem_VariableString_Register.2C_System_VariableSystem_Variable.2C_String_Register">%H</a>はこれとは異なり、アクティブウィンドウの名前を格納します。
+</td></tr>
+<tr>
+<td>&nbsp;%@O
+</td>
+<td> Origin.EXEのEXEの名前を含めたフルパス。
+</td></tr>
+<tr>
+<td>&nbsp;%@P
+</td>
+<td> アクティブなフォルダのプロジェクトエクスプローラのフルパス。
+</td></tr>
+<tr>
+<td>&nbsp;%@Q
+</td>
+<td> 現在のOriginプロジェクトファイルの拡張子（小文字のopjまたはopju）。
+</td></tr>
+<tr>
+<td>&nbsp;%@R
+</td>
+<td> Originがパッチファイル(\Updates) やヘルプファイル(\Updates) をダウンロードして保存するProgramData のルートフォルダ。メニューの<b>へルプ: フォルダを開く:プログラムデータフォルダ</b>で開くものと同じです。
+</td></tr>
+<tr>
+<td>&nbsp;%@S
+</td>
+<td> インストール中のOriginセットアップダイアログボックスで入力されたユーザ名。
+</td></tr>
+<tr>
+<td>&nbsp;%@T
+</td>
+<td> アクティブなグラフシート（シートとしてワークブックに追加されたグラフ）のタイトル（存在する場合はショートネーム + ロングネーム）。このタイプのシートでない場合、または含まれているグラフがない場合は空です。グラフにロングネーム無い場合は%@Gと同じです。
+</td></tr>
+<tr>
+<td>&nbsp;%@U
+</td>
+<td> プロジェクトの未保存ファイルのパス。
+</td></tr>
+<tr>
+<td>&nbsp;%@V
+</td>
+<td> 一時保存フォルダ。このフォルダはプロジェクトの保存中にファイルを保存するために使用されます。
+</td></tr>
+<tr>
+<td>&nbsp;%@W
+</td>
+<td> インストール中のOriginセットアップダイアログボックスで入力された会社名。
+</td></tr>
+<tr>
+<td>&nbsp;%@X
+</td>
+<td> 現在実行中のAppsフォルダ。
+</td></tr>
+<tr>
+<td>&nbsp;%@Y
+</td>
+<td> ユーザのAppDataルートフォルダ。このフォルダには、インストールされているアプリとそのバージョン番号をリストしたxmlファイルが格納されています。
+</td></tr></table>
+<h2><a name="String_Registers_as_String_VariablesString_Register.2C_String_VariableString_Variable.2C_String_Register"></a><span class="mw-headline">文字列変数としての文字列レジスタ<span class="OIndex" style="display:none">文字列レジスタ, 文字列変数</span><span class="OIndex" style="display:none">文字列変数, 文字列レジスタ</span></span></h2>
+<p>スクリプトの実行中に文字列レジスタの内容が置換される<strong class="selflink">文字列レジスタ</strong>を使う方法は置換の最も単純な形式です。<a href="../../LabTalk/Script/String_Variables_and_String_Registers.html" title="スクリプト：文字列変数と文字列レジスタ">文字列変数</a>が導入される前は、古いスクリプトでのみ文字列レジスタが使用されていました（Origin 8）。以下のシステム変数を除く文字列レジスタは、文字列レジスタを文字列変数として使用できます。以下ご参照ください。
+</p>
+<h3><a name="Assigning_Values_to_a_String_Variable"></a><span class="mw-headline">文字列変数への値の代入</span></h3>
+<p>スクリプトウィンドウに次の代入文を入力します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> John</pre>
+<p>上記は、文字列レジスタ<b>%A</b> の内容を<b>John</b>にします。
+</p><p>文字列変数は置換表記でも使用できます。  置換表記法を使用して、スクリプトウィンドウに次の代入文を入力します。 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>A F Smith</pre>
+<p>これは<b>%B</b>の内容を
+<b>John F Smith</b>にします。
+つまり、代入演算子の<i>右側</i>で文字列変数が評価されると、その結果が代入演算子の<i>左側の識別子</i>に割り当てられます。 
+</p><p>数値変数と同様に、スクリプトウィンドウに次の代入文を入力するとこのようになります。
+</p>
+ <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+<p>Origin は変数の値を返します。
+</p><p><b>John F Smith</b>
+</p>
+<h3><a name="Expressing_the_Variable_Before_Assignment"></a><span class="mw-headline">割り当て前の変数の評価</span></h3>
+<p>括弧を使用すると、代入演算子の左側にある文字列変数を代入前に表現できます。例えば、スクリプトウィンドウに次の代入文を入力します。
+</p>
+ <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> Book1_A</pre>
+<p>このスクリプトにより、値<b>Book1_A</b>が、文字列レジスタ%Bに割り当てられます。  <b>Book1_A</b>がデータセット名だとして、スクリプトウィンドウに次の代入文を入力します。次の例を見てください。
+</p>
+ <pre class="lt" style="font-family:monospace;"><span style="color: #000000;">(</span><span style="color: #000080;">%</span>B<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000080;">*%</span>B</pre>
+<p>データセットが<b>2</b>倍になります。しかし、文字列レジスタ<b>%B</b>の内容は、文字列<b>Book1_A</b>のままです。
+</p>
+<h3><a name="String_ComparisonString_Comparison"></a><span class="mw-headline">文字列比較<span class="OIndex" style="display:none">文字列比較</span></span></h3>
+<p>文字列レジスタを比較するときは、「等価」演算子 (==) を使用します。
+</p>
+<ul><li> 文字列レジスタが引用符 (&quot;%A&quot; のように) で囲まれている場合、Origin は文字どおり、各変数名を構成する文字列文字を比較します。例</li></ul>
+<pre class="lt" style="font-family:monospace;">aaa <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+bbb <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+<span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> aaa;
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> bbb;
+if <span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%A&quot;</span> <span style="color: #000080;">==</span> <span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000000;">)</span>
+    type <span style="color: #ff00ff;">&quot;YES&quot;</span>;
+else
+    type <span style="color: #ff00ff;">&quot;NO&quot;</span>;</pre>
+<p>この例の結果は<b>NO</b>となります。なぜならば、この比較式の場合、文字列変数の文字を比較するので、<b>aaa !=bbb</b>となります。
+</p>
+<ul><li> 文字列レジスタが引用符で囲まれていないと(例えば%A)、Originは文字列レジスタに含まれる変数の値を比較します。  例</li></ul>
+<pre class="lt" style="font-family:monospace;">aaa <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+bbb <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+<span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> aaa;
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> bbb;
+if <span style="color: #000000;">(</span><span style="color: #000080;">%</span>A <span style="color: #000080;">==</span> <span style="color: #000080;">%</span>B<span style="color: #000000;">)</span>
+    type <span style="color: #ff00ff;">&quot;YES&quot;</span>;
+else
+    type <span style="color: #ff00ff;">&quot;NO&quot;</span></pre>
+<p>この例の結果は<b>YES</b>となります。なぜならば、この比較式は、得られた(数値)変数の内容を比較しているので、<b>aaa==bbb==4</b>となるからです。
+</p>
+<h3><a name="Substring_Notation"></a><span class="mw-headline">部分文字列表記</span></h3>
+<p><span class="OIndex">部分文字列表記</span> <b>%[ <i>string</i>, <i>[argument1]</i>, <i>[argument2]</i> ]</b> は、引数または引数1と引数2で指定された部分文字列がない場合、文字列の長さを返します。
+</p>
+<table class="simple">
+<tr>
+<th width="250">以下のように操作します。
+</th>
+<th width="10">引数
+</th>
+<th width="100">入力スクリプト
+</th>
+<th width="150">戻り値
+</th></tr>
+<tr>
+<td> 文字列の長さを返します。文字列を引用符で囲まない場合、両側のスペースは無視されます
+</td>
+<td> <i>NA</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;     hello     &quot;</span>; 
+type <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A<span style="color: #000000;">]</span>;
+<span style="color: #000080;">%</span>B<span style="color: #000080;">=</span>     hello    &nbsp;;
+type <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>B<span style="color: #000000;">]</span>;</pre>
+</td>
+<td>
+<pre>15 
+5
+</pre>
+</td></tr>
+<tr>
+<td> 文字を検索し、その文字の左側にあるすべてのテキストを返します。
+</td>
+<td> <i> &apos;&lt;char&gt;&apos; </i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Results from Data2_Test&quot;</span>;
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, <span style="color: #ff00ff;">&apos;_&apos;</span><span style="color: #000000;">]</span>; 
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+</td>
+<td> Results from Data2
+</td></tr>
+<tr>
+<td> 文字を検索し、その文字の右側にあるすべてのテキストを返します。
+</td>
+<td> <i>&gt;&apos;&lt;char&gt;&apos;</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Results from Data2_Test&quot;</span>;
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, <span style="color: #000080;">&gt;</span><span style="color: #ff00ff;">&apos;_&apos;</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+</td>
+<td> Test
+</td></tr>
+<tr>
+<td> <b>n</b>番目の文字位置の左側にあるすべてのテキストを返します。
+</td>
+<td> <i>n</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Results from Data2_Test&quot;</span>;
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, <span style="color: #0000dd;">8</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+</td>
+<td> Results
+</td></tr>
+<tr>
+<td> 指定された2つの文字位置の間 <b>n:m</b> (両端を含む) のすべてのテキストを返します。
+</td>
+<td> <i>14:18</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Results from Data2_Test&quot;</span>; 
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, <span style="color: #0000dd;">14</span><span style="color: #000000;">:</span><span style="color: #0000dd;">18</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+</td>
+<td> Data2
+</td></tr>
+<tr>
+<td> 左から数えて<code><i>#n</i></code>トークンを返します。
+</td>
+<td> <i>#n</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Results from Data2_Test&quot;</span>; 
+<span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, #<span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B <span style="color: #000080;">=</span></pre>
+</td>
+<td> from
+</td></tr>
+<tr>
+<td> <b>@n</b>行目を返す。
+</td>
+<td> <i>@n</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;First line
+second line&quot;</span>;
+<span style="color: #000080;">%</span>Z <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, @2<span style="color: #000000;">]</span>;
+<span style="color: #000080;">%</span>Z<span style="color: #000080;">=</span>;</pre>
+</td>
+<td> <b>%A</b>文字列の2行目を<b>%Z</b>に割り当て
+</td></tr>
+<tr>
+<td> 指定された区切り文字に基づいて部分文字列を返します。
+</td>
+<td> <i>#n , &lt;separator&gt;</i>
+</td>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> <span style="color: #0000dd;">123</span>	<span style="color: #0000dd;">342</span>	<span style="color: #0000dd;">456</span>;
+for <span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">3</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   Book1_A<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, #ii,\t<span style="color: #000000;">]</span>
+<span style="color: #000000;">}</span>;</pre>
+</td>
+<td> Book1 の列 A は
+<pre>123
+342
+456
+</pre>
+</td></tr></table>
+<h4><a name="A_Note_on_Tokens"></a><span class="mw-headline">トークンについての注意</span></h4>
+<p><span class="OIndex">トークン</span>とは、ホワイトスペース(スペース又はタブ)、丸括弧(...)、カギ括弧[...]、引用符(&quot;)で囲まれた文字群のことです。  例えば、
+</p>
+ <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>A <span style="color: #000080;">=</span> These <span style="color: #000000;">(</span>are all<span style="color: #000000;">)</span> <span style="color: #ff00ff;">&quot;different tokens&quot;</span></pre>
+<p>さらにスクリプトウィンドウに次のように入力します。
+</p>
+<table class="simple">
+<tr>
+<th width="300">スクリプト
+</th>
+<th width="300">戻り値
+</th></tr>
+<tr>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, #<span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B<span style="color: #000080;">=</span></pre>
+</td>
+<td> These
+</td></tr>
+<tr>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, #<span style="color: #0000dd;">2</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B<span style="color: #000080;">=</span></pre>
+</td>
+<td> are all
+</td></tr>
+<tr>
+<td> <pre class="lt" style="font-family:monospace;"><span style="color: #000080;">%</span>B <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span>A, #<span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>; <span style="color: #000080;">%</span>B<span style="color: #000080;">=</span></pre>
+</td>
+<td> different tokens
+</td></tr></table>
+
+
+
+    

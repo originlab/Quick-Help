@@ -1,0 +1,270 @@
+﻿<h1 class="firstheading">SQLエディタでのデータベース分析</h1>
+
+  <p class='urlname' style='display: none'>SQL-Editor-for-Database-Analysis</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_you_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Import_Data_from_Database"><span class="tocnumber">3.1</span> <span class="toctext">データベースからデータをインポートする</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Filter_Data"><span class="tocnumber">3.2</span> <span class="toctext">データフィルタ</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Create_Pivot_Table_and_Plot_Column_Graph"><span class="tocnumber">3.3</span> <span class="toctext">ピボットテーブルと棒グラフを作成</span></a></li>
+
+          <li class="toclevel-2 tocsection-7"><a href="#Customize_Graph_and_Create_Analysis_Template"><span class="tocnumber">3.4</span> <span class="toctext">グラフを編集して分析テンプレートを作成</span></a></li>
+
+          <li class="toclevel-2 tocsection-8"><a href="#Add_Floating_Graph_in_Worksheet_and_Save_Analysis_Template"><span class="tocnumber">3.5</span> <span class="toctext">ワークシートにフローティンググラフを追加して分析テンプレートとして保存</span></a></li>
+
+          <li class="toclevel-2 tocsection-9"><a href="#Change_Query_and_Re-import_Data_to_Automatically_Update_Analysis"><span class="tocnumber">3.6</span> <span class="toctext">クエリを変更してデータを再インポートし、分析を自動的に更新</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/SQL_Editor_for_Database_Analysis/Alert_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>このチュートリアルは説明のみを目的としています。チュートリアルに示されている接続文字列は、インストールされたデータベースには接続しません。チュートリアルで説明したプロセスを実行できるように、独自のサーバーに AdventureWorks データベースをセットアップする場合は、<a class="external text" href="https://github.com/Microsoft/sql-server-samples/releases/tag/adventureworks" target="_blank">この GitHub ページ</a>を参照してください。</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Origin は、ADO または ODBC を使用して、多くの一般的なデータベースからのデータのインポートをサポートしています。データが入力されたら、Originのデータフィルタと分析機能により分析テンプレートを用意します。このチュートリアルでは、このような分析テンプレートの作成方法と、保存した分析テンプレートをデータベースからインポートしたデータに適用して、分析結果を更新する方法を説明します。</p>
+
+  <p class="version">必要なOriginのバージョン:Origin 9.0 SR0以降</p>
+
+  <h2><a name="What_you_will_learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ul>
+    <li>SQLエディタを使ってデータベースから特定年のデータをインポートする</li>
+
+    <li>表示したい製品をしぼるために列フィルタを追加する</li>
+
+    <li>異なる国の異なる製品の合計コストのピボットテーブルを作成する</li>
+
+    <li>結果を確認するために棒グラフを作成する</li>
+
+    <li>ワークシートにフローティンググラフを挿入して分析テンプレートとして保存する</li>
+
+    <li>保存した分析テンプレートをロードし、SQLクエリを変更してデータベースを再インポートし、他の年の分析を実行する</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <p>サーバマシン<i>noho</i>上にSQLサーバ<i>AdventureWorks2008</i>を予めセットアップ済であることを想定しています。</p>
+
+  <h3><a name="Import_Data_from_Database"></a><span class="mw-headline">データベースからデータをインポートする</span></h3>
+
+  <ol>
+    <li>新しいプロジェクトを開始します。<b>データベースアクセス</b>ツールバーの<b>SQLエディタを開く</b>ボタンをクリックしてSQLエディタを起動します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 1.png" src="../images/SQL_Editor_for_Database_Analysis/ImportDataDatabase_1.png" width="275"></a></dd>
+      </dl>
+    </li>
+
+    <li>メニューから<b>ファイル：接続文字列の編集</b>を選択してテキストボックスに以下の接続文字列を入力します。
+      <pre class="sql" style="font-family:monospace;">
+Provider<span style="color: #66cc66;">=</span>SQLOLEDB<span style="color: #66cc66;">.</span>1; Password<span style="color: #66cc66;">=</span>labtalk2015; Persist Security Info<span style="color: #66cc66;">=</span><span style="color: #993333; font-weight: bold;">TRUE</span>; <span style="color: #993333; font-weight: bold;">USER</span> ID<span style="color: #66cc66;">=</span><span style="color: #993333; font-weight: bold;">CONNECT</span>; Initial Catalog<span style="color: #66cc66;">=</span>AdventureWorks2008; <span style="color: #993333; font-weight: bold;">DATA</span> <span style="color: #993333; font-weight: bold;">SOURCE</span><span style="color: #66cc66;">=</span>noho
+</pre>
+    </li>
+
+    <li><b>テスト</b>ボタンをクリックして接続を確認します。問題なければ、<b>OK</b>をクリックしてデータベースにアクセスします。</li>
+
+    <li>以下のクエリをコピーして、SQLエディタのテキストボックスに貼り付けます。このクエリで2003年のデータを表示します。
+      <pre class="sql" style="font-family:monospace;">
+<span style="color: #993333; font-weight: bold;">SELECT</span> CR<span style="color: #66cc66;">.</span>Name <span style="color: #993333; font-weight: bold;">AS</span> CustomerCountry<span style="color: #66cc66;">,</span>
+        Pr<span style="color: #66cc66;">.</span>Name <span style="color: #993333; font-weight: bold;">AS</span> ProductName<span style="color: #66cc66;">,</span>
+        Pr<span style="color: #66cc66;">.</span>Color <span style="color: #993333; font-weight: bold;">AS</span> ProductColor<span style="color: #66cc66;">,</span>
+        PC<span style="color: #66cc66;">.</span>Name <span style="color: #993333; font-weight: bold;">AS</span> ProductCategory<span style="color: #66cc66;">,</span>
+        PS<span style="color: #66cc66;">.</span>Name <span style="color: #993333; font-weight: bold;">AS</span> ProductSubcategory<span style="color: #66cc66;">,</span>
+        SOH<span style="color: #66cc66;">.</span>OrderDate <span style="color: #993333; font-weight: bold;">AS</span> OrderDate<span style="color: #66cc66;">,</span>
+        SOD<span style="color: #66cc66;">.</span>OrderQty <span style="color: #993333; font-weight: bold;">AS</span> OrderAmount<span style="color: #66cc66;">,</span>
+        SOD<span style="color: #66cc66;">.</span>LineTotal <span style="color: #993333; font-weight: bold;">AS</span> TotalCost
+<span style="color: #993333; font-weight: bold;">FROM</span> Person<span style="color: #66cc66;">.</span>CountryRegion <span style="color: #993333; font-weight: bold;">AS</span> CR
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Person<span style="color: #66cc66;">.</span>StateProvince <span style="color: #993333; font-weight: bold;">AS</span> SP
+<span style="color: #993333; font-weight: bold;">ON</span> SP<span style="color: #66cc66;">.</span>CountryRegionCode <span style="color: #66cc66;">=</span> CR<span style="color: #66cc66;">.</span>CountryRegionCode
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Person<span style="color: #66cc66;">.</span>Address <span style="color: #993333; font-weight: bold;">AS</span> A
+<span style="color: #993333; font-weight: bold;">ON</span> A<span style="color: #66cc66;">.</span>StateProvinceID <span style="color: #66cc66;">=</span> SP<span style="color: #66cc66;">.</span>StateProvinceID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Person<span style="color: #66cc66;">.</span>BusinessEntityAddress <span style="color: #993333; font-weight: bold;">AS</span> BEA
+<span style="color: #993333; font-weight: bold;">ON</span> BEA<span style="color: #66cc66;">.</span>AddressID <span style="color: #66cc66;">=</span> A<span style="color: #66cc66;">.</span>AddressID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Person<span style="color: #66cc66;">.</span>Person <span style="color: #993333; font-weight: bold;">AS</span> P
+<span style="color: #993333; font-weight: bold;">ON</span> P<span style="color: #66cc66;">.</span>BusinessEntityID <span style="color: #66cc66;">=</span> BEA<span style="color: #66cc66;">.</span>BusinessEntityID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>PersonCreditCard <span style="color: #993333; font-weight: bold;">AS</span> PCC
+<span style="color: #993333; font-weight: bold;">ON</span> PCC<span style="color: #66cc66;">.</span>BusinessEntityID <span style="color: #66cc66;">=</span> P<span style="color: #66cc66;">.</span>BusinessEntityID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader <span style="color: #993333; font-weight: bold;">AS</span> SOH
+<span style="color: #993333; font-weight: bold;">ON</span> SOH<span style="color: #66cc66;">.</span>CreditCardID <span style="color: #66cc66;">=</span> PCC<span style="color: #66cc66;">.</span>CreditCardID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail <span style="color: #993333; font-weight: bold;">AS</span> SOD
+<span style="color: #993333; font-weight: bold;">ON</span> SOD<span style="color: #66cc66;">.</span>SalesOrderID <span style="color: #66cc66;">=</span> SOH<span style="color: #66cc66;">.</span>SalesOrderID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>Product <span style="color: #993333; font-weight: bold;">AS</span> Pr
+<span style="color: #993333; font-weight: bold;">ON</span> Pr<span style="color: #66cc66;">.</span>ProductID <span style="color: #66cc66;">=</span> SOD<span style="color: #66cc66;">.</span>ProductID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory <span style="color: #993333; font-weight: bold;">AS</span> PS
+<span style="color: #993333; font-weight: bold;">ON</span> PS<span style="color: #66cc66;">.</span>ProductSubcategoryID <span style="color: #66cc66;">=</span> Pr<span style="color: #66cc66;">.</span>ProductSubcategoryID
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductCategory <span style="color: #993333; font-weight: bold;">AS</span> PC
+<span style="color: #993333; font-weight: bold;">ON</span> PC<span style="color: #66cc66;">.</span>ProductCategoryID <span style="color: #66cc66;">=</span> PS<span style="color: #66cc66;">.</span>ProductCategoryID
+<span style="color: #993333; font-weight: bold;">WHERE</span> SOH<span style="color: #66cc66;">.</span>OrderDate <span style="color: #993333; font-weight: bold;">BETWEEN</span> <span style="color: #ff0000;">&apos;1/1/2003&apos;</span> <span style="color: #993333; font-weight: bold;">AND</span> <span style="color: #ff0000;">&apos;12/31/2003&apos;</span>
+</pre>
+    </li>
+
+    <li>プレビューボタンをクリックして下側のパネルでクエリが表示するデータを確認します。
+
+      <dl>
+        <dd><a class="image"><img alt="Query I(c).png" src="../images/SQL_Editor_for_Database_Analysis/Query_I_28c_29.png" width="681"></a></dd>
+      </dl>
+    </li>
+
+    <li>SQLエディタダイアログで、メニューから<b>ファイル：アクティブワークシートに保存</b>を選択して、データベース接続とクエリーをアクティブワークシートに保存します。SQLエディタを閉じます。</li>
+
+    <li><b>データインポート</b>ボタンをクリックし、データをワークシートにインポートします。ワークブックの左上のアイコンは、そのシートにSQLクエリーが含まれることを示しています。
+
+      <dl>
+        <dd><a class="image"><img alt="Import into sheet(b).png" src="../images/SQL_Editor_for_Database_Analysis/Import_into_sheet_28b_29.png" width="398"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3><a name="Filter_Data"></a><span class="mw-headline">データフィルタ</span></h3>
+
+  <ol>
+    <li>OriginにはExcelと同じようなデータフィルタ機能があります。この機能を使用して、残りのデータを削除することなく、グラフ化と分析のために特定のデータを選択できます。</li>
+
+    <li><i>E列</i>（ロングネーム：Product Subcategory)を選択します。分析用にバイクデータのみを選択するには、<b>ワークシートデータ操作</b>ツールバーの<b>データ フィルターの追加/削除</b>ボタンをクリックして、この列にデータ フィルターを追加します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 9.png" src="../images/SQL_Editor_for_Database_Analysis/ImportDataDatabase_9.png" width="430"></a></dd>
+      </dl>
+    </li>
+
+    <li>列ヘッダの左上にフィルタアイコンが表示されます。この上でクリックすると表示されるリストで、<i>全て選択</i>のチェックを外し、<i>Mountain Bikes</i>、<i>Road Bikes</i>、<i>Touring Bikes</i>を選択します。
+
+      <dl>
+        <dd><a class="image"><img alt="Add Filter(c).png" src="../images/SQL_Editor_for_Database_Analysis/Add_Filter_28c_29.png" width="519"></a></dd>
+      </dl>
+    </li>
+
+    <li>隠れたデータに関するメッセージが現れた場合には、<b>はい</b>を選択して、OKをクリックします。</li>
+
+    <li>3種類の自転車データだけワークシートに表示されます。</li>
+  </ol>
+
+  <h3><a name="Create_Pivot_Table_and_Plot_Column_Graph"></a><span class="mw-headline">ピボットテーブルと棒グラフを作成</span></h3>
+
+  <ol>
+    <li>ピボットテーブルを作成して、異なる国の自転車の種類についてそれぞれの合計コストを確認できます。</li>
+
+    <li>ワークシートで何も選択せずに、メニューから<b>ワークシート：ピボットテーブル：ダイアログを開く</b>と選択します。</li>
+
+    <li>開いたダイアログで、<b>行ソース</b>として、<i>CustomerCountry</i>を選択します。</li>
+
+    <li>列ソースとして、<i>ProductSubcategory</i>（フィルタ付きの列）を設定します。</li>
+
+    <li>毎年の合計コストを確認するために、<b>サマリー出力タイプ</b>を<b>合計</b>にして、<b>ピボットテーブルのデータソース</b>を<i>Total Cost</i> に設定します。
+
+      <dl>
+        <dd><a class="image"><img alt="Pivot Table b vNext.png" src="../images/SQL_Editor_for_Database_Analysis/Pivot_Table_b_vNext.png" width="507"></a></dd>
+      </dl>
+    </li>
+
+    <li><b><b>OK</b></b>をクリックします。<i>Pivot1</i>という新しいワークシートが作成されます。</li>
+
+    <li>最初の列の右上にある緑色の鍵マークをクリックし、コンテキストメニューで<b>再計算モード: 自動</b>を設定します。これにより、データがSQLエディタから再インポートされた場合に、ピボットテーブル操作が更新されます。
+
+      <dl>
+        <dd><a class="image"><img alt="Recaluculate pivot auto(b).png" src="../images/SQL_Editor_for_Database_Analysis/Recaluculate_pivot_auto_28b_29.png" width="442"></a></dd>
+      </dl>
+    </li>
+
+    <li>処理されたデータを選択して、<b>縦棒</b>ボタンをクリックして縦棒グラフを作成します。
+
+      <dl>
+        <dd><a class="image"><img alt="Column Plot(b)t.png" src="../images/SQL_Editor_for_Database_Analysis/500px-Column_Plot_28b_29t.png" width="500"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3><a name="Customize_Graph_and_Create_Analysis_Template"></a><span class="mw-headline">グラフを編集して分析テンプレートを作成</span></h3>
+
+  <ol>
+    <li>Y軸タイトルをダブルクリックし、<b>総売り上げ($)</b>と入力します。</li>
+
+    <li>Y軸をダブルクリックして<b>軸</b>ダイアログを開きます。</li>
+
+    <li>Y軸の<b>スケール</b>タブにて、<b>再スケール</b>のドロップダウンで<b>自動</b>を選択します。OKをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="Set Axis Recalc(b).png" src="../images/SQL_Editor_for_Database_Analysis/Set_Axis_Recalc_28b_29.png" width="598"></a></dd>
+      </dl>
+    </li>
+
+    <li>グラフウを右クリックし、開いたコンテキストメニューから、 <b>レイヤタイトルを追加/変更</b> を選択します。タイトルを<b>Bike Sales by Year</b>とします。必要があれば年のタイトルもこのように追加します。</li>
+  </ol>
+
+  <h3><a name="Add_Floating_Graph_in_Worksheet_and_Save_Analysis_Template"></a><span class="mw-headline">ワークシートにフローティンググラフを追加して分析テンプレートとして保存</span></h3>
+
+  <ol>
+    <li>ワークシートの灰色の部分を右クリックして、<b>グラフを追加</b>を選択し、元データのワークシートにグラフを追加します。</li>
+
+    <li><b>グラフブラウザ</b>ダイアログが開きます。グラフを選択して<b><b>OK</b></b>をクリックします。必要に応じてサイズ変更や移動を行ってください。グラフに編集を加えたい場合は、ダブルクリックしてグラフウィンドウで開き、編集します。編集後は、グラフウィンドウのタイトルバーにある、戻るボタンをクリックしてワークシートに戻ります。</li>
+
+    <li>1つのワークブックに、データベース接続、データフィルタ、分析（ピボットテーブル）、グラフのすべての要素を含めました。</li>
+
+    <li>メニューから、<b>ワークシート：ワークシートをクリア</b>を選択し、ワークブックからデータをクリアするか尋ねられたら、はいを選択します。Note: 通常、分析テンプレートを保存するとデータが自動でクリアされますが、データベース接続の場合自動では行われません。そのため、ここではこの操作が必要です。</li>
+
+    <li>メニューから<b>ファイル：ワークブックを分析テンプレートとして保存</b>を選択するか、ワークブックタイトルバーを右クリックして<b>分析テンプレートとして保存</b>を選択し、テンプレートを保存します。</li>
+
+    <li style="list-style: none">
+      <dl>
+        <dd><a class="image"><img alt="Save as Analysistemp(d).png" src="../images/SQL_Editor_for_Database_Analysis/Save_as_Analysistemp_28d_29.png" width="576"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3><a name="Change_Query_and_Re-import_Data_to_Automatically_Update_Analysis"></a><span class="mw-headline">クエリを変更してデータを再インポートし、分析を自動的に更新</span></h3>
+
+  <ol>
+    <li>メニューから<b>ファイル：最近使ったブック</b>を選択して、先ほど保存した分析テンプレートをロードします。数値の入っていない、空のテンプレートワークブックが開きます。
+
+      <dl>
+        <dd><a class="image"><img alt="Blank temp(c).png" src="../images/SQL_Editor_for_Database_Analysis/Blank_temp_28c_29.png" width="634"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>SQLエディタを開く</b>をクリックして、SQLクエリーがロードされた<b>SQLエディタ</b>を開きます。2004年のデータを表示するように変更して、エディタを終了します。<b>はい</b>を選択して、ワークシートに変更を保存します。
+
+      <dl>
+        <dd><a class="image"><img alt="Change query(c).png" src="../images/SQL_Editor_for_Database_Analysis/Change_query_28c_29.png" width="656"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>データベースアクセス</b>ツールバーの<b>データのインポート</b>ボタン<a class="image"><img alt="Button db Import Data.png" src="../images/SQL_Editor_for_Database_Analysis/Button_db_Import_Data.png" width="25"></a>をクリックしてデータを再インポートします。</li>
+
+    <li>フィルタの<b>再適用ボタン</b><a class="image"><img alt="Reapply filter.png" src="../images/SQL_Editor_for_Database_Analysis/Reapply_filter.png" width="25"></a>でフィルタを再適用します。</li>
+
+    <li>全てのデータが更新されます。グラフは2004年のBike Salesを表示し、年のタイトルもグラフに反映されます。</li>
+
+    <li>作成したプロジェクトには2つのブックがあります。<i>Book1</i>には2003年のデータが、<i>Book2</i>には2004年のデータが入っています。
+
+      <dl>
+        <dd><a class="image"><img alt="End result(b).png" src="../images/SQL_Editor_for_Database_Analysis/600px-End_result_28b_29.png" width="600"></a></dd>
+      </dl>
+    </li>
+
+    <li>このテンプレートとSQL再インポート機能により、SQLエディタで範囲を調整して再インポートするだけで、必要な年のBikeの売り上げを確認できます。</li>
+  </ol>

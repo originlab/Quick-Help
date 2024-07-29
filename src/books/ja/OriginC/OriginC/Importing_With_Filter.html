@@ -1,0 +1,326 @@
+﻿<h1 class="firstheading">Importing With Filter</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Prior_to_Calling_Import_Functions"><span class="tocnumber">2</span> <span class="toctext">Prior to Calling Import Functions</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Examples"><span class="tocnumber">3</span> <span class="toctext">Examples</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Import_Single_File_With_Specified_Filter"><span class="tocnumber">3.1</span> <span class="toctext">Import Single File With Specified Filter</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Import_Multiple_Files_With_Specified_Filter"><span class="tocnumber">3.2</span> <span class="toctext">Import Multiple Files With Specified Filter</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Configure_ASCII_Filter"><span class="tocnumber">3.3</span> <span class="toctext">Configure ASCII Filter</span></a></li>
+
+          <li class="toclevel-2 tocsection-7">
+            <a href="#Load_and_Configure_Filter_with_OC_Code"><span class="tocnumber">3.4</span> <span class="toctext">Load and Configure Filter with OC Code</span></a>
+
+            <ul>
+              <li class="toclevel-3 tocsection-8"><a href="#Configure_Filter_to_Add_More_Variables"><span class="tocnumber">3.4.1</span> <span class="toctext">Configure Filter to Add More Variables</span></a></li>
+
+              <li class="toclevel-3 tocsection-9"><a href="#Configure_Filter_to_Set_Import_Mode"><span class="tocnumber">3.4.2</span> <span class="toctext">Configure Filter to Set Import Mode</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR6</p>
+
+  <h2><a name="Prior_to_Calling_Import_Functions"></a><span class="mw-headline">Prior to Calling Import Functions</span></h2>
+
+  <p>Functions for importing files are declared in <b>OriginC\Originlab\FileImport.h</b> file. These functions are also documented in the Origin C Language Reference help file.</p>
+
+  <p>Prior to calling the import file functions, you need to first programmatically load and compile <b>FileImport.c</b>. This can be done from script using the command:</p>
+  <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\FileImport.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// Option 16 ensures that all dependent Origin C files are loaded, by scanning for the corresponding .h in FileImport.c</span>
+</pre>
+
+  <p><b>Note:</b> The above run.LoadOC command needs to be run any time a new Origin session is launched, and also any time you start a new workspace in Code Builder.</p>
+
+  <p>Once the above has been executed from script, then you can compile the examples below or your own function that calls the import functions. Note that if you have a .c file with your function (or have copied the examples below to a .c file), you could load and compile that file as well from script, using the command:</p>
+  <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>MyFileImport.<span style="color: #000080;">c</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// where MyFileImport is your file name</span>
+</pre>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <h3><a name="Import_Single_File_With_Specified_Filter"></a><span class="mw-headline">Import Single File With Specified Filter</span></h3>
+
+  <p>This example shows how to import a single data file using a specific import filter file. Run <b>import_file_with_specify_filter_ex</b> in Command Window to see result.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">// import file with filter to active layer</span>
+<span style="color: #0000ff;">void</span> import_file_with_specify_filter_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>    
+    Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Active Page</span>
+    
+    <span style="color: #008000;">// Get page book name</span>
+    string strPageName <span style="color: #000080;">=</span> pg.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Get page active layer index</span>
+    <span style="color: #0000ff;">int</span> nIndexLayer <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Get Origin sample folder</span>
+    string strPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Signal Processing<span style="color: #666666; font-weight: bold;">\\</span>"</span>;
+    
+    <span style="color: #008000;">// specify .oif filter name</span>
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"TR Data Files"</span>;
+    
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> import_file<span style="color: #000000;">(</span>strPageName, nIndexLayer, strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"TR2MM.dat"</span>, strFilterName<span style="color: #000000;">)</span>;
+    
+    
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Import successful!"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to import!"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Import_Multiple_Files_With_Specified_Filter"></a><span class="mw-headline">Import Multiple Files With Specified Filter</span></h3>
+
+  <p>This example shows how to import multiple PCLAMP files refer to system pCLAMP filter. Run <b>import_multiple_files_with_specify_filter_ex</b> in Command Window to see result.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> import_multiple_files_with_specify_filter_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>    
+    Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Active Page</span>
+    
+    <span style="color: #008000;">// Get page book name</span>
+    string strPageName <span style="color: #000080;">=</span> pg.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Get page active layer index</span>
+    <span style="color: #0000ff;">int</span> nIndexLayer <span style="color: #000080;">=</span> pg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// Get Origin sample folder</span>
+    string strPath <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>"</span>;
+    
+    <span style="color: #008000;">// List all file names need to imported</span>
+    StringArray saFileNames;
+    saFileNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"pCLAMP<span style="color: #666666; font-weight: bold;">\\</span>93310C08.DAT"</span><span style="color: #000000;">)</span>;
+    saFileNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"pCLAMP<span style="color: #666666; font-weight: bold;">\\</span>93310C10.DAT"</span><span style="color: #000000;">)</span>;
+    saFileNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strPath <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"pCLAMP<span style="color: #666666; font-weight: bold;">\\</span>93311C01.DAT"</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// specify .oif filter name, location see the setting of nLocation below.</span>
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"pCLAMP"</span>;
+ 
+    <span style="color: #008000;">// import filter tree</span>
+    <span style="color: #008000;">// about filter settings, refer to imppClamp xfunction tree variable "options"</span>
+    Tree trFilter;    
+
+    <span style="color: #0000ff;">int</span> nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// Origin exe folder, more options see the document of load_import_filter function.</span>
+    
+    <span style="color: #0000ff;">int</span> nRet;
+    nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">(</span>strFilterName, saFileNames<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, strPageName, nLocation, trFilter<span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Loaded import filter successfully!"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load import filter!<span style="color: #666666; font-weight: bold;">\n</span>Please check strFilterName and nLocation if assigned correctly"</span><span style="color: #000000;">)</span>;
+ 
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        nRet <span style="color: #000080;">=</span> import_files<span style="color: #000000;">(</span>saFileNames, strPageName, nIndexLayer, trFilter<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+            out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Imported successfully!"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">else</span>
+            out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to import!"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Configure_ASCII_Filter"></a><span class="mw-headline">Configure ASCII Filter</span></h3>
+
+  <p>This example to show how to load ASCII filter to a tree, then convert the tree to ASCII struct, you can update some import settings in the struct, and then import the data file using the <b><a href="../../OriginC/OriginC/Datasheet-ImportASCII.html" title="OriginC:Datasheet-ImportASCII">DataSheet::ImportASCII</a></b> function.</p>
+
+  <p>For additional examples on how to update import settings with ASCII struct, please see <a href="../../OriginC/OriginC/Import_ASCII.html" title="OriginC:Import ASCII">ASCII Import</a></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> config_filter_tree_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Step01.dat"</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;    
+                
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// load filter to tree</span>
+    Tree trFilter;    
+    string strFilterName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"ASCII"</span>;
+    <span style="color: #0000ff;">int</span> nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// build-in Filters folder</span>
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">(</span>strFilterName, strFile, wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, nLocation, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load import filter"</span><span style="color: #000000;">)</span>;
+
+        ASCIMP ascimp;
+        ascimp <span style="color: #000080;">=</span> trFilter.<span style="color: #000000;">ASCIMP</span>;<span style="color: #008000;">// convert filter tree to ASCIMP struct</span>
+        
+        ascimp.<span style="color: #000000;">iRenameCols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0 to keep default column name, 1 to rename column       </span>
+        
+        nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ascimp<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Import successful"</span><span style="color: #000000;">)</span>;  
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Load_and_Configure_Filter_with_OC_Code"></a><span class="mw-headline">Load and Configure Filter with OC Code</span></h3>
+
+  <p>The following examples show how to load filter file to tree and config import settings by tree.</p>
+
+  <h4><a name="Configure_Filter_to_Add_More_Variables"></a><span class="mw-headline">Configure Filter to Add More Variables</span></h4>
+
+  <p>This example shows how to get information from data file as user variable and add variables to Page Info. Run <b>import_ascii_file_with_filter</b> in Command Window to import file. After import, right click worksheet title and choose <b>Show Organizer</b>, in left list box, click page.info -&gt; USER.VARIABLES, will see <b>POSITION</b> and <b>DATASUBFOLDER</b> variables in right panel.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> import_ascii_file_with_filter<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string strDataFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>S15-125-03.dat"</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>strDataFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot find this data file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;    
+        <span style="color: #000000;">}</span>             
+        
+        string strFilterFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>VarsFromFileNameAndheader.oif"</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>strFilterFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Cannot find this filter file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+                
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+        string strPageName <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// 1. load filter to tree</span>
+        Tree    trFilter;      
+    <span style="color: #0000ff;">int</span>    nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// Full path of filter file</span>
+    <span style="color: #0000ff;">int</span>    nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">(</span>strFilterFile, strDataFile, strPageName, nLocation, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to load import filter"</span><span style="color: #000000;">)</span>;       
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #008000;">// 2. Config filter tree to add more user variables to page info</span>
+    trFilter.<span style="color: #000000;">Variables</span>.<span style="color: #000000;">PageInfo</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    trFilter.<span style="color: #000000;">Variables</span>.<span style="color: #000000;">ExtractByDelimiter</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    
+    <span style="color: #008000;">// 2.1 Extract variable name and value from file</span>
+    <span style="color: #008000;">// here use H008 line last item as variable name and H009 line last item as value.</span>
+    <span style="color: #0000ff;">int</span> nLastColumnIndex <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// there is 4 columns</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vn<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        vn<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">'<span style="color: #666666; font-weight: bold;">\t</span>'</span>;
+    
+    Tree trVar;
+    trVar.<span style="color: #000000;">Name</span>.<span style="color: #000000;">Line</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>; <span style="color: #008000;">// H008, 7 = header line number(8) - 1 </span>
+    trVar.<span style="color: #000000;">Name</span>.<span style="color: #000000;">Token</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> nLastColumnIndex;
+    trVar.<span style="color: #000000;">Name</span>.<span style="color: #000000;">Delimiters</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vn;    
+    
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Line</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>; <span style="color: #008000;">// H009, 8 = header line number(9) - 1 </span>
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Token</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> nLastColumnIndex;
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Delimiters</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vn;    
+    
+    trFilter.<span style="color: #000000;">Variables</span>.<span style="color: #000000;">Vars</span>.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span>trVar<span style="color: #000000;">)</span>; 
+    
+    
+    <span style="color: #008000;">// 2.2 Extract value from file and define variable name by yourself</span>
+    trVar.<span style="color: #000000;">Reset</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    trVar.<span style="color: #000000;">Name</span>.<span style="color: #000000;">Constant</span>.<span style="color: #000000;">strVal</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"DataSubFolder"</span>;
+    
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Line</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span>; <span style="color: #008000;">//F002, -2 = file line number(2) * -1</span>
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Token</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// 3th (offset 0) token is the last sub folder in file path string    </span>
+        vn<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">'<span style="color: #666666; font-weight: bold;">\\</span>'</span>;
+    trVar.<span style="color: #000000;">Value</span>.<span style="color: #000000;">Delimiters</span>.<span style="color: #000000;">nVals</span> <span style="color: #000080;">=</span> vn; <span style="color: #008000;">// '\' is file path delimiter   </span>
+    
+        trFilter.<span style="color: #000000;">Variables</span>.<span style="color: #000000;">Vars</span>.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span>trVar<span style="color: #000000;">)</span>; 
+   
+
+    <span style="color: #008000;">// 3. Do import with filter tree   </span>
+    StringArray saDataFiles;
+    saDataFiles.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span> strDataFile <span style="color: #000000;">)</span>;
+    
+    nRet <span style="color: #000080;">=</span> import_files<span style="color: #000000;">(</span>saDataFiles, strPageName, wks.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to import data file"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h4><a name="Configure_Filter_to_Set_Import_Mode"></a><span class="mw-headline">Configure Filter to Set Import Mode</span></h4>
+
+  <p>This example shows how to config filter tree to set import mode to import multiple ASCII files to separate new sheets. Run <b>config_filter_to_set_import_mode</b> in Command Window to see result.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\FileImport.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">void</span> config_filter_to_set_import_mode<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string strFileFolder <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>"</span>;  
+        string strFile1 <span style="color: #000080;">=</span> strFileFolder <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"S15-125-03.dat"</span>;
+        string strFile2 <span style="color: #000080;">=</span> strFileFolder <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"S21-235-07.dat"</span>;
+        string strFile3 <span style="color: #000080;">=</span> strFileFolder <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"S32-014-04.dat"</span>;
+        StringArray saDataFiles;
+        saDataFiles.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strFile1<span style="color: #000000;">)</span>;
+        saDataFiles.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strFile2<span style="color: #000000;">)</span>;
+        saDataFiles.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>strFile3<span style="color: #000000;">)</span>;
+        
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"origin"</span><span style="color: #000000;">)</span>;
+        string strPageName <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetPage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>.<span style="color: #000000;">GetName</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// 1. load filter to tree</span>
+        Tree    trFilter;      
+    <span style="color: #0000ff;">int</span>    nLocation <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 1 - Origin working filter folder</span>
+        string  strFilterFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"ASCII"</span>;
+    <span style="color: #0000ff;">int</span>    nRet <span style="color: #000080;">=</span> load_import_filter<span style="color: #000000;">(</span>strFilterFile, strFile1, strPageName, nLocation, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to load import filter"</span><span style="color: #000000;">)</span>; 
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>   
+
+    
+    <span style="color: #008000;">// 2. Modify filter tree to import multiple files to separate new sheets</span>
+    <span style="color: #008000; font-style: regular;">/*
+    Import Mode:
+    0 - Replace Data
+        1 - Append Columns
+        2 - Append Rows
+        3 - New Books
+        4 - New Sheets
+        5 - Auto
+    */</span>
+    trFilter.<span style="color: #000000;">Display</span>.<span style="color: #000000;">i1stMode</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; 
+    trFilter.<span style="color: #000000;">ASCIMP</span>.<span style="color: #000000;">iMode</span>.<span style="color: #000000;">nVal</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+    
+    <span style="color: #008000;">// 3. Do import with filter tree     </span>
+    nRet <span style="color: #000080;">=</span> import_files<span style="color: #000000;">(</span>saDataFiles, strPageName, wks.<span style="color: #000000;">GetIndex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, trFilter<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to import data file"</span><span style="color: #000000;">)</span>;   
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>  
+        
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Data file import to "</span> <span style="color: #000040;">+</span> strPageName<span style="color: #000000;">)</span>;            
+<span style="color: #000000;">}</span>
+</pre>

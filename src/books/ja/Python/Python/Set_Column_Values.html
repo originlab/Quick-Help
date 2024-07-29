@@ -1,0 +1,240 @@
+﻿<h1 class="firstheading">列値の設定</h1>
+<p><br />
+列値の設定ダイアログやスクリプトウィンドウ、スクリプトを設定したボタンといった、Origin内でLabTalkスクリプトにアクセス可能な様々な場所で、LabTalkを使ってPython関数を呼び出し可能です。</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Using_Python_Functions_in_Column_Formula"><span class="tocnumber">1</span> <span class="toctext">値の設定でPython関数を使用</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Example_1"><span class="tocnumber">1.1</span> <span class="toctext">サンプル 1</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Example_2"><span class="tocnumber">1.2</span> <span class="toctext">サンプル 2</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Example_3"><span class="tocnumber">1.3</span> <span class="toctext">サンプル 3</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Calling_Python_Functions_from_External_Files"><span class="tocnumber">2</span> <span class="toctext">外部ファイルからPython関数を呼び出す</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Specifying_Input_and_Output_Types"><span class="tocnumber">2.1</span> <span class="toctext">入力および出力の型を指定</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Returning_Multiple_Values_or_Arrays"><span class="tocnumber">2.2</span> <span class="toctext">複数の値または配列を返す</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Calling_Functions_from_File_Attached_to_Project"><span class="tocnumber">3</span> <span class="toctext">プロジェクトに添付されたファイルから関数を呼び出す</span></a></li>
+</ul>
+</div>
+<h2><a name="Using_Python_Functions_in_Column_Formula" id="Using_Python_Functions_in_Column_Formula"></a><span class="mw-headline">値の設定でPython関数を使用</span></h2>
+<p>ワークシートや行列シートの両方の<b>値の設定</b>ダイアログで、Python関数の定義およびアクセスが可能です。Python関数は、<b>Python関数</b>タブで定義する必要があります。関数は、式の編集ボックスから、または、<b>実行前の処理スクリプト</b>タブから呼び出すことができます。</p>
+<p>Python関数が他のパッケージを必要とする場合は、値の設定ダイアログで関数を定義およびアクセスする前にインストールしておく必要があります。</p>
+<p>最適なパフォーマンスを得るためには、浮動小数点型または文字列のリストを返すように関数を定義するのがお勧めです。関数が1つの浮動小数型または文字列の値を返すように定義されている場合、計算に関係する行ごとに関数が呼び出されます。</p>
+<h4><a name="Example_1" id="Example_1"></a><span class="mw-headline">サンプル 1</span></h4>
+<p>このサンプルでは、列Cの列式でPython関数を使用し、列Bのノイズの多いデータをスムージングします。関数は、次のように定義します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> scipy <span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">signal</span>
+
+<span style="color: #ff7700;font-weight:bold;">def</span> smooth<span style="color: #000;">(</span>y<span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder<span style="color: #000;">)</span>:
+    <span style="color: #0a0;">"""
+    F:Fii
+    """</span>
+    y<span style="color: #000;">=</span><span style="color: #000;">signal</span>.<span style="color: #000;">savgol_filter</span><span style="color: #000;">(</span>np.<span style="color: #000;">array</span><span style="color: #000;">(</span>y<span style="color: #000;">)</span><span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder<span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> y
+</pre>
+<p>この関数は、浮動小数点型のリストと、スムージングウィンドウと多項式の次数を指定する2つの整数を受け入れ、浮動小数点型のリストを返します。入力および出力の型は、docstring <b>F:Fii</b>　で指定します。。ここでは、NumPy および SciPyパッケージはインストール済みであると仮定します。</p>
+<p>式の編集ボックスから関数にアクセスするには、次のようにして関数名の先頭に<b>py...</b>を付ける必要があります。</p>
+<pre class="lt" style="font-family:monospace;">
+py.<span style="color: #000080;">smooth</span><span style="color: #000000;">(</span>B, <span style="color: #0000dd;">51</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>
+</pre>
+<p>以下は、元のデータと結果が入力されたワークシートと、<b>Python関数</b>タブが表示された<b>値の設定</b>ダイアログの画像です。 <a class="image"><img alt="Scv python smooth.png" src="../images/Set_Column_Values/600px-Scv_python_smooth.png" width="838" /></a></p>
+<h4><a name="Example_2" id="Example_2"></a><span class="mw-headline">サンプル 2</span></h4>
+<p>このサンプルでは、Python関数を使ってデータ列のグループごとに統計を実行します。この関数は3列のデータを取り、結果が入力された3列を返します。したがって、式の編集ボックスから直接この関数を呼び出すことはできません。代わりに、<b>実行前の処理スクリプト</b>タブを使って関数を呼び出します。</p>
+<p>次のようにして関数を定義します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #ff7700;font-weight:bold;">def</span> groupstats<span style="color: #000;">(</span>ID<span style="color: #000;">,</span> x<span style="color: #000;">,</span> y<span style="color: #000;">)</span>:
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #900090;">len</span><span style="color: #000;">(</span>ID<span style="color: #000;">)</span> <span style="color: #000;">==</span> <span style="color: #900090;">len</span><span style="color: #000;">(</span>x<span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">and</span> <span style="color: #900090;">len</span><span style="color: #000;">(</span>ID<span style="color: #000;">)</span><span style="color: #000;">==</span><span style="color: #900090;">len</span><span style="color: #000;">(</span>y<span style="color: #000;">)</span>:
+        df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">(</span><span style="color: #000;">{</span><span style="color: #0a0;">'ID'</span>:ID<span style="color: #000;">,</span><span style="color: #0a0;">'x'</span>:x<span style="color: #000;">,</span><span style="color: #0a0;">'y'</span>:y<span style="color: #000;">}</span><span style="color: #000;">)</span>
+        df1 <span style="color: #000;">=</span> df.<span style="color: #000;">groupby</span><span style="color: #000;">(</span><span style="color: #0a0;">'ID'</span><span style="color: #000;">)</span>.<span style="color: #000;">mean</span><span style="color: #000;">(</span><span style="color: #000;">)</span>  
+        <span style="color: #ff7700;font-weight:bold;">return</span> df1.<span style="color: #000;">index</span><span style="color: #000;">,</span> df1.<span style="color: #000;">x</span><span style="color: #000;">,</span> df1.<span style="color: #000;">y</span>
+    <span style="color: #ff7700;font-weight:bold;">else</span>:
+        <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">[</span><span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #000;">]</span>
+</pre>
+<p>この関数では、入力および出力の型ははっきりと定義していません。関数に渡された3つの入力列は、リストに変換されます。データフレームを使用して計算が実行され、関数は3つのリストを返します。戻り値は、<b>実行前の処理スクリプト</b>タブのスクリプトコマンドを使用して3つの列に出力されます。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>E<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>F<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> py.<span style="color: #000080;">groupstats</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+</pre>
+<p><a class="image"><img alt="Scv python groupstats.png" src="../images/Set_Column_Values/600px-Scv_python_groupstats.png" width="600" /></a></p>
+<h4><a name="Example_3" id="Example_3"></a><span class="mw-headline">サンプル 3</span></h4>
+<p>上述の2つのサンプルでは、<b>値の設定</b>ダイアログでPython関数を定義しました。Python関数と一緒にワークシートをテンプレートとして保存し、のちにテンプレートの新しいインスタンスを開いて使用することができます。</p>
+<p>Python関数を外部ファイルで定義してから、列またはセルの式で使用することもできます。次のサンプルでは、<b>labTalk.py</b>ファイルで定義された関数を呼び出します。外部ファイルでの関数定義に関する詳細は、次のセクションを参照してください。</p>
+<p><br />
+<a class="image"><img alt="Scv python funcfromfile.png" src="../images/Set_Column_Values/600px-Scv_python_funcfromfile.png" width="600" /></a></p>
+<p></p>
+<table class="noborder">
+<tr>
+<td style="vertical-align:top" width="60"><img src="../images/Set_Column_Values/Tip_icon.png" width="57" border="0" alt="" /></td>
+<td>
+<ul>
+<li><b>実行前の処理スクリプト</b>と<b>Python関数</b>とともに列の式を保存するには、（1）値の設定ダイアログのメニュー<b>計算式：名前を付けて保存</b>をクリックするか、（2）値の設定の<a class="external text" href="../../UserGuide/UserGuide/Quick_Start_SetColumnValues.html#Set_Values_Dialog_Box_Key_Features"><b>式を保存</b>ボタン</a>をクリックするか、（3）列ラベル行の<b>F(x)=</b>セルを右クリックして、<b>名前を付けて保存</b>を選択します。保存した式をOriginメニューからロードするには、<b>列：ユーザ式入力</b>を選択してフライアウトメニューから式名を選択すると可能です。</li>
+<li><a class="external text" href="../../UserGuide/UserGuide/Displaying_Supporting_Data_in_Worksheet_header_Rows.html#F.28x.29.3D">ワークシートの<b>F(x)=</b>セル</a>が「<b>py.</b>」で始まる場合、および、外部ファイルで定義されたPython関数を呼び出す場合は、<b>F(x)=</b>セルを右クリックし、<b>Pythonファイルを開く</b>を選択して、<a class="external text" href="https://www.originlab.com/python/doc/originpro/annotated.html" target="_blank"><b>コードビルダ</b>IDE</a>でPython関数を開くことができます。</li>
+</ul>
+</td>
+</tr>
+</table>
+<h2><a name="Calling_Python_Functions_from_External_Files" id="Calling_Python_Functions_from_External_Files"></a><span class="mw-headline">外部ファイルからPython関数を呼び出す</span></h2>
+<p>Python関数は、外部<b>.py</b>ファイルで定義できます。Originはデフォルトで、ユーザファイルフォルダ(UFF)にある<b>labtalk.py</b>という名前のファイルを探します。Originメニューからこのファイルを開くには、<b>接続：デフォルトのPython関数を開く...</b>を選択します。</p>
+<p><b>labtalk.py</b>ファイルで定義された関数は、次のシンタックスを使ったLabTalkスクリプトから呼び出し可能です。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">f1</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+</pre>
+<p>ここで、<b>f1</b>は関数名です。</p>
+<table class="noborder">
+<tr>
+<td style="vertical-align:top" width="60"><img src="../images/Set_Column_Values/Tip_icon.png" width="57" border="0" alt="" /></td>
+<td>
+<p><b>examples.py</b>ファイルにはPython関数定義のサンプルがいくつかあります。Originメニューからこのファイルを開くには、<b>接続：examples.pyを開く...を選択します。</b>このファイルから<b>labtalk.py</b>ファイルに関数をコピーできます。</p>
+</td>
+</tr>
+</table>
+<p>他の<b>.py</b>ファイルで関数を定義する場合、次のシンタックスでアクセスできます。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>b<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> py.<span style="color: #000080;">myfuncs</span>.<span style="color: #000080;">sort</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>a<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+</pre>
+<p>ここで、<i>sort()</i> は、ファイル名<i>myfuncs.py</i> で定義されている関数です。</p>
+<p>Originはデフォルトでユーザファイルフォルダ(UFF)内の<b>.py</b>ファイルを検索します。異なるディレクトリを設定するには、Pythonオブジェクトプロパティ<b>Python.LTwd$</b>を使います。</p>
+<p>Pythonオブジェクトプロパティ<b>Python.LTwf$</b>を設定することで、関数呼び出し時にファイル名を省略できます。</p>
+<pre class="lt" style="font-family:monospace;">
+Python.<span style="color: #000080;">LTwd</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">"D:\Python"</span>;
+Python.<span style="color: #000080;">LTwf</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>MyFunctions.<span style="color: #000080;">py</span>;
+col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">sort</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">// D:\PytyhonフォルダにあるMyFunctions.pyからsort関数を呼び出す</span>
+</pre>
+<p>上記で使用されているオブジェクトプロパティは空で、デフォルトでは設定されていません。デフォルトのPythonファイルの位置は、内部的にはUFFに設定されています。そしてデフォルトのファイル名は内部的に<b>labtalk.py</b>です。これらのプロパティに値を割り当てると、その値はOriginのUFF内にある.iniファイルに保存されます。</p>
+<h3><a name="Specifying_Input_and_Output_Types" id="Specifying_Input_and_Output_Types"></a><span class="mw-headline">入力および出力の型を指定</span></h3>
+<p>Python関数は、入力および出力引数の型を指定して定義できます。型の指定方法は以下の2通りです。</p>
+<ul>
+<li>関数アノテーションを使用</li>
+<li>Docstringを使用</li>
+</ul>
+<p>以下にいくつかのサンプルを示します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #d00; font-style: italic;"># 型の指定に関数アノテーションを使う例</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">(</span>a<span style="color: #000;">,</span> k:<span style="color: #900090;">int</span><span style="color: #000;">)</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a + k
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> a2<span style="color: #000;">(</span>a<span style="color: #000;">,</span> b<span style="color: #000;">)</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">int</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a + b
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> ss1<span style="color: #000;">(</span>a:<span style="color: #900090;">str</span><span style="color: #000;">,</span> b:<span style="color: #900090;">str</span><span style="color: #000;">)</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">str</span>:
+    <span style="color: #0a0;">"""using function annotations"""</span>
+    c <span style="color: #000;">=</span> a + b
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #ff7700;font-weight:bold;">def</span> ss3<span style="color: #000;">(</span>a:<span style="color: #900090;">list</span><span style="color: #000;">)</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">list</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">[</span><span style="color: #900090;">len</span><span style="color: #000;">(</span>x<span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">]</span>
+
+<span style="color: #ff7700;font-weight:bold;">def</span> ss2<span style="color: #000;">(</span>a:<span style="color: #900090;">list</span><span style="color: #000;">,</span> b:<span style="color: #900090;">list</span><span style="color: #000;">)</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">list</span>:
+    c <span style="color: #000;">=</span> <span style="color: #000;">[</span> x + y <span style="color: #ff7700;font-weight:bold;">for</span> x<span style="color: #000;">,</span>y <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">zip</span><span style="color: #000;">(</span>a<span style="color: #000;">,</span> b<span style="color: #000;">)</span><span style="color: #000;">]</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #d00; font-style: italic;"># 型の指定にdocstringを使う例</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> s2<span style="color: #000;">(</span>a<span style="color: #000;">,</span>b<span style="color: #000;">)</span>:
+    <span style="color: #0a0;">"""
+    S:SS
+    concatenate strings, array version
+    """</span>
+    c <span style="color: #000;">=</span> <span style="color: #000;">[</span> x + y <span style="color: #ff7700;font-weight:bold;">for</span> x<span style="color: #000;">,</span>y <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">zip</span><span style="color: #000;">(</span>a<span style="color: #000;">,</span> b<span style="color: #000;">)</span><span style="color: #000;">]</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> c    
+
+<span style="color: #ff7700;font-weight:bold;">def</span> s1<span style="color: #000;">(</span>a<span style="color: #000;">,</span> b<span style="color: #000;">)</span>:
+    <span style="color: #0a0;">"""
+    s:ss
+    concatenate strings, scaler version
+    """</span>
+    c <span style="color: #000;">=</span> a + b
+    <span style="color: #ff7700;font-weight:bold;">return</span> c
+
+<span style="color: #ff7700;font-weight:bold;">def</span> s3<span style="color: #000;">(</span>a<span style="color: #000;">)</span>:
+    <span style="color: #0a0;">"""
+    F:S
+    intput string list and return float list
+    """</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">[</span><span style="color: #900090;">len</span><span style="color: #000;">(</span>x<span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">]</span>
+
+    
+<span style="color: #ff7700;font-weight:bold;">def</span> sin<span style="color: #000;">(</span>a<span style="color: #000;">)</span>:
+    <span style="color: #0a0;">"""
+    F:F
+    return sine
+    """</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> np.<span style="color: #000;">sin</span><span style="color: #000;">(</span>np.<span style="color: #000;">asarray</span><span style="color: #000;">(</span>a<span style="color: #000;">)</span><span style="color: #000;">)</span>
+</pre>
+<p>この関数は、浮動小数点型のリストと2つの整数を入力として受け入れ、浮動小数点型のリストを返します。そして、この関数はNumPyとSciPyパッケージを使用します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> scipy <span style="color: #ff7700;font-weight:bold;">import</span> <span style="color: #000;">signal</span>
+<span style="color: #ff7700;font-weight:bold;">def</span> smooth<span style="color: #000;">(</span>y<span style="color: #000;">,</span>npts<span style="color: #000;">,</span> norder<span style="color: #000;">)</span>:
+     <span style="color: #0a0;">"""
+     F:Fii
+     Perform Savitzky-Golay smoothing using scipy signal
+     """</span>
+     <span style="color: #d00; font-style: italic;">#npts: スムージングウィンドウのポイント数</span>
+     <span style="color: #d00; font-style: italic;">#norder: 多項式次数</span>
+     y<span style="color: #000;">=</span><span style="color: #000;">signal</span>.<span style="color: #000;">savgol_filter</span><span style="color: #000;">(</span> np.<span style="color: #000;">array</span><span style="color: #000;">(</span>y<span style="color: #000;">)</span><span style="color: #000;">,</span> npts<span style="color: #000;">,</span> norder <span style="color: #000;">)</span>
+     <span style="color: #ff7700;font-weight:bold;">return</span> y
+</pre>
+<p>ただし、列の式から関数にアクセスできるかどうかは、関数の定義方法によって異なります。</p>
+<p>スカラー関数として定義され、各行で呼び出される場合、次のようにして入力/出力の型を指定する必要があります。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">(</span>a:<span style="color: #900090;">float</span><span style="color: #000;">,</span> b:<span style="color: #900090;">int</span> <span style="color: #000;">=</span> <span style="color: #000;">10</span><span style="color: #000;">)</span>-<span style="color: #000;">&gt;</span><span style="color: #900090;">float</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> a+b
+</pre>
+<p>ベクトル関数として定義された場合、次のように、入力/出力の型を指定する必要がありません。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">def</span> a1<span style="color: #000;">(</span>a<span style="color: #000;">,</span> b:<span style="color: #900090;">int</span> <span style="color: #000;">=</span> <span style="color: #000;">10</span><span style="color: #000;">)</span>:
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">[</span>x + b <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">]</span>
+</pre>
+<p>ここでは、入出力タイプをリストとしています。</p>
+<p>いずれの場合も、関数を列の式で使用することもできますし、<i>col(B)=py.a1(col(A))</i> のようにスクリプトから使用することもできます。</p>
+<h3><a name="Returning_Multiple_Values_or_Arrays" id="Returning_Multiple_Values_or_Arrays"></a><span class="mw-headline">複数の値または配列を返す</span></h3>
+<p>Python関数からLabTalkに、複数の値またはリストを返すことができます。</p>
+<p>この関数は、リストと2つの浮動小数点型を入力として受け入れ、2つのリストを返します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">def</span> f3<span style="color: #000;">(</span>a<span style="color: #000;">,</span> b<span style="color: #000;">=</span><span style="color: #000;">5</span><span style="color: #000;">,</span> c<span style="color: #000;">=</span><span style="color: #000;">10</span><span style="color: #000;">)</span>:
+    b <span style="color: #000;">=</span> <span style="color: #000;">[</span>x + b <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">]</span>
+    c <span style="color: #000;">=</span> <span style="color: #000;">[</span>x + c <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> a<span style="color: #000;">]</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> b<span style="color: #000;">,</span> c
+</pre>
+<p>新しいワークシートで、col(A)に値が入力されます。次に、スクリプトから、以下のような関数にアクセスできます。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>b<span style="color: #000000;">)</span>,col<span style="color: #000000;">(</span>c<span style="color: #000000;">)</span><span style="color: #000080;">=</span>py.<span style="color: #000080;">f3</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>a<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+</pre>
+<p><br />
+<i><b>タプルを返す例：</b></i></p>
+<p><a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">ユーザファイルフォルダ</a>の<b>labtalk.py</b>ファイルに以下を追加して、ファイルを保存します。</p>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">def</span> TestReturnTuple<span style="color: #000;">(</span>arg1<span style="color: #000;">,</span> arg2<span style="color: #000;">,</span> arg3<span style="color: #000;">)</span>:
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span><span style="color: #0a0;">'TestReturnTuple11: arg1 = '</span><span style="color: #000;">,</span> arg1<span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span><span style="color: #0a0;">'TestReturnTuple11: arg2 = '</span><span style="color: #000;">,</span> arg2<span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span><span style="color: #0a0;">'TestReturnTuple11: arg3 = '</span><span style="color: #000;">,</span> arg3<span style="color: #000;">)</span>
+    <span style="color: #ff7700;font-weight:bold;">return</span> <span style="color: #000;">(</span><span style="color: #000;">[</span>arg1<span style="color: #000;">,</span> <span style="color: #000;">10</span>*arg1<span style="color: #000;">,</span> <span style="color: #000;">100</span>*arg1<span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">[</span>arg2<span style="color: #000;">,</span> arg2/<span style="color: #000;">10</span>.<span style="color: #000;">,</span> arg2/<span style="color: #000;">100</span>.<span style="color: #000;">,</span> arg2/<span style="color: #000;">1000</span>.<span style="color: #000;">]</span><span style="color: #000;">,</span> <span style="color: #000;">1000</span> * arg3<span style="color: #000;">)</span>
+</pre>
+<p>サンプルを実行するには以下のように操作します。</p>
+<ol>
+<li>メインメニューから、<b>ウィンドウ：スクリプトウィンドウ</b>を選択します。</li>
+<li>新しいワークブックを開き、以下をスクリプトウィンドウ内にコピーし、スクリプト全体を選択してEnterキーを押します。</li>
+</ol>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span>, myvar<span style="color: #000080;">=</span> py.<span style="color: #000080;">TestReturnTuple</span><span style="color: #000000;">(</span><span style="color: #0000dd;">3</span>., <span style="color: #0000dd;">45</span>., <span style="color: #0000dd;">66</span><span style="color: #000000;">)</span>;
+myvar<span style="color: #000080;">=</span>;
+</pre>
+<p>この関数は、2つのリスト（1つはcol(A)、もう1つはcol(B)）と、LabTalk変数<code>myvar</code>に書き込まれる1つの数値スカラーを持つタプルを返します。</p>
+<h2><a name="Calling_Functions_from_File_Attached_to_Project" id="Calling_Functions_from_File_Attached_to_Project"></a><span class="mw-headline">プロジェクトに添付されたファイルから関数を呼び出す</span></h2>
+<p>Python関数は、Originプロジェクト(OPJU)に添付された<b>.py</b>ファイルで定義することもできます。ファイルに添付された関数は、次のようにしてアクセスできます。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>b<span style="color: #000000;">)</span><span style="color: #000080;">=</span>py.@filename.<span style="color: #000080;">func</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>a<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+</pre>
+<p>ファイル名の最初の<b>@</b>文字により、ファイルがプロジェクトに添付されていることをOriginに示すことができます。</p>
+<p>プロジェクトに添付されている<b>.py</b>ファイルが1つだけの場合（推奨）は、関数にアクセスする際に関数名を省くことができます。たとえば、次のようになります。</p>
+<pre class="lt" style="font-family:monospace;">
+col<span style="color: #000000;">(</span>b<span style="color: #000000;">)</span><span style="color: #000080;">=</span>py.@func<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>a<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+</pre>

@@ -1,0 +1,193 @@
+﻿<h1 class="firstheading">Import ASCII</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Description"><span class="tocnumber">2</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#How_to_setup_header_lines_to_column_lables_after_import"><span class="tocnumber">3</span> <span class="toctext">How to setup header lines to column lables after import</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#To_show_how_to_do_partial_import"><span class="tocnumber">4</span> <span class="toctext">To show how to do partial import</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#How_to_import_a_data_file_by_using_semicolon_as_delimiter"><span class="tocnumber">5</span> <span class="toctext">How to import a data file by using semicolon as delimiter</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#How_to_Remove_Quotation_Marks_from_csv_Files"><span class="tocnumber">6</span> <span class="toctext">How to Remove Quotation Marks from csv Files</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR0</p>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>To import ASCII data, the method <a href="../../OriginC/OriginC/Datasheet-ImportASCII.html" title="OriginC:Datasheet-ImportASCII">Datasheet::IimportASCII</a> can be used. It allows to customize importation.</p>
+
+  <h2><a name="How_to_setup_header_lines_to_column_lables_after_import"></a><span class="mw-headline">How to setup header lines to column lables after import</span></h2>
+
+  <p>This example is to show how to import ascii data and how to setup sub header lines to column lables including uer defined parameter labels.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> ImportASCII_Ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        ASCIMP  ai;
+        string  strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// or "*.txt"</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                ai.<span style="color: #000000;">iAutoSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">//set auto detected to false since will set sub header to col label by below codes</span>
+                
+                ai.<span style="color: #000000;">iSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// 1. LongName 2. Units    3. Expanded Discription(User defined)   4. Type Indication(User defined)</span>
+                
+                <span style="color: #008000;">// Notice when iAutoSubheaderLines is 0, the index of ai.nLongName, ai.nUnits and ai.nFirstUserParams are begin from Main header</span>
+                ai.<span style="color: #000000;">nLongNames</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span>; 
+                ai.<span style="color: #000000;">nUnits</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;  
+                ai.<span style="color: #000000;">nFirstUserParams</span> <span style="color: #000080;">=</span> ai.<span style="color: #000000;">iheaderLines</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">2</span>;
+                ai.<span style="color: #000000;">nNumUserParams</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+                
+                ai.<span style="color: #000000;">iMaxLabels</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Not set any header line to Comments label            </span>
+                
+                Worksheet wks;
+                wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        <span style="color: #008000;">// Set user parameter labels to specified names</span>
+                        Grid grid;
+                        grid.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;
+                        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsUserLabels <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #ff00ff;">"Expanded Discription"</span>, <span style="color: #ff00ff;">"Type Indication"</span><span style="color: #000000;">}</span>;
+                        grid.<span style="color: #000000;">SetUserDefinedLabelNames</span><span style="color: #000000;">(</span>vsUserLabels<span style="color: #000000;">)</span>;
+                        
+                        wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// to resize worksheet. This method is very useful when data/text is longer than the width of cell</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">else</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="To_show_how_to_do_partial_import"></a><span class="mw-headline">To show how to do partial import</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> ImportASCII_Ex2<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"no acitve workbook window to import data"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        
+        ASCIMP  ai;
+        string strFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>Step01.dat"</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>strFile.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                strFile <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.dat"</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// or "*.txt"</span>
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>strFile.<span style="color: #000000;">IsEmpty</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                        <span style="color: #0000ff;">return</span>;<span style="color: #008000;">// user cancel</span>
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>AscImpReadFileStruct<span style="color: #000000;">(</span>strFile, <span style="color: #000040;">&amp;</span>ai<span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                ai.<span style="color: #000000;">iMode</span> <span style="color: #000080;">=</span> ASCIMP_MODE_APPEND_COLS; <span style="color: #008000;">// append imported data to this worksheet</span>
+                
+                ai.<span style="color: #000000;">iRenameCols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// 0 to keep default column name</span>
+                
+                ai.<span style="color: #000000;">iPartial</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 1 to specify partial import </span>
+                ai.<span style="color: #000000;">iPartialC1</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// import from 2nd column (0 offset)</span>
+                ai.<span style="color: #000000;">iPartialC2</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// set the last column, so here just import 4 columns</span>
+                ai.<span style="color: #000000;">iPartialR1</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// set the import row from</span>
+                ai.<span style="color: #000000;">iPartialR2</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">9</span>; <span style="color: #008000;">// set the import row to</span>
+                
+                <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span>  wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>strFile, ai<span style="color: #000000;">)</span>;
+                out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"nRet = "</span>, nRet<span style="color: #000000;">)</span>;
+
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nRet<span style="color: #000000;">)</span>
+                        wks.<span style="color: #000000;">AutoSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// to resize worksheet. This method is very useful when data/text is longer than the width of cell</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #0000ff;">else</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed to read ascii file"</span><span style="color: #000000;">)</span>;  
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="How_to_import_a_data_file_by_using_semicolon_as_delimiter"></a><span class="mw-headline">How to import a data file by using semicolon as delimiter</span></h2>
+
+  <p>Firstly, run the following LabTalk script to load and compile the <i>fu_utils.c</i> file.</p>
+  <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\fu_utils.<span style="color: #000080;">c</span><span style="color: #000000;">)</span>;
+</pre>
+
+  <p>Then compile the Origin C code below.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\fu_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> ImportASCII_Ex3<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        string fileName <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.txt"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// txt file browser</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>fileName.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+        
+        <span style="color: #008000;">// create a new worksheet</span>
+        Worksheet wks;
+        wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        
+        <span style="color: #008000;">// ascii import</span>
+        ASCIMP ai;
+        initASCIMP<span style="color: #000000;">(</span>ai<span style="color: #000000;">)</span>;  <span style="color: #008000;">// initialize</span>
+        ai.<span style="color: #000000;">iAutoSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// auto detect subheader line</span>
+        ai.<span style="color: #000000;">iDelimited</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// use delimiter</span>
+        ai.<span style="color: #000000;">iDelimiter</span> <span style="color: #000080;">=</span> ASCIMP_DELIM_DEMICOLON;  <span style="color: #008000;">// semicolon as delimiter</span>
+        <span style="color: #0000ff;">int</span> nret <span style="color: #000080;">=</span> AscImpReadFileStruct<span style="color: #000000;">(</span>fileName, <span style="color: #000040;">&amp;</span>ai, AIRF_USE_ASCIMP<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nret <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">// import</span>
+                wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>fileName, ai<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>     
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="How_to_Remove_Quotation_Marks_from_csv_Files"></a><span class="mw-headline">How to Remove Quotation Marks from csv Files</span></h2>
+
+  <p>This sample shows how to import a csv file and trim all the quotes around text entries. Please note that <i>fu_utils.c</i> is needed to use ascii import functions. You can run the following LabTalk script to load and compile it.</p>
+  <pre class="lt" style="font-family:monospace;">
+run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\fu_utils.<span style="color: #000080;">c</span><span style="color: #000000;">)</span>;
+</pre>
+
+  <p>Then compile the Origin C code below.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\fu_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> ImportASCII_Ex4<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string fileName <span style="color: #000080;">=</span> GetOpenBox<span style="color: #000000;">(</span><span style="color: #ff00ff;">"*.csv"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// csv file browser</span>
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>fileName.<span style="color: #000000;">IsFile</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span>;
+    
+    <span style="color: #008000;">// create a new worksheet</span>
+    Worksheet wks;
+    wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// ascii import</span>
+    ASCIMP ai;
+    initASCIMP<span style="color: #000000;">(</span>ai<span style="color: #000000;">)</span>;  <span style="color: #008000;">// initialize</span>
+    ai.<span style="color: #000000;">iAutoSubheaderLines</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// auto detect subheader line</span>
+    ai.<span style="color: #000000;">iDelimited</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;  <span style="color: #008000;">// use delimiter</span>
+        ai.<span style="color: #000000;">iDelimiter</span> <span style="color: #000080;">=</span> ASCIMP_DELIM_COMMA;   <span style="color: #008000;">// comma as delimiter</span>
+        ai.<span style="color: #000000;">iNonnumeric</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// NONNUMERIC_READ_AS_MISSING</span>
+        <span style="color: #008000;">// special quote symbol and remove it when import</span>
+        ai.<span style="color: #000000;">cQuote</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">'<span style="color: #666666; font-weight: bold;">\"</span>'</span>;
+        ai.<span style="color: #000000;">flags</span> <span style="color: #000040;">|</span><span style="color: #000080;">=</span> AI_FLAG_REMOVE_QUOTES;
+    <span style="color: #0000ff;">int</span> nret <span style="color: #000080;">=</span> AscImpReadFileStruct<span style="color: #000000;">(</span>fileName, <span style="color: #000040;">&amp;</span>ai, AIRF_USE_ASCIMP<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nret <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #008000;">// import</span>
+        wks.<span style="color: #000000;">ImportASCII</span><span style="color: #000000;">(</span>fileName, ai<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>   
+<span style="color: #000000;">}</span>
+</pre>

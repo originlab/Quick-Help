@@ -1,0 +1,147 @@
+﻿<h1 class="firstheading">Images</h1>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Accessing_Individual_Image_in_an_Image_Stack"><span class="tocnumber">1</span> <span class="toctext">Accessing Individual Image in an Image Stack</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Image_Split_and_Merge_Channels"><span class="tocnumber">2</span> <span class="toctext">Image Split and Merge Channels</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Image_Window_Basics"><span class="tocnumber">3</span> <span class="toctext">Image Window Basics</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Image_thinning_with_opencv"><span class="tocnumber">4</span> <span class="toctext">Image thinning with opencv</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Inverting_an_Image_with_skimage"><span class="tocnumber">5</span> <span class="toctext">Inverting an Image with skimage</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Load_Digits_Dataset_from_scikit-learn"><span class="tocnumber">6</span> <span class="toctext">Load Digits Dataset from scikit-learn</span></a></li>
+</ul>
+</div>
+<h2><a name="Accessing_Individual_Image_in_an_Image_Stack" id="Accessing_Individual_Image_in_an_Image_Stack"></a><span class="mw-headline">Accessing Individual Image in an Image Stack</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> skimage.<span style="color: #000;">util</span> <span style="color: #ff7700;font-weight:bold;">import</span> invert
+<span style="color: #d00; font-style: italic;">#load image stack</span>
+fn <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\*</span>.tif'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>iw.<span style="color: #000;">frames</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#get the 3rd image</span>
+im2 <span style="color: #000;">=</span> iw.<span style="color: #000;">to_np2d</span><span style="color: #000;">(</span><span style="color: #000;">2</span><span style="color: #000;">)</span>
+im2 *<span style="color: #000;">=</span> <span style="color: #000;">2</span>
+im2 <span style="color: #000;">=</span> invert<span style="color: #000;">(</span>im2<span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#put it back into 2nd image</span>
+iw.<span style="color: #000;">from_np2d</span><span style="color: #000;">(</span>im2<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#show thumbnails</span>
+iw.<span style="color: #000;">set_int</span><span style="color: #000;">(</span><span style="color: #0a0;">'NAV'</span><span style="color: #000;">,</span><span style="color: #000;">1</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">set_str</span><span style="color: #000;">(</span><span style="color: #0a0;">'Palette'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Fire'</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Image_Split_and_Merge_Channels" id="Image_Split_and_Merge_Channels"></a><span class="mw-headline">Image Split and Merge Channels</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+fn <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\L</span>eaves.jpg'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">)</span>
+iw.<span style="color: #000;">split</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+g <span style="color: #000;">=</span> iw.<span style="color: #000;">to_np2d</span><span style="color: #000;">(</span><span style="color: #000;">1</span><span style="color: #000;">)</span>
+g *<span style="color: #000;">=</span> <span style="color: #000;">0</span>
+iw.<span style="color: #000;">from_np2d</span><span style="color: #000;">(</span>g<span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">merge</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">lname</span><span style="color: #000;">=</span><span style="color: #0a0;">'Green is removed'</span>
+</pre>
+<h2><a name="Image_Window_Basics" id="Image_Window_Basics"></a><span class="mw-headline">Image Window Basics</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #d00; font-style: italic;">#single image</span>
+fn <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\c</span>ar.bmp'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'channels {iw.channels}, size {iw.size}, type {iw.type}'</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">rgb2gray</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'after convert to grayscale, channels {iw.channels}, frames {iw.frames}'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#load multiple as image stack</span>
+fn2 <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\*</span>.tif'</span>
+iw2<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw2.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn2<span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'channels {iw2.channels}, size {iw2.size}, type {iw2.type}, frames {iw2.frames}'</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#show image thumbnails(1), 2=play control, 3=slider</span>
+<span style="color: #ff7700;font-weight:bold;">if</span> iw2.<span style="color: #900090;">type</span> <span style="color: #000;">&gt;</span> <span style="color: #000;">1</span>:
+    iw2.<span style="color: #000;">set_int</span><span style="color: #000;">(</span><span style="color: #0a0;">'NAV'</span><span style="color: #000;">,</span> <span style="color: #000;">1</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Image_thinning_with_opencv" id="Image_thinning_with_opencv"></a><span class="mw-headline">Image thinning with opencv</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #d00; font-style: italic;">#recommand to install "opencv-python-headless"</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> cv2
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+fn <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\c</span>ar.bmp'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">)</span>
+iw.<span style="color: #000;">lname</span><span style="color: #000;">=</span><span style="color: #0a0;">'original image'</span>
+iw.<span style="color: #000;">rgb2gray</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#make a copy to put result</span>
+iw2<span style="color: #000;">=</span>iw.<span style="color: #000;">duplicate</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw2.<span style="color: #000;">lname</span> <span style="color: #000;">=</span> <span style="color: #0a0;">'thinning result'</span>
+img <span style="color: #000;">=</span> iw2.<span style="color: #000;">to_np</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;"># Structuring Element</span>
+kernel <span style="color: #000;">=</span> cv2.<span style="color: #000;">getStructuringElement</span><span style="color: #000;">(</span>cv2.<span style="color: #000;">MORPH_CROSS</span><span style="color: #000;">,</span><span style="color: #000;">(</span><span style="color: #000;">3</span><span style="color: #000;">,</span><span style="color: #000;">3</span><span style="color: #000;">)</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;"># Create an empty output image to hold values</span>
+thin <span style="color: #000;">=</span> np.<span style="color: #000;">zeros</span><span style="color: #000;">(</span>img.<span style="color: #000;">shape</span><span style="color: #000;">,</span>dtype<span style="color: #000;">=</span><span style="color: #0a0;">'uint8'</span><span style="color: #000;">)</span>
+ 
+<span style="color: #d00; font-style: italic;"># Loop until erosion leads to an empty set or max</span>
+<span style="color: #900090;">max</span> <span style="color: #000;">=</span> <span style="color: #000;">20</span>
+<span style="color: #ff7700;font-weight:bold;">while</span> <span style="color: #000;">(</span>cv2.<span style="color: #000;">countNonZero</span><span style="color: #000;">(</span>img<span style="color: #000;">)</span><span style="color: #000;">!=</span><span style="color: #000;">0</span><span style="color: #000;">)</span>:
+    <span style="color: #d00; font-style: italic;"># Erosion</span>
+    erode <span style="color: #000;">=</span> cv2.<span style="color: #000;">erode</span><span style="color: #000;">(</span>img<span style="color: #000;">,</span>kernel<span style="color: #000;">)</span>
+    <span style="color: #d00; font-style: italic;"># Opening on eroded image</span>
+    opening <span style="color: #000;">=</span> cv2.<span style="color: #000;">morphologyEx</span><span style="color: #000;">(</span>erode<span style="color: #000;">,</span>cv2.<span style="color: #000;">MORPH_OPEN</span><span style="color: #000;">,</span>kernel<span style="color: #000;">)</span>
+    <span style="color: #d00; font-style: italic;"># Subtract these two</span>
+    subset <span style="color: #000;">=</span> erode - opening
+    <span style="color: #d00; font-style: italic;"># Union of all previous sets</span>
+    thin <span style="color: #000;">=</span> cv2.<span style="color: #000;">bitwise_or</span><span style="color: #000;">(</span>subset<span style="color: #000;">,</span>thin<span style="color: #000;">)</span>
+    <span style="color: #d00; font-style: italic;"># Set the eroded image for next iteration</span>
+    img <span style="color: #000;">=</span> erode.<span style="color: #000;">copy</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+    <span style="color: #900090;">max</span> -<span style="color: #000;">=</span> <span style="color: #000;">1</span>
+    <span style="color: #ff7700;font-weight:bold;">if</span> <span style="color: #900090;">max</span> <span style="color: #000;">==</span> <span style="color: #000;">0</span>:
+        <span style="color: #ff7700;font-weight:bold;">break</span>
+
+iw2.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>thin<span style="color: #000;">)</span>
+</pre>
+<h2><a name="Inverting_an_Image_with_skimage" id="Inverting_an_Image_with_skimage"></a><span class="mw-headline">Inverting an Image with skimage</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #d00; font-style: italic;">#need to install "scikit-image" first</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">from</span> skimage.<span style="color: #000;">util</span> <span style="color: #ff7700;font-weight:bold;">import</span> invert
+
+fn <span style="color: #000;">=</span> op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + r<span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\I</span>mage Processing and Analysis<span style="color: #000099; font-weight: bold;">\F</span>lower.jpg'</span>
+iw<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">)</span>
+iw.<span style="color: #000;">lname</span><span style="color: #000;">=</span><span style="color: #0a0;">'original image'</span>
+<span style="color: #d00; font-style: italic;">#make a copy to put result</span>
+iw2<span style="color: #000;">=</span>iw.<span style="color: #000;">duplicate</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+iw2.<span style="color: #000;">lname</span><span style="color: #000;">=</span><span style="color: #0a0;">'inverted'</span>
+img <span style="color: #000;">=</span> iw2.<span style="color: #000;">to_np</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+inv <span style="color: #000;">=</span> invert<span style="color: #000;">(</span>img<span style="color: #000;">)</span>
+iw2.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>inv<span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#put into new empty image window</span>
+iw3<span style="color: #000;">=</span>op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#need to first setup the image window as 3 channels and not multi-frames</span>
+iw3.<span style="color: #000;">setup</span><span style="color: #000;">(</span><span style="color: #000;">3</span><span style="color: #000;">,</span><span style="color: #900090;">False</span><span style="color: #000;">)</span>
+iw3.<span style="color: #000;">lname</span><span style="color: #000;">=</span><span style="color: #0a0;">'invert back'</span>
+inv <span style="color: #000;">=</span> invert<span style="color: #000;">(</span>inv<span style="color: #000;">)</span>
+iw3.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>inv<span style="color: #000;">)</span>
+</pre>
+<h2><a name="Load_Digits_Dataset_from_scikit-learn" id="Load_Digits_Dataset_from_scikit-learn"></a><span class="mw-headline">Load Digits Dataset from scikit-learn</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">from</span> sklearn.<span style="color: #000;">datasets</span> <span style="color: #ff7700;font-weight:bold;">import</span> load_digits
+digits <span style="color: #000;">=</span> load_digits<span style="color: #000;">(</span><span style="color: #000;">)</span>  <span style="color: #d00; font-style: italic;"># load digit images, total 1797 images, each is 8x8</span>
+aa <span style="color: #000;">=</span> digits.<span style="color: #000;">images</span>.<span style="color: #000;">astype</span><span style="color: #000;">(</span>dtype<span style="color: #000;">=</span><span style="color: #0a0;">'uint8'</span><span style="color: #000;">)</span>
+iw <span style="color: #000;">=</span> op.<span style="color: #000;">new_image</span><span style="color: #000;">(</span><span style="color: #000;">)</span> 
+iw.<span style="color: #000;">setup</span><span style="color: #000;">(</span><span style="color: #000;">1</span><span style="color: #000;">,</span> <span style="color: #900090;">True</span><span style="color: #000;">)</span>  <span style="color: #d00; font-style: italic;"># set image window is gray scale, with multiple frames</span>
+data <span style="color: #000;">=</span> aa<span style="color: #000;">[</span><span style="color: #000;">0</span>:<span style="color: #000;">10</span><span style="color: #000;">,</span>:<span style="color: #000;">,</span>:<span style="color: #000;">]</span>
+iw.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>data<span style="color: #000;">,</span> <span style="color: #900090;">False</span><span style="color: #000;">)</span>
+iw.<span style="color: #000;">set_int</span><span style="color: #000;">(</span><span style="color: #0a0;">'GrayMax'</span><span style="color: #000;">,</span><span style="color: #000;">16</span><span style="color: #000;">)</span> <span style="color: #d00; font-style: italic;">#set to show only 17 colors (0-16)</span>
+iw.<span style="color: #000;">set_int</span><span style="color: #000;">(</span><span style="color: #0a0;">'nav'</span><span style="color: #000;">,</span> <span style="color: #000;">3</span><span style="color: #000;">)</span>  <span style="color: #d00; font-style: italic;"># Show navigation bar as slider</span>
+iw.<span style="color: #000;">set_str</span><span style="color: #000;">(</span><span style="color: #0a0;">'Palette'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Fire'</span><span style="color: #000;">)</span>
+</pre>

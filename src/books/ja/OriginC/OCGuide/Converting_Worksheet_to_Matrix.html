@@ -1,0 +1,174 @@
+﻿<h1 class="firstheading">ワークシートから行列に変換</h1><p>分析またはグラフ作成時に、ワークシートから行列に変換またはその反対の操作をして、データを再構成する必要があるかもしれません。このページはワークシートを行列に変換する時のサンプルと情報を紹介します。なお、反対の操作をする際は<a href="../../OriginC/OCGuide/Converting_Matrix_to_Worksheet.html" title="OCGuide:Converting Matrix to Worksheet">行列をワークシートに変換する</a>を参照してください。
+</p>
+<h2><a name="Worksheet_GriddingWorksheet.2C_Convert_Data_To_MatrixsheetGridding"></a><span class="mw-headline">ワークシートグリッディング<span class="OIndex" style="display:none">Worksheet, Convert Data To Matrixsheet</span><span class="OIndex" style="display:none">Gridding</span></span></h2>
+<ol><li>コマンドウィンドウで次のコマンドを実行し、nag_utils.cファイルをコンパイルし、現在のワークスペースにそれを追加します。
+<pre class="lt" style="font-family:monospace;">Run.<span style="color: #000080;">LoadOC</span><span style="color: #000000;">(</span>Originlab\nag_utils.<span style="color: #000080;">c</span>, <span style="color: #0000dd;">16</span><span style="color: #000000;">)</span>;</pre></li>
+<li>Origin Cファイルにヘッダファイルを含めます。
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>wks2mat.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Nag_utils.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre></li>
+<li><span class="OIndex" style="display:none">DataRange, Construct XYZ Range</span>アクティブなワークシートのXYZ列からXYZデータを取得します。
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// XYZ列からXYZデータ範囲を取得</span>
+XYZRange rng;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">)</span>;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">)</span>;
+rng.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;Z&quot;</span><span style="color: #000000;">)</span>;
+ 
+<span style="color: #008000;">// データ範囲オブジェクトからベクターにXYZデータを取得</span>
+vector vX, vY, vZ;
+rng.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vZ, vY, vX<span style="color: #000000;">)</span>;</pre></li>
+<li>元のデータ型を調査します。例：XY等間隔配置、疎データ
+<pre class="oc" style="font-family:monospace;">UINT nVar;
+<span style="color: #0000ff;">double</span> xmin, xstep, xmax, ymin, ystep, ymax;
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span> nMethod <span style="color: #000080;">=</span> ocmath_xyz_examine_data<span style="color: #000000;">(</span>nSize, vX, vY, vZ, 1.0e<span style="color: #000040;">-</span>8, 1.0e<span style="color: #000040;">-</span>8, 
+<span style="color: #000040;">&amp;</span>nVar, <span style="color: #000040;">&amp;</span>xmin, <span style="color: #000040;">&amp;</span>xstep, <span style="color: #000040;">&amp;</span>xmax, <span style="color: #000040;">&amp;</span>ymin, <span style="color: #000040;">&amp;</span>ystep, <span style="color: #000040;">&amp;</span>ymax<span style="color: #000000;">)</span>;</pre></li>
+<li>結果の行列ウィンドウに対する行と列の数を計算します。
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>, nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000040;">||</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">==</span> nMethod <span style="color: #000000;">)</span> <span style="color: #008000;">// XY等間隔または疎データ</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> dGap <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.5</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">(</span>ystep, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                nRows <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">(</span>ymax <span style="color: #000040;">-</span> ymin<span style="color: #000000;">)</span><span style="color: #000040;">/</span>ystep <span style="color: #000040;">+</span> dGap; 
+ 
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>is_equal<span style="color: #000000;">(</span>xstep, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                nCols <span style="color: #000080;">=</span> <span style="color: #000000;">abs</span><span style="color: #000000;">(</span>xmax <span style="color: #000040;">-</span> xmin<span style="color: #000000;">)</span><span style="color: #000040;">/</span>xstep <span style="color: #000040;">+</span> dGap;
+<span style="color: #000000;">}</span></pre></li>
+<li>結果の行列ウィンドウを準備します。
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// グリッディング結果を配置する行列ウィンドウを準備</span>
+MatrixPage mp;
+mp.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;origin&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 行列ウィンドウを作成</span>
+MatrixLayer ml <span style="color: #000080;">=</span> mp.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 第1行列シートを取得</span>
+MatrixObject mo<span style="color: #000000;">(</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 第1行列オブジェクトを取得</span>
+ 
+mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">(</span>xmin, ymin, xmax, ymax<span style="color: #000000;">)</span>; <span style="color: #008000;">// XとYの開始/終了値をセット   </span>
+mo.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nRows, nCols<span style="color: #000000;">)</span>; <span style="color: #008000;">// 行と列の数をセット</span></pre></li>
+<li>異なるメソッドの種類でXYZグリッディングを行います。
+<pre class="oc" style="font-family:monospace;">matrix<span style="color: #000040;">&amp;</span> mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 行列オブジェクトからデータオブジェクトを取得</span>
+
+<span style="color: #0000ff;">int</span> iRet;
+<span style="color: #0000ff;">switch</span><span style="color: #000000;">(</span>nMethod<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">:</span> <span style="color: #008000;">// XY等間隔</span>
+	iRet <span style="color: #000080;">=</span> ocmath_convert_regular_xyz_to_matrix<span style="color: #000000;">(</span>nSize, vX, vY, vZ, 
+		mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;---&nbsp;%d: regular conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">)</span>;	
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span> <span style="color: #008000;">// 疎データ</span>
+	iRet <span style="color: #000080;">=</span> ocmath_convert_sparse_xyz_to_matrix<span style="color: #000000;">(</span>nSize, vX, vY, vZ, 
+		mat, xmin, xstep, nCols, ymin, ystep, nRows<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;---&nbsp;%d: sparse conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">)</span>;		
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">:</span> <span style="color: #008000;">// ランダム(Renka Cline) </span>
+	vector vxGrid<span style="color: #000000;">(</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">)</span>, vyGrid<span style="color: #000000;">(</span>nRows<span style="color: #000040;">*</span>nCols<span style="color: #000000;">)</span>;
+	iRet <span style="color: #000080;">=</span> ocmath_mat_to_regular_xyz<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, xmin, 
+		xmax, ymin, ymax, vxGrid, vyGrid<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> iRet <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		iRet <span style="color: #000080;">=</span> xyz_gridding_nag<span style="color: #000000;">(</span>vX, vY, vZ, vxGrid, vyGrid, mat<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;---&nbsp;%d: random conversion ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, iRet<span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">break</span>;
+
+<span style="color: #0000ff;">default</span><span style="color: #000000;">:</span> <span style="color: #008000;">// エラー</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;--- Error: Other method type ---<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre></ol>
+<h2><a name="Worksheet_to_Matrix"></a><span class="mw-headline">ワークシートから行列へ</span></h2>
+<p>ワークシートに含まれるデータは、一連の関数を使って行列に変換することができます。
+</p><p>行列のようなワークシートデータを直接行列に変換するために、ワークシートの最初の列と行にXまたはYの値を入力します。しかし、行列の座標は等間隔でなければならいので、元のワークシートに等間隔なX/Y値が入力されている必要があります。メソッド <a href="../../OriginC/OriginC/Matrixbase-CopyFromWks.html" title="OriginC:Matrixbase-CopyFromWks">CopyFromWks</a> を直接使用するか、単に行列にXYZデータ範囲を付けます。
+</p><p>次のサンプルはワークシートから直接変換する方法を示しています。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 方法 1: CopyFromWksを使用</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+MatrixPage matPg;
+matPg.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;
+MatrixLayer matLy <span style="color: #000080;">=</span> matPg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+Matrix mat<span style="color: #000000;">(</span>matLy<span style="color: #000000;">)</span>;
+
+matrix<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> mat1;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>mat1.<span style="color: #000000;">CopyFromWks</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Error: CopyFromWks failed!&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+mat <span style="color: #000080;">=</span> mat1;
+
+
+<span style="color: #008000;">// 方法 2: 行列オブジェクトに付加</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumCols</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetNumRows</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, nCols <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 最初のセルを除いた最初の行</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, nRows <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">//最初のセルを除いた最初の列</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Z&quot;</span>, wks, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span>, nRows <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, nCols <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+MatrixPage matPg;
+matPg.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;
+MatrixLayer matLy <span style="color: #000080;">=</span> matPg.<span style="color: #000000;">Layers</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+MatrixObject mo <span style="color: #000080;">=</span> matLy.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+MatrixObject moTmp;
+moTmp.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>dr<span style="color: #000000;">)</span>;
+matrixbase <span style="color: #000040;">&amp;</span>matTmp <span style="color: #000080;">=</span> moTmp.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+matrixbase <span style="color: #000040;">&amp;</span>mat <span style="color: #000080;">=</span> mo.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+mat <span style="color: #000080;">=</span> matTmp;
+moTmp.<span style="color: #000000;">Detach</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;</pre>
+<p>ワークシートデータがXYZ列形式で構成されているとき、グリッディング法を使ってこのようなデータを行列に変換します。多くのグリッディング法が利用でき、これにより元のデータを補間し、指定した次数での等間隔なXYで、値の配列を生成します。
+</p><p>次のサンプルでは、Renka-Clineの手法によりXYZデータを変換します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Renka-Clineグリッディング手法によりワークシートデータを20*20の行列に変換</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+Dataset dsX<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+Dataset dsY<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+Dataset dsZ<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span> nPoints <span style="color: #000080;">=</span> dsX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+vector vX <span style="color: #000080;">=</span> dsX;
+vector vY <span style="color: #000080;">=</span> dsY;
+vector vZ <span style="color: #000080;">=</span> dsZ;
+
+ocmath_RenkaCline_Struct comm;
+ocmath_renka_cline_interpolation<span style="color: #000000;">(</span>nPoints, vX, vY, vZ, <span style="color: #000040;">&amp;</span>comm<span style="color: #000000;">)</span>;
+
+
+<span style="color: #008000;">//グリッディングのXとYをセット</span>
+<span style="color: #0000ff;">double</span> dXMin, dXMax, dYMin, dYMax;
+vX.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dXMin, dXMax<span style="color: #000000;">)</span>;
+vY.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dYMin, dYMax<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//Kriging アルゴリズムを使用したランダム行列変換</span>
+<span style="color: #0000ff;">int</span> nRows <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+<span style="color: #0000ff;">int</span> nCols <span style="color: #000080;">=</span> <span style="color: #0000dd;">20</span>;
+matrix mZ<span style="color: #000000;">(</span>nRows, nCols<span style="color: #000000;">)</span>;
+vector vEvalX<span style="color: #000000;">(</span>nRows <span style="color: #000040;">*</span> nCols<span style="color: #000000;">)</span>;
+vector vEvalY<span style="color: #000000;">(</span>nRows <span style="color: #000040;">*</span> nCols<span style="color: #000000;">)</span>;
+ocmath_mat_to_regular_xyz<span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span>, nRows, nCols, dXMin, dXMax, dYMin, dYMax, vEvalX, vEvalY, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+ocmath_renka_cline_eval<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>comm, nRows <span style="color: #000040;">*</span> nCols, vEvalX, vEvalY, mZ<span style="color: #000000;">)</span>;    
+ocmath_renka_cline_struct_free<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>comm<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 行列を作成して結果を格納</span>
+MatrixLayer    mResultLayer;
+mResultLayer.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+Matrix    matResult<span style="color: #000000;">(</span>mResultLayer<span style="color: #000000;">)</span>;
+matResult <span style="color: #000080;">=</span> mZ;
+MatrixObject mo <span style="color: #000080;">=</span> mResultLayer.<span style="color: #000000;">MatrixObjects</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+mo.<span style="color: #000000;">SetXY</span><span style="color: #000000;">(</span>dXMin, dYMin, dXMax, dYMax<span style="color: #000000;">)</span>;<span style="color: #008000;">//行列を作成して結果を格納</span></pre>
+
+
+
+
+
+
+
+    

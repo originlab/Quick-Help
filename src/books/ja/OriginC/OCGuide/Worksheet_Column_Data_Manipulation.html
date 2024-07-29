@@ -1,0 +1,192 @@
+﻿<h1 class="firstheading">ワークシート列データの操作</h1><div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Basic_Arithmetic_Operation"><span class="tocnumber">1</span> <span class="toctext">基本的な算術操作</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Set_Value_by_FormulaSet_Column_Values"><span class="tocnumber">2</span> <span class="toctext">式で値を設定<span class="OIndex" style="display:none">Set Column Values</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Sort_Column"><span class="tocnumber">3</span> <span class="toctext">列をソートする</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Reverse_Column"><span class="tocnumber">4</span> <span class="toctext">列を逆順にする</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Get_.26_Set_Data_from_Column"><span class="tocnumber">5</span> <span class="toctext">列からデータを取得/設定</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Get_.26_Set_Numeric_Data_Values_from_ColumnColumn.2C_Get.2FSet_Numeric_Data"><span class="tocnumber">5.1</span> <span class="toctext">列から数値データ値を取得/設定<span class="OIndex" style="display:none">Column, Get/Set Numeric Data</span></span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Get_.26_Set_String_Values_from_ColumnColumn.2C_Get.2FSet_String_Data"><span class="tocnumber">5.2</span> <span class="toctext">列から文字列値を取得/設定<span class="OIndex" style="display:none">Column, Get/Set String Data</span></span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Get_.26_Set_Date_and_Time_Data_from_Column"><span class="tocnumber">5.3</span> <span class="toctext">列から日時データを取得/設定</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Get_the_columns_of_different_worksheets.5Cworkbooks"><span class="tocnumber">6</span> <span class="toctext">異なるワークシート/ワークブックの列から取得</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Basic_Arithmetic_Operation"></a><span class="mw-headline">基本的な算術操作</span></h2>
+<p>列データに対して基本的な算術演算の操作を行うには、列データをベクトルに取得し、対応ベクトルで操作します。
+<span class="OIndex" style="display:none">算術</span>
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 1、2列目からデータを取得</span>
+<span style="color: #008000;">// この2列を足す</span>
+<span style="color: #008000;">//  そして結果を3列目に出力</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+Column col1 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 1列目</span>
+Column col2 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 2列目</span>
+Column col3 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 3列目</span>
+
+vectorbase <span style="color: #000040;">&amp;</span>v1 <span style="color: #000080;">=</span> col1.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// データオブジェクトを取得</span>
+vectorbase <span style="color: #000040;">&amp;</span>v2 <span style="color: #000080;">=</span> col2.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; 
+vectorbase <span style="color: #000040;">&amp;</span>v3 <span style="color: #000080;">=</span> col3.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+v3 <span style="color: #000080;">=</span> v1 <span style="color: #000040;">+</span> v2;  <span style="color: #008000;">// 足し合わせる</span></pre>
+<h2><a name="Set_Value_by_FormulaSet_Column_Values"></a><span class="mw-headline">式で値を設定<span class="OIndex" style="display:none">Set Column Values</span></span></h2>
+<p><a href="../../OriginC/OriginC/DataObject-SetFormula.html" title="OriginC:DataObject-SetFormula">DataObject::SetFormula</a> と <a href="../../OriginC/OriginC/DataObject-ExecuteFormula.html" title="OriginC:DataObject-ExecuteFormula">DataObject::ExecuteFormula</a>メソッドは、値の設定ダイアログのように、列/行列値の設定に使用できます。次のサンプルでは、3列のワークシートを作成し、各列の値を式で設定します。
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks;
+wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;origin&quot;</span>, CREATE_VISIBLE<span style="color: #000000;">)</span>;
+wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 1列目の値をセット</span>
+Column colA;
+colA.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+colA.<span style="color: #000000;">SetFormula</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;5*(i-1)&quot;</span><span style="color: #000000;">)</span>;
+colA.<span style="color: #000000;">ExecuteFormula</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 次の2列は再計算を自動にセット</span>
+Column colB;
+colB.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+colB.<span style="color: #000000;">SetFormula</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;sin(4*col(A)*pi/180)&quot;</span>, AU_AUTO<span style="color: #000000;">)</span>;
+colB.<span style="color: #000000;">ExecuteFormula</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// スクリプト実行前で宣言した変数を使用</span>
+Column colC;
+colC.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+string strExpression <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;cos(Amp*x*pi/180)&quot;</span>;
+string strBeforeScript <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;double Amp=4.5;&quot;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;<span style="color: #666666; font-weight: bold;">\r</span><span style="color: #666666; font-weight: bold;">\n</span>&quot;</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;range x=col(A);&quot;</span>;
+string strFormula <span style="color: #000080;">=</span> strExpression <span style="color: #000040;">+</span> STR_COL_FORMULAR_SEPARATOR <span style="color: #000040;">+</span> strBeforeScript;
+colC.<span style="color: #000000;">SetFormula</span><span style="color: #000000;">(</span>strFormula, AU_AUTO<span style="color: #000000;">)</span>;
+colC.<span style="color: #000000;">ExecuteFormula</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;</pre>
+<h2><a name="Sort_Column"></a><span class="mw-headline">列をソートする</span></h2>
+<p>指定した列をソートするには、まず列データをベクトルに取得し、ベクトルでソートした後で値を戻します。列からデータオブジェクトを取得するためのベクトル参照を使用することで、自動的にベクトルを列に付加し、ベクトルのデータが更新されると列に戻すようにします。
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+Column col1 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 1列目</span>
+vectorbase <span style="color: #000040;">&amp;</span>v1 <span style="color: #000080;">=</span> col1.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 参照を使用してデータオブジェクトを取得</span>
+v1.<span style="color: #000000;">Sort</span><span style="color: #000000;">(</span>SORT_DESCENDING<span style="color: #000000;">)</span>;  <span style="color: #008000;">//降順にソート</span></pre>
+<h2><a name="Reverse_Column"></a><span class="mw-headline">列を逆順にする</span></h2>
+<p>列データを逆順にするには、まず列データをベクトルに取得し、ベクトルのデータを逆順にしてから戻します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 1列目のデータを逆順にする</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+Column col1 <span style="color: #000080;">=</span> wks.<span style="color: #000000;">Columns</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 1列目</span>
+vectorbase <span style="color: #000040;">&amp;</span>v1 <span style="color: #000080;">=</span> col1.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// データオブジェクトを取得</span>
+vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vnIndices;  <span style="color: #008000;">// vector for reverse indices</span>
+vnIndices.<span style="color: #000000;">Data</span><span style="color: #000000;">(</span>v1.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 逆順インデックス</span>
+v1.<span style="color: #000000;">Reorder</span><span style="color: #000000;">(</span>vnIndices<span style="color: #000000;">)</span>;  <span style="color: #008000;">// データを逆順にする</span></pre>
+<h2><a name="Get_.26_Set_Data_from_Column"></a><span class="mw-headline">列からデータを取得/設定</span></h2>
+<h3><a name="Get_.26_Set_Numeric_Data_Values_from_ColumnColumn.2C_Get.2FSet_Numeric_Data"></a><span class="mw-headline">列から数値データ値を取得/設定<span class="OIndex" style="display:none">Column, Get/Set Numeric Data</span></span></h3>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 最初の列に付加。列のフォーマットが</span>
+<span style="color: #008000;">// 文字と数値（デフォルト）または数値であるか確認</span>
+Column col<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 列のデータ型をdoubleとする</span>
+<span style="color: #008000;">// 他の数値データ型 int, short, complex などもサポート</span>
+vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span><span style="color: #000040;">&amp;</span> vec <span style="color: #000080;">=</span> col.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// この列の最後に100を追加</span>
+vec.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #0000dd;">100</span><span style="color: #000000;">)</span>;</pre>
+<p>あるいは、<a href="../../OriginC/Category/Dataset_(class).html" title="Category:Dataset (class)">Dataset</a>オブジェクトを使用して列の数値データを取得できます。例えば、例えば、
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+Dataset ds<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>ds.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    out_double<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;&quot;</span>, ds<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;</pre>
+<h3><a name="Get_.26_Set_String_Values_from_ColumnColumn.2C_Get.2FSet_String_Data"></a><span class="mw-headline">列から文字列値を取得/設定<span class="OIndex" style="display:none">Column, Get/Set String Data</span></span></h3>
+<pre class="oc" style="font-family:monospace;">Column col<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 1列目に追加</span>
+
+<span style="color: #008000;">// 列から文字列配列を取得</span>
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vs;
+col.<span style="color: #000000;">GetStringArray</span><span style="color: #000000;">(</span>vs<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 列に文字列配列を戻す</span>
+vs.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;test&quot;</span><span style="color: #000000;">)</span>;
+col.<span style="color: #000000;">PutStringArray</span><span style="color: #000000;">(</span>vs<span style="color: #000000;">)</span>;</pre>
+<h3><a name="Get_.26_Set_Date_and_Time_Data_from_Column"></a><span class="mw-headline">列から日時データを取得/設定</span></h3>
+<p>列のデータ型が日付や時間の場合、この列から取得したデータは、ユリウス日/時間のデータで、表示-日付-時間-フォーマット文字列ではありません。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// アクティブワークシートを取得</span>
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+Column col1<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 最初の列</span>
+Column col2<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 2番目の列</span>
+<span style="color: #008000;">// 列フォーマットが日付や時間であるか確認</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>col1.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> OKCOLTYPE_DATE <span style="color: #000040;">||</span> col1.<span style="color: #000000;">GetFormat</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> OKCOLTYPE_TIME<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #008000;">// 1列目からデータを取得, v1 は ユリウス通日データを保持</span>
+	vector <span style="color: #000040;">&amp;</span>v1 <span style="color: #000080;">=</span> col1.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  
+	vector <span style="color: #000040;">&amp;</span>v2 <span style="color: #000080;">=</span> col2.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// 2列目からデータを取得</span>
+	v2 <span style="color: #000080;">=</span> v1;  <span style="color: #008000;">// Set 1st column&apos;s Julian data to 2nd column</span>
+	col2.<span style="color: #000000;">SetFormat</span><span style="color: #000000;">(</span>OKCOLTYPE_DATE<span style="color: #000000;">)</span>;  <span style="color: #008000;">// 1列目のユリウス通日データを2列目に</span>
+	<span style="color: #008000;">// 表示フォーマットを MM/dd/yyyy HH:mm:ss にセット</span>
+	col2.<span style="color: #000000;">SetSubFormat</span><span style="color: #000000;">(</span>LDF_SHORT_AND_HHMMSS_SEPARCOLON<span style="color: #000000;">)</span>;  
+<span style="color: #000000;">}</span></pre>
+<p><br />
+</p>
+<h2><a name="Get_the_columns_of_different_worksheets.5Cworkbooks"></a><span class="mw-headline">異なるワークシート/ワークブックの列から取得</span></h2>
+<p>全ワークブック中のすべてのワークシートの特定の列について合計を計算するには、現在のフォルダ内のすべてのワークシートをループしることで、目的の列の操作が可能です。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 現在のフォルダの各ワークブック内の各ワークシートの2番目の列を取得し、その合計を計算して、新しいワークシートに出力</span>
+<span style="color: #0000ff;">void</span> Calculate_Column_Sum<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    StringArray ColNames;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">double</span><span style="color: #000080;">&gt;</span> ColMeans;
+    <span style="color: #0000ff;">int</span> K <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    Dataset ds;
+    <span style="color: #0000ff;">double</span> colSum;
+    Folder fld <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveFolder</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// アクティブ/現在のフォルダを取得	</span>
+    foreach<span style="color: #000000;">(</span>PageBase pb in fld.<span style="color: #000000;">Pages</span><span style="color: #000000;">)</span> 
+    <span style="color: #000000;">{</span>  
+            <span style="color: #008000;">// フォルダ内の全ページでループ</span>
+            WorksheetPage wksPgSource <span style="color: #000080;">=</span> pb;  <span style="color: #008000;">// PageをWorksheetPageに変換</span>
+	    <span style="color: #008000;">// 変換に失敗した場合</span>
+	    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wksPgSource<span style="color: #000000;">)</span> 
+	    <span style="color: #000000;">{</span>  
+		<span style="color: #0000ff;">continue</span>;  <span style="color: #008000;">// 次のページ</span>
+       	    <span style="color: #000000;">}</span>
+
+	    <span style="color: #008000;">// ワークブック内の全ワークシートでループ</span>
+	    foreach<span style="color: #000000;">(</span>Layer lay in wksPgSource.<span style="color: #000000;">Layers</span><span style="color: #000000;">)</span> 
+	    <span style="color: #000000;">{</span>
+		Worksheet wks <span style="color: #000080;">=</span> lay; 
+                <span style="color: #008000;">// 列情報取得</span>
+		ds.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks, K<span style="color: #000000;">)</span>;
+		DataRange dr;
+		dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks,<span style="color: #0000dd;">0</span>,K,<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>,K<span style="color: #000000;">)</span>;
+		ColNames.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>dr.<span style="color: #000000;">GetDescription</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;			
+		<span style="color: #008000;">// 列の合計を計算</span>
+		ds.<span style="color: #000000;">Sum</span><span style="color: #000000;">(</span>colSum<span style="color: #000000;">)</span>;	
+		ColMeans.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>colSum<span style="color: #000000;">)</span>;
+	    <span style="color: #000000;">}</span>
+
+    <span style="color: #000000;">}</span>	
+    <span style="color: #008000;">// 結果ワークシートを用意</span>
+    Worksheet wksResult;
+    wksResult.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;
+    DataRange dr;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wksResult,<span style="color: #0000dd;">0</span>,<span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wksResult,<span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">)</span>;
+    dr.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>ColMeans,<span style="color: #000040;">&amp;</span>ColNames<span style="color: #000000;">)</span>;	
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

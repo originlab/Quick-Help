@@ -1,0 +1,290 @@
+﻿<h1 class="firstheading">数学</h1><p><span class="OIndex" style="display:none">数学</span>
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Normalize"><span class="tocnumber">1</span> <span class="toctext"><span class="OIndex">正規化</span></span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#InterpolationExtrapolationInterpolation.2FExtrapolation"><span class="tocnumber">2</span> <span class="toctext"><span class="OIndex" style="display:none">Interpolation</span><span class="OIndex" style="display:none">Extrapolation</span>補間/補外</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Integration"><span class="tocnumber">3</span> <span class="toctext"><span class="OIndex">積分</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Simple_Integral_Function"><span class="tocnumber">3.1</span> <span class="toctext">簡単な積分関数</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Integral_Function_with_Parameters"><span class="tocnumber">3.2</span> <span class="toctext">パラメータ付きの積分関数</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Multi-dimension_Integral_Function"><span class="tocnumber">3.3</span> <span class="toctext">高次積分関数</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Differentiation"><span class="tocnumber">4</span> <span class="toctext"><span class="OIndex">微分</span></span></a></li>
+</ul>
+</div>
+
+<h2><a name="Normalize"></a><span class="mw-headline"><span class="OIndex">正規化</span></span></h2>
+<p>次のサンプルは、データプロット(曲線)内のデータポイントを選択し、レイヤ内のすべての曲線をその点と同じ値に正規化します。  このコードは、複数曲線を持つグラフレイヤがアクティブであり、すべての曲線が同じX値を共有していることを前提としています。  この前提条件は、スペクトル分析ではよく行われることです。 
+</p>
+<pre class="oc" style="font-family:monospace;">GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>gl <span style="color: #000000;">)</span>
+    <span style="color: #0000ff;">return</span>;
+
+<span style="color: #008000;">// Aある特定の曲線の1つの特定のポイントをクリックして選択</span>
+GetGraphPoints mypts;
+mypts.<span style="color: #000000;">SetFollowData</span><span style="color: #000000;">(</span><span style="color: #0000ff;">true</span><span style="color: #000000;">)</span>;
+mypts.<span style="color: #000000;">GetPoints</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>, gl<span style="color: #000000;">)</span>;
+
+vector vx, vy;
+vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vn;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>mypts.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>vx, vy, vn<span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 選択したポイントのインデックスとy値を保存</span>
+    <span style="color: #0000ff;">int</span> nxpicked <span style="color: #000080;">=</span> vn<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #0000ff;">double</span> dypicked <span style="color: #000080;">=</span> vy<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+    
+    <span style="color: #008000;">// レイヤ内のすべてのデータポイントをループ</span>
+    foreach<span style="color: #000000;">(</span> DataPlot dp in gl.<span style="color: #000000;">DataPlots</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #008000;">// データ範囲、現在のプロットのy列</span>
+        XYRange xy;
+        Column cy;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">(</span>xy<span style="color: #000000;">)</span> <span style="color: #000040;">&amp;&amp;</span> xy.<span style="color: #000000;">GetYColumn</span><span style="color: #000000;">(</span>cy<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #008000;">// y列からvector参照をy値に取得                </span>
+            vectorbase <span style="color: #000040;">&amp;</span>vycurrent <span style="color: #000080;">=</span> cy.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+            
+            <span style="color: #008000;">// vectorをスケールし、y値と選択したポイントを一致</span>
+            vycurrent <span style="color: #000040;">*</span><span style="color: #000080;">=</span> dypicked<span style="color: #000040;">/</span>vycurrent<span style="color: #000000;">[</span>nxpicked<span style="color: #000000;">]</span>;
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<h2><a name="InterpolationExtrapolationInterpolation.2FExtrapolation"></a><span class="mw-headline"><span class="OIndex" style="display:none">Interpolation</span><span class="OIndex" style="display:none">Extrapolation</span>補間/補外</span></h2>
+<p><b><a href="../../OriginC/OriginC/Ocmath_interpolate_(global_function).html" title="OriginC:Ocmath interpolate (global function)">ocmath_interpolate </a></b>関数は、線形、スプライン、Bスプラインのモードで補間/補外を実行するのに使われます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// アクティブワークシートを4列にする</span>
+<span style="color: #008000;">// 最初の2列に元のxyデータ</span>
+<span style="color: #008000;">// 3列目に入力x値、4列目にy値</span>
+Worksheet    wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;    
+wks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>; 
+
+DataRange drSource;
+drSource.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 1列目 - 元のxデータ</span>
+drSource.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 2列目 - 元のyデータ</span>
+
+vector vSrcx, vSrcy;
+drSource.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcx, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+drSource.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vSrcy, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+
+DataRange drOut;
+drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span>, <span style="color: #ff00ff;">&quot;X&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 3列目 - 入力xデータ</span>
+drOut.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span>, <span style="color: #ff00ff;">&quot;Y&quot;</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 4列目 - 補間したyデータ</span>
+
+vector vOutx, vOuty;
+drOut.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vOutx, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">int</span>    nSrcSize <span style="color: #000080;">=</span> vSrcx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span>    nOutSize <span style="color: #000080;">=</span> vOutx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+vOuty.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nOutSize<span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">int</span> nMode <span style="color: #000080;">=</span> INTERP_TYPE_BSPLINE;
+<span style="color: #0000ff;">double</span> dSmoothingFactor <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #0000ff;">int</span> iRet <span style="color: #000080;">=</span> ocmath_interpolate<span style="color: #000000;">(</span>vOutx, vOuty, nOutSize, vSrcx, vSrcy, nSrcSize, 
+nMode, dSmoothingFactor<span style="color: #000000;">)</span>;
+
+drOut.<span style="color: #000000;">SetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vOuty, <span style="color: #000040;">&amp;</span>vOutx<span style="color: #000000;">)</span>;</pre>
+<h2><a name="Integration"></a><span class="mw-headline"><span class="OIndex">積分</span></span></h2>
+<p>Origin Cでは、積分を実行するのにNAGの積分ルーチンを使っています。  Origin CとNAGを使って、被積分関数、パラメータを持つ被積分関数、揺れのある被積分関数、不定積分、高次積分などで積分を実行できます。  次のサンプルは、NAGを使った積分を行う方法を示しています。 
+</p><p>Origin Cコードには、NAG関数を呼ぶ前にNAGヘッダファイルをインクルードします。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span> <span style="color: #008000;">// NAGの宣言</span></pre>
+<h3><a name="Simple_Integral_Function"></a><span class="mw-headline">簡単な積分関数</span></h3>
+<p>最初のサンプルは、1つの積分変数を持つ簡単な被積分関数で基本積分を実行する方法を示しています。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// NAG_CALL は適切な呼び出し表記。これを関数ポインタのように扱い</span>
+<span style="color: #008000;">// 自分自身の被積分関数を定義</span>
+<span style="color: #0000ff;">double</span> NAG_CALL func<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x,Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span>use_comm <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span><span style="color: #000000;">)</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p;
+        <span style="color: #0000ff;">return</span> <span style="color: #000000;">(</span>x<span style="color: #000040;">*</span><span style="color: #000000;">sin</span><span style="color: #000000;">(</span>x<span style="color: #000040;">*</span><span style="color: #0000dd;">30.0</span><span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">-</span>x<span style="color: #000040;">*</span>x<span style="color: #000040;">/</span><span style="color: #000000;">(</span>PI<span style="color: #000040;">*</span>PI<span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+	<span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> PI <span style="color: #000040;">*</span> <span style="color: #0000dd;">2.0</span>;  <span style="color: #008000;">// 積分範囲</span>
+	
+	<span style="color: #0000ff;">double</span> epsabs, abserr, epsrel, result;
+	<span style="color: #008000;">// 精度が十分でない場合、epsabs と epsrel を使って </span>
+	<span style="color: #008000;">// この値を目的の精度に拡張</span>
+	epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+	epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;
+	
+	<span style="color: #008000;">// 積分内の関数を評価するために部分間隔の最大数が必要。 </span>
+	<span style="color: #008000;">// ほとんどの場合、200から500くらいが適切であり、お薦め。</span>
+	<span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>;
+	
+	Nag_QuadProgress qp;
+	NagError fail;   
+	
+        Nag_User comm;
+	<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">int</span> use_comm<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>;
+	comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Pointer<span style="color: #000000;">)</span><span style="color: #000040;">&amp;</span>use_comm;
+        d01sjc<span style="color: #000000;">(</span>func, a, b, epsabs, epsrel, max_num_subint, <span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, 
+	<span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+	
+	
+	<span style="color: #008000;">// 次の3つのエラー以外のエラーは</span>
+	<span style="color: #008000;">// 入力が不正か、割り当ての失敗。再び積分ルーチンを呼び出す前に</span>
+	<span style="color: #008000;">// メモリリークを避け、メモリ割り当てを</span>
+	<span style="color: #008000;">// 解放する必要がある</span>
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM <span style="color: #000040;">&amp;&amp;</span> 
+	    fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span>  NE_ALLOC_FAIL<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">)</span>;
+		NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">)</span>;
+		NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">)</span>;
+		NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result<span style="color: #000000;">)</span>; 
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Integral_Function_with_Parameters"></a><span class="mw-headline">パラメータ付きの積分関数</span></h3>
+<p><span class="OIndex" style="display:none">Integral, with Multiple Parameters</span>
+次のサンプルは、パラメータ付きの被積分関数で積分を定義し、実行する方法を示しています。  ユーザ定義の構造でパラメータが積分子に渡されます。  これは、スタティックな変数を被積分関数のパラメータとして使用し、スレッドを安全にします。  
+</p><p>このサンプルは、NAGの不定積分子を使用することもできます。例えば、不定積分<b>d01smc</b> 関数を呼び出す行を有効にして、サンプルが不定積分を実行するのに使用します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">struct</span> user <span style="color: #008000;">// 被積分パラメータ</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">double</span> A;
+    <span style="color: #0000ff;">double</span> Xc;
+    <span style="color: #0000ff;">double</span> W; 
+<span style="color: #000000;">}</span>;
+
+<span style="color: #008000;">// ユーザによって供給される関数は、与えられたxで被積分関数の戻り値を返す</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f_callback<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span>param <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p<span style="color: #000000;">)</span>;
+	
+    <span style="color: #0000ff;">return</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>A <span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span><span style="color: #000040;">-</span><span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> <span style="color: #000000;">(</span>x <span style="color: #000040;">-</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Xc<span style="color: #000000;">)</span> <span style="color: #000040;">*</span> <span style="color: #000000;">(</span>x <span style="color: #000040;">-</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Xc<span style="color: #000000;">)</span>
+        <span style="color: #000040;">/</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W <span style="color: #000040;">/</span> param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W<span style="color: #000000;">)</span> <span style="color: #000040;">/</span> <span style="color: #000000;">(</span>param<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W <span style="color: #000040;">*</span> <span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span>PI <span style="color: #000040;">/</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>関数に対するパラメータをセットし、積分を実行する必要のある追加のパラメータを定義します。   そして、積分は、引数としてパラメータを渡し、1つの関数呼び出しで実行されます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    <span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.0</span>; <span style="color: #008000;">// 積分間隔</span>
+    
+    <span style="color: #008000;">// 次の変数は積分の精度を</span>
+    <span style="color: #008000;">// 制御するのに使用</span>
+    <span style="color: #0000ff;">double</span> epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;      <span style="color: #008000;">// 絶対精度、相対精度を使うには負値をセット</span>
+    <span style="color: #0000ff;">double</span> epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;   <span style="color: #008000;">// 相対精度、絶対精度を使うには負値をセット</span>
+    <span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>; <span style="color: #008000;">// 最大部分間隔をセット、200-500がお勧め</span>
+    
+    <span style="color: #008000;">// 結果は、アルゴリズムで返される近似積分値を保持</span>
+    <span style="color: #008000;">// abserrは |I - result| に対する上側境界の見積もり値</span>
+    <span style="color: #008000;">// ここで I は積分値</span>
+    <span style="color: #0000ff;">double</span> result, abserr;
+    
+    <span style="color: #008000;">// Nag_QuadProgressの構造、</span>
+    <span style="color: #008000;">// max_num_subint要素を持つ内部的に割り当てられたポインタを含む</span>
+    Nag_QuadProgress qp;
+    
+    <span style="color: #008000;">// NAGエラーパラメータ(構造)</span>
+    NagError fail;
+    
+    <span style="color: #008000;">// パラメータはNAGの通信構造体で被積分関数に渡される</span>
+    <span style="color: #0000ff;">struct</span> user param;
+    param.<span style="color: #000000;">A</span>  <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+    param.<span style="color: #000000;">Xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+    param.<span style="color: #000000;">W</span>  <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+
+    Nag_User comm;
+    comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Pointer<span style="color: #000000;">)</span><span style="color: #000040;">&amp;</span>param;
+    
+    <span style="color: #008000;">// 積分実行</span>
+    <span style="color: #008000;">// NAGの不定積分子で使用可能な3種類の不定境界タイプ </span>
+    <span style="color: #008000;">// integrator Nag_LowerSemiInfinite, Nag_UpperSemiInfinite, Nag_Infinite</span>
+    <span style="color: #008000; font-style: regular;">/*
+    d01smc(f_callback, Nag_LowerSemiInfinite, b, epsabs, epsrel, max_num_subint, 
+    &amp;result, &amp;abserr, &amp;qp, &amp;comm, &amp;fail);
+    */</span>
+    d01sjc<span style="color: #000000;">(</span>f_callback, a, b, epsabs, epsrel, max_num_subint, 
+    <span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, <span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+        
+    <span style="color: #008000;">// エラーメッセージを出力してエラーをチェック</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;
+    
+    <span style="color: #008000;">// 次の3つのエラー以外のエラーは</span>
+    <span style="color: #008000;">// 入力が不正か、割り当ての失敗</span>
+    <span style="color: #008000;">// 再び積分ルーチンを呼び出す前にメモリリークを避け</span>
+    <span style="color: #008000;">// メモリ割り当てを解放する必要がある</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM 
+        <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_ALLOC_FAIL<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">)</span>;
+        NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">)</span>;
+        NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">)</span>;
+        NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, result<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Multi-dimension_Integral_Function"></a><span class="mw-headline">高次積分関数</span></h3>
+<p>2次以上の高次積分に対して、NAG積分子関数 <b>d01wcc</b>を呼び出し、積分を実行します。 
+</p><p>ユーザ定義のコールバック関数は、NAGの<b>d01wcc</b>関数に渡されます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> NAG_CALL f_callback<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> n, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> z, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span> 
+	<span style="color: #0000ff;">double</span> tmp_pwr;
+	tmp_pwr <span style="color: #000080;">=</span> z<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">+</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+	<span style="color: #0000ff;">return</span> z<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #000000;">exp</span><span style="color: #000000;">(</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>tmp_pwr<span style="color: #000040;">*</span>tmp_pwr<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>メイン関数：
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> nag_d01wcc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>	
+	<span style="color: #008000;">// 入力変数</span>
+	<span style="color: #0000ff;">int</span> ndim <span style="color: #000080;">=</span> NDIM;  <span style="color: #008000;">// 積分の次元</span>
+	<span style="color: #0000ff;">double</span> a<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>, b<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>;
+	<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span>; <span style="color: #000040;">++</span>ii<span style="color: #000000;">)</span>  <span style="color: #008000;">// 積分範囲</span>
+	<span style="color: #000000;">{</span>
+		a<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+		b<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">int</span> minpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;	
+	<span style="color: #0000ff;">int</span> maxpts <span style="color: #000080;">=</span> MAXPTS;  <span style="color: #008000;">// 関数評価の最大数</span>
+	<span style="color: #0000ff;">double</span> eps <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>; <span style="color: #008000;">// 精度をセット</span>
+	
+	<span style="color: #008000;">// 変数出力</span>
+	<span style="color: #0000ff;">double</span> finval, acc;
+	Nag_User comm;	
+	NagError fail;	
+	
+	d01wcc<span style="color: #000000;">(</span>ndim, f_callback, a, b, <span style="color: #000040;">&amp;</span>minpts, maxpts, eps, <span style="color: #000040;">&amp;</span>finval, <span style="color: #000040;">&amp;</span>acc, 
+	<span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">)</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, fail.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;
+	
+	<span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_NOERROR <span style="color: #000040;">||</span> fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_QUAD_MAX_INTEGRAND_EVAL<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Requested accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, eps<span style="color: #000000;">)</span>;
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Estimated value    =%12.4f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, finval<span style="color: #000000;">)</span>;  
+		<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Estimated accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, acc<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Differentiation"></a><span class="mw-headline"><span class="OIndex">微分</span></span></h2>
+<p><b><a href="../../OriginC/OriginC/Ocmath_derivative_(global_function).html" title="OriginC:Ocmath derivative (global function)">ocmath_derivative</a></b>関数は、スムージング無しで単純な微分を計算するのに使用します。  関数は、以下に示すように、ocmath.hで宣言されます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> ocmath_derivative<span style="color: #000000;">(</span>
+    <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> pXData, <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> pYData, uint nSize, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;</pre>
+<p>関数は、すべての欠損値を無視し、データ点とその隣のデータ点間の2つの勾配の平均を取ることで微分を計算します。  dwCntrl引数が0というデフォルト値を使う場合、関数は、データの方向が変わるときに入力されます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_derivative<span style="color: #000000;">(</span>vx, vy, vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;successfully&quot;</span><span style="color: #000000;">)</span>;</pre>
+<p>dwCntrlがDERV_PEAK_AS_ZEROにセットされると、データの方向が変わった場合に関数に0が入力されます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_derivative<span style="color: #000000;">(</span>vx, vy, vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, DERV_PEAK_AS_ZERO<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;successfully&quot;</span><span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

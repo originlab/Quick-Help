@@ -1,0 +1,46 @@
+﻿<h1 class="firstheading">エラーの取扱い</h1><p class='urlname' style='display: none'>Error-Handling</p>
+<p>エラーが発生するとLabTalkスクリプトは中断します。しかし、エラーが発生してもスクリプトの実行を続けたいときがあります。この場合、Originでエラーが発生するスクリプトの一部分を中括弧 (&quot;{&quot; と &quot;}&quot;) で囲みます。Originはエラーがあるセクションに到達すると、&quot;}&quot; までのスクリプトは飛ばし、中括弧の外から実行が再開されます。この意味では、中括弧と run.section() コマンドは同じ動作になります。
+</p><p>以下は、エラーを取り扱う方法を示す単純なサンプルです。スクリプトウィンドウでスクリプトを実行する前に、新しいワークシートを作成し、列Cが存在しないことを確認してください。 
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// エラー取扱いなしのスクリプト</span>
+type <span style="color: #ff00ff;">&quot;Start the section&quot;</span>;
+stats col<span style="color: #000000;">(</span>c<span style="color: #000000;">)</span>;
+stats.<span style="color: #000080;">max</span><span style="color: #000080;">=</span>;	
+type <span style="color: #ff00ff;">&quot;Finished the section&quot;</span>;</pre>
+<p>コード行<code>stats col(c);</code>は、列Cが存在しないのでエラーが発生します。そして、スクリプトが中断し、次の出力だけ行われます。
+</p>
+<pre class="lt" style="font-family:monospace;">Start the section
+Failed to resolve range string, VarName <span style="color: #000080;">=</span> ix, VarValue <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span>c<span style="color: #000000;">)</span></pre>
+<p>今度は、中括弧を入れて、エラーの取扱いを行います。エラーが発生したかどうかを示す変数を追加し、システム変数を使ってOriginのエラーメッセージを一時的に遮断します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// エラーの取り扱いのあるスクリプト </span>
+type <span style="color: #ff00ff;">&quot;Start the section&quot;</span>;
+int iNOE <span style="color: #000080;">=</span> @NOE;  <span style="color: #008000;">// 現在のOriginエラーメッセージ出力フラグを保存する</span>
+<span style="color: #008000;">// エラーの発生するセクション</span>
+<span style="color: #000000;">{</span>
+	@NOE <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// Originのエラーメッセージを中断する</span>
+	vErr <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// エラー変数を true (1)にセット</span>
+	stats col<span style="color: #000000;">(</span>c<span style="color: #000000;">)</span>; <span style="color: #008000;">// これがエラーを引き起こす可能性があるコード</span>
+	stats.<span style="color: #000080;">max</span><span style="color: #000080;">=</span>; <span style="color: #008000;">// エラーが無い時のみ実行は継続する</span>
+	vErr <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; <span style="color: #008000;">// エラーが無い場合、変数は false (0)を返す</span>
+<span style="color: #000000;">}</span>
+@NOE <span style="color: #000080;">=</span> iNOE; <span style="color: #008000;">// Originのエラーメッセージを再表示</span>
+if<span style="color: #000000;">(</span>vErr<span style="color: #000000;">)</span> ty An error occurred.<span style="color: #000080;">Continuing</span> ...;
+type <span style="color: #ff00ff;">&quot;Finished the section&quot;</span>;</pre>
+<p>出力は次のとおりです。
+</p>
+<pre>
+Start the section
+An error occurred.Continuing ...
+Finished the section
+</pre>
+<p>コード <code>stats col(c)</code> でのエラーの後、中括弧 (<b>}</b>) の外側のコードが実行され、必要に応じてエラーをトラップして処理を行います。
+もし、発生したすべてのエラーの記録を保持したい場合、@ NOEに関連する行を、メッセージログでコメントアウトすることができます。
+</p>
+
+
+
+
+
+
+    

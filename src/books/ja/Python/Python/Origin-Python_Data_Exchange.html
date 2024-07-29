@@ -1,0 +1,157 @@
+﻿<h1 class="firstheading">Origin-Python Data Exchange</h1>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#DataFrame_and_Column_Format"><span class="tocnumber">1</span> <span class="toctext">DataFrame and Column Format</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Get_Tree_in_Origin_as_dict"><span class="tocnumber">2</span> <span class="toctext">Get Tree in Origin as dict</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Matrix_Data_Exchange"><span class="tocnumber">3</span> <span class="toctext">Matrix Data Exchange</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Putting_Data_to_Columns"><span class="tocnumber">4</span> <span class="toctext">Putting Data to Columns</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Worksheet_User_Tree_Access"><span class="tocnumber">5</span> <span class="toctext">Worksheet User Tree Access</span></a></li>
+</ul>
+</div>
+<p>&#160;</p>
+<p>This folder contains examples showing data exchange between Python (list, dataframe, dictionary) and Origin objects ( workbook, matrixbook, project variables).</p>
+<br />
+<br />
+<h2><a name="DataFrame_and_Column_Format" id="DataFrame_and_Column_Format"></a><span class="mw-headline">DataFrame and Column Format</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This sample shows how to set Column Format with DataFrame and from_df, to_df functions.
+Make sure you've installed pandas. To install the module, 
+open the Script Window (Shift+Alt+3), type the following and press Enter:
+ pip install pandas
+
+The following will check and install:
+ pip -chk pandas
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+<span style="color: #ff7700;font-weight:bold;">import</span> pandas <span style="color: #ff7700;font-weight:bold;">as</span> pd
+
+<span style="color: #d00; font-style: italic;"># Create a dataframe to fill the sheet</span>
+df <span style="color: #000;">=</span> pd.<span style="color: #000;">DataFrame</span><span style="color: #000;">(</span><span style="color: #000;">{</span>
+    <span style="color: #0a0;">'Date'</span>: <span style="color: #000;">[</span><span style="color: #0a0;">'10/25/2018'</span><span style="color: #000;">,</span><span style="color: #0a0;">'02/21/2019'</span><span style="color: #000;">,</span><span style="color: #0a0;">'04/01/2020'</span><span style="color: #000;">]</span><span style="color: #000;">,</span>
+    <span style="color: #0a0;">'Gender'</span>:<span style="color: #000;">[</span><span style="color: #0a0;">'Male'</span><span style="color: #000;">,</span><span style="color: #0a0;">'Male'</span><span style="color: #000;">,</span><span style="color: #0a0;">'Female'</span><span style="color: #000;">]</span><span style="color: #000;">,</span>
+    <span style="color: #0a0;">'Score'</span>: <span style="color: #000;">[</span><span style="color: #000;">75.5</span><span style="color: #000;">,</span> <span style="color: #000;">86.7</span><span style="color: #000;">,</span> <span style="color: #000;">91</span><span style="color: #000;">]</span><span style="color: #000;">,</span>
+<span style="color: #000;">}</span><span style="color: #000;">)</span>
+
+df<span style="color: #000;">[</span><span style="color: #0a0;">'Date'</span><span style="color: #000;">]</span> <span style="color: #000;">=</span> pd.<span style="color: #000;">to_datetime</span><span style="color: #000;">(</span>df<span style="color: #000;">[</span><span style="color: #0a0;">'Date'</span><span style="color: #000;">]</span><span style="color: #000;">)</span>
+df<span style="color: #000;">[</span><span style="color: #0a0;">'Gender'</span><span style="color: #000;">]</span><span style="color: #000;">=</span> pd.<span style="color: #000;">Categorical</span><span style="color: #000;">(</span>df<span style="color: #000;">[</span><span style="color: #0a0;">'Gender'</span><span style="color: #000;">]</span><span style="color: #000;">)</span>
+
+wks<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+wks.<span style="color: #000;">from_df</span><span style="color: #000;">(</span>df<span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;">#can also create book and get first sheet like this</span>
+wks2<span style="color: #000;">=</span>op.<span style="color: #000;">new_book</span><span style="color: #000;">(</span><span style="color: #0a0;">'w'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'Copy using DF'</span><span style="color: #000;">)</span><span style="color: #000;">[</span><span style="color: #000;">0</span><span style="color: #000;">]</span>
+
+<span style="color: #d00; font-style: italic;">#column formats like date is automatically handled</span>
+df1<span style="color: #000;">=</span>wks.<span style="color: #000;">to_df</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+wks2.<span style="color: #000;">from_df</span><span style="color: #000;">(</span>df1<span style="color: #000;">)</span>
+</pre>
+<h2><a name="Get_Tree_in_Origin_as_dict" id="Get_Tree_in_Origin_as_dict"></a><span class="mw-headline">Get Tree in Origin as dict</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+To show how to get a Tree in Origin. 
+Tree variables are used extensively inside Origin. In this example, we use an X-Function
+which will generate a Tree after its execution. The Tree will have the same name as the 
+X-Function, which in the sample below is "fitlr". It does a simple linear fit and generates
+basic stats fromt the fit, see
+https://www.originlab.com/doc/X-Function/ref/fitLR
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+fn<span style="color: #000;">=</span>op.<span style="color: #000;">path</span><span style="color: #000;">(</span><span style="color: #0a0;">'e'</span><span style="color: #000;">)</span> + <span style="color: #0a0;">'Samples<span style="color: #000099; font-weight: bold;">\C</span>urve Fitting<span style="color: #000099; font-weight: bold;">\L</span>inear Fit.dat'</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+wks.<span style="color: #000;">from_file</span><span style="color: #000;">(</span>fn<span style="color: #000;">,</span><span style="color: #900090;">False</span><span style="color: #000;">)</span>
+<span style="color: #d00; font-style: italic;">#fit A(x) D(y)</span>
+wks.<span style="color: #000;">get_book</span><span style="color: #000;">(</span><span style="color: #000;">)</span>.<span style="color: #000;">lt_exec</span><span style="color: #000;">(</span><span style="color: #0a0;">'fitlr (A,D)'</span><span style="color: #000;">)</span>
+dd <span style="color: #000;">=</span> op.<span style="color: #000;">lt_tree_to_dict</span><span style="color: #000;">(</span><span style="color: #0a0;">'fitlr'</span><span style="color: #000;">)</span>
+slope <span style="color: #000;">=</span> dd<span style="color: #000;">[</span><span style="color: #0a0;">'b'</span><span style="color: #000;">]</span>
+err <span style="color: #000;">=</span> dd<span style="color: #000;">[</span><span style="color: #0a0;">'berr'</span><span style="color: #000;">]</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'slope= {slope:.3f} +- {err:.3f}'</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Matrix_Data_Exchange" id="Matrix_Data_Exchange"></a><span class="mw-headline">Matrix Data Exchange</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''This example transfers a 3D Numpy array (four 3X3 matrices) into Origin,
+the data is saved into a matrix sheet containing four matrix objects. Then
+the data is extracted from the matrix sheet and saved into Numpy arrays. '''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> numpy <span style="color: #ff7700;font-weight:bold;">as</span> np
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+arr<span style="color: #000;">=</span>np.<span style="color: #000;">random</span>.<span style="color: #000;">rand</span><span style="color: #000;">(</span><span style="color: #000;">4</span><span style="color: #000;">,</span><span style="color: #000;">3</span><span style="color: #000;">,</span><span style="color: #000;">3</span><span style="color: #000;">)</span>
+
+mxs<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #0a0;">'m'</span><span style="color: #000;">)</span>
+mxs.<span style="color: #000;">from_np</span><span style="color: #000;">(</span>arr<span style="color: #000;">)</span>
+mxs.<span style="color: #000;">show_thumbnails</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># Extract the data from the four matrix objects and save into a Numpy 3D array.</span>
+arr_3d<span style="color: #000;">=</span>mxs.<span style="color: #000;">to_np3d</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>arr_3d.<span style="color: #000;">shape</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># Extract the data from the first matrix object and save into a Numpy 2D array.</span>
+arr_2d<span style="color: #000;">=</span>mxs.<span style="color: #000;">to_np2d</span><span style="color: #000;">(</span><span style="color: #000;">0</span><span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>arr_2d.<span style="color: #000;">shape</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Putting_Data_to_Columns" id="Putting_Data_to_Columns"></a><span class="mw-headline">Putting Data to Columns</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This sample shows how to use from_list function to put data to Columns
+'''</span>
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># Prepare data.</span>
+data<span style="color: #000;">=</span><span style="color: #000;">[</span>x/<span style="color: #000;">10</span>. <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">(</span><span style="color: #000;">50</span><span style="color: #000;">)</span><span style="color: #000;">]</span>
+
+<span style="color: #d00; font-style: italic;"># Prepare worksheet.</span>
+wks<span style="color: #000;">=</span>op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># Put data to col(A), and set Long Name, Units, designation as well</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">(</span><span style="color: #0a0;">'A'</span><span style="color: #000;">,</span>data<span style="color: #000;">,</span> <span style="color: #0a0;">'time'</span><span style="color: #000;">,</span> <span style="color: #0a0;">'sec'</span><span style="color: #000;">,</span>axis<span style="color: #000;">=</span><span style="color: #0a0;">'N'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># Prepare data and out data to col(B)</span>
+data1<span style="color: #000;">=</span><span style="color: #000;">[</span>x*<span style="color: #000;">1.5</span> <span style="color: #ff7700;font-weight:bold;">for</span> x <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">range</span><span style="color: #000;">(</span><span style="color: #000;">50</span><span style="color: #000;">)</span><span style="color: #000;">]</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">(</span><span style="color: #0a0;">'B'</span><span style="color: #000;">,</span> data1<span style="color: #000;">,</span> axis<span style="color: #000;">=</span><span style="color: #0a0;">'X'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># Add a third column</span>
+wks.<span style="color: #000;">cols</span><span style="color: #000;">=</span><span style="color: #000;">3</span>
+
+<span style="color: #d00; font-style: italic;"># Use the sum of data and data1 to set the third column</span>
+wks.<span style="color: #000;">from_list</span><span style="color: #000;">(</span><span style="color: #000;">2</span><span style="color: #000;">,</span> <span style="color: #000;">[</span><span style="color: #900090;">sum</span><span style="color: #000;">(</span>i<span style="color: #000;">)</span> <span style="color: #ff7700;font-weight:bold;">for</span> i <span style="color: #ff7700;font-weight:bold;">in</span> <span style="color: #900090;">zip</span><span style="color: #000;">(</span>data<span style="color: #000;">,</span> data1<span style="color: #000;">)</span><span style="color: #000;">]</span><span style="color: #000;">,</span> comments <span style="color: #000;">=</span> <span style="color: #0a0;">'A+B'</span><span style="color: #000;">)</span>
+</pre>
+<h2><a name="Worksheet_User_Tree_Access" id="Worksheet_User_Tree_Access"></a><span class="mw-headline">Worksheet User Tree Access</span></h2>
+<pre class="python" style="font-family:monospace;">
+<span style="color: #0a0;">'''
+This sample shows how to prepare a worksheet tree, and 
+how to read the values back. This is useful to save the metadata
+of a data file. See the blog:
+https://blog.originlab.com/accessing-metadata-using-python
+'''</span>
+
+<span style="color: #ff7700;font-weight:bold;">import</span> originpro <span style="color: #ff7700;font-weight:bold;">as</span> op
+
+<span style="color: #d00; font-style: italic;"># Create a new worksheet and set worksheet tree values.</span>
+wks <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+wks.<span style="color: #000;">set_str</span><span style="color: #000;">(</span><span style="color: #0a0;">"tree.data.name"</span><span style="color: #000;">,</span> <span style="color: #0a0;">"Larry"</span><span style="color: #000;">)</span>
+wks.<span style="color: #000;">set_int</span><span style="color: #000;">(</span><span style="color: #0a0;">"tree.data.age"</span><span style="color: #000;">,</span> <span style="color: #000;">37</span><span style="color: #000;">)</span>
+wks.<span style="color: #000;">set_float</span><span style="color: #000;">(</span><span style="color: #0a0;">"tree.data.mean"</span><span style="color: #000;">,</span> <span style="color: #000;">23.56</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># access the tree as a dictionary</span>
+dd <span style="color: #000;">=</span> wks.<span style="color: #000;">userprops</span><span style="color: #000;">[</span><span style="color: #0a0;">'data'</span><span style="color: #000;">]</span>
+<span style="color: #000;">user</span><span style="color: #000;">=</span>dd<span style="color: #000;">[</span><span style="color: #0a0;">'name'</span><span style="color: #000;">]</span>
+value<span style="color: #000;">=</span>dd<span style="color: #000;">[</span><span style="color: #0a0;">'age'</span><span style="color: #000;">]</span>
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'{user} is {value}'</span><span style="color: #000;">)</span>
+
+<span style="color: #d00; font-style: italic;"># you can also get the tree as an xml ElementTree for more advanced usage</span>
+trWks <span style="color: #000;">=</span> wks.<span style="color: #000;">usertree</span>
+trData <span style="color: #000;">=</span> trWks.<span style="color: #000;">find</span><span style="color: #000;">(</span><span style="color: #0a0;">'data'</span><span style="color: #000;">)</span>
+<span style="color: #ff7700;font-weight:bold;">for</span> child <span style="color: #ff7700;font-weight:bold;">in</span> trData:
+    <span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>f<span style="color: #0a0;">'{child.tag} = {child.text}'</span><span style="color: #000;">)</span>
+    
+<span style="color: #d00; font-style: italic;"># how to put a modified tree to another sheet</span>
+wk2 <span style="color: #000;">=</span> op.<span style="color: #000;">new_sheet</span><span style="color: #000;">(</span><span style="color: #000;">)</span>
+age_node<span style="color: #000;">=</span>trData.<span style="color: #000;">find</span><span style="color: #000;">(</span><span style="color: #0a0;">'age'</span><span style="color: #000;">)</span>
+age_node.<span style="color: #000;">text</span><span style="color: #000;">=</span><span style="color: #0a0;">'47'</span>
+
+wk2.<span style="color: #000;">usertree</span><span style="color: #000;">=</span>trWks
+<span style="color: #ff7700;font-weight:bold;">print</span><span style="color: #000;">(</span>wk2.<span style="color: #000;">userprops</span><span style="color: #000;">[</span><span style="color: #0a0;">'data'</span><span style="color: #000;">]</span><span style="color: #000;">[</span><span style="color: #0a0;">'age'</span><span style="color: #000;">]</span><span style="color: #000;">)</span>
+</pre>

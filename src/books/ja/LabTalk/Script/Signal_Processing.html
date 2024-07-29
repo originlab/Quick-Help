@@ -1,0 +1,199 @@
+﻿<h1 class="firstheading">信号処理</h1><p class='urlname' style='display: none'>Signal-Processing</p>
+<p>Originは、信号処理、ノイズデータのスムージングからFFT、逆FFT、ショートタイムFFT、コンボリューションと相関、FFtフィルタリング、ウェーブレット分析のXファンクションとLabTalk関数を提供しています。
+</p><p>これらのXファンクションは、<span class="OIndex"><b>信号処理</b></span>カテゴリーで利用でき、次のコマンドを実行して、一覧表示できます。
+</p>
+<pre class="lt" style="font-family:monospace;">lx cat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;signal processing*&quot;</span>;</pre>
+<p>ショートタイムFFTやウェーブレットなどのいくつかの機能は、OriginProでのみ利用できます。
+</p><p>信号処理のLabTalk関数は、<a href="../../LabTalk/Category/Signal_Processing_Functions_(Labtalk).html" title="Category:信号処理関数 (Labtalk)">信号処理関数</a>で使用でき、複数のデータセットの振幅、位相などのFFT結果を個別に計算し、結果を目的の列に配置するために使用されます。一方、これらの関数を使用して、異なるデータセット間でDCオフセット除去振幅を比較できます。
+</p><p>次のセクションでは、スクリプトから信号処理のXファンクションとLabTalk関数を呼び出すいくつかの簡単なサンプルを提供しています。
+</p>
+<h2><a name="Smoothing"></a><span class="mw-headline">スムージング</span></h2>
+<p>ノイズデータの<span class="OIndex">スムージング</span> は、 <a class="external text" href="../../XFunction/X-Function/Smooth.html"><b>smooth</b></a> Xファンクションを使って実行することができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 3次多項式でSavitzkyGolay法を使って</span>
+<span style="color: #008000;">// ワークシートの列1,2のXYデータをスムージング</span>
+range r<span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// ワークシートにXYがあり、アクティブである前提</span>
+smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>r meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>;</pre>
+<p>レイヤ内のすべてのプロットをスムージングするため、以下のプロットをループ
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// レイヤ内のデータプロットの数を数え、結果を </span>
+<span style="color: #008000;">// 変数&quot;count&quot;に保存</span>
+layer <span style="color: #000080;">-</span>c;       
+<span style="color: #008000;">// このグラフページの名前を取得      </span>
+string gname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;   
+<span style="color: #008000;">// smoothという名前の新しいブックを作成 - 実際の名前はbkname$に保存されている</span>
+newbook na<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Smoothed; 
+<span style="color: #008000;">// 列なしで開始</span>
+wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;          
+loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,count<span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 入力範囲は&apos;ii&apos;番目のプロットを参照</span>
+    range riy <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>gname<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000080;">!$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;            
+    <span style="color: #008000;">// 出力範囲は2つの新しい列を参照</span>
+   range roy <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>bkname<span style="color: #000080;">$</span><span style="color: #000000;">]</span><span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">*</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>; 
+    <span style="color: #008000;">// 3次多項式を使ったSavitsky-Golay スムージング</span>
+    smooth iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>riy meth<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sg poly<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">3</span> oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>roy;   
+<span style="color: #000000;">}</span></pre>
+<h2><a name="FFT_and_IFFT"></a><span class="mw-headline">FFT および IFFT</span></h2>
+<p>次のサンプルでは、<a href="../../LabTalk/Category/Signal_Processing_Functions_(Labtalk).html" title="Category:信号処理関数 (Labtalk)">信号処理関数</a>にあるLabTalk関数によってFFT結果を個別に取得する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+<span style="color: #008000;">// 信号データをインポート</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\fftfilter1.DAT&quot;</span>;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// 5列を追加して、異なる値を保存</span>
+worksheet <span style="color: #000080;">-</span>a <span style="color: #0000dd;">5</span>;
+<span style="color: #008000;">// 区別するために列ラベルを設定</span>
+col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Raw Signal&quot;</span>;
+
+<span style="color: #008000;">// FFT分析からの複素数の結果を保存する前に、データ型をcomplexに設定</span>
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;FFT Complex&quot;</span>;
+
+<span style="color: #008000;">// FFT複素数結果を計算</span>
+col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftc<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//シフトなし</span>
+
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Frequency&quot;</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//X列に設定</span>
+
+<span style="color: #008000;">// 列Aの時間データに基づいて周波数を計算</span>
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftfreq<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">-</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>, wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span><span style="color: #000000;">)</span>;
+
+col<span style="color: #000000;">(</span>E<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Magnitude&quot;</span>;
+
+<span style="color: #008000;">// FFTマグニチュード結果</span>
+col<span style="color: #000000;">(</span>E<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftmag<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//  fftmag(col(C), 2)で両側のシフト付きマグニチュードを取得</span>
+
+col<span style="color: #000000;">(</span>F<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Phase&quot;</span>;
+col<span style="color: #000000;">(</span>F<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftphase<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// fftphase(col(C), 2, 1, 0)でラジアン単位で両側の巻きのない位相を取得</span>
+
+wks.<span style="color: #000080;">col7</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+col<span style="color: #000000;">(</span>G<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Shifted FFT Complex&quot;</span>;
+col<span style="color: #000000;">(</span>G<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftshift<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 計算結果のスパークラインを更新</span>
+sparklines sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> c1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> c2<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span>;
+<span style="color: #008000;">// コンテンツに合わせて列幅を自動調整</span>
+wautosize;</pre>
+<p>次の例は、シフト付きFFT複素数結果からIFFT結果を取得する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//上記の例から続けて、G列のFFT結果をシフトしたと仮定</span>
+<span style="color: #008000;">// さらに2列追加して、異なる値を保存</span>
+worksheet <span style="color: #000080;">-</span>a <span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">// 区別するために列にラベル付け</span>
+col<span style="color: #000000;">(</span>H<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Unshifted FFT Complex&quot;</span>;
+<span style="color: #008000;">// データ型をcomplexに設定</span>
+wks.<span style="color: #000080;">col8</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+<span style="color: #008000;">// IFFTを実行する前に、シフトしたFFT結果のシフトを解除</span>
+col<span style="color: #000000;">(</span>H<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> ifftshift<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>G<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+col<span style="color: #000000;">(</span>I<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;IFFT result&quot;</span>;
+wks.<span style="color: #000080;">col9</span>.<span style="color: #000080;">numerictype</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">11</span>;
+<span style="color: #008000;">// シフトされていないFFT結果から逆FFTを計算</span>
+col<span style="color: #000000;">(</span>I<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> invfft<span style="color: #000000;">(</span> col<span style="color: #000000;">(</span>H<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;</pre>
+<p>以下のサンプルでは、FFTの際にウィンドウを指定する方法を示します。
+</p>
+<pre class="lt" style="font-family:monospace;">newbook;
+<span style="color: #008000;">// 信号データをインポート</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\Chirp Signal.dat.&quot;</span>;
+impASC fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span>;
+
+<span style="color: #008000;">// 入力信号の範囲変数を定義</span>
+range rSignal <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span>;
+int wSize <span style="color: #000080;">=</span> rSignal.<span style="color: #000080;">nrows</span>;
+
+col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Apply Blackman window&quot;</span>;
+col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span>B<span style="color: #000000;">)</span> <span style="color: #000080;">*</span> windata<span style="color: #000000;">(</span><span style="color: #0000dd;">6</span>, wSize<span style="color: #000000;">)</span>; <span style="color: #008000;">// Blackmanウィンドウを適用</span>
+
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Amplitude&quot;</span>;
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftamp<span style="color: #000000;">(</span> fftc<span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>C<span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>; <span style="color: #008000;">//Originウィンドウ修正なし</span></pre>
+<p>次のサンプルは、ループを使用して複数の列でFFT分析を実行し、取得した振幅の列と位相の列を並べて配置する方法を示しています。ワークシートで複数の列を選択し、右クリックして<b>複数列の値を設定...</b>を選択することにより、ワークシートで複数の列のFFT結果を直接計算することもできます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//FFT分析用に複数の列データを準備</span>
+newbook;
+int nc <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>, ii;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span>;
+<span style="color: #008000;">//X列に時間データを入力</span>
+col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> data<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span><span style="color: #000080;">-</span>1e<span style="color: #000080;">-</span>3, 1e<span style="color: #000080;">-</span>3<span style="color: #000000;">)</span>;
+<span style="color: #008000;">//5列をf1 Hz正弦波とf2 Hz正弦波の合計を入力</span>
+for<span style="color: #000000;">(</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+double f1, f2;
+f1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">50</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">20</span><span style="color: #000080;">*</span>ii;
+f2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">20</span><span style="color: #000080;">*</span>ii;
+wcol<span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">+</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>pi<span style="color: #000080;">*</span>f1<span style="color: #000080;">*</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">+</span><span style="color: #000000;">(</span><span style="color: #0000dd;">8</span><span style="color: #000080;">-</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">*</span>sin<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>pi<span style="color: #000080;">*</span>f2<span style="color: #000080;">*</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000080;">+</span>rnd<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//FFTの前に平均値を減算してDCオフセットを除去</span>
+for<span style="color: #000000;">(</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+wcol<span style="color: #000000;">(</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Subtract mean of Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">(</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> wcol<span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">-</span>mean<span style="color: #000000;">(</span> wcol<span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//FFT結果の周波数を計算</span>
+wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>.<span style="color: #000080;">type</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">//X列に設定</span>
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Frequency&quot;</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftfreq<span style="color: #000000;">(</span> col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000080;">-</span>col<span style="color: #000000;">(</span>A<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>, wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">nrows</span> <span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//5列のFFTの振幅と位相を計算</span>
+for<span style="color: #000000;">(</span> ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nc; ii<span style="color: #000080;">++</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+<span style="color: #008000;">//FFTの振幅</span>
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Amplitude&quot;</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftamp<span style="color: #000000;">(</span> fftc<span style="color: #000000;">(</span> wcol<span style="color: #000000;">(</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//FFTの位相</span>
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Phase&quot;</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>C<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Data$(ii)&quot;</span>;
+wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> fftphase<span style="color: #000000;">(</span> fftc<span style="color: #000000;">(</span> wcol<span style="color: #000000;">(</span>nc<span style="color: #000080;">+</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//2つのレイヤに5列のFFT振幅と位相の結果をプロット</span>
+plotstack iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000080;">*</span>nc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> portrait<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> order<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> layer<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> number<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;5 5&quot;</span>;</pre>
+<p><br />
+</p><p><br />
+</p>
+<h2><a name="FFT_and_Filtering"></a><span class="mw-headline">FFTとフィルタリング</span></h2>
+<p>次のサンプルは、 <a class="external text" href="../../XFunction/X-Function/Fft1.html"><b>fft1</b></a> Xファンクションを使ったデータの1D <span class="OIndex">FFT</span>を実行する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// サンプルファイルをインポート</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\fftfilter1.dat&quot;</span>;
+impasc;
+<span style="color: #008000;">// FFTを実行し、名前を付けたツリーに出力</span>
+Tree myfft;
+fft1 ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfft rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>none<span style="color: #000080;">&gt;</span>; 
+<span style="color: #008000;">// コマンド list vtを使ってすべてのツリーを一覧表示</span></pre>
+<p>ツリーに結果を格納すると、その出力に対して次のように分析を行うことができます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 目的のツリーベクターノードをデータセットにコピー</span>
+<span style="color: #008000;">// ピークを位置づけ、周波数成分を平均</span>
+dataset tmp_x<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">freq</span>;
+dataset tmp_y<span style="color: #000080;">=</span>myfft.<span style="color: #000080;">fft</span>.<span style="color: #000080;">amp</span>;
+<span style="color: #008000;">// statsを実行し、結果を出力</span>
+percentile <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">0</span><span style="color: #000000;">:</span><span style="color: #0000dd;">10</span><span style="color: #000000;">:</span><span style="color: #0000dd;">100</span><span style="color: #000000;">}</span>;
+diststats iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>tmp_x, tmp_y<span style="color: #000000;">)</span> percent<span style="color: #000000;">:</span><span style="color: #000080;">=</span>percentile;
+type <span style="color: #ff00ff;">&quot;The mean frequency is $(diststats.mean)&quot;</span>;</pre>
+<p>次のサンプルは、 <b><a class="external text" href="../../XFunction/X-Function/Fft_filters.html">fft_filters</a></b> Xファンクションを使ったデータの信号 <span class="OIndex">フィルタリング</span> を実行する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// ノイズ入りのデータをインポートする</span>
+newbook;
+string filepath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Signal Processing\&quot;</span>;
+string filename<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Signal with High Frequency Noise.dat&quot;</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filepath<span style="color: #000080;">$</span> <span style="color: #000080;">+</span> filename<span style="color: #000080;">$</span>;
+impasc;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span>line;
+&nbsp;
+<span style="color: #008000;">// ローパスフィルタを実行</span>
+fft_filters filter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lowpass cutoff<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1.5</span>;</pre>
+
+
+
+
+
+
+
+    

@@ -1,0 +1,99 @@
+﻿<h1 class="firstheading">アルゴリズム (STFT)</h1>
+<p class="urlname" style="display: none;">ODR(直交距離回帰) アルゴリズム</p>
+<p>STFT入力された信号{<i>ix(n)</i>}をNセクションのスライドウィンドウに分割し、それぞれのセクションにFFTを実行します。さらに、</p>
+<p><img src="../images/Algorithm_(STFT)/math-b7782b6d6de5c1237e94d47beca08bcb.png" title="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" alt="STFT\left \{x[n]\right \} \equiv X(m, \omega)=\sum_{n=-\infty}^\infty x[n]\omega [n-m]e^{-j\omega n}" class="tex" border="0" /></p>
+<p>ここで <img src="../images/Algorithm_(STFT)/math-b5e496a80c0259060dad76468e217c13.png" title="\omega (n)" alt="\omega (n)" class="tex" border="0" /> は、その範囲内で局所的な周波数成分を強調するスライドウィンドウを表します。</p>
+<p><br />
+<b>STFTは、次の手順で計算します。</b></p>
+<ol>
+<li>入力信号を<i>N</i>セクションに分割します。常に<b>ウィンドウの長さ</b>に等しい<i>n</i>が適用されます。</li>
+<li>選択した<b>ウィンドウスタイル</b>が、抽出されたデータを増幅する際に利用されます。</li>
+<li><b>ウィンドウの長さ</b>が<b>FFTの長さ</b>のり小さい時、ウィンドウの両側に0が挿入されます。</li>
+<li>FTTはFTTセクションで算出されます。</li>
+<li>ユーザー定義の<b>重複</b>サイズのウィンドウに移動し、 インプットした信号の終了するまで、1から4までを繰り返します。</li>
+</ol>
+<dl>
+<dd><a class="image"><img alt="STFT algorithms overlap.png" src="../images/Algorithm_(STFT)/STFT_algorithms_overlap.png" width="352" border="0" /></a></dd>
+</dl>
+<p>STFTの結果は、N列とM行から構成される行列で、MとNはそれぞれ、</p>
+<p><img src="../images/Algorithm_(STFT)/math-9e348c3fe7f09aadbbd7d72a053ac985.png" title="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" alt="N=floor(\frac{DataSize-Window Size}{WindowSize-OverlapSize})+1\,\!" class="tex" border="0" /></p>
+<p>および、</p>
+<p><img src="../images/Algorithm_(STFT)/math-59e9a587d2252885aae75c225885eb51.png" title="M= \begin{cases} FFTLength/2+1, &amp; \mbox{if input signal is real} \ FFTLength, &amp; \mbox{if input signal is not real} \end{cases}" alt="M= \begin{cases} FFTLength/2+1, &amp; \mbox{if input signal is real} \ FFTLength, &amp; \mbox{if input signal is not real} \end{cases}" class="tex" border="0" /></p>
+<p>行列の<i>j</i>列目は、FFTの<i>j</i>番目のセクションとXの値が<i>j</i>番目のセクションの時間中点であることを示しています。Yの値はサンプル区間<img src="../images/Algorithm_(STFT)/math-5a72f1304af0783657605aed0e38201a.png" title="\Delta t" alt="\Delta t" class="tex" border="0" />の周波数で、<i>N</i>はインプットされたデータポイントの数です。<i>i</i>番目の周波数は:</p>
+<p><img src="../images/Algorithm_(STFT)/math-50aa7a12fb8c13db0f687048c53d8b89.png" title="f_i=\frac i{N\Delta t}" alt="f_i=\frac i{N\Delta t}" class="tex" border="0" /></p>
+<p><br /></p>
+<p><b>サンプル間隔の自動計算について：</b></p>
+<p><b>サンプル間隔</b>で<b>&lt;自動&gt;</b>を選択すると、Originがサンプル区間内で自動的に計算を行います。</p>
+<p>自動的に計算されるサンプリング間隔は、時間データの増加の平均で、これは通常入力信号と結びついているXデータが使われます。結びついているX列が無ければ、行番号が使われます。Originが増加の平均を取得するのに失敗した場合、サンプリング間隔は1にセットされます。</p>
+<p><b>ウィンドウ法</b></p>
+<p>FFTで使用されるウィンドウ法を指定します。デフォルトのオプションは<b>Hanning</b>です。</p>
+<ul>
+<li><b>四角形</b>
+<dl>
+<dd>矩形ウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-1dff02816a08f5abee4db570718fae2e.png" title="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \ 0, &amp; \mbox{otherwise } \end{cases}" alt="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \ 0, &amp; \mbox{otherwise } \end{cases}" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>Welch</b>
+<dl>
+<dd>Welchウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-6e73eab9df4bcc92805e0be4ccc831c1.png" title="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" alt="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>三角</b>
+<dl>
+<dd><b>Triangularウィンドウ</b>：</dd>
+<dd>奇数: <img src="../images/Algorithm_(STFT)/math-0301923ac9ba030df614e6d597b61aca.png" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex" width="301" height="36" border="0" /><br /></dd>
+<dd>偶数: <img src="../images/Algorithm_(STFT)/math-8e83f30fc0b782e1d8b13c070ff8819d.png" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex" width="244" height="35" border="0" /></dd>
+</dl>
+</li>
+<li><b>Bartlett</b>
+<dl>
+<dd>Bartlettウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-e66a9f4dcc74b3ab6be533c1c74db331.png" title="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" alt="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>Hanning</b>
+<dl>
+<dd>Hannウィンドウ：</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-f625e1fbe6f2ba1e906c542714a5a198.png" title="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" alt="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>Hamming</b>
+<dl>
+<dd>Hamming ウィンドウ:</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-b6803ad49e62341c7d027fda8b337cb8.png" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>Blackman</b>
+<dl>
+<dd>Blackmanウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-53be39cb73653898ae42aa3e07614275.png" title="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" alt="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" class="tex" border="0" /></dd>
+</dl>
+</li>
+<li><b>Gaussian</b>
+<dl>
+<dd>Gaussianウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-fab7a042f67f1dfb6dc5556e228508ec.png" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex" border="0" /></dd>
+<dd><i>Alpha</i>は<b>Alpha</b>パラメータで指定されます。</dd>
+</dl>
+</li>
+<li><b>Kaiser</b>
+<dl>
+<dd>Kaiserウィンドウ</dd>
+<dd><img src="../images/Algorithm_(STFT)/math-04b7bbeb549a0b1d5ee22e3d50305676.png" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex" border="0" /></dd>
+<dd>I(ix)はBessel関数を示し、<i>beta</i>は<b>Beta</b>パラメータで指定されます。</dd>
+</dl>
+</li>
+</ul>
+<p><b>結果</b></p>
+<ol>
+<li>複素結果<br />
+各FFTセクションの複素FFT結果です。最初のパートが負の周波数の結果になるようにシフトされます。</li>
+<li>振幅結果<br />
+実部の片側入力信号と虚部の両側入力信号です。この定義は、<a href="../../UserGuide/UserGuide/Algorithm_(FFT1).html" title="ユーザガイド:アルゴリズム(FFT1)">FFTツールの振幅</a>と同様です。両側の結果では、開始部分が負の周波数の結果になるようにシフトが使用されます。</li>
+<li>振幅(dB)<br />
+<img src="../images/Algorithm_(STFT)/math-12ec70533ced68ec298d82a8c5ab34e7.png" title="20\text{log}(\text{Amplitude})" alt="20\text{log}(\text{Amplitude})" class="tex" border="0" /></li>
+</ol>
+<p><b>時間</b><br />
+STFT結果の各FFTセクション時間は、各セクションの信号の時間間隔の中心に対応します。例えば、セクション間隔 (ti, ti+(N-1)*dt) では、STFT結果のFFTセクションの時間は、ti+(N-1)*dt/2 です。</p>

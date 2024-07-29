@@ -1,0 +1,224 @@
+﻿<h1 class="firstheading">Ordinary Differential Equations</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#A_simple_second_order_ODE"><span class="tocnumber">2</span> <span class="toctext">A simple second order ODE</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Second_order_ODE_with_Parameters"><span class="tocnumber">3</span> <span class="toctext">Second order ODE with Parameters</span></a></li>
+    </ul>
+  </div>
+
+  <p>User can access NAG Ordinary Differential Equation (ODE) solvers to evaluate the intial value problem. NAG supplies flexible ODE solvers and methods to solve this kind of problem.</p>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR1</p>
+
+  <h2><a name="A_simple_second_order_ODE"></a><span class="mw-headline">A simple second order ODE</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// Start your functions here.</span>
+
+<span style="color: #0000ff;">#define</span> NEQ <span style="color: #0000dd;">2</span>
+<span style="color: #0000ff;">#define</span> ZERO <span style="color: #0000dd;">0.0</span>
+<span style="color: #0000ff;">#define</span> ONE <span style="color: #0000dd;">1.0</span>
+<span style="color: #0000ff;">#define</span> TWO <span style="color: #0000dd;">2.0</span>
+<span style="color: #0000ff;">#define</span> FOUR <span style="color: #0000dd;">4.0</span>
+
+
+<span style="color: #008000;">// Supply your own differential equation system</span>
+<span style="color: #008000;">// Here is an example of second order oscillator system</span>
+<span style="color: #008000;">// For higher order differential equation, you need to supply its equivalent first-order differential equation system</span>
+<span style="color: #008000;">// i.e.  y'' = -y with initial value y(0)=0, y'(0)=1 can be rewriten as y1'= y2; y2'= -y1</span>
+<span style="color: #008000;">// In addition, by Nag_User struct you can also pass in the parameters for the system</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> NAG_CALL f<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> t, Integer neq, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span>y, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span>yp, Nag_Comm <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        yp<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> y<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+        yp<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000040;">-</span>y<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #0000ff;">void</span> test_diff_eqn<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Integer neq;
+        Nag_RK_method method;
+        <span style="color: #0000ff;">double</span> hstart, pii, tgot, tend, tinc;
+        <span style="color: #0000ff;">double</span>  tol, tstart, twant;
+        Integer i, j, nout;
+        <span style="color: #0000ff;">double</span> thres<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ygot<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ymax<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ypgot<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ystart<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>;
+        Nag_ErrorAssess errass;
+        Nag_Comm comm;
+
+        <span style="color: #008000; font-style: regular;">/* Set initial conditions and input for d02pvc */</span>
+        neq <span style="color: #000080;">=</span> NEQ;  <span style="color: #008000;">// number of differential equations</span>
+
+        pii <span style="color: #000080;">=</span> <span style="color: #0000dd;">3.1415926</span>;
+        tstart <span style="color: #000080;">=</span> ZERO; <span style="color: #008000;">//  span of the time interval (the independant variable) for the solution</span>
+        tend <span style="color: #000080;">=</span> TWO<span style="color: #000040;">*</span>pii;
+
+        ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ZERO; <span style="color: #008000;">// initial values</span>
+        ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ONE;
+
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>neq; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+                thres<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>8;
+        errass <span style="color: #000080;">=</span> Nag_ErrorAssess_off;
+        hstart <span style="color: #000080;">=</span> ZERO;
+        method  <span style="color: #000080;">=</span> Nag_RK_2_3;
+
+        <span style="color: #008000; font-style: regular;">/* Set control for output */</span>
+        nout <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+        tinc <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>tend<span style="color: #000040;">-</span>tstart<span style="color: #000000;">)</span><span style="color: #000040;">/</span>nout;
+
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; i<span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">2</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">==</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>    <span style="color: #008000;">// solve for two kinds of accuracy for the solution</span>
+                        tol <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>3;
+                <span style="color: #0000ff;">else</span>
+                        tol <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>4;
+                <span style="color: #008000;">// setup function need to be called to call the solver nag_ode_ivp_rkts_range</span>
+                <span style="color: #0000ff;">int</span> iwsav<span style="color: #000000;">[</span><span style="color: #0000dd;">130</span><span style="color: #000000;">]</span>;
+                <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> rwsav <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">malloc</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">350</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">32</span><span style="color: #000040;">*</span>neq<span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+                nag_ode_ivp_rkts_setup<span style="color: #000000;">(</span>neq, tstart, tend, ystart, tol, thres, method, errass, hstart, iwsav, rwsav, NAGERR_DEFAULT<span style="color: #000000;">)</span>;
+
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Calculation with tol = %8.1e<span style="color: #666666; font-weight: bold;">\n</span><span style="color: #666666; font-weight: bold;">\n</span>"</span>,tol<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%8.3f   %8.3f   %8.3f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, tstart, ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span>nout<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; j<span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000040;">--</span><span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        twant <span style="color: #000080;">=</span> tend <span style="color: #000040;">-</span> j<span style="color: #000040;">*</span>tinc; <span style="color: #008000;">// the solution at twant is wanted</span>
+
+                        nag_ode_ivp_rkts_range<span style="color: #000000;">(</span>f, neq, twant, <span style="color: #000040;">&amp;</span>tgot, ygot, ypgot, ymax, <span style="color: #000040;">&amp;</span>comm, iwsav, rwsav, NAGERR_DEFAULT<span style="color: #000000;">)</span>;
+                        <span style="color: #008000;">// obtain the solution at tgot, and when no error exit tgot should equal to twant</span>
+                        <span style="color: #008000;">// and ygot[0] will then be the solution we want at time twant</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%8.3f   %8.3f   %8.3f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, tgot, ygot<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, ygot<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;   
+                <span style="color: #000000;">}</span>
+
+                <span style="color: #000000;">free</span><span style="color: #000000;">(</span>rwsav<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Second_order_ODE_with_Parameters"></a><span class="mw-headline">Second order ODE with Parameters</span></h2>
+
+  <p>The following example defines a differential equation system with a damped parameter.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Origin.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">////////////////////////////////////////////////////////////////////////////////////</span>
+<span style="color: #008000;">// Start your functions here.</span>
+
+<span style="color: #0000ff;">#define</span> NEQ <span style="color: #0000dd;">2</span>
+<span style="color: #0000ff;">#define</span> ZERO <span style="color: #0000dd;">0.0</span>
+<span style="color: #0000ff;">#define</span> ONE <span style="color: #0000dd;">1.0</span>
+<span style="color: #0000ff;">#define</span> TWO <span style="color: #0000dd;">2.0</span>
+<span style="color: #0000ff;">#define</span> FOUR <span style="color: #0000dd;">4.0</span>
+
+
+
+<span style="color: #0000ff;">struct</span> user   <span style="color: #008000;">// parameters in the differential equations</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> beta;
+ 
+<span style="color: #000000;">}</span>;
+
+<span style="color: #008000;">// Supply your own differential equation system here</span>
+<span style="color: #008000;">// Here is an example of damped oscillator system</span>
+<span style="color: #008000;">// The equivalent first-order differential equation system for this damped system</span>
+<span style="color: #008000;">// y'' = -y-beta*y' with initial value y(0)=0, y'(0)=1 is y1'= y2; y2'= -y1-beta*y2</span>
+<span style="color: #008000;">// By Nag_User struct we can passed in the parameter beta</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> NAG_CALL f<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> t, Integer neq, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span>y, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span>yp, Nag_Comm <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span>sp <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p<span style="color: #000000;">)</span>;
+
+        <span style="color: #0000ff;">double</span> beta; <span style="color: #008000;">// temp variable</span>
+        beta <span style="color: #000080;">=</span> sp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>beta;
+
+        yp<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> y<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+        yp<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000040;">-</span>y<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">-</span>beta<span style="color: #000040;">*</span>y<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #0000ff;">int</span> test_diff_eqn_damp_osc<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Integer neq;
+        Nag_RK_method method;
+        <span style="color: #0000ff;">double</span> hstart, pii, tgot, tend, tinc;
+        <span style="color: #0000ff;">double</span>  tol, tstart, twant;
+        Integer i, j, nout;
+        <span style="color: #0000ff;">double</span> thres<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ygot<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ymax<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ypgot<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>, ystart<span style="color: #000000;">[</span>NEQ<span style="color: #000000;">]</span>;
+        Nag_ErrorAssess errass;
+
+        Nag_Comm comm;  
+        <span style="color: #0000ff;">struct</span> user s;
+        <span style="color: #0000ff;">double</span> beta <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.02</span>;
+        s.<span style="color: #000000;">beta</span> <span style="color: #000080;">=</span> beta; <span style="color: #008000;">// the parameters of the differential equation systems is passed through this Nag_User communication struct</span>
+        comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Pointer<span style="color: #000000;">)</span><span style="color: #000040;">&amp;</span>s;  <span style="color: #008000;">// you can define your own parametrized differential equation system through this way</span>
+
+        <span style="color: #008000; font-style: regular;">/* Set initial conditions and input for d02pvc */</span>
+        neq <span style="color: #000080;">=</span> NEQ;  <span style="color: #008000;">// number of differential equations</span>
+
+        pii <span style="color: #000080;">=</span> <span style="color: #0000dd;">3.1415926</span>;
+        tstart <span style="color: #000080;">=</span> ZERO; <span style="color: #008000;">//  span of the time interval (the independant variable) for the solution</span>
+        tend <span style="color: #000080;">=</span> TWO<span style="color: #000040;">*</span>pii;
+
+        ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ZERO; <span style="color: #008000;">// initial values</span>
+        ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> ONE;
+
+
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>neq; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+                thres<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>8;
+        errass <span style="color: #000080;">=</span> Nag_ErrorAssess_off;
+        hstart <span style="color: #000080;">=</span> ZERO;
+        method  <span style="color: #000080;">=</span> Nag_RK_2_3;
+
+        <span style="color: #008000; font-style: regular;">/* Set control for output */</span>
+        nout <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+        tinc <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>tend<span style="color: #000040;">-</span>tstart<span style="color: #000000;">)</span><span style="color: #000040;">/</span>nout;
+
+
+        <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; i<span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">2</span>; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>i<span style="color: #000080;">==</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>    <span style="color: #008000;">// solve for two kinds of accuracy for the solution</span>
+                        tol <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>3;
+                <span style="color: #0000ff;">else</span>
+                        tol <span style="color: #000080;">=</span> 1.0e<span style="color: #000040;">-</span>4;
+                <span style="color: #008000;">// setup function need to be called to call the solver nag_ode_ivp_rkts_range</span>
+                <span style="color: #0000ff;">int</span> iwsav<span style="color: #000000;">[</span><span style="color: #0000dd;">130</span><span style="color: #000000;">]</span>;
+                <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> rwsav <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">malloc</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000dd;">350</span> <span style="color: #000040;">+</span> <span style="color: #0000dd;">32</span><span style="color: #000040;">*</span>neq<span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+                nag_ode_ivp_rkts_setup<span style="color: #000000;">(</span>neq, tstart, tend, ystart, tol, thres, method, errass, hstart, iwsav, rwsav, NAGERR_DEFAULT<span style="color: #000000;">)</span>;
+
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"<span style="color: #666666; font-weight: bold;">\n</span>Calculation with tol = %8.1e<span style="color: #666666; font-weight: bold;">\n</span><span style="color: #666666; font-weight: bold;">\n</span>"</span>,tol<span style="color: #000000;">)</span>;
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%8.3f   %8.3f   %8.3f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, tstart, ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, ystart<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+
+                <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>j<span style="color: #000080;">=</span>nout<span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; j<span style="color: #000080;">&gt;=</span><span style="color: #0000dd;">0</span>; j<span style="color: #000040;">--</span><span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        twant <span style="color: #000080;">=</span> tend <span style="color: #000040;">-</span> j<span style="color: #000040;">*</span>tinc; <span style="color: #008000;">// the solution at twant is wanted</span>
+
+                        nag_ode_ivp_rkts_range<span style="color: #000000;">(</span>f, neq, twant, <span style="color: #000040;">&amp;</span>tgot, ygot, ypgot, ymax, <span style="color: #000040;">&amp;</span>comm, iwsav, rwsav, NAGERR_DEFAULT<span style="color: #000000;">)</span>;
+                        <span style="color: #008000;">// obtain the solution at tgot, and when no error exit tgot should equal to twant</span>
+                        <span style="color: #008000;">// and ygot[0] will then be the solution we want at time twant</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%8.3f   %8.3f   %8.3f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, tgot, ygot<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span>, ygot<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span>;   
+                  
+                <span style="color: #000000;">}</span>
+
+                <span style="color: #000000;">free</span><span style="color: #000000;">(</span>rwsav<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">}</span>
+</pre>

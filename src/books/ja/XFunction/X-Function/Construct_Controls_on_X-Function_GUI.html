@@ -1,0 +1,134 @@
+﻿<h1 class="firstheading">XファンクションGUIでコントロールを構築する</h1>
+<p><span class="OIndex" style="display: none;">Xファンクション, ダイアログでコントロールの構築</span></p>
+<table id="toc" class="toc">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">サマリー</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#You_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Run_the_X-Function"><span class="tocnumber">4</span> <span class="toctext">Xファンクションを実行する</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<h2><a name="Summary" id="Summary"></a><span class="mw-headline">サマリー</span></h2>
+<p>このサンプルはXファンクションのGetN ダイアログをツリーノード変数で構築する方法を示します。この仕組みは複数の変数によるコントロールを避けるために使用します。これはXファンクションダイアログの例です。</p>
+<p><a class="image"><img alt="OCguide xf example make tree.png" src="../images/Construct_Controls_on_X-Function_GUI/OCguide_xf_example_make_tree.png" width="360" height="427" border="0" /></a></p>
+<h2><a name="You_will_learn" id="You_will_learn"></a><span class="mw-headline">学習する項目</span></h2>
+<ol>
+<li>make_treeによって異なるコントロールを作成する方法</li>
+<li>GUIを特定のコントロールのイベントで更新する方法</li>
+<li>正しい入力を確認して尋ねる方法</li>
+</ol>
+<h2><a name="Steps" id="Steps"></a><span class="mw-headline">ステップ</span></h2>
+<ol start="1">
+<li><b style="font-weight: bold;">ツール：Xファンクション・ビルダ</b>を選択してXファンクション・ビルダダイアログを開きます。それから<b>ファイル：新しいXファンクションウィザード</b>を選択して入力変数名を <b>GUI</b> とするTreeNode型のXファンクションを作成して「gui_controls.oxf」として保存します。</li>
+<li>Xファンクションをコードビルダで開き、<i>gui_controls_make_tree</i> 関数に以下のコードを追加します。
+<pre class="oc" style="font-family: monospace;">
+if <span style="color: #000000;">(</span> strcmp<span style="color: #000000;">(</span><span style="color: #ff00ff;">"GUI"</span>, lpcszVarName<span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span> <span style="color: #008000;">// 変数を名前でチェック</span><span style="color: #000000;">
+{</span>
+        <span style="color: #008000;">// ID は固有(ユニーク)である必要がある</span>
+        int nBranchID <span style="color: #000080;">=</span> 0x0001;
+        int nUserID <span style="color: #000080;">=</span> GET_USER_DATAID<span style="color: #000000;">(</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">//NodeID を使用してテーマをサポート</span>
+ 
+        GETN_USE<span style="color: #000000;">(</span>tr<span style="color: #000000;">)</span>  <span style="color: #008000;">//このノードを現在のノードとして使用</span>
+ 
+        <span style="color: #008000;">//サブブランチ開始</span>
+        GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>UserInfo, <span style="color: #ff00ff;">"User Information"</span><span style="color: #000000;">)</span>        GETN_ID<span style="color: #000000;">(</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+                <span style="color: #008000;">//文字列編集ボックス</span>
+                GETN_STR<span style="color: #000000;">(</span>UserName, <span style="color: #ff00ff;">"Name"</span>, <span style="color: #ff00ff;">"Unknown"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+ 
+                <span style="color: #008000;">// パスワード編集ボックス</span>
+                GETN_PASSWORD<span style="color: #000000;">(</span>Password, <span style="color: #ff00ff;">"Password"</span>, <span style="color: #ff00ff;">""</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+        GETN_END_BRANCH<span style="color: #000000;">(</span>UserInfo<span style="color: #000000;">)</span> <span style="color: #008000;">//サブブランチ終了</span>
+ 
+        <span style="color: #008000;">//サブブランチ開始</span>
+        GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>Detail, <span style="color: #ff00ff;">"Details"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>       
+                <span style="color: #008000;">// 編集可能なドロップダウンリスト</span>
+                GETN_STRLIST<span style="color: #000000;">(</span>Language, <span style="color: #ff00ff;">"Language"</span>, <span style="color: #ff00ff;">"English"</span>, <span style="color: #ff00ff;">"|English|German"</span><span style="color: #000000;">)</span> 
+                GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+ 
+                <span style="color: #008000;">// ラジオボタン</span>
+                GETN_BEGIN_BRANCH<span style="color: #000000;">(</span>lGender, <span style="color: #ff00ff;">"Gender"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nBranchID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+                        GETN_RADIO_INDEX<span style="color: #000000;">(</span>Gender, <span style="color: #0000dd;">0</span>, <span style="color: #ff00ff;">"Male|Female"</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>                              
+                        <span style="color: #008000;">// ラジオボタンの形式</span>
+                        GETN_OPTION_DISPLAY_FORMAT<span style="color: #000000;">(</span>DISPLAY_EDITOR_LEFT<span style="color: #000000;">)</span>                       
+                GETN_END_BRANCH<span style="color: #000000;">(</span>lGender<span style="color: #000000;">)</span>
+ 
+                <span style="color: #008000;">//数値編集ボックス。age(年齢)は整数でないといけないのでデータ型として "%d”を使用</span>
+                GETN_NUM<span style="color: #000000;">(</span>Age, <span style="color: #ff00ff;">"Age"</span>, <span style="color: #0000dd;">18</span><span style="color: #000000;">)</span> GETN_OPTION_NUM_FORMAT<span style="color: #000000;">(</span><span style="color: #ff00ff;">"%d"</span><span style="color: #000000;">)</span>
+                GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+ 
+                <span style="color: #008000;">//イベント操作と共にチェックボックス設置</span>
+                GETN_CHECK<span style="color: #000000;">(</span>iEmail, <span style="color: #ff00ff;">"Have Email"</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>       GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span><span style="color: #008000;">//チェックボックス</span>
+                        GETN_OPTION_EVENT<span style="color: #000000;">(</span>_show_email<span style="color: #000000;">)</span> <span style="color: #008000;">//iEmailイベントのチェックボックス</span>
+ 
+                <span style="color: #008000;">//文字列編集ボックス</span>
+                GETN_STR<span style="color: #000000;">(</span>Email, <span style="color: #ff00ff;">"Email"</span>, <span style="color: #ff00ff;">""</span><span style="color: #000000;">)</span> GETN_ID<span style="color: #000000;">(</span>nUserID<span style="color: #000040;">++</span><span style="color: #000000;">)</span>          
+        GETN_END_BRANCH<span style="color: #000000;">(</span>Detail<span style="color: #000000;">)</span> <span style="color: #008000;">//サブブランチ終了</span><span style="color: #000000;">
+}</span>
+</pre></li>
+<li><i style="font-style: italic;">「//put your own support static functions here」</i>という行の後に、以下のイベント操作関数を入力します。
+<pre class="oc" style="font-family: monospace;">
+static bool _show_email<span style="color: #000000;">(</span>TreeNode<span style="color: #000040;">&amp;</span> tr, int nRow, int nType, Dialog<span style="color: #000040;">&amp;</span> Dlg<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        TreeNode trDetail <span style="color: #000080;">=</span> tr.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Detail</span>;
+        if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>trDetail <span style="color: #000000;">)</span>
+                return false;
+        int nShow <span style="color: #000080;">=</span> trDetail.<span style="color: #000000;">iEmail</span>.<span style="color: #000000;">nVal</span>;
+        <span style="color: #008000;">//チェックがあれば表示、無いなら非表示</span>
+        trDetail.<span style="color: #000000;">Email</span>.<span style="color: #000000;">Show</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>nShow <span style="color: #000080;">==</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        return true;<span style="color: #000000;">
+}</span>
+ 
+static bool _check_email<span style="color: #000000;">(</span>LPCSTR lpcszEmail<span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+        string strEmail<span style="color: #000000;">(</span>lpcszEmail<span style="color: #000000;">)</span>;
+        if <span style="color: #000000;">(</span> strEmail.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">'@'</span><span style="color: #000000;">)</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span> 
+                return false; <span style="color: #008000;">//1つだけ「@」記号を含む</span>
+        int nSep <span style="color: #000080;">=</span> strEmail.<span style="color: #000000;">Find</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">'@'</span><span style="color: #000000;">)</span>;
+        string strLeft <span style="color: #000080;">=</span> strEmail.<span style="color: #000000;">Left</span><span style="color: #000000;">(</span>nSep<span style="color: #000000;">)</span>;
+        string strRight <span style="color: #000080;">=</span> strEmail.<span style="color: #000000;">Right</span><span style="color: #000000;">(</span>strEmail.<span style="color: #000000;">GetLength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">-</span> nSep <span style="color: #000040;">-</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        if <span style="color: #000000;">(</span> strLeft.<span style="color: #000000;">GetLength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                return false;
+        if <span style="color: #000000;">(</span> strRight.<span style="color: #000000;">GetLength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                return false;
+        LPCSTR lpcszInvalid <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"~!#$%^&amp;*()+ -=|<span style="color: #666666; font-weight: bold;">\\</span>/&gt;&lt;,`"</span>;
+        if <span style="color: #000000;">(</span> strEmail.<span style="color: #000000;">FindOneOf</span><span style="color: #000000;">(</span>lpcszInvalid<span style="color: #000000;">)</span> <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                return false;
+        return true;<span style="color: #000000;">
+}</span>
+</pre></li>
+<li><i style="font-style: italic;">gui_controls_event1</i>関数に、以下のエラーチェックコードを入力します。
+<pre class="oc" style="font-family: monospace;">
+if <span style="color: #000000;">(</span> strcmp<span style="color: #000000;">(</span>lpcszNodeName, <span style="color: #ff00ff;">"Email"</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span><span style="color: #000000;">
+{</span>
+    string strVal <span style="color: #000080;">=</span> trGetN.<span style="color: #000000;">GUI</span>.<span style="color: #000000;">Detail</span>.<span style="color: #000000;">Email</span>.<span style="color: #000000;">strVal</span>;
+    if <span style="color: #000000;">(</span> <span style="color: #000040;">!</span>_check_email<span style="color: #000000;">(</span>strVal<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        strErrMsg <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Invalid Email Address!Please correct it"</span>;
+        <span style="color: #008000;">//OKボタン無効化、エラーがあるときは継続出来なくする</span>
+        bOKEnable <span style="color: #000080;">=</span> false;
+    <span style="color: #000000;">}</span><span style="color: #000000;">
+}</span>
+</pre></li>
+<li><span class="OIndex" style="display: none;">Xファンクション,ダイアログ内のコントロール値を更新</span>返してくる値を「<i>return false</i> 」(デフォルト)から「 <i>return true</i> 」に変更してGUIを強制的に変更します。</li>
+<li>Xファンクションのボディではユーザ設定をツリー上に表示します。<a class="image"><img alt="Ocguide XF Compile Button.PNG" src="../images/Construct_Controls_on_X-Function_GUI/Ocguide_XF_Compile_Button.PNG" width="107" height="24" border="0" /></a>ボタンをクリックしてコンパイルし、変更を保存します。
+<pre class="oc" style="font-family: monospace;">
+out_tree<span style="color: #000000;">(</span>GUI<span style="color: #000000;">)</span>;
+        
+</pre></li>
+</ol>
+<h2><a name="Run_the_X-Function" id="Run_the_X-Function"></a><span class="mw-headline">Xファンクションを実行する</span></h2>
+<ol>
+<li>スクリプトウィンドウで「<i>gui_controls -d</i>」を実行します。</li>
+<li>ダイアログの「Have Email」チェックボックスを付けると、メール編集ボックスが表示されます。</li>
+<li>無効なメールアドレスをメール編集ボックスに入力(例えば「abc」)すると、ダイアログボックスの下部にエラーメッセージが表示され、OKボタンが無効になります。</li>
+<li>OKをクリックします。設定ツリーはスクリプトウィンドウに出力されます。</li>
+</ol>
+
+

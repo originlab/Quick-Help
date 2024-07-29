@@ -1,0 +1,74 @@
+﻿<h1 class="firstheading">ワークブックの操作</h1><p>Originは分割、統合、複製など、LabTalkスクリプトを使用してブックを操作するための機能を提供しています。
+</p>
+<h2><a name="Duplicate_Workbook"></a><span class="mw-headline">ワークブックの複製</span></h2>
+<p>アクティブなワークブックを複製するために、<a href="../../LabTalk/LabTalk/Window_(command).html#-d.3B_Create_a_duplicate_of_the_active_window_and_make_the_new_window_active" title="LabTalk:Window (コマンド)">win -d</a> コマンドを使用します。複製されたワークブックの名前指定が可能で、新たなワークブックは複製後アクティブになります。コマンド <a href="../../LabTalk/LabTalk/Window_(command).html#-da.3B_Create_a_duplicate_of_the_active_window_keeping_the_current_window_active" title="LabTalk:Window (コマンド)">win -da</a> は同じように動作しますが、複製後もアクティブなウィンドウは変わりません。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// プロジェクトを開く</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\Loop_wks.opj&quot;</span>;
+&nbsp;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">// ワークブックS2Freq1をアクティブにする</span>
+win <span style="color: #000080;">-</span>a S2Freq1;
+&nbsp;
+<span style="color: #008000;">// このワークブックを複製して、名前を&quot;MyCopy&quot;とし、</span>
+<span style="color: #008000;">// これをアクティブウィンドウにする</span>
+win <span style="color: #000080;">-</span>d MyCopy;
+&nbsp;
+<span style="color: #008000;">// ワークブックMyCopyを複製し、名前を&quot;MyCopy2&quot;にする</span>
+<span style="color: #008000;">// アクティブウィンドウはMyCopyのままにする</span>
+win <span style="color: #000080;">-</span>da MyCopy2;</pre>
+<h2><a name="Merge_Workbooks"></a><span class="mw-headline">ワークブックを統合</span></h2>
+<p>複数のワークブックをひとつのワークブックに統合するには、Xファンクション<a class="external text" href="../../XFunction/X-Function/Merge_book.html">merge_book</a>を使用します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// プロジェクトを開く</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\LabTalk Script Examples\Loop_wks.opj&quot;</span>;
+&nbsp;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">// Sample1フォルダをアクティブにする</span>
+pe_cd <span style="color: #000080;">/</span>Sample1;
+&nbsp;
+<span style="color: #008000;">// 2つのサブフォルダ内にある、2つのワークブック(S1Freq1 と S1Freq2)を統合する </span>
+<span style="color: #008000;">// 統合されたブック内のワークシート名には、元のワークブック名を使用する</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>recursive rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname;
+&nbsp;
+<span style="color: #008000;">// Sample2フォルダをアクティブにする</span>
+pe_cd <span style="color: #000080;">/</span>Sample2;
+&nbsp;
+<span style="color: #008000;">// 2つのサブフォルダ内にある、2つのワークブック(S2Freq1 と S2Freq2)を統合する</span>
+<span style="color: #008000;">// 統合されたブック内のワークシート名には、元のワークブック名を使用する</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>recursive rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sname;
+&nbsp;
+<span style="color: #008000;">// rootフォルダをアクティブにする</span>
+pe_cd <span style="color: #000080;">/</span>;
+&nbsp;
+<span style="color: #008000;">// 上記スクリプトで作成された2つのワークブックは</span>
+<span style="color: #008000;">// それぞれ&quot;mergebook&quot;という名前をはじめに持つ</span>
+<span style="color: #008000;">// これら2つのワークブックを統合し、1つのワークブックにまとめる</span>
+<span style="color: #008000;">// 最終的得られるワークシートには、</span>
+<span style="color: #008000;">// 元のワークシート名を付ける</span>
+merge_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>project single<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> match<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wkbshort key<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;mergebook*&quot;</span> rename<span style="color: #000000;">:</span><span style="color: #000080;">=</span>wksname;</pre>
+<h2><a name="Split_Workbook"></a><span class="mw-headline">ワークブックの分割</span></h2>
+<p>上記のサンプルでは複数のワークブックを統合して一つにまとめましたが、ワークブックを分割し、単一ワークシートを持つ複数のブックにすることができます。この場合には、Xファンクション<a class="external text" href="../../XFunction/X-Function/Wsplit_book.html">wsplit_book</a>を使用します。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// プロジェクトを開く</span>
+string strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span>;
+strOpj<span style="color: #000080;">$</span> <span style="color: #000080;">+</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\COM Server and Client\Basic Stats on Data.opj&quot;</span>;
+&nbsp;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strOpj<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+&nbsp;
+<span style="color: #008000;">// アクティブなワークブック、RawDataには3つのワークシートがあり、</span>
+<span style="color: #008000;">// このブックを分割し、3つのブックを作成する</span>
+<span style="color: #008000;">// それぞれのワークブックには、元のワークブックからワークシートを1つずつ格納する</span>
+wsplit_book fld<span style="color: #000000;">:</span><span style="color: #000080;">=</span>active;</pre>
+
+
+
+
+
+
+
+    

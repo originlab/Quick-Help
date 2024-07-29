@@ -1,0 +1,79 @@
+﻿<h1 class="firstheading">動画のインポート</h1><p><span class="OIndex" style="display:none">動画</span><span class="OIndex" style="display:none">動画のインポート</span><span class="OIndex" style="display:none">動画の読み込み</span><span class="OIndex" style="display:none">フレームの抽出</span>
+</p>
+<h2><a name="Version_Info"></a><span class="mw-headline">バージョン情報</span></h2>
+<p class="version" >Minimum Origin Version Required: Origin 93 SR0</p>
+<p>Origin Cは、ビデオファイルの読み取りと動画のフレームの行列へのインポートのためにVideoReaderクラスを提供しています。 
+</p><p>このVideoReader クラスを使用するために、ヘッダファイル&quot;VideoReader.h&quot; をソースコードにインクルードする必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\OriginLab\VideoReader.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<p>VideoReaderクラスで、動画ファイルを開き、フレーム数、フレーム率（フレーム/秒）、現在の位置などのプロパティを取得できます。また、検索フレーム、検索時間、行列オブジェクトへの読み込みフレームのためのメソッドを提供しています。
+</p><p>次のサンプルでは、新しい行列ブックを作成し、動画内の10フレームを探します。そして、他のフレームをスキップすることにより、100フレームを行列オブジェクトとして、アクティブ行列シートにロードします。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\VideoReader.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>  <span style="color: #008000;">// ヘッダファイルをインクルード</span>
+<span style="color: #0000ff;">void</span> Import_Video_Ex1<span style="color: #000000;">(</span>string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;d:<span style="color: #666666; font-weight: bold;">\t</span>est.avi&quot;</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        MatrixLayer ml; 
+        ml.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// フレームのための行列シートを作成</span>
+        <span style="color: #0000ff;">char</span> str<span style="color: #000000;">[</span>MAXLINE<span style="color: #000000;">]</span>;
+        VideoReader vr;  <span style="color: #008000;">// VideoReaderを宣言</span>
+        <span style="color: #000000;">strcpy</span><span style="color: #000000;">(</span>str, strFile<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>vr.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>str<span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>  <span style="color: #008000;">// 動画ファイルを開く</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to open video file!&quot;</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #008000;">// フレーム数取得</span>
+        <span style="color: #0000ff;">int</span> iFrameCount <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span>vr.<span style="color: #000000;">GetFrameCount</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%u frames<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>,iFrameCount<span style="color: #000000;">)</span>;
+        <span style="color: #008000;">// 開始フレーム</span>
+        <span style="color: #0000ff;">int</span> iOffset <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+        <span style="color: #008000;">// 読み込むフレームの合計を指定</span>
+        <span style="color: #0000ff;">int</span> iTotalFrames <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span>;
+        <span style="color: #008000;">// 各読み込み間でスキップするフレームを指定</span>
+        <span style="color: #0000ff;">int</span> iSkip <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 全ての他のフレームを読み込む</span>
+        <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> vr.<span style="color: #000000;">SeekFrame</span><span style="color: #000000;">(</span>iOffset<span style="color: #000000;">)</span>;
+        vr.<span style="color: #000000;">ReadFrames</span><span style="color: #000000;">(</span>ml, iTotalFrames, iSkip<span style="color: #000000;">)</span>;  <span style="color: #008000;">// フレームを読み込む</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>vr.<span style="color: #000000;">ReaderReady</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>  
+                vr.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// ビデオリーダを閉じる</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<p>このサンプルでは、時間が測定基準として使用されています。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\VideoReader.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>  <span style="color: #008000;">// ヘッダファイルをインクルード</span>
+<span style="color: #0000ff;">void</span> Import_Video_Ex2<span style="color: #000000;">(</span>string strFile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;d:<span style="color: #666666; font-weight: bold;">\t</span>est.avi&quot;</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        MatrixLayer ml; 
+        ml.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Origin&quot;</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// フレームのための行列シートを作成</span>
+        <span style="color: #0000ff;">char</span> str<span style="color: #000000;">[</span>MAXLINE<span style="color: #000000;">]</span>;
+        VideoReader vr;  <span style="color: #008000;">// VideoReaderを宣言</span>
+        <span style="color: #000000;">strcpy</span><span style="color: #000000;">(</span>str, strFile<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>vr.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>str<span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>  <span style="color: #008000;">// 動画ファイルを開く</span>
+                out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to open video file!&quot;</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #008000;">// フレーム数を取得</span>
+        <span style="color: #0000ff;">int</span> iFrameCount <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span>vr.<span style="color: #000000;">GetFrameCount</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #008000;">// フレーム率を取得</span>
+        <span style="color: #0000ff;">double</span> dFPS <span style="color: #000080;">=</span> vr.<span style="color: #000000;">GetFPS</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">double</span> dRunningTime <span style="color: #000080;">=</span> iFrameCount <span style="color: #000040;">/</span> dFPS;
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%u frames at %f fps with a running time of %f seconds<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>,
+                iFrameCount, dFPS, dRunningTime<span style="color: #000000;">)</span>;
+ 
+        <span style="color: #008000;">// 読み込みのためのセットアップ</span>
+        <span style="color: #0000ff;">double</span> dStartTime <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>; <span style="color: #008000;">// 5秒で読み込み開始</span>
+        <span style="color: #0000ff;">double</span> dSkipLength <span style="color: #000080;">=</span> <span style="color: #0000dd;">3.333</span>; <span style="color: #008000;">// 読み込みの間で3.333秒スキップ</span>
+        vr.<span style="color: #000000;">SeekFrame</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span> dStartTime <span style="color: #000040;">*</span> dFPS<span style="color: #000000;">)</span>; <span style="color: #008000;">// フレーム開始を計算</span>
+        <span style="color: #0000ff;">int</span> iSkip <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span> dSkipLength <span style="color: #000040;">*</span> dFPS; <span style="color: #008000;">// スキップするフレーム数を計算</span>
+        <span style="color: #008000;">// 実際に読み込むフレームの数を計算</span>
+        <span style="color: #0000ff;">int</span> iTotalFrames <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span><span style="color: #000000;">)</span> <span style="color: #000000;">(</span> <span style="color: #000000;">(</span>dRunningTime <span style="color: #000040;">-</span> dStartTime<span style="color: #000000;">)</span> <span style="color: #000040;">*</span> dFPS<span style="color: #000000;">)</span>
+        <span style="color: #000040;">/</span> <span style="color: #000000;">(</span>iSkip <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+        vr.<span style="color: #000000;">ReadFrames</span><span style="color: #000000;">(</span>ml, iTotalFrames, iSkip<span style="color: #000000;">)</span>;  <span style="color: #008000;">// フレームを読み込み</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>vr.<span style="color: #000000;">ReaderReady</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>  
+                vr.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// ビデオリーダを閉じる</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

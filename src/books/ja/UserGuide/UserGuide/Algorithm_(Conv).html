@@ -1,0 +1,34 @@
+﻿<h1 class="firstheading">アルゴリズム (Conv)</h1>
+<table id="toc" class="toc" summary="Contents">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1"><a href="#Fast_algorithm_for_Convolution"><span class="toctext">コンボリューションの高速アルゴリズム</span></a></li>
+<li class="toclevel-1"><a href="#Automatic_Computation_of_Sampling_Interval"><span class="toctext">サンプリング間隔の自動計算</span></a></li>
+</ol>
+</td>
+</tr>
+</table>
+<a name="Fast_algorithm_for_Convolution" id="Fast_algorithm_for_Convolution"></a>
+<h2><span class="mw-headline">コンボリューションの高速アルゴリズム</span></h2>
+<p>Originのコンボリューションのアルゴリズムは、コンボリューション理論に基づいています。理論によると、応答信号のコンボリューションは、次式のように2つの信号のフーリエ変換を乗算し、積の逆フーリエ変換を実行するのと同じです。そのため:</p>
+<p><img class="tex" alt="f*g=ifft(fft(f)) \cdot fft(g)) \,\!" src="../images/Algorithm_(Conv)/math-0fa27f2163270df853dc9601fc152063.png" width="213" height="18" border="0" /></p>
+<p>この式は次の仮定が有効な場合に成り立ちます。</p>
+<ol>
+<li>1) 両方の入力(信号および応答)が周期的である</li>
+<li>2) 応答の区間が信号と同じである</li>
+</ol>
+<p>しかし、実際のデータは常にこれら2つの条件を満たすとは限りません。コンボリューション理論を適用できるように、データにいくつか0を付加する必要があります。同時に、0付加と周期性の条件が結果に影響を与えないという保証する注意が必要です。</p>
+<p>循環コンボリューションでは、入力範囲の外側のデータポイントは、周期的に繰り返されると考えられ、それにより最初の条件が満たされます。両方の入力シーケンスの長さが等しくなるように短い入力データの最後に0が付加されます。</p>
+<p>しかし、線形の場合、入力範囲外のデータポイントは0と見なされます。信号が周期的だと仮定することは、結果の先頭のいくつかのデータは、周期の最後の方のデータが加えられるため、結果に影響を及ぼします。この影響を避けるために、ラップデータ用にバッファ領域をセットするため、0を付加する必要があります。付加した後、両方の入力は次式のようになります。</p>
+<p><img class="tex" alt="M_f+M_g-1 \,\!" src="../images/Algorithm_(Conv)/math-6452057b8299cfdc383437bb71c63eca.png" width="96" height="17" border="0" /></p>
+<p>ここで<img class="tex" alt="M_f\,\!" src="../images/Algorithm_(Conv)/math-210ae0cf745771a69bd193a0e0227e06.png" width="24" height="16" border="0" /> および <img class="tex" alt="M_g\,\!" src="../images/Algorithm_(Conv)/math-89c54f97395a40ee1d71239b18ac815f.png" width="23" height="16" border="0" />は、 <i>f</i> および <i>g</i>の長さを表します。</p>
+<p>付加の後、コンボリューションの結果を計算するのに上記のような高速コンボリューションアルゴリズムが使われます。</p>
+<a name="Automatic_Computation_of_Sampling_Interval" id="Automatic_Computation_of_Sampling_Interval"></a>
+<h2><span class="mw-headline">サンプリング間隔の自動計算</span></h2>
+<p>&lt;<b>自動</b>&gt;が<b>サンプリング間隔</b>オプションで選択されると、サンプリング間隔は自動的に計算されます。</p>
+<p>自動的に計算されるサンプリング間隔は、時間データの増加の平均で、これは通常入力信号と結びついているXデータが使われます。結びついているX列が無ければ、行番号が使われます。Originが増加の平均を取得するのに失敗した場合、サンプリング間隔は1にセットされます。</p>
+<p><br /></p>

@@ -1,0 +1,54 @@
+﻿<h1 class="firstheading">データベースからインポート</h1><p>Origin Cは、データベースからワークシートにデータをインポートする機能があります。  以下のサンプルは、OriginのSamplesサブフォルダにあるAccessデータベースファイルをインポートすることで、これを行う方法を示しています。  <i>ADODB.Reocrdset </i>オブジェクトはMSDNを参照することができます。接続文字列を作成する方法については、<a class="external text" href="../../XFunction/X-Function/DbEdit.html#Connection_String">DbEdit Xファンクション</a>を参照してください。 
+</p>
+<pre class="oc" style="font-family:monospace;">Object ocora;
+
+<span style="color: #0000ff;">try</span>
+<span style="color: #000000;">{</span>
+	ocora <span style="color: #000080;">=</span> CreateObject<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;ADODB.Recordset&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+<span style="color: #0000ff;">catch</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nError<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to create ADODB.Recordset&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// Originのサンプルフォルダからstars.mdbをインポート</span>
+string  strDatabaseFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> 
+    <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Import and Export<span style="color: #666666; font-weight: bold;">\\</span>stars.mdb&quot;</span>;
+ 
+<span style="color: #008000;">// データベース接続文字列の準備</span>
+string strConn;
+strConn.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s; 
+    User ID=admin; Password=;&quot;</span>, strDatabaseFile<span style="color: #000000;">)</span>;           
+ 
+<span style="color: #008000;">// SQL文字列を準備</span>
+string strQuery <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Select Stars.Index, Stars.Name, Stars.LightYears, 
+    Stars.Magnitude From Stars&quot;</span>;
+ 
+
+ocora.<span style="color: #000000;">CursorLocation</span> <span style="color: #000080;">=</span> adUseClient;
+<span style="color: #0000ff;">try</span>
+<span style="color: #000000;">{</span>
+	ocora.<span style="color: #000000;">open</span><span style="color: #000000;">(</span>strQuery, strConn, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;	
+<span style="color: #000000;">}</span>
+<span style="color: #0000ff;">catch</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nError<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Failed to open Oracle database&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span> <span style="color: #0000ff;">FALSE</span>;
+<span style="color: #000000;">}</span>
+
+Worksheet wks;
+wks.<span style="color: #000000;">Create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//ワークシートにデータを配置</span>
+<span style="color: #0000ff;">BOOL</span>			bRet <span style="color: #000080;">=</span> wks.<span style="color: #000000;">PutRecordset</span><span style="color: #000000;">(</span>ocora<span style="color: #000000;">)</span>;
+out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;bRet = &quot;</span>, bRet<span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">return</span> bRet;</pre>
+
+
+
+
+
+
+
+    

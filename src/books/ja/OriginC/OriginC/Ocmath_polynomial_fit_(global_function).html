@@ -1,0 +1,177 @@
+﻿<h1 class="firstheading">ocmath_polynomial_fit</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Function to Perform polynomail fit on the given X and Y data points. The function will normailize X data first, and then call ocmath_multiple_linear_regression(), which is the main computational engine, and finally correct the variance-covariance matrix.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_polynomial_fit<span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> nSize, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pX, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pY, <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pWeightIn, <span style="color: #0000ff;">int</span> nOrder, <span style="color: #0000ff;">const</span> LROptions <span style="color: #000040;">*</span> psLROptions, FitParameter <span style="color: #000040;">*</span> psFitParameter, <span style="color: #0000ff;">int</span> nSizeFitParams, RegStats <span style="color: #000040;">*</span> psRegStats <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, RegANOVA <span style="color: #000040;">*</span> psRegANOVA <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pCov <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pCorr <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pH <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">int</span> nSizeCovCorr <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>nSize</dt>
+
+    <dd>[Input] the number of observations, n. n&gt;=2;</dd>
+
+    <dt>pX</dt>
+
+    <dd>[Input] vector containing data points of the independent variables, size of pX = nSize;</dd>
+
+    <dt>pY</dt>
+
+    <dd>[Input] vector containing data points of dependent variable, size of pY = nSize;</dd>
+
+    <dt>pWeightIn</dt>
+
+    <dd>[Input] vector containing weight of the data, all data should be bigger than zero, size of pY = nsize. Can be NULL if no weighting;</dd>
+
+    <dt>nOrder</dt>
+
+    <dd>[Input] the polynomial order, nOrder &gt;= 1;</dd>
+
+    <dt>psLROptions</dt>
+
+    <dd>[Input] structuure for linear regression options;</dd>
+
+    <dt>psFitParameter</dt>
+
+    <dd>[Output] array of structs to receive information on each fitting parameter;</dd>
+
+    <dt>nSizeFitParams</dt>
+
+    <dd>[input] size (number of structs) of psFitParameter, must be at least (nOrder+1);</dd>
+
+    <dt>psRegStats</dt>
+
+    <dd>[output] Optional, pointer to struct containing Regression statistics;</dd>
+
+    <dt>psRegANOVA</dt>
+
+    <dd>[output] Optional, pointer to struct containing ANOVA statistics;</dd>
+
+    <dt>pCov</dt>
+
+    <dd>[output] Optional, coriviance matrix of estimate; The size should be (nOrder+1)*(nOrder+1).</dd>
+
+    <dt>pCorr</dt>
+
+    <dd>[output] Optional, correlation matrix of estimate, having the same size as pCov.</dd>
+
+    <dt>pH</dt>
+
+    <dd>[output] Optional output pointer to diagonal element of H, leverage Size of the pH should be nSize</dd>
+
+    <dt>nSizeCovCorr</dt>
+
+    <dd>[input] size of pCov and pCorr, will check this size if pCov or pCorr passed and nSizeCovCorr &gt;= 0 and will return STATS_ERROR_ARRAY_TOO_SMALL if nSizeCovCorr &lt; (nOrder+1)*(nOrder+1)</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>Returns STATS_NO_ERROR or positive on successful exit and a negative STATS error code on failure.</p>
+
+  <p>LARGE_X_NORMALIZED(1): the independent data have large value and small range, so are normalized first.</p>
+
+  <p>Error Codes:</p>
+
+  <p>STATS_ERROR_ARRAY_TOO_SMALL(-99): nSizeCovCorr &lt; (nOrder+1)*(nOrder+1)</p>
+
+  <p>STATS_INPUT_NULL_POINTER(-156): pX and pY must not be empty.</p>
+
+  <p>STATS_ERROR_TOO_FEW_DATA_PTS(-165): nSize must not be less than 2</p>
+
+  <p>STATS_ERROR_SETTING(-151): nOrder must not be less than 1</p>
+
+  <p>STATS_ERROR_SVD_FAIL(-179): The singular value decomposition is failed</p>
+
+  <p>STATS_ERROR_RANK_DEFICIENT(-180): The pX is not full rank.</p>
+
+  <p>STATS_ERROR_BAD_WEIGHT(-108): Some data of the weight are less than zero</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> ocmath_polynomial_fit_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">int</span> nOrder;    
+    <span style="color: #0000ff;">int</span> nRet;    
+    <span style="color: #008000;">//parameters required by stats_polynomial_fit</span>
+    LROptions sLROptions;
+    <span style="color: #008000;">//LROptionsNANUM(sLROptions);</span>
+    RegStats sRegStats;    
+    RegANOVA sRegANOVA;
+
+    <span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+    vector vX, vY;
+    vX.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">10</span><span style="color: #000000;">)</span>;
+    vY.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span><span style="color: #0000dd;">10</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>nSize; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// Y = X^2</span>
+    <span style="color: #000000;">{</span>
+        vX<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> i<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;
+        vY<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>i<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>i<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>        
+
+    <span style="color: #0000ff;">double</span> vW<span style="color: #000000;">[</span><span style="color: #0000dd;">10</span><span style="color: #000000;">]</span>;                        
+
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>i<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; i<span style="color: #000080;">&lt;</span>nSize; i<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        vW<span style="color: #000000;">[</span>i<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;
+    <span style="color: #000000;">}</span>
+
+    sLROptions.<span style="color: #000000;">Confidence</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.95</span>;    
+
+    nOrder <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;        
+    <span style="color: #0000ff;">double</span> pCov<span style="color: #000000;">[</span><span style="color: #0000dd;">9</span><span style="color: #000000;">]</span>, pCorr<span style="color: #000000;">[</span><span style="color: #0000dd;">9</span><span style="color: #000000;">]</span> ;
+    <span style="color: #0000ff;">int</span> nParam <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>sLROptions.<span style="color: #000000;">FixIntercept</span><span style="color: #000000;">)</span> ? nOrder <span style="color: #000000;">:</span> nOrder <span style="color: #000040;">+</span> <span style="color: #0000dd;">1</span>;
+
+    FitParameter sFitParameter<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+
+    nRet <span style="color: #000080;">=</span> ocmath_polynomial_fit<span style="color: #000000;">(</span>nSize,vX,vY,vW,nOrder,<span style="color: #000040;">&amp;</span>sLROptions,sFitParameter,nParam,<span style="color: #000040;">&amp;</span>sRegStats,<span style="color: #000040;">&amp;</span>sRegANOVA,pCov,pCorr<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nRet <span style="color: #000080;">==</span> LARGE_X_NORMALIZED<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"x data are normalized!<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>nRet <span style="color: #000080;">&lt;</span> STATS_NO_ERROR<span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Error!<span style="color: #666666; font-weight: bold;">\n</span>"</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

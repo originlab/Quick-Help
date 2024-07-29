@@ -1,0 +1,410 @@
+﻿<h1 class="firstheading">アルゴリズム (判別分析)</h1>
+<table id="toc" class="toc" summary="Contents">
+<tr>
+<td>
+<div id="toctitle">
+<h2>内容</h2>
+</div>
+<ol>
+<li class="toclevel-1"><a href="#Test_for_Equality_of_Within-group_Covariance_Matrices"><span class="tocnumber">1</span> <span class="toctext">グループ内共分散行列の均衡検定</span></a></li>
+<li class="toclevel-1"><a href="#Canonical_Discriminant_Analysis"><span class="tocnumber">2</span> <span class="toctext">正準判別分析</span></a></li>
+<li class="toclevel-1"><a href="#Mahalanobis_Distance"><span class="tocnumber">3</span> <span class="toctext">マハラノビス距離</span></a></li>
+<li class="toclevel-1"><a href="#Classify"><span class="tocnumber">4</span> <span class="toctext">分類する</span></a>
+<ol>
+<li class="toclevel-2"><a href="#Prior_Probabilities"><span class="tocnumber">4.1</span> <span class="toctext">事前確率</span></a></li>
+<li class="toclevel-2"><a href="#Posterior_Probability"><span class="tocnumber">4.2</span> <span class="toctext">事後確率</span></a></li>
+<li class="toclevel-2"><a href="#Atypicality_Index"><span class="tocnumber">4.3</span> <span class="toctext">異型性インデックス</span></a></li>
+<li class="toclevel-2"><a href="#Linear_Discriminant_Function_Coefficients"><span class="tocnumber">4.4</span> <span class="toctext">線形判別関数係数</span></a></li>
+<li class="toclevel-2"><a href="#Classify_Training_Data"><span class="tocnumber">4.5</span> <span class="toctext">トレーニングデータを分類する</span></a></li>
+<li class="toclevel-2"><a href="#Cross_Validation_for_Training_Data"><span class="tocnumber">4.6</span> <span class="toctext">トレーニングデータをクロス検証する</span></a></li>
+<li class="toclevel-2"><a href="#Classify_Test_Data"><span class="tocnumber">4.7</span> <span class="toctext">テストデータを分類する</span></a></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+</table>
+
+<p><br />
+<b>判別分析</b>は観測値のグループ所属が分かっているものをさらにグループに振り分け、トレーニングデータとするために使われます。</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-687a245ac15fad69d39d2ac8207ff385.png" title="X_t\ " alt="X_t\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />をn個の観測値とp個の変数を持った<img src="../images/Algorithm_(Discriminant_Analysis)/math-6857d71951ca137bcda4fe14dccae251.png" title="n_g" alt="n_g" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />グループに所属しているトレーニングデータとします。<img src="../images/Algorithm_(Discriminant_Analysis)/math-fbcc679a0035f6fef5099eb0106f996d.png" title="\bar{x}_j" alt="\bar{x}_j" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />は<i>ｊ</i>グループのサンプル平均の行ベクトルで、<img src="../images/Algorithm_(Discriminant_Analysis)/math-f898efd8ac64b6621a2aeed350ce3164.png" title="n_j\ " alt="n_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />は<i>ｊ</i>グループの観測された個数です。<i>ｊ</i>グループのグループ内共分散行列は次のように表示されます。</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-42484c7b3cb9982bcabccb7cfda729e9.png" title="S_j=\frac{1}{n_j-1}\cdot (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" alt="S_j=\frac{1}{n_j-1}\cdot (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>プールされたグループ内共分散行列は次のようになります。</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-25624e90423e449a29d89e9cb2ef1335.png" title="S=\frac{1}{n-n_g}\cdot\sum_{j=1}^{n_g} (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" alt="S=\frac{1}{n-n_g}\cdot\sum_{j=1}^{n_g} (X_{t}-\bar{x}_j)^T(X_{t}-\bar{x}_j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>欠損値はこのリスト形式で除かれています。つまり、欠損値を一つ以上含んでいる観測は分析から除外されています。</p>
+<a name="Test_for_Equality_of_Within-group_Covariance_Matrices" id="Test_for_Equality_of_Within-group_Covariance_Matrices"></a>
+<h2><span class="mw-headline">グループ内共分散行列の均衡検定</span></h2>
+<p>もしトレーニングデータが多変量正規分布になると仮定されているとき、次の尤度比検定統計<i>G</i>を使い、グループ内共分散行列の均衡検定を行えます。</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-4f141902b982a67990e391daacc238dd.png" title="G=C{(n-n_g) \mathrm{log} |S|-\sum_{j=1}^{n_g} (n_j-1) \mathrm{log} |S_j|}" alt="G=C{(n-n_g) \mathrm{log} |S|-\sum_{j=1}^{n_g} (n_j-1) \mathrm{log} |S_j|}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>ここで</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-7b51445c6fda672aa6cfd4a759c53f7d.png" title="C=1-\frac{2p^2+3p-1}{6(p+1)(n_g-1)}\cdot(\sum_{j=1}^{n_g} \frac{1}{n_j-1} -\frac{1}{n-n_g})" alt="C=1-\frac{2p^2+3p-1}{6(p+1)(n_g-1)}\cdot(\sum_{j=1}^{n_g} \frac{1}{n_j-1} -\frac{1}{n-n_g})" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>大きい<i>ｎ</i>の値は、<i>G</i>がおおよそ<img src="../images/Algorithm_(Discriminant_Analysis)/math-cfbb03435e8c5628a146d4d6c1697e6c.png" title="\chi^2\ " alt="\chi^2\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />変数と自由度<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-d9da675dbc50d16c00b81e4fdf268f83.png" title="\frac{1}{2}\cdot p(p+1)(n_g-1)" alt="\frac{1}{2}\cdot p(p+1)(n_g-1)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> で分散されていると考えられます。</p>
+<a name="Canonical_Discriminant_Analysis" id="Canonical_Discriminant_Analysis"></a>
+<h2><span class="mw-headline">正準判別分析</span></h2>
+<p>正準判別分析は<i>p</i>値において、グループ間の分散がグループ内の分散と違いが最大になる割合の線形結合を探すのに使われます。作成された正準変量はグループ間の分離をするのに使われます。</p>
+<p>トレーニングデータから総平均を引いたものを<i>X</i>とし、そのランクを<i>k</i>とします。直交行列<i>Q</i>は<b>QR</b>分解(すべての列ランクを行う)またはXからの<b>SVD</b>で計算されます。そして<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-309bc456893777dfc6d546a826f80222.png" title="Q_X\ " alt="Q_X\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> はｋ列の最初のQになります。<img src="../images/Algorithm_(Discriminant_Analysis)/math-7f2bb5755738fc0dc2bce690ffbd02fb.png" title="Q_g\ " alt="Q_g\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />を<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-748eca54826a6c8ac743ce0e8d9de0da.png" title="n_g-1" alt="n_g-1" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;によってnとし、直交行列によりグループを定義します。<i>ｋ</i>ｘ<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-bf9c1d397597752f55b120ef5a7d1a98.png" title="n_g-1\ " alt="n_g-1\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> の行列<i>V</i>を 次のようにします。</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-f1ba4d194a3d3c69ac32a0e4f172c72f.png" title="V=Q_X^TQ_g" alt="V=Q_X^TQ_g" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>The <b>SVD</b> of <i>V</i> is:</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-156accfd15fe0adbcb2d4dd525fb0797.png" title="V=U_X \triangle U_g^T" alt="V=U_X \triangle U_g^T" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>ゼロでない行列<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-8722439958298b3dfbd60cded8990f4e.png" title="\triangle" alt="\triangle" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;の対角要素はiの正準係数で、正準変量とは<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-b1e513a36c4f9d05731ce051a387fc4e.png" title="\delta_i\ " alt="\delta_i\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /><span class="Apple-converted-space">&#160;</span>&#160;&#160;i=1,2,...,と<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-8c794226d0a6faf42a11d59a9f5c7945.png" title="l=\mathrm{min}(k, n_g)\ " alt="l=\mathrm{min}(k, n_g)\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> で関係しています。</p>
+<p>グループ内の二乗和行列における固有値は：</p>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-5b9da385f048bd163e59dc5f058db912.png" title="\lambda_i=\frac{\delta_i^2}{1-\delta_i^2}" alt="\lambda_i=\frac{\delta_i^2}{1-\delta_i^2}" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></p>
+<p>&#160;</p>
+<ul>
+<li>ウィルクスのラムダ(λ)</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd><i style="font-style: italic;">i</i> より有意に大きくなる次元数を検定するには</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-4e02cd8f2b56fe09ee5b91cfca052400.png" title="\Lambda_i=\prod_{j=i+1}^{l} 1/(1+\lambda_j)" alt="\Lambda_i=\prod_{j=i+1}^{l} 1/(1+\lambda_j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>
+<dl>
+<dd>自由度<img src="../images/Algorithm_(Discriminant_Analysis)/math-556713eae767a14fe21eb016694c8238.png" title="(k-i)(n_g-1-i)\ " alt="(k-i)(n_g-1-i)\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />を持った<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-cfbb03435e8c5628a146d4d6c1697e6c.png" title="\chi^2\ " alt="\chi^2\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> 統計が使用されて次のようになります。</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ec58bf195d61ef078e1bc352e76becac.png" title="(n-1-n_g-\frac{1}{2}(k-n_g))\sum_{j=i+1}^{l} \mathrm{log}(1+\lambda_j)\ i=0,1,...,l-1" alt="(n-1-n_g-\frac{1}{2}(k-n_g))\sum_{j=i+1}^{l} \mathrm{log}(1+\lambda_j)\ i=0,1,...,l-1" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>正規化されていない正準係数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>正準変量のため行列<i>B</i>をロードするには<img src="../images/Algorithm_(Discriminant_Analysis)/math-d3f8540a0d3fb0b603051f1afdac58e8.png" title="U_X\ " alt="U_X\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />から計算されます。正準変量はグループ内分散からプールされた単位を持つようにようにスケールされています。つまり：
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ea1d8b4a1a9949c04ce897debcb0f3cb.png" title="B^TSB=I\ " alt="B^TSB=I\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd>固有ベクトルの符号は<b>SVD</b>の結果に特有ではありません。つまり、各列の<i>B</i>はー1によってかけることができます。Originは<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-dd2ed2b7aef1cc29f38fcf893e186990.png" title="RB\ " alt="RB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> 内の各和がプラスになるように正規化しています。<i>R</i>は<i>S</i>の<b>コレスキー</b>因数分解結果です。</dd>
+<dd>定数は次のように計算されます。
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-842807b1d59b68029f9e47502204de56.png" title="C_0=-X_mB\ " alt="C_0=-X_mB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-ad5fcaadac0238a2873254ce2bf39933.png" title="X_m\ " alt="X_m\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は変数の平均を表す行ベクトルです。</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>正規化されている正準係数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-f83a67f933bd9989a9c82a155597d0f4.png" title="D=S_aB\ " alt="D=S_aB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-720199a1df04989fca46b40db9dc3ffa.png" title="S_a\ " alt="S_a\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は対角行列で対角要素はグループ内の共分散行列<i>S</i>の対角要素の平方根を取ったものになります。</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>正準構造行列</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-3d43ba2f89c50ad3d6e41f32eaad76dc.png" title="C=S_a^{-1}SB\ " alt="C=S_a^{-1}SB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>正準グループ平均</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-ae15be586008ad972cdb2e54d0a8c6c4.png" title="M_j=C_0+\bar{x}_jB\ " alt="M_j=C_0+\bar{x}_jB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-163ee00f28eda2300d069cc196469322.png" title="M_j\ " alt="M_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />と<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-9a256199940d00c2536a5816e8562a68.png" title="\bar{x}_j\ " alt="\bar{x}_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;は順に正準グループ平均と<i>ｊ</i>番目のグループ平均の行ベクトルとなっています。</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>正準判別関数のスコア</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-e7722c1abe5d5c070d236c68e07ee5c8.png" title="A_i=C_0+X_iB\ " alt="A_i=C_0+X_iB\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-5c89cbde69c9b5306689d7612cc3a31c.png" title="A_i\ " alt="A_i\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は<i>i</i>番目の観測、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-364c437f9831f6eeb78ffd3643f5b2f0.png" title="X_i\ " alt="X_i\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> 、の正準スコアです。</dd>
+<dd><i style="font-style: italic;">i</i> 番目の観測はトレーニングデータでもテストデータでも構いません。</dd>
+</dl>
+</dd>
+</dl>
+<a name="Mahalanobis_Distance" id="Mahalanobis_Distance"></a>
+<h2><span class="mw-headline">マハラノビス距離</span></h2>
+<p><b style="font-weight: bold;">マハラノビス距離</b>は観測点とグループ間の距離を測ります。これには2種類の形があります。<i>j</i> 番目のグループと観測点<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-22cf6d90476d6b87655fb83d74ee08f5.png" title="x_i\ " alt="x_i\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> の距離は次のようになります。</p>
+<ul>
+<li>グループ内共分散行列を使う</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-4e610adaa8869efc930751889369fb0d.png" title="D_{ij}^2=(x_i-\bar{x}_j)S_j^{-1}(x_i-\bar{x}_j)^T" alt="D_{ij}^2=(x_i-\bar{x}_j)S_j^{-1}(x_i-\bar{x}_j)^T" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>プールされたグループ内共分散行列を使う</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-d92d0334e383634096e4117f51874db1.png" title="D_{ij}^2=(x_i-\bar{x}_j)S^{-1}(x_i-\bar{x}_j)^T" alt="D_{ij}^2=(x_i-\bar{x}_j)S^{-1}(x_i-\bar{x}_j)^T" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<a name="Classify" id="Classify"></a>
+<h2><span class="mw-headline">分類</span></h2>
+<a name="Prior_Probabilities" id="Prior_Probabilities"></a>
+<h3><span class="mw-headline">事前確率</span></h3>
+<p>事前確率は他のグループから観測データが集められた可能性のユーザ見解を反映します。Originは2種類の先験的確率をサポートしています。</p>
+<ul>
+<li>等価</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-e1de4455b1c3e1e0a1ab05eda657f3ad.png" title="\pi_j=1/n_g\ " alt="\pi_j=1/n_g\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>グループの大きさに比例する</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-97ca54b52364dcc3af70b85c99b12763.png" title="\pi_j=n_j/n\ " alt="\pi_j=n_j/n\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-f898efd8ac64b6621a2aeed350ce3164.png" title="n_j\ " alt="n_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> &#160;はトレーニングデータの<i>ｊ</i>番目のグループ内にある観測データの数です。</dd>
+</dl>
+</dd>
+</dl>
+<a name="Posterior_Probability" id="Posterior_Probability"></a>
+<h3><span class="mw-headline">事後確率</span></h3>
+<p>観測データが<i>j</i> 番目のグループから出ている場合の<i>p</i>値は平均<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-d02f177eaa99e609210550a8e168aa2f.png" title="\mu_j\ " alt="\mu_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> と共分散行列<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-46ad204a4582a9cd6ba59c2724056d0b.png" title="\Sigma_j\ " alt="\Sigma_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> をもつ多変量正規分布に当てはまることを前提としています。観測点<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-22cf6d90476d6b87655fb83d74ee08f5.png" title="x_i\ " alt="x_i\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> がグループ<i>ｊ</i>のから計測された確立は<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-381ca9d538e0de13d017ea1309e83ddb.png" title="p(x_i|\mu_j,\Sigma_j)\ " alt="p(x_i|\mu_j,\Sigma_j)\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> となるとき、グループ<i>ｊ</i>に所属する事後確率は次のようになります。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-55fe41c69c4f2dbb7fe75337bfa93c42.png" title="q_j=p(j|x_i,\mu_j,\Sigma_j)\propto p(x_i|\mu_j,\Sigma_j)\pi_j" alt="q_j=p(j|x_i,\mu_j,\Sigma_j)\propto p(x_i|\mu_j,\Sigma_j)\pi_j" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<p><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-d02f177eaa99e609210550a8e168aa2f.png" title="\mu_j\ " alt="\mu_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> と<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-46ad204a4582a9cd6ba59c2724056d0b.png" title="\Sigma_j\ " alt="\Sigma_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> のパラメータはテストデータ<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-687a245ac15fad69d39d2ac8207ff385.png" title="X_t\ " alt="X_t\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> から推測されています。すると観測点は最も事後確率が高いグループに入れられます。Originは事後確率を計算するのに2通りの計算方法を準備しています。</p>
+<ul>
+<li>一次判別関数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>グループ内の共分散行列は等しいと推測されています。</dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-78b58f6de3a01695068779e99f80e92c.png" title="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)+c_0" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)+c_0" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>
+<dl>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-73850f915f6390176ce13cfdd422f1a3.png" title="D_{ij}^2" alt="D_{ij}^2" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は<i>i</i> 番目の観測点とプールされたグループ内共分散行列のマハラノビス距離で、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png" title="c_0\ " alt="c_0\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は定数です。</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>二次判別関数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>グループ内の共分散行列は等しくないと推測されています。</dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-97bb999f1c63118e1c15d0cd99f3ecd9.png" title="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)-\frac{1}{2}\mathrm{log}|S_j|+c_0" alt="\mathrm{log}(q_j)=-\frac{1}{2}D_{ij}^2+\mathrm{log}(\pi_j)-\frac{1}{2}\mathrm{log}|S_j|+c_0" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dd>
+<dl>
+<dd><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-73850f915f6390176ce13cfdd422f1a3.png" title="D_{ij}^2" alt="D_{ij}^2" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は<i>i</i> 番目の観測点とプールされたグループ内共分散行列のマハラノビス距離で、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png" title="c_0\ " alt="c_0\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は定数です。</dd>
+</dl>
+</dd>
+</dl>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-f680dc664fc7f822ae305c4d1586956d.png" title="q_j\ " alt="q_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は次のように正規化され、<span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-ecd67c43f1d5cc8aa1cc153e7b57fd71.png" title="c_0\ " alt="c_0\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /> は正規化したものから算出されます。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-766af91331121006a73b3d401c5e661e.png" title="\sum_{j=1}^{n_g} q_j=1" alt="\sum_{j=1}^{n_g} q_j=1" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<a name="Atypicality_Index" id="Atypicality_Index"></a>
+<h3><span class="mw-headline">異型性インデックス</span></h3>
+<p><b style="font-weight: bold;">異型性インデックス</b><img src="../images/Algorithm_(Discriminant_Analysis)/math-cc421199a07c0dc7f86b04779cf2a388.png" title="I_j(x_i)\ " alt="I_j(x_i)\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />は観測点が<i>i</i>番目の観測データよりもグループ<i>j</i>により典型的に当てはまる確立を示しています。すべてのグループで１に近い場合、それはトレーニングデータに入っているグループから来ていない可能性が高いことを意味しています。異型性インデックスは次のように計算されます。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-732acf44e40ad9cac61088dcd141df05.png" title="I_j(x_i)=P(B\le z:\frac{1}{2}p,\frac{1}{2}(n_j-d)) " alt="I_j(x_i)=P(B\le z:\frac{1}{2}p,\frac{1}{2}(n_j-d)) " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<p><img src="../images/Algorithm_(Discriminant_Analysis)/math-8c5084405b04323ffd7f2875ca6a833b.png" title="P(B\le \beta:\ a, b)" alt="P(B\le \beta:\ a, b)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />はグループ内共分散行列が等しいもののベータ分布の下限破棄の可能性を示しています。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-cd6fb8799495aa07b0c4c32cb5b97836.png" title="z=D_{ij}^2/(D_{ij}^2+(n-n_g)(n_j-1)/n_j)" alt="z=D_{ij}^2/(D_{ij}^2+(n-n_g)(n_j-1)/n_j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<p>グループ内共分散行列が等しくないものに関しては次のようになります。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-45a4cc9d19289a7db844343cc7755561.png" title="z=D_{ij}^2/(D_{ij}^2+(n_j^2-1)/n_j)" alt="z=D_{ij}^2/(D_{ij}^2+(n_j^2-1)/n_j)" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<a name="Linear_Discriminant_Function_Coefficients" id="Linear_Discriminant_Function_Coefficients"></a>
+<h3><span class="mw-headline">線形判別関数係数</span></h3>
+<p>線形判別関数(またはフィッシャーの線形判別関数)は次のように計算されます。</p>
+<ul>
+<li><i style="font-style: italic;">j</i> 番目のグループの線形(一次)係数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-bba90644f0ee4526a124e9a060efad5f.png" title="b_j=S^{-1}\bar{x}_j^T" alt="b_j=S^{-1}\bar{x}_j^T" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-e10b85a99fd3e0319c1a12b37038bee1.png" title="b_j\ " alt="b_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" />は<i>p</i>の大きさの列ベクトルです。</dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li><i style="font-style: italic;">j</i> 番目のグループの定数係数</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-b49fb8d88d19012d29f58a5ec2d3145e.png" title="a_j=\bar{x}_jb_j" alt="a_j=\bar{x}_jb_j" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<a name="Classify_Training_Data" id="Classify_Training_Data"></a>
+<h3><span class="mw-headline">トレーニングデータを分類する</span></h3>
+<p>トレーニングデータ内の観測データは事後確率によって分類されることができます。つまり事後確率が一番高いグループに入れられることになります。各グループからの<b>マハラノビス距離の二乗</b>と各グループからの<b>異型性インデックス</b>もそれぞれ計算されます。</p>
+<p>トレーニングデータの分類結果は与えられたグループメンバーシップと予想されるグループの結果を比較した状態でまとめられています。分類失敗された観測データに事前確率で重み付けされた分類失敗エラー率はパーセンテージ(％)で計算されます。</p>
+<dl>
+<dd>
+<dl>
+<dd><img src="../images/Algorithm_(Discriminant_Analysis)/math-23a8991fe54e13492cec65429649bf96.png" title="E=\sum_{j=1}^{n_g} e_j\pi_j" alt="E=\sum_{j=1}^{n_g} e_j\pi_j" class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /></dd>
+</dl>
+</dd>
+</dl>
+<p><span class="Apple-converted-space">&#160;</span><img src="../images/Algorithm_(Discriminant_Analysis)/math-c6c1265e2ebb2dd779b29fea40842909.png" title="e_j\ " alt="e_j\ " class="tex" style="color: #000000; font-family: Arial, sans-serif; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 19.2px; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;" border="0" /><span class="Apple-converted-space">&#160;</span>&#160;は<i>ｊ</i>グループに分類失敗の観測点があるパーセントです。</p>
+<a name="Cross_Validation_for_Training_Data" id="Cross_Validation_for_Training_Data"></a>
+<h3><span class="mw-headline">トレーニングデータをクロス検証する</span></h3>
+<p><a href="#Classify_Training_Data" title="">トレーニングデータを分類する</a>と同じ手順に従ってください。ただし、トレーニングデータ内で観測点の所属を明らかにするとき、グループ内共分散行列またはプールされたグループ内共分散行列を計算するときに除外されたデータは使用できません。</p>
+<a name="Classify_Test_Data" id="Classify_Test_Data"></a>
+<h3><span class="mw-headline">テストデータを分類する</span></h3>
+<p>グループ内共分散行列とプールされたグループ内共分散行列はトレーニングデータから算出されます。テストデータ内の観測データは事後確率によって分類されることができます。つまり事後確率が一番高いグループに入れられることになります。</p>
+<p>&#160;</p>
+<p style="margin: 3pt 0.125in 8pt; font-family: Arial, sans-serif; font-size: 9pt; line-height: 19.2px; color: #000000; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px;">&#160;</p>

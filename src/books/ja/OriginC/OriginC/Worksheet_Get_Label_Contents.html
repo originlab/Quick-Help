@@ -1,0 +1,86 @@
+﻿<h1 class="firstheading">Worksheet Get Label Contents</h1>
+
+  <p><br>
+  The following examples show how to get one whole label contents from Worksheet by row index, label type or label name.</p>
+
+  <h2><a name="Get_Label_Contents_by_Label_Type"></a><span class="mw-headline">Get Label Contents by Label Type</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8.1 SR0</p>
+
+  <p>Label type (RCLT_*) defined in oc_const.h file ROWCOLLABELTYPE enum.</p>
+  <pre class="oc" style="font-family:monospace;">
+Worksheet wks;
+wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+Grid gg;
+gg.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;  
+
+vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vstr;
+<span style="color: #0000ff;">int</span> nLabelType <span style="color: #000080;">=</span> RCLT_UDL; <span style="color: #008000;">// "UDL" means User Defined Label type</span>
+gg.<span style="color: #000000;">GetLabelsByType</span><span style="color: #000000;">(</span>vstr, nLabelType<span style="color: #000000;">)</span>;
+
+out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"size="</span>, vstr.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// convert string vector to double vector</span>
+vector vv;
+convert_str_vector_to_num_vector<span style="color: #000000;">(</span>vstr, vv<span style="color: #000000;">)</span>;
+out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"size="</span>, vv.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+</pre>
+
+  <h2><a name="Get_Label_Contents_by_Row_Index"></a><span class="mw-headline">Get Label Contents by Row Index</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8.0 SR0</p>
+
+  <p>The index of data row begin from 0, however the index of label row begin from -1, number from the bottom up, -1, -2, -3 and so on. The code below shows how to get label type from the row index. Then get label contents by label type according to the above section.</p>
+  <pre class="oc" style="font-family:monospace;">
+Worksheet wks;
+wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">int</span> nRowIndex <span style="color: #000080;">=</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// the last header row</span>
+<span style="color: #0000ff;">int</span> nLabelType <span style="color: #000080;">=</span> wks.<span style="color: #000000;">GetLabelType</span><span style="color: #000000;">(</span>nRowIndex<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 1 means the row is user defined label, else 0 means not</span>
+out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">""</span>, nLabelType <span style="color: #000080;">==</span> RCLT_UDL<span style="color: #000000;">)</span>;
+</pre>
+
+  <h2><a name="Get_Label_Contents_by_Label_Name"></a><span class="mw-headline">Get Label Contents by Label Name</span></h2>
+
+  <p>If want to get user defined label contents by label name, need to find the label by label name firstly. Then use <a href="../../OriginC/OriginC/Grid-GetLabelsByType.html" title="OriginC:Grid-GetLabelsByType">Grid::GetLabelsByType</a> method to get label contents by label type.</p>
+
+  <p>There are two ways to find the user defined label, please choise one based on Origin version.</p>
+
+  <p class="version">Minimum Origin Version Required: Origin 8.5 Sr1</p>
+  <pre class="oc" style="font-family:monospace;">
+Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// find the label named Threshold</span>
+<span style="color: #0000ff;">int</span> nLabelType <span style="color: #000080;">=</span> find_user_defined_label<span style="color: #000000;">(</span>wks, <span style="color: #ff00ff;">"Threshold"</span><span style="color: #000000;">)</span>;
+out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Label Type="</span>, nLabelType<span style="color: #000000;">)</span>;
+</pre>
+
+  <p class="version">Minimum Origin Version Required: Origin 8.1 Sr0</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>Dialog.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #0000ff;">#define</span> IDC_WORKSHEET <span style="color: #0000dd;">1001</span>
+
+<span style="color: #0000ff;">void</span> Worksheet_Get_Label_Contents_ex<span style="color: #000000;">(</span>Dialog<span style="color: #000040;">&amp;</span> dlg<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+         
+        Grid gg;
+        gg.<span style="color: #000000;">Attach</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>;
+         
+        vector<span style="color: #000080;">&lt;</span>string<span style="color: #000080;">&gt;</span> vsLabelNames;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> gg.<span style="color: #000000;">GetUserDefinedLabelNames</span><span style="color: #000000;">(</span>vsLabelNames<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                string strLabelName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Threshold"</span>; <span style="color: #008000;">// input</span>
+                <span style="color: #008000;">// return -1 means not found, else return the index in vector</span>
+                <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> vsLabelNames.<span style="color: #000000;">Find</span><span style="color: #000000;">(</span>strLabelName<span style="color: #000000;">)</span>; 
+                out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">""</span>, nn<span style="color: #000000;">)</span>;
+                
+                <span style="color: #0000ff;">int</span> nLabelType;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> nn <span style="color: #000080;">&gt;=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+                        nLabelType <span style="color: #000080;">=</span> RCLT_UDL <span style="color: #000040;">+</span> nn;
+                out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Label Type="</span>, nLabelType<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p>After get label type index by label name, see the above section to get row label contents by label type index.</p>

@@ -1,0 +1,275 @@
+﻿<h1 class="firstheading">分析のためにデータベースからデータをインポートする</h1>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_you_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Import_Data_from_Database"><span class="tocnumber">3.1</span> <span class="toctext">データベースからデータをインポートする</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Data_Filter_and_Statistics"><span class="tocnumber">3.2</span> <span class="toctext">データフィルタと統計</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Radar_Plot"><span class="tocnumber">3.3</span> <span class="toctext">レーダーチャート</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Import_Data_from_a_Database_for_Analysis/Alert_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>このチュートリアルは説明のみを目的としています。チュートリアルに示されている接続文字列は、インストールされたデータベースには接続しません。チュートリアルで説明したプロセスを実行できるように、独自のサーバーに AdventureWorks データベースをセットアップする場合は、<a class="external text" href="https://github.com/Microsoft/sql-server-samples/releases/tag/adventureworks" target="_blank">この GitHub ページ</a>を参照してください。</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>このチュートリアルでは、SQLエディタを使用してデータベースから Origin ワークシートにデータをインポートする方法を示します。次に、フィルタ、統計など、データに対していくつかの操作を実行して、グラフ作成に必要な結果を取得します。</p>
+
+  <p class="version">必要なOriginのバージョン:Origin 9.0 SR0以降</p>
+
+  <h2><a name="What_you_will_learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ul>
+    <li>同じデータベースの2つのSQLクエリを、SQLエディタを使用して2つのブックデータにインポートする</li>
+
+    <li>ワークシートのデータにデータフィルタを適用する</li>
+
+    <li>列の統計を実行する</li>
+
+    <li>棒グラフなどのグラフを作成する</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <p>サーバマシンnoho上にSQLサーバAdventureWorks2008を予めセットアップ済であることを想定しています。</p>
+
+  <h3><a name="Import_Data_from_Database"></a><span class="mw-headline">データベースからデータをインポートする</span></h3>
+
+  <ol>
+    <li>新しいプロジェクトを開始します。<b>データベースアクセス</b>ツールバーの<b>SQLエディタを開く</b>ボタンをクリックしてSQLエディタを起動します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 1.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_1.png" width="275"></a></dd>
+      </dl>
+    </li>
+
+    <li>メニューから<b>ファイル：接続文字列の編集</b>を選択してテキストボックスに以下の接続文字列を入力します。
+      <pre class="sql" style="font-family:monospace;">
+Provider<span style="color: #66cc66;">=</span>SQLOLEDB<span style="color: #66cc66;">.</span>1; Password<span style="color: #66cc66;">=</span>labtalk2015; Persist Security Info<span style="color: #66cc66;">=</span><span style="color: #993333; font-weight: bold;">TRUE</span>; <span style="color: #993333; font-weight: bold;">USER</span> ID<span style="color: #66cc66;">=</span><span style="color: #993333; font-weight: bold;">CONNECT</span>; Initial Catalog<span style="color: #66cc66;">=</span>AdventureWorks2008; <span style="color: #993333; font-weight: bold;">DATA</span> <span style="color: #993333; font-weight: bold;">SOURCE</span><span style="color: #66cc66;">=</span>noho
+</pre>
+    </li>
+
+    <li><b>テスト</b>ボタンをクリックして接続を確認します。問題なければ、<b>OK</b>をクリックしてデータベースにアクセスします。</li>
+
+    <li>左上のパネルで<i>Production.Product</i> 表をダブルクリックして右パネルに追加します。</li>
+
+    <li><b>結果データをプレビュー</b>ボタン<a class="image"><img alt="Button db Preview Import.png" src="../images/Import_Data_from_a_Database_for_Analysis/Button_db_Preview_Import.png" width="24"></a>をクリックして下のパネルでデータを参照します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 3.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_3.png" width="646"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>データをワークシートにインポート</b>ボタン<a class="image"><img alt="Button db Import Data.png" src="../images/Import_Data_from_a_Database_for_Analysis/Button_db_Import_Data.png" width="25"></a>をクリックしてアクティブなワークシートにデータをインポートします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 4.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_4.png" width="396"></a></dd>
+      </dl>
+    </li>
+
+    <li>新しいシートに、同じデータベースから他のSQLクエリーをベースにしたデータをインポートするには、SQLエディタダイアログのタイトルバーにある最初化ボタンをクリックして最小化します。</li>
+
+    <li>Sheet1タブを右クリックして<b>追加</b>を選択し、新しいシートを追加します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 5.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_5.png" width="396"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>SQLエディタ</b>の最小化ボタンをクリックしてダイアログを再び大きくします。右パネルに、まだ<i>Production: Product</i>がある状態です。ここでは、これを無視して進めます。</li>
+
+    <li><b>クエリー:LabTalk</b>と選択して<b>LabTalkサポート設定</b>ダイアログを開きます。ダ<b><b>LabTalk置換(%,$)をする</b></b>のチェックボックスを付けて、以下のスクリプトをテキストボックスに入力します。
+      <pre class="lt" style="font-family:monospace;">
+string strDateBegin1<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2003&quot;</span>;
+string strDateEnd1<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2003&quot;</span>;
+string strDateBegin2<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;1/1/2004&quot;</span>;
+string strDateEnd2<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;12/31/2004&quot;</span>;
+</pre>
+
+      <p>ダイアログは次のようになります。</p>
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 6.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_6.png" width="533"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>OK </b> をクリックして、SQLエディタに戻ります。次の SQL スクリプトを右上のパネルに配置して、既存のコンテンツ <i>Production.Product</i>を置き換えます。このスクリプトは、データベースから3つの列を抽出します。1 つは製品のカテゴリ名で、他の2つはそれぞれ2003と2004の各カテゴリの行の合計です。
+      <pre class="sql" style="font-family:monospace;">
+<span style="color: #993333; font-weight: bold;">SELECT</span> TABLE2003<span style="color: #66cc66;">.</span>Name<span style="color: #66cc66;">,</span> TABLE2003<span style="color: #66cc66;">.</span>LineTotalFor2003<span style="color: #66cc66;">,</span> TABLE2004<span style="color: #66cc66;">.</span>LineTotalFor2004
+<span style="color: #993333; font-weight: bold;">FROM</span>
+        <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>Name<span style="color: #66cc66;">,</span> LINETOALANDNAME2003<span style="color: #66cc66;">.</span>LineTotalFor2003
+        <span style="color: #993333; font-weight: bold;">FROM</span> 
+                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> <span style="color: #993333; font-weight: bold;">SUM</span><span style="color: #66cc66;">(</span>SALEANDPRODUCT2003<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> LineTotalFor2003<span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID
+                <span style="color: #993333; font-weight: bold;">FROM</span>
+                        <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> SALEINFO2003<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> PRODUCTINFO2003<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                        <span style="color: #993333; font-weight: bold;">FROM</span>
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>ProductID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader 
+                                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail 
+                                <span style="color: #993333; font-weight: bold;">ON</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>SalesOrderID<span style="color: #66cc66;">=</span>Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>SalesOrderID
+                                <span style="color: #993333; font-weight: bold;">WHERE</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate <span style="color: #993333; font-weight: bold;">BETWEEN</span> <span style="color: #ff0000;">&apos;%(strDateBegin1$)&apos;</span> <span style="color: #993333; font-weight: bold;">AND</span> <span style="color: #ff0000;">&apos;%(strDateEnd1$)&apos;</span><span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEINFO2003
+                        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> 
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> PRODUCTINFO2003
+                        <span style="color: #993333; font-weight: bold;">ON</span> SALEINFO2003<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">=</span>PRODUCTINFO2003<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEANDPRODUCT2003
+                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory 
+                <span style="color: #993333; font-weight: bold;">ON</span> SALEANDPRODUCT2003<span style="color: #66cc66;">.</span>ProductSubcategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                <span style="color: #993333; font-weight: bold;">GROUP</span> <span style="color: #993333; font-weight: bold;">BY</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> LINETOALANDNAME2003
+        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductCategory
+        <span style="color: #993333; font-weight: bold;">ON</span> LINETOALANDNAME2003<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> TABLE2003
+<span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span>
+        <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>Name<span style="color: #66cc66;">,</span> LINETOALANDNAME2004<span style="color: #66cc66;">.</span>LineTotalFor2004
+        <span style="color: #993333; font-weight: bold;">FROM</span> 
+                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> <span style="color: #993333; font-weight: bold;">SUM</span><span style="color: #66cc66;">(</span>SALEANDPRODUCT2004<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> LineTotalFor2004<span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID
+                <span style="color: #993333; font-weight: bold;">FROM</span>
+                        <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> SALEINFO2004<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> PRODUCTINFO2004<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                        <span style="color: #993333; font-weight: bold;">FROM</span>
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>LineTotal<span style="color: #66cc66;">,</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>ProductID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader 
+                                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Sales<span style="color: #66cc66;">.</span>SalesOrderDetail 
+                                <span style="color: #993333; font-weight: bold;">ON</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>SalesOrderID<span style="color: #66cc66;">=</span>Sales<span style="color: #66cc66;">.</span>SalesOrderDetail<span style="color: #66cc66;">.</span>SalesOrderID
+                                <span style="color: #993333; font-weight: bold;">WHERE</span> Sales<span style="color: #66cc66;">.</span>SalesOrderheader<span style="color: #66cc66;">.</span>OrderDate <span style="color: #993333; font-weight: bold;">BETWEEN</span> <span style="color: #ff0000;">&apos;%(strDateBegin2$)&apos;</span> <span style="color: #993333; font-weight: bold;">AND</span> <span style="color: #ff0000;">&apos;%(strDateEnd2$)&apos;</span><span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEINFO2004
+                        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> 
+                                <span style="color: #66cc66;">(</span><span style="color: #993333; font-weight: bold;">SELECT</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">,</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                                <span style="color: #993333; font-weight: bold;">FROM</span> Production<span style="color: #66cc66;">.</span>Product<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> PRODUCTINFO2004
+                        <span style="color: #993333; font-weight: bold;">ON</span> SALEINFO2004<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">=</span>PRODUCTINFO2004<span style="color: #66cc66;">.</span>ProductID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> SALEANDPRODUCT2004
+                <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory 
+                <span style="color: #993333; font-weight: bold;">ON</span> SALEANDPRODUCT2004<span style="color: #66cc66;">.</span>ProductSubcategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductSubcategoryID
+                <span style="color: #993333; font-weight: bold;">GROUP</span> <span style="color: #993333; font-weight: bold;">BY</span> Production<span style="color: #66cc66;">.</span>ProductSubcategory<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> LINETOALANDNAME2004
+        <span style="color: #993333; font-weight: bold;">INNER</span> <span style="color: #993333; font-weight: bold;">JOIN</span> Production<span style="color: #66cc66;">.</span>ProductCategory
+        <span style="color: #993333; font-weight: bold;">ON</span> LINETOALANDNAME2004<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">=</span>Production<span style="color: #66cc66;">.</span>ProductCategory<span style="color: #66cc66;">.</span>ProductCategoryID<span style="color: #66cc66;">)</span> <span style="color: #993333; font-weight: bold;">AS</span> TABLE2004
+<span style="color: #993333; font-weight: bold;">ON</span> TABLE2003<span style="color: #66cc66;">.</span>Name<span style="color: #66cc66;">=</span>TABLE2004<span style="color: #66cc66;">.</span>Name
+</pre>
+    </li>
+
+    <li>最後のボタン<a class="image"><img alt="Button db Preview LabTalk Substitute.png" src="../images/Import_Data_from_a_Database_for_Analysis/Button_db_Preview_LabTalk_Substitute.png" width="23"></a> をクリックして置換変数付きのSQLクエリー文を表示します。<b>結果データをプレビュー</b>ボタン<a class="image"><img alt="Button db Preview Import.png" src="../images/Import_Data_from_a_Database_for_Analysis/Button_db_Preview_Import.png" width="24"></a>をクリックして下のパネルでデータを参照します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 7.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_7.png" width="646"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>ワークシートにデータをインポート</b>ボタン<a class="image"><img alt="Button db Import Data.png" src="../images/Import_Data_from_a_Database_for_Analysis/Button_db_Import_Data.png" width="25"></a>をクリックしてアクティブなSheet2にクエリーをインポートします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 8.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_8.png" width="396"></a></dd>
+      </dl>
+    </li>
+
+    <li>SQLエディタを閉じます。変更を保存するか尋ねられます。インポートボタンをクリックすると、クエリーの設定が自動でシートに保存されるので、<b>いいえ</b>を選択することもできます。また、<b>はい</b>を選択して、今後の利用のためにアクティブシートのクエリーをODQファイルとして保存することもできます。</li>
+  </ol>
+
+  <h3><a name="Data_Filter_and_Statistics"></a><span class="mw-headline">データフィルタと統計</span></h3>
+
+  <ol>
+    <li>上のセクションでインポートした<i>Production.Product</i>のデータシート(最初のデータ)をアクティブにします。</li>
+
+    <li>列<b>I</b>(ロングネームはStandardCost)を選択し、データフィルタを追加します。<b>ワークシートデータ操作</b>ツールバーで<b>データフィルタの追加/削除</b>ボタンをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 9.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_9.png" width="422"></a></dd>
+      </dl>
+    </li>
+
+    <li>列ヘッダの左上ににフィルタアイコンが追加されます。クリックして<b>より大きい</b>をコンテキストメニューから選択します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 10.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_10.png" width="447"></a></dd>
+      </dl>
+    </li>
+
+    <li>ダイアログが開くので、デフォルトの<b>値</b>の0のまま<b>OK</b>ボタンをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 11.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_11.png" width="220"></a></dd>
+      </dl>
+    </li>
+
+    <li>同様に列P（ロングネームはProductLine）にフィルタを追加して、以下のような条件を設定します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 12.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_12.png" width="232"></a></dd>
+      </dl>
+    </li>
+
+    <li>列IとJ(StandardCost および ListPrice)を選択し、メニューから<b>統計：記述統計：列の統計</b>を選択して<b>列の統計</b>ダイアログを開きます。</li>
+
+    <li><b>グループ</b>を列Pに設定します。三角形のボタンをクリックして右側のリストから列Pを選択します。<b><b>プロット</b></b>タブを開いて<b><b><b>ボックスチャート</b></b></b>をチェックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 13.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_13.png" width="573"></a></dd>
+      </dl>
+    </li>
+
+    <li><b>OK</b> をクリックして実行します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 14.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_14.png" width="604"></a></dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3><a name="Radar_Plot"></a><span class="mw-headline">レーダーチャート</span></h3>
+
+  <ol>
+    <li><b>Sheet2</b>を開きます。</li>
+
+    <li>3列すべてを選択して、作図：レーダー：レーダーを選択してレーダーチャートを作図します。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 15.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_15.png" width="422"></a></dd>
+      </dl>
+    </li>
+
+    <li><i>Clothing</i>軸をダブルクリックして<b>軸ダイアログ</b>を開きます。次の操作はOrigin 2017をベースにしていますので、注意してください。</li>
+
+    <li><b>スケール</b>タブを選択します。<b>全ての軸に同じオプションを使用</b>のチェックを外します。左パネルで、Axis1からAxis4を選択します。<b>開始</b>を0に設定し、<b>主目盛</b>を<b>主目盛の数</b>にして6に設定します。<b>適用</b>ボタンをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 18.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_18.png" width="548"></a></dd>
+      </dl>
+    </li>
+
+    <li>左パネルで、Axis1からAxis4を選択したまま、目盛ラベルタブを開きます。<b>目盛ラベルを表示</b>で<b>軸の前</b>が選択されています。このドロップダウンリストを開き、再度<i><i>軸の前</i></i> を選択して、すべての軸に対してこれを適用します。</li>
+
+    <li><b>表示</b>を、<b>十進数: 1000</b>とし、<b>割る値</b>を1000000に設定します。<b>適用</b>ボタンをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 19.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_19.png" width="548"></a></dd>
+      </dl>
+    </li>
+
+    <li>スケールタブに戻ります。左パネルで<b>Axis1 - Clothing</b> のみを選択し、<b>終了</b>の値を<i>1.5 </i>にします。同様にして<b>Axis3 - Accessories</b> および <b>Axis4 - Components</b>の終了の値をそれぞれ<i>0.7</i>、<i>6</i>に設定します。前の操作で割る値を1000000にしたので、終了の値を簡単に入力できます。</li>
+
+    <li><b>OK</b>ボタンをクリックします。
+
+      <dl>
+        <dd><a class="image"><img alt="ImportDataDatabase 20.png" src="../images/Import_Data_from_a_Database_for_Analysis/ImportDataDatabase_20.png" width="422"></a></dd>
+      </dl>4 つのカテゴリすべてについて、2004の行の合計が 2003の行の合計よりも大きいことがわかります。そしてBikesが最も大きくなっています。
+    </li>
+  </ol>

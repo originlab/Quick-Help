@@ -1,0 +1,154 @@
+﻿<h1 class="firstheading">アルゴリズム (FFT)</h1><p class='urlname' style='display: none'>FFT1-Algorithm</p>
+<p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#FFTW"><span class="tocnumber">1</span> <span class="toctext">FFTW</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Power_density"><span class="tocnumber">2</span> <span class="toctext">パワー密度</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#More_results"><span class="tocnumber">3</span> <span class="toctext">その他の結果</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Normalization"><span class="tocnumber">4</span> <span class="toctext">正規化</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Automatic_Computation_of_Sampling_Interval"><span class="tocnumber">5</span> <span class="toctext">サンプリング間隔の自動計算</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Windows"><span class="tocnumber">6</span> <span class="toctext">ウィンドウ法</span></a></li>
+</ul>
+</div>
+
+<p>離散フーリエ変換(DFT)は、時間領域の信号を周波数領域に変換する処理です。(<i><img src="../images/Algorithm_(FFT1)/math-1ba8aaab47179b3d3e24b0ccea9f4e30.png" title="x_i" alt="x_i" class="tex"/></i>) を長さNのデータとすると、そのDFTは次式で与えられるデータ (<i><img src="../images/Algorithm_(FFT1)/math-f67871cd00ac973d0e2b80db93f3bcd3.png" title="F_n" alt="F_n" class="tex"/></i>)  となります。
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-44b84261a0760528e61954194fb105bb.png" title="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" alt="F_n=\sum_{i=0}^{N-1}x_ie^{-\frac{2\pi j}{N}ni}" class="tex"/></dd></dl>
+<p>Originは、FFTWライブラリを使ってフーリエ変換を実行します。Originは、変換されたデータを使って、振幅、マグニチュード、パワー密度を計算します。
+</p>
+<h4><a name="FFTW"></a><span class="mw-headline">FFTW</span></h4>
+<p>FFTWでは、変換されたデータの計算は、&ldquo;codelets&rdquo;と呼ばれるC言語のコードブロックで構成されるエグゼキュータにより実行されます。各codeletは、変換の一部に指定されています。これらのcodeletsを使って、エグゼキュータはCooley-TurkeyのFFTアルゴリズムを実行し、これの考えは入力信号のサイズをファクタリングするものです。再帰的ファクタリングによって、信号は短く分けられます。短く分けられた変換の結果は乗算され、最終的に元の信号の変換が計算されます。FFTWについての詳細は、<a class="external free" href="http://fftw.org/" target="_blank">http://fftw.org/</a>をご覧下さい。
+</p>
+<h4><a name="Power_density"></a><span class="mw-headline">パワー密度</span></h4>
+<p>定義式により、パワー密度とスペクトルは次の式で計算できます。
+</p><p><img src="../images/Algorithm_(FFT1)/math-01ea72bb6484d55067efaf077c138a95.png" title="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" alt="P_{xx}(e^{j\omega })=\sum_{m=-\infty }^\infty r_{xx}(m)e^{-j\omega m}" class="tex"/>
+</p><p>ここで<img src="../images/Algorithm_(FFT1)/math-da6b0fd4971690d9cd42cf8f66d491ea.png" title="r_{xx}(m)\,\!" alt="r_{xx}(m)\,\!" class="tex"/>は入力信号の自動相関関数です。
+</p><p>しかし、入力信号は有限であり、ある方法がパワースペクトルを推定するのに使えるだけなので、定義式でパワースペクトルを計算することはできません。Originで使われる方法は、<i>Periodogram</i>で、これはフーリエ変換した振幅からパワーを推定するものです。振幅の2乗がパワースペクトルの振幅に比例することは一般的ですが、各ドメインでパワースペクトルの規格化について議論するさまざまな規則が存在します。Originでは、二乗振幅(MSA)、二乗和振幅(SSA)、時間積分2乗振幅 (TISA)の3つを使っています。これらは次のように表されます。
+</p><p><img src="../images/Algorithm_(FFT1)/math-f78ce05254203460fee0e30a9b4cff70.png" title="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" alt="Power Density(two-sided)=\begin{cases}\frac{{Re}^2+{Im}^2}{n^2},for MSA\\\frac{{Re}^2+{Im}^2}n,for SSA\\\frac{\Delta t({Re}^2+{Im}^2)}n,for TISA\end{cases}" class="tex"/>
+</p><p>ここで<img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png" title="Re\,\!" alt="Re\,\!" class="tex"/>および<img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png" title="Im\,\!" alt="Im\,\!" class="tex"/>は変換データの実数部と虚数部で、<img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png" title="n\,\!" alt="n\,\!" class="tex"/>は入力データの長さ、 <img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex"/>はサンプリング間隔です。
+</p><p>パワースペクトルは、<b>スペクトルの種類</b> (st)で、<b>両側</b>(2)または<b>片側</b>(1)が選択されているかどうかにより、片側または両側にすることができます。片側のパワー密度を計算するには、最初に両側のパワーを計算する必要があります。そして、結果は次の式を使って片側のパワーに変換されます。
+</p><p><img src="../images/Algorithm_(FFT1)/math-7bce1e1b9a6be59860ec46e258c91cd1.png" title="P_s(i)=P_d(i),i=0\,\!" alt="P_s(i)=P_d(i),i=0\,\!" class="tex"/>
+</p><p><img src="../images/Algorithm_(FFT1)/math-baeb6ffeed47a699cc1b677554430b8c.png" title="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" alt="P_s(i)=2P_d(i),i=1,2,\cdots \frac n2-1" class="tex"/>
+</p><p>ここで<img src="../images/Algorithm_(FFT1)/math-31778efa2cc67bd5c807be00488cba96.png" title="P_s(i)\,\!" alt="P_s(i)\,\!" class="tex"/>は片側のパワースペクトルで、<img src="../images/Algorithm_(FFT1)/math-e075b2b8adb8eba728d28cab34392d45.png" title="P_d(i)\,\!" alt="P_d(i)\,\!" class="tex"/>は両側のパワースペクトルです。
+</p><p>窓関数が適用される場合、パワーの結果は、次式で定義される補償の係数で乗算されます。
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-363eaa9c63ea87cd48ba42fdf880175e.png" title="N/{\sum_{n=0}^{N-1}w(n)^2}" alt="N/{\sum_{n=0}^{N-1}w(n)^2}" class="tex"/> ここで<img src="../images/Algorithm_(FFT1)/math-4f1e95fe0a7a8e27f3b50dd3fc160462.png" title="w(n)" alt="w(n)" class="tex"/>は、下記で定義した窓関数です。 </dd></dl>
+<h4><a name="More_results"></a><span class="mw-headline">その他の結果</span></h4>
+<p>Originは変換したデータのマグニチュード、位相、振幅を計算できます。<img src="../images/Algorithm_(FFT1)/math-ee3b649c91bbd9dec3819b3f5481c130.png" title="Re\,\!" alt="Re\,\!" class="tex"/>と<img src="../images/Algorithm_(FFT1)/math-b51fd3509fe55c0eedb0147d08bdbf8f.png" title="Im\,\!" alt="Im\,\!" class="tex"/>を変換したデータの実数部と虚数部にし、<img src="../images/Algorithm_(FFT1)/math-baa52b85c066dbd5eeff3c078a69205b.png" title="n\,\!" alt="n\,\!" class="tex"/>を入力信号のサイズにします。<img src="../images/Algorithm_(FFT1)/math-80c473f1c5ffddd8f4ec87f62dc50209.png" title="\Delta t\,\!" alt="\Delta t\,\!" class="tex"/>を使って、サンプリング間隔を表します。<b>norma</b> 変数を0にセットします。(正規化を使用しない)その他の出力は、以下の式で計算されます。
+</p>
+<table class="simple">
+<tr>
+<th>
+</th>
+<th>スペクトルの種類<br />両側<br />(i=1-n/2 ~ n/2)
+</th>
+<th>スペクトルの種類<br />片側<br />(i=0 ~ n/2)
+</th></tr>
+<tr>
+<td>
+<p>位相
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-ad64609096818ed7ccb8b3d4ba0f7ab6.png" title="\arctan (\frac{Im}{Re})\," alt="\arctan (\frac{Im}{Re})\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>マグニチュード
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-c1ece0acf285e8b40cf88b80e8282cfa.png" title="\sqrt{Re^2+Im^2}\," alt="\sqrt{Re^2+Im^2}\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>振幅
+</td>
+<td>
+<p><img src="../images/Algorithm_(FFT1)/math-492e800da9c3c4b1292f0a0bea063f0d.png" title="\sqrt{Re^2+Im^2}/n\," alt="\sqrt{Re^2+Im^2}/n\," class="tex"/>
+</p>
+</td>
+<td>
+<p><img src="../images/Algorithm_(FFT1)/math-13a921e0253cc1827e37d9ff186d9278.png" title="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," alt="\sqrt{Re^2+Im^2}/n, i=0\mbox{ or }i=n/2\," class="tex"/><br />
+<img src="../images/Algorithm_(FFT1)/math-59b53c2648a667df20f43a3773b28534.png" title="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," alt="2*\sqrt{Re^2+Im^2}/n, \mbox{ otherwise }\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>dB
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-ea3686f5a52c473b0e14137f2542b7aa.png" title="20log(Amplitude)\," alt="20log(Amplitude)\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>dB単位で正規化された振幅
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-0496b25eab060be3595e4ca0bca32c71.png" title="dB-max(dB)\," alt="dB-max(dB)\," class="tex"/>
+</p>
+</td></tr>
+<tr>
+<td>
+<p>RMS振幅
+</p>
+</td>
+<td colspan="2">
+<p><img src="../images/Algorithm_(FFT1)/math-01979a16e7b68ffff4f1b0b1456829ea.png" title="\frac{\sqrt{2}}2Amplitude\," alt="\frac{\sqrt{2}}2Amplitude\," class="tex"/>
+</p>
+</td></tr></table>
+<h4><a name="Normalization"></a><span class="mw-headline">正規化</span></h4>
+<p>上記の計算は、実際には、<b>norma</b> 変数がfalseにセットされているという前提に基づいています。この変数がtrueにセットされていると、複素数、実数、虚数、マグニチュード、二乗マグニチュードが正規化されます。位相、パワー、振幅、正規化した振幅、dB、二乗振幅は、<b>norma</b> 変数の影響を受けません。
+</p><p><b>スペクトルの種類</b>(st)で、<b>両側</b> (2)が選択されていて、<b>正規化</b> (norma)がTrueにセットされている場合、複素数、実数、虚数、マグニチュード、二乗マグニチュードの結果は、 <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png" title="n\," alt="n\," class="tex"/>で除算されます。ここで、 <img src="../images/Algorithm_(FFT1)/math-a957404c96e59f1746f97ab668c8e1f8.png" title="n\," alt="n\," class="tex"/>は入力信号の大きさです。
+</p><p><b>スペクトルの種類</b>(st)で、<b>片側</b> (1)が選択されていて、<b>正規化</b> (norma)がTrueにセットされている場合、複素数、実数、虚数、マグニチュード、二乗マグニチュードの結果は、次のように正規化されます。<img src="../images/Algorithm_(FFT1)/math-4d30e4daa217409c00a4232ebdb923a1.png" title="res_s&apos;\," alt="res_s&apos;\," class="tex"/>を正規化した結果にします。 
+</p>
+<dl><dd><img src="../images/Algorithm_(FFT1)/math-a5652bda282e618ec59b68074eb5790f.png" title="res_s&apos;(i) = 
+\begin{cases} 
+res_s(i)/n,  &amp; \mbox{if } i=0 \\
+2*res_s(i)/n,  &amp; \mbox{otherwise} 
+\end{cases}" alt="res_s&apos;(i) = 
+\begin{cases} 
+res_s(i)/n,  &amp; \mbox{if } i=0 \\
+2*res_s(i)/n,  &amp; \mbox{otherwise} 
+\end{cases}" class="tex"/></dd></dl>
+<h4><a name="Automatic_Computation_of_Sampling_Interval"></a><span class="mw-headline">サンプリング間隔の自動計算</span></h4>
+<p>自動的に計算されるサンプリング間隔は、時間データの増加の平均で、これは通常入力信号と結びついているXデータが使われます。結びついているX列が無ければ、行番号が使われます。Originが増加の平均を取得するのに失敗した場合、サンプリング間隔は1にセットされます。
+</p><p><b>周波数</b>
+</p><p>周波数の列は、サンプリング間隔<a  class="image"><img alt="Fft1 help English files image014.gif" src="../images/Algorithm_(FFT1)/Fft1_help_English_files_image014.gif" width="20"  /></a>および、入力データポイント <i>N</i>の数から取得されます。<i>n</i>番目の周波数データは次式で与えられます。
+</p><p><img src="../images/Algorithm_(FFT1)/math-8763f1f56d63a872fd52fda663147678.png" title="f_n=\frac n{N\Delta t}" alt="f_n=\frac n{N\Delta t}" class="tex"/>
+</p><p>N個の入力データポイントがある場合、周波数領域も最大周波数 でN個のポイントを持ちます。最大周波数<img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"/>は<img src="../images/Algorithm_(FFT1)/math-f10972036c4bdf0172f82cbdec5fdf32.png" title="\frac 1{\Delta t}(1-\frac 1N)" alt="\frac 1{\Delta t}(1-\frac 1N)" class="tex"/>です。<i>結果の移動</i>オプションが選択されていない場合、変換は0から<img src="../images/Algorithm_(FFT1)/math-4329ba377dc00cf706e49f696f7238de.png" title="f_{\max }\,\!" alt="f_{\max }\,\!" class="tex"/>の間で表示されます。そうでない場合、移動した結果は <img src="../images/Algorithm_(FFT1)/math-da28b5b651977378ea2afdc6646eabbc.png" title="-\frac{f_{\max }}2" alt="-\frac{f_{\max }}2" class="tex"/>から<img src="../images/Algorithm_(FFT1)/math-e8556cbd67b2e41e95b7cbc74d5fdd96.png" title="\frac{f_{\max }}2" alt="\frac{f_{\max }}2" class="tex"/>の間で表示されます。
+</p>
+<h4><a name="Windows"></a><span class="mw-headline">ウィンドウ法</span></h4>
+<p>ウィンドウ法は漏れを抑えるのに使用します。Originで利用できる異なるウィンドウの種類が次のように定義されます。
+</p>
+<table class="mtip"><tr>
+	<td style="vertical-align:top"><img src="../images/Algorithm_(FFT1)/Mini_bulb.png" /></td><td><p>以下の式で、<img src="../images/Algorithm_(FFT1)/math-7b8b965ad4bca0e41ab51de7b31363a1.png" title="n" alt="n" class="tex"/>はデータのインデックス、<img src="../images/Algorithm_(FFT1)/math-8d9c307cb7f3c4a32822a51922d1ceaa.png" title="N" alt="N" class="tex"/>はデータセットの総数です。
+</p></td></tr></table>
+<p><b>矩形ウィンドウ</b>： 
+</p><p><img src="../images/Algorithm_(FFT1)/math-0ea6c517a0282283a8ebbdd2525f1713.png" title="w[n]=1\,\!" alt="w[n]=1\,\!" class="tex"/>
+</p><p><b>Welchウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-36c370ad4c40cff081352cd6c147f4bf.png" title="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" alt="w[n]=1-\left( \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right) ^2" class="tex"/>
+</p><p><b>Triangularウィンドウ</b>：
+</p><p>奇数: <img src="../images/Algorithm_(FFT1)/math-0301923ac9ba030df614e6d597b61aca.png" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex"/> <br />
+偶数: <img src="../images/Algorithm_(FFT1)/math-8e83f30fc0b782e1d8b13c070ff8819d.png" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex"/>
+</p><p><b><b>Bartlettウィンドウ</b>：</b>
+</p><p><img src="../images/Algorithm_(FFT1)/math-825eb9c392e4c816f626392c7bd01c1b.png" title="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" alt="w(n)=\frac 2{N-1}(\frac{N-1}2-|n-\frac{N-1}2|)" class="tex"/>
+</p><p><b>Hanningウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-8f823e6c7622542b06faa1579d56e96a.png" title="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" alt="w[n]=\frac 12[1-\cos (\frac{2\pi n}{N-1})]" class="tex"/>
+</p><p><b>Hammingウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-a6fd9500215ae9924cd381d672708a6d.png" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1})" class="tex"/>
+</p><p><b>Blackmanウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-d1c1de031af458564cd1fdf389d5fa25.png" title="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" alt="w[n]=0.42-0.5\cos (\frac{2\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1})" class="tex"/>
+</p><p><b>Gaussianウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-fab7a042f67f1dfb6dc5556e228508ec.png" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex"/>
+</p><p><b>Kaiserウィンドウ</b>：
+</p><p><img src="../images/Algorithm_(FFT1)/math-04b7bbeb549a0b1d5ee22e3d50305676.png" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex"/>
+</p>
+
+
+    

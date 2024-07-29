@@ -1,0 +1,74 @@
+﻿<h1 class="firstheading">Output to Script Window</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Version_Info"><span class="tocnumber">1</span> <span class="toctext">Version Info</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Example"><span class="tocnumber">2</span> <span class="toctext">Example</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Version_Info"></a><span class="mw-headline">Version Info</span></h2>
+
+  <p class="version">Minimum Origin Version Required: Origin 8 SR5</p>
+
+  <h2><a name="Example"></a><span class="mw-headline">Example</span></h2>
+
+  <p>This example will use the <a href="../../OriginC/OriginC/Curve_stats_(global_function).html" title="OriginC:Curve stats (global function)">curve_stats</a> function to perform statistics, and then the results will be put to the Script Window.</p>
+
+  <p>Before running the Origin C code, please run the following LabTalk script first to generate the required data.</p>
+  <pre class="lt" style="font-family:monospace;">
+newbook;  <span style="color: #008000;">// create a name workbook</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">"Samples\Statistics\Descriptive Statistics on columns.txt"</span>;
+impASC;  <span style="color: #008000;">// import the file to the workbook</span>
+</pre>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> output_script_window<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// get the active worksheet</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+                <span style="color: #0000ff;">return</span>;
+        
+        DataRange dr;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"X"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Y"</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">3</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+        
+        Tree trResult;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>curve_stats<span style="color: #000000;">(</span>dr, trResult<span style="color: #000000;">)</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// perform statistics on column D, results to trResult</span>
+                <span style="color: #0000ff;">return</span>;
+        
+        Tree trRoot;  <span style="color: #008000;">// root</span>
+        
+        <span style="color: #008000;">// create the tree node of the stats results</span>
+        TreeNode trStats <span style="color: #000080;">=</span> trRoot.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"DescriptiveStatsReport"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// the tree node of result</span>
+        
+        TreeNode trN <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"N"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// n total</span>
+        trN.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">N</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trSum <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Sum"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// sum</span>
+        trSum.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">sum</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trMin <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Minimum"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// min</span>
+        trMin.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">min</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trMax <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Maximum"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// max</span>
+        trMax.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">max</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trMean <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Mean"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// mean</span>
+        trMean.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">mean</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trMedian <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Median"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// median</span>
+        trMedian.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">median</span>.<span style="color: #000000;">dVal</span>;
+        TreeNode trSD <span style="color: #000080;">=</span> trStats.<span style="color: #000000;">AddNode</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"SD"</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// sd</span>
+        trSD.<span style="color: #000000;">dVal</span> <span style="color: #000080;">=</span> trResult.<span style="color: #000000;">sd</span>.<span style="color: #000000;">dVal</span>;
+        
+        string strResult;  <span style="color: #008000;">// string of the tree node</span>
+        vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnTableDisplayFormat <span style="color: #000080;">=</span> <span style="color: #000000;">{</span>DISPLAY_CENTER, DISPLAY_RIGHT, DISPLAY_RIGHT<span style="color: #000000;">}</span>;  <span style="color: #008000;">// diaplay format</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #0000dd;">0</span> <span style="color: #000080;">&lt;</span> tree_to_str<span style="color: #000000;">(</span>trStats, strResult, vnTableDisplayFormat<span style="color: #000000;">)</span><span style="color: #000000;">)</span>  <span style="color: #008000;">// convert tree node to string</span>
+        <span style="color: #000000;">{</span>
+                LT_execute<span style="color: #000000;">(</span><span style="color: #ff00ff;">"type -a"</span><span style="color: #000000;">)</span>;
+                out_str<span style="color: #000000;">(</span>strResult<span style="color: #000000;">)</span>;  <span style="color: #008000;">// output the string of the results</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>

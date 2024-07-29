@@ -1,0 +1,208 @@
+﻿<h1 class="firstheading">LabTalkによるピーク解析</h1>
+
+  <p class='urlname' style='display: none'>Tutorial-Peak-Analysis</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_You_Will_Learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Steps"><span class="tocnumber">3</span> <span class="toctext">ステップ</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Example_1:_Peak_Analysis_with_Scripts"><span class="tocnumber">3.1</span> <span class="toctext">サンプル1: スクリプトでピーク分析</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Example_2:_Running_Batch_Processing_with_pre-saved_Theme"><span class="tocnumber">3.2</span> <span class="toctext">サンプル2: 事前保存したテーマでバッチ処理を実行</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <p>このチュートリアルでは、ピーク分析でLabTalkを使用する方法を示します。</p>
+
+  <h2><a name="What_You_Will_Learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、LabTalk スクリプトを使用して次のことを行う方法を説明します。</p>
+
+  <ul>
+    <li>ソースデータから行を減算</li>
+
+    <li>各データセットで高さが最大のピークを検索</li>
+
+    <li>高さが最大のピークについて面積高さ、FWHMを計算</li>
+
+    <li>ピークに関する値のグラフを作成</li>
+
+    <li>ピークアナライザーのテーマを作成し保存したテーマでバッチ処理を実行</li>
+  </ul>
+
+  <h2><a name="Steps"></a><span class="mw-headline">ステップ</span></h2>
+
+  <h3><a name="Example_1:_Peak_Analysis_with_Scripts"></a><span class="mw-headline">サンプル1: スクリプトでピーク分析</span></h3>
+
+  <ol>
+    <li><i>&lt;Origin EXE folder&gt;\Samples\Graphing</i>のデータファイル<b>Waterfall.dat</b> を関連するインポートフィルタでワークブック<b>Waterfall</b>にインポートします。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// 新規ブックを作成し、Waterfallと名前付け（ロングネームとショートネーム両方）</span>
+newbook name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Waterfall&quot;</span> option<span style="color: #000000;">:</span><span style="color: #000080;">=</span>lsname;
+<span style="color: #008000;">// ファイル名とフィルタ名を定義</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Waterfall.dat&quot;</span>;
+string filtername<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;waterfall.oif&quot;</span>;  
+<span style="color: #008000;">// Xファンクションimpfileを使用して、インポートフィルタで指定ファイルをインポート</span>
+impfile fname<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fname<span style="color: #000080;">$</span> filtername<span style="color: #000000;">:</span><span style="color: #000080;">=</span>filtername<span style="color: #000080;">$</span> location<span style="color: #000000;">:</span><span style="color: #000080;">=</span>data orng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;
+</pre>
+    </li>
+
+    <li>ループとXファンクション<a class="external text" href="../../XFunction/X-Function/Subtract_line.html">subtract_line</a>を使用して、エンドポイント接続の単純な基線を減算します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// SubtractedDataという新しいシートを作成</span>
+newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData;
+<span style="color: #008000;">//新しく作成したワークシート(現在アクティブ)を範囲変数として定義</span>
+range sdwk <span style="color: #000080;">=</span> <span style="color: #000080;">!</span>;
+<span style="color: #008000;">//名前で &quot;Waterfall&quot; シートをアクティブ化</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Waterfall&quot;</span>;
+<span style="color: #008000;">//Waterfallシートの列数を保持する整数を定義</span>
+int nc <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+
+<span style="color: #008000;">//excitation wavelength = 600, 610, 620, 630 etcの列を検索</span>
+<span style="color: #008000;">//Xファンクションloopおよびsubtract_lineを使用して、ベースラインを減算</span>
+<span style="color: #008000;">//最初と最後のデータ ポイントが検出され、直線的に接続</span>
+<span style="color: #008000;">//この線をベースラインとしてソースデータから減算</span>
+<span style="color: #008000;">//減算されたデータは、ソース データのexcitation wavelengthの値で名前付け</span>
+int nexc;
+loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">2</span>, nc<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        range ry <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        int nWave <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>ry<span style="color: #000000;">[</span>D1<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+        if <span style="color: #000000;">(</span>mod<span style="color: #000000;">(</span>nWave, <span style="color: #0000dd;">10</span><span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                nexc <span style="color: #000080;">=</span> nexc <span style="color: #000080;">+</span> <span style="color: #0000dd;">1</span>;
+                range rx <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>Waterfall<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                range rr <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Waterfall<span style="color: #000000;">]</span>SubtractedData<span style="color: #000080;">!</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #000080;">$</span><span style="color: #000000;">(</span>nexc<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+                subtract_line iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry 
+                x1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最初の点の X 値を指定*/</span>
+                y1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最初の点の Y 値を指定*/</span>
+                x2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rx<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最後の点の X 値を指定*/</span>
+                y2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ry<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">maxRows</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #008000; font-style: regular;">/* 最後の点の Y 値を指定*/</span>
+                oy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rr;
+        <span style="color: #008000;">//SubtractedDataシートの列のロングネームを変更</span>
+        <span style="color: #008000;">//Waterfallシートでユーザ定義パラメータWavelengthを使用</span>
+         rr<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> ry<span style="color: #000000;">[</span>D1<span style="color: #000000;">]</span><span style="color: #000080;">$</span>;
+         
+         <span style="color: #008000;">//次のループのために新しい列を追加</span>
+         wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        else
+        <span style="color: #000000;">{</span>
+                continue;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>概要レポート用の新しいシートを作成します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// 要約レポート用の新しいシートを作成し、範囲を定義</span>
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">7</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;XYYYYYY&quot;</span> name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Summary&quot;</span>;
+range rWaveLength <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, rCntrInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, rLtInd <span style="color: #000080;">=</span><span style="color: #0000dd;">3</span>, rRtInd <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+range rArea <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>, rCntr <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>, rHt <span style="color: #000080;">=</span> <span style="color: #0000dd;">7</span>, rFWHM <span style="color: #000080;">=</span> <span style="color: #0000dd;">8</span>;
+rWaveLength<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;WaveLength&quot;</span>;
+rCntrInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center Index&quot;</span>;
+rLtInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Left Index&quot;</span>;
+rRtInd<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>   <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Right Index&quot;</span>;
+rArea<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Area&quot;</span>;
+rCntr<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>    <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Center&quot;</span>;
+rHt<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>      <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Peak Height&quot;</span>;
+rFWHM<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span>         <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;FWHM&quot;</span>;
+</pre>
+    </li>
+
+    <li>高さ最大のピークに関する値を計算するには、 <a class="external text" href="../../XFunction/X-Function/PkFind.html">pkfind </a>Xファンクションで最大ピークを見つけてから、<a class="external text" href="../../XFunction/X-Function/Integ1.html">integ1</a> Xファンクションでそれぞれの値を計算する必要があります。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+ <span style="color: #008000;">// SubtractedDataシートをアクティブにする</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;SubtractedData&quot;</span>;
+
+<span style="color: #008000;">//見つかったピークの一時的な結果を出力する列を追加</span>
+loop<span style="color: #000000;">(</span>cc, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>;
+
+loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">2</span>, nexc<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span> 
+        <span style="color: #008000;">//最大ピーク</span>
+        range rData <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+        range pcenter<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>, pleft<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>, pright<span style="color: #000080;">=</span> <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+        pkfind rData filter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>num value<span style="color: #000000;">:</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> ocenter<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pcenter oleft<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pleft oright<span style="color: #000000;">:</span><span style="color: #000080;">=</span>pright; <span style="color: #008000;">//最大ピークを検索</span>
+
+        <span style="color: #008000;">//一時列の結果を概要シートにコピー</span>
+        wrcopy iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>SubtractedData ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span>Summary c1<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span> c2<span style="color: #000000;">:</span><span style="color: #000080;">=</span>nexc<span style="color: #000080;">+</span><span style="color: #0000dd;">3</span> r1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> r2<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> dc1<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> dr1<span style="color: #000000;">:</span><span style="color: #000080;">=</span> ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span>;
+        
+        <span style="color: #008000;">//integ1で最大ピークに関する値を出力</span>
+        int n1 <span style="color: #000080;">=</span> pleft<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>; <span style="color: #008000;">//ピーク左インデックスを指定</span>
+        int n2 <span style="color: #000080;">=</span> pright<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>; <span style="color: #008000;">//ピーク右インデックスを指定</span>
+        range rint <span style="color: #000080;">=</span> rData<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n1<span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>n2<span style="color: #000000;">)</span><span style="color: #000000;">]</span>; <span style="color: #008000;">// 積分のデータ範囲</span>
+        double aa, cc, hh, fw; 
+        integ1 iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span>rint area<span style="color: #000000;">:</span><span style="color: #000080;">=</span>aa x0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cc y0<span style="color: #000000;">:</span><span style="color: #000080;">=</span>hh dx<span style="color: #000000;">:</span><span style="color: #000080;">=</span>fw oy<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>optional<span style="color: #000080;">&gt;</span>;
+        <span style="color: #008000;">//概要シートに値を出力</span>
+        rArea<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> aa;
+        rCntr<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> cc;
+        rHt<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> hh;
+        rFWHM<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span>fw;
+        <span style="color: #008000;">//計算されたデータのロングネームを概要シートにコピー</span>
+        rWaveLength<span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">-</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>rData<span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+    </li>
+
+    <li>Xファンクション<a class="external text" href="../../XFunction/X-Function/Plotxy.html">plotxy</a>を使用して、励起波長の値のグラフを作成します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// excitation wavelengthに関する値のグラフを作成</span>
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>rWaveLength, rArea<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>rWaveLength, rHt<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;
+plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>rWaveLength, rFWHM<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">202</span> ogl<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;
+</pre>
+    </li>
+  </ol>
+
+  <h3><a name="Example_2:_Running_Batch_Processing_with_pre-saved_Theme"></a><span class="mw-headline">サンプル2: 事前保存したテーマでバッチ処理を実行</span></h3>
+
+  <ol>
+    <li><i>&lt;Origin EXE folder&gt;\Samples\Batch Processing</i>フォルダにある事前に用意されたテーマファイル0-PA-BatchPA.oisをOriginにドラッグ&amp;ドロップします。</li>
+
+    <li>ピーク分析用のデータを含むプロジェクトファイルを開きます。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// Originのプロジェクトファイルを開く</span>
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Batch Processing\Batch Peak Analysis.opj&quot;</span>;
+doc <span style="color: #000080;">-</span>o <span style="color: #000080;">%</span><span style="color: #000000;">(</span>fname<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">//  &apos;&apos;document -open&apos;&apos;の略</span>
+</pre>
+    </li>
+
+    <li>事前保存されたテーマを使ってXファンクション <a class="external text" href="../../XFunction/X-Function/PaMultiY.html">pamultiY</a>でピーク分析のバッチ処理を実行します。</li>
+
+    <li style="list-style: none">
+      <pre class="lt" style="font-family:monospace;">
+paMultiY iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span><span style="color: #000000;">:</span>end theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;BatchPA&quot;</span> append<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span> dataid<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;My Parameter&quot;</span>;
+</pre>
+    </li>
+  </ol>

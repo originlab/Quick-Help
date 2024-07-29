@@ -1,0 +1,86 @@
+﻿<h1 class="firstheading">非線形フィットのためにPython関数を使用</h1><p class='urlname' style='display: none'>Python-Func-NLFit</p>
+<p><br />
+非線形曲線フィットの実行時にPython関数を使用できます。Python関数と、その関数に必要なPythonパッケージをインストールするためのスクリプトコマンドを含むフィット関数ファイル（FDFファイル）を作成する必要があります。
+</p><p>次のサンプルで、Python関数を使用してFDFを作成する方法の概要を示します。
+</p>
+<h3><a name="Fitting_Function_for_Mass_Diffusion"></a><span class="mw-headline">質量拡散のためのフィット関数</span></h3>
+<p>このセクションでは、Pythonを関数を使って次の質量拡散方程式のフィッティング関数を作成する手順の概要を説明します。<br />
+<a  class="image"><img alt="MassDiffusionFittingFunction.png" src="../images/Python_Functions_NLFit/300px-MassDiffusionFittingFunction.png" width="300"   /></a><br />
+</p>
+<ol>
+<li> まず、新しくFDFファイルを作成します。Originのメニューから<b>ツール：フィット関数ビルダー...</b>を選択して、<b>フィット関数ビルダー</b>を開きます。
+<li>最初のページでは、<b>新しい関数の作成</b>を選択します。
+<li>2ページ目では、<b>関数名</b>をMassDiffusionに設定し、関数形式は<b>算術式</b>にします。
+<li>3ページ目では、独立変数をx、従属変数をy、パラメータをy0, D, Lに設定します。
+<li>4ページ目では、<br />
+<pre>
+MassDiffuse(x, y0, D, L)
+</pre>
+<p>のように<b>関数式</b>編集ボックスに入力します。
+</p>
+<li><b>完了<i>ボタン をクリックします。</i></b>これで、ユーザファイルフォルダ内の<b>fitfunc</b>サブフォルダに、<i>MassDiffusion.FDF</i>というファイル名で作成されます。
+<li>FDFファイルを編集してPython関数を追加します。メモ帳などのテキストエディタでファイルを開きます。
+<li><b>[Formula]</b>セクションに行き、その下に次の新しいセクションを追加します。
+<pre>
+[PythonV]
+from mpmath import nsum, exp, inf
+import numpy as np
+
+def MassDiffuse(x, y0, D, L):
+	sm = [float((nsum(lambda ii: 1/(2*ii+1)**2*exp(-D*(2*ii+1)**2*np.pi**2*t/(4*L**2)),[0, inf]))) for t in x]
+	return [y0*(1-8/np.pi**2*t) for t in sm]
+</pre>
+<li>この関数は、<b>mpmath</b> および <b>numpy</b>パッケージが必要です。関数使用前にこれらをインストールする必要があります。パッケージをインストールするには、Originの<b>接続</b>メニューにある<b>Pythonパッケージ</b>ツールを使用できます。
+
+他のOriginユーザと関数を共有する場合は、Originに関数を追加するときに自動でパッケージをインストールするように設定できます。このためには、FDFファイルに次のセクションを追加します。
+<pre>
+[BeforeInstall]
+if(Python.chk(&quot;mpmath numpy&quot;) &gt; 1)
+	return 1;
+
+return 0;
+</pre>
+<li> ファイルを保存すると、このフィット関数を使用可能になります。
+<li>以下のXYデータでフィット関数のテストが可能です。
+<pre>
+0.00	-0.078
+0.20	 0.604
+0.40	 0.842
+0.60	 1.101
+0.80	 1.029
+1.00	 1.083
+1.20	 0.828
+1.40	 0.884
+1.60	 0.991
+1.80	 1.005
+2.00	 0.915
+</pre>
+<p>パラメータの初期値には以下を入力します。
+</p>
+<pre>
+y0 = 1, D = 0.5, L = 0.5
+</pre>
+<p>そしてフィットを実行します。最終的なパラメータ値は以下の通りです。
+</p>
+<pre>
+フィット値: y0 = 0.97846, D = 0.37563, L = 0.43781
+</pre></li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</li>
+</ol>
+
+
+
+
+
+
+
+    

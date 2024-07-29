@@ -1,0 +1,54 @@
+﻿<h1 class="firstheading">多項式フィット</h1><p>Origin Cで多項式フィットのルーチンを実行するには、<b><a href="../../OriginC/OriginC/Ocmath_polynomial_fit_(global_function).html" title="OriginC:Ocmath polynomial fit (global function)">ocmath_polynomial_fit</a></b> 関数を使用します。この関数では、重み付き多項式フィットを実行し、パラメータ値や統計情報を含むフィット結果などを取得できます。
+</p><p>ここでは、この関数使用することによってOrigin C で多項式フィットを実行する方法を紹介します。
+</p>
+<h2><a name="Perform_Polynomial_Fitting"></a><span class="mw-headline"><span class="OIndex">多項式フィット</span>を実行</span></h2>
+<p>多項式フィットを実行する前に、データをインポートします。ここでは、独立、従属変数ともに1つずつ必要です。
+</p><p>多項式フィットを実行する操作には、3つのステップが必要です。
+</p><p>1.多項式フィットを実行するデータを取得します。
+独立/従属変数ともにベクトル変数を使用します。 
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+	<span style="color: #0000ff;">return</span>;  <span style="color: #008000;">// 無効なワークシート</span>
+
+DataRange dr;
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;X&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// x列</span>
+dr.<span style="color: #000000;">Add</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Y&quot;</span>, wks, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">1</span>, <span style="color: #000040;">-</span><span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// y列</span>
+
+vector vX, vY;
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vX, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// x列データをベクトルに取得</span>
+dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>vY, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;  <span style="color: #008000;">// y列データをベクトルに取得</span></pre>
+<p>2.構造体変数を定義し、他のデータ型に関数のパラメータを渡します。これは、関数設定の初期化もできます。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 結果出力のための構造体のみ定義</span>
+<span style="color: #0000ff;">int</span> nSize <span style="color: #000080;">=</span> vX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> nOrder <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;  <span style="color: #008000;">// 順序</span>
+
+<span style="color: #0000ff;">int</span> nSizeFitParams <span style="color: #000080;">=</span> nOrder<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>;
+FitParameter psFitParameter<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;  <span style="color: #008000;">// パラメータ数 = nOrder+1</span>
+
+RegStats psRegStats;  <span style="color: #008000;">// regression statistics</span>
+RegANOVA psRegANOVA;  <span style="color: #008000;">// anova統計</span></pre>
+<p>3.引数を渡してデータに多項式フィットを実行します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// デフォルトオプションである2次の多項式フィット</span>
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_polynomial_fit<span style="color: #000000;">(</span>nSize, vX, vY, <span style="color: #0000ff;">NULL</span>, nOrder, <span style="color: #0000ff;">NULL</span>, psFitParameter, 
+									nSizeFitParams, <span style="color: #000040;">&amp;</span>psRegStats, <span style="color: #000040;">&amp;</span>psRegANOVA<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// エラーのチェック</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>nRet<span style="color: #000040;">!</span><span style="color: #000080;">=</span>STATS_NO_ERROR<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Error&quot;</span><span style="color: #000000;">)</span>;
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Output_the_Results"></a><span class="mw-headline">結果を出力</span></h2>
+<p>計算が完了したら、スクリプトウィンドウ、結果ログ、ワークシートなどに結果を出力できます。
+</p><p>詳細は、<b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Output_Window" title="OCGuide:線形フィット">結果ウィンドウに出力</a></b>、<b><a href="../../OriginC/OCGuide/Linear_Fitting.html#Result_to_Worksheet" title="OCGuide:線形フィット">ワークシートに出力</a></b> のセクションを確認してください（ <b><a href="../../OriginC/OCGuide/Linear_Fitting.html" title="OCGuide:線形フィット">分析とアプリケーション：カーブフィッティング：線形フィット</a></b> ）
+</p>
+
+
+
+
+
+
+    

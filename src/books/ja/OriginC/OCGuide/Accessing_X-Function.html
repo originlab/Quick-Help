@@ -1,0 +1,63 @@
+﻿<h1 class="firstheading">Xファンクションへのアクセス</h1><p><span class="OIndex" style="display:none">Xファンクションへのアクセス</span>
+Originには、様々なタスクを処理するために、多くの<a class="external text" href="../../XFunction/Category/X-Functions.html">Xファンクション</a>が組み込まれています。  XファンクションはLabTalkとOriginCの両方から呼び出すことができます。このセクションはOriginCのXFBaseクラスを使用してXファンションを呼び出す方法を示します。<span class="OIndex" style="display:none">XFBase クラス</span>この仕組みはXファンクションをもう1つ、別のXファンクションで呼び出す時に使用できます。
+</p><p>XFBaseクラスはOrigin CシステムフォルダにあるXFBase.hヘッダファイルで宣言されます。  XFBase.hヘッダファイルはOrigin.hヘッダファイルに含まれている物ではありません。そのため、他のXFBase クラスを使用するOrigin Cとは別に含まれる必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<h2><a name="Calling_the_impFile_X-Function_From_Origin_C"></a><span class="mw-headline">Origin Cから impFile Xファンクションを呼び出す</span></h2>
+<p>Origin C内で、Xファンクションを使用するための手順を以下に示します。
+</p>
+<ol><li> 特定のXファンクションから構成されたオブジェクトを宣言 </li>
+<li> Xファンクションオブジェクトから、SetArg オプションを使用して引数を割り当てる </li>
+<li> Xファンクションオブジェクトの Evaluateメソッドを使用してXファンクションを実行 </li></ol>
+<p>以下のOrigin CコードはファイルをOriginにインポートする一般的な何数を定義します。  関数は2つの引数、データファイル名とインポートファイル名を使用します。<a class="external text" href="../../XFunction/X-Function/ImpFile.html"><b>impFile</b></a>Xファンクションに対する他の引数は、デフォルトの値を使用します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">bool</span> call_impFile_XF<span style="color: #000000;">(</span>LPCSTR lpcszDataFile, LPCSTR lpcszFilterFile<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strDataFile <span style="color: #000080;">=</span> lpcszDataFile;
+    string strFilterFile <span style="color: #000080;">=</span> lpcszFilterFile;
+
+    <span style="color: #008000;">// XFBaseのインスタンスをXファンクション名を使って作成</span>
+    XFBase xf<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;impFile&quot;</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf<span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// 引数 &apos;fname&apos; をセット</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;fname&quot;</span>, strDataFile<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// 引数 &apos;filtername&apos; をセット</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;filtername&quot;</span>, strFilterFile<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #008000;">// Xファンクション実行のために、XFBase の &apos;Evaluate&apos; メソッドを呼び出す</span>
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span>;
+
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span>;
+<span style="color: #000000;">}</span></pre>
+<p>次のOrigin Cコードは、上で定義した関数call_impFile_XFを呼び出し、画像ファイルのインポートに使用する方法を示します。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// OriginのサンプルフォルダにあるビットマップファイルCarインポート</span>
+string strImageFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span>
+    <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>Image Processing and Analysis<span style="color: #666666; font-weight: bold;">\\</span>Car.bmp&quot;</span>;
+
+<span style="color: #008000;">// 画像インポートフィルタを使用してビットマップ画像をインポート</span>
+string strFilterFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">TRUE</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Filters<span style="color: #666666; font-weight: bold;">\\</span>Image.oif&quot;</span>;
+
+<span style="color: #008000;">// XファンクションimpFileで使用するために関数を呼び出す</span>
+call_impFile_XF<span style="color: #000000;">(</span>strImageFile, strFilterFile<span style="color: #000000;">)</span>;</pre>
+<table class="note">
+
+<tr>
+<td><b>Note:</b>
+<ol><li>Xファンクションへのアクセスについての詳細情報は、<a href="../../OriginC/Category/Accessing_X-Functions.html" title="Category:Xファンクションへのアクセス"><b>ヘルプ：プログラミング &gt; Origin C &gt; Examples &gt; Accessing X-Functions &gt; Accessing X-Function</b></a> をご覧ください。</li>
+<li> Xファンクションについての詳細情報は、<a class="external text" href="../../XFunction/Category/X-Functions.html"><b>ヘルプ：Xファンクション </b></a>をご覧ください。</li></ol>
+</td></tr></table>
+
+
+
+
+
+
+
+    

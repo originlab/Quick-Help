@@ -1,0 +1,109 @@
+﻿<h1 class="firstheading">FindFirstFile</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Searches a directory for a file whose name matches the specified file name (wildcards are allowed). One can use this function in combination with FindNextFile and FindClose to find all the files in the specified directory.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+HANDLE FindFirstFile<span style="color: #000000;">(</span> LPCSTR lpFileName, WIN32_FIND_DATAA <span style="color: #000040;">*</span> lpFindFileData <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>lpFileName</dt>
+
+    <dd>[input] the wildcard pattern which the file name must match</dd>
+
+    <dt>lpFindFileData</dt>
+
+    <dd>[input] pointer to a structure WIN32_FIND_DATAA which will receive the information</dd>
+
+    <dd>about each file</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>If the function succeeds, the return value is a search handle used in a subsequent call to FindNextFile or FindClose.</p>
+
+  <p>If the function fails, the return value is INVALID_HANDLE_VALUE.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> FindFirstFile_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// case1: List all file under c:</span>
+    string strPath <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"c:<span style="color: #666666; font-weight: bold;">\\</span>*.*"</span>;
+    FindFirstFile_dir<span style="color: #000000;">(</span>strPath<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">1</span>;
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// a DOS dir command</span>
+<span style="color: #008000;">// can type into ScriptWindow "dir c:\*.*", for example.</span>
+<span style="color: #008000;">//</span>
+<span style="color: #0000ff;">void</span> FindFirstFile_dir<span style="color: #000000;">(</span>string strFile<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    WIN32_FIND_DATAA    find;
+    HANDLE    hFile;
+
+    <span style="color: #008000;">//out_str(strFile);</span>
+    <span style="color: #0000ff;">int</span>    nCount <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000000;">(</span>hFile<span style="color: #000080;">=</span>FindFirstFile<span style="color: #000000;">(</span>strFile,<span style="color: #000040;">&amp;</span>find<span style="color: #000000;">)</span><span style="color: #000000;">)</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> INVALID_HANDLE_VALUE<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span>find.<span style="color: #000000;">cFileName</span><span style="color: #000000;">)</span>;
+        nCount<span style="color: #000040;">++</span>;
+        <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span>FindNextFile<span style="color: #000000;">(</span>hFile,<span style="color: #000040;">&amp;</span>find<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            out_str<span style="color: #000000;">(</span>find.<span style="color: #000000;">cFileName</span><span style="color: #000000;">)</span>;
+            nCount<span style="color: #000040;">++</span>;
+        <span style="color: #000000;">}</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%d files found<span style="color: #666666; font-weight: bold;">\n</span>"</span>,nCount<span style="color: #000000;">)</span>;
+        FindClose<span style="color: #000000;">(</span>hFile<span style="color: #000000;">)</span>;        <span style="color: #008000;">// must close  the handle</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s: file(s) not found<span style="color: #666666; font-weight: bold;">\n</span>"</span>,strFile<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/FindNextFile_(global_function).html" title="OriginC:FindNextFile (global function)">FindNextFile</a>, <a href="../../OriginC/OriginC/FindClose_(global_function).html" title="OriginC:FindClose (global function)">FindClose</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

@@ -1,0 +1,269 @@
+﻿<h1 class="firstheading">Floating Dialog to download file in another thread</h1>
+<p><span class="OIndex" style="display:none">Floating dialog to download file in another thread</span><span class="OIndex" style="display:none">HTML Dialog</span></p>
+<p class='urlname' style='display: none'>fourth-HTML-dialog</p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_an_HTML_Page_for_Dialog"><span class="tocnumber">2</span> <span class="toctext">Creating an HTML Page for Dialog</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Creating_an_Floating_HTML_Dialog"><span class="tocnumber">3</span> <span class="toctext">Creating an Floating HTML Dialog</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Adding_JavaScript_Callable_Prototypes_in_Origin_C"><span class="tocnumber">4</span> <span class="toctext">Adding JavaScript Callable Prototypes in Origin C</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Launching_The_Dialog"><span class="tocnumber">5</span> <span class="toctext">Launching The Dialog</span></a></li>
+</ul>
+</div>
+<h2><a name="Summary" id="Summary"></a><span class="mw-headline">Summary</span></h2>
+<p>In this tutorial, you build a dailog works as follows:</p>
+<ol>
+<li>Floating dialog with input/output box and two buttons.</li>
+<li>After a user input URL specify a file to download，Origin download the file in another thread so that user can use Origin to do other things.</li>
+<li>Dialog will update download status.</li>
+<li>A user can abort downloading thread.</li>
+</ol>
+<p class="version">Minimum Origin Version Required: Origin 2024b</p>
+<h2><a name="Creating_an_HTML_Page_for_Dialog" id="Creating_an_HTML_Page_for_Dialog"></a><span class="mw-headline">Creating an HTML Page for Dialog</span></h2>
+<ol>
+<li>Open <b>Code Builder</b>, create a new HTML file and save as DownloadFile.html to the folder Download Example.</li>
+<li>Copy the following code and paste it within the DownloadFile.html:
+<pre class="javascript" style="font-family:monospace;">
+<span style="color: #339933;">&lt;!</span>doctype html<span style="color: #339933;">&gt;</span>
+<span style="color: #339933;">&lt;</span>html<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>head<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>meta charset<span style="color: #339933;">=</span><span style="color: #3366CC;">"utf-8"</span> <span style="color: #339933;">/&gt;</span>
+                <span style="color: #339933;">&lt;</span>meta http<span style="color: #339933;">-</span>equiv<span style="color: #339933;">=</span><span style="color: #3366CC;">"X-UA-Compatible"</span> content<span style="color: #339933;">=</span><span style="color: #3366CC;">"IE=Edge"</span> <span style="color: #339933;">/&gt;</span>
+        <span style="color: #339933;">&lt;/</span>head<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>body<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>input id<span style="color: #339933;">=</span><span style="color: #3366CC;">"path"</span> style<span style="color: #339933;">=</span><span style="color: #3366CC;">"width:350px"</span> placeholder<span style="color: #339933;">=</span><span style="color: #3366CC;">"input file url and click Download"</span> onchange<span style="color: #339933;">=</span><span style="color: #3366CC;">"On_Path()"</span><span style="color: #339933;">&gt;&lt;/</span>input<span style="color: #339933;">&gt;</span>           
+                <span style="color: #339933;">&lt;</span>br<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">"button"</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">"btnDownload"</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">"Download"</span> onclick<span style="color: #339933;">=</span><span style="color: #3366CC;">"Invoke_Download()"</span><span style="color: #339933;">/&gt;</span>            
+                <span style="color: #339933;">&lt;</span>input type<span style="color: #339933;">=</span><span style="color: #3366CC;">"button"</span> id<span style="color: #339933;">=</span><span style="color: #3366CC;">"btnAbort"</span> value<span style="color: #339933;">=</span><span style="color: #3366CC;">"Abort"</span> onclick<span style="color: #339933;">=</span><span style="color: #3366CC;">"Invoke_Abort()"</span><span style="color: #339933;">/&gt;</span>     
+                <span style="color: #339933;">&lt;</span>br<span style="color: #339933;">&gt;</span>
+                <span style="color: #339933;">&lt;</span>input id<span style="color: #339933;">=</span><span style="color: #3366CC;">"hint"</span> style<span style="color: #339933;">=</span><span style="color: #3366CC;">"width:350px;border:none"</span> disabled<span style="color: #339933;">=</span><span style="color: #3366CC;">"true"</span><span style="color: #339933;">&gt;&lt;/</span>div<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;/</span>body<span style="color: #339933;">&gt;</span>
+        <span style="color: #339933;">&lt;</span>script<span style="color: #339933;">&gt;</span>
+                <span style="color: #000066; font-weight: bold;">function</span> On_Path<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+                        document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'btnDownload'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+                        document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'hint'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> <span style="color: #3366CC;">""</span><span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #000066; font-weight: bold;">function</span> Invoke_Download<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+                        <span style="color: #000066; font-weight: bold;">var</span> Result <span style="color: #339933;">=</span> window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"DownloadOnlineFile"</span><span style="color: #339933;">,</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'path'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'hint'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> Result<span style="color: #339933;">;</span>
+                        document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'btnDownload'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>             
+                <span style="color: #000066; font-weight: bold;">function</span> Invoke_Abort<span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">{</span>
+                        window.<span style="color: #660066;">external</span>.<span style="color: #660066;">ExtCall</span><span style="color: #009900;">(</span><span style="color: #3366CC;">"DownloadAbort"</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'btnDownload'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">disabled</span> <span style="color: #339933;">=</span> <span style="color: #003366; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #000066; font-weight: bold;">function</span> Update<span style="color: #009900;">(</span>str<span style="color: #009900;">)</span> <span style="color: #009900;">{</span> document.<span style="color: #660066;">getElementById</span><span style="color: #009900;">(</span><span style="color: #3366CC;">'hint'</span><span style="color: #009900;">)</span>.<span style="color: #660066;">value</span> <span style="color: #339933;">=</span> str<span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+        <span style="color: #339933;">&lt;/</span>script<span style="color: #339933;">&gt;</span>    
+<span style="color: #339933;">&lt;/</span>html<span style="color: #339933;">&gt;</span>
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b> This code adds functionality to the HTML page you created above:
+<ul>
+<li><code>On_Path()</code>:Enable Download button and output message after a user input file url</li>
+<li><code>Invoke_Download()</code>: Respond to the event of a user hitting the Download button</li>
+<li><code>Invoke_Abort()</code>: Respond to the event of a user hitting the Abort button</li>
+<li><code>Update()</code>: Output download message</li>
+</ul>
+</td>
+</tr>
+</table>
+</li>
+</ol>
+<p>Once you finish this step, you can see the html page by opening the DownloadFile.html with a web browser.</p>
+<table class="noborder">
+<tr>
+<td style="vertical-align:top" width="60"><img src="../images/4th_HTML_Dialog/Tip_icon.png" width="57" border="0" alt="" /></td>
+<td>
+<p>In the functions <code>Invoke_Download</code> and <code>Invoke_Abort</code>, <code>window.external.ExtCall</code> is used to call Origin C. You can learn more about <code>window.external.ExtCall</code> from <a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Calling_Origin_C_Function_in_JavaScript" title="OCGuide:2nd HTML Dialog">here</a>.</p>
+</td>
+</tr>
+</table>
+<h2><a name="Creating_an_Floating_HTML_Dialog" id="Creating_an_Floating_HTML_Dialog"></a><span class="mw-headline">Creating an Floating HTML Dialog</span></h2>
+<p>Now you are ready to edit the Origin C code to create an HTML dialog.</p>
+<ol>
+<li>In <b>Code Builder</b>, create a new cpp file named DownloadDlg.cpp under the folder Download Example.</li>
+<li>Include the needed headers.
+<pre class="c" style="font-family:monospace;">
+<span style="color: #339933;">#include &lt;Origin.h&gt;</span>
+<span style="color: #339933;">#include &lt;../OriginLab/DialogEx.h&gt;</span>
+<span style="color: #339933;">#include &lt;../OriginLab/HTMLDlg.h&gt;</span>
+</pre></li>
+<li>Declare HTML dialog class DownloadDialog and define a pointer of DownloadDialog. This pointer is to make the HTML dialog floating.
+<pre class="c" style="font-family:monospace;">
+class DownloadDialog<span style="color: #339933;">;</span>
+<span style="color: #993333;">static</span> DownloadDialog<span style="color: #339933;">*</span> s_pDLDlg<span style="color: #339933;">;</span>
+</pre></li>
+<li>Derive the HTML dialog class <code>DownloadDialog</code> from the class <code>HTMLDlg</code>, and point to the HTML page inside the method <code>GetInitURL()</code>.
+<pre class="c" style="font-family:monospace;">
+class DownloadDialog<span style="color: #339933;">:</span> public HTMLDlg
+<span style="color: #009900;">{</span>
+protected<span style="color: #339933;">:</span>
+        string GetInitURL<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span><span style="color: #b1b100;">return</span> GetFilePath<span style="color: #009900;">(</span>__FILE__<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> <span style="color: #ff0000;">"DownloadFile.html"</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span>
+        string GetDialogTitle<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span><span style="color: #b1b100;">return</span> <span style="color: #ff0000;">""</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span>
+        BOOL GetDlgInitSize<span style="color: #009900;">(</span>int<span style="color: #339933;">&amp;</span> width<span style="color: #339933;">,</span> int<span style="color: #339933;">&amp;</span> height<span style="color: #009900;">)</span><span style="color: #009900;">{</span> width <span style="color: #339933;">=</span> <span style="color: #0000dd;">400</span><span style="color: #339933;">;</span> height <span style="color: #339933;">=</span> <span style="color: #0000dd;">150</span><span style="color: #339933;">;</span> <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+<span style="color: #009900;">}</span><span style="color: #339933;">;</span>
+</pre></li>
+<li>Add Create function to invoke the modeless dialog box.
+<pre class="c" style="font-family:monospace;">
+public<span style="color: #339933;">:</span>
+        <span style="color: #993333;">int</span> Create<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+                InitMsgMap<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                <span style="color: #993333;">int</span> nRet <span style="color: #339933;">=</span> Create<span style="color: #009900;">(</span>NULL<span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                Visible <span style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">;</span>
+                <span style="color: #b1b100;">return</span> nRet<span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+</pre></li>
+<li>Map the dialog message inside the class <code>DownloadDialog</code> to specify which events will be handled and which function will be called to handle. Add event handler methods to respond to the event.
+<pre class="c" style="font-family:monospace;">
+protected<span style="color: #339933;">:</span>
+EVENTS_BEGIN_DERIV<span style="color: #009900;">(</span>HTMLDlg<span style="color: #009900;">)</span>
+        ON_DESTROY<span style="color: #009900;">(</span>OnDestroy<span style="color: #009900;">)</span>
+        ON_IDLE<span style="color: #009900;">(</span>OnIdle<span style="color: #009900;">)</span>
+EVENTS_END_DERIV
+        BOOL OnDestroy<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+                BOOL bRet <span style="color: #339933;">=</span> HTMLDlg<span style="color: #339933;">::</span><span style="color: #202020;">OnDestroy</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                
+                delete this<span style="color: #339933;">;</span>
+                s_pDLDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span>
+                <span style="color: #b1b100;">return</span> bRet<span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+        BOOL OnIdle<span style="color: #009900;">(</span><span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+                string strMsg<span style="color: #339933;">,</span> strJS<span style="color: #339933;">;</span>
+                <span style="color: #993333;">double</span> err<span style="color: #339933;">;</span>
+                LT_get_var<span style="color: #009900;">(</span><span style="color: #ff0000;">"@OCDL"</span><span style="color: #339933;">,</span> <span style="color: #339933;">&amp;</span>err<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+                <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> err <span style="color: #339933;">&lt;</span> <span style="color: #0000dd;">0</span> <span style="color: #009900;">)</span> 
+                <span style="color: #009900;">{</span>
+                        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> <span style="color: #339933;">!</span>m_strFile.<span style="color: #202020;">IsEmpty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+                        <span style="color: #009900;">{</span>
+                                <span style="color: #b1b100;">switch</span><span style="color: #009900;">(</span>err<span style="color: #009900;">)</span>
+                                <span style="color: #009900;">{</span>
+                                <span style="color: #b1b100;">case</span> OHTTP_E_INVALID_URL<span style="color: #339933;">:</span>
+                                        strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">"Invalid URL"</span><span style="color: #339933;">;</span> 
+                                        <span style="color: #000000; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+                                <span style="color: #b1b100;">case</span> OHTTP_E_USER_CANCEL<span style="color: #339933;">:</span> 
+                                        strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">"Abort"</span><span style="color: #339933;">;</span>
+                                        <span style="color: #000000; font-weight: bold;">break</span><span style="color: #339933;">;</span>
+                                <span style="color: #b1b100;">default</span><span style="color: #339933;">:</span>
+                                        strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"err = %g"</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                                <span style="color: #009900;">}</span>
+                                m_strFile.<span style="color: #202020;">Empty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        <span style="color: #009900;">}</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #b1b100;">else</span> <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> err <span style="color: #339933;">==</span> <span style="color: #0000dd;">0</span> <span style="color: #009900;">)</span> 
+                <span style="color: #009900;">{</span>
+                        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> m_strFile.<span style="color: #202020;">IsFile</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+                        <span style="color: #009900;">{</span>
+                                strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"download complete: %s"</span><span style="color: #339933;">,</span> m_strFile<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                                m_strFile.<span style="color: #202020;">Empty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        <span style="color: #009900;">}</span>                     
+                <span style="color: #009900;">}</span>
+                <span style="color: #b1b100;">else</span>
+                        strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"downloading %.2f%%"</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                
+                
+                <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> <span style="color: #339933;">!</span>strMsg.<span style="color: #202020;">IsEmpty</span><span style="color: #009900;">(</span><span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+                <span style="color: #009900;">{</span>
+                        strJS.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"Update(<span style="color: #000099; font-weight: bold;">\'</span>%s<span style="color: #000099; font-weight: bold;">\'</span>)"</span><span style="color: #339933;">,</span> strMsg<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #666666; font-style: italic;">//call Update() in html code                   </span>
+                        CallJavaScript<span style="color: #009900;">(</span>strJS<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #b1b100;">return</span> TRUE<span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b> <code>OnIdle()</code> is triggered when Origin is idle, and it will get download status and call JavaScript <code>Update()</code> by a member function <code>CallJavaScript()</code> of the <code>DHtmlControl</code> class.</td>
+</tr>
+</table>
+</li>
+</ol>
+<h2><a name="Adding_JavaScript_Callable_Prototypes_in_Origin_C" id="Adding_JavaScript_Callable_Prototypes_in_Origin_C"></a><span class="mw-headline">Adding JavaScript Callable Prototypes in Origin C</span></h2>
+<p>In this section, inside your dialog class <code>DownloadDialog</code> you add method</p>
+<ul>
+<li><code>DownloadOnlineFile()</code> , which is called in JavaScript function <code>Invoke_Download()</code> in order to download file when the user hit the Download key;</li>
+<li><code>DownloadAbort()</code> , which is called in JavaScript function <code>Invoke_Abort()</code> in order to abort downloading thread when the user hit the Abort key.</li>
+</ul>
+<ol>
+<li>Add the method and DECLARE_DISPATCH_MAP inside your dialog class.
+<pre class="c" style="font-family:monospace;">
+public<span style="color: #339933;">:</span>      
+        DECLARE_DISPATCH_MAP
+        string DownloadOnlineFile<span style="color: #009900;">(</span>string strURL<span style="color: #009900;">)</span> 
+        <span style="color: #009900;">{</span>
+                string strMsg<span style="color: #339933;">,</span> strName <span style="color: #339933;">=</span> GetFileName<span style="color: #009900;">(</span>strURL<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                m_strFile <span style="color: #339933;">=</span> GetOriginPath<span style="color: #009900;">(</span>ORIGIN_PATH_USER<span style="color: #009900;">)</span> <span style="color: #339933;">+</span> strName<span style="color: #339933;">;</span>
+                BOOL bWait <span style="color: #339933;">=</span> FALSE<span style="color: #339933;">,</span> bShowMsg <span style="color: #339933;">=</span> TRUE<span style="color: #339933;">;</span> <span style="color: #666666; font-style: italic;">// download file in a separate thread, and message log will show message after download complete</span>
+                <span style="color: #993333;">double</span> err<span style="color: #339933;">;</span>
+                <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span> okutil_http_download<span style="color: #009900;">(</span>strURL<span style="color: #339933;">,</span> m_strFile<span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> FALSE<span style="color: #339933;">,</span> bWait<span style="color: #339933;">,</span> bShowMsg<span style="color: #009900;">)</span> <span style="color: #009900;">)</span>
+                <span style="color: #009900;">{</span>
+                        LT_get_var<span style="color: #009900;">(</span><span style="color: #ff0000;">"@OCDL"</span><span style="color: #339933;">,</span> <span style="color: #339933;">&amp;</span>err<span style="color: #009900;">)</span><span style="color: #339933;">;</span> 
+                        strMsg.<span style="color: #202020;">Format</span><span style="color: #009900;">(</span><span style="color: #ff0000;">"previous download not completed %.2f%%"</span><span style="color: #339933;">,</span> err<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #b1b100;">else</span>
+                        strMsg <span style="color: #339933;">=</span> <span style="color: #ff0000;">"downloading..."</span><span style="color: #339933;">;</span>
+                <span style="color: #b1b100;">return</span> strMsg<span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>     
+        <span style="color: #993333;">void</span> DownloadAbort<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span> LT_set_var<span style="color: #009900;">(</span><span style="color: #ff0000;">"@OCDL"</span><span style="color: #339933;">,</span> <span style="color: #0000dd;">2</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span> <span style="color: #009900;">}</span>
+private<span style="color: #339933;">:</span>
+        string m_strFile<span style="color: #339933;">;</span>
+</pre></li>
+<li>Map the method of your OriginC dialog class to this HTML dialog.
+<pre class="c" style="font-family:monospace;">
+BEGIN_DISPATCH_MAP<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> HTMLDlg<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> DownloadOnlineFile<span style="color: #339933;">,</span> VTS_STR<span style="color: #339933;">,</span> VTS_STR<span style="color: #009900;">)</span>
+    DISP_FUNCTION<span style="color: #009900;">(</span>DownloadDialog<span style="color: #339933;">,</span> DownloadAbort<span style="color: #339933;">,</span> VTS_VOID<span style="color: #339933;">,</span> VTS_VOID<span style="color: #009900;">)</span>
+END_DISPATCH_MAP
+</pre>
+<table class="note">
+<tr>
+<td><b>Note:</b>
+<ul>
+<li>More details of DISP_FUNCTION can be found <a href="../../OriginC/OCGuide/2nd_HTML_Dialog.html#Adding_JavaScript_Callable_Prototypes_in_OriginC" title="OCGuide:2nd HTML Dialog">here</a>.</li>
+<li>More details of <code>okutil_http_download()</code> can be found <a href="../../OriginC/OriginC/Okutil_http_download_(global_function).html" title="OriginC:Okutil http download (global function)">here</a>.</li>
+<li>System variable <a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#O">@OCDL</a> return download status, and @OCDL &gt; 1 to abort the downloading thread.</li>
+</ul>
+</td>
+</tr>
+</table>
+</li>
+</ol>
+<h2><a name="Launching_The_Dialog" id="Launching_The_Dialog"></a><span class="mw-headline">Launching The Dialog</span></h2>
+<p>You are ready to launch the dialog.</p>
+<ol>
+<li>Add main function:
+<pre class="c" style="font-family:monospace;">
+<span style="color: #993333;">int</span> DownloadDlg<span style="color: #009900;">(</span><span style="color: #993333;">int</span> nMsg<span style="color: #339933;">,</span> DWORD dwCntrl <span style="color: #339933;">=</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">,</span> LPVOID lpData <span style="color: #339933;">=</span> NULL<span style="color: #009900;">)</span>
+<span style="color: #009900;">{</span>
+        bool bClose <span style="color: #339933;">=</span> OMSG_CLOSE<span style="color: #339933;">==</span>nMsg<span style="color: #339933;">?</span> <span style="color: #000000; font-weight: bold;">true</span><span style="color: #339933;">:</span><span style="color: #000000; font-weight: bold;">false</span><span style="color: #339933;">;</span>
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>bClose<span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+                <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>s_pDLDlg<span style="color: #009900;">)</span>
+                <span style="color: #009900;">{</span>
+                        Window winDlg <span style="color: #339933;">=</span> s_pDLDlg<span style="color: #339933;">-&gt;</span>GetWindow<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span>winDlg<span style="color: #009900;">)</span>
+                                winDlg.<span style="color: #202020;">SendMessage</span><span style="color: #009900;">(</span>WM_CLOSE<span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                        delete s_pDLDlg<span style="color: #339933;">;</span>
+                        s_pDLDlg <span style="color: #339933;">=</span> NULL<span style="color: #339933;">;</span>
+                <span style="color: #009900;">}</span>
+                <span style="color: #b1b100;">return</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+        
+        <span style="color: #b1b100;">if</span><span style="color: #009900;">(</span><span style="color: #339933;">!</span>s_pDLDlg<span style="color: #009900;">)</span>
+        <span style="color: #009900;">{</span>
+                s_pDLDlg <span style="color: #339933;">=</span> new DownloadDialog<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+                s_pDLDlg<span style="color: #339933;">-&gt;</span>Create<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #339933;">;</span>
+        <span style="color: #009900;">}</span>
+        <span style="color: #b1b100;">return</span> <span style="color: #0000dd;">0</span><span style="color: #339933;">;</span>
+<span style="color: #009900;">}</span>
+
+<span style="color: #993333;">void</span> open_downloaddlg<span style="color: #009900;">(</span><span style="color: #009900;">)</span><span style="color: #009900;">{</span>DownloadDlg<span style="color: #009900;">(</span>OMSG_OPEN<span style="color: #009900;">)</span><span style="color: #339933;">;</span><span style="color: #009900;">}</span>
+</pre></li>
+<li>Save all the code and build it.</li>
+<li>Run <code>open_downloaddlg</code> to lauch the dialog.</li>
+</ol>

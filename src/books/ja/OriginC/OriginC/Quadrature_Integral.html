@@ -1,0 +1,241 @@
+﻿<h1 class="firstheading">OriginC: Quadrature Integral</h1>
+
+  <p>&#160;</p>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Simple_Integral_Function.28Origin80_SR4.29"><span class="tocnumber">1</span> <span class="toctext">Simple Integral Function(Origin80 SR4)</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Integral_Function_with_Parameters.28Origin80_SR4.29"><span class="tocnumber">2</span> <span class="toctext">Integral Function with Parameters(Origin80 SR4)</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Multi-dimension_Integral_Function.28Origin80_SR0.29"><span class="tocnumber">3</span> <span class="toctext">Multi-dimension Integral Function(Origin80 SR0)</span></a></li>
+    </ul>
+  </div>
+
+  <p>Using Origin C, user can access NAG integral routines to perform integration. And this page will show you how to access the powerful NAG integrators to do integration on different kinds of integrands. For example, user can do integration on normal integrand, integrand with parameters, integrand with oscillation, infinite integral, higher-dimension integration etc.</p>
+
+  <h2><a name="Simple_Integral_Function.28Origin80_SR4.29"></a><span class="mw-headline">Simple Integral Function(Origin80 SR4)</span></h2>
+
+  <p>The following integral routine shows how to do a basic integration on a simple integrand. The integrand has only one integration variable.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+
+<span style="color: #008000;">// Start your functions here.</span>
+
+<span style="color: #008000;">//NAG_CALL denotes proper calling convention. You may treat it like a function pointer</span>
+<span style="color: #008000;">//and define your own integrand </span>
+ 
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f_callback_ex<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span>use_comm <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span><span style="color: #000000;">)</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p;
+        <span style="color: #0000ff;">return</span> <span style="color: #000000;">(</span>x<span style="color: #000040;">*</span><span style="color: #000000;">sin</span><span style="color: #000000;">(</span>x<span style="color: #000040;">*</span><span style="color: #0000dd;">30.0</span><span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">-</span>x<span style="color: #000040;">*</span>x<span style="color: #000040;">/</span><span style="color: #000000;">(</span>PI<span style="color: #000040;">*</span>PI<span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+        <span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> PI <span style="color: #000040;">*</span> <span style="color: #0000dd;">2.0</span>;  <span style="color: #008000;">// integration interval</span>
+ 
+        <span style="color: #0000ff;">double</span> epsabs, abserr, epsrel, result;
+       <span style="color: #008000;">// you may use epsabs and epsrel and this quantity to enhance your desired precision </span>
+       <span style="color: #008000;">// when not enough precision encountered</span>
+        epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+        epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;
+        <span style="color: #008000;">// The max number of sub-intervals needed to evaluate the function in the integral</span>
+        <span style="color: #008000;">// The more diffcult the integrand the larger max_num_subint should be</span>
+        <span style="color: #008000;">// For most problems 200 to 500 is adequate and recommmended</span>
+        <span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>;
+ 
+        Nag_QuadProgress qp;
+        NagError fail;  
+ 
+        Nag_User comm;
+        <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">int</span> use_comm<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>;
+        comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Pointer<span style="color: #000000;">)</span><span style="color: #000040;">&amp;</span>use_comm;
+        <span style="color: #008000;">//Note:nag_1d_quad_gen (d01ajc) has been replaced by nag_1d_quad_gen_1 (d01sjc) at Mark 25</span>
+        d01sjc<span style="color: #000000;">(</span>f_callback_ex, a, b, epsabs, epsrel, max_num_subint,<span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, <span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+ 
+ 
+        <span style="color: #008000;">// For the error other than the following three errors which are due to bad input parameters </span>
+        <span style="color: #008000;">// or allocation failure  NE_INT_ARG_LT  NE_BAD_PARAM   NE_ALLOC_FAIL</span>
+        <span style="color: #008000;">// You will need to free the memory allocation before calling the integration routine again to </span>
+        <span style="color: #008000;">// avoid memory leakage</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span>  NE_ALLOC_FAIL<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+ 
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%10.6f"</span>, result<span style="color: #000000;">)</span>; 
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Integral_Function_with_Parameters.28Origin80_SR4.29"></a><span class="mw-headline">Integral Function with Parameters(Origin80 SR4)</span></h2>
+
+  <p>The following example shows how to define and perform integration on a <b>integrand with parameters</b>. Note that the paramters are passed to the integrator by a user struct, which can avoid using static variables as parameters of the integrand. And it is thread-safe by this way.</p>
+
+  <p>The example code can also be adapted to using <b>infinite integrator</b> of NAG. For instance, by uncomment the line using infinite integrator <code>d01smc</code>, the example code can then be used to perform infinite integration.</p>
+
+  <p> </p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #008000;">// Start your functions here.</span>
+<span style="color: #0000ff;">struct</span> user   <span style="color: #008000;">// parameters in the integrand</span>
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> A, Xc, W;
+ 
+<span style="color: #000000;">}</span>;
+
+<span style="color: #008000;">// Function supplied by user, return the value of the integrand at a given x.</span>
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f_callback<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span>sp <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">struct</span> user <span style="color: #000040;">*</span><span style="color: #000000;">)</span><span style="color: #000000;">(</span>comm<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>p<span style="color: #000000;">)</span>;
+ 
+        <span style="color: #0000ff;">double</span> A, xc, w;    <span style="color: #008000;">// temp variable to accept the parameters in the Nag_User communication struct</span>
+        A<span style="color: #000080;">=</span> sp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>A;
+        xc<span style="color: #000080;">=</span> sp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>Xc;
+        w<span style="color: #000080;">=</span> sp<span style="color: #000040;">-</span><span style="color: #000080;">&gt;</span>W;
+ 
+        <span style="color: #0000ff;">return</span> A<span style="color: #000040;">*</span> <span style="color: #000000;">exp</span><span style="color: #000000;">(</span> <span style="color: #000040;">-</span><span style="color: #0000dd;">2</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>x <span style="color: #000040;">-</span> xc<span style="color: #000000;">)</span><span style="color: #000040;">*</span><span style="color: #000000;">(</span>x <span style="color: #000040;">-</span> xc<span style="color: #000000;">)</span><span style="color: #000040;">/</span>w<span style="color: #000040;">/</span>w<span style="color: #000000;">)</span> <span style="color: #000040;">/</span> <span style="color: #000000;">(</span>w<span style="color: #000040;">*</span><span style="color: #000000;">sqrt</span><span style="color: #000000;">(</span>PI<span style="color: #000040;">/</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+
+<span style="color: #0000ff;">void</span> nag_d01sjc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+
+<span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">double</span> a <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+        <span style="color: #0000ff;">double</span> b <span style="color: #000080;">=</span> <span style="color: #0000dd;">2.0</span>;  <span style="color: #008000;">// integration interval</span>
+
+        <span style="color: #008000;">// Through the absolute accuracy epsabs, relative accuracy epsrel and max_num_subint you can  </span>
+        <span style="color: #008000;">// control the precision of the integration you need </span>
+        <span style="color: #008000;">// if epsrel is set negative, the absolute accuracy will be used. </span>
+        <span style="color: #008000;">// Similarly, you can control only relative accuracy by set the epsabs negative</span>
+        <span style="color: #0000ff;">double</span> epsabs <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>, epsrel <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>;
+ 
+        <span style="color: #008000;">// The max number of sub-intervals needed to evaluate the function in the integral</span>
+        <span style="color: #008000;">// The more diffcult the integrand the larger max_num_subint should be</span>
+        <span style="color: #008000;">// For most problems 200 to 500 is adequate and recommmended</span>
+        <span style="color: #0000ff;">int</span> max_num_subint <span style="color: #000080;">=</span> <span style="color: #0000dd;">200</span>;
+ 
+        <span style="color: #008000;">// Result keeps the approximate integral value returned by the algorithm</span>
+        <span style="color: #008000;">// abserr is an estimate of the error which should be an upper bound for the |I - result| </span>
+        <span style="color: #008000;">// where I is the integral value</span>
+        <span style="color: #0000ff;">double</span> result, abserr;
+ 
+        <span style="color: #008000;">// The structure of type Nag_QuadProgress, </span>
+        <span style="color: #008000;">// it contains pointers allocated memory internally with max_num_subint elements</span>
+        Nag_QuadProgress qp;
+ 
+        <span style="color: #008000;">// The NAG error parameter (structure)</span>
+        <span style="color: #0000ff;">static</span> NagError fail;
+ 
+        <span style="color: #008000;">// Parameters passed to integrand by Nag_User communication struct</span>
+        Nag_User comm;  
+        <span style="color: #0000ff;">struct</span> user s;
+        <span style="color: #0000ff;">double</span> A <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+        <span style="color: #0000ff;">double</span> xc <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+        <span style="color: #0000ff;">double</span> w <span style="color: #000080;">=</span><span style="color: #0000dd;">1.0</span>;
+        
+        s.<span style="color: #000000;">A</span> <span style="color: #000080;">=</span> A;
+        s.<span style="color: #000000;">Xc</span> <span style="color: #000080;">=</span> xc;
+        s.<span style="color: #000000;">W</span> <span style="color: #000080;">=</span> w;
+        comm.<span style="color: #000000;">p</span> <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>Pointer<span style="color: #000000;">)</span><span style="color: #000040;">&amp;</span>s;
+ 
+        <span style="color: #008000;">// Perform integration</span>
+        <span style="color: #008000;">// There are 3 kinds of infinite boundary types you can use in Nag infinite integrator</span>
+        <span style="color: #008000;">// Nag_LowerSemiInfinite, Nag_UpperSemiInfinite, Nag_Infinite</span>
+        <span style="color: #008000;">//d01smc(f_callback, Nag_LowerSemiInfinite, b, epsabs, epsrel, max_num_subint, &amp;result, &amp;abserr, &amp;qp, &amp;comm, &amp;fail);</span>
+        d01sjc<span style="color: #000000;">(</span>f_callback, a, b, epsabs, epsrel, max_num_subint, <span style="color: #000040;">&amp;</span>result, <span style="color: #000040;">&amp;</span>abserr, <span style="color: #000040;">&amp;</span>qp, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+
+ 
+        <span style="color: #008000;">// you may want to exam the error by printing out error message, just uncomment the following lines</span>
+        <span style="color: #008000;">// if (fail.code != NE_NOERROR)</span>
+        <span style="color: #008000;">// printf("%s\n", fail.message);</span>
+ 
+        <span style="color: #008000;">// For the error other than the following three errors which are due to bad input parameters </span>
+        <span style="color: #008000;">// or allocation failure  NE_INT_ARG_LT  NE_BAD_PARAM   NE_ALLOC_FAIL</span>
+        <span style="color: #008000;">// You will need to free the memory allocation before calling the integration routine again to avoid memory leakage</span>
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_INT_ARG_LT <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_BAD_PARAM <span style="color: #000040;">&amp;&amp;</span> fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_ALLOC_FAIL<span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_beg_pts</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_end_pts</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_result</span><span style="color: #000000;">)</span>;
+                NAG_FREE<span style="color: #000000;">(</span>qp.<span style="color: #000000;">sub_int_error</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+        
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%10.6f"</span>, result<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Multi-dimension_Integral_Function.28Origin80_SR0.29"></a><span class="mw-headline">Multi-dimension Integral Function(Origin80 SR0)</span></h2>
+
+  <p>For higher dimension (more than 2D) integral, user can access NAG integrator <code>d01wcc</code> to perform higher dimension integration.</p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>OC_nag.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">#define</span> NDIM <span style="color: #0000dd;">4</span>
+<span style="color: #0000ff;">#define</span> MAXPTS <span style="color: #0000dd;">1000</span><span style="color: #000040;">*</span>NDIM
+<span style="color: #0000ff;">#define</span> <span style="color: #0000ff;">EXIT_SUCCESS</span> <span style="color: #0000dd;">1</span>
+<span style="color: #0000ff;">#define</span> <span style="color: #0000ff;">EXIT_FAILURE</span> <span style="color: #0000dd;">0</span>
+
+<span style="color: #0000ff;">static</span> <span style="color: #0000ff;">double</span> NAG_CALL f<span style="color: #000000;">(</span>Integer n, <span style="color: #0000ff;">double</span> z<span style="color: #000000;">[</span><span style="color: #000000;">]</span>, Nag_User <span style="color: #000040;">*</span>comm<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+
+  <span style="color: #0000ff;">double</span> tmp_pwr;
+  tmp_pwr <span style="color: #000080;">=</span> z<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000040;">+</span><span style="color: #0000dd;">1.0</span><span style="color: #000040;">+</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">3</span><span style="color: #000000;">]</span>;
+  <span style="color: #0000ff;">return</span> z<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">4.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #000000;">exp</span><span style="color: #000000;">(</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">0</span><span style="color: #000000;">]</span><span style="color: #000040;">*</span><span style="color: #0000dd;">2.0</span><span style="color: #000040;">*</span>z<span style="color: #000000;">[</span><span style="color: #0000dd;">2</span><span style="color: #000000;">]</span><span style="color: #000000;">)</span><span style="color: #000040;">/</span><span style="color: #000000;">(</span>tmp_pwr<span style="color: #000040;">*</span>tmp_pwr<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">int</span> nag_d01wcc_ex<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+
+  Integer ndim <span style="color: #000080;">=</span> NDIM;  <span style="color: #008000;">// the integral dimension</span>
+  Integer maxpts <span style="color: #000080;">=</span> MAXPTS;  <span style="color: #008000;">// maximum number of function evaluation </span>
+  <span style="color: #0000ff;">double</span> a<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>, b<span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span>;
+  Integer k;
+
+  <span style="color: #0000ff;">static</span> NagError fail;
+  <span style="color: #0000ff;">double</span> finval;
+  Integer minpts;
+  <span style="color: #0000ff;">double</span> acc, eps;
+  Nag_User comm;
+
+
+  
+  
+ 
+  <span style="color: #0000ff;">for</span> <span style="color: #000000;">(</span>k<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; k <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">4</span>; <span style="color: #000040;">++</span>k<span style="color: #000000;">)</span>  <span style="color: #008000;">// integration interval</span>
+    <span style="color: #000000;">{</span>
+      a<span style="color: #000000;">[</span>k<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0</span>;
+      b<span style="color: #000000;">[</span>k<span style="color: #000000;">]</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1.0</span>;
+    <span style="color: #000000;">}</span>
+  eps <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.0001</span>; <span style="color: #008000;">// set the precision</span>
+  minpts <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+
+  
+
+  d01wcc<span style="color: #000000;">(</span>ndim, f, a, b, <span style="color: #000040;">&amp;</span>minpts, maxpts, eps, <span style="color: #000040;">&amp;</span>finval, <span style="color: #000040;">&amp;</span>acc, <span style="color: #000040;">&amp;</span>comm, <span style="color: #000040;">&amp;</span>fail<span style="color: #000000;">)</span>;
+
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> NE_NOERROR<span style="color: #000000;">)</span>
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"%s<span style="color: #666666; font-weight: bold;">\n</span>"</span>,fail.<span style="color: #000000;">message</span><span style="color: #000000;">)</span>;
+  <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_NOERROR <span style="color: #000040;">||</span> fail.<span style="color: #000000;">code</span> <span style="color: #000080;">==</span> NE_QUAD_MAX_INTEGRAND_EVAL<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+      <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Requested accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>"</span>, eps<span style="color: #000000;">)</span>;
+      <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Estimated value    =%12.4f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, finval<span style="color: #000000;">)</span>;  <span style="color: #008000;">// the final integration result</span>
+      <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Estimated accuracy =%12.2e<span style="color: #666666; font-weight: bold;">\n</span>"</span>, acc<span style="color: #000000;">)</span>;
+      <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">EXIT_SUCCESS</span>;
+    <span style="color: #000000;">}</span>
+  <span style="color: #0000ff;">else</span>
+    <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">EXIT_FAILURE</span>;
+<span style="color: #000000;">}</span>
+</pre>

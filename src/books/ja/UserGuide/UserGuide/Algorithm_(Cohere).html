@@ -1,0 +1,75 @@
+﻿<h1 class="firstheading">アルゴリズム (コヒーレンス)</h1>
+<p class="urlname" style="display: none;">Cohere-Algorithm</p>
+<p><br />
+パワースペクトル密度は相関のフーリエ変換です。離散相関定理から、2つの信号の相関のフーリエ変換が1つの信号のフーリエ変換ともう一方の信号の共役フーリエ変換の積に等しいことが分かっています。したがって、パワースペクトルの密度はフーリエ変換で計算できます。そして、2つの信号xとyのクロスパワー密度は次式で計算できます。</p>
+<p><img src="../images/Algorithm_(Cohere)/math-77dd31c1cd9ff13ad4caa9707f3feb2e.png" title=" P_{xy}(f)=YX^{*}\,\!" alt=" P_{xy}(f)=YX^{*}\,\!" class="tex" border="0" /></p>
+<p>ここで、XおよびYは、それぞれxとyのフーリエ変換で、* は、複素共役を表しています。</p>
+<p>同様に自動パワー密度は次式で計算できます。</p>
+<p><img src="../images/Algorithm_(Cohere)/math-400f95ebc472374fd9314f179de00472.png" title=" P_{xx}(f)=XX^{*}\,\!" alt=" P_{xx}(f)=XX^{*}\,\!" class="tex" border="0" /></p>
+<p>したがって、コヒーレンスの計算は次のように書き直すことができます。</p>
+<p><img src="../images/Algorithm_(Cohere)/math-84b126113f548847e1ff06797292b68c.png" title="C_{xy}(f)=\frac{\left| YX^{*}\right| ^2}{XX^{*}YY^{*}}\,\!" alt="C_{xy}(f)=\frac{\left| YX^{*}\right| ^2}{XX^{*}YY^{*}}\,\!" class="tex" border="0" /></p>
+<p>入力信号xとyは、重なり合うセクションに分割されます。各セクションのコヒーレンスは、上記の数式を使って計算されます。</p>
+<p><b>サンプリング間隔の自動計算</b></p>
+<p><b>サンプル間隔</b>で&lt;<b>自動</b>&gt;を選択すると、計算に必要なサンプル間隔が自動で計算されます。</p>
+<p>自動的に計算されるサンプリング間隔は、時間データの増加の平均で、これは通常入力信号と結びついているXデータが使われます。結びついているX列が無ければ、行番号が使われます。Originが増加の平均を取得するのに失敗した場合、サンプリング間隔は1にセットされます。</p>
+<p><b>ウィンドウ法</b></p>
+<p>FFTで使用されるウィンドウ法を指定します。デフォルトのオプションは<b>Hanning</b>です。</p>
+<ul>
+<li><b>四角形</b>
+<dl>
+<dd>矩形ウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-1dff02816a08f5abee4db570718fae2e.png" title="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \ 0, &amp; \mbox{otherwise } \end{cases}" alt="w[n] = \begin{cases} 1, &amp; \mbox{if }0 \leq n \leq N-1 \ 0, &amp; \mbox{otherwise } \end{cases}" class="tex" width="217" height="51" border="0" /></dd>
+</dl>
+</li>
+<li><b>Welch</b>
+<dl>
+<dd>Welchウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-6e73eab9df4bcc92805e0be4ccc831c1.png" title="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" alt="w[n]=1-\left[ \frac{n-\frac 12(N-1)}{\frac 12(N+1)}\right] ^2\,\!" class="tex" width="207" height="48" border="0" /></dd>
+</dl>
+</li>
+<li><b>三角</b>
+<dl>
+<dd><b>Triangularウィンドウ</b>：</dd>
+<dd>奇数: <img src="../images/Algorithm_(Cohere)/math-0301923ac9ba030df614e6d597b61aca.png" title="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2{N+1}(\frac {N+1}2-|n+1-\frac {N+1}2|)" class="tex" width="301" height="36" border="0" /><br /></dd>
+<dd>偶数: <img src="../images/Algorithm_(Cohere)/math-8e83f30fc0b782e1d8b13c070ff8819d.png" title="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" alt="w(n)=\frac 2N(\frac N2-|n+1-\frac {N+1}2|)" class="tex" width="244" height="35" border="0" /></dd>
+</dl>
+</li>
+<li><b>Bartlett</b>
+<dl>
+<dd>Bartlettウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-e66a9f4dcc74b3ab6be533c1c74db331.png" title="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" alt="w[n]=\frac 2{N-1}\left[ \frac{N-1}2-\left| n-\frac{N-1}2\right| \right] \,\!" class="tex" width="275" height="42" border="0" /></dd>
+</dl>
+</li>
+<li><b>Hanning</b>
+<dl>
+<dd>Hannウィンドウ：</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-f625e1fbe6f2ba1e906c542714a5a198.png" title="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" alt="w[n]=\frac 12\left[ 1-\cos (\frac{2\pi n}{N-1})\right] \,\!" class="tex" width="193" height="40" border="0" /></dd>
+</dl>
+</li>
+<li><b>Hamming</b>
+<dl>
+<dd>Hamming ウィンドウ:</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-b6803ad49e62341c7d027fda8b337cb8.png" title="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" alt="w[n]=0.54-0.46\cos (\frac{2\pi n}{N-1}) \,\!" class="tex" width="217" height="36" border="0" /></dd>
+</dl>
+</li>
+<li><b>Blackman</b>
+<dl>
+<dd>Blackmanウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-53be39cb73653898ae42aa3e07614275.png" title="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" alt="w[n]=0.42-0.5\cos (\frac{w\pi n}{N-1})+0.08\cos (\frac{4\pi n}{N-1}) \,\!" class="tex" width="344" height="36" border="0" /></dd>
+</dl>
+</li>
+<li><b>Gaussian</b>
+<dl>
+<dd>Gaussianウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-fab7a042f67f1dfb6dc5556e228508ec.png" title="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" alt="w[n]=exp(-0.5(Alpha( \frac{2n}{N-1}-1 ))^2) \,\!" class="tex" width="279" height="36" border="0" /></dd>
+<dd><i>Alpha</i>は<b>Alpha</b>パラメータで指定されます。</dd>
+</dl>
+</li>
+<li><b>Kaiser</b>
+<dl>
+<dd>Kaiserウィンドウ</dd>
+<dd><img src="../images/Algorithm_(Cohere)/math-04b7bbeb549a0b1d5ee22e3d50305676.png" title="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" alt="w[n]=I(beta*\sqrt{1-(\frac{2n}{N-1}-1)^2}) / I(beta) \,\!" class="tex" width="320" height="41" border="0" /></dd>
+<dd>I(ix)はBessel関数を示し、<i>beta</i>は<b>Beta</b>パラメータで指定されます。</dd>
+</dl>
+</li>
+</ul>

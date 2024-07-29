@@ -1,0 +1,126 @@
+﻿<h1 class="firstheading">GetExitCodeProcess</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Included"><span class="tocnumber">8</span> <span class="toctext">header to Included</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> GetExitCodeProcess<span style="color: #000000;">(</span> HANDLE hProcess, LPDWORD lpExitCode <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>hProcess</dt>
+
+    <dd>[input] A handle to the process.</dd>
+
+    <dt>lpExitCode</dt>
+
+    <dd>[output] A pointer to a variable to receive the process termination status. For more information, see Remarks.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>If the function succeeds, the return value is nonzero.</p>
+
+  <p>If the function fails, the return value is zero. To get extended error information, call GetLastError.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">void</span> create_and_terminate_process<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    STARTUPINFO            sinfo;
+    
+    PROCESS_INFORMATION    pinfo;
+    
+    <span style="color: #000000;">memset</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>sinfo, <span style="color: #0000dd;">0</span>, <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span>STARTUPINFO<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">memset</span><span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>pinfo, <span style="color: #0000dd;">0</span>, <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span>PROCESS_INFORMATION<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    <span style="color: #008000;">// test control wShowWindow</span>
+    sinfo.<span style="color: #000000;">dwFlags</span> <span style="color: #000080;">=</span> STARTF_USESHOWWINDOW;
+    sinfo.<span style="color: #000000;">wShowWindow</span> <span style="color: #000080;">=</span> SW_SHOWMAXIMIZED;
+    <span style="color: #0000ff;">BOOL</span> bSucess <span style="color: #000080;">=</span> CreateProcess<span style="color: #000000;">(</span><span style="color: #ff00ff;">"C:<span style="color: #666666; font-weight: bold;">\\</span>Windows<span style="color: #666666; font-weight: bold;">\\</span>notepad.exe"</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">FALSE</span>, CREATE_DEFAULT_ERROR_MODE, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>sinfo, <span style="color: #000040;">&amp;</span>pinfo<span style="color: #000000;">)</span>;
+        
+    DWORD dwCode;
+    
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>GetExitCodeProcess<span style="color: #000000;">(</span>pinfo.<span style="color: #000000;">hProcess</span>, <span style="color: #000040;">&amp;</span>dwCode<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dwCode <span style="color: #000080;">==</span> STATUS_PENDING<span style="color: #000000;">)</span>
+            out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"still alive"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">else</span>
+            <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"code = %X<span style="color: #666666; font-weight: bold;">\n</span>"</span>, dwCode<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get exit code"</span><span style="color: #000000;">)</span>;
+
+    <span style="color: #008000;">//wait 1 sec</span>
+    LT_execute<span style="color: #000000;">(</span><span style="color: #ff00ff;">"sec -p 1"</span><span style="color: #000000;">)</span>;
+    TerminateProcess<span style="color: #000000;">(</span>pinfo.<span style="color: #000000;">hProcess</span>, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>GetExitCodeProcess<span style="color: #000000;">(</span>pinfo.<span style="color: #000000;">hProcess</span>, <span style="color: #000040;">&amp;</span>dwCode<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"After terminated, code = %X<span style="color: #666666; font-weight: bold;">\n</span>"</span>, dwCode<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Failed to get exit code"</span><span style="color: #000000;">)</span>;
+        
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>Retrieves the termination status of the specified process.</p>
+
+  <p>This function returns immediately.</p>
+
+  <p>If the process has not terminated and the function succeeds, the status returned is STATUS_PENDING.</p>
+
+  <p>If the process has terminated and the function succeeds, the status returned is one of the following values:</p>
+
+  <ul>
+    <li>The exit value specified in the ExitProcess or TerminateProcess function.</li>
+  </ul>
+
+  <ul>
+    <li>The return value from the main or WinMain function of the process.</li>
+  </ul>
+
+  <ul>
+    <li>The exception value for an unhandled exception that caused the process to terminate.</li>
+  </ul>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/CreateProcess_(global_function).html" title="OriginC:CreateProcess (global function)">CreateProcess</a>, <a href="../../OriginC/OriginC/TerminateProcess_(global_function).html" title="OriginC:TerminateProcess (global function)">TerminateProcess</a> , <a href="../../OriginC/OriginC/ShellExecute_(global_function).html" title="OriginC:ShellExecute (global function)">ShellExecute</a>, <a href="../../OriginC/OriginC/WinExec_(global_function).html" title="OriginC:WinExec (global function)">WinExec</a></p>
+
+  <h2><a name="header_to_Included"></a><span class="mw-headline">header to Included</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

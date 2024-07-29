@@ -1,0 +1,377 @@
+﻿<h1 class="firstheading">データ操作</h1>
+
+  <p class='urlname' style='display: none'>Data-Manipulation</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1">
+        <a href="#Worksheet"><span class="tocnumber">1</span> <span class="toctext">ワークシート</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-2"><a href="#Selecting_and_Coloring_Worksheet_Cells"><span class="tocnumber">1.1</span> <span class="toctext">ワークシートセルの選択と色付け</span></a></li>
+
+          <li class="toclevel-2 tocsection-3"><a href="#Coloring_Worksheet_Rows_by_wxt"><span class="tocnumber">1.2</span> <span class="toctext">wxtでワークシート行の色付け</span></a></li>
+
+          <li class="toclevel-2 tocsection-4"><a href="#Using_wxt_with_Text_Columns"><span class="tocnumber">1.3</span> <span class="toctext">テキスト列にwxtを使用</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#Copy_and_Paste_Data_to_New_Sheet_and_Apply_Transpose"><span class="tocnumber">1.4</span> <span class="toctext">新しいシートのデータをコピー/貼り付けして転置</span></a></li>
+
+          <li class="toclevel-2 tocsection-6"><a href="#Splitting_and_Extracting_Data_to_New_Sheets"><span class="tocnumber">1.5</span> <span class="toctext">データを新しいシートに分割、抽出</span></a></li>
+
+          <li class="toclevel-2 tocsection-7"><a href="#Subgroup_a_Worksheet_to_New_Worksheets"><span class="tocnumber">1.6</span> <span class="toctext">ワークシートをサブグループ化して新しいワークシートに出力</span></a></li>
+
+          <li class="toclevel-2 tocsection-8"><a href="#Masking_the_Outliers"><span class="tocnumber">1.7</span> <span class="toctext">外れ値をマスクする</span></a></li>
+        </ul>
+      </li>
+
+      <li class="toclevel-1 tocsection-9">
+        <a href="#Matrix"><span class="tocnumber">2</span> <span class="toctext">行列</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-10"><a href="#RGB_Image_Matrix"><span class="tocnumber">2.1</span> <span class="toctext">RGBイメージ行列</span></a></li>
+
+          <li class="toclevel-2 tocsection-11"><a href="#Convert_Multiple_Matrices_into_Worksheets"><span class="tocnumber">2.2</span> <span class="toctext">複数行列をワークシートに変換</span></a></li>
+
+          <li class="toclevel-2 tocsection-12"><a href="#Normalize_a_Matrix"><span class="tocnumber">2.3</span> <span class="toctext">行列を正規化</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Worksheet"></a><span class="mw-headline">ワークシート</span></h2>
+
+  <h3><a name="Selecting_and_Coloring_Worksheet_Cells"></a><span class="mw-headline">ワークシートセルの選択と色付け</span></h3>
+
+  <p>Originには、条件付き選択のために2つのXファンクション<b>wcellsel</b>と<b>wxt</b>があります。wcellselはワークシート内の任意のセル範囲をベースにしています。wxtは列レベルで動作するワークシートの抽出ダイアログに相当します。</p>
+
+  <p>次のコードは、Xファンクションwcellselを使って、条件に合うセルを選択し、wcellcolorを使って色付けします。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// いくつかの列にランダムデータを持つ新しいブックを作成</span>
+newbook;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+loop<span style="color: #000000;">(</span>i,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">)</span><span style="color: #000000;">{</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">(</span><span style="color: #0000dd;">100</span><span style="color: #000000;">)</span><span style="color: #000000;">}</span>;
+<span style="color: #008000;">// 0.5以上の値を持つ全てのセルを選択し、色付け</span>
+wcellsel <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ge v<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0.5</span>;
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>green<span style="color: #000000;">)</span>;
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>red<span style="color: #000000;">)</span> type<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+wcellsel; <span style="color: #008000;">// セルの選択を解除して色を表示</span>
+</pre>
+
+  <h3><a name="Coloring_Worksheet_Rows_by_wxt"></a><span class="mw-headline">wxtでワークシート行の色付け</span></h3>
+
+  <p>wcellselはワークシートセルを選択できますが、セル入力範囲で条件に合ったものを選択することしかできません。行を選択し、詳細な条件が必要な場合、Xファンクションwxtを使います。これはワークシートクエリダイアログのLabTalk版ともいえます。次のサンプルを実行する前に、ランダムデータを持つ2列を用意してください。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//アクティブワークシートで、col(2)&gt;0.3という</span>
+<span style="color: #008000;">//条件に合う行を選択(sel:=1)</span>
+wxt <span style="color: #ff00ff;">&quot;col(2)&gt;0.3&quot;</span> sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+
+<span style="color: #008000;">//選択されたセルの色を変更する </span>
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>green<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//ワークシートの選択を解除して色を確認</span>
+wcellsel;
+</pre>
+
+  <h3><a name="Using_wxt_with_Text_Columns"></a><span class="mw-headline">テキスト列にwxtを使用</span></h3>
+
+  <p>条件にテキストが含まれる時には、注意が必要です。次のサンプルでは、テキスト列と数値列の両方を選択するための複雑な条件を使用します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//自動車のメーカー、車種ごとの特性が入力されたデータをインポート</span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\automobile.dat&quot;</span>;
+newbook;
+impasc options.<span style="color: #000080;">sparklines</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// ワークシート内で make=Acura かつ Gas Mileage &gt; 11 の行をすべて選択</span>
+<span style="color: #008000;">// range変数を使用して、クエリを&quot;col(Make)[i]$&quot;より読みやすく記述</span>
+range car<span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Make<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 文字列変数を使用して&quot; &quot;の中に文字列を記述しなくていいようにする</span>
+string str<span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Acura&quot;</span>;
+<span style="color: #008000;">//wxt は &quot;=&quot; を &quot;==&quot;、&quot;and&quot; を &quot;&amp;&amp;&quot; として扱う</span>
+wxt <span style="color: #ff00ff;">&quot;car=str$ and col(Gas Mileage)&gt;11&quot;</span> sel<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 行を選択</span>
+wcellcolor c<span style="color: #000000;">:</span><span style="color: #000080;">=</span>color<span style="color: #000000;">(</span>green<span style="color: #000000;">)</span>; <span style="color: #008000;">// 選択された行を色付け</span>
+wcellsel; <span style="color: #008000;">// 選択をクリア</span>
+</pre>
+
+  <h3><a name="Copy_and_Paste_Data_to_New_Sheet_and_Apply_Transpose"></a><span class="mw-headline">新しいシートのデータをコピー/貼り付けして転置</span></h3>
+
+  <p>このコードは、Xファンクション<b>copydata</b>を使用して数値データのブロックを新しいワークシートにコピーし、その後Xファンクション<b>wtranspose</b> でデータを転置します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//乱数が入力された6列を持つ新規ワークブックを作成</span>
+newbook;
+newsheet cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">6</span> xy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+loop<span style="color: #000000;">(</span>i,<span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">6</span><span style="color: #000000;">)</span><span style="color: #000000;">{</span>wcol<span style="color: #000000;">(</span>i<span style="color: #000000;">)</span><span style="color: #000080;">=</span>normal<span style="color: #000000;">(</span><span style="color: #0000dd;">100</span><span style="color: #000000;">)</span><span style="color: #000000;">}</span>;
+<span style="color: #008000;">//ワークシート内のブロックを選択</span>
+worksheet <span style="color: #000080;">-</span>s <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">3</span> <span style="color: #0000dd;">4</span> <span style="color: #0000dd;">6</span>;  
+<span style="color: #008000;">//選択されたブロックを新しいワークシートにコピー</span>
+copydata  orng<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new<span style="color: #000080;">&gt;</span><span style="color: #000080;">!</span><span style="color: #000080;">&lt;</span>new<span style="color: #000080;">&gt;</span> clear<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">//結果ワークシートを転置</span>
+wtranspose;
+</pre>
+
+  <p>Xファンクション<b>copydata</b>はテキストデータでは動作しません。数値と文字列両方を含むデータブロックの場合は、<b>range -v</b>表記を使用してブロックを範囲変数として定義し、元のブロックを新しいブロックに割り当てて値を貼り付けてください。その後、wtranspose を使用してデータを転置します。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">/新しいブックにサンプルデータをインポート</span>
+fname<span style="color: #000080;">$</span><span style="color: #000080;">=</span>system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;\Samples\Statistics\Protein Consumption in Europe.dat&quot;</span>;
+newbook;
+impasc;
+<span style="color: #008000;">//文字列データのブロックを定義</span>
+int nc <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>; <span style="color: #008000;">// ブロック内の列数</span>
+int nr <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>; <span style="color: #008000;">// ブロック内の行数</span>
+int fi <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span> <span style="color: #000080;">+</span> nr; <span style="color: #008000;">// ブロックの最後の行番号</span>
+range <span style="color: #000080;">-</span>v r1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">[</span><span style="color: #0000dd;">4</span><span style="color: #000000;">]</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>nc<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>fi<span style="color: #000000;">)</span><span style="color: #000000;">]</span>; <span style="color: #008000;">// Set input range</span>
+<span style="color: #008000;">//新しいワークシートを作成 ;</span>
+newsheet;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> nc; 
+int fo <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span> <span style="color: #000080;">+</span> nr; <span style="color: #008000;">// 結果範囲の最終行番号</span>
+range <span style="color: #000080;">-</span>v r2<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>nc<span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>fo<span style="color: #000000;">)</span><span style="color: #000000;">]</span>;  <span style="color: #008000;">// 結果範囲をセット</span>
+<span style="color: #008000;">// r1の値をr2に割り当て</span>
+r2<span style="color: #000080;">=</span>r1; 
+<span style="color: #008000;">//ブロックを転置</span>
+wtranspose;
+<span style="color: #008000;">// 最初の行をロングネームとして設定</span>
+wrow2label longname<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>
+</pre>
+
+  <h3><a name="Splitting_and_Extracting_Data_to_New_Sheets"></a><span class="mw-headline">データを新しいシートに分割、抽出</span></h3>
+
+  <p>ここでは、Xファンクションdiscfreqs および wxtを使用して、データの抽出を行い、離散度数を個別のシートに置きます。Xファンクションdiscfreqsは、<b>OriginPro</b>でのみ使用できます。</p>
+  <pre class="lt" style="font-family:monospace;">
+ 
+<span style="color: #008000;">//新しいブックを作成し、データファイルをインポート</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; 
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Data Manipulation\US Metropolitan Area Population.dat&quot;</span>;
+impASC;
+ 
+<span style="color: #008000;">//処理する列をRange変数に格納する</span>
+range cc <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span>; 
+string originalsheet<span style="color: #000080;">=</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+ 
+
+<span style="color: #008000;">// 分割した変数のために新しく2列を作成</span>
+wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span> <span style="color: #000080;">+</span> <span style="color: #0000dd;">2</span>;
+wks.<span style="color: #000080;">col5</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>City ;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>State;
+
+ 
+<span style="color: #008000;">// 範囲内の各エントリで繰り返す..</span>
+ 
+for <span style="color: #000000;">(</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>cc.<span style="color: #000080;">getsize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        initialItem<span style="color: #000080;">$</span><span style="color: #000080;">=</span>cc<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span>; <span style="color: #008000;">//セルの文字列を作成..</span>
+        <span style="color: #008000;">// 新しい2列のii番目のセルに変数を書き込む...</span>
+        Col<span style="color: #000000;">(</span>City<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>initialitem.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #ff00ff;">&apos;,&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>; 
+        Col<span style="color: #000000;">(</span>State<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>initialitem.<span style="color: #000080;">gettoken</span><span style="color: #000000;">(</span><span style="color: #0000dd;">2</span>,<span style="color: #ff00ff;">&apos;,&apos;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+<span style="color: #000000;">}</span>
+ 
+<span style="color: #008000;">// 新しい&quot;State&quot;行を分析して、度数を調べる</span>
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>State<span style="color: #000000;">)</span> rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>Frequency<span style="color: #000080;">!</span>;
+ 
+<span style="color: #008000;">// Range変数を定義する</span>
+range ff <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span>Frequency<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+ 
+<span style="color: #008000;">// 度数出力から各Stateの値でループ</span>
+for <span style="color: #000000;">(</span>jj<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; jj<span style="color: #000080;">&lt;=</span>ff.<span style="color: #000080;">getsize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; jj<span style="color: #000080;">++</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+        <span style="color: #008000;">// この文字列が各反復の度数表の</span>
+        <span style="color: #008000;">//  異なる行を指す条件にする</span>
+        string state<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>jj<span style="color: #000000;">]</span><span style="color: #000080;">$</span>; 
+        <span style="color: #008000;">// 文字列を条件の一つとするとき</span>
+        <span style="color: #008000;">//  Xファンクション wxt は&quot;[i]&quot;を含める必要がある</span>
+        string statequote<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;&quot;</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>state<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #ff00ff;">&quot;&quot;</span>; 
+        string cond<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;col(6)[i]$==&quot;</span> <span style="color: #000080;">+</span> statequote<span style="color: #000080;">$</span>; 
+        <span style="color: #008000;">// Wxtは元のシートに対応する各行を、</span>
+        <span style="color: #008000;">// 新しいシートに抽出</span>
+        wxt test<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cond<span style="color: #000080;">$</span> iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;%(state$)&quot;</span>; 
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Subgroup_a_Worksheet_to_New_Worksheets"></a><span class="mw-headline">ワークシートをサブグループ化して新しいワークシートに出力</span></h3>
+
+  <p>ここでは、Xファンクションdiscfreqs および wxtを使用して、データの抽出を行い、離散度数を個別のシートに置きます。Tree と StringArray変数は、度数カウントの結果を保持するのに使用します。Xファンクションdiscfreqsは、<b>OriginPro</b>でのみ使用できます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//新しいブックを作成しデータファイルをインポート</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\automobile.dat&quot;</span>;
+impASC;
+
+<span style="color: #008000;">//Range変数に必要な列を格納</span>
+range makeCol <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span>make<span style="color: #000000;">)</span>;
+range sourceWks <span style="color: #000080;">=</span> <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000080;">!</span>;
+
+<span style="color: #008000;">//度数カウントの結果を入力するツリーを作成し、</span>
+<span style="color: #008000;">//&quot;Make&quot; 列に度数カウントを実行</span>
+<span style="color: #008000;">//このXファンクションはOriginProでのみ有効</span>
+tree tr;
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>makeCol rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>tr;
+
+<span style="color: #008000;">//文字列配列を作成し、&quot;Make&quot;の度数を入力</span>
+StringArray sa;
+sa.<span style="color: #000080;">append</span><span style="color: #000000;">(</span>tr.<span style="color: #000080;">FreqCount1</span>.<span style="color: #000080;">Data1</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">//sa にデータが含まれている場合、</span>
+<span style="color: #008000;">//&quot;Make&quot;で繰り返す</span>
+<span style="color: #008000;">//そして、元のワークシートから新しいワークシートにデータを抽出する</span>
+if <span style="color: #000000;">(</span>sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> NANUM<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        for <span style="color: #000000;">(</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>sa.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                <span style="color: #008000;">//この文字列は、各反復で文字列配列に</span>
+                <span style="color: #008000;">//格納された&quot;Make&quot;を指す</span>
+                <span style="color: #008000;">//条件のために使用される</span>
+                string newWk<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> sa.<span style="color: #000080;">GetAt</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+
+                <span style="color: #008000;">//wxtのテスト条件を構築</span>
+                string cond<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;makeCol$==&quot;</span> <span style="color: #000080;">+</span> newWk<span style="color: #000080;">$</span>;
+
+                <span style="color: #008000;">//wxtはテストに従って元のシートの行を抽出し、</span>
+                <span style="color: #008000;">//対応するMakeの値で名前付けされた </span>
+                <span style="color: #008000;">//ワークシートに置く</span>
+                wxt test<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cond<span style="color: #000080;">$</span> iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sourceWks ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>input<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span><span style="color: #000080;">&lt;</span>new <span style="color: #000080;">%</span><span style="color: #000000;">(</span>newWk<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000080;">&gt;</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Masking_the_Outliers"></a><span class="mw-headline">外れ値をマスクする</span></h3>
+
+  <p>このスクリプトは、Xファンクション rowstats と wcellmaskを使用して行に記述統計を実行し、外れ値として定義された値のセルにマスクをかけます。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// 新しいブックを作成してデータファイルをインポート</span>
+newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+string fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Graphing\Contour.dat&quot;</span>;
+impASC;
+
+<span style="color: #008000;">// 列と行の数を取得</span>
+int nCols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+int nRows <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nRows</span>;
+
+<span style="color: #008000;">// 平均値と標準偏差のための列を追加</span>
+col<span style="color: #000000;">(</span>nCols<span style="color: #000080;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>Mean;
+col<span style="color: #000000;">(</span>nCols<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span>SD;
+
+<span style="color: #008000;">// 行の統計を実行</span>
+rowstats <span style="color: #000080;">-</span>r <span style="color: #0000dd;">0</span> irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span><span style="color: #000000;">:</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>nCols<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>nRows<span style="color: #000000;">]</span> mean<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Mean<span style="color: #000000;">)</span> sd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>SD<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 外れ値をマスク</span>
+for<span style="color: #000000;">(</span>int ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span>nRows; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        double dLower <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span>Mean<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">-</span>col<span style="color: #000000;">(</span>SD<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>;  <span style="color: #008000;">// 平均値-標準偏差</span>
+        double dUpper <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span>Mean<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000080;">+</span>col<span style="color: #000000;">(</span>SD<span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>;  <span style="color: #008000;">// 平均値+標準偏差</span>
+        for<span style="color: #000000;">(</span>int jj<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; jj<span style="color: #000080;">&lt;=</span>nCols; jj<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                double dOutlier <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>jj<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>;  <span style="color: #008000;">// セル値を取得</span>
+                if<span style="color: #000000;">(</span>dOutlier<span style="color: #000080;">&lt;</span>dLower <span style="color: #000080;">||</span> dOutlier<span style="color: #000080;">&gt;</span>dUpper<span style="color: #000000;">)</span>
+                <span style="color: #000000;">{</span>
+                        wcellmask irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>jj<span style="color: #000000;">)</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>;  <span style="color: #008000;">// セルをマスク</span>
+                <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Matrix"></a><span class="mw-headline">行列</span></h2>
+
+  <h3><a name="RGB_Image_Matrix"></a><span class="mw-headline">RGBイメージ行列</span></h3>
+
+  <p>行列は、表示する行と列がいくつあるかという情報を含みますが、それは線形配列として内部的に格納されています。そのため、行列からワークシート列にデータをコピーし、以下のことが行えます。</p>
+
+  <ol>
+    <li>画像ファイルをインポート</li>
+
+    <li>赤、緑、青（RGB）チャネルを抽出（行列から行列）</li>
+
+    <li>チャネルデータをコピー（行列から列）</li>
+
+    <li>RGB値の文字列表現を構築</li>
+
+    <li>RGB値のヒストグラムを計算</li>
+  </ol>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// サンプル画像を指定してインポート</span>
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> SYSTEM.<span style="color: #000080;">PATH</span>.<span style="color: #000080;">PROGRAM</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Image Processing and Analysis\Flower.jpg&quot;</span>;
+impImage;
+<span style="color: #008000;">// RGBを、赤、緑、青それぞれの行列に分割</span>
+imgRGBsplit r<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>RED<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span> g<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>GREEN<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span> b<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>BLUE<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// 新しいワークブック作成</span>
+newbook;
+wks.<span style="color: #000080;">ncols</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">6</span>;
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Red;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Green;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Blue;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> RGB;
+wks.<span style="color: #000080;">col5</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Value;
+wks.<span style="color: #000080;">col6</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span> <span style="color: #000080;">=</span> Count;
+<span style="color: #008000;">// ワークシート範囲</span>
+range raDR <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>, raDG <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>, raDB <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, raDRGB <span style="color: #000080;">=</span> <span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">// 行列範囲</span>
+range raR <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>RED<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+range raG <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>GREEN<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+range raB <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>RGBOUT<span style="color: #000000;">]</span>BLUE<span style="color: #000080;">!</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">// 行列からワークブックにrange割り当てでデータをコピーする</span>
+raDR <span style="color: #000080;">=</span> raR;
+raDG <span style="color: #000080;">=</span> raG;
+raDB <span style="color: #000080;">=</span> raB;
+<span style="color: #008000;">// RGBを表示するための文字列を作成</span>
+col<span style="color: #000000;">(</span>D<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot; &quot;</span> <span style="color: #000080;">+</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">// ヒストグラムを計算</span>
+discfreqs irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>raDRGB rd<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span>Value<span style="color: #000000;">)</span>;
+</pre>
+
+  <h3><a name="Convert_Multiple_Matrices_into_Worksheets"></a><span class="mw-headline">複数行列をワークシートに変換</span></h3>
+
+  <p><i>X</i>, <i>Y</i>, <i>Intensity</i>データがすべての高さ<i>Z</i>について、ロングネームが&quot;Z2um&quot;、&quot;Z4um&quot;、&quot;Z6um&quot;…という名前の行列ブックが20個あるとします(Z方向に 20の高さでスキャン)。ここで「Z」と「um」の間の数字はZ高さを意味します。スキャンしたすべての<i>X</i>、<i>Y</i>、<i>Intensity</i>行列を<i>XYZI</i>構造の1つのワークシートに結合します。</p>
+
+  <p>これは、3D 共焦点顕微鏡画像およびタイムラプス画像での一般的なルーチンです。</p>
+  <pre class="lt" style="font-family:monospace;">
+doc <span style="color: #000080;">-</span>e M 
+<span style="color: #000000;">{</span>
+        string strMat<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span>;
+        strMat<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> strMat.<span style="color: #000080;">Between</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Z&quot;</span>,<span style="color: #ff00ff;">&quot;um&quot;</span><span style="color: #000000;">)</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// 行列ブックのロングネームからZ値を取得</span>
+        int ZHeight <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strMat<span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+        m2w method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>xyz; <span style="color: #008000;">// 行列を XYZに変換</span>
+        wks.<span style="color: #000080;">addcol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// Z列を追加</span>
+        csetvalue col<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> formula<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;ZHeight&quot;</span>; <span style="color: #008000;">// 行列のロングネームから抽出した数値から値を設定</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">//変換ワークシートを1つに追加</span>
+string strPWKB<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// 現在のワークブックを親ワークブックにする</span>
+string strPWKS<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> wks.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// 他のシート追加のために現在のシートを記録</span>
+
+doc <span style="color: #000080;">-</span>e W
+<span style="color: #000000;">{</span>
+        string strTempWKB<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> page.<span style="color: #000080;">name</span><span style="color: #000080;">$</span>; <span style="color: #008000;">// 現在のワークブックのショートネーム</span>
+        if <span style="color: #000000;">(</span>strTempWKB<span style="color: #000080;">$</span> <span style="color: #000080;">!</span><span style="color: #000080;">=</span> strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">)</span> <span style="color: #008000;">// 親ワークブックがない場合追加開始</span>
+        <span style="color: #000000;">{</span>
+                wAppend irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>, <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>strTempWKB<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>row ow<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPWKB<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>; <span style="color: #008000;">// 追加</span>
+                win <span style="color: #000080;">-</span>c <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strTempWKB<span style="color: #000080;">$</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 追加されたワークシートを削除</span>
+        <span style="color: #000000;">}</span>
+        else
+                continue;
+<span style="color: #000000;">}</span>
+
+dataset sps <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">4</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>;
+dataset sodr <span style="color: #000080;">=</span> <span style="color: #000000;">{</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">1</span><span style="color: #000000;">}</span>;
+wsort nestcols<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sps order<span style="color: #000000;">:</span><span style="color: #000080;">=</span>sodr; <span style="color: #008000;">// 追加ワークシートをZ(高さ)でソート</span>
+colmove rng<span style="color: #000000;">:</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">4</span><span style="color: #000000;">)</span> operation<span style="color: #000000;">:</span><span style="color: #000080;">=</span>left; <span style="color: #008000;">// Z列を移動して3番目の列にする</span>
+
+wks.<span style="color: #000080;">col1</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;X&quot;</span>;
+wks.<span style="color: #000080;">col2</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Y&quot;</span>;
+wks.<span style="color: #000080;">col3</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Z&quot;</span>;
+wks.<span style="color: #000080;">col4</span>.<span style="color: #000080;">lname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Intensity&quot;</span>;
+page.<span style="color: #000080;">longname</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;XYZI Table&quot;</span>;
+page.<span style="color: #000080;">title</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; <span style="color: #008000;">// 名前付け</span>
+</pre>
+
+  <h3><a name="Normalize_a_Matrix"></a><span class="mw-headline">行列を正規化</span></h3>
+
+  <p>内部的には、Origin&apos;x 行列は1次元のベクトルのような配列です。そのため、実行される数学演算は、真の行列ではなくベクトルの演算に似ています。</p>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// 行列を作成</span>
+newbook mat<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+mdim cols<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span> rows<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">10</span>;
+msetvalue formula<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;rnd()&quot;</span>;
+
+<span style="color: #008000;">//  [0, 1]に正規化</span>
+vnormalize ix<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mat<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> method<span style="color: #000000;">:</span><span style="color: #000080;">=</span>range ox<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>input<span style="color: #000080;">&gt;</span>;
+</pre>

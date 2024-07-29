@@ -1,0 +1,122 @@
+﻿<h1 class="firstheading">stdioFile::ReadString</h1>
+
+  <p><span class="OIndex" style="display:none">ReadString</span></p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Read a line from the current file position into a string and advance the file position. The end of line character is removed.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">BOOL</span> ReadString<span style="color: #000000;">(</span> string <span style="color: #000040;">&amp;</span> str, DWORD dwCntrl <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>str</dt>
+
+    <dd>[output]A reference to a string object that will contain the string when the function returns.</dd>
+
+    <dt>dwCntrl</dt>
+
+    <dd>[input] bits like FRS_EOL_CRLF_ONLY etc</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>TRUE for success, FALSE for end of file reached, or other error.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//the following example will type out any ascii files from the User folder</span>
+<span style="color: #0000ff;">void</span> stdioFile_ReadString_ex1<span style="color: #000000;">(</span>string strfile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"origin.ini"</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strFilename <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strfile;
+    stdioFile ff;
+    <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>strFilename, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeRead</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>bRet<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"file not found!"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+ 
+    string strTemp;
+    <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span>ff.<span style="color: #000000;">ReadString</span><span style="color: #000000;">(</span>strTemp<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        out_str<span style="color: #000000;">(</span>strTemp<span style="color: #000000;">)</span>;
+ 
+    ff.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <p><b>EX2</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// this code read a sample ascii file and paste data to </span>
+<span style="color: #008000;">// active worksheet line by line</span>
+<span style="color: #0000ff;">void</span> stdioFile_ReadString_ex2<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strfile <span style="color: #000080;">=</span> <span style="color: #ff00ff;">"Samples<span style="color: #666666; font-weight: bold;">\\</span>Curve Fitting<span style="color: #666666; font-weight: bold;">\\</span>gamma.dat"</span>;
+    string strFilename <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span><span style="color: #0000ff;">true</span><span style="color: #000000;">)</span> <span style="color: #000040;">+</span> strfile;
+    stdioFile ff;
+    <span style="color: #0000ff;">bool</span> bRet <span style="color: #000080;">=</span> ff.<span style="color: #000000;">Open</span><span style="color: #000000;">(</span>strFilename, <span style="color: #0000ff;">file</span><span style="color: #000000;">::</span><span style="color: #000000;">modeRead</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>bRet<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"file not found!"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span><span style="color: #000040;">!</span>wks<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"no active wks"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    string strTemp;
+    <span style="color: #0000ff;">while</span><span style="color: #000000;">(</span>ff.<span style="color: #000000;">ReadString</span><span style="color: #000000;">(</span>strTemp<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        wks.<span style="color: #000000;">PasteData</span><span style="color: #000000;">(</span>strTemp<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    ff.<span style="color: #000000;">Close</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>Strings in ascii file might be separated by "\r\n", as typical of files fom DOS/Windows or can be just "\n" or just "\r", as typical of unix and MAC files. Both forms are supported by this function.</p>
+
+  <p>This function will also return TRUE on the last line even if it does not have a "\n" or "\r" termination. In other words, when reaching the end of a file, the function returns FALSE and the resulting string will always be empty.</p>
+
+  <p>Please note, so longer lines will be broken into multiple lines.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/StdioFile-WriteString.html" title="OriginC:StdioFile-WriteString">stdioFile::WriteString</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>

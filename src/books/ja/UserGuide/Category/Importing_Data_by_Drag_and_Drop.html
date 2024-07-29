@@ -1,0 +1,105 @@
+﻿<h1 class="firstheading">ドラッグ&amp;ドロップによるデータのインポート</h1>
+<p class="urlname" style="display: none;">Imp-DragDrop</p>
+<p>Originは、多くの一般的なファイルタイプに対してドラッグ&amp;ドロップでのインポートをサポートしています。歴史的な理由により、複数のテクノロジーが使用されています。Originワークシートまたは行列シートにファイルをドロップすると、使用方法を決定するコードチェックシーケンスが発生します。下記の<b>インポートコードの読み込む順序</b>をご参照ください。</p>
+<table class="note">
+<tr>
+<td><b>Note:</b> <a class="external text" href="../../QuickHelp/QuickHelp/Why_does_not_drag_and_drop_work.html">管理者として実行でOriginを起動</a>している場合、ファイルのドラッグアンドドロップはできません。</td>
+</tr>
+</table>
+<p><br /></p>
+<div id="toc" class="toc">
+<div id="toctitle">
+<h2>目次</h2>
+</div>
+<ol>
+<li class="toclevel-1 tocsection-1"><a href="#Import_Code_Reading_Sequence"><span class="tocnumber">1</span> <span class="toctext">インポートコードの読み込む順序</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Data_Connectors_and_Drag-and-Drop"><span class="tocnumber">2</span> <span class="toctext">データコネクタとドラッグアンドドロップ</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Save_Drag-and-Drop_Settings_into_the_Sheet"><span class="tocnumber">3</span> <span class="toctext">ドラッグアンドドロップの設定をシートに保存</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Using_the_Import_Wizard_to_Set_Up_D.26D_Import"><span class="tocnumber">4</span> <span class="toctext">インポートウィザードを使ってドラッグアンドドロップインポートを設定</span></a>
+<ol>
+<li class="toclevel-2 tocsection-5"><a href="#Origin_Import_Filters"><span class="tocnumber">4.1</span> <span class="toctext">Originのインポートフィルタ</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Target_Windows_and_Target_Window_Templates"><span class="tocnumber">4.2</span> <span class="toctext">ターゲットウィンドウとターゲットウィンドウテンプレート</span></a></li>
+</ol>
+</li>
+</ol>
+</div>
+<h2><a name="Import_Code_Reading_Sequence" id="Import_Code_Reading_Sequence"></a><span class="mw-headline">インポートコードの読み込む順序</span></h2>
+<p>ファイルがOriginにドロップされと、このシーケンスが発生します。</p>
+<ol>
+<li>最も古い方法は<b>DOFILE.OGS</b>というファイルのLabTalkセクションを呼び出します。見つかった場合、インポートルーチンが実行されます。DOFILEの従来のコードは問題なく実行できますが、ユーザーはこのメソッドを使用して新しいインポートルーチンを作成しないでください。</li>
+<li>次に、アクティブなワークシートまたは行列シートがスキャンされ、シートに保存されたインポートフィルター情報が検索されます（以下の「<a href="#Save_Drag-and-Drop_Settings_into_the_Sheet">ドラッグアンドドロップの設定をシートに保存</a>」を参照ください）。</li>
+<li>フィルタ情報がシートに保存されていない場合、データフォルダは、該当する<a href="#Origin_Import_Filters">Originインポートフィルタ(*.oif)</a>にチェックされます。</li>
+<li>データフォルダにフィルタが見つからない場合、<a class="external text" href="../../UserGuide/UserGuide/The_User_Files_Folder.html">User Files\Filters</a> folderで一致するインポートフィルタがチェックされます。USERフィルターが存在し、<a class="external text" href="../../UserGuide/UserGuide/Introduction_to_Import_Filters_Manager.html">フィルタマネージャー</a>で<b>ドラッグ＆ドロップのサポート</b>ボックスがオンになっている場合、このフィルターはインポートを処理します。</li>
+<li>User Files \ Filtersに該当するフィルタが見つからない場合、コードは、ファイルタイプと一致するインストール済みの<a class="external text" href="../../UserGuide/Category/Data_Connector.html">データコネクタ</a>があるかどうかを確認します。一致するデータコネクタがある場合、そのデータコネクタを使ってインポートします。</li>
+<li>データコネクタが見つからず、SYSTEM<b>ドラッグ＆ドロップのサポート</b>ボックスがオフになっているか、フィルタマネージャーに表示されていない場合、<a class="external text" href="../../UserGuide/Category/The_Import_Wizard.html">インポートウィザード</a>を開いてファイルをインポートするかどうかを尋ねる注目ダイアログがポップアップします。</li>
+</ol>
+<table class="noborder">
+<tr>
+<td style="vertical-align: top;" width="60"><img src="../images/Importing_Data_by_Drag_and_Drop/Tip_icon.png" alt="" width="57" border="0" /></td>
+<td>
+<p>.dat、.xls/xlsx、.txt、.csv のドラッグアンドドロップ時の挙動は、システム変数<b>@IFS</b>を設定することで変更できます。次のセクションの<b>Notes</b>を参照ください。</p>
+</td>
+</tr>
+</table>
+<h2><a name="Data_Connectors_and_Drag-and-Drop" id="Data_Connectors_and_Drag-and-Drop"></a><span class="mw-headline">データコネクタとドラッグアンドドロップ</span></h2>
+<p><a href="../../UserGuide/Category/Data_Connector.html#Adding_a_Connector_to_the_Sheet" title="カテゴリー：データコネクタ"><b>データコネクタ</b></a>はＯriginの最新データインポート技術です。データコネクタは、<b>テキスト/CSV</b>や<b>Excel</b>などの一般的なデータファイルの簡単なデータ取り込みを提供します。多くの場合、ファイルは自動的に処理され、ダイアログボックスを構成したり、設定をシートや外部のフィルタファイルに保存したりする必要はありません。<b>テキスト/CSV</b> と <b>Excel</b> のコネクタはどちらも、日時データを適切に処理します。データは、インポート時に自動的に認識され、シートで書式設定されます。</p>
+<p>Originインポートフィルタ（* .oif）ベースのルーチンを使用している場合でも、完全にサポートされています（下記<b>Note</b>を参照ください）。ただし、利用可能なコネクタのいずれかを使用してデータをインポートすることをお勧めします (<b>データ: ～に接続</b>)。また、インポートフィルタをデータコネクタ (<b>ファイルに接続: インポートフィルタ</b>) で使用<i>できる</i>ことに注意してください。</p>
+<ul>
+<li>Originインポートフィルタ（* .oif）ファイルとして<i>シート</i>または<i>データフォルダ</i>に保存されたインポートフィルタは、データコネクタよりも優先されます。</li>
+<li>User Files\Filtersに保存されたフィルタは、フィルタマネージャ (<b>設定: インポートフィルタ・マネージャ</b>) でユーザフォルダフィルタの<b>ドラッグ＆ドロップのサポート</b>ボックスがオンになっている<i>場合</i>、データコネクタよりも優先されます。</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd><a class="image"><img alt="OH filter manager supportDandD.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_filter_manager_supportDandD.png" width="497" height="209" border="0" /></a></dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>ファイルをドロップしたときに適用可能なフィルタが複数見つかった場合は、<b>フィルタの選択</b>ダイアログが開きます。ダイアログを使用して、使用するフィルタを選択します。または<b>コネクタの使用</b>を選択します。</li>
+</ul>
+<dl>
+<dd>
+<dl>
+<dd><a class="image"><img alt="OH select filter dialog.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_select_filter_dialog.png" width="298" height="154" border="0" /></a></dd>
+</dl>
+</dd>
+</dl>
+<ul>
+<li>.dat、.xls/xlsx、.txt、.csvファイルのドラッグアンドドロップ時の挙動は、システム変数<a class="external text" href="../../LabTalk/LabTalk/System_Variable_List.html#H.2CI.2CJ.2CK"><b>@IFS</b></a>の値を変更することで設定できます。（デフォルト＝0）例えば、(a) <b>@IFS</b>=<i>1</i> を設定し、(b) User Files\Filters に適用可能な .datファイルが少なくとも1つあり、(c) そのフィルタで<b>ドラッグ&amp;ドロップのサポート</b>が有効になっている場合に、.datファイルをOriginにドロップしますと、<b>フィルタ選択</b>ダイアログが開きます。ここで、システムフィルタを含むフィルタを選択できます (これらは通常役に立ちません)。または、<b>コネクタの使用</b>を選択できます。</li>
+<li>また、<i>データフォルダ</i>に適用可能なフィルタを持つファイルをドラッグアンドドロップすると、基本的に、<b>データ: ファイルに接続: インポートフィルタ</b> を選択した場合と同じ結果になることは、注目に値します。ここでの利点は、インポートフィルタを使用してファイルを解析できることです。<i>さらに</i>、<a href="../../UserGuide/Category/Data_Connector.html#Adding_a_Connector_to_the_Sheet" title="カテゴリー：データコネクタ"><b>データコネクタ</b></a>がシートに追加されます。</li>
+</ul>
+<h2><a name="Save_Drag-and-Drop_Settings_into_the_Sheet" id="Save_Drag-and-Drop_Settings_into_the_Sheet"></a><span class="mw-headline">ドラッグアンドドロップの設定をシートに保存</span></h2>
+<p>ファイルのインポートにXファンクションベースのダイアログの1つを使用する場合（<b>データ: ファイルからインポート</b>に存在する）、ダイアログボックスの現在の構成を<a href="../../UserGuide/UserGuide/Dialog_Themes.html" title="ユーザガイド：ダイアログテーマ"><b>ダイアログテーマ</b></a>に保存するか、<b>ドラッグ&amp;ドロップの設定を保存</b>を選択できます。</p>
+<p><b>ドラッグ&amp;ドロップの設定を保存</b>を選択した場合、インポートフィルタがシート自体に保存されます。シートまたは複製されたシートがアクティブである限り、同じファイルタイプと構造の新しいファイルをドロップして、シートにきれいにインポートできます。</p>
+<ol>
+<li>新しいワークブックを作成し、<b>データ：ファイルからインポート</b> (例：<b>単一ASCII</b>でファイル形式を選択します。</li>
+<li>該当するファイルを選択し、<b>オプションダイアログを表示する</b>チェックボックスがオンになっていることを確認して、<b>開く</b>をクリックします。</li>
+<li>ダイアログでオプションを選択してファイルデータが適切に解析されるようにしてから、<b>ダイアログテーマ</b>（ダイアログ上部）の右側にある<a class="image"><img alt="Dialog Theme Button.png" src="../images/Importing_Data_by_Drag_and_Drop/Dialog_Theme_Button.png" width="21" border="0" /></a>をクリックし、<b>ドラッグ&amp;ドロップの設定を保存</b>を選択します。</li>
+</ol>
+<ul>
+<li>この時点で、同じタイプと構造の別のファイルをアクティブシートにドロップできます（ダイアログボックスの<b>インポートモード</b>設定によっては、既存のデータを上書きするか、新しいシートまたはブックを開始する場合があります）。そして、シートに保存された設定で処理されます。</li>
+<li>また、ウィンドウをテンプレートとして保存し（<b>ファイル：テンプレートの新規保存</b>）、後で使用するためにウィンドウ構成（ドラッグ＆ドロップファイルの処理を含む）を呼び出すこともできます。</li>
+</ul>
+<h2><a name="Using_the_Import_Wizard_to_Set_Up_D.26D_Import" id="Using_the_Import_Wizard_to_Set_Up_D.26D_Import"></a><span class="mw-headline">インポートウィザードを使ってドラッグアンドドロップインポートを設定</span></h2>
+<p><a href="../../UserGuide/Category/The_Import_Wizard.html" title="カテゴリ：インポートウィザード">インポートウィザード</a>は、<b>ASCII</b>および単純な<b>バイナリ</b>（「単純な」とはオプションのヘッダセクションの後に連続的なバイナリ構造をもつこと）ファイルのインポートをサポートします。データがこれら2つのカテゴリのいずれかに分類されない場合は、データのインポートのための独自のOrigin Cコード（<b>ユーザ定義</b>）を書くことができます。</p>
+<p><b>データタイプ</b>に関係なく、ウィザードを使用してデータ ファイルをインポートする主な利点の1つは、カスタム設定を Originインポートフィルタ (*.oif) に保存して、同じ構造のファイルをインポートするために繰り返し使用できることです。フィルタを作成したら、それ以降のファイルはドラッグアンドドロップして簡単にインポートできます。</p>
+<h3><a name="Origin_Import_Filters" id="Origin_Import_Filters"></a><span class="mw-headline">Originのインポートフィルタ</span></h3>
+<p><a href="../../UserGuide/UserGuide/Import_Wizard_Basics.html" title="ユーザガイド： インポートウィザードの基本"><b>インポートウィザード</b></a>で<a href="../../UserGuide/UserGuide/Import_Wizard_Basics.html" title="ユーザガイド： インポートウィザードの基本">インポートフィルタを作成する</a>通常の手順は、インポートウィザードを開き、データファイルを選択し、各ウィザードページでファイルの構造を解析し、ファイルやウィンドウ名のオプションを選択し、保存、再利用するヘッダ情報を選択するといった設定を行います。&#160;ファイルインポート設定が完了したら、インポートフィルタとして設定を保存できます。(今後似たようなファイル構造を持つファイルをインポートすることがあるのなら、フィルタを保存することをお勧めします。)</p>
+<p>インポートフィルタを作成する場合、フィルタを (a) <b>データファイルのフォルダに保存する</b>か、(b) <b>ユーザファイルのフォルダに保存する</b>か、(c) <b>ウィンドウ内に保存する</b>かを選択できます。全てのオプションでファイル取り込み時のドラッグアンドドロップを行うことができます。</p>
+<dl>
+<dd><a class="image"><img alt="OH save filters page storage options.png" src="../images/Importing_Data_by_Drag_and_Drop/OH_save_filters_page_storage_options.png" width="731" height="266" border="0" /></a></dd>
+</dl>
+<p>フィルタを<b>ウィンドウ内に保存する</b>メリットは、フィルタをウィンドウと一緒に移動することができ、Originプロジェクトファイル(<b>*.opju</b>)や<a class="external text" href="../../GettingStarted/OriginLab/The_Origin_Interface.html#Origin_Child_Windows">子ウィンドウファイル (<b>*.ogwu</b>)</a>の一部にできることです。</p>
+<p>二つの異なるオプション（<b>データファイルフォルダ</b>と<b>ユーザファイルフォルダ</b>）では、フィルタを別の*.oif ファイルとして保存する必要があります。ここでの主な利点は、インポート時の自由度が高いことです。フィルタ（データフォルダ）を<i>常に</i>使用するか、フィルタを使用<i>せず</i>に代わりにデータコネクタを使用するかを選択できます (フィルタマネージャ (<b>設定: インポートフィルタ・マネージャ</b>) で ユーザフィルタの<b>ドラッグ＆ドロップのサポート</b>チェックをオフにすることにより)、または別の優れたオプション - インポートフィルタファイル設定 (<b>データ: ファイルに接続: インポートフィルタ</b>) <b>で</b>データコネクタを使用する。</p>
+<p>一度作成すれば、構造が少し異なるファイルをインポートする場合でも、すべてのインポート設定を行うのではなく、フィルタファイルを少し調整するだけで利用できます。 ここでの手順は、ウィザードを開き、(1) インポートフィルタを変更するファイルを選択し、(2) インポートフィルタをロードします (「<b>適用可能なフィルタを表示</b>」のチェックをオフにする必要がある場合があります)。 (3) 必要に応じて設定を変更しながらウィザードを進め、(4) ウィザードの「フィルタの保存」ページでフィルタ設定を新しい名前で保存します。</p>
+<p>インポートフィルタは、特定のファイル名(または似たようなファイル名)でしか扱えないようにしたり、指定したファイル拡張子を持つすべてのファイルに適用するように幅広く指定したりすることができます。 例えばXYZ_001.CSV, XYZ_002.CSV, XYZ_003.CSV.のような順次的な名前を自動的に付ける機器を使っている場合には、 ワイルドカード文字 "*" を使用して、"*.CSV"のように指定すれば、データファイルフォルダ内の全ての.CSVファイルをターゲットにすることができます。 もし、"XYZ*.CSV"のように指定すれば、ファイル名の最初にXYZが付く全てのCSVファイルをターゲットにすることができます。</p>
+<h3><a name="Target_Windows_and_Target_Window_Templates" id="Target_Windows_and_Target_Window_Templates"></a><span class="mw-headline">ターゲットウィンドウとターゲットウィンドウテンプレート</span></h3>
+<p>ASCII、バイナリ、ユーザ定義のインポートフィルタを定義するとき、<b>ターゲットウィンドウ</b>と<b>ターゲットウィンドウテンプレート</b>を指定する必要があります。<b>ユーザ定義</b>以外の<b>データタイプ</b>の場合、<b>ターゲットウィンドウ</b>は、<b>ワークブック</b>に制限されています。 <b>ユーザ定義</b>では、ウィンドウの作成は<b>Origin C</b> コードで行うので、<b>ターゲットウィンドウ</b>と<b>ターゲットウィンドウテンプレート</b>（<b>ターゲットウィンドウ</b>が<b>無し</b>の場合）を指定する必要はありません。</p>
+<ul>
+<li><b>ターゲットウィンドウ</b>は、インポートするデータを受け取る子ウィンドウのタイプを指定するものです。</li>
+<li><b>ターゲットウィンドウテンプレート</b>は、独自の構成やフォーマット設定を持つ特定の（名前の付けられた）ウィンドウテンプレートです（単に &lt;default&gt; の場合もあります）。<b>ターゲットウィンドウテンプレート</b>は、ドラッグ&amp;ドロップインポートによるインポートにより、新しいウィンドウを作成するときに使用されます。</li>
+</ul>
+<p>インポートフィルタを定義していれば、1つ以上のファイルをワークシートにドラッグ&amp;ドロップする時に、そのウィンドウが<b>ターゲットウィンドウ</b>タイプである場合、Originは、フィルタで指定されている設定で、そのファイルを新しいワークブック/新しいワークシート/新しい列のいずれかにインポートします。 例えば、 (1) フィルタの<b>インポートモード</b> が<b>列を追加して読み込む</b>にセットされており、(2) ファイルがワークブックウィンドウ(フィルタ内にあるターゲットウィンドウのタイプ)にドロップすると、アクティブワークブックのアクティブワークシートの列としてファイルがインポートされます。アクティブシートが空白列の場合、最初の列から入力されます。この場合、アクティブワークブックは、正しい<b>ターゲットウィンドウ</b>のタイプになっており、各ファイルは新しい列を作成することだけを要求します。新しいウィンドウを作成する必要が無いので、<b>ターゲットウィンドウテンプレート</b>は使われません。</p>
+<p>フィルタの<b>インポートモード</b>が、<b>ブックを新たに作って読み込む</b>に設定されている場合、最初にドロップしたファイルは、アクティブシートの列が空白ならアクティブワークブックにインポートされます(<b>ターゲットウィンドウ</b>は正しいタイプ)。2つめ以降のファイルは、ターゲットウィンドウテンプレートを使用して作成した新しいワークブックにインポートされます。 なお、<b>ターゲットウィンドウテンプレート</b>は、アクティブなワークブックウィンドウの基になったテンプレートと同じ場合もそうでない場合もあります。 しかし、デフォルトの<b>ターゲットウィンドウ</b> テンプレート (インポートウィザードの「<b>データソース</b>」ページにあるドロップダウンリストから<b>&lt;デフォルト&gt;</b> を選択) は、デフォルトのOriginワークシートまたは行列シートになっています。 別のデフォルトテンプレートを選択していない限り、これは ORIGIN.OTW (ワークシート) または ORIGIN.OTM (行列) になります。</p>
+<p><br /></p>

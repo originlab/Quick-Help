@@ -1,0 +1,132 @@
+﻿<h1 class="firstheading">fft_apply_window</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Apply a window to a sequence with shift, then get a new sequence of result. Pay atention the start position is not at 0, but at ishift.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> fft_apply_window<span style="color: #000000;">(</span> <span style="color: #0000ff;">int</span> iSigSize, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> vSig, <span style="color: #0000ff;">int</span> iWinSize, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> vWindow, <span style="color: #0000ff;">int</span> iShift, <span style="color: #0000ff;">int</span> iResultSize, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> vResult, <span style="color: #0000ff;">int</span> iPadding, <span style="color: #0000ff;">int</span> iStep <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>iSigSize</dt>
+
+    <dd>[input] number of data values in the source sequency.</dd>
+
+    <dt>vSig</dt>
+
+    <dd>[input] source sequency</dd>
+
+    <dt>iWinSize</dt>
+
+    <dd>[input] size of window to be applied</dd>
+
+    <dt>vWindow</dt>
+
+    <dd>[input] window sequency</dd>
+
+    <dt>iShift</dt>
+
+    <dd>[input] shift of window per step</dd>
+
+    <dt>iResultSize</dt>
+
+    <dd>[output] the size of the vResult</dd>
+
+    <dt>vResult</dt>
+
+    <dd>[output] result sequency</dd>
+
+    <dt>iPadding</dt>
+
+    <dd>[input] number of paddings (0)</dd>
+
+    <dt>iStep</dt>
+
+    <dd>[input] number of total shift steps</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>returns 0 for success.</p>
+
+  <p>returns INVALID_SIZE data size maybe incorrect.</p>
+
+  <p>returns UNKNOWN_ERROR Memory Error.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//Assume in the current worksheet, the first is signal sequence, the second is the window data to be applied.</span>
+
+<span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\originlab\fft.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+
+<span style="color: #0000ff;">void</span> TEST_fft_apply_window<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>wks<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        Dataset dsSig<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+        Dataset dsWin<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+    
+        vector vecSig, vecWin, vecResult;
+        <span style="color: #0000ff;">int</span> iSigSize, iWinSize, iShift, iPadding;
+    
+        vecSig <span style="color: #000080;">=</span> dsSig;
+        vecWin <span style="color: #000080;">=</span> dsWin;
+        iSigSize <span style="color: #000080;">=</span> vecSig.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        iWinSize <span style="color: #000080;">=</span> vecWin.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        iShift <span style="color: #000080;">=</span> <span style="color: #0000dd;">5</span>;                  <span style="color: #008000;">//specify a number just as you wish</span>
+        iPadding <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+        <span style="color: #0000ff;">int</span> iSteps <span style="color: #000080;">=</span> iSigSize<span style="color: #000040;">/</span>iShift;
+        <span style="color: #0000ff;">int</span> iResultSize <span style="color: #000080;">=</span> iSteps <span style="color: #000040;">*</span> <span style="color: #000000;">(</span>iWinSize<span style="color: #000040;">+</span>iPadding<span style="color: #000000;">)</span>;
+        vecResult.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>iResultSize<span style="color: #000000;">)</span>;
+        
+        <span style="color: #0000ff;">int</span> ret <span style="color: #000080;">=</span> fft_apply_window<span style="color: #000000;">(</span>iSigSize, vecSig, iWinSize, vecWin, iShift, iResultSize, vecResult, iPadding, iSteps<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span>ret <span style="color: #000040;">!</span><span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+            out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail call"</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>fft.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

@@ -1,0 +1,106 @@
+﻿<h1 class="firstheading">生存分析</h1><p class='urlname' style='display: none'>Survival-Analysis</p>
+<p>生存分析は、バイオサイエンスの分野で、研究対象の母集団の中から生存数を定量化するのに使用されます。Originは3つの幅広い検定をサポートしており、OriginProでは使用できます。
+</p>
+<table class="simple" width="80%">
+<tr>
+<th> 名前
+</th>
+<th> 説明
+</th></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Kaplanmeier.html"><b>kaplanmeier</b></a>
+</td>
+<td>Kaplan-Meier (積極限) 推定量 
+</td></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Phm_Cox.html"><b>phm_cox</b></a>
+</td>
+<td>Cox比例ハザードモデル
+</td></tr>
+<tr>
+<td><a class="external text" href="../../XFunction/X-Function/Weibullfit.html"><b>weibullfit</b></a>
+</td>
+<td>ワイブルフィット
+</td></tr></table>
+<p>これらのXファンクションの入出力の引数など完全な説明は、オンラインヘルプの <a class="external text" href="../../XFunction/Category/Survival_Analysis.html">生存分析</a>をご覧下さい。
+</p>
+<h2><a name="Kaplan-Meier_EstimatorKaplan-Meier_Estimator"></a><span class="mw-headline">Kaplan-Meier分析<span class="OIndex" style="display:none">Kaplan-Meier Estimator</span></span></h2>
+<p>生存率を推定したければ、 <b><a class="external text" href="../../XFunction/X-Function/Kaplanmeier.html">kaplanmeier</a></b> Xファンクションを使って、生存グラフを作成し、生存関数の性質を比較します。これは、積極限を使って、生存関数を推定し、生存関数の同等性を検定するため、Log Rank, Breslow, Tarone-Wareの3つの手法をサポートしています。
+</p><p>例えば、生化学者がより良い抗ガン剤を探しているとします。いくつかのラットに発ガン物質DMBAを与えた後、ラットの異なるグループに異なる薬を投与し、最初の60時間の生存状況を記録します。  2種類の薬で生存率の違いを定量化したいと考えます。   
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// サンプルデータをインポート</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\SurvivedRats.dat&quot;</span>;
+impasc;
+&nbsp;
+<span style="color: #008000;">//Kaplan-Meier分析を実行</span>
+kaplanmeier irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span>,<span style="color: #0000dd;">3</span><span style="color: #000000;">)</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> logrank<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> 
+            rd<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;sf&quot;</span><span style="color: #000080;">&gt;</span> 
+            rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;km&quot;</span><span style="color: #000080;">&gt;</span>;
+&nbsp;
+<span style="color: #008000;">//生存レポートツリーから結果を取得</span>
+getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>mykm iw<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;km&quot;</span>;
+&nbsp;
+if <span style="color: #000000;">(</span>mykm.<span style="color: #000080;">comp</span>.<span style="color: #000080;">logrank</span>.<span style="color: #000080;">prob</span> <span style="color: #000080;">&lt;=</span> <span style="color: #0000dd;">0.05</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    type <span style="color: #ff00ff;">&quot;The two medicines have significantly different&quot;</span>
+    type <span style="color: #ff00ff;">&quot;effects on survival at the 0.05 level ...&quot;</span>; 
+    type <span style="color: #ff00ff;">&quot;Please see the survival plot.&quot;</span>;
+&nbsp;
+    <span style="color: #008000;">//生存関数をプロット</span>
+    page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;sf&quot;</span>;
+    plotxy iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>?, <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> plot<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">200</span> o<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">[</span><span style="color: #000080;">&lt;</span>new template<span style="color: #000000;">:</span><span style="color: #000080;">=</span>survivalsf<span style="color: #000080;">&gt;</span><span style="color: #000000;">]</span>;
+&nbsp;
+<span style="color: #000000;">}</span>
+else
+<span style="color: #000000;">{</span>
+    type <span style="color: #ff00ff;">&quot;The two medicines are not significantly different.&quot;</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Cox_Proportional_Hazard_Regression"></a><span class="mw-headline">Cox比例ハザード回帰</span></h2>
+<p><a class="external text" href="../../XFunction/X-Function/Phm_Cox.html"><b>phm_cox</b></a> Xファンクションは、固定の共変量に対する<span class="OIndex">Cox比例ハザードモデル</span>に関連するパラメータの見積もりおよびその他の統計量を取得するのに使うことができます。  いくつかの固定の共変量に沿ってハザード率の変化を予測できます。 
+</p><p>例えば、結腸直腸癌の66名の患者に対して、効果的な予後因子と最適な予後指標を決めたいとします。(予後因子は、人がある病気であるかどうかを決めるパラメータ)  このスクリプトは、関連のある統計量を取得するため、<b>phm_cox</b> Xファンクションを実装しています。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//サンプルデータをインポート</span>
+newbook;
+string fpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\ColorectalCarcinoma.dat&quot;</span>;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> fpath<span style="color: #000080;">$</span>;
+impasc option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">LNames</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">units</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">CommsFrom</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> 
+       option.<span style="color: #000080;">hdr</span>.<span style="color: #000080;">CommsTo</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span>;
+&nbsp;
+<span style="color: #008000;">// Cox回帰を実行</span>
+phm_Cox irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>,col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>,col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">:</span>end<span style="color: #000000;">)</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span> rt<span style="color: #000000;">:</span><span style="color: #000080;">=&lt;</span>new name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;cox&quot;</span><span style="color: #000080;">&gt;</span>;
+&nbsp;
+<span style="color: #008000;">//レポートツリーから結果を取得</span>
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;cox&quot;</span>;
+getresults tr<span style="color: #000000;">:</span><span style="color: #000080;">=</span>cox;
+&nbsp;
+type <span style="color: #ff00ff;">&quot;Prognostic parameters determining colorectal carcinoma are:&quot;</span>;
+&nbsp;
+page.<span style="color: #000080;">active</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;ColorectalCarcinoma&quot;</span>;
+loop<span style="color: #000000;">(</span>ii, <span style="color: #0000dd;">1</span>, <span style="color: #0000dd;">7</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+  <span style="color: #008000;">// 確率が 0.05以下の場合 </span>
+  <span style="color: #008000;">// 生存時間に対して効果ありと言える</span>
+  if <span style="color: #000000;">(</span>cox.<span style="color: #000080;">paramestim</span>.<span style="color: #000080;">param</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>.<span style="color: #000080;">prob</span><span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">0.05</span><span style="color: #000000;">)</span>
+    type wks.<span style="color: #000080;">col</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000080;">+</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>.<span style="color: #000080;">comment</span><span style="color: #000080;">$</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Weibull_FitWeibull_Fit"></a><span class="mw-headline">Weibullフィット</span></h2>
+<p>データがワイブル分布であると<i>前もって</i>分かっている場合、 <b><a class="external text" href="../../XFunction/X-Function/Weibullfit.html">weibullfit</a></b> Xファンクションを使って、ワイブルパラメータを推定できます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//サンプルデータをインポート</span>
+newbook;
+fname<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Statistics\Weibull Fit.dat &quot;</span>;
+impasc;
+&nbsp;
+<span style="color: #008000;">//ワイブルフィットを実行</span>
+weibullfit irng<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span>col<span style="color: #000000;">(</span>a<span style="color: #000000;">)</span>, col<span style="color: #000000;">(</span>b<span style="color: #000000;">)</span><span style="color: #000000;">)</span> censor<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;</pre>
+
+
+
+
+
+
+
+    

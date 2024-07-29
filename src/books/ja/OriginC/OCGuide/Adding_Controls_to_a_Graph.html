@@ -1,0 +1,70 @@
+﻿<h1 class="firstheading">グラフにコントロールを追加する</h1><p><span class="OIndex" style="display:none">Graph Page, Attach a User Defined Dialog to It</span>
+ワークブックのオーガナイザや極座標グラフの上部にあるようにダイアログをページに接続する場合、<b><a href="../../OriginC/Category/PageBase_(class).html" title="Category:PageBase (class)">PageBase</a></b>クラスの<b>SetSplitters</b>メソッドを使います。
+</p><p>ダイアログバーをページに追加するには、<b>lpcszString</b> は、ダイアログクラスの名前とページウィンドウの位置(上下左右)を含む必要があります。<b>lpcszString</b>をNULLにセットすると、既存のダイアログバーを削除します。 
+</p><p>次のサンプルは、グラフウィンドウにユーザ定義のダイアログを追加および削除する方法を示しています。 
+</p><p>ユーザ定義のダイアログのクラス
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">#include</span> <span style="color: #000080;">&lt;</span>..\Originlab\DialogEx.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span>
+<span style="color: #008000;">// OC_REGISTERED キーワードは、このクラスを見つけるために </span>
+<span style="color: #008000;">// PageBase::SetSplittersメソッドを許可する必要がある</span>
+<span style="color: #0000ff;">class</span> OC_REGISTERED MyGraphPolarBar <span style="color: #000000;">:</span> <span style="color: #0000ff;">public</span> Dialog
+<span style="color: #000000;">{</span>
+<span style="color: #0000ff;">public</span><span style="color: #000000;">:</span>
+	<span style="color: #008000;">// IDD_POLAR_CONTROL はダイアログのリソースID</span>
+	<span style="color: #008000;">// Odlg8 はダイアログリソースDLLファイル名で、パスが見つからない場合 </span>
+	<span style="color: #008000;">//デフォルトのパスは  OriginC\Originlab</span>
+	MyGraphPolarBar<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">:</span>Dialog<span style="color: #000000;">(</span>IDD_POLAR_CONTROL, <span style="color: #ff00ff;">&quot;Odlg8&quot;</span><span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+	<span style="color: #000000;">}</span>	
+	
+	<span style="color: #0000ff;">BOOL</span> CreateWindow<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nID, HWND hWnd<span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>		
+		<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> Dialog<span style="color: #000000;">::</span><span style="color: #000000;">Create</span><span style="color: #000000;">(</span>hWnd, DLG_AS_CHILD<span style="color: #000000;">)</span>;
+		
+		HWND hWndThis <span style="color: #000080;">=</span> GetSafeHwnd<span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+		SetWindowLong<span style="color: #000000;">(</span>hWndThis, GWL_ID, nID<span style="color: #000000;">)</span>;
+		<span style="color: #0000ff;">return</span> nRet;
+	<span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>;</pre>
+<p>グラフウィンドウのダイアログを追加または削除
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">void</span> Page_SplittersControl<span style="color: #000000;">(</span><span style="color: #0000ff;">BOOL</span> bShow <span style="color: #000080;">=</span> <span style="color: #0000ff;">TRUE</span>, <span style="color: #0000ff;">int</span> nPos <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	Page pg <span style="color: #000080;">=</span> Project.<span style="color: #000000;">Pages</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Graph1&quot;</span><span style="color: #000000;">)</span>;
+
+	<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> bShow <span style="color: #000000;">)</span>
+	<span style="color: #000000;">{</span>
+		<span style="color: #0000ff;">int</span> nPercent <span style="color: #000080;">=</span> <span style="color: #0000dd;">30</span>;
+		string strDlgClass <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;MyGraphPolarBar&quot;</span>; <span style="color: #008000;">// 上記ダイアログクラス</span>
+		
+		string	strConfig;
+		<span style="color: #0000ff;">switch</span><span style="color: #000000;">(</span>nPos<span style="color: #000000;">)</span>
+		<span style="color: #000000;">{</span>
+		<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">:</span> <span style="color: #008000;">// 下</span>
+			strConfig.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;r{%s}r[%s]&quot;</span>, <span style="color: #000000;">(</span>string<span style="color: #000000;">)</span>nPercent<span style="color: #000040;">+</span><span style="color: #ff00ff;">&quot;%&quot;</span>, strDlgClass<span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">1</span><span style="color: #000000;">:</span> <span style="color: #008000;">// 右</span>
+			strConfig.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;c{%s}c[%s]&quot;</span>, <span style="color: #000000;">(</span>string<span style="color: #000000;">)</span>nPercent<span style="color: #000040;">+</span><span style="color: #ff00ff;">&quot;%&quot;</span>, strDlgClass<span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">break</span>;				
+		<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">2</span><span style="color: #000000;">:</span> <span style="color: #008000;">// 上</span>
+			strConfig.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;r[%s]{%d}r&quot;</span>, strDlgClass, nPercent<span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #0000ff;">case</span> <span style="color: #0000dd;">3</span><span style="color: #000000;">:</span> <span style="color: #008000;">// 左</span>
+			strConfig.<span style="color: #000000;">Format</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;c[%s]{%d}c&quot;</span>, strDlgClass, nPercent<span style="color: #000000;">)</span>;
+			<span style="color: #0000ff;">break</span>;
+		<span style="color: #000000;">}</span>				
+		pg.<span style="color: #000000;">SetSplitters</span><span style="color: #000000;">(</span>strConfig<span style="color: #000000;">)</span>;
+	<span style="color: #000000;">}</span>
+	<span style="color: #0000ff;">else</span>
+		pg.<span style="color: #000000;">SetSplitters</span><span style="color: #000000;">(</span><span style="color: #0000ff;">NULL</span><span style="color: #000000;">)</span>;	<span style="color: #008000;">// ページからダイアログバーを削除</span>
+	
+<span style="color: #000000;">}</span></pre>
+
+
+
+
+
+
+
+    

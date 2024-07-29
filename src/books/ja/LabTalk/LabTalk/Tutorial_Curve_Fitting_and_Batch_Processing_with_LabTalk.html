@@ -1,0 +1,295 @@
+﻿<h1 class="firstheading">LabTalkによるカーブフィットとバッチ処理</h1>
+
+  <p class='urlname' style='display: none'>Tutorial-Curve-Fitting-and-Batch-Processing-with-LT</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>目次</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Summary"><span class="tocnumber">1</span> <span class="toctext">概要</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#What_you_will_learn"><span class="tocnumber">2</span> <span class="toctext">学習する項目</span></a></li>
+
+      <li class="toclevel-1 tocsection-3">
+        <a href="#Importing_Data"><span class="tocnumber">3</span> <span class="toctext">データのインポート</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-4"><a href="#Importing_a_.2A.dat_File"><span class="tocnumber">3.1</span> <span class="toctext">*.datファイルのインポート</span></a></li>
+
+          <li class="toclevel-2 tocsection-5"><a href="#ImpASC_Options_TreeNode"><span class="tocnumber">3.2</span> <span class="toctext">ImpASCオプションツリーノード</span></a></li>
+        </ul>
+      </li>
+
+      <li class="toclevel-1 tocsection-6">
+        <a href="#Fitting_your_data"><span class="tocnumber">4</span> <span class="toctext">データのフィッティング</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-7"><a href="#NLBEGIN_x-function"><span class="tocnumber">4.1</span> <span class="toctext">XファンクションNLBEGIN</span></a></li>
+
+          <li class="toclevel-2 tocsection-8"><a href="#NLFIT_x-function"><span class="tocnumber">4.2</span> <span class="toctext">XファンクションNLFIT</span></a></li>
+
+          <li class="toclevel-2 tocsection-9"><a href="#NLEND_x-function"><span class="tocnumber">4.3</span> <span class="toctext">XファンクションNLEND</span></a></li>
+
+          <li class="toclevel-2 tocsection-10"><a href="#Gaussian_Fitting_Complete_Example"><span class="tocnumber">4.4</span> <span class="toctext">ガウスフィットのサンプル</span></a></li>
+        </ul>
+      </li>
+
+      <li class="toclevel-1 tocsection-11">
+        <a href="#Batch_Process"><span class="tocnumber">5</span> <span class="toctext">バッチ処理</span></a>
+
+        <ul>
+          <li class="toclevel-2 tocsection-12"><a href="#Batch_Nonlinear_Curve_Fitting"><span class="tocnumber">5.1</span> <span class="toctext">非線形曲線フィットのバッチ処理</span></a></li>
+
+          <li class="toclevel-2 tocsection-13"><a href="#Batch_Linear_Fit_Analysis"><span class="tocnumber">5.2</span> <span class="toctext">線形フィットのバッチ処理</span></a></li>
+
+          <li class="toclevel-2 tocsection-14"><a href="#Processing_Each_Dataset_in_a_Loop"><span class="tocnumber">5.3</span> <span class="toctext">ループ内の各データセットの処理</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2><a name="Summary"></a><span class="mw-headline">概要</span></h2>
+
+  <p>このチュートリアルでは、データのインポート、データ操作、カーブフィットの実行、ループで複数のデータセットのバッチ処理の方法を示すスクリプトサンプルを多数用意しています。</p>
+
+  <h2><a name="What_you_will_learn"></a><span class="mw-headline">学習する項目</span></h2>
+
+  <p>このチュートリアルでは、以下の項目について解説します。</p>
+
+  <ol>
+    <li>データのインポート</li>
+
+    <li>非線形回帰を実行</li>
+
+    <li>線形回帰を実行</li>
+
+    <li>バッチ処理</li>
+  </ol>
+
+  <h2><a name="Importing_Data"></a><span class="mw-headline">データのインポート</span></h2>
+
+  <p>LabTalkスクリプトの中には、ワークシートに既にインポートまたは入力されているデータを操作するものがあります。</p>
+
+  <p>多くの場合、LabTalkスクリプトを記述して選択したデータファイルをインポートする必要があります。</p>
+
+  <p>Origin でインポートがサポートされているすべてのファイルタイプには、独自のXファンクションがあります。たとえば、<b>データ：ファイルからインポート：CSV</b>メニューオプションを選択し、開いたダイアログでデータファイルを選択してOKをクリックしたときに、「オプションダイアログを表示」 にチェックがついていると、impCSVダイアログが表示されます。ダイアログのタイトルにインポートで使用されるXファンクションの名前が表示されます。</p>
+
+  <p>また、ほかの例として、pCLAMPファイルをインポートする場合には、imppClampを使用します。</p>
+
+  <p>&#160;</p>
+
+  <h3><a name="Importing_a_.2A.dat_File"></a><span class="mw-headline">*.datファイルのインポート</span></h3>
+
+  <p>ASCIIファイルをインポートするには、XファンクションimpASCを使用します。</p>
+  <pre>
+ string fname$ = system.path.program$ + &quot;Samples\Curve Fitting\Multiple Gaussians.dat&quot;;
+ impASC fname:=fname$;
+</pre>
+
+  <h3><a name="ImpASC_Options_TreeNode"></a><span class="mw-headline">ImpASCオプションツリーノード</span></h3>
+
+  <p>メニューからインポートを行う場合、オプションダイアログを開くことができます。このダイアログの設定には、Treenode変数タイプによってアクセスできます。</p>
+
+  <p>XファンクションimpASCには、次のような入力変数があります。</p>
+  <pre>
+ options: [in] 
+   type=TreeNode
+   default=&lt;unassigned&gt;
+   description=Specify the import options in the dialog.
+</pre>
+
+  <p>このサンプルでは、 impASC Xファンクションの多くの詳細オプションの使用方法を利用しています。すべてが impASC の呼び出しの一部であることを示すセミコロン (すべてのオプションの割り当てに続く) が1つだけであることに注意してください。</p>
+  <pre>
+ string fn$=system.path.program$ + &quot;Samples\Spectroscopy\HiddenPeaks.dat&quot;; 
+ impasc fname:=fn$ 
+ options.ImpMode:=3                        /* 新規ブックで開始 */
+ options.Sparklines:=0                     /* スパークラインオフ */
+ options.Names.AutoNames:=0                /* 自動名前変更オフ */
+ options.Names.FNameToSht:=1               /* シートをファイル名に変更 */
+ options.Miscellaneous.LeadingZeros:=1;    /* 数値の前にあるゼロを消去*/
+</pre>
+
+  <h2><a name="Fitting_your_data"></a><span class="mw-headline">データのフィッティング</span></h2>
+
+  <p>LabTalkでのフィット操作では、次の3つのXファンクションがこの順序の通りに使用されます。</p>
+
+  <ul>
+    <li>nlbegin</li>
+
+    <li>nlfit</li>
+
+    <li>nlend</li>
+  </ul>
+
+  <h3><a name="NLBEGIN_x-function"></a><span class="mw-headline">XファンクションNLBEGIN</span></h3>
+
+  <p>フィット処理を開始します。入力データ、フィット関数の種類、入力パラメータを定義します。</p>
+
+  <p>この関数には多くの入力変数があります。デフォルト値を持たないのは<b>func</b>変数だけなので、nlbeginを使用する場合は、最低限フィット関数を指定する必要があります。指定した関数は、 <b>解析：フィット：非線形曲線フィット</b>メニューからフィットする場合と同様に、アクティブなXY範囲をフィットするために使用されます。</p>
+  <pre>
+// ガウスモデルを使用してアクティブプロットのフィッティングを初期化
+nlbegin iy:=1 func:=gauss nltree:=tt; 
+</pre>
+  <pre>
+// expgrow1モデルを初期化して、列1をX、列2をYとしてフィット
+nlbegin iy:=(1,2) func:=expgrow1 nltree:=tt;
+</pre>
+
+  <p>nltree変数は重要です。</p>
+  <pre>
+ nltree: [in/out] 
+ type=TreeNode
+ default=nlt
+ description=Tree containing the information of fitting such as parameter values, standard 
+               error, etc.
+</pre>
+
+  <h3><a name="NLFIT_x-function"></a><span class="mw-headline">XファンクションNLFIT</span></h3>
+
+  <p>この関数はフィットの計算処理を実行します。2つの入力変数があります。</p>
+
+  <p>変数</p>
+  <pre>
+ n: [in] 
+   type=int
+   default=-1
+   description=Number of Iterations
+ method: [in] 
+   type=int
+   default=0
+   description=Iteration Method
+   allowed values: 0=lm:LM, 1=s:Simplex
+</pre>
+
+  <p>スクリプトの使用例</p>
+  <pre>
+ nlfit 0; // フィット曲線を更新しカイ二乗を再計算
+ nlfit 1; // 1回反復
+ nlfit; // 収束までフィット
+</pre>
+
+  <h3><a name="NLEND_x-function"></a><span class="mw-headline">XファンクションNLEND</span></h3>
+
+  <p>このXファンクションはフィッティングプロセスを終了し、パラメーター値を出力します。</p>
+  <pre>
+ nlend output:=1 autoupdate:=1
+</pre>
+
+  <h3><a name="Gaussian_Fitting_Complete_Example"></a><span class="mw-headline">ガウスフィットのサンプル</span></h3>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">// アクティブなワークシートの列1(X)と2(Y)から入力データを取得</span>
+<span style="color: #008000;">// フィッティング関数をガウスとして指定</span>
+<span style="color: #008000;">// ParamTreeという入力パラメーターツリーを作成して</span>
+<span style="color: #008000;">// 非線形フィッティングを開始</span>
+nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gauss nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>ParamTree;
+<span style="color: #008000;">// ピークの中心を X = 5に固定（オプション） </span>
+ParamTree.<span style="color: #000080;">xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">25</span>;     <span style="color: #008000;">// ピーク中心X値5を割り当て</span>
+ParamTree.<span style="color: #000080;">f_xc</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>;   <span style="color: #008000;">// ピーク中心固定 (f_xc = 0 は固定なし).</span>
+<span style="color: #008000;">// フィット計算を実行:</span>
+nlfit;
+<span style="color: #008000;">// 結果をスクリプト ウィンドウに表示（オプション）</span>
+type Baseline y0 is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">y0</span><span style="color: #000000;">)</span>,; 
+type Peak Center is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">xc</span><span style="color: #000000;">)</span>, and; 
+type Peak width <span style="color: #000000;">(</span>FWHM<span style="color: #000000;">)</span> is <span style="color: #000080;">$</span><span style="color: #000000;">(</span>ParamTree.<span style="color: #000080;">w</span><span style="color: #000000;">)</span>;
+<span style="color: #008000;">// レポートシートなしでフィッティングセッションを終了</span>
+nlend;
+</pre>
+
+  <p> </p>
+
+  <h2><a name="Batch_Process"></a><span class="mw-headline">バッチ処理</span></h2>
+
+  <p>バッチ処理の1つの方法として、複数のファイルまたはデータセットをループ処理し、ループ内で適切なXファンクションやその他のスクリプトコマンドを呼び出して必要なデータ処理を実行することで、各データセットを処理するといものがあります。</p>
+
+  <h3><a name="Batch_Nonlinear_Curve_Fitting"></a><span class="mw-headline">非線形曲線フィットのバッチ処理</span></h3>
+
+  <p>次の例は、10個のファイルをインポートしてカーブ フィットを実行し、フィット結果を出力する方法を示しています。</p>
+  <pre class="lt" style="font-family:monospace;">
+ <span style="color: #008000;">// ワイルドカードで全ファイルを検索</span>
+ string path<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Batch Processing&quot;</span>;
+ findFiles ext<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;T*.csv&quot;</span>;
+ 
+ <span style="color: #008000;">// シートなしのブックから開始</span>
+ newbook sheet<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>;
+ <span style="color: #008000;">//全ファイルをループ</span>
+ for<span style="color: #000000;">(</span>int iFile <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span>; iFile <span style="color: #000080;">&lt;=</span> fname.<span style="color: #000080;">GetNumTokens</span><span style="color: #000000;">(</span>CRLF<span style="color: #000000;">)</span>; iFile<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+ <span style="color: #000000;">{</span>
+     <span style="color: #008000;">// ファイル名を取得</span>
+     string file<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetToken</span><span style="color: #000000;">(</span>iFile, CRLF<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+     <span style="color: #008000;">// 新規シートにファイルをインポート</span>
+     newsheet;
+     impasc file<span style="color: #000080;">$</span>;
+     <span style="color: #008000;">// 現在のデータの列2にガウスフィッティングを実行</span>
+     nlbegin iy<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">2</span> func<span style="color: #000000;">:</span><span style="color: #000080;">=</span>gaussamp nltree<span style="color: #000000;">:</span><span style="color: #000080;">=</span>myfitresult;
+     <span style="color: #008000;">// フィットし、レポートなしで終了</span>
+     nlfit;
+     nlend;
+     <span style="color: #008000;">// ファイル名と結果を表示</span>
+     type <span style="color: #ff00ff;">&quot;File Name: %(file$)&quot;</span>;
+     type <span style="color: #ff00ff;">&quot;   Peak Center= $(myfitresult.xc)&quot;</span>;   
+     type <span style="color: #ff00ff;">&quot;   Peak Height= $(myfitresult.A)&quot;</span>;    
+     type <span style="color: #ff00ff;">&quot;   Peak Width=  $(myfitresult.w)&quot;</span>;    
+ <span style="color: #000000;">}</span>
+</pre>
+
+  <h3><a name="Batch_Linear_Fit_Analysis"></a><span class="mw-headline">線形フィットのバッチ処理</span></h3>
+  <pre class="lt" style="font-family:monospace;">
+<span style="color: #008000;">//ワイルドカードで全ファイルを選択</span>
+ string strpath<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> system.<span style="color: #000080;">path</span>.<span style="color: #000080;">program</span><span style="color: #000080;">$</span> <span style="color: #000080;">+</span> <span style="color: #ff00ff;">&quot;Samples\Curve Fitting&quot;</span>;
+ dlgfile group<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Sensor*.dat&quot;</span> init<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strpath<span style="color: #000080;">$</span> multi<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>;
+<span style="color: #008000;">//ファイル数を取得</span>
+ int nfiles <span style="color: #000080;">=</span> fname.<span style="color: #000080;">getnumtokens</span><span style="color: #000000;">(</span>CRLF<span style="color: #000000;">)</span>;
+<span style="color: #008000;">//線形フィット結果の傾きを保存する変数を定義</span>
+ double dslope; 
+<span style="color: #008000;">//ファイル名を保存する文字列変数を定義</span>
+ string strFile<span style="color: #000080;">$</span>;
+<span style="color: #008000;">//選択したファイルすべてでループ</span>
+ loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,nfiles<span style="color: #000000;">)</span>
+ <span style="color: #000000;">{</span>
+<span style="color: #008000;">//ファイル名を取得</span>
+  strFile<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> fname.<span style="color: #000080;">GetToken</span><span style="color: #000000;">(</span>ii, CRLF<span style="color: #000000;">)</span><span style="color: #000080;">$</span>;
+<span style="color: #008000;">//新規シートにファイルをインポート</span>
+  impASC strFile<span style="color: #000080;">$</span> options.<span style="color: #000080;">ImpMode</span><span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #0000dd;">4</span>;
+<span style="color: #008000;">//Xファンクションfitlrでデータセットをフィットし傾きを出力</span>
+  fitlr <span style="color: #000000;">(</span><span style="color: #0000dd;">1</span>,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span> b<span style="color: #000000;">:</span><span style="color: #000080;">=</span>bslope;
+<span style="color: #008000;">//結果の文字列をスクリプトウィンドウに出力</span>
+  type <span style="color: #000080;">-</span>a <span style="color: #ff00ff;">&quot;Slope for %(strFile$) is $(bslope)&quot;</span>;
+ <span style="color: #000000;">}</span>
+</pre>
+
+  <table class="noborder">
+    <tr>
+      <td style="vertical-align:top" width="60"><img src="../images/Tutorial_Curve_Fitting_and_Batch_Processing_with_LabTalk/Tip_icon.png" width="57" border="0" alt=""></td>
+
+      <td>
+        <p>事前に分析テンプレートを作成し、<b>batchProcess</b>Xファンクションを呼び出すことでバッチ処理を行うこともできます。これにより、必要なコーディング作業が少なくなります。</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="Processing_Each_Dataset_in_a_Loop"></a><span class="mw-headline">ループ内の各データセットの処理</span></h3>
+
+  <p>Samples\Data Manipulation\Setting Column Values.OPJのプロジェクトを開き、Columns from Other Sheets サブフォルダを開きます。</p>
+
+  <p>サンプルの最初の値からリファレンスの最初の値を減算した値を、サンプル データ全体から減算します。複数のTransducerがあるので、この計算をループで実行します。</p>
+  <pre class="lt" style="font-family:monospace;">
+ <span style="color: #008000;">//Referenceワークシート範囲</span>
+ range rReference <span style="color: #000080;">=</span> <span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>;
+ <span style="color: #008000;">//Sample ワークシート範囲</span>
+ range rSample <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>;
+ <span style="color: #008000;">//Timeデータ範囲</span>
+ range rTime <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span>Time<span style="color: #000000;">)</span>;
+ <span style="color: #008000;">//新しいワークシートを作成</span>
+ newsheet name<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Corrected Sample&quot;</span>;
+ <span style="color: #008000;">//この新しいワークシートの最初の列に時間データ範囲を入力</span>
+ wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span> <span style="color: #000080;">=</span> rTime;
+ <span style="color: #008000;">//Transducer列全てでループ</span>
+ loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">2</span>,rSample.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span>
+ <span style="color: #000000;">{</span>
+ range rS<span style="color: #000080;">=</span>rSample<span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+ range rR <span style="color: #000080;">=</span> rReference<span style="color: #000080;">!</span>wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;
+ wcol<span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span> <span style="color: #000080;">=</span> rS <span style="color: #000080;">-</span> <span style="color: #000000;">(</span> rS<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000080;">-</span> rR<span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span> <span style="color: #000000;">)</span>;
+ <span style="color: #000000;">}</span>
+</pre>

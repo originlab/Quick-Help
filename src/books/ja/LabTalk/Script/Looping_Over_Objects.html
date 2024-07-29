@@ -1,0 +1,204 @@
+﻿<h1 class="firstheading">オブジェクトのループ</h1><p class='urlname' style='display: none'>Looping-Over-objs</p>
+<p>Origin プロジェクトに存在している特定のオブジェクトに、ある操作を次々と実行することができます。  例えば、プロジェクトのすべてのグラフレイヤを再スケールしたり、プロジェクト内のすべてのワークシートに新しい列を追加することができます。  LabTalkの<a href="../../LabTalk/LabTalk/Document_(command).html" title="LabTalk:Document (コマンド)">documentコマンド</a>(または<b>doc</b>)は、このような操作を行うものです。  <b>doc</b>コマンドのいくつかの例がここに示されています。
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>内容</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Looping_over_Objects_in_a_Project"><span class="tocnumber">1</span> <span class="toctext">プロジェクト内のオブジェクトをループする</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Looping_over_Workbooks_and_Worksheets"><span class="tocnumber">1.1</span> <span class="toctext">ワークブックとワークシートをループする</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Looping_Over_Graph_Windows"><span class="tocnumber">1.2</span> <span class="toctext">グラフウィンドウをループする</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Looping_Over_Workbook_Windows"><span class="tocnumber">1.3</span> <span class="toctext">ワークブックウィンドウをループする</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Looping_over_Columns_and_Rows"><span class="tocnumber">1.4</span> <span class="toctext">列と行をループする</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Looping_Over_Graphic_Objects"><span class="tocnumber">1.5</span> <span class="toctext">グラフィックオブジェクトをループする</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Perform_Peak_Analysis_on_All_Layers_in_Graph"><span class="tocnumber">2</span> <span class="toctext">グラフのすべてのレイヤにピーク分析を実行する</span></a></li>
+</ul>
+</div>
+
+<h2><a name="Looping_over_Objects_in_a_Project"></a><span class="mw-headline">プロジェクト内のオブジェクトをループする</span></h2>
+<p>-e または -ef スイッチ付きの <a href="../../LabTalk/LabTalk/Document_(command).html" title="LabTalk:Document (コマンド)">document</a> コマンド(または <a href="../../LabTalk/LabTalk/Document_(command).html#-e_object_.7Bscript.7D.3B_Execute_the_given_script_for_all_objects" title="LabTalk:Document (コマンド)"><span class="OIndex">doc -e</span></a> コマンド)は、Originプロジェクト内のさまざまなオブジェクトのコレクションをループするための一般的な方法です。このコマンドは、コレクション内に見つかったOriginの各インスタンスに複数行のLabTalkスクリプトを実行します。
+</p>
+<h3><a name="Looping_over_Workbooks_and_Worksheets"></a><span class="mw-headline">ワークブックとワークシートをループする</span></h3>
+<p>doc -e LB コマンドを使って、プロジェクト内のすべてのワークシートをループできます。   以下のスクリプトは、すべてのワークシートをループし、行列レイヤを読み飛ばします。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">//プロジェクト内のすべてのワークシートをループし</span>
+<span style="color: #008000;">//その名前および各シートの列数を出力</span>
+doc <span style="color: #000080;">-</span>e LB <span style="color: #000000;">{</span>
+	if<span style="color: #000000;">(</span>exist<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H,<span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000000;">)</span> <span style="color: #008000;">//ワークブックではなく、行列でなければならい</span>
+		continue;
+	int nn <span style="color: #000080;">=</span> wks.<span style="color: #000080;">nCols</span>;
+	string str<span style="color: #000080;">=</span>wks.<span style="color: #000080;">Name</span><span style="color: #000080;">$</span>;
+	type <span style="color: #ff00ff;">&quot;[%H]%(str$) has $(nn) columns&quot;</span>;
+<span style="color: #000000;">}</span></pre>
+<p>次のサンプルは、プロジェクトの異なるワークブックにあるデータ列をループして、操作する方法を示します。
+</p><p><span style="color:#FF0000">Origin 8.1 SR2</span>以降のバージョンで利用可能なサンプルプロジェクトファイルを次のパスから開きます。<br /> 
+<b>\\Samples\LabTalk Script Examples\Loop_wks.opj</b>
+</p><p>プロジェクトには、Sample1、Sample2フォルダとバックグラウンド信号に <b>Bgsignal</b> というフォルダがあります。Sample1、Sample2フォルダには <b>Freq1</b> および <b>Freq2</b>という2つのフォルダがあり、これは特定のサンプルに対する1セットの周波数でのデータに対応しています。 
+</p><p><b>Freq1、Freq2</b> フォルダ内のワークブックは <b>DataX</b>, <b>DataY</b> および定数の周波数を含む3列があります。<b>Bgsignal</b> フォルダのワークブックの名前は <b>Bgsig</b>です。  <b>Bgsig</b> ワークブックでは、<b>DataX</b> と2つのY列を含む3列があり、そのロングネームは、各 <b>Freq</b> フォルダのワークブックの周波数に対応しています。
+</p><p>目的は、各ワークブックの列を加算し、特定の周波数に対するバックグラウンド信号を同じ周波数のサンプルデータから減算することです。  次のLabtalkスクリプトはこの操作を実行します。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e LB
+<span style="color: #000000;">{</span> <span style="color: #008000;">//各ワークシートをループ</span>
+   if<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H <span style="color: #000080;">!</span><span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;Bgsig&quot;</span><span style="color: #000000;">)</span> <span style="color: #008000;">//バックグラウンド信号のワークブックをスキップ</span>
+   <span style="color: #000000;">{</span>
+      Freq<span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">3</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #0000dd;">1</span><span style="color: #000000;">]</span>; <span style="color: #008000;">//周波数を取得</span>
+      wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">=</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000080;">+</span><span style="color: #0000dd;">1</span>;  <span style="color: #008000;">//サンプルシートに列を追加</span>
+      <span style="color: #008000;">//ロングネームを使ってFreqに対するbg 信号列を取得</span>
+      range aa<span style="color: #000080;">=</span><span style="color: #000000;">[</span>Bgsig<span style="color: #000000;">]</span><span style="color: #0000dd;">1</span><span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;$(Freq)&quot;</span><span style="color: #000000;">)</span>;
+      wcol<span style="color: #000000;">(</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span><span style="color: #000080;">=</span>col<span style="color: #000000;">(</span><span style="color: #0000dd;">2</span><span style="color: #000000;">)</span><span style="color: #000080;">-</span>aa; <span style="color: #008000;">//bg 信号を減算</span>
+      wcol<span style="color: #000000;">(</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span>L<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;Remove bg signal&quot;</span>; <span style="color: #008000;">//ロングネームをセット</span>
+   <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<p>上記コードよりもやや遅いですが、コード内でブックをループし、そしてシートをループすることもできます。
+</p><p>以下の例では、現在アクティブなプロジェクトエクスプローラのフォルダにあるすべてのワークブックをループし、見つかった各ブック内のシートをループする方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;">int nbooks <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// このフォルダの名前を取得</span>
+string strPath;
+pe_path path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strPath;
+<span style="color: #008000;">// すべてのワークブックをループ </span>
+<span style="color: #008000;">// 現在のフォルダの中のみ</span>
+doc <span style="color: #000080;">-</span>ef W <span style="color: #000000;">{</span>
+   int nsheets <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+   <span style="color: #008000;">// 各ワークブック内のすべてのワークシートをループ</span>
+   doc <span style="color: #000080;">-</span>e LW <span style="color: #000000;">{</span>
+      type Sheet name<span style="color: #000000;">:</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>layer.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+      nsheets<span style="color: #000080;">++</span>;
+   <span style="color: #000000;">}</span>
+   type Found <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nsheets<span style="color: #000000;">)</span> sheet<span style="color: #000000;">(</span>s<span style="color: #000000;">)</span> in <span style="color: #000080;">%</span>H;
+   type <span style="color: #000080;">%</span><span style="color: #000000;">(</span>CRLF<span style="color: #000000;">)</span>;
+   nbooks<span style="color: #000080;">++</span>;   
+<span style="color: #000000;">}</span>
+type Found <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nbooks<span style="color: #000000;">)</span> book<span style="color: #000000;">(</span>s<span style="color: #000000;">)</span> in folder <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">)</span> of project <span style="color: #000080;">%</span>G;</pre>
+<p>さらにワークブックプロパティを使って内部ループを置き換えることができます。
+</p>
+<pre class="lt" style="font-family:monospace;">int nbooks <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// このフォルダの名前を取得</span>
+string strPath;
+pe_path path<span style="color: #000000;">:</span><span style="color: #000080;">=</span>strPath;
+<span style="color: #008000;">// すべてのワークブックをループ </span>
+<span style="color: #008000;">// 現在のフォルダの中のみ</span>
+doc <span style="color: #000080;">-</span>ef W <span style="color: #000000;">{</span>
+   <span style="color: #008000;">// 各ワークブックのすべてのワークシートをループ</span>
+   loop<span style="color: #000000;">(</span>ii,<span style="color: #0000dd;">1</span>,page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+      range rW <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>Book1<span style="color: #000000;">]</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000080;">!</span>;
+      type Sheet name<span style="color: #000000;">:</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>rw.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+   <span style="color: #000000;">}</span>
+   type Found <span style="color: #000080;">$</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">nlayers</span><span style="color: #000000;">)</span> sheet<span style="color: #000000;">(</span>s<span style="color: #000000;">)</span> in <span style="color: #000080;">%</span>H;
+   type <span style="color: #000080;">%</span><span style="color: #000000;">(</span>CRLF<span style="color: #000000;">)</span>;
+   nbooks<span style="color: #000080;">++</span>;   
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// 最終的なレポート- %G はプロジェクト名を含む</span>
+type Found <span style="color: #000080;">$</span><span style="color: #000000;">(</span>nbooks<span style="color: #000000;">)</span> book<span style="color: #000000;">(</span>s<span style="color: #000000;">)</span> in folder <span style="color: #000080;">%</span><span style="color: #000000;">(</span>strPath<span style="color: #000080;">$</span><span style="color: #000000;">)</span> of project <span style="color: #000080;">%</span>G;</pre>
+<h3><a name="Looping_Over_Graph_Windows"></a><span class="mw-headline">グラフウィンドウをループ</span></h3>
+<p>ここでは、すべての グラフウィンドウをループします(プロットウィンドウには、すべての<span class="OIndex">グラフ</span>, 関数グラフ, レイアウトページ、埋込グラフが含まれます)。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e LP
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 埋め込みグラフまたはレイアウトウィンドウをスキップ</span>
+    if<span style="color: #000000;">(</span>page.<span style="color: #000080;">IsEmbedded</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span><span style="color: #000080;">&amp;&amp;</span>exist<span style="color: #000000;">(</span><span style="color: #000080;">%</span>H<span style="color: #000000;">)</span><span style="color: #000080;">!</span><span style="color: #000080;">=</span><span style="color: #0000dd;">11</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        string name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span><span style="color: #000000;">(</span>page.<span style="color: #000080;">label</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+        if<span style="color: #000000;">(</span>name.<span style="color: #000080;">Getlength</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000080;">==</span><span style="color: #0000dd;">0</span> <span style="color: #000000;">)</span> name<span style="color: #000080;">$</span> <span style="color: #000080;">=</span> <span style="color: #000080;">%</span>H;
+        type <span style="color: #000000;">[</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>name<span style="color: #000080;">$</span><span style="color: #000000;">)</span><span style="color: #000000;">]</span><span style="color: #000080;">%</span><span style="color: #000000;">(</span>layer.<span style="color: #000080;">name</span><span style="color: #000080;">$</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<p>下記のスクリプトは、プロジェクト内の全てのグラフウィンドウ中の内容をデフォルトプリンタに印刷します。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e P print; <span style="color: #008000;">// &apos;&apos;document -each Plot Print&apos;&apos;の省略形</span></pre>
+<h3><a name="Looping_Over_Workbook_Windows"></a><span class="mw-headline">ワークブックウィンドウをループ</span></h3>
+<p><a href="../../LabTalk/LabTalk/Document_(command).html#-e_object_.7Bscript.7D.3B_Execute_the_given_script_for_all_objects" title="LabTalk:Document (コマンド)">document -e command</a> コマンドをネストすることができ、この例では、すべてのワークシート内のすべてのYデータセットをループします。
+</p>
+<pre class="lt" style="font-family:monospace;">doc <span style="color: #000080;">-</span>e W
+<span style="color: #000000;">{</span>
+    int iCount <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    doc <span style="color: #000080;">-</span>e DY
+    <span style="color: #000000;">{</span>
+        iCount<span style="color: #000080;">++</span>;
+    <span style="color: #000000;">}</span>
+    if<span style="color: #000000;">(</span> iCount <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">2</span> <span style="color: #000000;">)</span>
+      <span style="color: #000000;">{</span> type Worksheet <span style="color: #000080;">%</span>H has <span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span> columns,; 
+        type <span style="color: #000080;">$</span><span style="color: #000000;">(</span>iCount<span style="color: #000000;">)</span> of which are Y columns; <span style="color: #000000;">}</span>
+    else
+      <span style="color: #000000;">{</span> type Worksheet <span style="color: #000080;">%</span>H has <span style="color: #000080;">$</span><span style="color: #000000;">(</span>wks.<span style="color: #000080;">ncols</span><span style="color: #000000;">)</span> columns,; 
+        type <span style="color: #000080;">$</span><span style="color: #000000;">(</span>iCount<span style="color: #000000;">)</span> of which are Y columns; <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Looping_over_Columns_and_Rows"></a><span class="mw-headline">列と行をループする</span></h3>
+<p>この例は、すべての<span class="OIndex">列</span>をループし、n番目の列ごとに削除します。
+</p>
+<pre class="lt" style="font-family:monospace;">int ndel <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>; <span style="color: #008000;">// 必要に応じてこの数字を変更</span>
+int ncols <span style="color: #000080;">=</span> wks.<span style="color: #000080;">ncols</span>;
+int nlast <span style="color: #000080;">=</span> ncols <span style="color: #000080;">-</span> mod<span style="color: #000000;">(</span>ncols, ndel<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 右から左に削除する必要がある</span>
+for<span style="color: #000000;">(</span>int ii <span style="color: #000080;">=</span> nlast; ii <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">-</span><span style="color: #000080;">=</span> ndel<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   delete wcol<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>この例では、ワークシートの<span class="OIndex">行</span>ごとに削除する方法を示しています。
+</p>
+<pre class="lt" style="font-family:monospace;">int ndel <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;           <span style="color: #008000;">// 必要に応じてこの数字を変更</span>
+range rr <span style="color: #000080;">=</span> col<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;      <span style="color: #008000;">// 列1の範囲を取得</span>
+nrows <span style="color: #000080;">=</span> rr.<span style="color: #000080;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;   <span style="color: #008000;">// 数値行の数を取得</span>
+int nlast <span style="color: #000080;">=</span> nrows <span style="color: #000080;">-</span> mod<span style="color: #000000;">(</span>nrows, ndel<span style="color: #000000;">)</span>;
+<span style="color: #008000;">// 下から上に削除する必要がある</span>
+for<span style="color: #000000;">(</span>int ii <span style="color: #000080;">=</span> nlast; ii <span style="color: #000080;">&gt;</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">-</span><span style="color: #000080;">=</span> ndel<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+   range rr <span style="color: #000080;">=</span> wcol<span style="color: #000000;">(</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">[</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">:</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">]</span>;
+   mark <span style="color: #000080;">-</span>d rr;
+<span style="color: #000000;">}</span></pre>
+<p>このスクリプトは、Sheet1の4つの列の対数を計算し、Sheet2の対応する列に結果を配置する
+</p>
+<pre class="lt" style="font-family:monospace;">for<span style="color: #000000;">(</span>ii<span style="color: #000080;">=</span><span style="color: #0000dd;">1</span>; ii<span style="color: #000080;">&lt;=</span><span style="color: #0000dd;">4</span>; ii<span style="color: #000080;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	range ss <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>book1<span style="color: #000000;">]</span>sheet1<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+	range dd <span style="color: #000080;">=</span> <span style="color: #000000;">[</span>book1<span style="color: #000000;">]</span>sheet2<span style="color: #000080;">!</span>col<span style="color: #000000;">(</span><span style="color: #000080;">$</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+	dd <span style="color: #000080;">=</span> log<span style="color: #000000;">(</span>ss<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Looping_Over_Graphic_Objects"></a><span class="mw-headline">図形オブジェクトをループする</span></h3>
+<p>アクティブレイヤ内のすべての <span class="OIndex">図形オブジェクト</span> をループすることができます。2つのオプションでこれを包むことによって、すべてのグラフウィンドウをカバーできます。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// 各プロットに対して</span>
+doc <span style="color: #000080;">-</span>e P
+<span style="color: #000000;">{</span>
+    <span style="color: #008000;">// 各プロットの各レイヤに対して</span>
+    doc <span style="color: #000080;">-</span>e LW
+    <span style="color: #000000;">{</span>
+        <span style="color: #008000;">// 各プロットの各レイヤの各図形オブジェクトに対して</span>
+        doc <span style="color: #000080;">-</span>e G
+        <span style="color: #000000;">{</span>   <span style="color: #008000;">// 凡例の背景に陰を付ける設定</span>
+            if<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;Legend&quot;</span><span style="color: #000000;">)</span> <span style="color: #000080;">%</span>B.<span style="color: #000080;">background</span> <span style="color: #000080;">=</span> <span style="color: #0000dd;">2</span>;
+            <span style="color: #008000;">// 日時スタンプの色を青にセット</span>
+            if<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;timestamp&quot;</span><span style="color: #000000;">)</span> <span style="color: #000080;">%</span>B.<span style="color: #000080;">color</span> <span style="color: #000080;">=</span> color<span style="color: #000000;">(</span>blue<span style="color: #000000;">)</span>;
+            <span style="color: #008000;">// すべての矩形オブジェクトを削除</span>
+            if<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;%B&quot;</span><span style="color: #000080;">==</span><span style="color: #ff00ff;">&quot;rect*&quot;</span><span style="color: #000000;">)</span> label <span style="color: #000080;">-</span>r <span style="color: #000080;">%</span>B; 
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Perform_Peak_Analysis_on_All_Layers_in_Graph"></a><span class="mw-headline">グラフのすべてのレイヤにピーク分析を実行する</span></h2>
+<p>この例は、グラフ内のすべての<span class="OIndex">レイヤ</span>をループし、事前に保存したピークアナライザテーマファイルを使って、各レイヤのデータセットにピーク分析を実行します。  アクティブウィンドウが複数レイヤグラフで、各レイヤに1つのデータ曲線があるものとします。  また、ピークアナライザテーマファイルが存在しているものとします。
+</p>
+<pre class="lt" style="font-family:monospace;"><span style="color: #008000;">// ループを入力する前にリマインダメッセージを表示しないようにする</span>
+<span style="color: #008000;">// これはOriginがレポートシートに切り替わることについての</span>
+<span style="color: #008000;">// リマインダーメッセージをポップアップしないようにする</span>
+type <span style="color: #000080;">-</span>mb <span style="color: #0000dd;">0</span>;
+<span style="color: #008000;">// グラフウィンドウのすべてのレイヤをループ</span>
+doc <span style="color: #000080;">-</span>e LW
+<span style="color: #000000;">{</span>
+   <span style="color: #008000;">// 事前セットしたテーマでピーク分析を実行</span>
+   sec; 
+   pa theme<span style="color: #000000;">:</span><span style="color: #000080;">=</span><span style="color: #ff00ff;">&quot;My Peak Fit&quot;</span>; 
+   watch;
+   <span style="color: #008000; font-style: regular;">/* sec と watch は任意
+      これらは各レイヤでデータフィットにかかる時間を出力 */</span>
+<span style="color: #000000;">}</span>
+<span style="color: #008000;">// リマインダーメッセージを戻す</span>
+type <span style="color: #000080;">-</span>me;</pre>
+
+
+
+
+
+
+
+    

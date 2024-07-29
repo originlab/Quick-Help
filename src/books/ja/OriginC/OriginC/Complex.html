@@ -1,0 +1,62 @@
+﻿<h1 class="firstheading">Complex</h1>
+
+  <p>&#160;</p>
+
+  <h2><a name="Using_Complex_Values_With_Origin_C_Functions"></a><span class="mw-headline">Using Complex Values With Origin C Functions</span></h2>
+
+  <p>Complex values can be passed into and returned from Origin C functions. The following Origin C code is a simple example.</p>
+  <pre class="oc" style="font-family:monospace;">
+complex myFunction<span style="color: #000000;">(</span><span style="color: #0000ff;">double</span> x, <span style="color: #0000ff;">int</span> n, complex C<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    complex cc;
+    cc.<span style="color: #000000;">m_re</span> <span style="color: #000080;">=</span> C.<span style="color: #000000;">m_re</span> <span style="color: #000040;">*</span> x;
+    cc.<span style="color: #000000;">m_im</span> <span style="color: #000080;">=</span> C.<span style="color: #000000;">m_im</span> <span style="color: #000040;">+</span> n;
+    <span style="color: #0000ff;">return</span> cc;
+<span style="color: #000000;">}</span>
+
+<span style="color: #0000ff;">void</span> testMyFunction<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    complex C1<span style="color: #000000;">(</span><span style="color: #0000dd;">4.5</span>, <span style="color: #0000dd;">7.8</span><span style="color: #000000;">)</span>;
+    complex C2 <span style="color: #000080;">=</span> myFunction<span style="color: #000000;">(</span><span style="color: #0000dd;">1.2</span>, <span style="color: #0000dd;">3</span>, C1<span style="color: #000000;">)</span>;
+    <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"real == %f<span style="color: #666666; font-weight: bold;">\n</span>imag == %f<span style="color: #666666; font-weight: bold;">\n</span>"</span>, C2.<span style="color: #000000;">m_re</span>, C2.<span style="color: #000000;">m_im</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Access_complex_Data_from_Worksheet"></a><span class="mw-headline">Access complex Data from Worksheet</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// make sure data type is complex in the second column in active worksheet window.</span>
+<span style="color: #0000ff;">void</span> GetComplexDataset<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> wks <span style="color: #000000;">)</span> <span style="color: #008000;">// if active layer is Worksheet</span>
+        <span style="color: #000000;">{</span>
+                Dataset<span style="color: #000080;">&lt;</span>complex<span style="color: #000080;">&gt;</span> ds<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+                        
+                vector vPhase;
+                <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ds.<span style="color: #000000;">GetPhase</span><span style="color: #000000;">(</span>vPhase<span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #0000dd;">0</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> nRet <span style="color: #000000;">)</span> <span style="color: #008000;">// 0 for success</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to get phase"</span><span style="color: #000000;">)</span>;
+                
+                <span style="color: #008000;">// add phase result to a new column</span>
+                Dataset dsPhase<span style="color: #000000;">(</span>wks, wks.<span style="color: #000000;">AddCol</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+                dsPhase <span style="color: #000080;">=</span> vPhase;          
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Access_complex_Data_from_Matrix"></a><span class="mw-headline">Access complex Data from Matrix</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">// make sure data type is complex in the active matrix window.</span>
+<span style="color: #0000ff;">void</span> GetComplexMatrix<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+        MatrixLayer ml <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> ml <span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+                Matrix<span style="color: #000080;">&lt;</span>complex<span style="color: #000080;">&gt;</span> mat<span style="color: #000000;">(</span>ml, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+                
+                matrix matPhase;
+                <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> <span style="color: #000040;">!</span>mat.<span style="color: #000000;">GetPhase</span><span style="color: #000000;">(</span>matPhase<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+                        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"Fail to get phase"</span><span style="color: #000000;">)</span>;
+        <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>

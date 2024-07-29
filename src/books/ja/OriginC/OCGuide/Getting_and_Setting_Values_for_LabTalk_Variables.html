@@ -1,0 +1,66 @@
+﻿<h1 class="firstheading">LabTalk変数の値を取得およびセット</h1><p>Origin Cには、LabTalkの数値および文字列値を取得またはセットしたり、LabTalkスクリプトを実行する機能があります。
+</p>
+<h2><a name="Getting_and_Setting_LabTalk_Numeric_Values"></a><span class="mw-headline">LabTalkの数値を取得およびセット</span></h2>
+<p>Origin Cのグローバル関数<b><a href="../../OriginC/OriginC/LT_get_var_(global_function).html" title="OriginC:LT get var (global function)">LT_get_var</a></b><span class="OIndex" style="display:none">LT_get_var</span> および <b><a href="../../OriginC/OriginC/LT_set_var_(global_function).html" title="OriginC:LT set var (global function)">LT_set_var</a></b><span class="OIndex" style="display:none">LT_set_var</span>は、LabTalkの数値を取得およびセットするのに使うことができます。  数値には、変数、システム変数、オブジェクトプロパティが含まれます。  クラスメンバー関数<b><a href="../../OriginC/OriginC/OriginObject-GetProp.html" title="OriginC:OriginObject-GetProp">OriginObject::GetProp</a></b> および <b><a href="../../OriginC/OriginC/OriginObject-SetProp.html" title="OriginC:OriginObject-SetProp">OriginObject::SetProp</a></b> は、オブジェクトプロパティを取得、セットできます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> dOriginVer;
+LT_get_var<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@V&quot;</span>, <span style="color: #000040;">&amp;</span>dOriginVer<span style="color: #000000;">)</span>;
+<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Running Origin version&nbsp;%f<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, dOriginVer<span style="color: #000000;">)</span>;</pre>
+<p>これは、データ表示ウィンドウで使用する最小のフォントサイズをセットする方法です。 
+</p>
+<pre class="oc" style="font-family:monospace;">LT_set_var<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;System.DataDisplay.MinFontSize&quot;</span>, <span style="color: #0000dd;">12</span><span style="color: #000000;">)</span>;</pre>
+<p>LabTalkの変数を一時的にセットし、操作を行い、LabTalk変数を元の値に戻したい場合があります。  これには主に2つの方法があります。最初の方法は、<i>LT_get_var</i> および <i>LT_set_var </i>を使って行うコードです。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">double</span> dProgressBar;
+LT_get_var<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, <span style="color: #000040;">&amp;</span>dProgressBar<span style="color: #000000;">)</span>; <span style="color: #008000;">// 開始値の取得</span>
+LT_set_var<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 新しい値をセット</span>
+<span style="color: #008000;">//</span>
+<span style="color: #008000;">// 操作を行う</span>
+<span style="color: #008000;">//</span>
+LT_set_var<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, dProgressBar<span style="color: #000000;">)</span>; <span style="color: #008000;">// 開始値に戻す</span></pre>
+<p>次の方法は、<i>LTVarTempChange</i> クラスを使う単純な方法です。クラスを使うには、単に変数名と一時的な値を渡すだけです。コンストラクタは開始値をデータメンバーに保存し、変数を一時的な値にセットします。デストラクタは変数をその開始値に戻します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #000000;">{</span>
+    LTVarTempChange progressBar<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;@NPO&quot;</span>, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>;
+    <span style="color: #008000;">//</span>
+    <span style="color: #008000;">// 操作を行う</span>
+    <span style="color: #008000;">//</span>
+<span style="color: #000000;">}</span></pre>
+<p>以下は、線オブジェクトの色を設定、取得する方法です。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">//このサンプルはアクティブグラフに線オブジェクトがあると仮定</span>
+<span style="color: #0000ff;">void</span> SetProp_Ex1<span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> nColor <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>, string strName <span style="color: #000080;">=</span> <span style="color: #ff00ff;">&quot;line&quot;</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    GraphLayer    gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    GraphObject    grobj;
+    grobj <span style="color: #000080;">=</span> gl.<span style="color: #000000;">GraphObjects</span><span style="color: #000000;">(</span>strName<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">double</span> vv;
+    <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>grobj<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">int</span> nn <span style="color: #000080;">=</span> grobj.<span style="color: #000000;">SetProp</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;color&quot;</span>, nColor<span style="color: #000000;">)</span>;
+        out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;SetProp return: &quot;</span>, nn<span style="color: #000000;">)</span>;
+        out_int<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;new color: &quot;</span>, grobj.<span style="color: #000000;">GetProp</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;color&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">else</span>
+        out_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;no such obj&quot;</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Getting_and_Setting_LabTalk_String_Values"></a><span class="mw-headline">LabTalkの文字列値を取得およびセット</span></h2>
+<p>Origin Cのグローバル関数<b><a href="../../OriginC/OriginC/LT_get_str_(global_function).html" title="OriginC:LT get str (global function)">LT_get_str</a></b><span class="OIndex" style="display:none">LT_get_str</span>および<b><a href="../../OriginC/OriginC/LT_set_str_(global_function).html" title="OriginC:LT set str (global function)">LT_set_str</a></b><span class="OIndex" style="display:none">LT_set_str</span> は、LabTalkの文字列値を取得およびセットするのに使うことができます。  文字列には、変数、文字列置換変数、オブジェクトプロパティが含まれます。クラスメンバー関数<b><a href="../../OriginC/OriginC/OriginObject-GetProp.html" title="OriginC:OriginObject-GetProp">OriginObject::GetProp</a></b> および <b><a href="../../OriginC/OriginC/OriginObject-SetProp.html" title="OriginC:OriginObject-SetProp">OriginObject::SetProp</a></b> は、オブジェクトプロパティを取得、セットできます。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">char</span> szCustomDateFmt<span style="color: #000000;">[</span><span style="color: #0000dd;">200</span><span style="color: #000000;">]</span>;
+LT_get_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;System.Date.CustomFormat1$&quot;</span>, szCustomDateFmt, <span style="color: #0000dd;">200</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Custom Date Format 1: &nbsp;%s<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, szCustomDateFmt<span style="color: #000000;">)</span>;</pre>
+<p>以下は、データ表示ウィンドウで使用するフォントをセットする方法です。 
+</p>
+<pre class="oc" style="font-family:monospace;">LT_set_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;System.DataDisplay.Font$&quot;</span>, <span style="color: #ff00ff;">&quot;Courier&quot;</span><span style="color: #000000;">)</span>;</pre>
+<p>以下は、アクティブブックのアクティブシートの名前を変更する方法です。 
+</p>
+<pre class="oc" style="font-family:monospace;">LT_set_str<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;wks.name$&quot;</span>, <span style="color: #ff00ff;">&quot;MySheet&quot;</span><span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+
+
+    

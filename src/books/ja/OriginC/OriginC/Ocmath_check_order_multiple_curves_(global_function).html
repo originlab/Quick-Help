@@ -1,0 +1,191 @@
+﻿<h1 class="firstheading">ocmath_check_order_multiple_curves</h1>
+
+  <p>&#160;</p>
+
+  <div id="toc" class="toc">
+    <div id="toctitle">
+      <h2>Contents</h2>
+    </div>
+
+    <ul>
+      <li class="toclevel-1 tocsection-1"><a href="#Description"><span class="tocnumber">1</span> <span class="toctext">Description</span></a></li>
+
+      <li class="toclevel-1 tocsection-2"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a></li>
+
+      <li class="toclevel-1 tocsection-3"><a href="#Parameters"><span class="tocnumber">3</span> <span class="toctext">Parameters</span></a></li>
+
+      <li class="toclevel-1 tocsection-4"><a href="#Return"><span class="tocnumber">4</span> <span class="toctext">Return</span></a></li>
+
+      <li class="toclevel-1 tocsection-5"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a></li>
+
+      <li class="toclevel-1 tocsection-6"><a href="#Remark"><span class="tocnumber">6</span> <span class="toctext">Remark</span></a></li>
+
+      <li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">7</span> <span class="toctext">See Also</span></a></li>
+
+      <li class="toclevel-1 tocsection-8"><a href="#header_to_Include"><span class="tocnumber">8</span> <span class="toctext">header to Include</span></a></li>
+
+      <li class="toclevel-1 tocsection-9"><a href="#Reference"><span class="tocnumber">9</span> <span class="toctext">Reference</span></a></li>
+    </ul>
+  </div>
+
+  <h2><a name="Description"></a><span class="mw-headline">Description</span></h2>
+
+  <p>Check all curves's X value's monotonic and consistent state.</p>
+
+  <h2><a name="Syntax"></a><span class="mw-headline">Syntax</span></h2>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #0000ff;">int</span> ocmath_check_order_multiple_curves<span style="color: #000000;">(</span> UINT nSize, <span style="color: #0000ff;">const</span> OneCurveData <span style="color: #000040;">*</span> pCurves, <span style="color: #0000ff;">int</span> nSegments <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pMeanInc <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> <span style="color: #000040;">*</span> pSDInc <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">int</span> <span style="color: #000040;">*</span> pSegSize <span style="color: #000080;">=</span> <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">double</span> dProb <span style="color: #000080;">=</span> <span style="color: #0000dd;">0.8</span> <span style="color: #000000;">)</span>
+</pre>
+
+  <h2><a name="Parameters"></a><span class="mw-headline">Parameters</span></h2>
+
+  <dl>
+    <dt>nSize</dt>
+
+    <dd>[input] number of curves and should &gt; 1.</dd>
+
+    <dt>pCurves</dt>
+
+    <dd>[input] pointer to structures that must be filled with pointers to input curves data.</dd>
+
+    <dt>nSegments</dt>
+
+    <dd>[input] number of parts that the curve should be divided when call ocmath_check_order_curve.</dd>
+
+    <dd>it can equal to 1 and its default value is 3.</dd>
+
+    <dt>pMeanInc</dt>
+
+    <dd>[output] if not NULL, pointer to all curves each part's mean increment, its</dd>
+
+    <dd>size should be equal to nSegments * nSize and the jth part's</dd>
+
+    <dd>mean increment of ith curve is pMeanInc[(i - 1) * nSegments + j -1].</dd>
+
+    <dd>Its default value is NULL.</dd>
+
+    <dt>pSDInc</dt>
+
+    <dd>[output] if not NULL, pointer to all curves each part's standard deviation</dd>
+
+    <dd>of increment array, its size should be equal to nSegments * nSize. and</dd>
+
+    <dd>the jth part's standard deviation f increment array of ith curve</dd>
+
+    <dd>is pSDInc[(i - 1) * nSegments + j - 1]. Its default value is NULL.</dd>
+
+    <dt>pSegSize</dt>
+
+    <dd>[output] if not NULL, pointer to all curves each part's size, its size should</dd>
+
+    <dd>be equal to nSegments * nSize. and the jth part's size of ith</dd>
+
+    <dd>curve is pSegSize[(i - 1) * nSegments + j - 1]. Its default value is NULL.</dd>
+
+    <dt>dProb</dt>
+
+    <dd>[input] detail info please check ocmath_check_order_curve, its default value is 0.8.</dd>
+  </dl>
+
+  <h2><a name="Return"></a><span class="mw-headline">Return</span></h2>
+
+  <p>if succeed, return MCO_MONO_CONSISTENT if monotonic and consistent,</p>
+
+  <p>return MCO_MONO_NOT_CONSISTENT if not monotonic but consistent,</p>
+
+  <p>return MCO_NOT_CONSISTENT if curves are not consistent;</p>
+
+  <p>orthewise, negetive error code is returned.</p>
+
+  <h2><a name="Examples"></a><span class="mw-headline">Examples</span></h2>
+
+  <p><b>EX1</b></p>
+  <pre class="oc" style="font-family:monospace;">
+<span style="color: #008000;">//This example assume the active window is a graph with at least two curves.</span>
+<span style="color: #0000ff;">void</span> ocmath_check_order_multi_curves_ex1<span style="color: #000000;">(</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    GraphLayer gl <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">if</span> <span style="color: #000000;">(</span><span style="color: #000040;">!</span>gl<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #0000ff;">return</span>;
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #0000ff;">int</span> nPlots <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span>.<span style="color: #000000;">Count</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">int</span> ii;
+    <span style="color: #0000ff;">int</span> nAveSize <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>;
+    
+    OneCurveData<span style="color: #000040;">*</span> multiCurveData <span style="color: #000080;">=</span> <span style="color: #000000;">(</span>OneCurveData<span style="color: #000040;">*</span><span style="color: #000000;">)</span> <span style="color: #000000;">malloc</span><span style="color: #000000;">(</span><span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span>OneCurveData<span style="color: #000000;">)</span><span style="color: #000040;">*</span>nPlots<span style="color: #000000;">)</span>;
+    
+    <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> xx;
+    <span style="color: #0000ff;">double</span><span style="color: #000040;">*</span> yy;
+    
+    <span style="color: #0000ff;">for</span><span style="color: #000000;">(</span>ii <span style="color: #000080;">=</span> <span style="color: #0000dd;">0</span>; ii <span style="color: #000080;">&lt;</span> nPlots; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+        DataPlot dp <span style="color: #000080;">=</span> gl.<span style="color: #000000;">DataPlots</span><span style="color: #000000;">(</span>ii<span style="color: #000000;">)</span>;        
+        DataRange dr;
+        vector vDatax, vDatay;
+        <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dp.<span style="color: #000000;">GetDataRange</span><span style="color: #000000;">(</span>dr<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">{</span>
+            DWORD dwPlotID;
+            <span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>dr.<span style="color: #000000;">GetData</span><span style="color: #000000;">(</span>DRR_GET_DEPENDENT <span style="color: #000040;">|</span> DRR_NO_FACTORS, <span style="color: #0000dd;">0</span>, <span style="color: #000040;">&amp;</span>dwPlotID, <span style="color: #0000ff;">NULL</span>, <span style="color: #000040;">&amp;</span>vDatay, <span style="color: #000040;">&amp;</span>vDatax<span style="color: #000000;">)</span> <span style="color: #000080;">&lt;</span> <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>
+            <span style="color: #000000;">{</span>
+                <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"get_plot_data failed GetData"</span><span style="color: #000000;">)</span>;
+                <span style="color: #0000ff;">return</span>;
+            <span style="color: #000000;">}</span>
+        <span style="color: #000000;">}</span>
+        nAveSize <span style="color: #000080;">=</span> vDatay.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+    
+        xx <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000040;">*</span><span style="color: #000000;">)</span> <span style="color: #000000;">malloc</span> <span style="color: #000000;">(</span><span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span> <span style="color: #000040;">*</span> nAveSize<span style="color: #000000;">)</span>;
+        yy <span style="color: #000080;">=</span> <span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000040;">*</span><span style="color: #000000;">)</span> <span style="color: #000000;">malloc</span> <span style="color: #000000;">(</span><span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span> <span style="color: #000040;">*</span> nAveSize<span style="color: #000000;">)</span>;
+    
+        <span style="color: #000000;">memcpy</span><span style="color: #000000;">(</span>xx, vDatax, <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span>nAveSize<span style="color: #000000;">)</span>;
+        <span style="color: #000000;">memcpy</span><span style="color: #000000;">(</span>yy, vDatay, <span style="color: #000000;">sizeof</span><span style="color: #000000;">(</span><span style="color: #0000ff;">double</span><span style="color: #000000;">)</span><span style="color: #000040;">*</span>nAveSize<span style="color: #000000;">)</span>;
+        
+        multiCurveData<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>.<span style="color: #000000;">nSize</span> <span style="color: #000080;">=</span> nAveSize;
+        multiCurveData<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>.<span style="color: #000000;">pX</span> <span style="color: #000080;">=</span> xx;
+        multiCurveData<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>.<span style="color: #000000;">pY</span> <span style="color: #000080;">=</span> yy;
+    <span style="color: #000000;">}</span>
+    
+    <span style="color: #0000ff;">int</span> nSegments <span style="color: #000080;">=</span> <span style="color: #0000dd;">3</span>;
+    vector vSDInc<span style="color: #000000;">(</span>nPlots <span style="color: #000040;">*</span> nSegments<span style="color: #000000;">)</span>;
+    vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vSegSize<span style="color: #000000;">(</span>nPlots <span style="color: #000040;">*</span> nSegments<span style="color: #000000;">)</span>;
+    <span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_check_order_multiple_curves<span style="color: #000000;">(</span>nPlots, multiCurveData, nSegments, vSDInc, <span style="color: #0000ff;">NULL</span>, vSegSize<span style="color: #000000;">)</span>;
+        
+    <span style="color: #0000ff;">switch</span><span style="color: #000000;">(</span>nRet<span style="color: #000000;">)</span>
+    <span style="color: #000000;">{</span>
+    <span style="color: #0000ff;">case</span> MCO_MONO_CONSISTENT<span style="color: #000000;">:</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"monotonic and consistent"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> MCO_MONO_NOT_CONSISTENT<span style="color: #000000;">:</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"not monotonic but consistent"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">case</span> MCO_NOT_CONSISTENT<span style="color: #000000;">:</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"not consistent"</span><span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">break</span>;
+    <span style="color: #0000ff;">default</span><span style="color: #000000;">:</span>
+        <span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">"failed: error code is %d"</span>, nRet<span style="color: #000000;">)</span>;
+        <span style="color: #0000ff;">break</span>;
+    <span style="color: #000000;">}</span>
+    <span style="color: #0000ff;">return</span>; 
+<span style="color: #000000;">}</span>
+</pre>
+
+  <h2><a name="Remark"></a><span class="mw-headline">Remark</span></h2>
+
+  <p>This function checks all curves's X value are monotonic and consistent, not monotonic</p>
+
+  <p>but consistent or not consistent by check each curve use ocmath_check_order_curve.</p>
+
+  <p>Number of curves should more than 1. If only one curve, please use ocmath_check_order_curve.</p>
+
+  <p>It can handle that the curve has some outliers.</p>
+
+  <h2><a name="See_Also"></a><span class="mw-headline">See Also</span></h2>
+
+  <p><a href="../../OriginC/OriginC/Ocmath_check_order_curve_(global_function).html" title="OriginC:Ocmath check order curve (global function)">ocmath_check_order_curve</a>, <a href="../../OriginC/OriginC/Ocmath_check_order_(global_function).html" title="OriginC:Ocmath check order (global function)">ocmath_check_order</a></p>
+
+  <h2><a name="header_to_Include"></a><span class="mw-headline">header to Include</span></h2>
+
+  <p>origin.h</p>
+
+  <h2><a name="Reference"></a><span class="mw-headline">Reference</span></h2>

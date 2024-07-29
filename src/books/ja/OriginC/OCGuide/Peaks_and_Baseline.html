@@ -1,0 +1,142 @@
+﻿<h1 class="firstheading">ピークと基線</h1><p><br />
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>目次</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Getting_input_XY_from_Graph_or_Worksheet"><span class="tocnumber">1</span> <span class="toctext">グラフまたはワークシートから入力XYデータを取得</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_a_BaselineBaseline.2C_Create"><span class="tocnumber">2</span> <span class="toctext">基線を作成<span class="OIndex" style="display:none">Baseline, Create</span></span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Removing_a_BaselineBaseline.2C_Remove"><span class="tocnumber">3</span> <span class="toctext">基線を削除<span class="OIndex" style="display:none">Baseline, Remove</span></span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Finding_PeaksPeaks.2C_Find"><span class="tocnumber">4</span> <span class="toctext">ピークを検索<span class="OIndex" style="display:none">Peaks, Find</span></span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Integrating_and_Fitting_PeaksPeaks.2C_IntegratePeaks.2C_Fit"><span class="tocnumber">5</span> <span class="toctext">ピークの積分とフィット <span class="OIndex" style="display:none">Peaks, Integrate</span><span class="OIndex" style="display:none">Peaks, Fit</span></span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Integrate_Peak"><span class="tocnumber">5.1</span> <span class="toctext">ピークの積分</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Fitting_Peak"><span class="tocnumber">5.2</span> <span class="toctext">ピークのフィット</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><a name="Getting_input_XY_from_Graph_or_Worksheet"></a><span class="mw-headline">グラフまたはワークシートから入力XYデータを取得</span></h2>
+<p>以下のセクションでは、入力XYデータとしてワークシートまたはグラフから取得可能であることを示しています。<a href="../../OriginC/OCGuide/Numeric_Data.html#DataRange" title="CGuide:数値データ">ここ</a>をクリックしてウィンドウからデータを取得する方法のヘルプを確認できます。
+</p>
+<h2><a name="Creating_a_BaselineBaseline.2C_Create"></a><span class="mw-headline">基線を作成<span class="OIndex" style="display:none">Baseline, Create</span></span></h2>
+<p><b><a href="../../OriginC/OriginC/Ocmath_create_baseline_by_masking_peaks_(global_function).html" title="OriginC:Ocmath create baseline by masking peaks (global function)">ocmath_create_baseline_by_masking_peaks</a></b>関数は、正のピークのみ、負のピークのみ、正負両方のピークに対して基線を作成します。 
+</p><p>次のサンプルは、入力XYデータ(vx, vy)で、正のピークと負のピークに対して基線を作成する方法を示します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 基線のXYベクトルにメモリを確保</span>
+vector vxBaseline<span style="color: #000000;">(</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>, vyBaseline<span style="color: #000000;">(</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 基線のXYデータを見つける</span>
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_create_baseline_by_masking_peaks<span style="color: #000000;">(</span>vx.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vx, vy, 
+	vxBaseline.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, vxBaseline, vyBaseline, BOTH_DIRECTION<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// XデータでXYデータを昇順にソート</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> OE_NOERROR <span style="color: #000080;">==</span> nRet <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	vector<span style="color: #000080;">&lt;</span>uint<span style="color: #000080;">&gt;</span> vn;
+	vxBaseline.<span style="color: #000000;">Sort</span><span style="color: #000000;">(</span>SORT_ASCENDING, <span style="color: #0000ff;">true</span>, vn<span style="color: #000000;">)</span>;
+	vyBaseline.<span style="color: #000000;">Reorder</span><span style="color: #000000;">(</span>vn<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Removing_a_BaselineBaseline.2C_Remove"></a><span class="mw-headline">基線を削除<span class="OIndex" style="display:none">Baseline, Remove</span></span></h2>
+<p>基線のX座標がピークの曲線のX座標と同じであれば直接減算でき、それ以外の場合、基線を除去する前に補間を行う必要があります。次のコードは、補間を行う方法を示し、基線を除去します。現在のワークシートは、ピークXYデータと基線XYデータの4列を持っています。
+</p>
+<pre class="oc" style="font-family:monospace;">Worksheet wks <span style="color: #000080;">=</span> Project.<span style="color: #000000;">ActiveLayer</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+Column colPeakX<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">0</span><span style="color: #000000;">)</span>, colPeakY<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>;
+Column colBaseLineX<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">2</span><span style="color: #000000;">)</span>, colBaseLineY<span style="color: #000000;">(</span>wks, <span style="color: #0000dd;">3</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// ピークXYデータを取得</span>
+<span style="color: #008000;">// 基線を減算したいので参照でYデータを取得</span>
+vector vPeakX <span style="color: #000080;">=</span> colPeakX.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+vector<span style="color: #000040;">&amp;</span> vPeakY <span style="color: #000080;">=</span> colPeakY.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// 基線データの取得</span>
+vector vBaselineX <span style="color: #000080;">=</span> colBaseLineX.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+vector vBaselineY <span style="color: #000080;">=</span> colBaseLineY.<span style="color: #000000;">GetDataObject</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;	
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000040;">!</span><span style="color: #000080;">=</span> vPeakY.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> 
+	<span style="color: #000040;">||</span> vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span> 
+	<span style="color: #000040;">||</span> vBaselineX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000080;">==</span> <span style="color: #0000dd;">0</span>
+<span style="color: #000000;">)</span>
+	<span style="color: #0000ff;">return</span>;
+
+<span style="color: #008000;">// 基線データの補間を行い、ピークデータと同じX座標を保持</span>
+vector vyBaseTemp<span style="color: #000000;">(</span>vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>OE_NOERROR <span style="color: #000040;">!</span><span style="color: #000080;">=</span> ocmath_interpolate<span style="color: #000000;">(</span>vPeakX, vyBaseTemp, vPeakX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, 
+	vBaselineX, vBaselineY, vBaselineX.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>, INTERP_TYPE_LINEAR<span style="color: #000000;">)</span><span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #0000ff;">return</span>;
+<span style="color: #000000;">}</span>
+
+<span style="color: #008000;">// 基線の減算</span>
+vPeakY <span style="color: #000040;">-</span><span style="color: #000080;">=</span> vyBaseTemp;</pre>
+<h2><a name="Finding_PeaksPeaks.2C_Find"></a><span class="mw-headline">ピークを検索<span class="OIndex" style="display:none">Peaks, Find</span></span></h2>
+<p><b>ocmath_find_peaks_*</b> 関数は、複数の方法でピークを見つけるのに使われます。 
+</p><p>次のサンプルは、nLocalPtsで選択したローカルスコープの局所最大点を見つける方法を示します。nIndexで印を付けた現在のポイントに対して、スコープは [nIndex-nLocalPts, nIndex+nLocalPts]です。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 出力ベクターとしてメモリを確保</span>
+UINT nDataSize <span style="color: #000080;">=</span> vxData.<span style="color: #000000;">GetSize</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span>;
+vector vxPeaks<span style="color: #000000;">(</span>nDataSize<span style="color: #000000;">)</span>, vyPeaks<span style="color: #000000;">(</span>nDataSize<span style="color: #000000;">)</span>;
+vector<span style="color: #000080;">&lt;</span><span style="color: #0000ff;">int</span><span style="color: #000080;">&gt;</span> vnIndices<span style="color: #000000;">(</span>nDataSize<span style="color: #000000;">)</span>;
+
+<span style="color: #008000;">// nDataSizeは入力データ, vxData, vyDataのサイズは</span>
+<span style="color: #008000;">// 出力データ, ピークの数を返す</span>
+<span style="color: #0000ff;">int</span> nLocalPts <span style="color: #000080;">=</span> <span style="color: #0000dd;">10</span>;
+<span style="color: #0000ff;">int</span> nRet <span style="color: #000080;">=</span> ocmath_find_peaks_by_local_maximum<span style="color: #000000;">(</span> <span style="color: #000040;">&amp;</span>nDataSize, vxData, vyData, 
+	vxPeaks, vyPeaks, vnIndices, 
+	POSITIVE_DIRECTION <span style="color: #000040;">|</span> NEGATIVE_DIRECTION, nLocalPts<span style="color: #000000;">)</span>;
+
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span>OE_NOERROR <span style="color: #000080;">==</span> nRet<span style="color: #000000;">)</span> 
+<span style="color: #000000;">{</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Peak Num=%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nDataSize<span style="color: #000000;">)</span>;
+	vxPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nDataSize<span style="color: #000000;">)</span>;
+	vyPeaks.<span style="color: #000000;">SetSize</span><span style="color: #000000;">(</span>nDataSize<span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<p>Origin Cは、次の2つの関数をサポートしています。<b><a href="../../OriginC/OriginC/Ocmath_test_peaks_by_height_(global_function).html" title="OriginC:Ocmath test peaks by height (global function)">ocmath_test_peaks_by_height</a></b> と <b><a href="../../OriginC/OriginC/Ocmath_test_peaks_by_number_(global_function).html" title="OriginC:Ocmath test peaks by number (global function)">ocmath_test_peaks_by_number</a></b>は、それぞれ指定した高さとピークの数によりピークを確認します。
+</p><p>次は、最小ピーク高さでピークを確認する方法を示すサンプルです。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// 元のYデータから最小値と最大値を取得</span>
+<span style="color: #0000ff;">double</span> dMin, dMax;
+vyData.<span style="color: #000000;">GetMinMax</span><span style="color: #000000;">(</span>dMin, dMax<span style="color: #000000;">)</span>; 
+
+<span style="color: #008000;">// 最高点、最低点からより大きな値を取得
+</span>
+<span style="color: #008000;">// そして、20%を乗算し、ピークの最小高さを取得</span>
+<span style="color: #0000ff;">double</span> dTotalHeight <span style="color: #000080;">=</span> max<span style="color: #000000;">(</span><span style="color: #000000;">abs</span><span style="color: #000000;">(</span>dMax<span style="color: #000000;">)</span>, <span style="color: #000000;">abs</span><span style="color: #000000;">(</span>dMin<span style="color: #000000;">)</span><span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">double</span> dPeakMinHeight <span style="color: #000080;">=</span> dTotalHeight <span style="color: #000040;">*</span> <span style="color: #0000dd;">20</span> <span style="color: #000040;">/</span> <span style="color: #0000dd;">100</span>;
+
+<span style="color: #008000;">// 指定した最小高さでピークを確認</span>
+nRet <span style="color: #000080;">=</span> ocmath_test_peaks_by_height<span style="color: #000000;">(</span><span style="color: #000040;">&amp;</span>nDataSize, vxPeaks, vyPeaks, vnIndices, 
+	dPeakMinHeight<span style="color: #000000;">)</span>;	
+
+<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Peak Num =&nbsp;%d<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, nDataSize<span style="color: #000000;">)</span>;
+<span style="color: #0000ff;">for</span><span style="color: #000000;">(</span><span style="color: #0000ff;">int</span> ii<span style="color: #000080;">=</span><span style="color: #0000dd;">0</span>; ii<span style="color: #000080;">&lt;</span>nDataSize; ii<span style="color: #000040;">++</span><span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Peak&nbsp;%d: (%f,%f)<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, ii<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span>, vxPeaks<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span>, vyPeaks<span style="color: #000000;">[</span>ii<span style="color: #000000;">]</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h2><a name="Integrating_and_Fitting_PeaksPeaks.2C_IntegratePeaks.2C_Fit"></a><span class="mw-headline">ピークの積分とフィット <span class="OIndex" style="display:none">Peaks, Integrate</span><span class="OIndex" style="display:none">Peaks, Fit</span></span></h2>
+<h3><a name="Integrate_Peak"></a><span class="mw-headline">ピークの積分</span></h3>
+<p><b><a href="../../OriginC/OriginC/Ocmath_integrate_(global_function).html" title="OriginC:Ocmath integrate (global function)">ocmath_integrate</a></b>関数は、曲線以下の面積を積分するのに使われます。 
+</p><p>次のサンプルは、1つのピークの部分曲線の積分を実行します。
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #0000ff;">int</span> i1 <span style="color: #000080;">=</span> <span style="color: #0000dd;">51</span>, i2 <span style="color: #000080;">=</span> <span style="color: #0000dd;">134</span>; <span style="color: #008000;">// 1つのピークの部分範囲を設定する開始と終了のインデックス</span>
+IntegrationResult IntResult; <span style="color: #008000;">// 出力, 積分結果</span>
+vector vIntegral<span style="color: #000000;">(</span>i2<span style="color: #000040;">+</span><span style="color: #0000dd;">1</span><span style="color: #000000;">)</span>; <span style="color: #008000;">// 出力, 積分データ</span>
+
+<span style="color: #008000;">// 積分し結果を出力</span>
+<span style="color: #0000ff;">if</span><span style="color: #000000;">(</span> OE_NOERROR <span style="color: #000080;">==</span> ocmath_integrate<span style="color: #000000;">(</span>vx, vy, i1, i2, <span style="color: #000040;">&amp;</span>IntResult, vIntegral, 
+MATHEMATICAL_AREA, <span style="color: #0000ff;">NULL</span>, <span style="color: #0000ff;">false</span>, SEARCH_FROM_PEAK<span style="color: #000000;">)</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+	<span style="color: #000000;">printf</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;Peak 1: Peak Index =&nbsp;%d, Area =&nbsp;%g, FWHM =&nbsp;%g, Center =&nbsp;%g, 
+		Height =&nbsp;%g<span style="color: #666666; font-weight: bold;">\n</span>&quot;</span>, IntResult.<span style="color: #000000;">iPeak</span>, IntResult.<span style="color: #000000;">Area</span>, IntResult.<span style="color: #000000;">dxPeak</span>, 
+		IntResult.<span style="color: #000000;">xPeak</span>, IntResult.<span style="color: #000000;">yPeak</span><span style="color: #000000;">)</span>;
+<span style="color: #000000;">}</span></pre>
+<h3><a name="Fitting_Peak"></a><span class="mw-headline">ピークのフィット</span></h3>
+<p>Origin Cの<b><a href="../../OriginC/Category/NLFitSession_(class).html" title="Category:NLFitSession (class)">NLFitSession</a></b>クラスは、異なるフィット関数でピークフィットを行うメソッドをサポートしています。 
+</p>
+
+
+
+
+
+
+    

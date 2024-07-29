@@ -1,0 +1,48 @@
+﻿<h1 class="firstheading">Origin CでXファンクションを呼び出す</h1><p><span class="OIndex" style="display:none">Xファンクション, Origin Cで実行</span> <span class="OIndex" style="display:none">Xファンクション, Origin Cでパラメータセット</span> Originは様々なタスクを実行するXファンクションと共に出荷されます。XファンクションはLabTalkとOriginCの両方から呼び出すことができます。このセクションはOriginCのXFBaseクラスを使用してXファンションを呼び出す方法を示します。<span class="OIndex" style="display:none">XFBase クラス</span>この仕組みはXファンクションをもう1つ、別のXファンクションで呼び出す時に使用できます。
+</p><p>XFBaseクラスはOrigin CシステムフォルダにあるXFBase.hヘッダファイルで宣言されます。XFBase.hヘッダファイルはOrigin.hヘッダファイルに含まれている物ではありません。そして、他のXFBase クラスを使用するOrigin Cとは別に含まれる必要があります。
+</p>
+<pre class="oc" style="font-family:monospace;">#include <span style="color: #000080;">&lt;</span>XFBase.<span style="color: #000000;">h</span><span style="color: #000080;">&gt;</span></pre>
+<h2><span class="mw-headline" id="Calling_the_impFile_X-Function_From_Origin_C"> Origin Cから impFile Xファンクションを呼び出す </span></h2>
+<p>以下のOrigin CコードはファイルをOriginにインポートする一般的な何数を定義します。関数は2つの引数、データファイル名とインポートファイル名を使用します。関数はまずXFBaseクラスのインスタンスを作成します。これは呼び出されるXファンクションの名前を元に作成されます。この場合、Xファンクション名は「impFile」です。それから、Xファンクションの引数を <i>SetArg</i> メソッドでセットし、最終的にXファンクションを<i>Evaluate</i>メソッドで呼び出します。
+</p>
+<pre class="oc" style="font-family:monospace;">bool call_impFile_XF<span style="color: #000000;">(</span>LPCSTR lpcszDataFile, LPCSTR lpcszFilterFile<span style="color: #000000;">)</span>
+<span style="color: #000000;">{</span>
+    string strDataFile <span style="color: #000080;">=</span> lpcszDataFile;
+    string strFilterFile <span style="color: #000080;">=</span> lpcszFilterFile;
+&nbsp;
+    <span style="color: #008000;">// XFBaseのインスタンスをXファンクション名を使って作成</span>
+    XFBase xf<span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;impFile&quot;</span><span style="color: #000000;">)</span>;
+    if <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf<span style="color: #000000;">)</span>
+        return false;
+&nbsp;
+    <span style="color: #008000;">// 「fname」引数をセット</span>
+    if <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;fname&quot;</span>, strDataFile<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        return false;
+&nbsp;
+    <span style="color: #008000;">// 「filtername」引数をセット</span>
+    if <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">SetArg</span><span style="color: #000000;">(</span><span style="color: #ff00ff;">&quot;filtername&quot;</span>, strFilterFile<span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        return false;
+&nbsp;
+    <span style="color: #008000;">// XFBaseの「Evaluate」メソッドを呼び出し、Xファンクションを実行</span>
+    if <span style="color: #000000;">(</span><span style="color: #000040;">!</span>xf.<span style="color: #000000;">Evaluate</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">)</span>
+        return false;
+&nbsp;
+    return true;
+<span style="color: #000000;">}</span></pre>
+<p>以下のOrigin Cコードは上記で定義したcall_impFile_XF関数をどのように呼び出すのか示します。イメージファイルをインポートするために呼び出します。 
+</p>
+<pre class="oc" style="font-family:monospace;"><span style="color: #008000;">// Originのサンプルフォルダにある、Carビットマップをインポート</span>
+string strImageFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span>TRUE<span style="color: #000000;">)</span> <span style="color: #000040;">+</span>
+    <span style="color: #ff00ff;">&quot;Samples<span style="color: #666666; font-weight: bold;">\\</span>イメージ処理と分析<span style="color: #666666; font-weight: bold;">\\</span>Car.bmp&quot;</span>;
+&nbsp;
+<span style="color: #008000;">// Lets import the bitmap using the Image import filter.</span>
+string strFilterFile <span style="color: #000080;">=</span> GetAppPath<span style="color: #000000;">(</span>TRUE<span style="color: #000000;">)</span> <span style="color: #000040;">+</span> <span style="color: #ff00ff;">&quot;Filters<span style="color: #666666; font-weight: bold;">\\</span>Image.oif&quot;</span>;
+&nbsp;
+<span style="color: #008000;">// impFile Xファンクションを呼び出す一般的な関数を呼び出す</span>
+call_impFile_XF<span style="color: #000000;">(</span>strImageFile, strFilterFile<span style="color: #000000;">)</span>;</pre>
+
+
+
+
+
+    
