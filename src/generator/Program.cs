@@ -20,8 +20,6 @@ internal class Program
 
     static async Task<int> Main(string[] args)
     {
-        Console.WriteLine(Environment.CurrentDirectory);
-
         var parsed = CommandLine.Parser.Default.ParseArguments<Options>(args);
 
         if (parsed.Tag != CommandLine.ParserResultType.Parsed)
@@ -101,32 +99,40 @@ internal class Program
                     var bookUrlName = pages[0].self.url;
                     var bookFolderName = Path.GetFileName(bookFolder);
 
-                    CopyImages(Options.OutputPath, language, bookFolderName, bookUrlName);
+                    var copyImagesTask = CopyImages(Options.OutputPath, language, bookFolderName, bookUrlName, cancellation);
 
-                    await Parallel.ForEachAsync(pages,
-                    new ParallelOptions
+                    if (Options.DisableParallelProcessing)
                     {
-                        MaxDegreeOfParallelism = Options.DisableParallelProcessing ? 1 : -1,
-                        CancellationToken = cancellation,
-                    },
-                    async (page, cancellation) =>
-                    {
-                        var pageFolder = Path.Combine(Options.OutputPath, language, page.self.url);
+                        await copyImagesTask;
+                    }
 
-                        Directory.CreateDirectory(pageFolder);
+                    var processPageTask = Parallel.ForEachAsync(pages,
+                        new ParallelOptions
+                        {
+                            MaxDegreeOfParallelism = Options.DisableParallelProcessing ? 1 : -1,
+                            CancellationToken = cancellation,
+                        },
+                        async (page, cancellation) =>
+                        {
+                            var pageFolder = Path.Combine(Options.OutputPath, language, page.self.url);
 
-                        await ProcessPage(bookUrlName, bookFolderName, page.self, page.parent, language, Path.Combine(pageFolder, "index.html"));
-                    });
+                            Directory.CreateDirectory(pageFolder);
+
+                            await ProcessPage(bookUrlName, bookFolderName, page.self, page.parent, language, Path.Combine(pageFolder, "index.html"), cancellation);
+                        }
+                    );
+
+                    await Task.WhenAll(copyImagesTask, processPageTask);
                 }
             }
 
-            await ProcessPage("", "", ("Index", "index.html", ""), null, language, Path.Combine(Options.OutputPath, language, "index.html"));
+            await ProcessPage("", "", ("Index", "index.html", ""), null, language, Path.Combine(Options.OutputPath, language, "index.html"), cancellation);
         }
 
         File.Copy(Path.Combine(Options.OutputPath, "en", "index.html"), Path.Combine(Options.OutputPath, "index.html"));
     }
 
-    private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, (string title, string file, string url)? parent, string language, string destinationPath)
+    private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, (string title, string file, string url)? parent, string language, string destinationPath, CancellationToken cancellation)
     {
         var sourcePath = Path.Combine(Options.SourcePath, language, bookFolderName, page.file);
 
@@ -157,7 +163,7 @@ internal class Program
             Contents = new HtmlString(File.ReadAllText(sourcePath)),
         });
         var parser = new HtmlParser();
-        var document = await parser.ParseDocumentAsync(html);
+        var document = await parser.ParseDocumentAsync(html, cancellation);
 
         Transform(document, bookUrlName, bookFolderName, language, page);
 
@@ -242,15 +248,15 @@ internal class Program
         }
     }
 
-    private void CopyImages(string outputRootFolder, string language, string bookFolderName, string bookUrlName)
+    private async Task CopyImages(string outputRootFolder, string language, string bookFolderName, string bookUrlName, CancellationToken cancellation)
     {
         var imagesFolder = Path.Combine(outputRootFolder, language, bookUrlName, "images");
 
-        CopyDirectory(Path.Combine(Options.SourcePath, "en", bookFolderName, "images"), imagesFolder);
+        await CopyDirectory(new DirectoryInfo(Path.Combine(Options.SourcePath, "en", bookFolderName, "images")), imagesFolder, cancellation);
 
         if (language != "en")
         {
-            CopyDirectory(Path.Combine(Options.SourcePath, language, bookFolderName, "images"), imagesFolder);
+            await CopyDirectory(new DirectoryInfo(Path.Combine(Options.SourcePath, language, bookFolderName, "images")), imagesFolder, cancellation);
         }
     }
 
@@ -279,11 +285,9 @@ internal class Program
         ? ("Index", "index.html", "")
         : (page.Attribute("title")!.Value, page.Attribute("file")!.Value, page.Attribute("url")!.Value);
 
-    private static void CopyDirectory(string source, string destination, bool recursive = true, bool overwrite = true)
+    private async Task CopyDirectory(DirectoryInfo source, string destination, CancellationToken cancellation, bool recursive = true, bool overwrite = true)
     {
-        var src = new DirectoryInfo(source);
-
-        if (!src.Exists)
+        if (!source.Exists)
         {
             Console.Error.WriteLine($"CopyDirectory: Source directory ({source}) not exists.");
             return;
@@ -291,17 +295,36 @@ internal class Program
 
         Directory.CreateDirectory(destination);
 
-        foreach (var file in src.EnumerateFiles())
+        var copyFilesTask = Task.Factory.StartNew(() => CopyFiles(source, destination, overwrite), cancellation);
+
+        if (Options.DisableParallelProcessing)
         {
-            file.CopyTo(Path.Combine(destination, file.Name), overwrite);
+            await copyFilesTask;
         }
 
         if (recursive)
         {
-            foreach (var sub in src.EnumerateDirectories())
-            {
-                CopyDirectory(sub.FullName, Path.Combine(destination, sub.Name), recursive, overwrite);
-            }
+            var copyFoldersTask = Parallel.ForEachAsync(source.EnumerateDirectories(),
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Options.DisableParallelProcessing ? 1 : -1,
+                    CancellationToken = cancellation,
+                },
+                async (sub, cancel) =>
+                {
+                    await CopyDirectory(sub, Path.Combine(destination, sub.Name), cancel, recursive, overwrite);
+                }
+            );
+
+            await Task.WhenAll(copyFilesTask, copyFoldersTask);
+        }
+    }
+
+    static void CopyFiles(DirectoryInfo src, string destination, bool overwrite)
+    {
+        foreach (var file in src.EnumerateFiles())
+        {
+            file.CopyTo(Path.Combine(destination, file.Name), overwrite);
         }
     }
 }
