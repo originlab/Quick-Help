@@ -104,9 +104,7 @@ internal class Program
                     await Parallel.ForEachAsync(pages,
                     new ParallelOptions
                     {
-#if DEBUG
-                        MaxDegreeOfParallelism = 1,
-#endif
+                        MaxDegreeOfParallelism = Options.DisableParallelProcessing ? 1 : -1,
                         CancellationToken = cancellation,
                     },
                     async (page, cancellation) =>
@@ -167,9 +165,10 @@ internal class Program
 
     private void Transform(IHtmlDocument document, string bookUrlName, string bookFolderName, string language, (string title, string file, string url) page)
     {
-#if DEBUG
-        Console.WriteLine($"Transforming {language}/{page.url}..");
-#endif
+        if (Options.Verbose)
+        {
+            Console.WriteLine($"Transforming {language}/{page.url}..");
+        }
 
         document.Title = page.title;
 
@@ -211,7 +210,7 @@ internal class Program
                         }
                         else
                         {
-                            Console.Error.WriteLine($"  {page.url}: Mapping unknown for href attribute value: {href}");
+                            Console.Error.WriteLine($"{language}/{page.url}: Mapping unknown for href: {href}");
                         }
                     }
                     else if (!href.StartsWith('#')
@@ -219,7 +218,7 @@ internal class Program
                         && !href.StartsWith("javascript:")
                         && !Uri.IsWellFormedUriString(href, UriKind.Absolute))
                     {
-                        Console.Error.WriteLine($"  {page.url}: Unrecognized href attribute value: {href}");
+                        Console.Error.WriteLine($"{language}/{page.url}: Unrecognized href: {href}");
                     }
                 }
             }
@@ -235,7 +234,7 @@ internal class Program
                 }
                 else if (!Uri.IsWellFormedUriString(src, UriKind.Absolute))
                 {
-                    Console.Error.WriteLine($"  {page.url}: Unrecognized src attribute value: {src}");
+                    Console.Error.WriteLine($"{language}/{page.url}: Unrecognized src: {src}");
                 }
             }
         }
