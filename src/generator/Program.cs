@@ -20,6 +20,8 @@ internal class Program
 
     static async Task<int> Main(string[] args)
     {
+        Console.WriteLine(Environment.CurrentDirectory);
+
         var parsed = CommandLine.Parser.Default.ParseArguments<Options>(args);
 
         if (parsed.Tag != CommandLine.ParserResultType.Parsed)
