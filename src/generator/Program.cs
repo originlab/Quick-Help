@@ -87,6 +87,8 @@ internal class Program
 
         foreach (var language in Languages)
         {
+            Console.WriteLine($"Processing {language} pages..");
+
             Directory.CreateDirectory(Path.Combine(Options.OutputPath, language));
 
             if (!Options.IndexPagesOnly)
@@ -165,7 +167,9 @@ internal class Program
 
     private void Transform(IHtmlDocument document, string bookUrlName, string bookFolderName, string language, (string title, string file, string url) page)
     {
+#if DEBUG
         Console.WriteLine($"Transforming {language}/{page.url}..");
+#endif
 
         document.Title = page.title;
 
@@ -207,7 +211,7 @@ internal class Program
                         }
                         else
                         {
-                            Console.Error.WriteLine($"  Mapping unknown for href attribute value: {href}");
+                            Console.Error.WriteLine($"  {page.url}: Mapping unknown for href attribute value: {href}");
                         }
                     }
                     else if (!href.StartsWith('#')
@@ -215,7 +219,7 @@ internal class Program
                         && !href.StartsWith("javascript:")
                         && !Uri.IsWellFormedUriString(href, UriKind.Absolute))
                     {
-                        Console.Error.WriteLine($"  Unrecognized href attribute value: {href}");
+                        Console.Error.WriteLine($"  {page.url}: Unrecognized href attribute value: {href}");
                     }
                 }
             }
@@ -231,7 +235,7 @@ internal class Program
                 }
                 else if (!Uri.IsWellFormedUriString(src, UriKind.Absolute))
                 {
-                    Console.Error.WriteLine($"  Unrecognized src attribute value: {src}");
+                    Console.Error.WriteLine($"  {page.url}: Unrecognized src attribute value: {src}");
                 }
             }
         }
