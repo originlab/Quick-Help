@@ -213,10 +213,9 @@ internal class Program
             Console.WriteLine($"Transforming {language}/{page.url}..");
         }
 
-        document.Title = page.title;
+        var basePath = Path.GetDirectoryName(sourcePath)!;
 
-        var dummyRoot = OperatingSystem.IsWindows() ? "C:/en/" : "/en/";
-        var dummyFolder = Path.Combine(dummyRoot, bookFolderName, Path.GetDirectoryName(page.file) ?? "");
+        document.Title = page.title;
 
         foreach (var a in document.Descendants<IHtmlAnchorElement>())
         {
@@ -232,34 +231,35 @@ internal class Program
 
                 if (!String.IsNullOrWhiteSpace(href))
                 {
-                    if (Uri.IsWellFormedUriString(href, UriKind.Relative))
+                    if (!href.StartsWith('/'))
                     {
-                        var fullPath = Path.GetFullPath(href, dummyFolder).Replace('\\', '/');
-
-                        if (fullPath.StartsWith(dummyRoot) && PageInfo.TryGetValue(fullPath[dummyRoot.Length..], out var link))
+                        if (Uri.IsWellFormedUriString(href, UriKind.Relative))
                         {
-                            a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
+                            var fullPath = Path.GetFullPath(href, basePath).Replace('\\', '/');
 
-                            if (String.IsNullOrWhiteSpace(a.Title) || a.Title.Contains(':'))
+                            if (fullPath.StartsWith(Options.SourcePath.Replace('\\', '/')) && PageInfo.TryGetValue(fullPath[(Options.SourcePath.Length + 1 + language.Length + 1)..], out var link))
                             {
-                                a.Title = link.title;
+                                a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
+
+                                if (String.IsNullOrWhiteSpace(a.Title) || a.Title.Contains(':'))
+                                {
+                                    a.Title = link.title;
+                                }
+                            }
+                            else
+                            {
+                                ReportProblem(sourcePath, $"Mapping unknown for href: {href}");
                             }
                         }
-                        else if (fullPath.StartsWith(OperatingSystem.IsWindows() ? $"C:{RootUrlPrefix}/" : $"{RootUrlPrefix}/"))
+                        else if (!href.StartsWith('#')
+                            && !href.StartsWith("mailto:")
+                            && !href.StartsWith("javascript:")
+                            && !Uri.IsWellFormedUriString(href, UriKind.Absolute))
                         {
-                            var secondSlash = fullPath.IndexOf('/', 3);
-
-                            a.SetAttribute("href", $"{RootUrlPrefix}{fullPath[secondSlash..]}{hash}");
-                        }
-                        else
-                        {
-                            ReportProblem(sourcePath, $"Mapping unknown for href: {href}");
+                            ReportProblem(sourcePath, $"Unrecognized href: {href}");
                         }
                     }
-                    else if (!href.StartsWith('#')
-                        && !href.StartsWith("mailto:")
-                        && !href.StartsWith("javascript:")
-                        && !Uri.IsWellFormedUriString(href, UriKind.Absolute))
+                    else if (!href.StartsWith("/static/"))
                     {
                         ReportProblem(sourcePath, $"Unrecognized href: {href}");
                     }
@@ -286,6 +286,11 @@ internal class Program
     private void ReportProblem(string file, string description)
     {
         ProblematicPages.GetOrAdd(file[(Options.SourcePath.Length + 1)..], f => []).Add(description);
+
+        if (Options.Verbose)
+        {
+            Console.Error.WriteLine($"[Problem] {file}: {description}");
+        }
     }
 
     private async Task CopyImages(string outputRootFolder, string language, string bookFolderName, string bookUrlName, CancellationToken cancellation)
