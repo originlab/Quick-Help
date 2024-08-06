@@ -13,9 +13,13 @@ public class Options
     [Option('v', HelpText = "Print more details during generation.")]
     public bool Verbose { get; set; }
 
+    private string? _SourcePath;
+
     [Value(0, Required = true, HelpText = "The folder path to the books.")]
-    public required string SourcePath { get; set; }
+    public required string SourcePath { get => _SourcePath!; set => _SourcePath = value.Replace('\\', '/'); }
+
+    private string? _OutputPath;
 
     [Value(1, Required = true, HelpText = "The folder path to the outpot.")]
-    public required string OutputPath { get; set; }
+    public required string OutputPath { get => _OutputPath!; set => _OutputPath = value.Replace('\\', '/'); }
 }
