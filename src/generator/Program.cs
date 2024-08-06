@@ -1,4 +1,5 @@
-﻿using System.Collections.Frozen;
+﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Xml.Linq;
 using AngleSharp.Dom;
@@ -17,6 +18,7 @@ internal class Program
     private readonly Options Options;
     private readonly ImmutableArray<string> Languages;
     private readonly FrozenDictionary<string, (string url, string title)> PageInfo;
+    private readonly ConcurrentDictionary<string, HashSet<string>> ProblematicPages = new();
 
     static async Task<int> Main(string[] args)
     {
@@ -80,6 +82,7 @@ internal class Program
     {
         if (Directory.Exists(Options.OutputPath))
         {
+            Console.WriteLine("Cleaning up output folder..");
             Directory.Delete(Options.OutputPath, true);
         }
 
@@ -130,6 +133,25 @@ internal class Program
         }
 
         File.Copy(Path.Combine(Options.OutputPath, "en", "index.html"), Path.Combine(Options.OutputPath, "index.html"));
+
+        Console.WriteLine("============================================");
+        Console.WriteLine($"Problematic files: {ProblematicPages.Count}, avg {ProblematicPages.Average(kvp => kvp.Value.Count)}");
+
+        var commonProblems = from file in ProblematicPages.Keys
+                             from description in ProblematicPages[file]
+                             group file by description;
+
+        foreach (var problem in commonProblems)
+        {
+            Console.WriteLine("-------------------------");
+            Console.WriteLine(problem.Key);
+            Console.WriteLine("Sources:");
+
+            foreach (var source in problem)
+            {
+                Console.WriteLine(source);
+            }
+        }
     }
 
     private async Task ProcessPage(string bookUrlName, string bookFolderName, (string title, string file, string url) page, (string title, string file, string url)? parent, string language, string destinationPath, CancellationToken cancellation)
@@ -140,7 +162,7 @@ internal class Program
         {
             if (language == "en")
             {
-                Console.Error.WriteLine($"Could not find {sourcePath}, skipped!");
+                ReportProblem(sourcePath, $"Could not find source file, skipped!");
                 return;
             }
 
@@ -165,7 +187,7 @@ internal class Program
         var parser = new HtmlParser();
         var document = await parser.ParseDocumentAsync(html, cancellation);
 
-        Transform(document, bookUrlName, bookFolderName, language, page);
+        Transform(document, bookUrlName, bookFolderName, language, page, sourcePath);
 
         try
         {
@@ -180,11 +202,11 @@ internal class Program
         }
         catch (IOException)
         {
-            Console.Error.WriteLine($"{language}/{page.url}: Failed to write contents to {destinationPath}");
+            ReportProblem(sourcePath, $"Failed to write contents to {destinationPath}");
         }
     }
 
-    private void Transform(IHtmlDocument document, string bookUrlName, string bookFolderName, string language, (string title, string file, string url) page)
+    private void Transform(IHtmlDocument document, string bookUrlName, string bookFolderName, string language, (string title, string file, string url) page, string sourcePath)
     {
         if (Options.Verbose)
         {
@@ -231,7 +253,7 @@ internal class Program
                         }
                         else
                         {
-                            Console.Error.WriteLine($"{language}/{page.url}: Mapping unknown for href: {href}");
+                            ReportProblem(sourcePath, $"Mapping unknown for href: {href}");
                         }
                     }
                     else if (!href.StartsWith('#')
@@ -239,7 +261,7 @@ internal class Program
                         && !href.StartsWith("javascript:")
                         && !Uri.IsWellFormedUriString(href, UriKind.Absolute))
                     {
-                        Console.Error.WriteLine($"{language}/{page.url}: Unrecognized href: {href}");
+                        ReportProblem(sourcePath, $"Unrecognized href: {href}");
                     }
                 }
             }
@@ -255,21 +277,34 @@ internal class Program
                 }
                 else if (!Uri.IsWellFormedUriString(src, UriKind.Absolute))
                 {
-                    Console.Error.WriteLine($"{language}/{page.url}: Unrecognized src: {src}");
+                    ReportProblem(sourcePath, $"Unrecognized src: {src}");
                 }
             }
         }
+    }
+
+    private void ReportProblem(string file, string description)
+    {
+        ProblematicPages.GetOrAdd(file[(Options.SourcePath.Length + 1)..], f => []).Add(description);
     }
 
     private async Task CopyImages(string outputRootFolder, string language, string bookFolderName, string bookUrlName, CancellationToken cancellation)
     {
         var imagesFolder = Path.Combine(outputRootFolder, language, bookUrlName, "images");
 
-        await CopyDirectory(new DirectoryInfo(Path.Combine(Options.SourcePath, "en", bookFolderName, "images")), imagesFolder, cancellation);
+        var imageSource = new DirectoryInfo(Path.Combine(Options.SourcePath, "en", bookFolderName, "images"));
+        if (imageSource.Exists)
+        {
+            await CopyDirectory(imageSource, imagesFolder, cancellation);
+        }
 
         if (language != "en")
         {
-            await CopyDirectory(new DirectoryInfo(Path.Combine(Options.SourcePath, language, bookFolderName, "images")), imagesFolder, cancellation);
+            imageSource = new DirectoryInfo(Path.Combine(Options.SourcePath, language, bookFolderName, "images"));
+            if (imageSource.Exists)
+            {
+                await CopyDirectory(imageSource, imagesFolder, cancellation);
+            }
         }
     }
 
