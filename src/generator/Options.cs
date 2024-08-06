@@ -16,10 +16,10 @@ public class Options
     private string? _SourcePath;
 
     [Value(0, Required = true, HelpText = "The folder path to the books.")]
-    public required string SourcePath { get => _SourcePath!; set => _SourcePath = value.Replace('\\', '/'); }
+    public required string SourcePath { get => _SourcePath!; set => _SourcePath = Path.GetFullPath(value).Replace('\\', '/'); }
 
     private string? _OutputPath;
 
     [Value(1, Required = true, HelpText = "The folder path to the outpot.")]
-    public required string OutputPath { get => _OutputPath!; set => _OutputPath = value.Replace('\\', '/'); }
+    public required string OutputPath { get => _OutputPath!; set => _OutputPath = Path.GetFullPath(value).Replace('\\', '/'); }
 }
