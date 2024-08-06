@@ -167,8 +167,21 @@ internal class Program
 
         Transform(document, bookUrlName, bookFolderName, language, page);
 
-        using var sw = new StreamWriter(destinationPath);
-        document.ToHtml(sw, HtmlMarkupFormatter.Instance);
+        try
+        {
+            using var sw = new StreamWriter(destinationPath, new FileStreamOptions
+            {
+                Mode = FileMode.CreateNew,
+                Access = FileAccess.Write,
+                Options = FileOptions.Asynchronous,
+            });
+
+            document.ToHtml(sw, HtmlMarkupFormatter.Instance);
+        }
+        catch (IOException)
+        {
+            Console.Error.WriteLine($"{language}/{page.url}: Failed to write contents to {destinationPath}");
+        }
     }
 
     private void Transform(IHtmlDocument document, string bookUrlName, string bookFolderName, string language, (string title, string file, string url) page)
