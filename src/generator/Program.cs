@@ -237,7 +237,7 @@ internal class Program
                         {
                             var fullPath = Path.GetFullPath(href, basePath).Replace('\\', '/');
 
-                            if (fullPath.StartsWith(Options.SourcePath) && PageInfo.TryGetValue(fullPath[(Options.SourcePath.Length + 1 + language.Length + 1)..], out var link))
+                            if (fullPath.StartsWith(Options.SourcePath) && PageInfo.TryGetValue(Uri.UnescapeDataString(fullPath[(Options.SourcePath.Length + 1 + language.Length + 1)..]), out var link))
                             {
                                 a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
 
