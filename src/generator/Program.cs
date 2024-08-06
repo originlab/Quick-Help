@@ -237,18 +237,13 @@ internal class Program
                         {
                             var fullPath = Path.GetFullPath(href, basePath).Replace('\\', '/');
 
-                            if (fullPath.StartsWith(Options.SourcePath))
+                            if (fullPath.StartsWith(Options.SourcePath) && PageInfo.TryGetValue(fullPath[(Options.SourcePath.Length + 1 + language.Length + 1)..], out var link))
                             {
-                                var pagePath = fullPath[(Options.SourcePath.Length + 1 + language.Length + 1)..];
+                                a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
 
-                                if (PageInfo.TryGetValue(pagePath, out var link))
+                                if (String.IsNullOrWhiteSpace(a.Title) || a.Title.Contains(':'))
                                 {
-                                    a.SetAttribute("href", $"{RootUrlPrefix}/{language}/{link.url}{hash}");
-
-                                    if (String.IsNullOrWhiteSpace(a.Title) || a.Title.Contains(':'))
-                                    {
-                                        a.Title = link.title;
-                                    }
+                                    a.Title = link.title;
                                 }
                             }
                             else
